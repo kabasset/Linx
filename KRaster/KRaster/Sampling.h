@@ -24,7 +24,7 @@ public:
   class Iterator : public std::iterator<std::input_iterator_tag, T> {
 
   public:
-    Iterator(const TSampling& sampling, std::size_t index) :
+    Iterator(const AxisSampling& sampling, std::size_t index) :
         m_sampling(sampling), m_current(m_sampling.front + m_sampling.step * index), m_index(index) {}
 
     T operator*() {
@@ -77,28 +77,14 @@ public:
   /**
    * @brief Iterator to the beginning of the sampling.
    */
-  Iterator<const AxisSampling<T>> begin() const {
+  Iterator begin() const {
     return {*this, 0};
   }
 
   /**
    * @brief Iterator to the end of the sampling.
    */
-  Iterator<const AxisSampling<T>> end() const {
-    return {*this, size()};
-  }
-
-  /**
-   * @copybrief begin()
-   */
-  Iterator<AxisSampling<T>> begin() {
-    return {*this, 0};
-  }
-
-  /**
-   * @copybrief end()
-   */
-  Iterator<AxisSampling<T>> end() {
+  Iterator end() const {
     return {*this, size()};
   }
 
@@ -309,6 +295,7 @@ public:
   IndexSampling operator++(int) {
     auto res = *this;
     ++res;
+    return res;
   }
 
   /**
