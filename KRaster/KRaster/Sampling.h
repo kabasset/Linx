@@ -173,8 +173,8 @@ public:
   /**
    * @brief An iterator over the samples.
    */
-  template <typename TSamples>
-  class Iterator : public std::iterator<std::input_iterator_tag, typename TSamples::value_type> {
+  template <typename TSamples, typename U>
+  class Iterator : public std::iterator<std::input_iterator_tag, U> {
 
   public:
     Iterator(TSamples& samples, std::size_t index) :
@@ -183,11 +183,11 @@ public:
             m_samples.data() + m_samples.front() * m_samples.stride() + m_samples.step() * m_samples.stride() * index) {
     }
 
-    value_type& operator*() {
+    U& operator*() {
       return *m_it;
     }
 
-    value_type* operator->() {
+    U* operator->() {
       return m_it;
     }
 
@@ -200,12 +200,12 @@ public:
       ++res;
     }
 
-    Iterator& operator+=(T n) {
+    Iterator& operator+=(Index n) {
       m_it += m_samples.step() * m_samples.stride() * n;
       return *this;
     }
 
-    Iterator& operator-=(T n) {
+    Iterator& operator-=(Index n) {
       *this += -n;
       return *this;
     }
@@ -218,14 +218,14 @@ public:
       return not(*this == rhs);
     }
 
-    Iterator& operator=(value_type* it) {
+    Iterator& operator=(U* it) {
       m_it = it;
       return *this;
     }
 
   private:
     TSamples& m_samples;
-    value_type* m_it;
+    U* m_it;
   };
 
   /**
@@ -318,29 +318,36 @@ public:
   /**
    * @brief Get an iterator to the beginning of the sampler.
    */
-  Iterator<const DataSamples<const T>> begin() const {
+  Iterator<const DataSamples<T>, const T> begin() const {
     return {*this, 0};
   }
 
   /**
    * @brief Get an iterator to the end of the sampler.
    */
-  Iterator<const DataSamples<const T>> end() const {
+  Iterator<const DataSamples<T>, const T> end() const {
     return {*this, size()};
   }
 
   /**
    * @copybrief begin()
    */
-  Iterator<DataSamples<T>> begin() {
+  Iterator<DataSamples<T>, T> begin() {
     return {*this, 0};
   }
 
   /**
    * @copybrief end()
    */
-  Iterator<DataSamples<T>> end() {
+  Iterator<DataSamples<T>, T> end() {
     return {*this, size()};
+  }
+
+  /**
+   * @brief Generate a vector of the samples.
+   */
+  std::vector<T> vector() const {
+    return std::vector<T>(begin(), end());
   }
 
 private:
