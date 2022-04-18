@@ -46,6 +46,7 @@ public:
 
     Iterator& operator+=(T n) {
       m_current += m_sampling.step * n;
+      m_index += n;
       return *this;
     }
 
@@ -62,7 +63,7 @@ public:
     }
 
   private:
-    AxisSampling<T>& m_sampling;
+    const AxisSampling<T>& m_sampling;
     T m_current;
     std::size_t m_index;
   };
