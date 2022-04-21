@@ -17,14 +17,14 @@ namespace Kast {
 /**
  * @brief Define a default virtual destructor.
  */
-#define ELEFITS_VIRTUAL_DTOR(classname) \
+#define KAST_VIRTUAL_DTOR(classname) \
   /** @brief Destructor. */ \
   virtual ~classname() = default;
 
 /**
  * @brief Define default copy constructor and assignment operator.
  */
-#define ELEFITS_COPYABLE(classname) \
+#define KAST_COPYABLE(classname) \
   /** @brief Copy constructor. */ \
   classname(const classname&) = default; \
   /** @brief Copy assignment operator. */ \
@@ -33,7 +33,7 @@ namespace Kast {
 /**
  * @brief Define deleted copy constructor and assignment operator.
  */
-#define ELEFITS_NON_COPYABLE(classname) \
+#define KAST_NON_COPYABLE(classname) \
   /** @brief Deleted copy constructor. */ \
   classname(const classname&) = delete; \
   /** @brief Deleted copy assignment operator. */ \
@@ -42,7 +42,7 @@ namespace Kast {
 /**
  * @brief Define default move constructor and assignment operator.
  */
-#define ELEFITS_MOVABLE(classname) \
+#define KAST_MOVABLE(classname) \
   /** @brief Move constructor. */ \
   classname(classname&&) = default; \
   /** @brief Move assignment operator. */ \
@@ -51,7 +51,7 @@ namespace Kast {
 /**
  * @brief Define deleted move constructor and assignment operator.
  */
-#define ELEFITS_NON_MOVABLE(classname) \
+#define KAST_NON_MOVABLE(classname) \
   /** @brief Deleted move constructor. */ \
   classname(classname&&) = delete; \
   /** @brief Deleted move assignment operator. */ \

@@ -58,9 +58,9 @@ public:
    */
   static constexpr Index Dim = N;
 
-  ELEFITS_VIRTUAL_DTOR(Position)
-  ELEFITS_COPYABLE(Position)
-  ELEFITS_MOVABLE(Position)
+  KAST_VIRTUAL_DTOR(Position)
+  KAST_COPYABLE(Position)
+  KAST_MOVABLE(Position)
 
   /**
    * @brief Default constructor.

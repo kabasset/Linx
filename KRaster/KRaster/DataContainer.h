@@ -210,9 +210,9 @@ public:
       typename std::enable_if_t<not std::is_integral<TArg0>::value, TArg0>* = nullptr>
   DataContainer(TArg0 arg0, TArgs&&... args) : Holder(std::forward<TArg0>(arg0), std::forward<TArgs>(args)...) {}
 
-  ELEFITS_VIRTUAL_DTOR(DataContainer)
-  ELEFITS_COPYABLE(DataContainer)
-  ELEFITS_MOVABLE(DataContainer)
+  KAST_VIRTUAL_DTOR(DataContainer)
+  KAST_COPYABLE(DataContainer)
+  KAST_MOVABLE(DataContainer)
 
   /// @group_properties
 

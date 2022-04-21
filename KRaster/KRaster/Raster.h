@@ -145,9 +145,9 @@ public:
 
   /// @group_construction
 
-  ELEFITS_VIRTUAL_DTOR(Raster)
-  ELEFITS_COPYABLE(Raster)
-  ELEFITS_MOVABLE(Raster)
+  KAST_VIRTUAL_DTOR(Raster)
+  KAST_COPYABLE(Raster)
+  KAST_MOVABLE(Raster)
 
   /**
    * @brief Constructor.
