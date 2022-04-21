@@ -2,8 +2,8 @@
 // This file is part of Kast.Raster <github.com/kabasset/KRaster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _ELEFITSDATA_CONTIGUOUSCONTAINER_H
-#define _ELEFITSDATA_CONTIGUOUSCONTAINER_H
+#ifndef _KRASTER_CONTIGUOUSCONTAINER_H
+#define _KRASTER_CONTIGUOUSCONTAINER_H
 
 #include <algorithm> // equal
 #include <ostream>

@@ -2,12 +2,11 @@
 // This file is part of EleFits <github.com/CNES/EleFits>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#if defined(_ELEFITSDATA_POSITION_IMPL) || defined(CHECK_QUALITY)
+#if defined(_KRASTER_POSITION_IMPL) || defined(CHECK_QUALITY)
 
-#include "EleFitsData/Position.h"
+#include "KRaster/Position.h"
 
-namespace Euclid {
-namespace Fits {
+namespace Kast {
 
 template <long N>
 Position<N>::Position() : DataContainer<long, DataContainerHolder<long, Indices<N>>, Position<N>>() {}
@@ -84,7 +83,6 @@ Position<M> Position<N>::extend(const Position<M>& padding) const {
   return res;
 }
 
-} // namespace Fits
-} // namespace Euclid
+} // namespace Kast
 
 #endif

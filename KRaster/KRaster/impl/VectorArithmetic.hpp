@@ -2,13 +2,12 @@
 // This file is part of EleFits <github.com/CNES/EleFits>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#if defined(_ELEFITSDATA_VECTORARITHMETIC_IMPL) || defined(CHECK_QUALITY)
+#if defined(_KRASTER_VECTORARITHMETIC_IMPL) || defined(CHECK_QUALITY)
 
-#include "EleFitsData/DataUtils.h"
-#include "EleFitsData/VectorArithmetic.h"
+#include "KRaster/DataUtils.h"
+#include "KRaster/VectorArithmetic.h"
 
-namespace Euclid {
-namespace Fits {
+namespace Kast {
 
 template <typename T, typename TDerived, bool Incrementable>
 TDerived VectorArithmeticMixin<T, TDerived, Incrementable>::operator+() const {
@@ -134,7 +133,6 @@ TDerived& VectorArithmeticMixin<T, TDerived, true>::operator--() {
   return static_cast<TDerived&>(*this);
 }
 
-} // namespace Fits
-} // namespace Euclid
+} // namespace Kast
 
 #endif

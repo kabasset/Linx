@@ -145,4 +145,8 @@ Index shapeSize(const Position<N>& shape) {
 
 } // namespace Kast
 
+#define _KRASTER_POSITION_IMPL
+#include "KRaster/impl/Position.hpp"
+#undef _KRASTER_POSITION_IMPL
+
 #endif // _KRASTER_POSITION_H

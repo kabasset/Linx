@@ -126,7 +126,12 @@ public:
   /**
    * @brief Constructor.
    */
-  PositionSampling(const Region<N>& boundingBox, const Position<N>& step = Position<N>::ones());
+  PositionSampling(const Region<N>& boundingBox, const Position<N>& step = Position<N>::ones()) :
+      m_samplings(step.size()) {
+    for (std::size_t i = 0; i < m_samplings.size(); ++i) {
+      m_samplings[i] = {boundingBox.front[i], boundingBox.back[i], step[i]};
+    }
+  }
 
   /**
    * @brief Get the number of samples along each axis.
@@ -231,46 +236,53 @@ public:
   /**
    * @brief Constructor.
    */
-  DataSamples(T* data, IndexSampling sampling, Index stride = 1) :
+  DataSamples(T* data, const IndexSampling& sampling, Index stride = 1) :
       m_data(data), m_sampling(sampling), m_stride(stride) {}
 
   /**
-   * @brief The number of samples.
+   * @brief Get the sampling.
+   */
+  const IndexSampling& sampling() const {
+    return m_sampling;
+  }
+
+  /**
+   * @brief Get the number of samples.
    */
   std::size_t size() const {
     return m_sampling.size();
   }
 
   /**
-   * @brief The first sample index.
+   * @brief Get the first sample index.
    */
   Index front() const {
     return m_sampling.front;
   }
 
   /**
-   * @brief The last sample index.
+   * @brief Get the last sample index.
    */
   Index back() const {
     return m_sampling.back;
   }
 
   /**
-   * @brief The sampling step.
+   * @brief Get the sampling step.
    */
   Index step() const {
     return m_sampling.step;
   }
 
   /**
-   * @brief The data stride.
+   * @brief Get the data stride.
    */
   Index stride() const {
     return m_stride;
   }
 
   /**
-   * @brief The data pointer.
+   * @brief Get the data pointer.
    */
   const T* data() const {
     return m_data;
@@ -286,14 +298,14 @@ public:
   /**
    * @brief Increment the data pointer.
    */
-  IndexSampling& operator++() {
+  DataSamples& operator++() {
     return *this += 1;
   }
 
   /**
    * @copybrief operator++()
    */
-  IndexSampling operator++(int) {
+  DataSamples operator++(int) {
     auto res = *this;
     ++res;
     return res;
@@ -302,7 +314,7 @@ public:
   /**
    * @brief Move the data pointer forward.
    */
-  IndexSampling& operator+=(T n) {
+  DataSamples& operator+=(T n) {
     m_data += n;
     return *this;
   }
@@ -310,7 +322,7 @@ public:
   /**
    * @brief Move the data pointer backward.
    */
-  IndexSampling& operator-=(T n) {
+  DataSamples& operator-=(T n) {
     *this += -n;
     return *this;
   }
@@ -366,6 +378,14 @@ private:
    */
   Index m_stride;
 };
+
+/**
+ * @brief Get the stride along a given axis.
+ */
+template <Index Axis, Index N>
+Index shapeStride(const Position<N>& shape) {
+  return std::accumulate(shape.begin(), shape.begin() + Axis, 1, std::multiplies<Index> {});
+}
 
 } // namespace Kast
 

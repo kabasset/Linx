@@ -2,16 +2,14 @@
 // This file is part of EleFits <github.com/CNES/EleFits>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#if defined(_ELEFITSDATA_RASTER_IMPL) || defined(CHECK_QUALITY)
+#if defined(_KRASTER_RASTER_IMPL) || defined(CHECK_QUALITY)
 
-#include "EleFitsData/FitsError.h"
-#include "EleFitsData/Raster.h"
+#include "KRaster/Raster.h"
 
 #include <functional> // multiplies
 #include <numeric> // accumulate
 
-namespace Euclid {
-namespace Fits {
+namespace Kast {
 
 template <typename T, long N, typename TContainer>
 constexpr long Raster<T, N, TContainer>::Dim;
@@ -63,7 +61,7 @@ struct IndexRecursionImpl<-1, I> {
   static long index(const Position<-1>& shape, const Position<-1>& pos) {
     const auto n = shape.size();
     if (pos.size() != n) {
-      throw FitsError(
+      throw std::runtime_error( // FIXME KastError?
           "Dimension mismatch. Raster is of dimension " + std::to_string(n) + " while position is of dimension " +
           std::to_string(pos.size()));
     }
@@ -122,7 +120,7 @@ inline const T& Raster<T, N, TContainer>::at(const Position<N>& pos) const {
   for (long i = 0; i < dimension(); ++i) {
     auto& b = boundedPos[i];
     const auto& s = m_shape[i];
-    OutOfBoundsError::mayThrow("pos[" + std::to_string(i) + "]", b, {-s, s - 1});
+    // OutOfBoundsError::mayThrow("pos[" + std::to_string(i) + "]", b, {-s, s - 1}); // FIXME
     if (b < 0) {
       b += s;
     }
@@ -150,7 +148,8 @@ template <long M>
 const PtrRaster<const T, M> Raster<T, N, TContainer>::slice(const Region<N>& region) const {
   // FIXME resolve
   if (not isContiguous<M>(region)) {
-    throw FitsError("Cannot slice: Region is not contiguous."); // FIXME clarify
+    throw std::runtime_error( // FIXME KastError?
+        "Cannot slice: Region is not contiguous."); // FIXME clarify
   }
   const auto& f = region.front;
   const auto& b = region.back;
@@ -165,7 +164,8 @@ template <typename T, long N, typename TContainer>
 template <long M>
 PtrRaster<T, M> Raster<T, N, TContainer>::slice(const Region<N>& region) {
   if (not isContiguous<M>(region)) {
-    throw FitsError("Cannot slice: Region is not contiguous."); // FIXME clarify
+    throw std::runtime_error( // FIXME KastError ?
+        "Cannot slice: Region is not contiguous."); // FIXME clarify
   }
   const auto& f = region.front;
   const auto& b = region.back;
@@ -233,22 +233,6 @@ bool Raster<T, N, TContainer>::isContiguous(const Region<N>& region) const {
   return true;
 }
 
-#ifndef DECLARE_RASTER_CLASSES
-#define DECLARE_RASTER_CLASSES(T, unused) \
-  extern template class Raster<T, -1, DataContainerHolder<T, T*>>; \
-  extern template class Raster<T, 2, DataContainerHolder<T, T*>>; \
-  extern template class Raster<T, 3, DataContainerHolder<T, T*>>; \
-  extern template class Raster<const T, -1, DataContainerHolder<const T, const T*>>; \
-  extern template class Raster<const T, 2, DataContainerHolder<const T, const T*>>; \
-  extern template class Raster<const T, 3, DataContainerHolder<const T, const T*>>; \
-  extern template class Raster<T, -1, DataContainerHolder<T, std::vector<T>>>; \
-  extern template class Raster<T, 2, DataContainerHolder<T, std::vector<T>>>; \
-  extern template class Raster<T, 3, DataContainerHolder<T, std::vector<T>>>;
-ELEFITS_FOREACH_RASTER_TYPE(DECLARE_RASTER_CLASSES)
-#undef DECLARE_COLUMN_CLASSES
-#endif
-
-} // namespace Fits
-} // namespace Euclid
+} // namespace Kast
 
 #endif
