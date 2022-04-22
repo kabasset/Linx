@@ -95,8 +95,8 @@ void testConvolution1d(const TIn& in, const TKernel& kernel, const TOut& expecte
 }
 
 BOOST_AUTO_TEST_CASE(convolve1d_along_test) {
-  const Position<2> shape {4, 3};
-  VecRaster<int, 2> in(shape);
+  const Position<3> shape {4, 3, 5};
+  VecRaster<int, 3> in(shape);
   Kernel1d<int, OutOfBoundsCrop> kernel({1, 2, 3}, 1);
   const int value = 10;
   std::fill(in.begin(), in.end(), value);
@@ -131,8 +131,8 @@ BOOST_AUTO_TEST_CASE(convolve1d_along_test) {
     }
   }
   testConvolution1d<0>(in, kernel, alongX);
-  // testConvolution1d<1>(in, kernel, alongY);
-  // testConvolution1d<2>(in, kernel, alongZ);
+  testConvolution1d<1>(in, kernel, alongY);
+  testConvolution1d<2>(in, kernel, alongZ);
 }
 
 BOOST_AUTO_TEST_CASE(standard_separable_convolve2d_test) {
