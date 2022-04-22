@@ -126,7 +126,7 @@ public:
   /**
    * @brief Constructor.
    */
-  PositionSampling(const Region<N>& boundingBox, const Position<N>& step = Position<N>::ones()) :
+  PositionSampling(const Region<N>& boundingBox, const Position<N>& step = Position<N>::one()) :
       m_samplings(step.size()) {
     for (std::size_t i = 0; i < m_samplings.size(); ++i) {
       m_samplings[i] = {boundingBox.front[i], boundingBox.back[i], step[i]};
@@ -236,8 +236,9 @@ public:
   /**
    * @brief Constructor.
    */
-  DataSamples(T* data, const IndexSampling& sampling, Index stride = 1) :
-      m_data(data), m_sampling(sampling), m_stride(stride) {}
+  DataSamples(T* data, std::size_t size, const IndexSampling& sampling = {}, Index stride = 1) :
+      m_data(data), m_size(size),
+      m_sampling({sampling.front, sampling.back == -1 ? m_size - 1 : sampling.back, sampling.step}), m_stride(stride) {}
 
   /**
    * @brief Get the sampling.
@@ -247,9 +248,16 @@ public:
   }
 
   /**
-   * @brief Get the number of samples.
+   * @brief Get the data size.
    */
   std::size_t size() const {
+    return m_size;
+  }
+
+  /**
+   * @brief Get the number of samples.
+   */
+  std::size_t count() const {
     return m_sampling.size();
   }
 
@@ -367,6 +375,11 @@ private:
    * @brief The data pointer.
    */
   T* m_data;
+
+  /**
+   * @brief The data size.
+   */
+  std::size_t m_size;
 
   /**
    * @brief The index sampling.

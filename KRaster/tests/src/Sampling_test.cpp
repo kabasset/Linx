@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(index_sampling_test) {
 void testDataSamples(std::size_t size, Index from, Index to, Index by, Index stride) {
   std::vector<double> data(size);
   std::iota(data.begin(), data.end(), 0);
-  DataSamples<double> samples(data.data(), {from, to, by}, stride);
+  DataSamples<double> samples(data.data(), data.size(), {from, to, by}, stride);
   BOOST_TEST(samples.size() == (to - from + by) / by);
   const auto vector = samples.vector();
   BOOST_TEST(vector.size() == samples.size());
