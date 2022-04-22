@@ -26,6 +26,64 @@ BOOST_AUTO_TEST_CASE(kernel_1d_init_test) {
   }
 }
 
+BOOST_AUTO_TEST_CASE(standard_convolve1d_test) {
+  const std::vector<int> inData {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+  const std::vector<float> kernelData {0.5, 1., 1.5};
+  std::vector<double> outData(inData.size(), 0.);
+  const std::vector<double> expected {4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 16};
+  DataSamples<const int> in(inData.data(), inData.size(), {0, -1});
+  Kernel1d<float> kernel(kernelData, 1);
+  DataSamples<double> out(outData.data(), outData.size(), {0, -1});
+  kernel.sparseCorrelate1dTo(in, out);
+  for (std::size_t i = 0; i < expected.size(); ++i) {
+    BOOST_TEST(outData[i] == expected[i]);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(steped_convolve1d_test) {
+  const std::vector<int> inData {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};
+  const std::vector<float> kernelData {0.5, 1., 1.5, 2., 1.};
+  std::vector<double> outData {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+  const std::vector<double> expected {1, 2, 8.5, 4, 26, 6, 44, 8, 62, 10, 65, 12};
+  DataSamples<const int> in(inData.data(), inData.size(), {1, -1, 3});
+  Kernel1d<float> kernel(kernelData, 3);
+  DataSamples<double> out(outData.data(), outData.size(), {2, -1, 2});
+  kernel.sparseCorrelate1dTo(in, out);
+  for (std::size_t i = 0; i < expected.size(); ++i) {
+    BOOST_TEST(outData[i] == expected[i]);
+  }
+}
+
+template <typename T>
+std::vector<T> transposePad(const std::vector<T>& in, Index stride) {
+  std::vector<T> out(in.size() * stride, T());
+  for (std::size_t i = 0; i < in.size(); ++i) {
+    out[i * stride] = in[i];
+  }
+  return out;
+}
+
+BOOST_AUTO_TEST_CASE(transpose_pad_test) {
+  const std::vector<int> in {1, 2, 3, 4};
+  const auto out = transposePad(in, 3);
+  const std::vector<int> expected {1, 0, 0, 2, 0, 0, 3, 0, 0, 4, 0, 0};
+  BOOST_TEST(out == expected);
+}
+
+BOOST_AUTO_TEST_CASE(strided_convolve1d_test) {
+  const auto inData = transposePad<int>({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}, 2);
+  const std::vector<float> kernelData {0.5, 1., 1.5, 2., 1.};
+  auto outData = transposePad<double>({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, 3);
+  const auto expected = transposePad<double>({1, 2, 8.5, 4, 26, 6, 44, 8, 62, 10, 65, 12}, 3);
+  DataSamples<const int> in(inData.data(), inData.size() / 2, {1, -1, 3}, 2);
+  Kernel1d<float> kernel(kernelData, 3);
+  DataSamples<double> out(outData.data(), outData.size() / 3, {2, -1, 2}, 3);
+  kernel.sparseCorrelate1dTo(in, out);
+  for (std::size_t i = 0; i < expected.size(); ++i) {
+    BOOST_TEST(outData[i] == expected[i]);
+  }
+}
+
 template <Index I, typename TIn, typename TKernel, typename TOut>
 void testConvolution1d(const TIn& in, const TKernel& kernel, const TOut& expected) {
   const auto out = kernel.template correlateAlong<I, typename TOut::Value>(in);
@@ -36,7 +94,7 @@ void testConvolution1d(const TIn& in, const TKernel& kernel, const TOut& expecte
   }
 }
 
-BOOST_AUTO_TEST_CASE(convolution_1d_test) {
+BOOST_AUTO_TEST_CASE(convolve1d_along_test) {
   const Position<2> shape {4, 3};
   VecRaster<int, 2> in(shape);
   Kernel1d<int, OutOfBoundsCrop> kernel({1, 2, 3}, 1);
@@ -75,6 +133,79 @@ BOOST_AUTO_TEST_CASE(convolution_1d_test) {
   testConvolution1d<0>(in, kernel, alongX);
   // testConvolution1d<1>(in, kernel, alongY);
   // testConvolution1d<2>(in, kernel, alongZ);
+}
+
+BOOST_AUTO_TEST_CASE(standard_separable_convolve2d_test) {
+  VecRaster<int, 2> in({4, 3});
+  std::fill(in.begin(), in.end(), 2);
+  std::vector<int> kernelData {1, 1, 1};
+  Kernel1d<int> kernel(kernelData, 1);
+  VecRaster<int, 2> out(in.shape());
+  kernel.correlate2dTo(in, out);
+  const std::vector<int> expected {8, 12, 12, 8, 12, 18, 18, 12, 8, 12, 12, 8};
+  BOOST_TEST(out.size() == expected.size());
+  for (std::size_t i = 0; i < expected.size(); ++i) {
+    BOOST_TEST(out.data()[i] == expected[i]);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(manual_separable_convolve2d_test) {
+  VecRaster<int, 2> in({4, 3});
+  std::fill(in.begin(), in.end(), 2);
+  std::vector<int> kernelData {1, 1, 1};
+  Kernel1d<int> kernel(kernelData, 1);
+  const auto interm = kernel.correlateAlong<0>(in);
+  const auto out = kernel.correlateAlong<1>(interm);
+  const std::vector<int> expected {8, 12, 12, 8, 12, 18, 18, 12, 8, 12, 12, 8};
+  BOOST_TEST(out.size() == expected.size());
+  for (std::size_t i = 0; i < expected.size(); ++i) {
+    BOOST_TEST(out.data()[i] == expected[i]);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(steped_no_edge_convolve2d_test) {
+  printf("\nSTEPPED NO EDGE\n\n");
+  VecRaster<int, 2> in({4 * 3 + 2, 3 * 2 + 2});
+  std::fill(in.begin(), in.end(), 2);
+  std::vector<int> kernelData {1, 1, 1};
+  Kernel1d<int> kernel(kernelData, 1);
+  VecRaster<int, 2> out({4, 3});
+  kernel.sparseCorrelate2dTo(in, {{{1, 1}, {4 * 3, 3 * 2}}, {3, 2}}, out);
+  const std::vector<int> expected(12, 18);
+  BOOST_TEST(out.size() == expected.size());
+  for (std::size_t i = 0; i < expected.size(); ++i) {
+    BOOST_TEST(out.data()[i] == expected[i]);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(stepped_front_edge_convolve2d_test) {
+  printf("\nSTEPPED FRONT EDGE\n\n");
+  VecRaster<int, 2> in({4 * 3 + 2, 3 * 2 + 2});
+  std::fill(in.begin(), in.end(), 2);
+  std::vector<int> kernelData {1, 1, 1};
+  Kernel1d<int> kernel(kernelData, 1);
+  VecRaster<int, 2> out({4, 3});
+  kernel.sparseCorrelate2dTo(in, {{{0, 0}, {3 * 3, 2 * 2}}, {3, 2}}, out);
+  const std::vector<int> expected {8, 12, 12, 12, 12, 18, 18, 18, 12, 18, 18, 18};
+  BOOST_TEST(out.size() == expected.size());
+  for (std::size_t i = 0; i < expected.size(); ++i) {
+    BOOST_TEST(out.data()[i] == expected[i]);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(steped_back_edge_convolve2d_test) {
+  printf("\nSTEPPED BACK EDGE\n\n");
+  VecRaster<int, 2> in({4 * 3 + 2, 3 * 2 + 2});
+  std::fill(in.begin(), in.end(), 2);
+  std::vector<int> kernelData {1, 1, 1};
+  Kernel1d<int> kernel(kernelData, 1);
+  VecRaster<int, 2> out({4, 3});
+  kernel.sparseCorrelate2dTo(in, {{{4, 3}, {4 * 3 + 1, 3 * 2 + 1}}, {3, 2}}, out);
+  const std::vector<int> expected {18, 18, 18, 12, 18, 18, 18, 12, 12, 12, 12, 8};
+  BOOST_TEST(out.size() == expected.size());
+  for (std::size_t i = 0; i < expected.size(); ++i) {
+    BOOST_TEST(out.data()[i] == expected[i]);
+  }
 }
 
 //-----------------------------------------------------------------------------
