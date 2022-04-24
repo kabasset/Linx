@@ -59,6 +59,10 @@ elements_add_unit_test(Kernel tests/src/Kernel_test.cpp
                      EXECUTABLE KRasterFilter_Kernel_test
                      LINK_LIBRARIES KRasterFilter
                      TYPE Boost)
+elements_add_unit_test(Kernel1d tests/src/Kernel1d_test.cpp 
+                     EXECUTABLE KRasterFilter_Kernel1d_test
+                     LINK_LIBRARIES KRasterFilter
+                     TYPE Boost)
 
 #===============================================================================
 # Use the following macro for python modules, scripts and aux files:

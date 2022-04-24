@@ -154,8 +154,8 @@ BOOST_AUTO_TEST_CASE(manual_separable_convolve2d_test) {
   std::fill(in.begin(), in.end(), 2);
   std::vector<int> kernelData {1, 1, 1};
   Kernel1d<int> kernel(kernelData, 1);
-  const auto interm = kernel.correlateAlong<0>(in);
-  const auto out = kernel.correlateAlong<1>(interm);
+  auto out = kernel.correlateAlong<0>(in);
+  out = kernel.correlateAlong<1>(out);
   const std::vector<int> expected {8, 12, 12, 8, 12, 18, 18, 12, 8, 12, 12, 8};
   BOOST_TEST(out.size() == expected.size());
   for (std::size_t i = 0; i < expected.size(); ++i) {
