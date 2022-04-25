@@ -16,7 +16,7 @@ struct CropExtrapolation {}; // FIXME rm
 namespace Kast {
 
 /// @cond
-template <typename TKernel, Index... Axes>
+template <typename TKernel, Index... Is>
 class Kernel1dSeq;
 /// @endcond
 
@@ -27,6 +27,9 @@ template <typename T, typename TExtrapolation = CropExtrapolation>
 class Kernel1d : public DataContainer<T, DataContainerHolder<T, std::vector<T>>, Kernel1d<T, TExtrapolation>> {
 
 public:
+  using Value = T;
+  using Extrapolation = TExtrapolation;
+
   /**
    * @brief Constructor.
    * @param values The kernel values
@@ -74,9 +77,9 @@ public:
    * auto out = kernel.along<1, 2>().correlate(in);
    * \endcode
    */
-  template <Index... Axes>
-  Kernel1dSeq<Kernel1d<T, TExtrapolation>, Axes...> along() const {
-    return Kernel1dSeq<Kernel1d<T, TExtrapolation>, Axes...>(*this);
+  template <Index... Is>
+  Kernel1dSeq<Kernel1d<T, TExtrapolation>, Is...> along() const {
+    return Kernel1dSeq<Kernel1d<T, TExtrapolation>, Is...>(*this);
   }
 
   /**
@@ -123,13 +126,35 @@ private:
 /**
  * @brief Sequence of oriented 1D kernels.
  */
-template <typename TKernel, Index... Axes>
+template <typename TKernel, Index... Is>
 class Kernel1dSeq {
+  template <typename UKernel, Index... Js>
+  friend class Kernel1dSeq;
+
 public:
-  explicit Kernel1dSeq(const TKernel& kernel) : m_kernels {{Axes, &kernel}...} {}
+  explicit Kernel1dSeq(const Kernel1d<typename TKernel::Value, typename TKernel::Extrapolation>& kernel) :
+      m_kernels {{Is, kernel}...} {}
+
+  template <typename... Ts>
+  explicit Kernel1dSeq(Ts&&... args) : m_kernels(std::forward<Ts>(args)...) {}
 
   const TKernel& operator[](Index axis) const {
     return m_kernels.at(axis);
+  }
+
+  const decltype(auto) begin() const {
+    return m_kernels.begin();
+  }
+
+  const decltype(auto) end() const {
+    return m_kernels.end();
+  }
+
+  template <Index... Js>
+  Kernel1dSeq<TKernel, Is..., Js...> operator*(const Kernel1dSeq<TKernel, Js...>& rhs) const {
+    Kernel1dSeq<TKernel, Is..., Js...> out(m_kernels);
+    out.m_kernels.insert(rhs.begin(), rhs.end());
+    return out;
   }
 
   template <typename TOut, typename TIn, Index N, typename TContainer>
@@ -141,7 +166,7 @@ public:
 
   template <typename TRasterIn, typename TRasterOut>
   void correlateTo(const TRasterIn& in, TRasterOut& out) const {
-    correlateAlongSeqTo<TRasterIn, TRasterOut, Axes...>(in, out);
+    correlateAlongSeqTo<TRasterIn, TRasterOut, Is...>(in, out);
   }
 
   template <typename TOut, Index N, typename TRasterIn>
@@ -152,15 +177,15 @@ public:
 
   template <typename TRasterIn, Index N, typename TRasterOut>
   void correlateSamplesTo(const TRasterIn& in, const PositionSampling<N>& sampling, TRasterOut& out) const {
-    correlateSamplesAlongSeqTo<TRasterIn, N, TRasterOut, Axes...>(in, sampling, out);
+    correlateSamplesAlongSeqTo<TRasterIn, N, TRasterOut, Is...>(in, sampling, out);
   }
 
 private:
-  template <typename TRasterIn, typename TRasterOut, Index I0, Index... Is>
+  template <typename TRasterIn, typename TRasterOut, Index J0, Index... Js>
   void correlateAlongSeqTo(const TRasterIn& in, TRasterOut& out) const {
-    const auto tmp = correlateAlong<TRasterIn, TRasterOut, I0>(in);
-    correlateAlongSeqTo<TRasterIn, TRasterOut, Is...>(tmp, out);
-    printf("%li: %i -> %i\n", I0, tmp[0], out[0]);
+    const auto tmp = correlateAlong<TRasterIn, TRasterOut, J0>(in);
+    correlateAlongSeqTo<TRasterIn, TRasterOut, Js...>(tmp, out);
+    printf("%li: %i -> %i\n", J0, tmp[0], out[0]);
   }
 
   template <typename TRasterIn, typename TRasterOut>
@@ -168,27 +193,27 @@ private:
     // pass
   }
 
-  template <typename TRasterIn, typename TRasterOut, Index I>
+  template <typename TRasterIn, typename TRasterOut, Index J>
   TRasterOut correlateAlong(const TRasterIn& in) const {
     const auto shape = in.shape();
-    const auto length = shape[I];
-    const auto stride = shapeStride<I>(shape);
+    const auto length = shape[J];
+    const auto stride = shapeStride<J>(shape);
     auto domain = in.domain();
-    domain.back[I] = 0;
+    domain.back[J] = 0;
     TRasterOut out(shape);
     for (const auto& p : domain) {
       DataSamples<const typename TRasterIn::Value> inSamples {&in[p], length, {}, stride};
       DataSamples<typename TRasterOut::Value> outSamples {&out[p], length, {}, stride};
-      m_kernels.at(I)->correlate(inSamples, outSamples);
+      m_kernels.at(J).correlate(inSamples, outSamples);
     }
     return out;
   }
 
-  template <typename TRasterIn, Index N, typename TRasterOut, Index I0, Index... Is>
+  template <typename TRasterIn, Index N, typename TRasterOut, Index J0, Index... Js>
   void correlateSamplesAlongSeqTo(const TRasterIn& in, const PositionSampling<N>& sampling, TRasterOut& out) const {
     auto box = correlationBox(sampling, in.shape()); // FIXME make unit and dilate
-    correlateAlongSeqTo<TRasterIn, N, TRasterOut, Is...>(in, box, out);
-    // FIXME m_kernels[I0]->correlateSamplesAlongTo<I0>(in, sampling, out)
+    correlateAlongSeqTo<TRasterIn, N, TRasterOut, Js...>(in, box, out);
+    // FIXME m_kernels[J0]->correlateSamplesAlongTo<J0>(in, sampling, out)
   }
 
   template <Index N>
@@ -206,12 +231,18 @@ private:
         back = shape[p.first] - 1;
       }
     }
-    return box;
+    return box; //FIXME box.dilate(amount).clamp(shape)
   }
 
 private:
-  std::map<Index, const TKernel*> m_kernels;
+  std::map<Index, TKernel> m_kernels;
 };
+
+template <typename T, Index IAverage, Index IDifference, typename TExtrapolation = CropExtrapolation>
+Kernel1dSeq<Kernel1d<T, TExtrapolation>, IAverage, IDifference> makeSobel() {
+  return Kernel1d<T, TExtrapolation>({1, 2, 1}, 1).template along<IAverage>() *
+      Kernel1d<T, TExtrapolation>({1, 0, -1}, 1).template along<IDifference>();
+}
 
 } // namespace Kast
 

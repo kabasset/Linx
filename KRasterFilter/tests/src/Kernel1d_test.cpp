@@ -29,6 +29,21 @@ BOOST_AUTO_TEST_CASE(sum_kernel_test) {
   }
 }
 
+BOOST_AUTO_TEST_CASE(make_sobel_test) {
+  const auto sobelX = makeSobel<int, 0, 1>();
+  const auto sobelY = makeSobel<int, 1, 0>();
+  VecRaster<int, 3> raster({3, 3, 3});
+  std::fill(raster.begin(), raster.end(), 1);
+  const auto edgesX = sobelX.correlate<int>(raster);
+  const std::vector<int> expectedX {
+      8,  12, 8,  12, 18, 12, 8,  12, 8, // z = 0
+      12, 18, 12, 18, 27, 18, 12, 18, 12, // z = 1
+      8,  12, 8,  12, 18, 12, 8,  12, 8}; // z = 2
+  for (std::size_t i = 0; i < 3 * 3 * 3; ++i) {
+    BOOST_TEST(edgesX[i] == expectedX[i]);
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE_END()
