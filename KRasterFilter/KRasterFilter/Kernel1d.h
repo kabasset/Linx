@@ -7,8 +7,7 @@
 
 #include "KRaster/Raster.h"
 #include "KRaster/Sampling.h"
-// #include "KRasterGeometry/Extrapolation.h"
-struct CropExtrapolation {}; // FIXME rm
+#include "KRasterGeometry/Extrapolation.h"
 
 #include <map>
 #include <vector>

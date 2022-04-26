@@ -6,14 +6,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 #   For declaring a project module:
 #         elements_subdir(ElementsExamples)
 #===============================================================================
-elements_subdir(KRasterFilter)
+elements_subdir(KRasterGeometry)
 
 #===============================================================================
 # Load elements_depends_on_subdirs macro here
 #   For creating a dependency onto an other accessible module
 #         elements_depends_on_subdirs(ElementsKernel)
 #===============================================================================
-elements_depends_on_subdirs(KRaster KRasterGeometry)
+elements_depends_on_subdirs(ElementsKernel)
 
 #===============================================================================
 # Add the find_package macro (a pure CMake command) here to locate the
@@ -30,10 +30,10 @@ elements_depends_on_subdirs(KRaster KRasterGeometry)
 #                     LINK_LIBRARIES Boost ElementsKernel
 #                     PUBLIC_HEADERS ElementsExamples)
 #===============================================================================
-elements_add_library(KRasterFilter src/lib/*.cpp
-                     INCLUDE_DIRS KRaster KRasterGeometry
-                     LINK_LIBRARIES KRaster KRasterGeometry
-                     PUBLIC_HEADERS KRasterFilter)
+elements_add_library(KRasterGeometry src/lib/*.cpp
+                     INCLUDE_DIRS ElementsKernel
+                     LINK_LIBRARIES ElementsKernel
+                     PUBLIC_HEADERS KRasterGeometry)
 
 #===============================================================================
 # Declare the executables here
@@ -51,17 +51,17 @@ elements_add_library(KRasterFilter src/lib/*.cpp
 #                       INCLUDE_DIRS ElementsExamples
 #                       LINK_LIBRARIES ElementsExamples TYPE Boost)
 #===============================================================================
-elements_add_unit_test(Convolution tests/src/Convolution_test.cpp 
-                     EXECUTABLE KRasterFilter_Convolution_test
-                     LINK_LIBRARIES KRasterFilter
+elements_add_unit_test(Interpolation tests/src/Interpolation_test.cpp 
+                     EXECUTABLE KRasterGeometry_Interpolation_test
+                     LINK_LIBRARIES KRasterGeometry
                      TYPE Boost)
-elements_add_unit_test(Kernel tests/src/Kernel_test.cpp 
-                     EXECUTABLE KRasterFilter_Kernel_test
-                     LINK_LIBRARIES KRasterFilter
+elements_add_unit_test(Extrapolation tests/src/Extrapolation_test.cpp 
+                     EXECUTABLE KRasterGeometry_Extrapolation_test
+                     LINK_LIBRARIES KRasterGeometry
                      TYPE Boost)
-elements_add_unit_test(Kernel1d tests/src/Kernel1d_test.cpp 
-                     EXECUTABLE KRasterFilter_Kernel1d_test
-                     LINK_LIBRARIES KRasterFilter
+elements_add_unit_test(Affinity tests/src/Affinity_test.cpp 
+                     EXECUTABLE KRasterGeometry_Affinity_test
+                     LINK_LIBRARIES KRasterGeometry
                      TYPE Boost)
 
 #===============================================================================
