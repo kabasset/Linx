@@ -97,7 +97,7 @@ public:
     inMinIt -= in.front();
     inIt -= m_backward;
     auto outIt = out.begin();
-    long i = in.front();
+    auto i = in.front();
 
     // Backward-croped
     for (; i < m_backward; i += step, inIt += step, ++outIt) {

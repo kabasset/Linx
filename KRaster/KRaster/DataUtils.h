@@ -61,7 +61,7 @@ namespace Kast {
  * @ingroup data_classes
  * @brief A light structure to bind a return type and a key, e.g. for reading records and columns.
  * @tparam TReturn The desired return type
- * @tparam TKey The key type, typically `std::string` or `long`
+ * @tparam TKey The key type, typically `std::string` or `Index`
  * @details
  * `TypedKeys` should not be instantiated directly.
  * Instead maker `as()` should be used for clarity, e.g.:
@@ -99,20 +99,6 @@ struct TypedKey {
 };
 
 /**
- * @brief Deprecated alias for named keys.
- * @deprecated Use `as()` instead.
- */
-template <typename TReturn>
-using Named = TypedKey<TReturn, std::string>;
-
-/**
- * @brief Deprecated alias for indexed keys.
- * @deprecated Use `as()` instead.
- */
-template <typename TReturn>
-using Indexed = TypedKey<TReturn, long>;
-
-/**
  * @relates TypedKey
  * @brief Create a `TypedKey` where the key type is deduced from the parameter.
  * @details
@@ -137,7 +123,7 @@ TypedKey<TReturn, long> as(int key) {
 
 /**
  * @relates TypedKey
- * @copydoc as(long)
+ * @copydoc as(Index)
  */
 template <typename TReturn>
 TypedKey<TReturn, std::string> as(const std::string& key) {
@@ -146,7 +132,7 @@ TypedKey<TReturn, std::string> as(const std::string& key) {
 
 /**
  * @relates TypedKey
- * @copydoc as(long)
+ * @copydoc as(Index)
  */
 template <typename TReturn>
 TypedKey<TReturn, std::string> as(const char* key) {

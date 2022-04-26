@@ -38,7 +38,7 @@ namespace Kast {
  * PtrRaster<char, 2> ptrRaster({800, 600}, &raster[{0, 0, 1}]);
  * \endcode
  */
-template <typename T, long N, typename THolder> // FIXME simplify as TParent
+template <typename T, Index N, typename THolder> // FIXME simplify as TParent
 class Subraster {
 
 public:
@@ -64,7 +64,7 @@ public:
   /**
    * @brief The number of pixels in the subraster.
    */
-  long size() const {
+  Index size() const {
     return m_region.size();
   }
 

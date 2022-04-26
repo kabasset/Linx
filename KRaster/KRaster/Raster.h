@@ -20,11 +20,11 @@ namespace Kast {
 // Issue with forward declarations: https://github.com/doxygen/doxygen/issues/8177
 
 // Forward declaration for Raster::subraster()
-template <typename T, long N, typename THolder>
+template <typename T, Index N, typename THolder>
 class Subraster;
 
 // Forward declaration for PtrRaster and VecRaster
-template <typename T, long N, typename THolder>
+template <typename T, Index N, typename THolder>
 class Raster;
 
 /// @endcond
@@ -33,14 +33,14 @@ class Raster;
  * @ingroup image_data_classes
  * @brief `Raster` which points to some external data (`THolder` = `T*`).
  */
-template <typename T, long N = 2>
+template <typename T, Index N = 2>
 using PtrRaster = Raster<T, N, DataContainerHolder<T, T*>>;
 
 /**
  * @ingroup image_data_classes
  * @brief `Raster` which owns a data vector (`THolder` = `std::vector<T>`).
  */
-template <typename T, long N = 2>
+template <typename T, Index N = 2>
 using VecRaster = Raster<T, N, DataContainerHolder<T, std::vector<T>>>;
 
 /**
@@ -124,7 +124,7 @@ using VecRaster = Raster<T, N, DataContainerHolder<T, std::vector<T>>>;
  * and also belongs to the Java library.
  * All in all, `Raster` seems to be a fair compromise.
  */
-template <typename T, long N, typename THolder>
+template <typename T, Index N, typename THolder>
 class Raster : public DataContainer<T, THolder, Raster<T, N, THolder>> {
   friend class ImageRaster; // FIXME rm when Subraster is removed
 
@@ -141,7 +141,7 @@ public:
    * In contrast, `dimension()` provides the actual dimension of the Raster,
    * even in the case of a variable dimension.
    */
-  static constexpr long Dim = N;
+  static constexpr Index Dim = N;
 
   /// @group_construction
 
@@ -202,13 +202,13 @@ public:
    * This corresponds to the `N` template parameter in general,
    * or to the current dimension if variable.
    */
-  long dimension() const;
+  Index dimension() const;
 
   /**
    * @brief Get the length along given axis.
    */
-  template <long I>
-  long length() const;
+  template <Index I>
+  Index length() const;
 
   /// @group_elements
 
@@ -217,7 +217,7 @@ public:
   /**
    * @brief Compute the raw index of a given position.
    */
-  inline long index(const Position<N>& pos) const;
+  inline Index index(const Position<N>& pos) const;
 
   /**
    * @brief Access the pixel value at given position.
@@ -253,7 +253,7 @@ public:
    * - For `i` < `M-1`, `front[i]` = 0 and `back[i]` = -1;
    * - For `i` > `M`, `front[i]` = `back[i]`.
    */
-  template <long M = 2>
+  template <Index M = 2>
   bool isContiguous(const Region<N>& region) const;
 
   /**
@@ -262,13 +262,13 @@ public:
    * @see isContiguous()
    * @see section()
    */
-  template <long M = 2>
+  template <Index M = 2>
   const PtrRaster<const T, M> slice(const Region<N>& region) const;
 
   /**
    * @copybrief slice()
    */
-  template <long M = 2>
+  template <Index M = 2>
   PtrRaster<T, M> slice(const Region<N>& region);
 
   /**
@@ -289,22 +289,22 @@ public:
    * 
    * @see slice()
    */
-  const PtrRaster<const T, N> section(long front, long back) const;
+  const PtrRaster<const T, N> section(Index front, Index back) const;
 
   /**
-   * @copybrief section(long,long)const
+   * @copybrief section(Index,Index)const
    */
-  PtrRaster<T, N> section(long front, long back);
+  PtrRaster<T, N> section(Index front, Index back);
 
   /**
    * @brief Create a section at given.
    */
-  const PtrRaster<const T, N == -1 ? -1 : N - 1> section(long index) const;
+  const PtrRaster<const T, N == -1 ? -1 : N - 1> section(Index index) const;
 
   /**
-   * @copybrief section(long)const
+   * @copybrief section(Index)const
    */
-  PtrRaster<T, N == -1 ? -1 : N - 1> section(long index);
+  PtrRaster<T, N == -1 ? -1 : N - 1> section(Index index);
 
   /// @}
 
@@ -338,12 +338,12 @@ private:
  * @tparam T The pixel type, should not be specified (automatically deduced)
  * @tparam Longs The axes lengths, should not be specified (automatically deduced)
  * @param data The raster values, which can be either a pointer (or C array) or a vector
- * @param shape The shape as a comma-separated list of `long`s
+ * @param shape The shape as a comma-separated list of `Index`s
  * @details
  * \par_example
  * \code
  * Given:
- * - long width, height, depth: The axes lengths;
+ * - Index width, height, depth: The axes lengths;
  * - float* ptr: The pixel values as a pointer;
  * - std::vector<float> vec: The pixel values as a vector;
  * 

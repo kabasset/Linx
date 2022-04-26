@@ -120,7 +120,7 @@ private:
     inMinIt -= in.front();
     inIt -= kernel.backward;
     auto outIt = out.begin();
-    long i = in.front();
+    auto i = in.front();
     for (; i < kernel.backward; i += in.step(), inIt += in.step(), ++outIt) {
       *outIt = std::inner_product(kernel.center - i, kernel.end(), inMinIt, kernel.bias);
     }

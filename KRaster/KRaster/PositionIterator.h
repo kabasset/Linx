@@ -17,7 +17,7 @@ namespace Kast {
  * The move is such that the corresponding offset in a `Raster` is always increasing.
  * In particular, when screening a whole `Raster`, the pixels are visited in the storage order.
  */
-template <long N = 2>
+template <Index N = 2>
 class PositionIterator : public std::iterator<std::input_iterator_tag, Position<N>> {
 
 public:
@@ -146,7 +146,7 @@ private:
  * @relates Region
  * @brief Iterator to the front position of a region.
  */
-template <long N = 2>
+template <Index N = 2>
 PositionIterator<N> begin(const Region<N>& region) {
   return PositionIterator<N>(region);
 }
@@ -155,7 +155,7 @@ PositionIterator<N> begin(const Region<N>& region) {
  * @relates Region
  * @brief Iterator to one past the back position of a region.
  */
-template <long N = 2>
+template <Index N = 2>
 PositionIterator<N> end(const Region<N>& region) {
   Region<N> pastTheLast {region.back, region.back};
   pastTheLast.front[0]++;

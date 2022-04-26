@@ -83,7 +83,7 @@ public:
     inMinIt -= in.front();
     inIt -= m_backward;
     auto outIt = out.begin();
-    long i = in.front();
+    auto i = in.front();
 
     printf("in = [%li:%li:%li:%li]\n", in.front(), in.back(), step, in.stride());
 
@@ -132,8 +132,8 @@ public:
     printf("%li-%li:%li - %li-%li:%li\n", xFrom, xTo, xStep, yFrom, yTo, yStep);
 
     // Convolve along x-axis
-    const long xConvolvedWidth = (xTo - xFrom + xStep) / xStep;
-    const long xConvolvedHeight = yTo - yFrom + 1;
+    const Index xConvolvedWidth = (xTo - xFrom + xStep) / xStep;
+    const Index xConvolvedHeight = yTo - yFrom + 1;
     VecRaster<typename TRasterOut::Value, TRasterOut::Dim> xConvolved({xConvolvedWidth, xConvolvedHeight});
     DataSamples<const typename TRasterIn::Value> inSamples(
         &in[{0, yFrom}],
@@ -147,7 +147,7 @@ public:
         xConvolvedSamples.back(),
         xConvolvedSamples.step(),
         xConvolvedSamples.stride());
-    for (long y = yFrom; y <= yTo; ++y) {
+    for (Index y = yFrom; y <= yTo; ++y) {
       printf(
           "in: %li, xConvolved: %li\n",
           std::distance(in.data(), inSamples.data()),
@@ -158,8 +158,8 @@ public:
     }
 
     printf("xConvolved:\n%lix%li\n", xConvolvedWidth, xConvolvedHeight);
-    for (long y = 0; y < xConvolvedHeight; ++y) {
-      for (long x = 0; x < xConvolvedWidth; ++x) {
+    for (Index y = 0; y < xConvolvedHeight; ++y) {
+      for (Index x = 0; x < xConvolvedWidth; ++x) {
         printf("%i ", xConvolved[{x, y}]);
       }
       printf("\n");
@@ -180,7 +180,7 @@ public:
         outSamples.back(),
         outSamples.step(),
         outSamples.stride());
-    for (long x = xFrom; x <= xTo; x += xStep) {
+    for (Index x = xFrom; x <= xTo; x += xStep) {
       printf(
           "xConvolved: %li, out: %li\n",
           std::distance(xConvolved.data(), ySamples.data()),
@@ -191,8 +191,8 @@ public:
     }
 
     printf("out:\n%lix%li\n", out.template length<0>(), out.template length<1>());
-    for (long y = 0; y < out.template length<1>(); ++y) {
-      for (long x = 0; x < out.template length<0>(); ++x) {
+    for (Index y = 0; y < out.template length<1>(); ++y) {
+      for (Index x = 0; x < out.template length<0>(); ++x) {
         printf("%i ", out[{x, y}]);
       }
       printf("\n");

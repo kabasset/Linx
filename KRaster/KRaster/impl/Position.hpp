@@ -8,43 +8,43 @@
 
 namespace Kast {
 
-template <long N>
-Position<N>::Position() : DataContainer<long, DataContainerHolder<long, Indices<N>>, Position<N>>() {}
+template <Index N>
+Position<N>::Position() : DataContainer<Index, DataContainerHolder<Index, Indices<N>>, Position<N>>() {}
 
-template <long N>
-Position<N>::Position(long dim) : DataContainer<long, DataContainerHolder<long, Indices<N>>, Position<N>>(dim) {}
+template <Index N>
+Position<N>::Position(Index dim) : DataContainer<Index, DataContainerHolder<Index, Indices<N>>, Position<N>>(dim) {}
 
-template <long N>
-Position<N>::Position(std::initializer_list<long> indices) :
-    DataContainer<long, DataContainerHolder<long, Indices<N>>, Position<N>>(indices) {}
+template <Index N>
+Position<N>::Position(std::initializer_list<Index> indices) :
+    DataContainer<Index, DataContainerHolder<Index, Indices<N>>, Position<N>>(indices) {}
 
-template <long N>
+template <Index N>
 template <typename TIterator>
 Position<N>::Position(TIterator begin, TIterator end) :
-    DataContainer<long, DataContainerHolder<long, Indices<N>>, Position<N>>(begin, end) {}
+    DataContainer<Index, DataContainerHolder<Index, Indices<N>>, Position<N>>(begin, end) {}
 
-template <long N>
+template <Index N>
 Position<N> Position<N>::zero() {
   Position<N> res(std::abs(Dim));
   std::fill(res.begin(), res.end(), 0);
   return res;
 }
 
-template <long N>
+template <Index N>
 Position<N> Position<N>::one() {
   Position<N> res(std::abs(Dim));
   std::fill(res.begin(), res.end(), 1);
   return res;
 }
 
-template <long N>
+template <Index N>
 Position<N> Position<N>::max() {
   Position<N> res(std::abs(N));
   std::fill(res.begin(), res.end(), -1);
   return res;
 }
 
-template <long N>
+template <Index N>
 bool Position<N>::isZero() const {
   for (auto i : *this) {
     if (i != 0) {
@@ -54,7 +54,7 @@ bool Position<N>::isZero() const {
   return true;
 }
 
-template <long N>
+template <Index N>
 bool Position<N>::isMax() const {
   for (auto i : *this) {
     if (i != -1) {
@@ -64,8 +64,8 @@ bool Position<N>::isMax() const {
   return true;
 }
 
-template <long N>
-template <long M>
+template <Index N>
+template <Index M>
 Position<M> Position<N>::slice() const {
   const auto b = this->begin();
   auto e = b;
@@ -73,8 +73,8 @@ Position<M> Position<N>::slice() const {
   return Position<M>(b, e);
 }
 
-template <long N>
-template <long M>
+template <Index N>
+template <Index M>
 Position<M> Position<N>::extend(const Position<M>& padding) const {
   auto res = padding;
   for (std::size_t i = 0; i < this->size(); ++i) { // TODO std::transform
