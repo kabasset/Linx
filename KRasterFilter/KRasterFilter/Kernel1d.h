@@ -50,14 +50,14 @@ public:
   /**
    * @brief Get the number of backward values.
    */
-  Index backwardCount() const {
+  Index backwardSize() const {
     return m_backward;
   }
 
   /**
    * @brief Get the number of forward values.
    */
-  Index forwardCount() const {
+  Index forwardSize() const {
     return m_forward;
   }
 
@@ -131,24 +131,67 @@ class Kernel1dSeq {
   friend class Kernel1dSeq;
 
 public:
+  /**
+   * @brief The element value type.
+   */
+  using Value = typename TKernel::Value;
+
+  /**
+   * @brief The logical dimension of the combined kernel.
+   */
+  static constexpr Index Dim = std::max({Is...}) + 1;
+
+  /**
+   * @brief Construct a sequence of identical `Kernel1d`s with various orientations.
+   */
   explicit Kernel1dSeq(const Kernel1d<typename TKernel::Value, typename TKernel::Extrapolation>& kernel) :
       m_kernels {{Is, kernel}...} {}
 
+  /**
+   * @brief Map-based constructor.
+   */
   template <typename... Ts>
   explicit Kernel1dSeq(Ts&&... args) : m_kernels(std::forward<Ts>(args)...) {}
 
+  /**
+   * @brief Get the `Kernel1d` along given axis.
+   */
   const TKernel& operator[](Index axis) const {
     return m_kernels.at(axis);
   }
 
+  /**
+   * @brief Beginning iterator over `{Index, Kernel1d}` pairs.
+   */
   const decltype(auto) begin() const {
     return m_kernels.begin();
   }
 
+  /**
+   * @brief End iterator over `{Index, Kernel1d}` pairs.
+   */
   const decltype(auto) end() const {
     return m_kernels.end();
   }
 
+  /**
+   * @brief Combine the separable components as a nD kernel.
+   */
+  VecRaster<Value, Dim> combine() const { // FIXME return Kernel<Value, Dim>
+    auto shape = Position<Dim>::one();
+    auto origin = Position<Dim>::zero();
+    for (const auto& k : m_kernels) {
+      shape[k.first] = k.second.size();
+      origin[k.first] = k.second.backwardSize();
+    }
+    VecRaster<Value, Dim> raster(shape);
+    // FIXME
+    return raster;
+  }
+
+  /**
+   * @brief Combine two sequences of kernels.
+   */
   template <Index... Js>
   Kernel1dSeq<TKernel, Is..., Js...> operator*(const Kernel1dSeq<TKernel, Js...>& rhs) const {
     Kernel1dSeq<TKernel, Is..., Js...> out(m_kernels);
@@ -156,6 +199,9 @@ public:
     return out;
   }
 
+  /**
+   * @brief Apply the correlation kernels to an input raster.
+   */
   template <typename TOut, typename TIn, Index N, typename TContainer>
   VecRaster<TOut, N> correlate(const Raster<TIn, N, TContainer>& in) const {
     VecRaster<TOut, N> out(in.shape());
@@ -163,17 +209,26 @@ public:
     return out;
   }
 
+  /**
+   * @copydoc correlate()
+   */
   template <typename TRasterIn, typename TRasterOut>
   void correlateTo(const TRasterIn& in, TRasterOut& out) const {
     correlateAlongSeqTo<TRasterIn, TRasterOut, Is...>(in, out);
   }
 
+  /**
+   * @brief Sparsely apply the correlation kernels to an input raster.
+   */
   template <typename TOut, Index N, typename TRasterIn>
   VecRaster<TOut, N> correlateSamples(const TRasterIn& in, const PositionSampling<N>& sampling) const {
     VecRaster<TOut, N> out(sampling.shape());
     correlateSamplesTo(in, sampling, out);
   }
 
+  /**
+   * @copydoc correlateSamples()
+   */
   template <typename TRasterIn, Index N, typename TRasterOut>
   void correlateSamplesTo(const TRasterIn& in, const PositionSampling<N>& sampling, TRasterOut& out) const {
     correlateSamplesAlongSeqTo<TRasterIn, N, TRasterOut, Is...>(in, sampling, out);
@@ -183,13 +238,13 @@ private:
   template <typename TRasterIn, typename TRasterOut, Index J0, Index... Js>
   void correlateAlongSeqTo(const TRasterIn& in, TRasterOut& out) const {
     const auto tmp = correlateAlong<TRasterIn, TRasterOut, J0>(in);
-    correlateAlongSeqTo<TRasterIn, TRasterOut, Js...>(tmp, out);
+    correlateAlongSeqTo<TRasterOut, TRasterOut, Js...>(tmp, out);
     printf("%li: %i -> %i\n", J0, tmp[0], out[0]);
   }
 
   template <typename TRasterIn, typename TRasterOut>
   void correlateAlongSeqTo(const TRasterIn& in, TRasterOut& out) const {
-    // pass
+    out = in; // FIXME swap? move?
   }
 
   template <typename TRasterIn, typename TRasterOut, Index J>
@@ -220,12 +275,12 @@ private:
     auto box = sampling.region();
     for (const auto& p : m_kernels) {
       auto& front = box.front[p.first];
-      front -= p.second.backwardCount();
+      front -= p.second.backwardSize();
       if (front < 0) {
         front = 0;
       }
       auto& back = box.back[p.first];
-      back += p.second.forwardCount();
+      back += p.second.forwardSize();
       if (back >= shape[p.first]) {
         back = shape[p.first] - 1;
       }
@@ -237,10 +292,16 @@ private:
   std::map<Index, TKernel> m_kernels;
 };
 
-template <typename T, Index IAverage, Index IDifference, typename TExtrapolation = CropExtrapolation>
-Kernel1dSeq<Kernel1d<T, TExtrapolation>, IAverage, IDifference> makeSobel() {
-  return Kernel1d<T, TExtrapolation>({1, 2, 1}, 1).template along<IAverage>() *
-      Kernel1d<T, TExtrapolation>({1, 0, -1}, 1).template along<IDifference>();
+/***
+ * @brief Make a Sobel correlation kernel along given axes.
+ * @details
+ * The kernel along the `IAverage` axis is `{1, 2, 1}` and that along `IDifference` is `{1, 0, -1}`.
+ * Note the ordering of the differentiation kernel, which is opposite to Sobel's _convolution_ kernel.
+ */
+template <typename T, Index IDifference, Index IAverage, typename TExtrapolation = CropExtrapolation>
+Kernel1dSeq<Kernel1d<T, TExtrapolation>, IDifference, IAverage> makeSobel() {
+  return Kernel1d<T, TExtrapolation>({1, 0, -1}, 1).template along<IDifference>() *
+      Kernel1d<T, TExtrapolation>({1, 2, 1}, 1).template along<IAverage>();
 }
 
 } // namespace Kast
