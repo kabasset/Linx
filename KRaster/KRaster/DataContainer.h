@@ -242,16 +242,6 @@ public:
     return this->m_container;
   }
 
-  /// @group_operations
-
-  /**
-   * @brief Copy the container values into an `std::vector`.
-   * @deprecated Use more generic `container()` instead, which performs no copy.
-   */
-  std::vector<T> vector() const {
-    return {this->begin(), this->end()};
-  }
-
   /// @group_modifiers
 
   /**
