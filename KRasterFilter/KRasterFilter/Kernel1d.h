@@ -304,6 +304,10 @@ Kernel1dSeq<Kernel1d<T, TExtrapolation>, IDifference, IAverage> makeSobel() {
       Kernel1d<T, TExtrapolation>({1, 2, 1}, 1).template along<IAverage>();
 }
 
+// FIXME
+// isCorrelation<T>()
+// decltype(auto) operator* (enable_if_t<isCorrelation<TKernel>>(), TRaster)
+
 } // namespace Kast
 
 #endif

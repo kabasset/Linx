@@ -6,14 +6,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 #   For declaring a project module:
 #         elements_subdir(ElementsExamples)
 #===============================================================================
-elements_subdir(KRaster)
+elements_subdir(KRasterUtils)
 
 #===============================================================================
 # Load elements_depends_on_subdirs macro here
 #   For creating a dependency onto an other accessible module
 #         elements_depends_on_subdirs(ElementsKernel)
 #===============================================================================
-elements_depends_on_subdirs(KRasterUtils)
+elements_depends_on_subdirs(ElementsKernel)
 
 #===============================================================================
 # Add the find_package macro (a pure CMake command) here to locate the
@@ -21,7 +21,6 @@ elements_depends_on_subdirs(KRasterUtils)
 # Examples:
 #          find_package(CppUnit)
 #===============================================================================
-find_package(Boost)
 
 #===============================================================================
 # Declare the library dependencies here
@@ -31,10 +30,10 @@ find_package(Boost)
 #                     LINK_LIBRARIES Boost ElementsKernel
 #                     PUBLIC_HEADERS ElementsExamples)
 #===============================================================================
-elements_add_library(KRaster src/lib/*.cpp
-                     INCLUDE_DIRS KRasterUtils Boost
-                     LINK_LIBRARIES KRasterUtils Boost
-                     PUBLIC_HEADERS KRaster)
+elements_add_library(KRasterUtils src/lib/*.cpp
+                     INCLUDE_DIRS ElementsKernel
+                     LINK_LIBRARIES ElementsKernel
+                     PUBLIC_HEADERS KRasterUtils)
 
 #===============================================================================
 # Declare the executables here
@@ -52,17 +51,9 @@ elements_add_library(KRaster src/lib/*.cpp
 #                       INCLUDE_DIRS ElementsExamples
 #                       LINK_LIBRARIES ElementsExamples TYPE Boost)
 #===============================================================================
-elements_add_unit_test(Sampling tests/src/Sampling_test.cpp 
-                     EXECUTABLE KRaster_Sampling_test
-                     LINK_LIBRARIES KRaster
-                     TYPE Boost)
-elements_add_unit_test(Position tests/src/Position_test.cpp 
-                     EXECUTABLE KRaster_Position_test
-                     LINK_LIBRARIES KRaster
-                     TYPE Boost)
-elements_add_unit_test(Region tests/src/Region_test.cpp 
-                     EXECUTABLE KRaster_Region_test
-                     LINK_LIBRARIES KRaster
+elements_add_unit_test(ProgramOptions tests/src/ProgramOptions_test.cpp 
+                     EXECUTABLE KRasterUtils_ProgramOptions_test
+                     LINK_LIBRARIES KRasterUtils
                      TYPE Boost)
 
 #===============================================================================

@@ -42,6 +42,9 @@ elements_add_library(KRasterFilter src/lib/*.cpp
 #                        INCLUDE_DIRS Boost ElementsExamples
 #                        LINK_LIBRARIES Boost ElementsExamples)
 #===============================================================================
+elements_add_executable(KBenchmarkCorrelation src/program/KBenchmarkCorrelation.cpp
+                     INCLUDE_DIRS ElementsKernel KRasterFilter
+                     LINK_LIBRARIES ElementsKernel KRasterFilter)
 
 #===============================================================================
 # Declare the Boost tests here
@@ -82,3 +85,4 @@ elements_add_unit_test(Kernel1d tests/src/Kernel1d_test.cpp
 # Examples:
 #          elements_install_conf_files()
 #===============================================================================
+elements_install_conf_files()
