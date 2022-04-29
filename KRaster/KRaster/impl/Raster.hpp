@@ -120,7 +120,7 @@ inline const T& Raster<T, N, TContainer>::at(const Position<N>& pos) const {
   for (Index i = 0; i < dimension(); ++i) {
     auto& b = boundedPos[i];
     const auto& s = m_shape[i];
-    // OutOfBoundsError::mayThrow("pos[" + std::to_string(i) + "]", b, {-s, s - 1}); // FIXME
+    OutOfBoundsError::mayThrow("pos[" + std::to_string(i) + "]", b, {-s, s - 1});
     if (b < 0) {
       b += s;
     }
@@ -148,8 +148,7 @@ template <Index M>
 const PtrRaster<const T, M> Raster<T, N, TContainer>::slice(const Region<N>& region) const {
   // FIXME resolve
   if (not isContiguous<M>(region)) {
-    throw std::runtime_error( // FIXME KastError?
-        "Cannot slice: Region is not contiguous."); // FIXME clarify
+    throw KError("Cannot slice: Region is not contiguous."); // FIXME clarify
   }
   const auto& f = region.front;
   const auto& b = region.back;
@@ -164,8 +163,7 @@ template <typename T, Index N, typename TContainer>
 template <Index M>
 PtrRaster<T, M> Raster<T, N, TContainer>::slice(const Region<N>& region) {
   if (not isContiguous<M>(region)) {
-    throw std::runtime_error( // FIXME KastError ?
-        "Cannot slice: Region is not contiguous."); // FIXME clarify
+    throw KError("Cannot slice: Region is not contiguous."); // FIXME clarify
   }
   const auto& f = region.front;
   const auto& b = region.back;
