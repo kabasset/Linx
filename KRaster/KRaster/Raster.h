@@ -8,6 +8,7 @@
 #include "KRaster/DataContainer.h"
 #include "KRaster/Position.h"
 #include "KRaster/Region.h"
+#include "KRasterUtils/Exceptions.h"
 
 #include <complex>
 #include <cstdint>

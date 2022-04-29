@@ -15,12 +15,12 @@ elements_add_unit_test(Dft tests/src/Dft_test.cpp
                      EXECUTABLE KRasterFourier_Dft_test
                      LINK_LIBRARIES KRasterFourier
                      TYPE Boost)
-elements_add_unit_test(DftMemory tests/src/DftMemory_test.cpp 
-                     EXECUTABLE KRasterFourier_DftMemory_test
-                     LINK_LIBRARIES KRasterFourier
-                     TYPE Boost)
 elements_add_unit_test(DftBuffer tests/src/DftBuffer_test.cpp 
                      EXECUTABLE KRasterFourier_DftBuffer_test
+                     LINK_LIBRARIES KRasterFourier
+                     TYPE Boost)
+elements_add_unit_test(DftMemory tests/src/DftMemory_test.cpp 
+                     EXECUTABLE KRasterFourier_DftMemory_test
                      LINK_LIBRARIES KRasterFourier
                      TYPE Boost)
 elements_add_unit_test(DftPlan tests/src/DftPlan_test.cpp 

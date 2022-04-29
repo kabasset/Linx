@@ -9,8 +9,6 @@
 
 namespace Kast {
 
-struct OutOfBoundsError {};
-
 struct OutOfBoundsCrop {};
 
 template <typename T>

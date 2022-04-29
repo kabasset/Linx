@@ -55,6 +55,10 @@ elements_add_unit_test(ProgramOptions tests/src/ProgramOptions_test.cpp
                      EXECUTABLE KRasterUtils_ProgramOptions_test
                      LINK_LIBRARIES KRasterUtils
                      TYPE Boost)
+elements_add_unit_test(Exceptions tests/src/Exceptions_test.cpp 
+                     EXECUTABLE KRasterUtils_Exceptions_test
+                     LINK_LIBRARIES KRasterUtils
+                     TYPE Boost)
 
 #===============================================================================
 # Use the following macro for python modules, scripts and aux files:
