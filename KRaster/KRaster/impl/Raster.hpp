@@ -148,7 +148,7 @@ template <Index M>
 const PtrRaster<const T, M> Raster<T, N, TContainer>::slice(const Region<N>& region) const {
   // FIXME resolve
   if (not isContiguous<M>(region)) {
-    throw KError("Cannot slice: Region is not contiguous."); // FIXME clarify
+    throw Exception("Cannot slice: Region is not contiguous."); // FIXME clarify
   }
   const auto& f = region.front;
   const auto& b = region.back;
@@ -163,7 +163,7 @@ template <typename T, Index N, typename TContainer>
 template <Index M>
 PtrRaster<T, M> Raster<T, N, TContainer>::slice(const Region<N>& region) {
   if (not isContiguous<M>(region)) {
-    throw KError("Cannot slice: Region is not contiguous."); // FIXME clarify
+    throw Exception("Cannot slice: Region is not contiguous."); // FIXME clarify
   }
   const auto& f = region.front;
   const auto& b = region.back;

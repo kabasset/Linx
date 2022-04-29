@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_SUITE(Exceptions_test)
 BOOST_AUTO_TEST_CASE(message_test) {
   const std::string prefix = "KRaster";
   const std::string message = "MESSAGE!";
-  KError error(message);
+  Exception error(message);
   const std::string output = error.what();
   const auto prefixPos = output.find(prefix);
   BOOST_TEST(prefixPos != std::string::npos);

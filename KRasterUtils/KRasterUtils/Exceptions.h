@@ -15,19 +15,19 @@ namespace Kast {
  * @ingroup exceptions
  * @brief Base of all exceptions thrown directly by the library.
  */
-class KError : public std::exception {
+class Exception : public std::exception {
 
 public:
   /**
    * @brief Destructor.
    */
-  virtual ~KError() = default;
+  virtual ~Exception() = default;
 
   /**
    * @brief Constructor.
    * @param message Input message
    */
-  explicit KError(const std::string& message) :
+  explicit Exception(const std::string& message) :
       std::exception(), m_prefix("KRaster error: "), m_message(m_prefix + message) {}
 
   /**
@@ -42,7 +42,7 @@ public:
    * @param line The line to be appended
    * @param indent Some indentation level
    */
-  KError& append(const std::string& line, std::size_t indent = 0) {
+  Exception& append(const std::string& line, std::size_t indent = 0) {
     m_message += "\n";
     for (std::size_t i = 0; i < indent; ++i) {
       m_message += "  ";
@@ -60,7 +60,7 @@ private:
  * @ingroup exceptions
  * @brief Exception thrown if a value lies out of given bounds.
  */
-class OutOfBoundsError : public KError {
+class OutOfBoundsError : public Exception {
 
 public:
   /**
@@ -69,7 +69,7 @@ public:
    * The error message is of the form "<prefix>: <value> not in (<min>, <max>)".
    */
   OutOfBoundsError(const std::string& prefix, long value, std::pair<long, long> bounds) :
-      KError(
+      Exception(
           prefix + ": " + std::to_string(value) + " not in (" + std::to_string(bounds.first) + ", " +
           std::to_string(bounds.second) + ")") {}
 
