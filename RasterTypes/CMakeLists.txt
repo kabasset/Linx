@@ -59,6 +59,10 @@ elements_add_unit_test(Exceptions tests/src/Exceptions_test.cpp
                      EXECUTABLE RasterTypes_Exceptions_test
                      LINK_LIBRARIES RasterTypes
                      TYPE Boost)
+elements_add_unit_test(SeqUtils tests/src/SeqUtils_test.cpp 
+                     EXECUTABLE RasterTypes_SeqUtils_test
+                     LINK_LIBRARIES RasterTypes
+                     TYPE Boost)
 
 #===============================================================================
 # Use the following macro for python modules, scripts and aux files:
