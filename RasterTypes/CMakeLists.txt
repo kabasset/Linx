@@ -51,10 +51,6 @@ elements_add_library(RasterTypes src/lib/*.cpp
 #                       INCLUDE_DIRS ElementsExamples
 #                       LINK_LIBRARIES ElementsExamples TYPE Boost)
 #===============================================================================
-elements_add_unit_test(ProgramOptions tests/src/ProgramOptions_test.cpp 
-                     EXECUTABLE RasterTypes_ProgramOptions_test
-                     LINK_LIBRARIES RasterTypes
-                     TYPE Boost)
 elements_add_unit_test(Exceptions tests/src/Exceptions_test.cpp 
                      EXECUTABLE RasterTypes_Exceptions_test
                      LINK_LIBRARIES RasterTypes
