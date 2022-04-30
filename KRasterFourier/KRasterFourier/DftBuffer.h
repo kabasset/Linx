@@ -8,7 +8,7 @@
 #include "KRaster/Raster.h"
 #include "KRasterFourier/DftMemory.h"
 
-namespace Kast {
+namespace Cnes {
 
 /**
  * @brief Data holder for FFTW's allocated buffers.
@@ -144,6 +144,6 @@ DftBuffer<T>& operator*=(DftBuffer<T>& lhs, const TRaster& rhs) {
   return lhs;
 }
 
-} // namespace Kast
+} // namespace Cnes
 
 #endif // _KRASTERFOURIER_DFTBUFFER_H

@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Kast.Raster <github.com/kabasset/KRaster>
+// This file is part of Cnes.Raster <github.com/kabasset/KRaster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _KRASTER_DATACONTAINER_H
@@ -15,7 +15,7 @@
 #include <exception> // runtime_error
 #include <initializer_list>
 
-namespace Kast {
+namespace Cnes {
 
 /**
  * @ingroup data_concepts
@@ -210,9 +210,9 @@ public:
       typename std::enable_if_t<not std::is_integral<TArg0>::value, TArg0>* = nullptr>
   DataContainer(TArg0 arg0, TArgs&&... args) : Holder(std::forward<TArg0>(arg0), std::forward<TArgs>(args)...) {}
 
-  KAST_VIRTUAL_DTOR(DataContainer)
-  KAST_COPYABLE(DataContainer)
-  KAST_MOVABLE(DataContainer)
+  CNES_VIRTUAL_DTOR(DataContainer)
+  CNES_COPYABLE(DataContainer)
+  CNES_MOVABLE(DataContainer)
 
   /// @group_properties
 
@@ -267,6 +267,6 @@ public:
   /// @}
 };
 
-} // namespace Kast
+} // namespace Cnes
 
 #endif

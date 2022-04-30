@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Kast.Raster <github.com/kabasset/KRaster>
+// This file is part of Cnes.Raster <github.com/kabasset/KRaster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _KRASTERUTILS_PROGRAMOPTIONS_H
@@ -8,7 +8,7 @@
 #include <boost/program_options.hpp>
 #include <sstream>
 
-namespace Kast {
+namespace Cnes {
 
 /**
  * @brief Helper class to declare positional, named and flag options, as well as some help message.
@@ -176,6 +176,6 @@ private:
   boost::program_options::variables_map m_variables;
 };
 
-} // namespace Kast
+} // namespace Cnes
 
 #endif // _KRASTERUTILS_PROGRAMOPTIONS_H

@@ -9,7 +9,7 @@
 #include <fftw3.h>
 #include <memory>
 
-namespace Kast {
+namespace Cnes {
 
 /// @cond
 namespace Internal {
@@ -120,6 +120,6 @@ public:
   }
 };
 
-} // namespace Kast
+} // namespace Cnes
 
 #endif // _KRASTERFOURIER_DFTMEMORY_H

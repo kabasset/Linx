@@ -11,7 +11,7 @@
 #include <limits>
 #include <random>
 
-namespace Kast {
+namespace Cnes {
 namespace Test {
 
 template <typename T>
@@ -122,6 +122,6 @@ template <>
 bool approx<std::complex<double>>(std::complex<double> test, std::complex<double> ref, double tol);
 
 } // namespace Test
-} // namespace Kast
+} // namespace Cnes
 
 #endif

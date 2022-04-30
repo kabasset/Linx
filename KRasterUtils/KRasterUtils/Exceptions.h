@@ -9,7 +9,7 @@
 #include <string>
 #include <utility> // pair // FIXME replace with Segment
 
-namespace Kast {
+namespace Cnes {
 
 /**
  * @ingroup exceptions
@@ -83,6 +83,6 @@ public:
   }
 };
 
-} // namespace Kast
+} // namespace Cnes
 
 #endif // _KRASTERUTILS_EXCEPTIONS_H

@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Kast.Raster <github.com/kabasset/KRaster>
+// This file is part of Cnes.Raster <github.com/kabasset/KRaster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "KRaster/Sampling.h"
@@ -7,7 +7,7 @@
 #include <boost/test/unit_test.hpp>
 #include <numeric> // iota
 
-using namespace Kast;
+using namespace Cnes;
 
 //-----------------------------------------------------------------------------
 

@@ -6,7 +6,7 @@
 
 #include "KRasterFourier/DftMemory.h"
 
-namespace Kast {
+namespace Cnes {
 
 template <>
 Position<2> RealDftType::Parent::outShape(const Position<2>& shape) {
@@ -88,4 +88,4 @@ Internal::FftwPlanPtr Internal::allocateFftwPlan<Inverse<HermitianComplexDftType
   return Internal::allocateFftwPlan<Inverse<ComplexDftType>>(in, out);
 }
 
-} // namespace Kast
+} // namespace Cnes

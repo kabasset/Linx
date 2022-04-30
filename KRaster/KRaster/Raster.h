@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Kast.Raster <github.com/kabasset/KRaster>
+// This file is part of Cnes.Raster <github.com/kabasset/KRaster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _KRASTER_RASTER_H
@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 
-namespace Kast {
+namespace Cnes {
 
 /// @cond
 // Issue with forward declarations: https://github.com/doxygen/doxygen/issues/8177
@@ -146,9 +146,9 @@ public:
 
   /// @group_construction
 
-  KAST_VIRTUAL_DTOR(Raster)
-  KAST_COPYABLE(Raster)
-  KAST_MOVABLE(Raster)
+  CNES_VIRTUAL_DTOR(Raster)
+  CNES_COPYABLE(Raster)
+  CNES_MOVABLE(Raster)
 
   /**
    * @brief Constructor.
@@ -372,7 +372,7 @@ PtrRaster<T, sizeof...(Longs)> makeRaster(T* data, Longs... shape) { // FIXME ca
   return {{shape...}, data};
 }
 
-} // namespace Kast
+} // namespace Cnes
 
 #include "KRaster/PositionIterator.h"
 #include "KRaster/Subraster.h"

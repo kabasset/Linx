@@ -8,7 +8,7 @@
 #include "KRasterFourier/DftBuffer.h"
 #include "KRasterFourier/DftMemory.h"
 
-namespace Kast {
+namespace Cnes {
 
 /**
  * @brief Memory- and computation-efficient discrete Fourier transform.
@@ -244,6 +244,6 @@ private:
   Internal::FftwPlanPtr m_plan;
 };
 
-} // namespace Kast
+} // namespace Cnes
 
 #endif // _KRASTERFOURIER_DFTPLAN_H

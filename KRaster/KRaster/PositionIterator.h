@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Kast.Raster <github.com/kabasset/KRaster>
+// This file is part of Cnes.Raster <github.com/kabasset/KRaster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _KRASTER_POSITIONITERATOR_H
@@ -7,7 +7,7 @@
 
 #include "KRaster/Region.h"
 
-namespace Kast {
+namespace Cnes {
 
 /**
  * @ingroup image_data_classes
@@ -162,6 +162,6 @@ PositionIterator<N> end(const Region<N>& region) {
   return PositionIterator<N>(pastTheLast);
 }
 
-} // namespace Kast
+} // namespace Cnes
 
 #endif

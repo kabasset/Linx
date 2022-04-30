@@ -8,7 +8,7 @@
 #include <complex>
 #include <vector>
 
-namespace Kast {
+namespace Cnes {
 
 /**
  * @brief Test-related classes and functions.
@@ -62,7 +62,7 @@ template <typename T>
 bool approx(T test, T ref, double tol = 0.01);
 
 } // namespace Test
-} // namespace Kast
+} // namespace Cnes
 
 /// @cond
 #define _KRASTER_TESTUTILS_IMPL

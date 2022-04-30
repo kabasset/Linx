@@ -1,4 +1,4 @@
-# Kast.Raster
+# Cnes.Raster
 
 This project is a work in progress to gather n-D array related features
 of EleFits' Raster -- an extensible n-D data storage class with pixel-wise operations --

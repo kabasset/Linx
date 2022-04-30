@@ -7,7 +7,7 @@
 
 #include "KRasterFourier/DftPlan.h"
 
-namespace Kast {
+namespace Cnes {
 
 /**
  * @brief Inverse type of a `DftType`.
@@ -195,6 +195,6 @@ VecRaster<double> norm2(const TComplexRaster& input) {
   return output;
 }
 
-} // namespace Kast
+} // namespace Cnes
 
 #endif // _KRASTERFOURIER_DFT_H

@@ -4,7 +4,7 @@
 
 #include "KRaster/TestUtils.h"
 
-namespace Kast {
+namespace Cnes {
 namespace Test {
 
 template <>
@@ -137,4 +137,4 @@ bool approx<std::complex<double>>(std::complex<double> test, std::complex<double
 }
 
 } // namespace Test
-} // namespace Kast
+} // namespace Cnes

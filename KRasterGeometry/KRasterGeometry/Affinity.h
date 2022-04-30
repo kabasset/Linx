@@ -1,16 +1,16 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Kast.Raster <github.com/kabasset/KRaster>
+// This file is part of Cnes.Raster <github.com/kabasset/KRaster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _KRASTERGEOMETRY_AFFINITY_H
 #define _KRASTERGEOMETRY_AFFINITY_H
 
-namespace Kast {
+namespace Cnes {
 
 struct Affinity {
   // FIXME
 };
 
-} // namespace Kast
+} // namespace Cnes
 
 #endif

@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Kast.Raster <github.com/kabasset/KRaster>
+// This file is part of Cnes.Raster <github.com/kabasset/KRaster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _KRASTER_CONTIGUOUSCONTAINER_H
@@ -8,7 +8,7 @@
 #include <algorithm> // equal
 #include <ostream>
 
-namespace Kast {
+namespace Cnes {
 
 /**
  * @ingroup data_concepts
@@ -226,6 +226,6 @@ std::ostream& operator<<(std::ostream& os, const ContiguousContainerMixin<T, TDe
   return os;
 }
 
-} // namespace Kast
+} // namespace Cnes
 
 #endif

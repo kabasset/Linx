@@ -1,5 +1,5 @@
 /// Copyright (C) 2022, Antoine Basset
-// This file is part of Kast.Raster <github.com/kabasset/KRaster>
+// This file is part of Cnes.Raster <github.com/kabasset/KRaster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _KRASTER_REGION_H
@@ -7,7 +7,7 @@
 
 #include "KRaster/Position.h"
 
-namespace Kast {
+namespace Cnes {
 
 /**
  * @brief A _n_-D bounding box, defined by its front and back positions (both inclusive),
@@ -233,6 +233,6 @@ Region<N> operator-(const Region<N>& lhs, Index rhs) {
   return res;
 }
 
-} // namespace Kast
+} // namespace Cnes
 
 #endif // _KRASTER_REGION_H

@@ -8,7 +8,7 @@
 #include "KRaster/Raster.h"
 #include "KRaster/TestUtils.h"
 
-namespace Kast {
+namespace Cnes {
 namespace Test {
 
 /**
@@ -59,6 +59,6 @@ template <typename TRaster, typename URaster>
 bool rasterApprox(const TRaster& test, const URaster& ref, double tol = 0.01);
 
 } // namespace Test
-} // namespace Kast
+} // namespace Cnes
 
 #endif // _KRASTER_TESTRASTER_H

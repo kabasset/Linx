@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Kast.Raster <github.com/kabasset/KRaster>
+// This file is part of Cnes.Raster <github.com/kabasset/KRaster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _KRASTER_SAMPLING_H
@@ -9,7 +9,7 @@
 
 #include <vector>
 
-namespace Kast {
+namespace Cnes {
 
 /**
  * @brief Linear sampling of scalars.
@@ -400,6 +400,6 @@ Index shapeStride(const Position<N>& shape) {
   return std::accumulate(shape.begin(), shape.begin() + Axis, 1, std::multiplies<Index> {});
 }
 
-} // namespace Kast
+} // namespace Cnes
 
 #endif // _KRASTER_SAMPLING_H

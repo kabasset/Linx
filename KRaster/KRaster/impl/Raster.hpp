@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Kast.Raster <github.com/kabasset/KRaster>
+// This file is part of Cnes.Raster <github.com/kabasset/KRaster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #if defined(_KRASTER_RASTER_IMPL) || defined(CHECK_QUALITY)
@@ -9,7 +9,7 @@
 #include <functional> // multiplies
 #include <numeric> // accumulate
 
-namespace Kast {
+namespace Cnes {
 
 template <typename T, Index N, typename TContainer>
 constexpr Index Raster<T, N, TContainer>::Dim;
@@ -61,7 +61,7 @@ struct IndexRecursionImpl<-1, I> {
   static Index index(const Position<-1>& shape, const Position<-1>& pos) {
     const auto n = shape.size();
     if (pos.size() != n) {
-      throw std::runtime_error( // FIXME KastError?
+      throw std::runtime_error( // FIXME CnesError?
           "Dimension mismatch. Raster is of dimension " + std::to_string(n) + " while position is of dimension " +
           std::to_string(pos.size()));
     }
@@ -231,6 +231,6 @@ bool Raster<T, N, TContainer>::isContiguous(const Region<N>& region) const {
   return true;
 }
 
-} // namespace Kast
+} // namespace Cnes
 
 #endif

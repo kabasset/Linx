@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Kast.Raster <github.com/kabasset/KRaster>
+// This file is part of Cnes.Raster <github.com/kabasset/KRaster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _KRASTER_VECTORARITHMETIC_H
@@ -10,7 +10,7 @@
 #include <functional>
 #include <type_traits>
 
-namespace Kast {
+namespace Cnes {
 
 /**
  * @ingroup data_concepts
@@ -144,7 +144,7 @@ struct VectorArithmeticMixin<T, TDerived, true> :
   TDerived& operator--();
 };
 
-} // namespace Kast
+} // namespace Cnes
 
 /// @cond INTERNAL
 #define _KRASTER_VECTORARITHMETIC_IMPL

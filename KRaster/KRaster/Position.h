@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Kast.Raster <github.com/kabasset/KRaster>
+// This file is part of Cnes.Raster <github.com/kabasset/KRaster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _KRASTER_POSITION_H
@@ -11,7 +11,7 @@
 #include <numeric> // accumulate, multiplies
 #include <type_traits> // conditional
 
-namespace Kast {
+namespace Cnes {
 
 /**
  * @brief The signed integer type which represents indices in a raster.
@@ -58,9 +58,9 @@ public:
    */
   static constexpr Index Dim = N;
 
-  KAST_VIRTUAL_DTOR(Position)
-  KAST_COPYABLE(Position)
-  KAST_MOVABLE(Position)
+  CNES_VIRTUAL_DTOR(Position)
+  CNES_COPYABLE(Position)
+  CNES_MOVABLE(Position)
 
   /**
    * @brief Default constructor.
@@ -143,7 +143,7 @@ Index shapeSize(const Position<N>& shape) {
   return std::accumulate(shape.begin(), shape.end(), 1L, std::multiplies<Index>());
 }
 
-} // namespace Kast
+} // namespace Cnes
 
 #define _KRASTER_POSITION_IMPL
 #include "KRaster/impl/Position.hpp"

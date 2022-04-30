@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Kast.Raster <github.com/kabasset/KRaster>
+// This file is part of Cnes.Raster <github.com/kabasset/KRaster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #if defined(_KRASTER_VECTORARITHMETIC_IMPL) || defined(CHECK_QUALITY)
@@ -7,7 +7,7 @@
 #include "KRaster/DataUtils.h"
 #include "KRaster/VectorArithmetic.h"
 
-namespace Kast {
+namespace Cnes {
 
 template <typename T, typename TDerived, bool Incrementable>
 TDerived VectorArithmeticMixin<T, TDerived, Incrementable>::operator+() const {
@@ -133,6 +133,6 @@ TDerived& VectorArithmeticMixin<T, TDerived, true>::operator--() {
   return static_cast<TDerived&>(*this);
 }
 
-} // namespace Kast
+} // namespace Cnes
 
 #endif

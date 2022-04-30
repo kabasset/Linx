@@ -8,7 +8,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-using namespace Kast;
+using namespace Cnes;
 
 //-----------------------------------------------------------------------------
 

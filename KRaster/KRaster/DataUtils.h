@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Kast.Raster <github.com/kabasset/KRaster>
+// This file is part of Cnes.Raster <github.com/kabasset/KRaster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _KRASTER_DATAUTILS_H
@@ -12,19 +12,19 @@
 #include <type_traits>
 #include <vector>
 
-namespace Kast {
+namespace Cnes {
 
 /**
  * @brief Define a default virtual destructor.
  */
-#define KAST_VIRTUAL_DTOR(classname) \
+#define CNES_VIRTUAL_DTOR(classname) \
   /** @brief Destructor. */ \
   virtual ~classname() = default;
 
 /**
  * @brief Define default copy constructor and assignment operator.
  */
-#define KAST_COPYABLE(classname) \
+#define CNES_COPYABLE(classname) \
   /** @brief Copy constructor. */ \
   classname(const classname&) = default; \
   /** @brief Copy assignment operator. */ \
@@ -33,7 +33,7 @@ namespace Kast {
 /**
  * @brief Define deleted copy constructor and assignment operator.
  */
-#define KAST_NON_COPYABLE(classname) \
+#define CNES_NON_COPYABLE(classname) \
   /** @brief Deleted copy constructor. */ \
   classname(const classname&) = delete; \
   /** @brief Deleted copy assignment operator. */ \
@@ -42,7 +42,7 @@ namespace Kast {
 /**
  * @brief Define default move constructor and assignment operator.
  */
-#define KAST_MOVABLE(classname) \
+#define CNES_MOVABLE(classname) \
   /** @brief Move constructor. */ \
   classname(classname&&) = default; \
   /** @brief Move assignment operator. */ \
@@ -51,7 +51,7 @@ namespace Kast {
 /**
  * @brief Define deleted move constructor and assignment operator.
  */
-#define KAST_NON_MOVABLE(classname) \
+#define CNES_NON_MOVABLE(classname) \
   /** @brief Deleted move constructor. */ \
   classname(classname&&) = delete; \
   /** @brief Deleted move assignment operator. */ \
@@ -324,6 +324,6 @@ void serialize(TLogger&& logger, T0&& arg0, Ts&&... args) {
   (void)mockUnpack {0, (void(std::forward<TLogger>(logger) << ", " << std::forward<Ts>(args)), 0)...};
 }
 
-} // namespace Kast
+} // namespace Cnes
 
 #endif
