@@ -10,19 +10,37 @@
 
 namespace Cnes {
 
+/**
+ * @brief List of supported integral types.
+ */
 #define CNES_RASTER_SUPPORTED_INTS \
   bool, unsigned char, char, signed char, unsigned short, signed short, unsigned int, signed int, unsigned long, \
       signed long, unsigned long long, signed long long
 
+/**
+ * @brief List of supported floating point types.
+ */
 #define CNES_RASTER_SUPPORTED_FLOATS float, double, long double
 
+/**
+ * @brief List of supported complex types.
+ */
 #define CNES_RASTER_SUPPORTED_COMPLEXES std::complex<float>, std::complex<double>, std::complex<long double>
 
+/**
+ * @brief List of supported types.
+ */
 #define CNES_RASTER_SUPPORTED_TYPES \
   CNES_RASTER_SUPPORTED_INTS, CNES_RASTER_SUPPORTED_FLOATS, CNES_RASTER_SUPPORTED_COMPLEXES
 
+/**
+ * @brief List of supported types as a tuple.
+ */
 using RasterSupportedTypesTuple = std::tuple<CNES_RASTER_SUPPORTED_TYPES>;
 
+/**
+ * @brief `BOOST_AUTO_TEST_CASE_TEMPLATE` for each supported type.
+ */
 #define CNES_RASTER_TEST_CASE_TEMPLATE(name) BOOST_AUTO_TEST_CASE_TEMPLATE(name, T, RasterSupportedTypesTuple)
 
 } // namespace Cnes
