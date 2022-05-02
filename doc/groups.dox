@@ -1,0 +1,39 @@
+/**
+
+\defgroup basics Basics
+\brief Memory layout and properties of rasters
+
+\defgroup pixelwise Pixel-wise operations
+\brief Operations applied to each pixel independently
+
+\defgroup pixelwise-operators Mathematical operators
+\ingroup pixelwise
+\brief Pixel-wise mathematical operators: `+`, `-`, `*`...
+
+\defgroup pixelwise-functions Mathematical functions
+\ingroup pixelwise
+\brief Pixel-wise mathematical functions: `min`, `sin`, `exp`...
+
+\defgroup filtering Filtering
+\brief Linear and non-linear filtering
+
+\defgroup filtering-correlation Linear filtering
+\ingroup filtering
+\brief Correlation and convolution operations on rasters
+
+\defgroup filtering-dft Discrete Fourier transforms
+\ingroup filtering
+\brief Thread-safe DFT plans building and execution
+
+\defgroup geometry Geometrical transforms
+\brief Transforms which act on pixel locations
+
+\defgroup geometry-policies Interpolation and extrapolation policies
+\ingroup geometry
+\brief Handling of values between pixels or outside the raster domain
+
+\defgroup geometry-interpolators Interpolators
+\ingroup geometry
+\brief Classes to apply interpolation and extrapolation functions
+
+*/
