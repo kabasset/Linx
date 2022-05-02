@@ -1,5 +1,5 @@
 #--------------------- 
-# Specific to Euclid
+# Specific to Elements
 #--------------------- 
 /build
 /build.*
@@ -29,34 +29,30 @@
 #--------------------- 
 # Python 
 #--------------------- 
+
 # Byte-compiled / optimized
 __pycache__/
 *.py[cod]
 *$py.class
 
 #--------------------- 
-# Eclipse
+# Editors
 #--------------------- 
+
 /.project
 /.pydevprojec
 /.cproject
 /.settings
-
-#--------------------
-# JetBrain
-#--------------------
 /.idea
-
-#--------------------
-# Editors
-#--------------------
 *~
 *.swp
 /.vscode
+.~*
 
 #--------------------
 # Data
 #--------------------
+
 *.eps
 *.fit
 *.fits
@@ -64,4 +60,4 @@ __pycache__/
 *.jpg
 *.jpeg
 *.png
-*.svg
+#*.svg For doc
