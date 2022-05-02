@@ -10,7 +10,7 @@
 
 static Elements::Logging logger = Elements::Logging::getLogger("RasterDemoBasics");
 
-// [MallocRaster]
+//! [MallocRaster]
 template <typename T>
 struct MallocContainer {
 
@@ -37,7 +37,7 @@ struct MallocContainer {
 
 template <typename T, Cnes::Index N>
 using MallocRaster = Cnes::Raster<T, N, MallocContainer<T>>;
-// [MallocRaster]
+//! [MallocRaster]
 
 class RasterDemoBasics : public Elements::Program {
 
@@ -52,49 +52,49 @@ public:
   }
 
   Cnes::VecRaster<int, 3> vecRasterIota() const {
-    // [VecRaster iota]
+    //! [VecRaster iota]
     Cnes::VecRaster<int, 3> raster({4, 3, 2});
     std::iota(raster.begin(), raster.end(), 0); // Assigns {0, 1, 2...}
     std::cout << "Access by ND position: " << raster[{2, 1, 0}] << std::endl; // 6
     std::cout << "Access by 1D index: " << raster[6] << std::endl; // 6
-    // [VecRaster iota]
+    //! [VecRaster iota]
     return raster;
   }
 
   Cnes::PtrRaster<int, 3> ptrRasterIota() const {
-    // [PtrRaster iota]
+    //! [PtrRaster iota]
     std::array<int, 4 * 3 * 2> array;
     std::iota(array.begin(), array.end(), 0);
     Cnes::PtrRaster<int, 3> raster({4, 3, 2}, array.data());
     std::cout << "Access by ND position: " << raster[{2, 1, 0}] << std::endl; // 6
     raster *= 2;
     std::cout << "Updated value: " << array[6] << std::endl; // 12
-    // [PtrRaster iota]
+    //! [PtrRaster iota]
     return raster;
   }
 
   MallocRaster<int, 3> mallocRasterIota() const {
-    // [MallocRaster iota]
+    //! [MallocRaster iota]
     MallocRaster<int, 3> raster({4, 3, 2});
     std::iota(raster.begin(), raster.end(), 0);
     std::cout << "Access by ND position: " << raster[{2, 1, 0}] << std::endl; // 6
     std::cout << "Access by 1D index: " << raster[6] << std::endl; // 6
-    // [MallocRaster iota]
+    //! [MallocRaster iota]
     return raster;
   }
 
   template <typename TRaster>
   void elementAccess(const TRaster& raster) const {
-    // [Element access]
+    //! [Element access]
     std::cout << "Access by ND position: " << raster[{2, 2, 0}] << std::endl; // 10
     std::cout << "Access by 1D index: " << raster[10] << std::endl; // 10
     std::cout << "Backward indexing: " << raster.at({-2, -1, 0}) << std::endl; // 10
-    // [Element access]
+    //! [Element access]
   }
 
   template <typename TRaster>
   void foreachElement(TRaster& raster) const {
-    // [Foreach element]
+    //! [Foreach element]
     // Position
     for (Cnes::Index z = 0; z < raster.length(2); ++z) {
       for (Cnes::Index y = 0; y < raster.length(1); ++y) {
@@ -131,7 +131,7 @@ public:
 
     // operator*=
     raster *= 2;
-    // [Foreach element]
+    //! [Foreach element]
   }
 };
 

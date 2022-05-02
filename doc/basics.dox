@@ -37,77 +37,30 @@ A raster built on top of a `std::vector` (with default allocator) is of type `Ve
 Here is a simple example to build the `VecRaster` illustrated in the section above
 (`std::iota()` is used to fill the 1D container with increasing values):
 
-\code
-VecRaster<int, 3> raster({4, 3, 2});
-std::iota(raster.begin(), raster.end(), 0); // Assign {0, 1, 2...}
-std::cout << "Access by ND position: " << raster[{2, 1, 0}] << std::endl; // 6
-std::cout << "Access by 1D index: " << raster[6] << std::endl; // 6
-\endcode
+\snippet RasterDemoBasics.cpp VecRaster iota
 
 It is also possible to dynamically augment any 1D contiguous container
 with the raster features (e.g. ND indexing or operations) thanks to the `PtrRaster` class,
 in which the underlying container is a raw pointer.
 For example:
 
-\code
-std::array<int, 4 * 3 * 2> array;
-std::iota(array.begin(), array.end(), 0);
-PtrRaster<int, 3> raster({4, 3, 2}, array.data());
-std::cout << "Access by ND position: " << raster[{2, 1, 0}] << std::endl; // 6
-raster *= 2;
-std::cout << "Updated value: " << array[6] << std::endl; // 12
-\endcode
+\snippet RasterDemoBasics.cpp PtrRaster iota
 
 Last but not least, it is also possible to use your own container,
 assuming that it provides the minimal interface, e.g.:
 
-\code
-template <typename T>
-struct MallocContainer {
-
-  MallocContainer(std::size_t size, T* data) :
-      m_size(size), m_container((T*)malloc(m_size * sizeof(T))) {}
-
-  ~MallocContainer() {
-    free(m_container);
-  }
-
-  std::size_t size() const {
-    return m_size;
-  }
-
-  const T* data() const {
-    return m_container;
-  }
-
-  std::size_t m_size;
-
-  T* m_container;
-};
-
-template <typename T, Index N>
-using MallocRaster = Raster<T, N, MallocContainer<T>>;
-\endcode
+\snippet RasterDemoBasics.cpp MallocRaster
 
 Which can be used like any other raster:
 
-\code
-MallocRaster<int, 3> raster({4, 3, 2});
-std::iota(raster.begin(), raster.end(), 0);
-std::cout << "Access by ND position: " << raster[{2, 1, 0}] << std::endl; // 6
-std::cout << "Access by 1D index: " << raster[6] << std::endl; // 6
-\endcode
+\snippet RasterDemoBasics.cpp MallocRaster iota
 
 \section basics-access Element access
 
 As disclosed in the examples above, elements of a raster can be accessed with 1D indices or ND positions.
 Indexes are 0-based signed integers, which enables backward indexing with `Raster::at()`, e.g.:
 
-\code
-std::cout << "Access by ND position: " << raster[{2, 2, 0}] << std::endl; // 10
-std::cout << "Access by 1D index: " << raster[10] << std::endl; // 10
-std::cout << "Backward indexing: " << raster.at({-2, -1, 0}) << std::endl; // 10
-\endcode
+\snippet RasterDemoBasics.cpp Element access
 
 As a standard contiguous container, `Raster` also provides access as iterators,
 which are explicitely raw pointers (as opposed to `std::vector` but like `eastl::vector`)
@@ -116,42 +69,7 @@ Methods `Raster::begin()` and `Raster::end()` enable range for loops
 and should be used with standard functions like algorithms.
 The following blocks are all functionally equivalent:
 
-\code
-// Position
-for (Index z = 0; z < raster.length(2); ++z) {
-  for (Index y = 0; y < raster.length(1); ++y) {
-    for (Index x = 0; x < raster.length(0); ++x) {
-      raster[{x, y, z}] *=2;
-    }
-  }
-}
-
-// Position iterator
-for (const auto& p : raster.domain()) {
-  raster[p] *= 2;
-}
-
-// Index
-for (std::size_t i = 0; i < raster.size(); ++i) {
-  raster[i] *= 2;
-}
-
-// Iterator (raw pointer)
-for (auto it = raster.begin(); it != raster.end(); ++it) {
-  *it *= 2;
-}
-
-// Range for loop
-for (auto& e : raster) {
-  e *= 2;
-}
-
-// Algorithm
-std::transform(raster.cbegin(), raster.cend(), raster.begin(), [](auto e) { return e * 2; });
-
-// operator*=
-raster *= 2;
-\endcode
+\snippet RasterDemoBasics.cpp Foreach element
 
 */
 }
