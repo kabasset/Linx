@@ -31,15 +31,15 @@ It will be used in the remaining of the documentation in code snippets.
 
 \section basics-container Underlying container
 
-The pixel values can be stored in any 1D contiguous container.
-The most standard option is a `std::vector`.
+The pixel values can be stored in any contiguous container.
+The most standard option is a `std::vector` (use this by default).
 A raster built on top of a `std::vector` (with default allocator) is of type `VecRaster`.
 Here is a simple example to build the `VecRaster` illustrated in the section above
 (`std::iota()` is used to fill the 1D container with increasing values):
 
 \code
 VecRaster<int, 3> raster({4, 3, 2});
-std::iota(raster.begin(), raster.end(), 0);
+std::iota(raster.begin(), raster.end(), 0); // Assign {0, 1, 2...}
 std::cout << "Access by ND position: " << raster[{2, 1, 0}] << std::endl; // 6
 std::cout << "Access by 1D index: " << raster[6] << std::endl; // 6
 \endcode

@@ -6,14 +6,6 @@
 \defgroup pixelwise Pixel-wise operations
 \brief Operations applied to each pixel independently
 
-\defgroup pixelwise-operators Mathematical operators
-\ingroup pixelwise
-\brief Pixel-wise mathematical operators: `+`, `-`, `*`...
-
-\defgroup pixelwise-functions Mathematical functions
-\ingroup pixelwise
-\brief Pixel-wise mathematical functions: `min`, `sin`, `exp`...
-
 \defgroup filtering Filtering
 \brief Linear and non-linear filtering
 
