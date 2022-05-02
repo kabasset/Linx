@@ -10,20 +10,22 @@ The number of axes, or dimension, N, is set at compile time or at runtime.
 The raster shape, i.e. the lengths along axes, is set at runtime.
 Pixels are located at N-dimensional positions, which convert to 1D indices in the underlying 1D container.
 
-Other names for similar concepts are multidimensional array, ND array, or tensor.
+There are other common names for similar concepts, like multidimensional array, ND array, or tensor.
 The term raster was chosen to convey some information on the memory contiguity and layout (see next section),
 because it is part of the public interface of the library, and not only an implementation detail.
 
 \section basics-memory Memory layout
 
-The pixel ordering scheme is row-major, which means that two pixels of the same row (along the axis of index 0) are contiguous in memory.
+The pixel ordering scheme is row-major, which means that two adjacent pixels of the same row (along the axis of index 0) are contiguous in memory.
 The last pixel of a row immediately precedes the first pixel of the next row,
 and the last pixel of the last row of a plane immediately precedes the first pixel of the first row of the next plane.
 
-There is no underlying geometry associated with the image.
+There is no physical geometry associated with the image.
 In particular, no assumption is made on the orientation of the axes.
 Graphically, positions are represented from left to right, from bottom to top and from front to back,
 but that is only for the purpose of documentation.
+The following figure shows the index of each pixel of a raster of shape (4, 3, 2).
+It will be used in the remaining of the documentation in code snippets.
 
 \image html diagrams/raster_ordering.svg
 
@@ -31,7 +33,7 @@ but that is only for the purpose of documentation.
 
 The pixel values can be stored in any 1D contiguous container.
 The most standard option is a `std::vector`.
-A raster built on top of a `std::vector` is of type `VecRaster`.
+A raster built on top of a `std::vector` (with default allocator) is of type `VecRaster`.
 Here is a simple example to build the `VecRaster` illustrated in the section above
 (`std::iota()` is used to fill the 1D container with increasing values):
 
@@ -48,12 +50,12 @@ in which the underlying container is a raw pointer.
 For example:
 
 \code
-std::vector<int> vector(4 * 3 * 2);
-std::iota(vector.begin(), vector.end(), 0);
-PtrRaster<int, 3> raster({4, 3, 2}, vector.data());
+std::array<int, 4 * 3 * 2> array;
+std::iota(array.begin(), array.end(), 0);
+PtrRaster<int, 3> raster({4, 3, 2}, array.data());
 std::cout << "Access by ND position: " << raster[{2, 1, 0}] << std::endl; // 6
-raster += 2;
-std::cout << "Updated value: " << vector[6] << std::endl; // 8
+raster *= 2;
+std::cout << "Updated value: " << array[6] << std::endl; // 12
 \endcode
 
 Last but not least, it is also possible to use your own container,
@@ -94,6 +96,61 @@ MallocRaster<int, 3> raster({4, 3, 2});
 std::iota(raster.begin(), raster.end(), 0);
 std::cout << "Access by ND position: " << raster[{2, 1, 0}] << std::endl; // 6
 std::cout << "Access by 1D index: " << raster[6] << std::endl; // 6
+\endcode
+
+\section basics-access Element access
+
+As disclosed in the examples above, elements of a raster can be accessed with 1D indices or ND positions.
+Indexes are 0-based signed integers, which enables backward indexing with `Raster::at()`, e.g.:
+
+\code
+std::cout << "Access by ND position: " << raster[{2, 2, 0}] << std::endl; // 10
+std::cout << "Access by 1D index: " << raster[10] << std::endl; // 10
+std::cout << "Backward indexing: " << raster.at({-2, -1, 0}) << std::endl; // 10
+\endcode
+
+As a standard contiguous container, `Raster` also provides access as iterators,
+which are explicitely raw pointers (as opposed to `std::vector` but like `eastl::vector`)
+to ensure compiler optimizations are maximal.
+Methods `Raster::begin()` and `Raster::end()` enable range for loops
+and should be used with standard functions like algorithms.
+The following blocks are all functionally equivalent:
+
+\code
+// Position
+for (Index z = 0; z < raster.length(2); ++z) {
+  for (Index y = 0; y < raster.length(1); ++y) {
+    for (Index x = 0; x < raster.length(0); ++x) {
+      raster[{x, y, z}] *=2;
+    }
+  }
+}
+
+// Position iterator
+for (const auto& p : raster.domain()) {
+  raster[p] *= 2;
+}
+
+// Index
+for (std::size_t i = 0; i < raster.size(); ++i) {
+  raster[i] *= 2;
+}
+
+// Iterator (raw pointer)
+for (auto it = raster.begin(); it != raster.end(); ++it) {
+  *it *= 2;
+}
+
+// Range for loop
+for (auto& e : raster) {
+  e *= 2;
+}
+
+// Algorithm
+std::transform(raster.cbegin(), raster.cend(), raster.begin(), [](auto e) { return e * 2; });
+
+// operator*=
+raster *= 2;
 \endcode
 
 */
