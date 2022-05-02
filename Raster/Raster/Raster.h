@@ -211,6 +211,13 @@ public:
   template <Index I>
   Index length() const;
 
+  /**
+   * @copydoc length()
+   */
+  Index length(Index i) const {
+    return m_shape[i];
+  }
+
   /// @group_elements
 
   using DataContainer<T, THolder, Raster<T, N, THolder>>::operator[];
