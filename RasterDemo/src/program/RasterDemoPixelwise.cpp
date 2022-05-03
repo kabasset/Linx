@@ -14,12 +14,12 @@ class RasterDemoPixelwise : public Elements::Program {
 
 public:
   ExitCode mainMethod(std::map<std::string, VariableValue>& /* args */) override {
-    Cnes::VecRaster<int> a({3, 2}); // FIXME , {1, 2, 3, 4, 5, 6});
-    Cnes::VecRaster<int> b({3, 2}); // FIXME , -1);
-    Cnes::VecRaster<int> c({3, 2}); // FIXME , ?
-    int k = 2;
+    Cnes::VecRaster<double> a({3, 2}); // FIXME , {1, 2, 3, 4, 5, 6});
+    Cnes::VecRaster<double> b({3, 2}); // FIXME , -1);
+    Cnes::VecRaster<double> c({3, 2}); // FIXME , ?
+    double k = 2;
     operators(a, b, k);
-    // FIXME functions(a, b, c, k);
+    functions(a, b, c, k);
     apply(a, b, k);
     return ExitCode::OK;
   }
@@ -47,19 +47,28 @@ public:
     //! [Operators]
   }
 
-  template <typename TRaster, typename T>
+  template <typename TRaster, typename URaster, typename T>
   void functions(TRaster& a, const TRaster& b, const URaster& c, T k) {
     //! [Functions]
-    a.sin();
-    auto res1 = sin(a); // Calls Cnes::sin(a) according to ADL
+    // Unary function
+    auto res1 = cos(a); // Calls Cnes::cos(a) according to ADL
+    a.cos();
 
-    a.pow(k);
+    // Binary function with scalar second argument
     auto res2 = pow(a, k);
+    a.pow(k);
 
-    auto res3 = norm(c);
+    // Binary function with raster second argument
+    auto res3 = pow(a, b);
+    a.pow(b);
+
+    // auto res3 = norm(c);
     // No in-place version when types do not match:
     // c is complex while res3 is real
     //! [Functions]
+    std::cout << "cos(a) = " << res1[0] << std::endl;
+    std::cout << "pow(a, k) = " << res2[0] << std::endl;
+    std::cout << "pow(a, b) = " << res3[0] << std::endl;
   }
 
   template <typename TRaster, typename T>

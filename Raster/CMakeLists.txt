@@ -22,6 +22,10 @@ elements_add_unit_test(DataUtils tests/src/DataUtils_test.cpp
                      EXECUTABLE Raster_DataUtils_test
                      LINK_LIBRARIES Raster
                      TYPE Boost)
+elements_add_unit_test(MathFunctions tests/src/MathFunctions_test.cpp 
+                     EXECUTABLE Raster_MathFunctions_test
+                     LINK_LIBRARIES Raster
+                     TYPE Boost)
 elements_add_unit_test(Position tests/src/Position_test.cpp 
                      EXECUTABLE Raster_Position_test
                      LINK_LIBRARIES Raster

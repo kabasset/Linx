@@ -6,6 +6,7 @@
 #define _RASTER_RASTER_H
 
 #include "Raster/DataContainer.h"
+#include "Raster/MathFunctions.h"
 #include "Raster/Position.h"
 #include "Raster/Region.h"
 #include "RasterTypes/Exceptions.h"
@@ -126,7 +127,9 @@ using VecRaster = Raster<T, N, DataContainerHolder<T, std::vector<T>>>;
  * All in all, `Raster` seems to be a fair compromise.
  */
 template <typename T, Index N, typename THolder>
-class Raster : public DataContainer<T, THolder, Raster<T, N, THolder>> {
+class Raster :
+    public DataContainer<T, THolder, Raster<T, N, THolder>>,
+    public MathFunctionsMixin<T, Raster<T, N, THolder>> {
   friend class ImageRaster; // FIXME rm when Subraster is removed
 
 public:
@@ -378,6 +381,68 @@ template <typename T, typename... Longs>
 PtrRaster<T, sizeof...(Longs)> makeRaster(T* data, Longs... shape) { // FIXME can we merge somehow?
   return {{shape...}, data};
 }
+
+#define CNES_RASTER_MATH_UNARY_NEWINSTANCE(function) \
+  template <typename T, Index N, typename THolder> \
+  VecRaster<T, N> function(const Raster<T, N, THolder>& in) { \
+    VecRaster<T, N> out(in.shape(), in.data()); \
+    out.function(); \
+    return out; \
+  }
+
+#define CNES_RASTER_MATH_BINARY_NEWINSTANCE(function) \
+  template <typename T, Index N, typename THolder, typename TOther> \
+  VecRaster<T, N> function(const Raster<T, N, THolder>& in, const TOther& other) { \
+    VecRaster<T, N> out(in.shape(), in.data()); \
+    out.function(other); \
+    return out; \
+  }
+
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(abs)
+CNES_RASTER_MATH_BINARY_NEWINSTANCE(max)
+CNES_RASTER_MATH_BINARY_NEWINSTANCE(min)
+CNES_RASTER_MATH_BINARY_NEWINSTANCE(fdim)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(ceil)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(floor)
+CNES_RASTER_MATH_BINARY_NEWINSTANCE(fmod)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(trunc)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(round)
+
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(cos)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(sin)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(tan)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(acos)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(asin)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(atan)
+CNES_RASTER_MATH_BINARY_NEWINSTANCE(atan2)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(cosh)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(sinh)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(tanh)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(acosh)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(asinh)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(atanh)
+
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(exp)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(exp2)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(expm1)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(log)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(log2)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(log10)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(logb)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(ilogb)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(log1p)
+CNES_RASTER_MATH_BINARY_NEWINSTANCE(pow)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(sqrt)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(cbrt)
+CNES_RASTER_MATH_BINARY_NEWINSTANCE(hypot)
+
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(erf)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(erfc)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(tgamma)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(lgamma)
+
+#undef CNES_RASTER_MATH_UNARY_NEWINSTANCE
+#undef CNES_RASTER_MATH_BINARY_NEWINSTANCE
 
 } // namespace Cnes
 

@@ -7,6 +7,7 @@
 
 #include <complex> // FIXME from TypeUtils?
 #include <tuple>
+#include <utility> // declval
 
 namespace Cnes {
 
@@ -42,6 +43,17 @@ using RasterSupportedTypesTuple = std::tuple<CNES_RASTER_SUPPORTED_TYPES>;
  * @brief `BOOST_AUTO_TEST_CASE_TEMPLATE` for each supported type.
  */
 #define CNES_RASTER_TEST_CASE_TEMPLATE(name) BOOST_AUTO_TEST_CASE_TEMPLATE(name, T, RasterSupportedTypesTuple)
+
+template <typename...>
+using templateVoid = void; // C++17's void_t // FIXME to TypeUtils
+
+template <typename T, typename = void>
+struct isIterable : std::false_type {};
+
+// https://en.cppreference.com/w/cpp/types/void_t
+template <typename T>
+struct isIterable<T, templateVoid<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>> :
+    std::true_type {};
 
 } // namespace Cnes
 
