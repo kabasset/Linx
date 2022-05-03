@@ -7,18 +7,23 @@ namespace Cnes {
 
 C++ operators are overloaded for rasters and scalars.
 In-place (`+=`, `-=`, `*=`...) and new-instance (`+`, `-`, `*`...) versions are available.
-The following examples for operator `+` holds for all operators.
-The complete list can be found in FIXME.
+The following examples for operator `+` holds for all operators;
+`a` and `b` denote `Raster`s while `k` is some scalar.
 
 \snippet RasterDemoPixelwise.cpp Operators
+
+The complete list of available operators can be found in FIXME.
 
 \section pixelwise-functions Functions
 
 Pixel-wise mathematical functions are also provided
 with in-place (`a.sin()`, `a.exp()`...) and new-instance (`Cnes::sin(a)`, `Cnes::exp(a)`...) versions.
-Argument-dependent lookup (ADL) allows skipping the namespace in the latter case:
+The latter return `VecRaster`s.
+Argument-dependent lookup (ADL) allows skipping the namespace in this case:
 
 \snippet RasterDemoPixelwise.cpp Functions
+
+The complete list of available functions can be found in `MathFunctionsMixin`'s documentation.
 
 \section pixelwise-apply Apply and generate
 

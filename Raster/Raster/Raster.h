@@ -441,8 +441,26 @@ CNES_RASTER_MATH_UNARY_NEWINSTANCE(erfc)
 CNES_RASTER_MATH_UNARY_NEWINSTANCE(tgamma)
 CNES_RASTER_MATH_UNARY_NEWINSTANCE(lgamma)
 
+#define CNES_RASTER_MATH_COMPLEX_TO_REAL(function) \
+  template <typename T, Index N, typename THolder> \
+  VecRaster<T, N> function(const Raster<std::complex<T>, N, THolder>& in) { \
+    VecRaster<T, N> out(in.shape()); \
+    std::transform(in.begin(), in.end(), out.begin(), [](const auto& e) { \
+      return std::function(e); \
+    }); \
+    return out; \
+  } // FIXME enable_if<isComplex<T>>
+
+CNES_RASTER_MATH_COMPLEX_TO_REAL(real)
+CNES_RASTER_MATH_COMPLEX_TO_REAL(imag)
+CNES_RASTER_MATH_COMPLEX_TO_REAL(abs)
+CNES_RASTER_MATH_COMPLEX_TO_REAL(arg)
+CNES_RASTER_MATH_COMPLEX_TO_REAL(norm)
+// FIXME conj
+
 #undef CNES_RASTER_MATH_UNARY_NEWINSTANCE
 #undef CNES_RASTER_MATH_BINARY_NEWINSTANCE
+#undef CNES_RASTER_MATH_COMPLEX_TO_REAL
 
 } // namespace Cnes
 

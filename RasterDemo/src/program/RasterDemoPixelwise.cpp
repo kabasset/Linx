@@ -16,7 +16,7 @@ public:
   ExitCode mainMethod(std::map<std::string, VariableValue>& /* args */) override {
     Cnes::VecRaster<double> a({3, 2}); // FIXME , {1, 2, 3, 4, 5, 6});
     Cnes::VecRaster<double> b({3, 2}); // FIXME , -1);
-    Cnes::VecRaster<double> c({3, 2}); // FIXME , ?
+    Cnes::VecRaster<std::complex<double>> c({3, 2}); // FIXME , ?
     double k = 2;
     operators(a, b, k);
     functions(a, b, c, k);
@@ -62,13 +62,14 @@ public:
     auto res3 = pow(a, b);
     a.pow(b);
 
-    // auto res3 = norm(c);
+    auto res4 = norm(c);
     // No in-place version when types do not match:
-    // c is complex while res3 is real
+    // c is complex while res4 is real
     //! [Functions]
     std::cout << "cos(a) = " << res1[0] << std::endl;
     std::cout << "pow(a, k) = " << res2[0] << std::endl;
     std::cout << "pow(a, b) = " << res3[0] << std::endl;
+    std::cout << "norm(c) = " << res4[0] << std::endl;
   }
 
   template <typename TRaster, typename T>

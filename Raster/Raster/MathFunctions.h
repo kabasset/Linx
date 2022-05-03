@@ -16,12 +16,8 @@ namespace Cnes {
  * @ingroup data_concepts
  * @brief Mixin to provide mathematical operations and transforms to a container.
  * @details
- * Implements vector space arithmetic operators
- * (uppercase letters are for vectors, lowercase letters are for scalars):
- * - Vector-additive: V += U, W = V + U, V += U, W = V - U;
- * - Scalar-additive: V += a, V = U + a, V = a + U, V -= a, V = U + a, V = a - U;
- * - Scalar-multiplicative: V *= a, V = U * a, V = a * U, V /= a, V = U / a;
- * - Incrementation if enabled (for integral value types by default): V++, ++V, V--, --V.
+ * Implements pixel-wise mathematical functions which may take an iterable or scalar argument (or none).
+ * In the former case, the number of elements in the iterable must match that of the container.
  */
 template <typename T, typename TDerived>
 struct MathFunctionsMixin {
