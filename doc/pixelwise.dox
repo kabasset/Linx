@@ -7,39 +7,18 @@ namespace Cnes {
 
 C++ operators are overloaded for rasters and scalars.
 In-place (`+=`, `-=`, `*=`...) and new-instance (`+`, `-`, `*`...) versions are available.
-If we denote any operator as `@`, the following holds:
+The following examples for operator `+` holds for all operators.
+The complete list can be found in FIXME.
 
-\code
-
-// Given:
-// - Some value k (an int, float, std::complex<double>...)
-// - Some Rasters a and b
-
-a @= b; // Is equivalent to:
-std::transform(a.cbegin(), a.cend(), b.cbegin(), a.begin(), [](auto e, auto f) { return e @ f; });
-
-a @= k; // Is equivalent to:
-std::transform(a.cbegin(), a.cend(), a.begin(), [](auto e) { return e @ k; });
-
-auto c = a @ b; // Is equivalent to:
-auto c = a;
-c @= b;
-
-auto c = a @ k; // Is equivalent to:
-auto c = a;
-c @= k;
-\endcode
+\snippet RasterDemoPixelwise.cpp Operators
 
 \section pixelwise-functions Functions
 
 Pixel-wise mathematical functions are also provided
 with in-place (`a.sin()`, `a.exp()`...) and new-instance (`Cnes::sin(a)`, `Cnes::exp(a)`...) versions.
-Argument-dependent lookup allows skipping the namespace in the latter case:
+Argument-dependent lookup (ADL) allows skipping the namespace in the latter case:
 
-\code
-a.sin();
-auto b = sin(a); // Calls Cnes::sin(a)
-\endcode
+\snippet RasterDemoPixelwise.cpp Functions
 
 \section pixelwise-apply Apply and generate
 
@@ -48,25 +27,20 @@ are the generic versions of in-place and new-instance operations, respectively.
 They take as input the function to be applied (e.g. a functor or a lambda function)
 and an unbounded number of input rasters (can be 0).
 
-For example, to compute `d = a * 2 + b - c`, do:
+For example, to compute `a * k + b`, do:
 
-\code
-d.generate([](auto e, auto f, auto g) { return e * 2 + f - g; }, a, b, c);
-\endcode
+\snippet RasterDemoPixelwise.cpp Generate
 
 This is equivalent but much faster than doing simply:
 
-\code
-d = a * 2 + b - c;
-\endcode
+\snippet RasterDemoPixelwise.cpp Formula
 
-because intermediate variables `tmp1 = a * 2` and `tmp2 = a * 2 + b` are not instanciated.
+because intermediate variable `tmp = a * k` is not instanciated.
+This is all the more true for formulae with more operations.
 
-The in-place version, corresponding to `a = a * 2 + b - c`, is obtained with `apply()`:
+The in-place version, corresponding to `a = a * k + b`, is obtained with `apply()`:
 
-\code
-a.apply([](auto e, auto f, auto g) { return e * 2 + f - g; }, b, c);
-\endcode
+\snippet RasterDemoPixelwise.cpp Apply
 
 This can be seen as an equivalent to XTensor's or Eigen's lazy evaluations,
 yet with arbitrary functions.
