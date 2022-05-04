@@ -27,7 +27,7 @@ but that is only for the purpose of documentation.
 The following figure shows the index of each pixel of a raster of shape (4, 3, 2).
 It will be used in the remaining of the documentation in code snippets.
 
-\image html diagrams/raster_ordering.svg
+\image html doc/diagrams/raster_ordering.svg
 
 \section basics-container Underlying container
 

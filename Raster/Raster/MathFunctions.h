@@ -18,6 +18,7 @@ namespace Cnes {
  * @details
  * Implements pixel-wise mathematical functions which may take an iterable or scalar argument (or none).
  * In the former case, the number of elements in the iterable must match that of the container.
+ * @see https://en.cppreference.com/w/cpp/header/cmath for functions description
  */
 template <typename T, typename TDerived>
 struct MathFunctionsMixin {

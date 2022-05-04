@@ -1,7 +1,8 @@
-# Cnes.Raster
+# <img src="raster_logo_notext.svg" height=100px alt="" onerror="this.style.display='none'"> Raster
 
-This project is a work in progress to gather _n_D array related features
-of EleFits' Raster -- an extensible _n_D data storage class with pixel-wise operations --
+
+This project is a work in progress to gather ND array related features
+of EleFits' Raster -- an extensible ND data storage class with pixel-wise operations --
 and PhiFun's operations -- e.g. Fourier transforms, linear filtering, and interpolation.
 
 The target is a header-only library focused on ease of use
