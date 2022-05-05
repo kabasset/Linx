@@ -1,5 +1,8 @@
-# <img src="raster_logo_notext.svg" height=100px alt="" onerror="this.style.display='none'"> Raster
+# Project overview
 
+![Raster logo](doc/diagrams/raster_logo.svg)
+
+# Purpose
 
 This project is a work in progress to gather ND array related features
 of EleFits' Raster -- an extensible ND data storage class with pixel-wise operations --
@@ -10,10 +13,13 @@ and which interfaces seamlessly with the standard C++ library.
 The image processing feature set is expected to grow steadily on demand.
 Currently supported operations are:
 
-* Pixel-wise operations through `Raster::apply()` and `Raster::generate()`;
+* Pixel-wise operations (`+`, `*`, `exp()`, `apply()`...);
 * Discrete Fourier transforms through the `Dft` class;
 * Linear filtering through the `Kernel` class.
 
+# License
+
+[LGPL-3.0-or-later](LICENSE.md)
 # Alternatives
 
 * Armadillo
