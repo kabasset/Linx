@@ -1,0 +1,76 @@
+namespace Cnes {
+/**
+
+\addtogroup dft
+
+
+\section dft-intro An FFTW wrapper
+
+
+<a href="http://fftw.org/">FFTW</a> is a fast(est) C library to compute a variety of discrete Fourier and related transforms (hereafter denoted DFTs).
+It provides low-level functions to configure, prepare and execute DFTs with a main focus on performance.
+Cnes.Raster offers an as-light-as-possible modern C++ wrapper of FFTW with automatic memory management,
+more friendly interfaces, and (obviously) perfect integration with rasters.
+
+Still, the key concept of FFTW hold:
+a so-called plan has to be instanciated prior to a transform.
+It contains two buffers (as a specific type of `Raster`) for input and output data,
+and the parametrization of a DFT algorithm which has been selected at instanciation time (more details below),
+during a phase named planning.
+
+Plan instanciation comes with the modification of some global variables and is *not* thread-safe.
+Plan execution is thread-safe, i.e. several plans can be executed in parallel in different threads.
+
+
+\section dft-planning Planning
+
+
+\snippet RasterDemoDft.cpp Plan direct
+
+
+\section dft-buffer Input and output buffers
+
+
+\snippet RasterDemoDft.cpp Transfer function
+
+
+\section dft-execution Execution
+
+
+\snippet RasterDemoDft.cpp Direct transform
+
+
+\section dft-composition Plan inversion and composition
+
+
+Often, it is necessary to perform the inverse transform of a previous direct transform.
+In this case, it is natural to reuse the buffers of the direct transform for inversion.
+This can be done manually by creating buffers with shared memory,
+or automatically with `DftPlan::inverse()`,
+which returns an object of appropriate type and with inverted buffers:
+
+\snippet RasterDemoDft.cpp Plan inverse
+
+\snippet RasterDemoDft.cpp Inverse transform
+
+Composition of transforms is also proposed, as `DftPlan::compose()`,
+and left as an exercise!
+
+
+\section dft-memory FFTW memory life cycle
+
+
+Plan and buffer memory is allocated on demand, at instanciation.
+Individual plan variables, and buffers which own data are freed when they go out of scope, like classical objects.
+Yet, global objects allocated at first plan instanciation must be freed, too.
+This is handled by a dedicated mechanism which is automatically triggered at program termination;
+nothing has to be done on user side.
+
+
+\section dft-parallel DFT parallelization
+
+
+TODO
+
+*/
+}
