@@ -3,7 +3,9 @@ namespace Cnes {
 
 \addtogroup pixelwise
 
+
 \section pixelwise-operators Operators
+
 
 C++ operators are overloaded for rasters and scalars.
 In-place (`+=`, `-=`, `*=`...) and new-instance (`+`, `-`, `*`...) versions are available.
@@ -14,7 +16,9 @@ The following examples for operator `+` holds for all operators;
 
 The complete list of available operators can be found in FIXME.
 
+
 \section pixelwise-functions Functions
+
 
 Pixel-wise mathematical functions are also provided
 with in-place (`a.sin()`, `a.exp()`...) and new-instance (`Cnes::sin(a)`, `Cnes::exp(a)`...) versions.
@@ -25,7 +29,9 @@ Argument-dependent lookup (ADL) allows skipping the namespace in this case:
 
 The complete list of available functions can be found in `MathFunctionsMixin`'s documentation.
 
+
 \section pixelwise-apply Apply and generate
+
 
 To go further or to speed up computations, methods `Raster::apply()` and `Raster::generate()`
 are the generic versions of in-place and new-instance operations, respectively.

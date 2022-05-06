@@ -13,7 +13,7 @@
 namespace Cnes {
 
 /**
- * @ingroup data_concepts
+ * @ingroup mixins
  * @brief Mixin to provide mathematical operations and transforms to a container.
  * @details
  * Implements pixel-wise mathematical functions which may take an iterable or scalar argument (or none).

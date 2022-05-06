@@ -32,22 +32,22 @@ class Raster;
 /// @endcond
 
 /**
- * @ingroup image_data_classes
+ * @ingroup data_classes
  * @brief `Raster` which points to some external data (`THolder` = `T*`).
  */
 template <typename T, Index N = 2>
 using PtrRaster = Raster<T, N, DataContainerHolder<T, T*>>;
 
 /**
- * @ingroup image_data_classes
+ * @ingroup data_classes
  * @brief `Raster` which owns a data vector (`THolder` = `std::vector<T>`).
  */
 template <typename T, Index N = 2>
 using VecRaster = Raster<T, N, DataContainerHolder<T, std::vector<T>>>;
 
 /**
- * @ingroup image_data_classes
- * @brief Data of a _n_-dimensional image (2D by default).
+ * @ingroup data_classes
+ * @brief Data of a N-dimensional image (2D by default).
  * 
  * @tparam T The value type, which can be `const`-qualified for read-only rasters
  * @tparam N The dimension, which can be &ge; 0 for fixed dimension, or -1 for variable dimension

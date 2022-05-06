@@ -18,7 +18,7 @@
 namespace Cnes {
 
 /**
- * @ingroup data_concepts
+ * @ingroup data_classes
  * @brief A holder of any contiguous container specified by a size and data pointer.
  * @details
  * The class can be specialized for any container,
@@ -80,7 +80,7 @@ protected:
 };
 
 /**
- * @ingroup data_concepts
+ * @ingroup data_classes
  * @brief Raw pointer specialization.
  */
 template <typename T>
@@ -112,7 +112,7 @@ protected:
 };
 
 /**
- * @ingroup data_concepts
+ * @ingroup data_classes
  * @brief `std::array` specialization.
  */
 template <typename T, std::size_t N>

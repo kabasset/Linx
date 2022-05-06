@@ -11,7 +11,7 @@
 namespace Cnes {
 
 /**
- * @ingroup data_concepts
+ * @ingroup concepts
  * @requirements{ContiguousContainer}
  * @brief Standard contiguous container requirements
  * @details
@@ -20,7 +20,7 @@ namespace Cnes {
  */
 
 /**
- * @ingroup data_concepts
+ * @ingroup concepts
  * @requirements{SizedData}
  * @brief Requirements for a `DataContainerHolder`.
  * @details
@@ -56,8 +56,8 @@ namespace Cnes {
  */
 
 /**
- * @ingroup data_concepts
- * @brief Base class for a FITS data container.
+ * @ingroup mixins
+ * @brief Base class for a contiguous container.
  * 
  * @tparam T The value type
  * @tparam TDerived The child class which implements required methods

@@ -3,7 +3,9 @@ namespace Cnes {
 
 \addtogroup basics
 
+
 \section basics-intro Introduction
+
 
 A raster is an N-dimensional array of pixels stored in a contiguous one-dimensional container.
 The number of axes, or dimension, N, is set at compile time or at runtime.
@@ -14,7 +16,9 @@ There are other common names for similar concepts, like multidimensional array, 
 The term raster was chosen to convey some information on the memory contiguity and layout (see next section),
 because it is part of the public interface of the library, and not only an implementation detail.
 
+
 \section basics-memory Memory layout
+
 
 The pixel ordering scheme is row-major, which means that two adjacent pixels of the same row (along the axis of index 0) are contiguous in memory.
 The last pixel of a row immediately precedes the first pixel of the next row,
@@ -29,7 +33,9 @@ It will be used in the remaining of the documentation in code snippets.
 
 \image html doc/diagrams/raster_ordering.svg
 
+
 \section basics-container Underlying container
+
 
 The pixel values can be stored in any contiguous container.
 The most standard option is a `std::vector` (use this by default).

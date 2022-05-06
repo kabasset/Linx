@@ -13,7 +13,7 @@
 namespace Cnes {
 
 /**
- * @ingroup data_concepts
+ * @ingroup concepts
  * @requirements{VectorArithmetic}
  * @brief Vector-space arithmetic requirements.
  * @details
@@ -26,7 +26,7 @@ namespace Cnes {
  */
 
 /**
- * @ingroup data_concepts
+ * @ingroup mixins
  * @brief Mixin to provide vector space arithmetics to a container.
  * @tparam T The contained element value type
  * @tparam TDerived The container which inherits this class

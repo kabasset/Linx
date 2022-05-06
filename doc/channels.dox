@@ -1,10 +1,10 @@
 namespace Cnes {
 /**
 
-\addtogroup guidelines-channels
+\addtogroup channels
 
 
-\section guidelines-channels-intro Problem statement
+\section channels-intro Problem statement
 
 
 Sometimes, pixels have vector values.
@@ -17,7 +17,7 @@ There are at least three obvious ways to store the data of such an image:
 Depending on what has to be done with the data, different strategies should be chosen.
 
 
-\section guidelines-channels-struct With a dedicated color structure
+\section channels-struct With a dedicated color structure
 
 
 We can define a simple structure like so:
@@ -49,7 +49,7 @@ And apply some function `rgbToHsv()` to each pixel with `Raster::generate()`:
 (The conversion function is not showed in this page but available in the demo program.)
 
 
-\section guidelines-channels-along0 With color along the first axis
+\section channels-along0 With color along the first axis
 
 
 Here is another possible memory layout, using the first axis for the color:
@@ -76,7 +76,7 @@ Does it mean that this strategy should always be avoided?
 Wait for the last section! (Spoiler: No.)
 
 
-\section guidelines-channels-along2 With color along the last axis
+\section channels-along2 With color along the last axis
 
 
 This strategy is efficient when channels are processed independently most of the time.
@@ -112,7 +112,7 @@ multiscale or multiresolution representations, where the last axis is scale,
 and so on as long as the raster sections are often processed independently.
 
 
-\section guidelines-channels-runtime With runtime-sized vectors along the first axis
+\section channels-runtime With runtime-sized vectors along the first axis
 
 
 Sometimes the number of channels, i.e. the size of the vector pixels, is not known at compile time.

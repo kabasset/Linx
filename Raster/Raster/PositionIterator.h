@@ -10,7 +10,7 @@
 namespace Cnes {
 
 /**
- * @ingroup image_data_classes
+ * @ingroup data_classes
  * @brief A helper class to screen a `Region`.
  * @details
  * Some current position is updated with increment operators.

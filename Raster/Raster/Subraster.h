@@ -13,10 +13,10 @@
 
 namespace Cnes {
 
-/// @cond INTERNAL
+/// @cond
 
 /**
- * @ingroup image_data_classes
+ * @ingroup data_classes
  * @brief A subraster as a view of a raster region.
  * @details
  * As opposed to a Raster, values of a Subraster are generally not contiguous in memory:
