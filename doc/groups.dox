@@ -2,6 +2,7 @@
 
 \defgroup basics Basics
 \brief Memory layout and core functionalities of rasters.
+\example RasterDemoBasics.cpp
 
 \defgroup data_classes Core data classes
 \ingroup basics
@@ -10,6 +11,7 @@
 \defgroup pixelwise Pixel-wise operations
 \ingroup basics
 \brief Operations applied to each pixel independently.
+\example RasterDemoPixelwise.cpp
 
 \defgroup filtering Filtering
 \brief Linear filtering with kernels or Fourier transforms.
@@ -20,7 +22,8 @@
 
 \defgroup dft Discrete Fourier transforms
 \ingroup filtering
-\brief Thread-safe DFT plans building and execution.
+\brief Thread-safe FFTW plans building and execution.
+\example RasterDemoDft.cpp
 
 \defgroup geometry Geometrical transforms
 \brief Transforms which act on pixel locations.
@@ -43,6 +46,7 @@
 \defgroup channels Vector pixels
 \ingroup guidelines
 \brief How to organize your data with non-scalar pixels?
+\example RasterDemoChannels.cpp
 
 \defgroup design Library design
 \brief Design documentation for developers and advanced users.
