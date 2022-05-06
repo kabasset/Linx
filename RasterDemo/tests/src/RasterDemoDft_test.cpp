@@ -2,13 +2,17 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "ElementsKernel/ProgramHeaders.h"
 #include "RasterFourier/Dft.h"
 
-#include <map>
-#include <string>
+#include <boost/test/unit_test.hpp>
 
-void filter() {
+//-----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_SUITE(RasterDemoDft_test)
+
+//-----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(filter_test) {
 
   //! [Plan direct]
   Cnes::RealDft direct({640, 480});
@@ -51,16 +55,10 @@ void filter() {
   std::cout << "Input buffer after filtering: " << signal[0] << std::endl;
 }
 
-void multithread() {}
+BOOST_AUTO_TEST_CASE(multithread_test) {
+  // FIXME
+}
 
-class RasterDemoDft : public Elements::Program {
+//-----------------------------------------------------------------------------
 
-public:
-  ExitCode mainMethod(std::map<std::string, VariableValue>& /* args */) override {
-    filter();
-    multithread();
-    return ExitCode::OK;
-  }
-};
-
-MAIN_FOR(RasterDemoDft)
+BOOST_AUTO_TEST_SUITE_END()

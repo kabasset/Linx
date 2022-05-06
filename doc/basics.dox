@@ -43,30 +43,30 @@ A raster built on top of a `std::vector` (with default allocator) is of type `Ve
 Here is a simple example to build the `VecRaster` illustrated in the section above
 (`std::iota()` is used to fill the 1D container with increasing values):
 
-\snippet RasterDemoBasics.cpp VecRaster iota
+\snippet RasterDemoBasics_test.cpp VecRaster iota
 
 It is also possible to dynamically augment any 1D contiguous container
 with the raster features (e.g. ND indexing or operations) thanks to the `PtrRaster` class,
 in which the underlying container is a raw pointer.
 For example:
 
-\snippet RasterDemoBasics.cpp PtrRaster iota
+\snippet RasterDemoBasics_test.cpp PtrRaster iota
 
 Last but not least, it is also possible to use your own container,
 assuming that it provides the minimal interface, e.g.:
 
-\snippet RasterDemoBasics.cpp MallocRaster
+\snippet RasterDemoBasics_test.cpp MallocRaster
 
 Which can be used like any other raster:
 
-\snippet RasterDemoBasics.cpp MallocRaster iota
+\snippet RasterDemoBasics_test.cpp MallocRaster iota
 
 \section basics-access Element access
 
 As disclosed in the examples above, elements of a raster can be accessed with 1D indices or ND positions.
 Indexes are 0-based signed integers, which enables backward indexing with `Raster::at()`, e.g.:
 
-\snippet RasterDemoBasics.cpp Element access
+\snippet RasterDemoBasics_test.cpp Element access
 
 As a standard contiguous container, `Raster` also provides access as iterators,
 which are explicitely raw pointers (as opposed to `std::vector` but like `eastl::vector`)
@@ -75,7 +75,7 @@ Methods `Raster::begin()` and `Raster::end()` enable range for loops
 and should be used with standard functions like algorithms.
 The following blocks are all functionally equivalent:
 
-\snippet RasterDemoBasics.cpp Foreach element
+\snippet RasterDemoBasics_test.cpp Foreach element
 
 */
 }

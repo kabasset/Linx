@@ -25,19 +25,19 @@ Plan execution is thread-safe, i.e. several plans can be executed in parallel in
 \section dft-planning Planning
 
 
-\snippet RasterDemoDft.cpp Plan direct
+\snippet RasterDemoDft_test.cpp Plan direct
 
 
 \section dft-buffer Input and output buffers
 
 
-\snippet RasterDemoDft.cpp Transfer function
+\snippet RasterDemoDft_test.cpp Transfer function
 
 
 \section dft-execution Execution
 
 
-\snippet RasterDemoDft.cpp Direct transform
+\snippet RasterDemoDft_test.cpp Direct transform
 
 
 \section dft-composition Plan inversion and composition
@@ -49,9 +49,9 @@ This can be done manually by creating buffers with shared memory,
 or automatically with `DftPlan::inverse()`,
 which returns an object of appropriate type and with inverted buffers:
 
-\snippet RasterDemoDft.cpp Plan inverse
+\snippet RasterDemoDft_test.cpp Plan inverse
 
-\snippet RasterDemoDft.cpp Inverse transform
+\snippet RasterDemoDft_test.cpp Inverse transform
 
 Composition of transforms is also proposed, as `DftPlan::compose()`,
 and left as an exercise!

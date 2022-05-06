@@ -4,17 +4,19 @@ elements_subdir(RasterDemo)
 
 elements_depends_on_subdirs(Raster RasterFourier)
 
-elements_add_executable(RasterDemoBasics src/program/RasterDemoBasics.cpp
-                     INCLUDE_DIRS Raster
-                     LINK_LIBRARIES Raster)
-elements_add_executable(RasterDemoPixelwise src/program/RasterDemoPixelwise.cpp
-                     INCLUDE_DIRS Raster
-                     LINK_LIBRARIES Raster)
-elements_add_executable(RasterDemoChannels src/program/RasterDemoChannels.cpp
-                     INCLUDE_DIRS Raster
-                     LINK_LIBRARIES Raster)
-elements_add_executable(RasterDemoDft src/program/RasterDemoDft.cpp
-                     INCLUDE_DIRS RasterFourier
-                     LINK_LIBRARIES RasterFourier)
-
-elements_install_conf_files()
+elements_add_unit_test(RasterDemoBasics tests/src/RasterDemoBasics_test.cpp 
+                     EXECUTABLE RasterDemoBasics_test
+                     LINK_LIBRARIES Raster
+                     TYPE Boost)
+elements_add_unit_test(RasterDemoPixelwise tests/src/RasterDemoPixelwise_test.cpp 
+                     EXECUTABLE RasterDemoPixelwise_test
+                     LINK_LIBRARIES Raster
+                     TYPE Boost)
+elements_add_unit_test(RasterDemoDft tests/src/RasterDemoDft_test.cpp 
+                     EXECUTABLE RasterDemoDft_test
+                     LINK_LIBRARIES RasterFourier
+                     TYPE Boost)
+elements_add_unit_test(RasterDemoChannels tests/src/RasterDemoChannels_test.cpp 
+                     EXECUTABLE RasterDemoChannels_test
+                     LINK_LIBRARIES Raster
+                     TYPE Boost)

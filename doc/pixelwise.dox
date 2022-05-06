@@ -12,7 +12,7 @@ In-place (`+=`, `-=`, `*=`...) and new-instance (`+`, `-`, `*`...) versions are 
 The following examples for operator `+` holds for all operators;
 `a` and `b` denote `Raster`s while `k` is some scalar.
 
-\snippet RasterDemoPixelwise.cpp Operators
+\snippet RasterDemoPixelwise_test.cpp Operators
 
 The complete list of available operators can be found in FIXME.
 
@@ -25,7 +25,7 @@ with in-place (`a.sin()`, `a.exp()`...) and new-instance (`Cnes::sin(a)`, `Cnes:
 The latter return `VecRaster`s.
 Argument-dependent lookup (ADL) allows skipping the namespace in this case:
 
-\snippet RasterDemoPixelwise.cpp Functions
+\snippet RasterDemoPixelwise_test.cpp Functions
 
 The complete list of available functions can be found in `MathFunctionsMixin`'s documentation.
 
@@ -40,18 +40,18 @@ and an unbounded number of input rasters (can be 0).
 
 For example, to compute `a * k + b`, do:
 
-\snippet RasterDemoPixelwise.cpp Generate
+\snippet RasterDemoPixelwise_test.cpp Generate
 
 This is equivalent but much faster than doing simply:
 
-\snippet RasterDemoPixelwise.cpp Formula
+\snippet RasterDemoPixelwise_test.cpp Formula
 
 because intermediate variable `tmp = a * k` is not instanciated.
 This is all the more true for formulae with more operations.
 
 The in-place version, corresponding to `a = a * k + b`, is obtained with `apply()`:
 
-\snippet RasterDemoPixelwise.cpp Apply
+\snippet RasterDemoPixelwise_test.cpp Apply
 
 This can be seen as an equivalent to XTensor's or Eigen's lazy evaluations,
 yet with arbitrary functions.

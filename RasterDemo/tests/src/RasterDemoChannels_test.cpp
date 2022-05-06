@@ -2,13 +2,9 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "ElementsKernel/ProgramHeaders.h"
 #include "Raster/Raster.h"
 
-#include <map>
-#include <string>
-
-static Elements::Logging logger = Elements::Logging::getLogger("RasterDemoChannels");
+#include <boost/test/unit_test.hpp>
 
 //! [Rgb struct]
 // An RGB (red, green, blue) color where each channel takes values between 0 and 255.
@@ -90,6 +86,13 @@ Hsv rgbToHsv(const Rgb& rgb) {
   return hsv;
 }
 
+void rgbDataToHsvData(unsigned char* rgb, double* hsv) {
+  const auto out = rgbToHsv(Rgb {rgb[0], rgb[1], rgb[2]});
+  hsv[0] = out.h;
+  hsv[1] = out.s;
+  hsv[2] = out.v;
+}
+
 std::string toString(const Rgb& rgb) {
   return std::to_string(rgb.r) + "R " + std::to_string(rgb.g) + "G " + std::to_string(rgb.b) + "B";
 }
@@ -98,7 +101,13 @@ std::string toString(const Hsv& hsv) {
   return std::to_string(hsv.h) + "H " + std::to_string(hsv.s) + "S " + std::to_string(hsv.v) + "V";
 }
 
-void colorStruct() {
+//-----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_SUITE(RasterDemoChannels_test)
+
+//-----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(color_struct_test) {
 
   //! [Input Rgb]
   static constexpr Rgb turquoise {64, 224, 208};
@@ -114,14 +123,8 @@ void colorStruct() {
   std::cout << toString(rgb[{0, 0}]) << " = " << toString(hsv[{0, 0}]) << std::endl;
 }
 
-void rgbToHsv(unsigned char* rgb, double* hsv) {
-  const auto out = rgbToHsv(Rgb {rgb[0], rgb[1], rgb[2]});
-  hsv[0] = out.h;
-  hsv[1] = out.s;
-  hsv[2] = out.v;
-}
+BOOST_AUTO_TEST_CASE(color_along_0_test) {
 
-void colorAlong0() {
   //! [CxyImage]
   using RgbXyImage = Cnes::VecRaster<unsigned char, 3>;
   using HsvXyImage = Cnes::VecRaster<double, 3>;
@@ -141,7 +144,7 @@ void colorAlong0() {
   auto hsvIt = hsv.begin();
   // Loop by steps of 3 pixels
   for (auto rgbIt = rgb.begin(); rgbIt != rgb.end(); rgbIt += 3, hsvIt += 3) {
-    rgbToHsv(rgbIt, hsvIt);
+    rgbDataToHsvData(rgbIt, hsvIt);
   }
   //! [Output Cxy]
 
@@ -150,7 +153,7 @@ void colorAlong0() {
   std::cout << toString(rgb0) << " = " << toString(hsv0) << std::endl;
 }
 
-void colorAlong2() {
+BOOST_AUTO_TEST_CASE(color_along_2_test) {
 
   //! [XycImage]
   using XyRgbImage = Cnes::VecRaster<double, 3>;
@@ -177,7 +180,7 @@ void colorAlong2() {
   std::cout << toString(in0) << " -> " << toString(out0) << std::endl;
 }
 
-void vectorAlong2() {
+BOOST_AUTO_TEST_CASE(vector_along_2_test) {
 
   //! [Vector image]
   using HyperspectralCube = Cnes::VecRaster<double, 3>;
@@ -202,16 +205,6 @@ void vectorAlong2() {
   std::cout << "Integrated flux = " << image[0] << std::endl;
 }
 
-class RasterDemoChannels : public Elements::Program {
+//-----------------------------------------------------------------------------
 
-public:
-  ExitCode mainMethod(std::map<std::string, VariableValue>& /* args */) override {
-    colorStruct();
-    colorAlong0();
-    colorAlong2();
-    vectorAlong2();
-    return ExitCode::OK;
-  }
-};
-
-MAIN_FOR(RasterDemoChannels)
+BOOST_AUTO_TEST_SUITE_END()
