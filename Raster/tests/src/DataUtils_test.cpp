@@ -87,17 +87,6 @@ BOOST_AUTO_TEST_SUITE(DataUtils_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(typed_test) {
-  const std::string name = "TOTOTATATITI";
-  const char* cStr = name.c_str();
-  const int integer = 707471;
-  const long index = integer;
-  BOOST_TEST(as<float>(name).key == name);
-  BOOST_TEST(as<float>(cStr).key == name);
-  BOOST_TEST(as<float>(integer).key == index);
-  BOOST_TEST(as<float>(index).key == index);
-}
-
 BOOST_AUTO_TEST_CASE(tuple_as_test) {
   const std::tuple<std::string, int, float, float> tuple {"TODO", 20, 1.8, 75};
   const auto body = tupleAs<Body>(tuple);
