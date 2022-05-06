@@ -28,4 +28,11 @@
 \ingroup geometry
 \brief Classes to apply interpolation and extrapolation functions
 
+\defgroup guidelines Development guidelines
+\brief Guidelines, good practices, optimization strategies...
+
+\defgroup guidelines-channels Vector pixels
+\ingroup guidelines
+\brief How to organize your data with non-scalar pixels
+
 */

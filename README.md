@@ -20,6 +20,7 @@ Currently supported operations are:
 # License
 
 [LGPL-3.0-or-later](LICENSE.md)
+
 # Alternatives
 
 * Armadillo

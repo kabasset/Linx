@@ -1,0 +1,143 @@
+namespace Cnes {
+/**
+
+\addtogroup guidelines-channels
+
+
+\section guidelines-channels-intro Problem statement
+
+
+Sometimes, pixels have vector values.
+The most common example is RGB images, where each pixel is made of red, green, and blue components.
+There are at least three obvious ways to store the data of such an image:
+- With a dedicated pixel structure, say `Rgb`, and where pixel values are of type `Rgb`;
+- By using the first axis to encode the color, i.e. axis 0 is the color channel, axis 1 is X and axis 2 is Y;
+- By using the last axis to encode the color, i.e. axis 0 is X, axis 1 is Y, and axis 2 is the color channel.
+
+Depending on what has to be done with the data, different strategies should be chosen.
+
+
+\section guidelines-channels-struct With a dedicated color structure
+
+
+We can define a simple structure like so:
+
+\snippet RasterDemoChannels.cpp Rgb struct
+
+If the three channels are always used together, this is the good approach because values will be stored contiguously in memory,
+i.e. `raster[1].r` will be stored immediately after `raster[0].b`.
+There is no pointer here, and therefore no indirection, and few cache misses.
+The underlying 1D container will look like: `{r0, g0, b0, r1, g1, b1, ...}`,
+and the raster can be represented this way:
+
+\image html doc/diagrams/raster_ordering_struct.svg
+
+For example, this is a very efficient and user-friendly approach for RGB to HSV conversion.
+Let us see how the code could look like.
+Define some structure for HSV pixels, too:
+
+\snippet RasterDemoChannels.cpp Hsv struct
+
+Instantiate an RGB image:
+
+\snippet RasterDemoChannels.cpp Input Rgb
+
+And apply some function `rgbToHsv()` to each pixel with `Raster::generate()`:
+
+\snippet RasterDemoChannels.cpp Output Hsv
+
+(The conversion function is not showed in this page but available in the demo program.)
+
+
+\section guidelines-channels-along0 With color along the first axis
+
+
+Here is another possible memory layout, using the first axis for the color:
+
+\image html doc/diagrams/raster_ordering_cxy.svg
+
+With this strategy, the RGB and HSV images are 3D:
+
+\snippet RasterDemoChannels.cpp CxyImage
+
+And things get ugly already when filling the input image:
+
+\snippet RasterDemoChannels.cpp Input Cxy
+
+Looping over the input RGB image and output HSV image at the same time is something like:
+
+\snippet RasterDemoChannels.cpp Output Cxy
+
+where this time `rgbToHsv()` operates on `rgbIt[0]`, `rgbIt[1]`, `rgbIt[2]`, `hsvIt[0]`, `hsvIt[1]`, `hsvIt[2]`!
+
+Note that the memory layout in the underlying 1D container is *exactly* the same as with the dedicated structure strategy.
+This is just more cumbersome!
+Does it mean that this strategy should always be avoided?
+Wait for the last section! (Spoiler: No.)
+
+
+\section guidelines-channels-along2 With color along the last axis
+
+
+This strategy is efficient when channels are processed independently most of the time.
+Clearly the RGB-to-HSV use case doesn't fit, so let's take a new one.
+Color images are generally acquired by monochromatic sensors, using beam splitters or filters:
+filter wheels in telescopes, dichroic mirrors in fluorescence microscopy, Bayer filters in cameras...
+With the filter wheel example, say we get an RGB image from three monochromatic images, each taken with a dedicated filter.
+If the filter transmittance characteristics are different, we may want to derive the incoming flux per color in post-processing,
+that is, multiplying the pixel values by the inverse of the transmittance.
+Just for demonstration, let's use a simplistic model,
+where we will multiply the red channel by 1.5, the green channel by 1.1 and the blue channel by 1.8.
+
+The image type will be similar to the previous section:
+
+\snippet RasterDemoChannels.cpp XycImage
+
+But the layout is very different:
+
+\image html doc/diagrams/raster_ordering_xyc.svg
+
+The pixels are organized channel by channel to ensure data contiguity inside each channel.
+The channels can then be viewed as `PtrRaster`s with the `Raster::section()` method:
+
+\snippet RasterDemoChannels.cpp Input Xyc
+
+Operations on each channel are very efficient (vectorized and with minimal cache missing):
+
+\snippet RasterDemoChannels.cpp Output Xyc
+
+Obviously, this approach is not limitted to color channels;
+it is also very convenient to handle video fluxes, where the last axis is time,
+multiscale or multiresolution representations, where the last axis is scale,
+and so on as long as the raster sections are often processed independently.
+
+
+\section guidelines-channels-runtime With runtime-sized vectors along the first axis
+
+
+Sometimes the number of channels, i.e. the size of the vector pixels, is not known at compile time.
+In these cases, the first approach with a pixel structure is not applicable,
+or it would yield an immense amount of indirections.
+For example, while `VecRaster<std::array<double, 42>>` (or any other compile time magic number) would be fine,
+`VecRaster<std::vector<double>>` would be extremely inefficient because each pixel access woul be a jump in memory.
+In this case, the best option to perform pixel-wise operations is to orient the vectors along the first axis.
+
+With the filter wheel example, assume we want to support any number of filters,
+and compute the pixel-wise integrated incoming flux as the weighted sum of the pixel components.
+In this scenario, we have a 3D input and a 2D output:
+
+\snippet RasterDemoChannels.cpp Vector image
+
+Let us set up some dummy input:
+
+\snippet RasterDemoChannels.cpp Input vector
+
+And compute the weighted sum:
+
+\snippet RasterDemoChannels.cpp Output scalar
+
+This technique is very both the most readable, and the most efficient for accumulators in general:
+when possible, it is best to accumulate along the first axis.
+
+*/
+}
