@@ -1,0 +1,36 @@
+namespace Cnes {
+/**
+
+\addtogroup data_classes
+
+
+\section data_classes-intro Class hierarchy overview
+
+
+As presented in \ref basics, the library's main class is `Raster`.
+It is built as a composition of various composites (mixins and base classes), each responsible for a set of features.
+This page presents the different sets, while the design is described in details in \ref design.
+
+A `Raster` object relies on some underlying 1D contiguous container of arbitrary type
+-- raw array, `std::vector`, `std::array`...
+The container is adapded by some data holder, which provides the necessary interface for compatibility with `Raster`.
+This means in particular that it implements a `size()` and a `data()` method.
+This is the only responsibility of the data holder.
+
+The data holder is embedded in a `DataContainer`, which brings the standard container interface
+-- `begin()`, `end()`, `operator[]()`, `operator==()` and co --
+as well as pixel-wise operators like `+`, `-`, `*`, and `/` (see \ref pixelwise).
+
+Finally, `Raster` provides the multidimensional features:
+shape, indexing scheme, views.
+
+A simplified overview is represented in the class diagram below:
+
+\image html doc/diagrams/data_classes.svg
+
+
+\section data_classes-holder Data holder
+
+
+*/
+}

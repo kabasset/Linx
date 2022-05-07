@@ -1,0 +1,47 @@
+@startuml data_classes
+class DataContainerHolder {
+# m_container
++ size()
++ data()
+}
+
+class DataContainer {
++ container()
++ moveTo(container)
+}
+
+class Raster {
+- m_shape
++ shape()
++ domain()
++ dimension()
++ length(axis)
++ operator[](position)
++ at(position)
++ section(front, back)
++ section(index)
+}
+
+class ContiguousContainerMixin {
++ empty()
++ operator[](index)
++ begin()
++ end()
++ operator==()
++ operator!=()
+}
+
+class VectorArithmeticMixin {
++ operator+=(rhs)
++ operator-=(rhs)
++ operator*=(rhs)
++ operator/=(rhs)
++ generate(function, args...)
++ apply(function, args...)
+}
+
+ContiguousContainerMixin <|-- DataContainer
+VectorArithmeticMixin <|-- DataContainer
+DataContainerHolder <|-- DataContainer
+DataContainer <|-- Raster
+@enduml
