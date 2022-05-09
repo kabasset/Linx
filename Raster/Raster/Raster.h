@@ -5,6 +5,7 @@
 #ifndef _RASTER_RASTER_H
 #define _RASTER_RASTER_H
 
+#include "Raster/AlignedBuffer.h" // Requires fftw3.h
 #include "Raster/DataContainer.h"
 #include "Raster/MathFunctions.h"
 #include "Raster/Position.h"
@@ -44,6 +45,13 @@ using PtrRaster = Raster<T, N, DataContainerHolder<T, T*>>;
  */
 template <typename T, Index N = 2>
 using VecRaster = Raster<T, N, DataContainerHolder<T, std::vector<T>>>;
+
+/**
+ * @ingroup data_classes
+ * @brief `Raster` which owns or shares some SIMD-compatible memory.
+ */
+template <typename T, Index N = 2>
+using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
 
 /**
  * @ingroup data_classes
