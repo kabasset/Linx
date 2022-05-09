@@ -34,14 +34,14 @@ class Raster;
 
 /**
  * @ingroup data_classes
- * @brief `Raster` which points to some external data (`THolder` = `T*`).
+ * @brief `Raster` which points to some external data.
  */
 template <typename T, Index N = 2>
 using PtrRaster = Raster<T, N, DataContainerHolder<T, T*>>;
 
 /**
  * @ingroup data_classes
- * @brief `Raster` which owns a data vector (`THolder` = `std::vector<T>`).
+ * @brief `Raster` which owns a data vector.
  */
 template <typename T, Index N = 2>
 using VecRaster = Raster<T, N, DataContainerHolder<T, std::vector<T>>>;
@@ -59,7 +59,7 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
  * 
  * @tparam T The value type, which can be `const`-qualified for read-only rasters
  * @tparam N The dimension, which can be &ge; 0 for fixed dimension, or -1 for variable dimension
- * @tparam THolder The underlying data container type
+ * @tparam THolder The underlying data container holder
  * 
  * @details
  * A raster is a contiguous container for the pixel data of an image.
@@ -95,6 +95,7 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
  * 
  * @tspecialization{PtrRaster}
  * @tspecialization{VecRaster}
+ * @tspecialization{AlignedRaster}
  * 
  * @satisfies{ContiguousContainer}
  * @satisfies{VectorArithmetic}

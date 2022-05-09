@@ -32,5 +32,24 @@ A simplified overview is represented in the class diagram below:
 \section data_classes-holder Data holder
 
 
+\section data_classes-flavors Raster flavors
+
+
+The library comes with three specializations of `Raster` by through the implementation of dedicated data holders:
+
+- `PtrRaster<T, N>` is a `Raster<T, N, T*>`, which means that the data is accessed via a raw pointer.
+  It is a non-owning container: no allocation or free is made; a `PtrRaster`'s memory is managed externally.
+  This is the type which is preferred to represent contiguous views, e.g. with `Raster::section()`.
+- `VecRaster<T, N>` is a `Raster<T, N, DataContainerHolder<std::vector<T>>>`, i.e. the underlying container is a `std::vector`.
+  It is convenient to interface with the standard library or other tools which work with `std::vector`s without copies,
+  because `std::vector` itself cannot be initialized without copies from an external pointer.
+- `AlignedRaster<T, N>` is a `Raster<T, N, AlignedBuffer<T>>`,
+  where `AlignedBuffer<T>` is a wrapper of `T*` which may or not manage memory,
+  but at least ensures that memory is correctly aligned for SIM instructions (generally, 16-byte aligned):
+  - If the `AlignedRaster` is constructed from a size only, then some memory will be allocated,
+    which will be aligned accoding to the compilation platform to ensure smooth usage of SIMD instructions;
+  - If it is constructed from a non-null pointer, it will act as a `PtrRaster`, i.e. not allocate or free memory,
+    but will verify that the memory is well aligned (or throw an exception otherwise).
+
 */
 }
