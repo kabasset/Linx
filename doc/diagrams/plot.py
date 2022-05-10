@@ -11,6 +11,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('input', type=str, help='Input CSV')
     parser.add_argument('output', type=str, nargs='?', help='Output plot')
+    parser.add_argument('--log', default=False, action='store_true', help='Set log scale')
+    parser.add_argument('--values', default=False, action='store_true', help='Display values')
     args = parser.parse_args()
 
     df = pd.read_csv(args.input, sep='\t')
@@ -24,8 +26,12 @@ if __name__ == '__main__':
         x, hue, y = df.columns
         ax = sns.barplot(data=df, x=x, hue=hue, y=y)
 
-    for i in ax.containers:
-        ax.bar_label(i,)
+    if args.log:
+        ax.set_yscale('log')
+
+    if args.values:
+        for i in ax.containers:
+            ax.bar_label(i,)
 
     if args.output is None:
         plt.show()
