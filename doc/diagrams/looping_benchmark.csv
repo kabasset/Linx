@@ -1,0 +1,16 @@
+Test case	Implementation	Walltime (ms)
+position	naive	582
+position	final	575
+position	inline	291
+position	inline + final	291
+position	CRTP	262
+index	naive	429
+index	final	416
+index	inline	55
+index	inline + final	52
+index	CRTP	52
+value	naive	26
+value	final	27
+value	inline	35
+value	inline + final	35
+value	CRTP	27
