@@ -48,6 +48,11 @@
 \brief How to organize your data with non-scalar pixels?
 \example RasterDemoChannels_test.cpp
 
+\defgroup looping_benchmark Looping strategies
+\ingroup guidelines
+\brief How to loop over the pixels efficiently
+\example RasterBenchmarkLoops.cpp
+
 \defgroup design Library design
 \brief Design documentation for developers and advanced users.
 
