@@ -86,10 +86,225 @@ Here are a few intermediate take home messages:
 \section looping_benchmark-test_cases Benchmark test cases
 
 
-\section looping_benchmark-old_results Benchmark intermediate results
+The benchmark consists in computing the pixel-wise sum `c` of two rasters `a` and `b`: `c = a + b`.
+
+Several test cases are implemented:
+
+\code
+// x-y-z loop
+void loopOverXyz() {
+  for (long x = 0; x < width; ++x)
+    for (long y = 0; y < height; ++y)
+      for (long z = 0; z < depth; ++z)
+        c[{x, y, z}] = a[{x, y, z}] + b[{x, y, z}];
+}
+
+// z-y-x loop
+void loopOverZyx() {
+  for (long z = 0; z < depth; ++z)
+    for (long y = 0; y < height; ++y)
+      for (long x = 0; x < width; ++x)
+        c[{x, y, z}] = a[{x, y, z}] + b[{x, y, z}];
+}
+
+// position iterator
+void loopOverPositions() {
+  for (const auto& p : c.domain())
+    c[p] = a[p] + b[p];
+}
+
+// index loop
+void loopOverIndices() {
+  for (long i = 0; i < c.size(); ++i)
+    c[i] = a[i] + b[i];
+}
+
+// value iterator
+void loopOverValues() {
+  auto ait = a.data();
+  auto bit = b.data();
+  const auto begin = c.data();
+  const auto end = begin + c.size();
+  for (auto cit = begin; cit != end; ++cit, ++ait, ++bit)
+    *cit = *ait + *bit;
+}
+\endcode
 
 
-\section looping_benchmark-results Updated benchmark results
+\section looping_benchmark-old_results Benchmark results before refactoring
+
+
+The benchmark was written and executed for the first time before a major refactoring of the library.
+Let us comment on the results obtained at that time, because the main messages are still valid,
+and this will be the starting point of the next section.
+Here are the estimated walltimes for each test case:
+
+\image html doc/diagrams/looping_benchmark_naive.svg
+
+TODO
+
+Given the results, here are some pros and cons:
+- Value iterator:
+  - Verbose,
+  - Can only loop over contiguous pixels;
+- Index loop:
+  - Less verbose,
+  - Introduces virtual functions and indirections (more on this later);
+- Position iterator:
+  - Clearer,
+  - Can loop over any region, e.g. `for (const auto& p : region)`;
+- Z-x-y loop:
+  - Easy to parallelize,
+  - Introduces temporary objects;
+- X-y-z loop:
+  - Never do this!
+
+Now, in order to better understand the root of the differences,
+we have used a simulator (namely Callgrind) to estimage the clock cycle distribution
+with the following parameters:
+
+<table class="fieldtable">
+<tr><td>Instructions per clock cycle<td>7
+<tr><td>Clock cycles per cache miss<td>150
+<tr><td>Clock cycles per cache hit<td>5
+<tr><td>Clock cycles per branch<td>5
+<tr><td>Clock cycles per mispredict<td>15
+<tr><td>MIPS<td>2216
+<tr><td>Cache line (B)<td>64
+<tr><td>Cache (MB)<td>8
+<tr><td>Frequency (MHz)<td>317
+</table>
+
+Here is the output:
+
+\image html doc/diagrams/looping_benchmark_callgrind.svg
+
+The simulation is not perfect, but we can still visualize some effects we anticipated.
+
+TODO
+
+
+\section looping_benchmark-results Benchmark results after refactoring
+
+
+Following the above findings, the library underwent a major design change,
+which made `VecRaster` and the likes template specializations of `Raster`
+instead of child classes of it.
+This was done in several steps which we will describe.
+
+The main motivation for investigating and optimizing further was the huge factor between
+index loop and value iterator test cases.
+Indeed, simple loops such as:
+
+\code
+  for (long i = 0; i < c.size(); ++i)
+    c[i] = a[i] + b[i];
+\endcode
+
+are generally thought to be inlined and vectorized by the compiler,
+which make them exactly equivalent to the value iterator version.
+Yet, the index loop is fifteen times slower.
+The explanation is that the compiler does not manage to inline and devirtualize correctly,
+For this to be clear, we have to show how the library was designed before refactoring,
+and more specifically how the `Raster::operator[]()` was implemented.
+Here is a simplified view:
+
+\code
+class Raster {
+
+public:
+
+  char& operator[](long index) {
+    return *(data() + index);
+  }
+
+  char* data() { // Non-virtual interface idiom
+    return dataImpl();
+  }
+
+private:
+
+  virtual char* dataImpl() = 0; // Pure virtual
+
+};
+
+class VecRaster : public Raster { // Inheritance
+
+private:
+
+  std::vector<char> m_vec;
+
+  char* dataImpl() override { // Virtual function
+    return m_vec.data();
+  }
+
+};
+\endcode
+
+Now, one call to `VecRaster::operator[]()` is:
+- One call to non-virtual function `data()`:
+  - 15-30 cycles;
+  - Question: Is it / can it be inlined?
+  - What can we do? Add inlining hint (keyword `inline` is just a hint to be taken into account -- or not -- by the compiler);
+- One call to virtual function `dataImpl()`
+  - 30-60 cycles;
+  - Question: Is it / can it be devirtualized?
+  - What can we do? Make the method `final` to help devirtualizing.
+
+Here is the updated code:
+
+\code
+class Raster {
+
+public:
+
+  inline char& operator[](long index) { // Inline
+    return *(data() + index);
+  }
+
+  inline char* data() { // Inline
+    return dataImpl();
+  }
+
+private:
+
+  virtual char* dataImpl() = 0;
+
+};
+
+class VecRaster : public Raster {
+
+private:
+
+  std::vector<char> m_vec;
+
+  char* dataImpl() final { // Final
+    return m_vec.data();
+  }
+
+};
+\endcode
+
+The `inline` keyword helps the compiler identifying the hot code lines,
+which will be inlined in priority.
+The `final` keyword tells the compiler that the virtual table is a singleton,
+and helps it bypassing any indirection related to the virtuality,
+if the usage context allows (which is the case in our benchmark).
+
+Combining those two minor changes helped a lot.
+Here are the outputs, with a spoiler!
+
+\image html doc/diagrams/looping_benchmark.svg
+
+Quick analysis before we introduce this CRTP stuff:
+- Making `dataImpl()` `final` sped up just a bit:
+  compiler must have been doing a pretty good job at devirtualizing already;
+- Suggesting inlining sped up spectacularly!!!
+  The compiler probably decided not to inline those functions by itself,
+  but the inlining hint is enough to make the compiler change its mind.
+
+Now the elephant in the room... CRTP.
+
 
 */
 }
