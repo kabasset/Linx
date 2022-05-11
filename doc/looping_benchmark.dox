@@ -158,5 +158,21 @@ here sorted from fastest to slowest:
 - X-y-z loop:
   - Never do this!
 
+To go further, note that the value iterator method is what is implemented
+in the various pixel-wise operations provided by the library (see \ref pixelwise),
+which wipes out the verbosity con most of the time.
+There are several ways of using value iterators with simpler syntax, e.g. for addition:
+
+\code
+c = a + b;
+\endcode
+
+Or if the operation is more complex than a mere addition (even arbitrarily complex),
+relying on `Raster::generate()` or `Raster::apply()`:
+
+\code
+c.generate([](auto e, auto f) { return e + f; }, a, b);
+\endcode
+
 */
 }
