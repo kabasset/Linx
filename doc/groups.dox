@@ -58,7 +58,11 @@
 
 \defgroup mixins Mixins
 \ingroup design
-\brief Usage of mixins and CRTP to decorate classes. 
+\brief Usage of mixins and CRTP to decorate classes.
+
+\defgroup crtp_refactoring Refactoring
+\ingroup design
+\brief What lead to the current implementation.
 
 \defgroup concepts Concepts
 \ingroup design

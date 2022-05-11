@@ -1,0 +1,175 @@
+namespace Cnes {
+/**
+
+\addtogroup crtp_refactoring
+
+
+\section crtp_refactoring-before Status before refactoring
+
+
+The benchmark presented in \ref looping_benchmark
+was written and executed for the first time before a major refactoring of the library,
+which is the subject of this page.
+Let us comment on the results obtained at that time,
+because they are the starting point of the refactoring.
+Here were the estimated walltimes for each test case before refactoring:
+
+\image html doc/diagrams/looping_benchmark_naive.svg
+
+Now, in order to better understand the root of the differences,
+we have used a simulator (namely Callgrind) to estimage the clock cycle distribution,
+with the following parameters:
+
+<table class="fieldtable">
+<tr><td>Instructions per clock cycle<td>7
+<tr><td>Clock cycles per cache miss<td>150
+<tr><td>Clock cycles per cache hit<td>5
+<tr><td>Clock cycles per right branch<td>5
+<tr><td>Clock cycles per mispredict<td>15
+<tr><td>Millions of instructions per second<td>2216
+<tr><td>Cache line (B)<td>64
+<tr><td>Cache (MB)<td>8
+<tr><td>Frequency (MHz)<td>317
+</table>
+
+Here is the output:
+
+\image html doc/diagrams/looping_benchmark_callgrind.svg
+
+The simulation is not perfect, but we can still visualize some effects we anticipated.
+
+TODO
+
+Following the above findings, the library underwent a major design change,
+which made `VecRaster` and the likes template specializations of `Raster`
+instead of child classes of it.
+This was done in two steps which are described in the next sections.
+
+
+\section crtp_refactoring-final_inline Local refactoring
+
+
+The main motivation for investigating and optimizing further
+was the huge factor between index loop and value iterator test cases.
+Indeed, simple loops such as:
+
+\code
+  for (long i = 0; i < c.size(); ++i)
+    c[i] = a[i] + b[i];
+\endcode
+
+are generally thought to be inlined and vectorized by the compiler,
+which make them exactly equivalent to the value iterator version.
+Yet, the index loop is fifteen times slower.
+The explanation is that the compiler does not manage to inline and/or devirtualize correctly,
+as showed by the huge difference of number of instructions in the simulation
+between the two test cases.
+For this to be clear, we have to show how the library was designed before refactoring,
+and more specifically how the `Raster::operator[]()` was implemented.
+Here is a simplified view:
+
+\code
+class Raster {
+
+public:
+
+  char& operator[](long index) {
+    return *(data() + index);
+  }
+
+  char* data() { // Non-virtual interface idiom
+    return dataImpl();
+  }
+
+private:
+
+  virtual char* dataImpl() = 0; // Pure virtual
+
+};
+
+class VecRaster : public Raster { // Inheritance
+
+private:
+
+  std::vector<char> m_vec;
+
+  char* dataImpl() override { // Virtual function
+    return m_vec.data();
+  }
+
+};
+\endcode
+
+Without compiler optimizations, one call to `VecRaster::operator[]()` is:
+- One call to non-virtual function `data()`:
+  - 15-30 cycles;
+  - Question: Is it and can it be inlined?
+  - What can we do? Add inlining hint (keyword `inline` is just a hint to be taken into account -- or not -- by the compiler);
+- One call to virtual function `dataImpl()`
+  - 30-60 cycles;
+  - Question: Is it and can it be devirtualized?
+  - What can we do? Make the method `final` to help devirtualizing.
+
+Here is the updated code:
+
+\code
+class Raster {
+
+public:
+
+  inline char& operator[](long index) { // Inline
+    return *(data() + index);
+  }
+
+  inline char* data() { // Inline
+    return dataImpl();
+  }
+
+private:
+
+  virtual char* dataImpl() = 0;
+
+};
+
+class VecRaster : public Raster {
+
+private:
+
+  std::vector<char> m_vec;
+
+  char* dataImpl() final { // Final
+    return m_vec.data();
+  }
+
+};
+\endcode
+
+The `inline` keyword helps the compiler identifying the _hot_ code lines
+(the ones which are executed the most frequently),
+which will be inlined in priority.
+The `final` keyword tells the compiler that the virtual table is a singleton,
+and helps it bypassing any indirection related to the virtuality,
+if the usage context allows (which is the case in our benchmark).
+
+Combining those two minor changes (three words) drammatically reduced the walltimes
+of the index loop and position iterator test cases.
+Here are the outputs, with a spoiler!
+
+\image html doc/diagrams/looping_benchmark_summary.svg
+
+A finer analysis showed that:
+- Making `dataImpl()` `final` sped up just a bit,
+  i.e. the compiler must have been doing a pretty good job at devirtualizing already;
+- Suggesting inlining sped up spectacularly!
+  The compiler probably decided not to inline those functions by itself,
+  but the inlining hint is enough to make the compiler change its mind.
+
+
+\section crtp_refactoring-major CRTP refactoring
+
+
+TODO
+
+
+*/
+}
