@@ -1,4 +1,4 @@
-Implementation	Test case	Cycles
+Cost item	Test case	Cycles
 Instructions	x-y-z	658651949
 Cache misses	x-y-z	19200000750
 Cache hits	x-y-z	11521604020
