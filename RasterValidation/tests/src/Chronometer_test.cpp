@@ -21,24 +21,21 @@
  *
  */
 
+#include "RasterValidation/Chronometer.h"
+
 #include <boost/test/unit_test.hpp>
 
-#include "RasterPrograms/Chronometer.h"
+//-----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_SUITE(Chronometer_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE (Chronometer_test)
-
-//-----------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE( example_test ) {
+BOOST_AUTO_TEST_CASE(example_test) {
 
   BOOST_FAIL("!!!! Please implement your tests !!!!");
-
 }
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE_END ()
-
-
+BOOST_AUTO_TEST_SUITE_END()

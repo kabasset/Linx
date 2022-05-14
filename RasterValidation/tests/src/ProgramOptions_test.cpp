@@ -2,7 +2,7 @@
 // This file is part of Cnes.Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "RasterPrograms/ProgramOptions.h"
+#include "RasterValidation/ProgramOptions.h"
 
 #include <boost/test/unit_test.hpp>
 

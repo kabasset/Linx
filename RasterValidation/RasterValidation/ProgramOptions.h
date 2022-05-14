@@ -2,8 +2,8 @@
 // This file is part of Cnes.Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTERPROGRAMS_PROGRAMOPTIONS_H
-#define _RASTERPROGRAMS_PROGRAMOPTIONS_H
+#ifndef _RASTERVALIDATION_PROGRAMOPTIONS_H
+#define _RASTERVALIDATION_PROGRAMOPTIONS_H
 
 #include <boost/program_options.hpp>
 #include <sstream>
@@ -178,4 +178,4 @@ private:
 
 } // namespace Cnes
 
-#endif // _RASTERPROGRAMS_PROGRAMOPTIONS_H
+#endif // _RASTERVALIDATION_PROGRAMOPTIONS_H

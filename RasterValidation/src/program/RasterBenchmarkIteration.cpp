@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "ElementsKernel/ProgramHeaders.h"
-#include "RasterPrograms/IterationBenchmark.h"
-#include "RasterPrograms/ProgramOptions.h"
+#include "RasterValidation/IterationBenchmark.h"
+#include "RasterValidation/ProgramOptions.h"
 
 #include <map>
 #include <string>

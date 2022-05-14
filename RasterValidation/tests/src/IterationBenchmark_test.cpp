@@ -21,24 +21,21 @@
  *
  */
 
+#include "RasterValidation/IterationBenchmark.h"
+
 #include <boost/test/unit_test.hpp>
 
-#include "RasterPrograms/IterationBenchmark.h"
+//-----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_SUITE(IterationBenchmark_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE (IterationBenchmark_test)
-
-//-----------------------------------------------------------------------------
-
-BOOST_AUTO_TEST_CASE( example_test ) {
+BOOST_AUTO_TEST_CASE(example_test) {
 
   BOOST_FAIL("!!!! Please implement your tests !!!!");
-
 }
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE_END ()
-
-
+BOOST_AUTO_TEST_SUITE_END()

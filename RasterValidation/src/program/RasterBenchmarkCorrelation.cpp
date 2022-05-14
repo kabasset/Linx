@@ -4,7 +4,7 @@
 
 #include "ElementsKernel/ProgramHeaders.h"
 #include "RasterFilter/Kernel1d.h"
-#include "RasterPrograms/ProgramOptions.h"
+#include "RasterValidation/ProgramOptions.h"
 
 #include <map>
 #include <string>

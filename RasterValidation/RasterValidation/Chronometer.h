@@ -2,8 +2,8 @@
 // This file is part of Cnes.Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTERPROGRAMS_CHRONOMETER_H
-#define _RASTERPROGRAMS_CHRONOMETER_H
+#ifndef _RASTERVALIDATION_CHRONOMETER_H
+#define _RASTERVALIDATION_CHRONOMETER_H
 
 #include <algorithm> // accumulate, min_element, max_element
 #include <chrono>
@@ -166,4 +166,4 @@ private:
 
 } // namespace Cnes
 
-#endif // _RASTERPROGRAMS_CHRONOMETER_H
+#endif // _RASTERVALIDATION_CHRONOMETER_H

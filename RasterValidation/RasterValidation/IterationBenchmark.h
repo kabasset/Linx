@@ -2,11 +2,11 @@
 // This file is part of Cnes.Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTERPROGRAMS_ITERATIONBENCHMARK_H
-#define _RASTERPROGRAMS_ITERATIONBENCHMARK_H
+#ifndef _RASTERVALIDATION_ITERATIONBENCHMARK_H
+#define _RASTERVALIDATION_ITERATIONBENCHMARK_H
 
 #include "Raster/TestRaster.h"
-#include "RasterPrograms/Chronometer.h"
+#include "RasterValidation/Chronometer.h"
 
 namespace Cnes {
 
@@ -83,4 +83,4 @@ private:
 
 } // namespace Cnes
 
-#endif // _RASTERPROGRAMS_ITERATIONBENCHMARK_H
+#endif // _RASTERVALIDATION_ITERATIONBENCHMARK_H

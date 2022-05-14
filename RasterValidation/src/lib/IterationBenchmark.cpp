@@ -21,7 +21,7 @@
  *
  */
 
-#include "RasterPrograms/IterationBenchmark.h"
+#include "RasterValidation/IterationBenchmark.h"
 
 namespace Cnes {
 
