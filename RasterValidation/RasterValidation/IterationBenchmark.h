@@ -71,10 +71,10 @@ public:
    */
   Duration callGenerate();
 
-private:
-  const long m_width;
-  const long m_height;
-  const long m_depth;
+protected:
+  const Index m_width;
+  const Index m_height;
+  const Index m_depth;
   const Test::RandomRaster<Value, Dim> m_a;
   const Test::RandomRaster<Value, Dim> m_b;
   VecRaster<Value, Dim> m_c;
