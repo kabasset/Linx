@@ -2,13 +2,13 @@
 // This file is part of Cnes.Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "Raster/TestRaster.h"
+#include "Raster/Stats.h"
 
 #include <boost/test/unit_test.hpp>
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(TestRaster_test)
+BOOST_AUTO_TEST_SUITE(Stats_test)
 
 //-----------------------------------------------------------------------------
 
