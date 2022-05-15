@@ -89,58 +89,75 @@ Here are a few intermediate take home messages:
 \section looping_benchmark-test_cases Benchmark test cases
 
 
-The benchmark consists in computing the pixel-wise sum `c` of two 3D rasters `a` and `b`: `c = a + b`.
-Several test cases are implemented:
+The benchmark consists in computing the pixel-wise sum `m_c` of two 3D rasters `m_a` and `m_b`
+of shape `{m_width, m_height, m_depth}`.
+The following test cases are implemented and will be compared hereafter:
 
 \snippet IterationBenchmark.cpp x-y-z
 \snippet IterationBenchmark.cpp z-y-x
 \snippet IterationBenchmark.cpp position
 \snippet IterationBenchmark.cpp index
 \snippet IterationBenchmark.cpp value
-\snippet IterationBenchmark.cpp operator
 \snippet IterationBenchmark.cpp generate
+\snippet IterationBenchmark.cpp operator
 
 
 \section looping_benchmark-results Benchmark results
 
 
-TODO
+The shapes of the rasters are set to 400³ and the value type to `char`.
+The benchmark consists in running 10 times each test case and comparing the minimum walltimes.
+Absolute values are not relevant, only the relative deviations will be analyzed.
 
 \image html doc/diagrams/looping_benchmark_crtp.svg
 
-Given the above results, we can extract some pros and cons for each method,
-here sorted from fastest to slowest:
-- Value iterator:
-  - Verbose,
-  - Can only loop over contiguous pixels;
-- Index loop:
-  - Less verbose,
-  - Introduces virtual functions and indirections (more on this later);
-- Z-x-y loop:
-  - Clearer,
-  - Easy to parallelize,
-  - Can loop over any region, e.g. `for (const auto& p : region)`;
-  - Introduces temporary objects;
-- Position iterator:
-  - Valid for any dimension (looping over a 6D array with the previous option would be ugly);
-- X-y-z loop:
-  - Never do this!
+As ploted above, there are very significant discrepancies,
+with one striking difference between the "x-y-z" and "z-y-x" cases.
+Although they perform _exactly_ the same instructions on the same data, order is different.
+In the first case, steps in the innermost loop are not contiguous in memory,
+which results in many cache misses.
+In the second case, the pixels are visited perfectly in order,
+which minimizes cache misses.
+There is no basic use case in which the "x-y-z" should be preferred.
 
-To go further, note that the value iterator method is what is implemented
-in the various pixel-wise operations provided by the library (see \ref pixelwise),
-which wipes out the verbosity con most of the time.
-There are several ways of using value iterators with simpler syntax, e.g. for addition:
+Test case "position" is very close to "z-y-x" in the way it operates on the pixels:
+they are visited in order, and the approach can be extended to rectangle regions easily.
+Where "position" shines is when dimension is very high (having many nested loops should generally be avoided)
+or when dimension is not even known at compile-time, in which case the approach of "z-y-x" is not applicable.
+By contrast, "z-y-x" is easily parallelized
+while "position" parallelization would require a manual partition of the iteration region.
 
-\code
-c = a + b;
-\endcode
+The remaining test cases have in common the drawback that the knowledge of the position is lost
+(there is no cheap way to get the position from the index).
+While this is not relevant in the benchmark use case,
+there might be situations in which the position is used in the evaluation of each pixel value.
 
-Or if the operation is more complex than a mere addition (even arbitrarily complex),
-relying on `Raster::generate()` or `Raster::apply()`:
+Looping over indices is as efficient in terms of cache hits as the "z-y-x" and "position" cases.
+Yet, iteration is much cheaper because the index is not computed from some formula at each iteration step:
+it is simply incremeted.
+Still, there are better approaches.
 
-\code
-c.generate([](auto e, auto f) { return e + f; }, a, b);
-\endcode
+The value iterator is a fast option, and one which generalizes to more complex case, e.g. with strided iterators.
+It could even be extended to region-wise loops.
+This comes at the cost of verbosity and loss of clarity in the code.
+Something which can be avoided through the use of `Raster::generate()`.
+Indeed, "generate" compiles exactly the same way as "value",
+thanks to the use of template metaprogramming under the hood.
+
+TODO "operator"
+
+<table class="fieldtable">
+<tr><th>Test case<th>Run-time dimension<th>Region-wise iteration<th>Access to position<th>Character count<th>Use when...
+<tr><th>x-y-z<td>No<td>Yes<td>Yes<td>127<td>Never! (Reverse loops order.)
+<tr><th>z-y-x<td>No<td>Yes<td>Yes<td>127<td>Looping over regions of dimension known at compile-time.
+<tr><th>position<td>Yes<td>Yes<td>Yes<td>52<td>Looping over regions of dimension known at run-time.
+<tr><th>index<td>Yes<td>No<td>No<td>78<td>Never! (Prefer value iterator or operators.)
+<tr><th>value<td>Yes<td>No<td>No<td>152<td>`Raster::generate()` does not fit.
+<tr><th>generate<td>Yes<td>No<td>No<td>50<td>Whenever possible.
+<tr><th>operator<td>Yes<td>No<td>No<td>12<td>Speed is less important than readability.
+</table>
+
+TODO conclusion
 
 */
 }
