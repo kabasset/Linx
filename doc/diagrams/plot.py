@@ -3,9 +3,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
-colors = ['#ff0000', '#ffff00', '#80d41a', '#404893', '#800080']
-sns.set_palette(sns.color_palette(colors))
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
