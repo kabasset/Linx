@@ -13,7 +13,6 @@ IterationBenchmark::IterationBenchmark(Index side) :
 IterationBenchmark::Duration IterationBenchmark::loopOverXyz() {
   m_chrono.start();
   //! [x-y-z]
-  // Loop over X, Y, Z
   for (Index x = 0; x < m_width; ++x) {
     for (Index y = 0; y < m_height; ++y) {
       for (Index z = 0; z < m_depth; ++z) {
@@ -28,7 +27,6 @@ IterationBenchmark::Duration IterationBenchmark::loopOverXyz() {
 IterationBenchmark::Duration IterationBenchmark::loopOverZyx() {
   m_chrono.start();
   //! [z-y-x]
-  // Loop over Z, Y, X
   for (Index z = 0; z < m_depth; ++z) {
     for (Index y = 0; y < m_height; ++y) {
       for (Index x = 0; x < m_width; ++x) {
@@ -43,7 +41,6 @@ IterationBenchmark::Duration IterationBenchmark::loopOverZyx() {
 IterationBenchmark::Duration IterationBenchmark::iterateOverPositions() {
   m_chrono.start();
   //! [position]
-  // Iterate over positions
   for (const auto& p : m_c.domain()) {
     m_c[p] = m_a[p] + m_b[p];
   }
@@ -54,7 +51,6 @@ IterationBenchmark::Duration IterationBenchmark::iterateOverPositions() {
 IterationBenchmark::Duration IterationBenchmark::iterateOverPositionsOptimized() {
   m_chrono.start();
   //! [position-index]
-  // Iterate over positions
   for (const auto& p : m_c.domain()) {
     const auto i = m_c.index(p);
     m_c[i] = m_a[i] + m_b[i];
@@ -66,7 +62,6 @@ IterationBenchmark::Duration IterationBenchmark::iterateOverPositionsOptimized()
 IterationBenchmark::Duration IterationBenchmark::loopOverIndices() {
   m_chrono.start();
   //! [index]
-  // Loop over indices
   const auto size = m_c.size();
   for (std::size_t i = 0; i < size; ++i) {
     m_c[i] = m_a[i] + m_b[i];
@@ -78,7 +73,6 @@ IterationBenchmark::Duration IterationBenchmark::loopOverIndices() {
 IterationBenchmark::Duration IterationBenchmark::iterateOverValues() {
   m_chrono.start();
   //! [value]
-  // Iterate over values
   auto ait = m_a.begin();
   auto bit = m_b.begin();
   const auto begin = m_c.begin();
@@ -93,7 +87,6 @@ IterationBenchmark::Duration IterationBenchmark::iterateOverValues() {
 IterationBenchmark::Duration IterationBenchmark::callOperator() {
   m_chrono.start();
   //! [operator]
-  // Call builtin operator
   m_c = m_a + m_b;
   //! [operator]
   return m_chrono.stop();
@@ -102,7 +95,6 @@ IterationBenchmark::Duration IterationBenchmark::callOperator() {
 IterationBenchmark::Duration IterationBenchmark::callGenerate() {
   m_chrono.start();
   //! [generate]
-  // Call Raster::generate()
   m_c.generate(
       [](auto e, auto f) {
         return e + f;

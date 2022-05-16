@@ -4,114 +4,49 @@ namespace Cnes {
 \addtogroup looping_benchmark
 
 
-\section looping_benchmark-model Simplistic computer model
+\section looping_benchmark-intro Introduction
 
 
-Here is a simplistic computer model.
-If you already know clock cycles, pipelining and cache misses, please skip this section.
+In this page, we compare different ways of looping over raster pixels.
+Walltimes are measured, and pros and cons of each method are outlined.
+Finally, guidelines are proposed to select the best approach for various use cases.
 
-The CPU executes instructions on some input data to produce output data, e.g. `c = a + b`.
-Data (and instructions) come from memory: disk, RAM, cache(s).
-Processing a single instruction really consists in:
-- Fetching data from memory,
-- Decoding the instruction,
-- Executing it,
-- Reading or writing in registers,
-- Writing output data to memory.
+The benchmark is run as program `RasterBenchmarkIteration`.
+Check the `--help` option for details.
 
-Each of the steps takes one CPU clock cycle.
-A cycle is the unit of measuremet of time, a clock tick, e.g. from which the CPU frequency is derived.
-
-Modern CPUs implement two models of parallelism -- instruction parallelism and data parallelism:
-- _Single instruction, multiple data (SIMD)_, or _vectorization_,
-  is a set of technologies (SSE, SSE2, SSE3, AVX, AVX2, AVX512...)
-  to exectue the same instructions on several inputs at once.
-  SIMD code is generated either by the compiler or by gurus!
-- _Pipelining_ is the concept of starting to fetch instruction 2
-  while instruction 1 is being decoded, and so on (see table below);
-  this results in the CPU being processing several instructions per cycle.
-
-<table class="fieldtable">
-<tr><th>Instruction<th>Cycle 1<th>Cycle 2<th>Cycle 3<th>Cycle 4<th>Cycle 5
-<tr><td>1<td>Fetch<td>Decode<td>Execute<td>Memory<td>Write
-<tr><td>2<td><td>Fetch<td>Decode<td>Execute<td>Memory
-<tr><td>3<td><td><td>Fetch<td>Decode<td>Execute
-<tr><td>4<td><td><td><td>Fetch<td>Decode
-</table>
-
-Before reaching the CPU, data passes from RAM to _cache_.
-Here is how a cache works:
-- If the needed byte is in CPU cache, use it;
-- Else, copy it from RAM to cache.
-
-Actually, there are several levels of cache (L1, L2, L3);
-the closer to the CPU, the smaller and faster.
-
-Writing to cache is _extremely_ slow, of the order of hundreds of cycles.
-Using pipelining, a cache write can be up to a thousand times slower than an instruction.
-That is a _cache miss_.
-To mitigate this, caches are organized in lines, which are consecutive bytes.
-When you need byte 42, the CPU caches bytes 43 to 105, too, just in case you'd need them later.
-Then, accessing byte 43 is not a cache miss anymore.
-This is why ensuring contiguity of pixels is of paramount importance.
-
-Here is an overly simplified example to get orders of magnitude:
-- `c = a + b;`
-  - 1 instruction = 1 clock cycle (could be several instructions but you get the idea)
-  - 3 cache misses = 600 clock cycles
-  - = 602 clock cycles
-- `for (int i = 0; i<64; ++i) { c[i] = a[i] + b[i]; }`
-  - Accessing c[0] loads c[0] to c[63] in memory (one cache line)
-  - 64 vectorized instructions = 8 clock cycles
-  - 3 cache misses = 600 clock cycles
-  - = 608 clock cycles <1% slower
-
-Conclusion: The more instructions per cache miss, the better.
-
-One of the key components for benefitting from parallelisms is the compiler,
-which does an enormous amount of transforms to produce optimized instructions from code, like:
-- Auto-inilining to avoid short functions = less sub-functions = better instruction locality;
-- Intermediate variable generation = less recomputations + less memory accesses;
-- Subscripting bypass = convert `operator[]()` into iterators;
-- Vectorization = unroll loops to create SIMD instructions;
-- Devirtualization of functions = bypass vtable of overriding function...
-
-Here are a few intermediate take home messages:
-- Cache misses are unavoidable -- each input data must be loaded at least once
-- Cache misses are amazingly expensive -- 1 cache miss ~ 1000 instructions
-- High-level optimization = minimize operations (algorithm, saves orders of magnitude)
-- Mid-level optimization = minimize instructions per operation (implementation, saves factors)
-- Low-level optimization = minimize cache misses per instruction (saves percents)
-  - E.g. organize memory for expected computation
-  - E.g. do everything you can with data already in cache
-
-
-\section looping_benchmark-test_cases Benchmark test cases
+\section looping_benchmark-test_cases Test cases
 
 
 The benchmark consists in computing the pixel-wise sum `m_c` of two 3D rasters `m_a` and `m_b`
 of shape `{m_width, m_height, m_depth}`.
 The following test cases are implemented and will be compared hereafter:
 
-\snippet IterationBenchmark.cpp x-y-z
-\snippet IterationBenchmark.cpp z-y-x
-\snippet IterationBenchmark.cpp position
-\snippet IterationBenchmark.cpp index
-\snippet IterationBenchmark.cpp value
-\snippet IterationBenchmark.cpp generate
-\snippet IterationBenchmark.cpp operator
+- Use nested loops over axes, where X is the outermost loop (hereafter referred to as "x-y-z" test case):
+  \snippet IterationBenchmark.cpp x-y-z
+- Same as "x-y-z" with inverted loops ("z-y-x"):
+  \snippet IterationBenchmark.cpp z-y-x
+- Iterate over positions ("position"):
+  \snippet IterationBenchmark.cpp position
+- Loop over indices ("index"):
+  \snippet IterationBenchmark.cpp index
+- Iterate over pixel values ("value"):
+  \snippet IterationBenchmark.cpp value
+- Use `Raster::generate()` ("generate"):
+  \snippet IterationBenchmark.cpp generate
+- Use builtin operator `Raster::operator+()` ("operator"):
+  \snippet IterationBenchmark.cpp operator
 
 Note that in the position-based test cases ("x-y-z", "z-y-x" and "position"),
-a simple optimization could be implemented by computing the index once instead of three times,
+a simple optimization can be implemented by computing the index once instead of three times,
 since the three rasters have the same shape:
 
 \snippet IterationBenchmark.cpp position-index
 
-Overall results and conclusions are not much impacted, and test cases are clearer and more flexible this way,
+Overall results and conclusions are not much impacted, and test cases are clearer and more flexible without optimization,
 which is why the simpler version is used instead.
 
 
-\section looping_benchmark-results Benchmark results
+\section looping_benchmark-results Results and analysis
 
 
 The shapes of the rasters are set to 400³ and the value type to `char`.
@@ -153,20 +88,39 @@ Something which can be avoided through the use of `Raster::generate()`.
 Indeed, "generate" compiles exactly the same way as "value",
 thanks to the use of template metaprogramming under the hood.
 
-TODO "operator"
+Case "operator" is appealing in terms of readability.
+Performance _seems_ comparable to other options in such a simple benchmark,
+but this generalizes badly, and "generate" is preferrable in most situations.
+Indeed, something like `m_c = m_a * m_a + m_b * m_b` loops three times over the rasters,
+and produces intermediate objects, where:
+
+\code
+  m_c.generate(
+      [](auto e, auto f) {
+        return e * e + f * f;
+      },
+      m_a,
+      m_b);
+  );
+\endcode
+
+performs only one loop without a single temporary raster.
+Solutions exist to avoid such pitfalls, like the expression templates used in XTensor or Eigen.
+They are not part of Cnes.Raster, because they would add burden on the library
+and could not match the "generate" performance anyway.
+
+Results and a few guidelines are summarized in the following table.
 
 <table class="fieldtable">
 <tr><th>Test case<th>Run-time dimension<th>Region-wise iteration<th>Access to position<th>Character count<th>Use when...
-<tr><th>x-y-z<td>No<td>Yes<td>Yes<td>127<td>Never! (Reverse loops order.)
-<tr><th>z-y-x<td>No<td>Yes<td>Yes<td>127<td>Looping over regions of dimension known at compile-time.
-<tr><th>position<td>Yes<td>Yes<td>Yes<td>52<td>Looping over regions of dimension known at run-time.
-<tr><th>index<td>Yes<td>No<td>No<td>78<td>Never! (Prefer value iterator or operators.)
-<tr><th>value<td>Yes<td>No<td>No<td>152<td>`Raster::generate()` does not fit.
-<tr><th>generate<td>Yes<td>No<td>No<td>50<td>Whenever possible.
-<tr><th>operator<td>Yes<td>No<td>No<td>12<td>Speed is less important than readability.
+<tr><td>x-y-z<td>No<td>Yes<td>Yes<td>127<td>Never! (Reverse loops order.)
+<tr><td>z-y-x<td>No<td>Yes<td>Yes<td>127<td>Looping over regions of dimension known at compile-time.
+<tr><td>position<td>Yes<td>Yes<td>Yes<td>52<td>Looping over regions of dimension known at run-time.
+<tr><td>index<td>Yes<td>No<td>No<td>78<td>Never! (Prefer value iterator or operators.)
+<tr><td>value<td>Yes<td>No<td>No<td>152<td>`Raster::generate()` does not fit.
+<tr><td>generate<td>Yes<td>No<td>No<td>50<td>Whenever possible.
+<tr><td>operator<td>Yes<td>No<td>No<td>12<td>Speed is less important than readability.
 </table>
-
-TODO conclusion
 
 */
 }

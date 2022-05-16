@@ -51,7 +51,7 @@
 \defgroup looping_benchmark Looping strategies
 \ingroup guidelines
 \brief How to loop over the pixels efficiently
-\example RasterBenchmarkLoops.cpp
+\example IterationBenchmark.cpp
 
 \defgroup design Library design
 \brief Design documentation for developers and advanced users.
