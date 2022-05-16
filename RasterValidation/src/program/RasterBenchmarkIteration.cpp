@@ -19,11 +19,13 @@ Cnes::IterationBenchmark::Duration iterate(Cnes::IterationBenchmark& benchmark, 
       return benchmark.loopOverZyx();
     case 'p':
       return benchmark.iterateOverPositions();
+    case 'q':
+      return benchmark.iterateOverPositionsOptimized();
     case 'i':
       return benchmark.loopOverIndices();
     case 'v':
       return benchmark.iterateOverValues();
-    case '+':
+    case 'o':
       return benchmark.callOperator();
     case 'g':
       return benchmark.callGenerate();
@@ -37,7 +39,10 @@ class RasterBenchmarkIteration : public Elements::Program {
 public:
   std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
     Cnes::ProgramOptions options;
-    options.named<char>("setup", "Test setup to be benchmarked (x, z, p, i, v)");
+    options.named<char>(
+        "case",
+        "Initial of the test case to be benchmarked: "
+        "x (x-y-z), z (z-y-x), p (position), i (index), v (value), o (operator), g (generate)");
     options.named<long>("side", "Image width, height and depth (same value)", 400);
     return options.asPair();
   }
@@ -48,7 +53,7 @@ public:
     Cnes::IterationBenchmark benchmark(args["side"].as<long>());
 
     logger.info("Iterating over them...");
-    const auto duration = iterate(benchmark, args["setup"].as<char>());
+    const auto duration = iterate(benchmark, args["case"].as<char>());
 
     logger.info() << "Done in " << duration.count() << "ms";
 

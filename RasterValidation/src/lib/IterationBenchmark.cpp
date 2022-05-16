@@ -32,7 +32,7 @@ IterationBenchmark::Duration IterationBenchmark::loopOverZyx() {
   for (Index z = 0; z < m_depth; ++z) {
     for (Index y = 0; y < m_height; ++y) {
       for (Index x = 0; x < m_width; ++x) {
-        m_c[{x, y, z}] = m_a[{x, y, z}] + m_b[{x, y, z}]; // FIXME precompute index once
+        m_c[{x, y, z}] = m_a[{x, y, z}] + m_b[{x, y, z}];
       }
     }
   }
@@ -45,9 +45,21 @@ IterationBenchmark::Duration IterationBenchmark::iterateOverPositions() {
   //! [position]
   // Iterate over positions
   for (const auto& p : m_c.domain()) {
-    m_c[p] = m_a[p] + m_b[p]; // FIXME precompute index once
+    m_c[p] = m_a[p] + m_b[p];
   }
   //! [position]
+  return m_chrono.stop();
+}
+
+IterationBenchmark::Duration IterationBenchmark::iterateOverPositionsOptimized() {
+  m_chrono.start();
+  //! [position-index]
+  // Iterate over positions
+  for (const auto& p : m_c.domain()) {
+    const auto i = m_c.index(p);
+    m_c[i] = m_a[i] + m_b[i];
+  }
+  //! [position-index]
   return m_chrono.stop();
 }
 

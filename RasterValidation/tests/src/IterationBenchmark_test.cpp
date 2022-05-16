@@ -46,6 +46,11 @@ BOOST_AUTO_TEST_CASE(position_test) {
   validate();
 }
 
+BOOST_AUTO_TEST_CASE(position_optimized_test) {
+  iterateOverPositionsOptimized();
+  validate();
+}
+
 BOOST_AUTO_TEST_CASE(index_test) {
   loopOverIndices();
   validate();

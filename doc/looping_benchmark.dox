@@ -101,6 +101,15 @@ The following test cases are implemented and will be compared hereafter:
 \snippet IterationBenchmark.cpp generate
 \snippet IterationBenchmark.cpp operator
 
+Note that in the position-based test cases ("x-y-z", "z-y-x" and "position"),
+a simple optimization could be implemented by computing the index once instead of three times,
+since the three rasters have the same shape:
+
+\snippet IterationBenchmark.cpp position-index
+
+Overall results and conclusions are not much impacted, and test cases are clearer and more flexible this way,
+which is why the simpler version is used instead.
+
 
 \section looping_benchmark-results Benchmark results
 

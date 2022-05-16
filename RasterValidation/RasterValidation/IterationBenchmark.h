@@ -52,6 +52,11 @@ public:
   Duration iterateOverPositions();
 
   /**
+   * @brief Loop over positions via a position iterator and factorized index computation.
+   */
+  Duration iterateOverPositionsOptimized();
+
+  /**
    * @brief Loop over indices.
    */
   Duration loopOverIndices();
