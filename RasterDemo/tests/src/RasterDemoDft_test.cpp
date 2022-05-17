@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_SUITE(RasterDemoDft_test)
 BOOST_AUTO_TEST_CASE(filter_test) {
 
   //! [Plan direct]
-  Cnes::RealDft direct({640, 480});
+  Cnes::RealDft<3> direct({640, 480, 3});
   //! [Plan direct]
   std::cout << "Input buffer after planning: " << direct.in()[0] << std::endl;
   std::cout << "Output buffer after planning: " << direct.out()[0] << std::endl;
@@ -36,14 +36,16 @@ BOOST_AUTO_TEST_CASE(filter_test) {
   //! [Fill signal]
 
   //! [Transfer function]
-  Cnes::ComplexDftBuffer transfer(direct.outShape());
+  Cnes::ComplexDftBuffer<3> transfer(direct.outShape());
   std::fill(transfer.begin(), transfer.end(), std::complex<double> {2., 3.});
   //! [Transfer function]
 
   //! [Direct transform]
   direct.transform();
   // Transformed data is in direct.out(), direct.in() is garbage now
-  direct.out() *= transfer;
+  std::transform(transfer.begin(), transfer.end(), direct.out().begin(), direct.out().begin(), [](auto e, auto f) {
+    return e * f;
+  }); // FIXME direct.out() *= transfer;
   // Filtered data is in direct.out()
   //! [Direct transform]
 

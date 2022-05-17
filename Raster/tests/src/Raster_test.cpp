@@ -64,6 +64,29 @@ BOOST_AUTO_TEST_CASE(const_vecraster_data_test) {
   BOOST_TEST(cVecRaster[{0}] == 0);
 }
 
+BOOST_AUTO_TEST_CASE(alignedraster_owned_and_shared_test) {
+  constexpr Index width = 3;
+  constexpr Index height = 4;
+  constexpr Index size = width * height;
+  AlignedRaster<double> owner({width, height});
+  BOOST_TEST(owner.size() == size);
+  const AlignedRaster<double> sharer({width, height}, owner.data());
+  BOOST_TEST(not sharer.owns());
+  BOOST_TEST(sharer.size() == size);
+  BOOST_TEST(sharer.data() == owner.data());
+  AlignedRaster<const double> observer({width, height}, owner.data());
+  BOOST_TEST(observer.size() == size);
+  BOOST_TEST(observer.data() == owner.data());
+  for (auto& v : owner) {
+    v = 0;
+  }
+  for (const auto& p : owner.domain()) {
+    BOOST_TEST(owner[p] == 0);
+    BOOST_TEST(sharer[p] == 0);
+    BOOST_TEST(observer[p] == 0);
+  }
+}
+
 BOOST_AUTO_TEST_CASE(variable_dimension_raster_size_test) {
   const Index width = 4;
   const Index height = 3;

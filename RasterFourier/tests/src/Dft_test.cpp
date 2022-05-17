@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(dft_r2c_c2c_ic2c_ir2c_test) {
   const Position<2> halfShape {halfWidth, height};
 
   // Make r2c
-  RealDft real({width, height});
+  RealDft<2> real({width, height});
   BOOST_TEST(real.in().shape() == shape);
   BOOST_TEST(real.in().owns());
   BOOST_TEST(real.in().data() != nullptr);
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(dft_r2c_c2c_ic2c_ir2c_test) {
   BOOST_TEST(inverseReal.out().data() == real.in().data());
 
   // Make c2c
-  auto complex = real.template compose<ComplexDft>(real.outShape());
+  auto complex = real.template compose<ComplexDft<2>>(real.outShape());
   BOOST_TEST(complex.in().shape() == halfShape);
   BOOST_TEST(not complex.in().owns());
   BOOST_TEST(complex.in().data() == real.out().data());

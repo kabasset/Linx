@@ -7,9 +7,38 @@
 
 #include "RasterTypes/Exceptions.h"
 
-#include <fftw3.h> // fftw_malloc, fftw_free
+#include <fftw3.h> // fftw_malloc, fftw_alignment_of, fftw_free
 
 namespace Cnes {
+
+/// @cond
+namespace Internal {
+
+template <typename T>
+T* alignedAlloc(std::size_t size) {
+  return (T*)fftw_malloc(sizeof(T) * size);
+}
+
+template <typename T>
+bool isAligned(T* data) {
+  return fftw_alignment_of(reinterpret_cast<double*>(data)) == 0;
+}
+
+template <typename T>
+bool isAligned(const T* data) {
+  return isAligned(const_cast<T*>(data)); // FIXME safe?
+}
+
+template <typename T>
+void alignedFree(T* data) {
+  fftw_free(data);
+}
+
+template <typename T>
+void alignedFree(const T*) {}
+
+} // namespace Internal
+/// @endcond
 
 /**
  * @brief Data holder with SIMD-friendly memory.
@@ -35,8 +64,8 @@ public:
    * Check for alignment of `data` otherwise.
    */
   AlignedBuffer(std::size_t size, T* data = nullptr) :
-      m_shared(data), m_size(size), m_container(data ? data : fftw_malloc(sizeof(T) * m_size)) {
-    if (m_shared && fftw_alignment_of(m_container)) {
+      m_shared(data), m_size(size), m_container(data ? data : Internal::alignedAlloc<T>(m_size)) {
+    if (m_shared && not Internal::isAligned(m_container)) {
       throw Exception("Provided data pointer is not correctly aligned."); // FIXME
     }
   }
@@ -83,8 +112,7 @@ public:
    */
   ~AlignedBuffer() {
     if (owns()) {
-      fftw_free(m_container);
-      m_container = nullptr;
+      Internal::alignedFree(m_container);
     }
   }
 

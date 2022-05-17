@@ -21,14 +21,6 @@ namespace Internal {
  */
 using FftwPlanPtr = std::unique_ptr<fftw_plan>;
 
-/**
- * @brief Allocate a plan.
- * @warning
- * This does not instantiate the singleton, as opposed to `FftwAllocator::createPlan()`.
- */
-template <typename TType, typename TIn, typename TOut>
-FftwPlanPtr allocateFftwPlan(TIn& in, TOut& out);
-
 } // namespace Internal
 /// @endcond
 
@@ -75,39 +67,14 @@ public:
   FftwAllocator& operator=(const FftwAllocator&) = delete;
 
   /**
-   * @brief Allocate a buffer's data.
-   * @details
-   * If `data` is not null, then no allocation is performed and the returned buffer points to `data`.
-   */
-  template <typename T>
-  static T* allocateBuffer(const std::size_t& size, T* data = nullptr) {
-    instantiate(); // FIXME is it necessary for buffers?
-    return data ? data : (T*)fftw_malloc(sizeof(T) * size);
-  }
-
-  /**
-   * @brief Free a buffer's data.
-   */
-  template <typename T>
-  static void freeBuffer(T* data) {
-    fftw_free(data);
-  }
-
-  /**
-   * @brief Specialization for constant data (does nothing).
-   */
-  template <typename T>
-  static void freeBuffer(const T*) {}
-
-  /**
    * @brief Create a plan.
    * @warning
    * `in` and `out` are filled with garbage.
    */
-  template <typename TType, typename TIn, typename TOut>
+  template <typename TTransform, typename TIn, typename TOut>
   static Internal::FftwPlanPtr createPlan(TIn& in, TOut& out) {
     instantiate();
-    return Internal::allocateFftwPlan<TType>(in, out);
+    return TTransform::allocateFftwPlan(in, out);
   }
 
   /**

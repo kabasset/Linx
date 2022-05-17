@@ -7,6 +7,6 @@ set(USE_SPHINX OFF
     FORCE)
 
 elements_project(
-    Cnes.Raster 1.0
+    CnesRaster 1.0
     USE Elements 6.0.1
     DESCRIPTION "Yet another ND image processing library")

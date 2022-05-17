@@ -1,4 +1,4 @@
-// Copyright (C) 2022, CNES
+// Copyright (C) N0NN, CNES
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -7,29 +7,46 @@
 
 #include "RasterFourier/DftPlan.h"
 
+#include <complex>
+
 namespace Cnes {
 
-/**
- * @brief Inverse type of a `DftType`.
- */
-template <typename TType>
-struct Inverse; // Forward declaration for DftType
+template <Index N = 2>
+using RealDftBuffer = AlignedRaster<double, N>;
+template <Index N = 2>
+using ComplexDftBuffer = AlignedRaster<std::complex<double>, N>;
+
+/// @cond
+namespace Internal {
+
+template <typename TRaster>
+std::vector<int> fftwShape(const TRaster& raster) {
+  std::vector<int> out(raster.shape().begin(), raster.shape().end());
+  std::reverse(out.begin(), out.end());
+  return out;
+}
 
 /**
- * @brief Base DFT type to be inherited.
+ * @brief Inverse of a `DftTransformMixin`.
  */
-template <typename TType, typename TIn, typename TOut>
-struct DftType {
+template <typename TTransform>
+struct Inverse; // Forward declaration for DftTransformMixin
+
+/**
+ * @brief Base DFT transform to be inherited.
+ */
+template <typename TIn, typename TOut, typename TDerived>
+struct DftTransformMixin {
 
   /**
-   * @brief The parent `DftType` class.
+   * @brief The parent `DftTransformMixin` class.
    */
-  using Parent = DftType;
+  using Base = DftTransformMixin;
 
   /**
-   * @brief The type tag.
+   * @brief The concrete transform.
    */
-  using Type = TType;
+  using Transform = TDerived;
 
   /**
    * @brief The input value type.
@@ -44,13 +61,14 @@ struct DftType {
   /**
    * @brief The tag of the inverse transform type.
    */
-  using InverseType = Inverse<TType>;
+  using InverseTransform = Inverse<Transform>;
 
   /**
    * @brief Input buffer shape.
    * @param shape The logical shape
    */
-  static Position<2> inShape(const Position<2>& shape) {
+  template <Index N>
+  static Position<N> inShape(const Position<N>& shape) {
     return shape;
   }
 
@@ -58,142 +76,128 @@ struct DftType {
    * @brief Output buffer shape.
    * @param shape The logical shape
    */
-  static Position<2> outShape(const Position<2>& shape) {
+  template <Index N>
+  static Position<N> outShape(const Position<N>& shape) {
     return shape;
   }
+
+  template <Index N>
+  static FftwPlanPtr allocateFftwPlan(AlignedRaster<TIn, N>& in, AlignedRaster<TOut, N>& out);
 };
 
 /**
- * @brief Specialization for inverse types.
+ * @brief Specialization for inverse transforms.
  */
-template <typename TType, typename TIn, typename TOut>
-struct DftType<Inverse<TType>, TIn, TOut> {
+template <typename TTransform, typename TIn, typename TOut>
+struct DftTransformMixin<TIn, TOut, Inverse<TTransform>> {
 
-  using Parent = DftType;
-  using Type = Inverse<TType>;
+  using Base = DftTransformMixin;
+  using Transform = Inverse<TTransform>;
   using InValue = TOut;
   using OutValue = TIn;
-  using InverseType = TType;
+  using InverseTransform = TTransform;
 
-  static Position<2> inShape(const Position<2>& shape) {
-    return DftType<TType, TIn, TOut>::outShape(shape);
+  template <Index N>
+  static Position<N> inShape(const Position<N>& shape) {
+    return DftTransformMixin<TIn, TOut, TTransform>::outShape(shape);
   }
 
-  static Position<2> outShape(const Position<2>& shape) {
-    return DftType<TType, TIn, TOut>::inShape(shape);
+  template <Index N>
+  static Position<N> outShape(const Position<N>& shape) {
+    return DftTransformMixin<TIn, TOut, TTransform>::inShape(shape);
   }
+
+  template <Index N>
+  static FftwPlanPtr allocateFftwPlan(AlignedRaster<TOut, N>& in, AlignedRaster<TIn, N>& out);
 };
 
-template <typename TType>
-struct Inverse : DftType<Inverse<TType>, typename TType::InValue, typename TType::OutValue> {};
+template <typename TTransform>
+struct Inverse : DftTransformMixin<typename TTransform::InValue, typename TTransform::OutValue, Inverse<TTransform>> {};
 
 /**
  * @brief Real DFT type.
  */
-struct RealDftType;
-struct RealDftType : DftType<RealDftType, double, std::complex<double>> {};
+struct RealDftTransform;
+struct RealDftTransform : DftTransformMixin<double, std::complex<double>, RealDftTransform> {};
+
 template <>
-Position<2> RealDftType::Parent::outShape(const Position<2>& shape);
+template <Index N>
+Position<N> RealDftTransform::Base::outShape(const Position<N>& shape) {
+  auto out = shape;
+  out[0] = out[0] / 2 + 1;
+  return out;
+}
+
+template <>
+template <Index N>
+FftwPlanPtr RealDftTransform::Base::allocateFftwPlan(RealDftBuffer<N>& in, ComplexDftBuffer<N>& out) {
+  auto shape = fftwShape(in);
+  return std::make_unique<fftw_plan>(fftw_plan_dft_r2c(
+      shape.size(),
+      shape.data(),
+      reinterpret_cast<double*>(in.data()),
+      reinterpret_cast<fftw_complex*>(out.data()),
+      FFTW_MEASURE));
+}
+
+template <>
+template <Index N>
+FftwPlanPtr Inverse<RealDftTransform>::Base::allocateFftwPlan(ComplexDftBuffer<N>& in, RealDftBuffer<N>& out) {
+  auto shape = fftwShape(out);
+  return std::make_unique<fftw_plan>(fftw_plan_dft_c2r(
+      shape.size(),
+      shape.data(),
+      reinterpret_cast<fftw_complex*>(in.data()),
+      reinterpret_cast<double*>(out.data()),
+      FFTW_MEASURE));
+}
 
 /**
  * @brief Complex DFT type.
  */
-struct ComplexDftType;
-struct ComplexDftType : DftType<ComplexDftType, std::complex<double>, std::complex<double>> {};
+struct ComplexDftTransform;
+struct ComplexDftTransform : DftTransformMixin<std::complex<double>, std::complex<double>, ComplexDftTransform> {};
 
-/**
- * @brief Complex DFT type with Hermitian symmertry.
- */
-struct HermitianComplexDftType;
-struct HermitianComplexDftType : DftType<HermitianComplexDftType, std::complex<double>, std::complex<double>> {};
 template <>
-Position<2> HermitianComplexDftType::Parent::inShape(const Position<2>& shape);
+template <Index N>
+FftwPlanPtr ComplexDftTransform::Base::allocateFftwPlan(ComplexDftBuffer<N>& in, ComplexDftBuffer<N>& out) {
+  auto shape = fftwShape(in);
+  return std::make_unique<fftw_plan>(fftw_plan_dft(
+      shape.size(),
+      shape.data(),
+      reinterpret_cast<fftw_complex*>(in.data()),
+      reinterpret_cast<fftw_complex*>(out.data()),
+      FFTW_FORWARD,
+      FFTW_MEASURE));
+}
+
 template <>
-Position<2> HermitianComplexDftType::Parent::outShape(const Position<2>& shape);
-
-/**
- * @brief Real DFT plan.
- */
-using RealDft = DftPlan<RealDftType>;
-
-/**
- * @brief Complex DFT plan.
- */
-using ComplexDft = DftPlan<ComplexDftType>;
-
-/**
- * @brief Complex DFT plan with Hermitian symmetry.
- */
-using HermitianComplexDft = DftPlan<HermitianComplexDftType>;
-
-/// @cond
-namespace Internal {
-
-template <typename TIter>
-void swapRanges(TIter aBegin, TIter aEnd, TIter bBegin) {
-  TIter aIt = aBegin;
-  TIter bIt = bBegin;
-  while (aIt != aEnd) {
-    std::iter_swap(aIt++, bIt++);
-  }
+template <Index N>
+FftwPlanPtr Inverse<ComplexDftTransform>::Base::allocateFftwPlan(ComplexDftBuffer<N>& in, ComplexDftBuffer<N>& out) {
+  auto shape = fftwShape(out);
+  return std::make_unique<fftw_plan>(fftw_plan_dft(
+      shape.size(),
+      shape.data(),
+      reinterpret_cast<fftw_complex*>(in.data()),
+      reinterpret_cast<fftw_complex*>(out.data()),
+      FFTW_BACKWARD,
+      FFTW_MEASURE));
 }
 
 } // namespace Internal
 /// @endcond
 
 /**
- * @brief Swap the quadrants of a raster in place.
+ * @brief Real DFT plan.
  */
-template <typename TRaster>
-TRaster& shiftDft(TRaster& raster) {
-  const auto width = raster.shape()[0];
-  const auto height = raster.shape()[1];
-  if (width % 2 != 0 || height % 2 != 0) {
-    throw std::runtime_error("shiftDft() only works with even sizes as of today.");
-  }
-  const Index halfWidth = raster.shape()[0] / 2;
-  const Index halfHeight = raster.shape()[1] / 2;
-
-  for (Index y = 0; y < halfHeight; ++y) {
-
-    // Swap UL with LR
-    auto ulBegin = &raster[{0, y}];
-    auto ulEnd = ulBegin + halfWidth;
-    auto lrBegin = &raster[{halfWidth, y + halfHeight}];
-    Internal::swapRanges(ulBegin, ulEnd, lrBegin);
-
-    // Swap UR and LL
-    auto urBegin = ulEnd;
-    auto urEnd = urBegin + halfWidth;
-    auto llBegin = &raster[{0, y + halfHeight}];
-    Internal::swapRanges(urBegin, urEnd, llBegin);
-  }
-
-  return raster;
-}
+template <Index N = 2>
+using RealDft = DftPlan<Internal::RealDftTransform, N>;
 
 /**
- * @brief Apply the norm squared to each element of a raster.
+ * @brief Complex DFT plan.
  */
-template <typename TComplexRaster, typename TRealRaster>
-TRealRaster& norm2(const TComplexRaster& input, TRealRaster& output) {
-  output.generate(
-      [](const std::complex<double>& c) {
-        return std::norm(c);
-      },
-      input);
-  return output;
-}
-
-/**
- * @copybrief norm2()
- */
-template <typename TComplexRaster>
-VecRaster<double> norm2(const TComplexRaster& input) {
-  VecRaster<double> output(input.shape());
-  norm2(input, output);
-  return output;
-}
+template <Index N = 2>
+using ComplexDft = DftPlan<Internal::ComplexDftTransform, N>;
 
 } // namespace Cnes
 

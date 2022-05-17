@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "RasterFourier/Dft.h"
-#include "RasterFourier/DftBuffer.h"
 #include "RasterFourier/DftMemory.h"
 
 #include <boost/test/unit_test.hpp>
@@ -17,22 +16,22 @@ BOOST_AUTO_TEST_SUITE(DftMemory_test)
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(allocate_plan_test) {
-  const Position<2> shape {6, 8};
-  const Position<2> halfShape {3, 8};
-  RealDftBuffer rin(shape);
-  RealDftBuffer rout(shape);
-  ComplexDftBuffer cin(shape);
-  ComplexDftBuffer cout(shape);
-  auto rc = FftwAllocator::createPlan<RealDftType>(rin, cout);
+  const Position<3> shape {6, 8, 2};
+  const Position<3> halfShape {3, 8, 2};
+  RealDftBuffer<3> rin(shape);
+  RealDftBuffer<3> rout(shape);
+  ComplexDftBuffer<3> cin(shape);
+  ComplexDftBuffer<3> cout(shape);
+  auto rc = FftwAllocator::createPlan<Internal::RealDftTransform>(rin, cout);
   BOOST_TEST(rc.get() != nullptr);
   FftwAllocator::destroyPlan(rc);
-  auto irc = FftwAllocator::createPlan<Inverse<RealDftType>>(cout, rin);
+  auto irc = FftwAllocator::createPlan<Internal::Inverse<Internal::RealDftTransform>>(cout, rin);
   BOOST_TEST(irc.get() != nullptr);
   FftwAllocator::destroyPlan(irc);
-  auto cc = FftwAllocator::createPlan<ComplexDftType>(cin, cout);
+  auto cc = FftwAllocator::createPlan<Internal::ComplexDftTransform>(cin, cout);
   BOOST_TEST(cc.get() != nullptr);
   FftwAllocator::destroyPlan(cc);
-  auto icc = FftwAllocator::createPlan<Inverse<ComplexDftType>>(cout, cin);
+  auto icc = FftwAllocator::createPlan<Internal::Inverse<Internal::ComplexDftTransform>>(cout, cin);
   BOOST_TEST(icc.get() != nullptr);
   FftwAllocator::destroyPlan(icc);
 }

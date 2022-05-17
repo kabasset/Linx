@@ -5,7 +5,7 @@
 #ifndef _RASTERFOURIER_DFTPLAN_H
 #define _RASTERFOURIER_DFTPLAN_H
 
-#include "RasterFourier/DftBuffer.h"
+#include "Raster/Raster.h"
 #include "RasterFourier/DftMemory.h"
 
 namespace Cnes {
@@ -25,7 +25,6 @@ namespace Cnes {
  * The most classical use case of composition
  * is to call the forward transform and later the inverse transform.
  * To this end, `inverse()` creates an inverse plan with shared buffers (see example below).
- * It is also possible to pipe transforms with `compose()`.
  * 
  * On computation side, the class relies on user-triggered evaluation
  * -- instead of early or lazy evaluations --,
@@ -39,7 +38,7 @@ namespace Cnes {
  * Here is a classical example to perform a convolution in Fourier domain:
  * 
  * \code
- * RealForwardDft dft(shape);
+ * RealDft dft(shape);
  * auto idft = dft.inverse();
  * dft.in() = ... ; // Assign data somehow
  * dft.transform(); // Perform direct transform -- dft.in() = idft.out() is garbage now
@@ -50,42 +49,51 @@ namespace Cnes {
  * ... // Do something with filtered, which contains the convolved signal
  * \endcode
  * 
- * Computation follows FFTW's conventions on formats and scaling, i.e.:
- * - If a buffer has Hermitian symmetry, it is of size `(width / 2 + 1) * height` instead of `width * height`;
- * - None of the transforms are scaled, which means that a factor `width * height` is introduced
- *   by calling `transform()` and then `inverse().transform()` -- `normalize()` performs normalization on request.
+ * Computation follows FFTW's conventions on formats and scaling.
+ * If a buffer has Hermitian symmetry (e.g. the output of a direct real DFT),
+ * the length along the first axis is `length0 / 2 + 1` if `length0` is the logical length along the first axis.
+ * None of the transforms are scaled, which means that a factor is introduced
+ * by calling `transform()` and then `inverse().transform()` -- `normalize()` performs normalization on request.
+ * The factor equals the logical number of elements.
+ * 
+ * @see http://www.fftw.org/fftw3_doc
  */
-template <typename TType>
+template <typename TTransform, Index N = 2>
 class DftPlan {
 
-  template <typename>
+  template <typename UTransform, Index M>
   friend class DftPlan;
 
 public:
   /**
-   * @brief The plan type.
+   * @brief The plan dimension.
    */
-  using Type = TType;
+  static constexpr Index Dim = N;
 
   /**
-   * @brief The inverse plan type.
+   * @brief The kind of transform.
    */
-  using InverseType = typename Type::InverseType;
+  using Transform = TTransform;
+
+  /**
+   * @brief The kind of inverse transform.
+   */
+  using InverseTransform = typename Transform::InverseTransform;
 
   /**
    * @brief The inverse plan.
    */
-  using Inverse = DftPlan<InverseType>;
+  using Inverse = DftPlan<InverseTransform, N>;
 
   /**
    * @brief The input value type.
    */
-  using InValue = typename Type::InValue;
+  using InValue = typename Transform::InValue;
 
   /**
    * @brief The output value type.
    */
-  using OutValue = typename Type::OutValue;
+  using OutValue = typename Transform::OutValue;
 
   /**
    * @brief Constructor.
@@ -93,9 +101,9 @@ public:
    * @param inData The pre-existing input buffer, or `nullptr` to allocate a new one
    * @param outData The pre-existing output buffer, or `nullptr` to allocate a new one
    */
-  DftPlan(Position<2> shape, InValue* inData = nullptr, OutValue* outData = nullptr) :
-      m_shape {shape}, m_in {Type::inShape(m_shape), inData}, m_out {Type::outShape(m_shape), outData},
-      m_plan {FftwAllocator::createPlan<Type>(m_in, m_out)} {}
+  DftPlan(Position<N> shape, InValue* inData = nullptr, OutValue* outData = nullptr) :
+      m_shape {shape}, m_in {Transform::inShape(m_shape), inData}, m_out {Transform::outShape(m_shape), outData},
+      m_plan {FftwAllocator::createPlan<Transform>(m_in, m_out)} {}
 
   DftPlan(const DftPlan&) = default;
   DftPlan(DftPlan&&) = default;
@@ -105,7 +113,7 @@ public:
   /**
    * @brief Destructor.
    * @warning
-   * Buffers are freed.
+   * Buffers are freed if they were allocated by the plan constructor.
    * If data has to outlive the `DftPlan` object, buffers should be copied beforehand.
    */
   ~DftPlan() {
@@ -132,7 +140,7 @@ public:
    * @brief Create a `DftPlan` which shares its input buffer with this `DftPlan`'s output buffer.
    * @details
    * \code
-   * auto planB = planA.compose<ComplexDft>();
+   * auto planB = planA.template compose<ComplexDft>();
    * planA.transform(); // Fills planA.out() = planB.in()
    * planB.transform(); // Fills planB.out()
    * \endcode
@@ -141,21 +149,21 @@ public:
    * which means that the input buffer of the composed plan (`planB`) has the same life cycle.
    */
   template <typename TPlan>
-  TPlan compose(const Position<2>& shape) {
+  TPlan compose(const Position<N>& shape) {
     return {shape, m_out.data(), nullptr};
   }
 
   /**
    * @brief Get the logical plane shape.
    */
-  const Position<2>& logicalShape() const {
+  const Position<N>& logicalShape() const {
     return m_shape;
   }
 
   /**
    * @brief Get the input buffer shape.
    */
-  const Position<2>& inShape() const {
+  const Position<N>& inShape() const {
     return m_in.shape();
   }
 
@@ -164,35 +172,35 @@ public:
    * @warning
    * Contains garbage after `transform()` has been called.
    */
-  const DftBuffer<InValue>& in() const {
+  const AlignedRaster<InValue, N>& in() const {
     return m_in;
   }
 
   /**
    * @copydoc in()
    */
-  DftBuffer<InValue>& in() {
+  AlignedRaster<InValue, N>& in() {
     return m_in;
   }
 
   /**
    * @brief Get the output buffer shape.
    */
-  const Position<2>& outShape() const {
+  const Position<N>& outShape() const {
     return m_out.shape();
   }
 
   /**
    * @brief Access the output buffer.
    */
-  const DftBuffer<OutValue>& out() const {
+  const AlignedRaster<OutValue, N>& out() const {
     return m_out;
   }
 
   /**
    * @copydoc out()
    */
-  DftBuffer<OutValue>& out() {
+  AlignedRaster<OutValue, N>& out() {
     return m_out;
   }
 
@@ -200,7 +208,7 @@ public:
    * @brief Get the normalization factor.
    */
   double normalizationFactor() const {
-    return m_shape[0] * m_shape[1];
+    return shapeSize(m_shape);
   }
 
   /**
@@ -226,17 +234,17 @@ private:
   /**
    * @brief The logical shape.
    */
-  Position<2> m_shape;
+  Position<N> m_shape;
 
   /**
    * @brief The input stack.
    */
-  DftBuffer<InValue> m_in;
+  AlignedRaster<InValue, N> m_in;
 
   /**
    * @brief The output stack.
    */
-  DftBuffer<OutValue> m_out;
+  AlignedRaster<OutValue, N> m_out;
 
   /**
    * @brief The transform plan.
