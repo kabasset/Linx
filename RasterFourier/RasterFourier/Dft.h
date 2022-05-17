@@ -11,14 +11,26 @@
 
 namespace Cnes {
 
+/**
+ * @ingroup dft
+ * @brief DFT buffer of real data.
+ */
 template <Index N = 2>
 using RealDftBuffer = AlignedRaster<double, N>;
+
+/**
+ * @ingroup dft
+ * @brief DFT buffer of complex data.
+ */
 template <Index N = 2>
 using ComplexDftBuffer = AlignedRaster<std::complex<double>, N>;
 
 /// @cond
 namespace Internal {
 
+/**
+ * @brief Convert a raster shape into an FFTW shape.
+ */
 template <typename TRaster>
 std::vector<int> fftwShape(const TRaster& raster) {
   std::vector<int> out(raster.shape().begin(), raster.shape().end());
@@ -188,16 +200,66 @@ FftwPlanPtr Inverse<ComplexDftTransform>::Base::allocateFftwPlan(ComplexDftBuffe
 /// @endcond
 
 /**
+ * @ingroup dft
  * @brief Real DFT plan.
  */
 template <Index N = 2>
 using RealDft = DftPlan<Internal::RealDftTransform, N>;
 
 /**
+ * @ingroup dft
  * @brief Complex DFT plan.
  */
 template <Index N = 2>
 using ComplexDft = DftPlan<Internal::ComplexDftTransform, N>;
+
+/**
+ * @ingroup dft
+ * @brief Compute the complex DFT.
+ */
+template <typename TRaster>
+ComplexDftBuffer<TRaster::Dim> complexDft(const TRaster& in) {
+  ComplexDft<TRaster::Dim> plan(in.shape());
+  std::copy(in.begin(), in.end(), plan.in().begin());
+  plan.transform();
+  return std::move(plan.out());
+}
+
+/**
+ * @ingroup dft
+ * @brief Compute the inverse complex DFT.
+ */
+template <typename TRaster>
+ComplexDftBuffer<TRaster::Dim> inverseComplexDft(const TRaster& in) {
+  typename ComplexDft<TRaster::Dim>::Inverse plan(in.shape());
+  std::copy(in.begin(), in.end(), plan.in().begin());
+  plan.transform().normalize();
+  return std::move(plan.out());
+}
+
+/**
+ * @ingroup dft
+ * @brief Compute the real DFT.
+ */
+template <typename TRaster>
+ComplexDftBuffer<TRaster::Dim> realDft(const TRaster& in) {
+  RealDft<TRaster::Dim> plan(in.shape());
+  std::copy(in.begin(), in.end(), plan.in().begin());
+  plan.transform();
+  return std::move(plan.out());
+}
+
+/**
+ * @ingroup dft
+ * @brief Compute the inverse real DFT.
+ */
+template <typename TRaster>
+RealDftBuffer<TRaster::Dim> inverseRealDft(const TRaster& in, const Position<TRaster::Dim>& shape) {
+  typename RealDft<TRaster::Dim>::Inverse plan(shape);
+  std::copy(in.begin(), in.end(), plan.in().begin());
+  plan.transform().normalize();
+  return std::move(plan.out());
+}
 
 } // namespace Cnes
 

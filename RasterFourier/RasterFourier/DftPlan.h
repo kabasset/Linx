@@ -224,9 +224,7 @@ public:
    */
   DftPlan& normalize() {
     const auto factor = 1. / normalizationFactor();
-    for (auto& c : m_out) {
-      c *= factor;
-    }
+    m_out *= factor;
     return *this;
   }
 

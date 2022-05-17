@@ -4,19 +4,48 @@ namespace Cnes {
 \addtogroup dft
 
 
-\section dft-intro An FFTW wrapper
+\section dft-tldr TL;DR
 
 
-<a href="http://fftw.org/">FFTW</a> is a fast(est) C library to compute a variety of discrete Fourier and related transforms (hereafter denoted DFTs).
-It provides low-level functions to configure, prepare and execute DFTs with a main focus on performance.
+This page presents the advanced usage of the Fourier transforms,
+namely repeated transforms, and parallelization of transforms.
+If only interested in basic use cases, i.e. transform data, do something in Fourier space, and inverse,
+then this is the only secion you have to read!
+
+As an illustrative example, we will compute the derivative of the sine function in Fourier space.
+Given an input sine signal:
+
+\snippet RasterDemoDft_test.cpp Fill vector
+
+We compute the Fourier transform:
+
+\snippet RasterDemoDft_test.cpp realDft
+
+Multiply by `jk` where `k` is the pulse:
+
+\snippet RasterDemoDft_test.cpp Concise derivation
+
+And transform back the data:
+
+\snippet RasterDemoDft_test.cpp inverseRealDft
+
+And that's all!
+
+
+\section dft-fftw An FFTW wrapper
+
+
+<a href="http://fftw.org/">FFTW</a> is a fast(est) C library
+to compute a variety of discrete Fourier and related transforms (hereafter denoted DFTs).
+It provides low-level functions to configure, prepare and execute DFTs with a primary focus on performance.
 Cnes.Raster offers an as-light-as-possible modern C++ wrapper of FFTW with automatic memory management,
 more friendly interfaces, and (obviously) perfect integration with rasters.
 
-Still, the key concept of FFTW hold:
-a so-called plan has to be instanciated prior to a transform.
-It contains two buffers (as a specific type of `Raster`) for input and output data,
+Still, the key concepts of FFTW hold:
+a so-called _plan_ has to be instanciated prior to a transform.
+It contains two buffers (as `AlignedRaster`s) for input and output data,
 and the parametrization of a DFT algorithm which has been selected at instanciation time (more details below),
-during a phase named planning.
+during a phase named _planning_.
 
 Plan instanciation comes with the modification of some global variables and is *not* thread-safe.
 Plan execution is thread-safe, i.e. several plans can be executed in parallel in different threads.
@@ -25,36 +54,52 @@ Plan execution is thread-safe, i.e. several plans can be executed in parallel in
 \section dft-planning Planning
 
 
+Planning is performed at `DftPlan` construction.
+It consists in benchmarking a predefined set of DFT algorithms using the provided input and output buffers.
+The fastest algorithm is selected, and will be used when calling `DftPlan::transform()`.
+After planning, the buffers contain temporary data generated for the benchmark.
+
+`RealDft` and `ComplexDft` respectively provide shortcuts for `DftPlan`s of real and complex rasters.
+Inverse transforms are obtained as `RealDft::Inverse` and `ComplexDft::Inverse` objects.
+
+Like in the first section, we will compute the derivative of the sine function.
+For this purpose, we need a direct 1D DFT of real values, and the associated inverse DFT.
+Let us instantiate a DFT plan of 360 values.
+
 \snippet RasterDemoDft_test.cpp Plan direct
 
-
-\section dft-buffer Input and output buffers
-
-
-\snippet RasterDemoDft_test.cpp Transfer function
-
-
-\section dft-execution Execution
-
-
-\snippet RasterDemoDft_test.cpp Direct transform
-
-
-\section dft-composition Plan inversion and composition
-
-
-Often, it is necessary to perform the inverse transform of a previous direct transform.
-In this case, it is natural to reuse the buffers of the direct transform for inversion.
+In order to perform the inverse transform,
+it is natural (and efficient) to reuse the buffers of the direct transform.
 This can be done manually by creating buffers with shared memory,
 or automatically with `DftPlan::inverse()`,
 which returns an object of appropriate type and with inverted buffers:
 
 \snippet RasterDemoDft_test.cpp Plan inverse
 
+
+\section dft-execution Execution
+
+
+After planning, the buffers may contain garbage values.
+Let us fill the input buffer with a sine signal:
+
+\snippet RasterDemoDft_test.cpp Fill signal
+
+Now, the DFT can be executed:
+
+\snippet RasterDemoDft_test.cpp Direct transform
+
+The derivative is computed in Fourier space as `direct.out() * jk` where `k` is the pulse:
+
+\snippet RasterDemoDft_test.cpp Derivation
+
+And the derived signal is recovered by executing the inverse transform.
+Like with FFTW, the inverse transform is scaled by the size of the logical raster shape.
+It can be normalized with `DftPlan::normalize()`, which acts directly on the output buffer.
+
 \snippet RasterDemoDft_test.cpp Inverse transform
 
-Composition of transforms is also proposed, as `DftPlan::compose()`,
-and left as an exercise!
+Now, `direct.in()` contains the derivative of the initial sine signal, i.e. a cosine signal.
 
 
 \section dft-memory FFTW memory life cycle

@@ -12,49 +12,81 @@ BOOST_AUTO_TEST_SUITE(RasterDemoDft_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(filter_test) {
+BOOST_AUTO_TEST_CASE(verbose_derivative_test) {
 
   //! [Plan direct]
-  Cnes::RealDft<3> direct({640, 480, 3});
+  Cnes::RealDft<1> direct({360});
   //! [Plan direct]
-  std::cout << "Input buffer after planning: " << direct.in()[0] << std::endl;
-  std::cout << "Output buffer after planning: " << direct.out()[0] << std::endl;
 
   //! [Plan inverse]
   auto inverse = direct.inverse();
-  // inverse is of type RealDft::Inverse
-  // inverse.in() is real.out() and inverse.out() is real.in()!
+  // The type of inverse is RealDft<1>::Inverse.
+  // inverse.in() is direct.out() and inverse.out() is direct.in()!
   //! [Plan inverse]
-  std::cout << "Input buffer after inverse planning: " << direct.in()[0] << std::endl;
-  std::cout << "Output buffer after inverse planning: " << direct.out()[0] << std::endl;
 
   //! [Fill signal]
-  auto& signal = direct.in();
-  for (const auto& p : signal.domain()) {
-    signal[p] = 1 + p[0] + p[1];
+  const double dx = std::acos(-1.) / 180;
+  double x = 0;
+  for (auto& e : direct.in()) {
+    e = std::sin(x);
+    x += dx;
   }
   //! [Fill signal]
 
-  //! [Transfer function]
-  Cnes::ComplexDftBuffer<3> transfer(direct.outShape());
-  std::fill(transfer.begin(), transfer.end(), std::complex<double> {2., 3.});
-  //! [Transfer function]
-
   //! [Direct transform]
   direct.transform();
-  // Transformed data is in direct.out(), direct.in() is garbage now
-  std::transform(transfer.begin(), transfer.end(), direct.out().begin(), direct.out().begin(), [](auto e, auto f) {
-    return e * f;
-  }); // FIXME direct.out() *= transfer;
-  // Filtered data is in direct.out()
+  // Transformed data is in direct.out(); direct.in() is garbage now.
   //! [Direct transform]
+
+  //! [Derivation]
+  Cnes::Index k = 0;
+  for (auto& e : direct.out()) {
+    e *= std::complex<double>(0, k);
+    ++k;
+  };
+  //! [Derivation]
 
   //! [Inverse transform]
   inverse.transform().normalize();
-  // Inverse transformed data is in direct.in(), direct.out() is garbage now
+  // Inverse transformed data is in direct.in(); direct.out() is garbage now.
   //! [Inverse transform]
 
-  std::cout << "Input buffer after filtering: " << signal[0] << std::endl;
+  for (Cnes::Index i = 0; i < direct.in().size(); ++i) {
+    BOOST_TEST(std::abs(direct.in()[i] - std::cos(dx * i)) < .001);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(concise_derivative_test) {
+
+  //! [Fill vector]
+  Cnes::VecRaster<double, 1> in({360});
+  const double dx = std::acos(-1.) / 180;
+  double x = 0;
+  for (auto& e : in) {
+    e = std::sin(x);
+    x += dx;
+  }
+  //! [Fill vector]
+
+  //! [realDft]
+  auto out = Cnes::realDft(in);
+  //! [realDft]
+
+  //! [Concise derivation]
+  Cnes::Index k = 0;
+  for (auto& e : out) {
+    e *= std::complex<double>(0, k);
+    ++k;
+  };
+  //! [Concise derivation]
+
+  //! [inverseRealDft]
+  auto inv = Cnes::inverseRealDft(out, {in.size()});
+  //! [inverseRealDft]
+
+  for (Cnes::Index i = 0; i < inv.size(); ++i) {
+    BOOST_TEST(std::abs(inv[i] - std::cos(dx * i)) < .001);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(multithread_test) {
