@@ -10,7 +10,7 @@ namespace Cnes {
 This page presents the advanced usage of the Fourier transforms,
 namely repeated transforms, and parallelization of transforms.
 If only interested in basic use cases, i.e. transform data, do something in Fourier space, and inverse,
-then this is the only secion you have to read!
+then this is the only section you have to read!
 
 As an illustrative example, we will compute the derivative of the sine function in Fourier space.
 Given an input sine signal:
@@ -21,7 +21,7 @@ We compute the Fourier transform:
 
 \snippet RasterDemoDft_test.cpp realDft
 
-Multiply by `jk` where `k` is the pulse:
+Multiply by `jk`:
 
 \snippet RasterDemoDft_test.cpp Concise derivation
 
@@ -89,7 +89,7 @@ Now, the DFT can be executed:
 
 \snippet RasterDemoDft_test.cpp Direct transform
 
-The derivative is computed in Fourier space as `direct.out() * jk` where `k` is the pulse:
+The derivative is computed in Fourier space as `direct.out() * jk`:
 
 \snippet RasterDemoDft_test.cpp Derivation
 
@@ -105,9 +105,15 @@ Now, `direct.in()` contains the derivative of the initial sine signal, i.e. a co
 \section dft-memory FFTW memory life cycle
 
 
+The main motivation to develop this wrapper was automated memory management.
+Indeed, it is very easy to introduce memory leaks when dealing with FFTW resources,
+especially because global objects are being allocated by FFTW under the hood.
+
 Plan and buffer memory is allocated on demand, at instanciation.
 Individual plan variables, and buffers which own data are freed when they go out of scope, like classical objects.
-Yet, global objects allocated at first plan instanciation must be freed, too.
+By contrast, global objects allocated at first plan instanciation,
+and possibly updated at each new plan instanciation,
+must be freed, too, when all DFTs have been completed.
 This is handled by a dedicated mechanism which is automatically triggered at program termination;
 nothing has to be done on user side.
 

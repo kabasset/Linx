@@ -93,6 +93,9 @@ struct DftTransformMixin {
     return shape;
   }
 
+  /**
+   * @brief Allocate an FFTW plan.
+   */
   template <Index N>
   static FftwPlanPtr allocateFftwPlan(AlignedRaster<TIn, N>& in, AlignedRaster<TOut, N>& out);
 };

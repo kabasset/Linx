@@ -46,7 +46,7 @@ And apply some function `rgbToHsv()` to each pixel with `Raster::generate()`:
 
 \snippet RasterDemoChannels_test.cpp Output Hsv
 
-(The conversion function is not showed in this page but available in the demo program.)
+(The conversion function is not showed in this page but available in the demo program: \ref RasterDemoChannels_test.cpp.)
 
 
 \section channels-along0 With color along the first axis
@@ -119,7 +119,7 @@ Sometimes the number of channels, i.e. the size of the vector pixels, is not kno
 In these cases, the first approach with a pixel structure is not applicable,
 or it would yield an immense amount of indirections.
 For example, while `VecRaster<std::array<double, 42>>` (or any other compile time magic number) would be fine,
-`VecRaster<std::vector<double>>` would be extremely inefficient because each pixel access woul be a jump in memory.
+`VecRaster<std::vector<double>>` would be extremely inefficient because each pixel access would be a jump in memory.
 In this case, the best option to perform pixel-wise operations is to orient the vectors along the first axis.
 
 With the filter wheel example, assume we want to support any number of filters,
@@ -136,7 +136,7 @@ And compute the weighted sum:
 
 \snippet RasterDemoChannels_test.cpp Output scalar
 
-This technique is very both the most readable, and the most efficient for accumulators in general:
+This technique is both the most readable, and the most efficient for accumulators in general:
 when possible, it is best to accumulate along the first axis.
 
 */

@@ -1,4 +1,4 @@
-@startuml data_classes
+@startuml
 class DataContainerHolder {
 # m_container
 + size()
@@ -40,8 +40,21 @@ class VectorArithmeticMixin {
 + apply(function, args...)
 }
 
+class MathFunctionsMixin {
++ abs()
++ min(rhs)
++ max(rhs)
++ sin()
++ cos()
++ exp()
++ log()
++ pow(rhs)
++ {method}...
+}
+
 ContiguousContainerMixin <|-- DataContainer
 VectorArithmeticMixin <|-- DataContainer
 DataContainerHolder <|-- DataContainer
 DataContainer <|-- Raster
+MathFunctionsMixin <|-- Raster
 @enduml

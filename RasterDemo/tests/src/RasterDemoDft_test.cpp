@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(verbose_derivative_test) {
   //! [Plan inverse]
 
   //! [Fill signal]
-  const double dx = std::acos(-1.) / 180;
+  const double dx = Cnes::pi<double>() / 180;
   double x = 0;
   for (auto& e : direct.in()) {
     e = std::sin(x);
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(concise_derivative_test) {
 
   //! [Fill vector]
   Cnes::VecRaster<double, 1> in({360});
-  const double dx = std::acos(-1.) / 180;
+  const double dx = Cnes::pi<double>() / 180;
   double x = 0;
   for (auto& e : in) {
     e = std::sin(x);

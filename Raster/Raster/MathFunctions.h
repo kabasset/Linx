@@ -13,6 +13,15 @@
 namespace Cnes {
 
 /**
+ * @brief 3.14
+ */
+template <typename T>
+T pi() {
+  static const T out = std::acos(T(-1));
+  return out;
+}
+
+/**
  * @ingroup mixins
  * @brief Mixin to provide mathematical operations and transforms to a container.
  * @details

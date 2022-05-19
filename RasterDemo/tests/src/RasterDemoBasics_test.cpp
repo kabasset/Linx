@@ -12,7 +12,11 @@ struct MallocContainer {
 
   using Container = T*; // FIXME rm
 
-  MallocContainer(std::size_t size, T* /* unused */) : m_size(size), m_container((T*)malloc(m_size * sizeof(T))) {}
+  MallocContainer(std::size_t s, T* d = nullptr) : m_size(s), m_container((T*)malloc(m_size * sizeof(T))) {
+    if (d) {
+      std::copy_n(d, m_size, m_container);
+    }
+  }
 
   ~MallocContainer() {
     free(m_container);

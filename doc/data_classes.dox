@@ -33,20 +33,17 @@ A simplified overview is represented in the class diagram below:
 
 
 The holder can be any class which satisfies `SizedData` requirements.
-Whatever the container it wraps, it must expose the methods a `Raster` expects,
-namely `size()`, which returns the number of elements,
-and `data()` which returns a pointer to the data.
-Additionally, the holder is constructed from two parameters:
-the size and a pointer to the data.
-
+Whatever the container it wraps, it must expose the methods a `Raster` expects:
+see `SizedData`.
 Users can implement their own holders if those provided (see next section) are not enough.
-Here is a simple example of a custom holder and associated `Raster` specialization:
+Here is a simple example of a custom holder and associated `Raster` specialization
+(see example \ref RasterDemoBasics_test.cpp):
 
 \snippet RasterDemoBasics_test.cpp MallocRaster
 
 Given that `Raster` inherits from the holder,
 methods can be implemented in the holder to be called from the raster.
-For example, the holder of `AlignedRaster` (see below) implements boolean method `owns()`
+For example, the holder of `AlignedRaster` (see next section) implements boolean method `owns()`
 to check whether the data is owned or shared.
 This method can be called from an `AlignedRaster` object:
 
@@ -71,11 +68,11 @@ The library comes with three specializations of `Raster` through the implementat
   because `std::vector` itself cannot be initialized without copies from an external pointer.
 - `AlignedRaster<T, N>` is a `Raster<T, N, AlignedBuffer<T>>`,
   where `AlignedBuffer<T>` is a wrapper of `T*` which may or not manage memory,
-  but at least ensures that memory is correctly aligned for SIM instructions (generally, 16-byte aligned):
+  but at least ensures that memory is correctly aligned for SIMD instructions (generally, 16-byte aligned):
   - If the `AlignedRaster` is constructed from a size only, then some memory will be allocated,
     which will be aligned accoding to the compilation platform to ensure smooth usage of SIMD instructions;
   - If it is constructed from a non-null pointer, it will act as a `PtrRaster`, i.e. not allocate or free memory,
-    but will verify that the memory is well aligned (or throw an exception otherwise).
+    but will verify that the memory is well aligned at construction (or throw an exception otherwise).
 
 `AlignedRaster` is a reasonnable default choice.
 

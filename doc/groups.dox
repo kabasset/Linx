@@ -37,7 +37,7 @@
 \brief Classes to apply interpolation and extrapolation functions.
 
 \defgroup guidelines Development guidelines
-\brief Guidelines, good practices, optimization strategies...
+\brief Guidelines, good practices, optimization strategies.
 
 \defgroup exceptions
 \ingroup guidelines

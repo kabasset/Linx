@@ -32,7 +32,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = @PROJECT_NAME@
+PROJECT_NAME           = Cnes.Raster # @PROJECT_NAME@ does not allow dot
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -2495,7 +2495,7 @@ CALLER_GRAPH           = NO
 # The default value is: YES.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-GRAPHICAL_HIERARCHY    = YES
+GRAPHICAL_HIERARCHY    = NO
 
 # If the DIRECTORY_GRAPH tag is set to YES then doxygen will show the
 # dependencies a directory has on other directories in a graphical way. The

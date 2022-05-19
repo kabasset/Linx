@@ -30,15 +30,16 @@ namespace Cnes {
  * - Constructor from a size and pointer;
  * - `std::size_t size() const`;
  * - `inline const T* data() const`.
+ * 
  * @par_example
  * Here is a minimal `SizedData`-compliant class which wraps a `std::vector`:
  * \code
  * template<typename T>
- * struct MyData {
+ * struct VecSizedData {
  * 
- *   MyData(std::size_t s, T* d) : m_container(s) {
+ *   VecSizedData(std::size_t s, T* d) : m_container(s) {
  *     if (d) {
- *       std::copy_n(d, s, m_container.begin());
+ *       std::copy_n(d, s, m_container.data());
  *     }
  *   }
  * 

@@ -11,7 +11,7 @@
  </defs>
  <defs>
   <font id="EmbeddedFont_1" horiz-adv-x="2048">
-   <font-face font-family="Ubuntu embedded" units-per-em="2048" font-weight="normal" font-style="normal" ascent="1905" descent="397"/>
+   <font-face font-family="sans-serif" units-per-em="2048" font-weight="normal" font-style="normal" ascent="1905" descent="397"/>
    <missing-glyph horiz-adv-x="2048" d="M 0,0 L 2047,0 2047,2047 0,2047 0,0 Z"/>
    <glyph unicode="Y" horiz-adv-x="1218" d="M 514,0 L 514,570 C 420,716 331,860 248,1002 165,1144 86,1283 12,1420 L 246,1420 C 298,1308 356,1194 420,1079 484,963 550,852 619,746 685,852 751,963 815,1079 879,1194 938,1308 991,1420 L 1212,1420 C 1139,1283 1060,1144 977,1003 894,862 806,719 713,574 L 713,0 514,0 Z"/>
    <glyph unicode="X" horiz-adv-x="1245" d="M 1028,0 C 1008,41 983,86 954,136 926,186 894,238 860,292 826,346 791,400 754,454 717,508 681,559 647,606 613,559 578,508 541,454 504,400 469,346 435,292 402,238 370,186 341,136 312,86 287,41 266,0 L 47,0 C 109,120 180,242 261,367 342,491 429,619 520,750 L 66,1420 295,1420 645,891 991,1420 1219,1420 772,758 C 865,626 952,496 1034,371 1116,245 1189,122 1251,0 L 1028,0 Z"/>
@@ -333,13 +333,13 @@
       <g class="com.sun.star.drawing.CustomShape">
        <g id="id29">
         <rect class="BoundingBox" stroke="none" fill="none" x="16510" y="10160" width="2541" height="1271"/>
-        <text class="SVGTextShape"><tspan class="TextParagraph" font-family="Ubuntu" font-size="635px" font-weight="400"><tspan class="TextPosition" x="17583" y="11032"><tspan fill="rgb(0,0,0)" stroke="none">C</tspan></tspan></tspan></text>
+        <text class="SVGTextShape"><tspan class="TextParagraph" font-family="sans-serif" font-size="635px" font-weight="400"><tspan class="TextPosition" x="17583" y="11032"><tspan fill="rgb(0,0,0)" stroke="none">C</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.CustomShape">
        <g id="id30">
         <rect class="BoundingBox" stroke="none" fill="none" x="13970" y="6350" width="2541" height="1271"/>
-        <text class="SVGTextShape"><tspan class="TextParagraph" font-family="Ubuntu" font-size="635px" font-weight="400"><tspan class="TextPosition" x="15039" y="7222"><tspan fill="rgb(0,0,0)" stroke="none">X</tspan></tspan></tspan></text>
+        <text class="SVGTextShape"><tspan class="TextParagraph" font-family="sans-serif" font-size="635px" font-weight="400"><tspan class="TextPosition" x="15039" y="7222"><tspan fill="rgb(0,0,0)" stroke="none">X</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.CustomShape">
@@ -387,7 +387,7 @@
       <g class="com.sun.star.drawing.CustomShape">
        <g id="id36">
         <rect class="BoundingBox" stroke="none" fill="none" x="16002" y="7620" width="2541" height="1271"/>
-        <text class="SVGTextShape"><tspan class="TextParagraph" font-family="Ubuntu" font-size="635px" font-weight="400"><tspan class="TextPosition" x="17082" y="8492"><tspan fill="rgb(0,0,0)" stroke="none">Y</tspan></tspan></tspan></text>
+        <text class="SVGTextShape"><tspan class="TextParagraph" font-family="sans-serif" font-size="635px" font-weight="400"><tspan class="TextPosition" x="17082" y="8492"><tspan fill="rgb(0,0,0)" stroke="none">Y</tspan></tspan></tspan></text>
        </g>
       </g>
       <g class="com.sun.star.drawing.CustomShape">
