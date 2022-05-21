@@ -37,6 +37,8 @@ BOOST_AUTO_TEST_CASE(aligned_alloc_test) {
   auto container = Internal::alignedAlloc<int>(10, nullptr, 16);
   int* p = container.second;
   BOOST_TEST(fftw_alignment_of((double*)p) == 0);
+  BOOST_TEST(Internal::isAligned(p, 16));
+  BOOST_TEST(Internal::alignment(p) % 16 == 0);
   auto view = Internal::alignedAlloc(10, p, 16);
   BOOST_TEST(fftw_alignment_of((double*)view.second) == 0);
   const auto cView = Internal::alignedAlloc<const int>(10, p, 16);
@@ -47,12 +49,15 @@ BOOST_AUTO_TEST_CASE(aligned_alloc_test) {
 }
 
 BOOST_AUTO_TEST_CASE(aligned_buffer_test) {
-  AlignedBuffer<int> buffer(10);
-  BOOST_TEST(fftw_alignment_of((double*)buffer.data()) == 0);
-  AlignedBuffer<int> view(10, const_cast<int*>(buffer.data()));
-  BOOST_TEST(view.data() == buffer.data());
-  AlignedBuffer<const int> cView(10, buffer.data());
-  BOOST_TEST(cView.data() == buffer.data());
+  for (std::size_t as = 16; as <= 1024; as <<= 1) {
+    AlignedBuffer<int> buffer(10, nullptr, as);
+    BOOST_TEST(fftw_alignment_of((double*)buffer.data()) == 0);
+    BOOST_TEST(buffer.alignment() % as == 0);
+    AlignedBuffer<int> view(10, const_cast<int*>(buffer.data()));
+    BOOST_TEST(view.data() == buffer.data());
+    AlignedBuffer<const int> cView(10, buffer.data());
+    BOOST_TEST(cView.data() == buffer.data());
+  }
 }
 
 //-----------------------------------------------------------------------------
