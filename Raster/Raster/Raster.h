@@ -48,7 +48,8 @@ using VecRaster = Raster<T, N, DataContainerHolder<T, std::vector<T>>>;
 
 /**
  * @ingroup data_classes
- * @brief `Raster` which owns or shares some SIMD-compatible memory.
+ * @brief `Raster` which owns or shares some aligned memory.
+ * @see `AlignedBuffer`
  */
 template <typename T, Index N = 2>
 using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;

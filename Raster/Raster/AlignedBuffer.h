@@ -7,7 +7,8 @@
 
 #include "RasterTypes/Exceptions.h"
 
-#include <fftw3.h> // fftw_malloc, fftw_alignment_of, fftw_free
+#include <cstdint> // uintptr_t
+#include <utility> // pair
 
 namespace Cnes {
 
@@ -15,27 +16,49 @@ namespace Cnes {
 namespace Internal {
 
 template <typename T>
-T* alignedAlloc(std::size_t size) {
-  return (T*)fftw_malloc(sizeof(T) * size);
+bool isAligned(const T* data, std::size_t as) {
+  if (not data) {
+    throw Exception("Null pointer tested for alignment.");
+  }
+  if (as == 1) {
+    return true;
+  }
+  return std::uintptr_t(data) % as == 0;
 }
 
 template <typename T>
-bool isAligned(T* data) {
-  return fftw_alignment_of(reinterpret_cast<double*>(data)) == 0;
+std::uintptr_t alignment(const T* data) {
+  if (not data) {
+    throw Exception("Null pointer tested for alignment.");
+  }
+  std::size_t as = 2;
+  while (std::uintptr_t(data) % as == 0) {
+    as <<= 1;
+  }
+  return as >> 1;
 }
 
 template <typename T>
-bool isAligned(const T* data) {
-  return isAligned(const_cast<T*>(data)); // FIXME safe?
+std::pair<void*, T*> alignedAlloc(std::size_t size, T* data, std::size_t as) {
+  if (data) {
+    if (isAligned(data, as)) {
+      return {nullptr, data};
+    }
+    throw Exception("Provided data pointer is not correctly aligned.");
+  }
+  void* p = std::malloc(sizeof(T) * size + as - 1);
+  return {p, reinterpret_cast<T*>((std::uintptr_t(p) + (as - 1)) & ~(as - 1))};
 }
 
 template <typename T>
-void alignedFree(T* data) {
-  fftw_free(data);
+void alignedFree(std::pair<void*, T*>& container) {
+  if (container.first) {
+    std::free(container.first);
+  }
 }
 
 template <typename T>
-void alignedFree(const T*) {}
+void alignedFree(const std::pair<void*, const T*>&) {}
 
 } // namespace Internal
 /// @endcond
@@ -44,9 +67,9 @@ void alignedFree(const T*) {}
  * @brief Data holder with SIMD-friendly memory.
  * @details
  * The data pointer is guaranteed to be aligned in memory
- * according to the available SIMD technology (generally, 16-byte aligned).
+ * according to the alignment requirement (might be better).
  * Data can be either owned by the object, or shared and owned by another object.
- * In the latter case, alignment is tested at construction.
+ * In the latter case, alignment is tested against requirement at construction.
  */
 template <typename T>
 struct AlignedBuffer {
@@ -55,7 +78,7 @@ public:
   /**
    * @brief The concrete container type.
    */
-  using Container = T*;
+  using Container = std::pair<void*, T*>;
 
   /**
    * @brief Constructor.
@@ -63,12 +86,8 @@ public:
    * Allocate some aligned memory if `data = nullptr`.
    * Check for alignment of `data` otherwise.
    */
-  AlignedBuffer(std::size_t size, T* data = nullptr) :
-      m_shared(data), m_size(size), m_container(data ? data : Internal::alignedAlloc<T>(m_size)) {
-    if (m_shared && not Internal::isAligned(m_container)) {
-      throw Exception("Provided data pointer is not correctly aligned."); // FIXME
-    }
-  }
+  AlignedBuffer(std::size_t size, T* data = nullptr, std::size_t align = 16) :
+      m_size(size), m_container(Internal::alignedAlloc(size, data, align)) {}
 
   /**
    * @brief Non-copyable.
@@ -78,11 +97,10 @@ public:
   /**
    * @brief Movable.
    */
-  AlignedBuffer(AlignedBuffer&& other) :
-      m_shared(other.m_shared), m_size(other.m_size), m_container(other.m_container) {
-    other.m_shared = false;
+  AlignedBuffer(AlignedBuffer&& other) : m_size(other.m_size), m_container(other.m_container) {
     other.m_size = 0;
-    other.m_container = nullptr;
+    other.m_container.first = nullptr;
+    other.m_container.second = nullptr;
   }
 
   /**
@@ -95,12 +113,10 @@ public:
    */
   AlignedBuffer& operator=(AlignedBuffer&& other) {
     if (this != &other) {
-      m_shared = other.m_shared;
       m_size = other.m_size;
       m_container = other.m_container;
-      other.m_shared = false;
       other.m_size = 0;
-      other.m_container = nullptr;
+      other.m_container = {nullptr, nullptr};
     }
     return *this;
   }
@@ -111,9 +127,7 @@ public:
    * Frees memory if needed.
    */
   ~AlignedBuffer() {
-    if (owns()) {
-      Internal::alignedFree(m_container);
-    }
+    Internal::alignedFree(m_container);
   }
 
   /**
@@ -127,7 +141,7 @@ public:
    * @brief Get the data pointer.
    */
   const T* data() const {
-    return m_container;
+    return m_container.second;
   }
 
   /**
@@ -137,24 +151,26 @@ public:
    * or if it is empty, e.g. was owned but has been moved.
    */
   bool owns() const {
-    return m_container && not m_shared;
+    return m_container.first;
+  }
+
+  /**
+   * @brief Get the actual data alignment, which may be better than required.
+   */
+  std::uintptr_t alignment() const {
+    return Internal::alignment(m_container.second);
   }
 
 protected:
-  /**
-   * @brief Is the data shared?
-   */
-  bool m_shared;
-
   /**
    * @brief The data size.
    */
   std::size_t m_size;
 
   /**
-   * @brief The data pointer.
+   * @brief The unaligned container.
    */
-  T* m_container;
+  std::pair<void*, T*> m_container;
 };
 
 } // namespace Cnes
