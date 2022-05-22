@@ -32,8 +32,8 @@ BOOST_AUTO_TEST_CASE(index_test) {
       fixedPos[0] + fixedShape[0] * (fixedPos[1] + fixedShape[1] * (fixedPos[2] + fixedShape[2] * (fixedPos[3]))));
 
   /* Variable dimension */
-  Position<-1> variableShape(fixedShape.begin(), fixedShape.end());
-  Position<-1> variablePos(fixedPos.begin(), fixedPos.end());
+  Position<-1> variableShape(fixedShape);
+  Position<-1> variablePos(fixedPos);
   auto variableIndex = Internal::IndexRecursionImpl<-1>::index(variableShape, variablePos);
   BOOST_TEST(variableIndex == fixedIndex);
 }
@@ -85,6 +85,15 @@ BOOST_AUTO_TEST_CASE(alignedraster_owned_and_shared_test) {
     BOOST_TEST(sharer[p] == 0);
     BOOST_TEST(observer[p] == 0);
   }
+}
+
+BOOST_AUTO_TEST_CASE(alignedraster_alignment_test) {
+  constexpr Index width = 3;
+  constexpr Index height = 4;
+  AlignedRaster<int> aligned({width, height});
+  BOOST_TEST(aligned.alignment() % 16 == 0);
+  AlignedRaster<int> raw({width, height}, aligned.data() + 1, 1);
+  BOOST_TEST(raw.alignment() == sizeof(int));
 }
 
 BOOST_AUTO_TEST_CASE(variable_dimension_raster_size_test) {

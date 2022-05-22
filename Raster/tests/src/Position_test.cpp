@@ -18,11 +18,11 @@ BOOST_AUTO_TEST_CASE(vector_init_test) {
 
   const std::vector<Index> indices {1, 2, 3};
 
-  Position<-1> braceList {indices[0], indices[1], indices[2]};
-  BOOST_TEST(braceList.size() == indices.size());
+  Position<-1> list {indices[0], indices[1], indices[2]};
+  BOOST_TEST(list.size() == indices.size());
 
-  Position<-1> iterators(indices.begin(), indices.end());
-  BOOST_TEST(iterators.size() == indices.size());
+  Position<-1> iterable(indices);
+  BOOST_TEST(iterable.size() == indices.size());
 
   Position<-1> dimension(indices.size());
   for (std::size_t i = 0; i < indices.size(); ++i) {
@@ -30,8 +30,8 @@ BOOST_AUTO_TEST_CASE(vector_init_test) {
   }
 
   for (std::size_t i = 0; i < indices.size(); ++i) {
-    BOOST_TEST(braceList[i] == indices[i]);
-    BOOST_TEST(iterators[i] == indices[i]);
+    BOOST_TEST(list[i] == indices[i]);
+    BOOST_TEST(iterable[i] == indices[i]);
     BOOST_TEST(dimension[i] == indices[i]);
   }
 }
@@ -40,11 +40,11 @@ BOOST_AUTO_TEST_CASE(array_init_test) {
 
   const std::array<Index, 3> indices {1, 2, 3};
 
-  Position<3> braceList {indices[0], indices[1], indices[2]};
-  BOOST_TEST(braceList.size() == indices.size());
+  Position<3> list {indices[0], indices[1], indices[2]};
+  BOOST_TEST(list.size() == indices.size());
 
-  Position<3> iterators(indices.begin(), indices.end());
-  BOOST_TEST(iterators.size() == indices.size());
+  Position<-1> iterable(indices);
+  BOOST_TEST(iterable.size() == indices.size());
 
   Position<3> dimension(indices.size());
   for (std::size_t i = 0; i < indices.size(); ++i) {
@@ -52,8 +52,8 @@ BOOST_AUTO_TEST_CASE(array_init_test) {
   }
 
   for (std::size_t i = 0; i < indices.size(); ++i) {
-    BOOST_TEST(braceList[i] == indices[i]);
-    BOOST_TEST(iterators[i] == indices[i]);
+    BOOST_TEST(list[i] == indices[i]);
+    BOOST_TEST(iterable[i] == indices[i]);
     BOOST_TEST(dimension[i] == indices[i]);
   }
 }

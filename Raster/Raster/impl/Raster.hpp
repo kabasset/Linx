@@ -156,7 +156,7 @@ const PtrRaster<const T, M> Raster<T, N, TContainer>::slice(const Region<N>& reg
   for (Index i = 0; i < M; ++i) {
     reduced[i] = b[i] - f[i] + 1;
   }
-  return {reduced, &operator[](region.front)};
+  return PtrRaster<const T, M> {reduced, &operator[](region.front)};
 }
 
 template <typename T, Index N, typename TContainer>
@@ -172,7 +172,7 @@ PtrRaster<T, M> Raster<T, N, TContainer>::slice(const Region<N>& region) {
     reduced[i] = b[i] - f[i] + 1;
   }
   // FIXME duplication
-  return {reduced, &operator[](region.front)};
+  return PtrRaster<T, M> {reduced, &operator[](region.front)};
 }
 
 template <typename T, Index N, typename TContainer>

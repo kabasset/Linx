@@ -22,8 +22,8 @@ public:
    * @brief Constructor.
    */
   Kernel1d(std::vector<T> values, Index origin, TOob oob = TOob()) :
-      DataContainer<T, DataContainerHolder<T, std::vector<T>>, Kernel1d<T, TOob>>(values.begin(), values.end()),
-      m_backward(origin), m_forward(this->size() - 1 - m_backward), m_bias(), m_oob(oob) {}
+      DataContainer<T, DataContainerHolder<T, std::vector<T>>, Kernel1d<T, TOob>>(values), m_backward(origin),
+      m_forward(this->size() - 1 - m_backward), m_bias(), m_oob(oob) {}
 
   /**
    * @brief Get the number of backward values.

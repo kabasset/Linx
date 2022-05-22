@@ -68,48 +68,88 @@ public:
    * The indices are unspecified.
    * To create position 0, use `zero()` instead.
    */
-  Position();
+  Position() : DataContainer<Index, DataContainerHolder<Index, Indices<N>>, Position<N>>() {}
 
   /**
    * @brief Create a position of given dimension.
    */
-  explicit Position(Index dim);
-
-  /**
-   * @brief Create a position by copying data from some container.
-   */
-  template <typename TIterator>
-  Position(TIterator begin, TIterator end);
+  explicit Position(Index dim) : DataContainer<Index, DataContainerHolder<Index, Indices<N>>, Position<N>>(dim) {}
 
   /**
    * @brief Create a position from a brace-enclosed list of indices.
    */
-  Position(std::initializer_list<Index> indices);
+  Position(std::initializer_list<Index> indices) :
+      DataContainer<Index, DataContainerHolder<Index, Indices<N>>, Position<N>>(indices) {}
+
+  /**
+   * @brief Create a position from an iterable.
+   */
+  template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr>
+  explicit Position(TIterable&& iterable) :
+      DataContainer<Index, DataContainerHolder<Index, Indices<N>>, Position<N>>(iterable) {}
 
   /**
    * @brief Create position 0.
    */
-  static Position<N> zero();
+  static Position<N> zero() {
+    Position<N> res(std::abs(Dim));
+    std::fill(res.begin(), res.end(), 0);
+    return res;
+  }
 
   /**
    * @brief Create a position full of 1's.
    */
-  static Position<N> one();
+  static Position<N> one() {
+    Position<N> res(std::abs(Dim));
+    std::fill(res.begin(), res.end(), 1);
+    return res;
+  }
 
   /**
    * @brief Create max position (full of -1's).
    */
-  static Position<N> max();
+  static Position<N> max() {
+    Position<N> res(std::abs(N));
+    std::fill(res.begin(), res.end(), -1);
+    return res;
+  }
 
   /**
    * @brief Check whether the position is zero.
    */
-  bool isZero() const;
+  bool isZero() const {
+    for (auto i : *this) {
+      if (i != 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @brief Check whether the position is one.
+   */
+  bool isOne() const {
+    for (auto i : *this) {
+      if (i != 1) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   /**
    * @brief Check whether the position is max.
    */
-  bool isMax() const;
+  bool isMax() const {
+    for (auto i : *this) {
+      if (i != -1) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   /**
    * @brief Create a position of lower dimension.
@@ -118,7 +158,11 @@ public:
    * The indices up to dimension `M` are copied.
    */
   template <Index M>
-  Position<M> slice() const;
+  Position<M> slice() const {
+    Position<M> res(M);
+    std::copy_n(this->data(), M, res.data());
+    return res;
+  }
 
   /**
    * @brief Create a position of higher dimension.
@@ -128,7 +172,11 @@ public:
    * Those between dimensions `N` and `M` are taken from the given position.
    */
   template <Index M>
-  Position<M> extend(const Position<M>& padding) const;
+  Position<M> extend(const Position<M>& padding = Position<M>::zero()) const {
+    auto res = padding;
+    std::copy_n(this->data(), this->size(), res.data());
+    return res;
+  }
 };
 
 /**
@@ -144,9 +192,5 @@ Index shapeSize(const Position<N>& shape) {
 }
 
 } // namespace Cnes
-
-#define _RASTER_POSITION_IMPL
-#include "Raster/impl/Position.hpp"
-#undef _RASTER_POSITION_IMPL
 
 #endif // _RASTER_POSITION_H

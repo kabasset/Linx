@@ -8,18 +8,20 @@
 #include "Raster/ContiguousContainer.h"
 #include "Raster/DataUtils.h"
 #include "Raster/VectorArithmetic.h"
+#include "RasterTypes/SeqUtils.h" // isIterable
 
 #include <algorithm> // copy_n
 #include <array>
 #include <cstddef> // size_t
 #include <exception> // runtime_error
 #include <initializer_list>
+#include <type_traits> // enable_if, is_integral, decay
 
 namespace Cnes {
 
 /**
  * @ingroup data_classes
- * @brief A holder of any contiguous container specified by a size and data pointer.
+ * @brief A default holder of any contiguous container specified by a size and data pointer.
  * @details
  * The class can be specialized for any container,
  * in which case it should satisfy the `SizedData` requirements.
@@ -40,7 +42,7 @@ public:
    * @brief Default or size-based constructor.
    */
   template <typename U>
-  explicit DataContainerHolder(std::size_t size, U* data) : m_container(size) {
+  explicit DataContainerHolder(std::size_t size, U* data = nullptr) : m_container(size) {
     if (data) {
       std::copy_n(data, size, const_cast<T*>(this->data()));
     }
@@ -82,6 +84,9 @@ protected:
 /**
  * @ingroup data_classes
  * @brief Raw pointer specialization.
+ * @details
+ * This is a non-owning holder, i.e. some view on exising data.
+ * No memory is managed.
  */
 template <typename T>
 class DataContainerHolder<T, T*> {
@@ -121,8 +126,8 @@ class DataContainerHolder<T, std::array<T, N>> {
 public:
   using Container = std::array<T, N>;
 
-  explicit DataContainerHolder(std::size_t size, const T* data) : m_container {} {
-    if (size != N && size != 0) {
+  explicit DataContainerHolder(std::size_t size, const T* data = nullptr) : m_container {} {
+    if (size != N && size != 0) { // FIXME allow size < N? => add m_size
       std::string msg = "Size mismatch in DataContainerHolder<std::array> specialization. ";
       msg += "Got " + std::to_string(size) + ", should be 0 or " + std::to_string(N) + ".";
       throw std::runtime_error(msg);
@@ -177,38 +182,32 @@ public:
   /// @group_construction
 
   /**
-   * @brief Construct from a size and non-constant data.
+   * @brief Size-based constructor.
    */
-  template <typename TSize = std::size_t, typename std::enable_if_t<std::is_integral<TSize>::value, TSize>* = nullptr>
-  DataContainer(TSize s = 0, std::remove_const_t<T>* d = nullptr) : Holder(std::size_t(s), d) {}
-
-  /**
-   * @brief Construct from a size and constant data.
-   */
-  template <typename TSize = std::size_t, typename std::enable_if_t<std::is_integral<TSize>::value, TSize>* = nullptr>
-  DataContainer(TSize s, const T* d) : Holder(std::size_t(s), d) {}
+  template <typename... TArgs>
+  explicit DataContainer(std::size_t s = 0, TArgs&&... args) : Holder(s, std::forward<TArgs>(args)...) {}
 
   /**
    * @brief Iterator-based constructor.
+   * @details
+   * Iterable values are copied to the container.
    */
-  template <typename TIterator>
-  DataContainer(TIterator begin, TIterator end) : DataContainer(std::distance(begin, end), &(*begin)) {}
+  template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr, typename... TArgs>
+  explicit DataContainer(TIterable&& iterable, TArgs&&... args) :
+      Holder(std::distance(iterable.begin(), iterable.end()), std::forward<TArgs>(args)...) {
+    std::copy(iterable.begin(), iterable.end(), this->data());
+  }
 
   /**
-   * @brief Value list constructor.
+   * @brief List-based constructor.
+   * @details
+   * List values are copied to the container.
    */
-  DataContainer(std::initializer_list<T> values) : DataContainer(values.begin(), values.end()) {}
-
-  /**
-   * @brief Forwarding constructor.
-   */
-  // template <typename... TArgs>
-  // DataContainer(TArgs&&... args) : Holder(std::forward<TArgs>(args)...) {}
-  template <
-      typename TArg0,
-      typename... TArgs,
-      typename std::enable_if_t<not std::is_integral<TArg0>::value, TArg0>* = nullptr>
-  DataContainer(TArg0 arg0, TArgs&&... args) : Holder(std::forward<TArg0>(arg0), std::forward<TArgs>(args)...) {}
+  template <typename U, typename... TArgs>
+  explicit DataContainer(std::initializer_list<U> list, TArgs&&... args) :
+      Holder(list.size(), std::forward<TArgs>(args)...) {
+    std::copy(list.begin(), list.end(), this->data());
+  }
 
   CNES_VIRTUAL_DTOR(DataContainer)
   CNES_COPYABLE(DataContainer)

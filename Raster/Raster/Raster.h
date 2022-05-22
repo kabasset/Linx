@@ -166,27 +166,36 @@ public:
   /**
    * @brief Constructor.
    * @param shape The raster shape
+   * @param args Arguments forwarded to the data holder
    */
-  explicit Raster(Position<N> shape) :
-      DataContainer<T, THolder, Raster<T, N, THolder>>(shapeSize(shape)), m_shape(std::move(shape)) {}
+  template <typename... TArgs>
+  explicit Raster(Position<N> shape, TArgs&&... args) :
+      DataContainer<T, THolder, Raster<T, N, THolder>>(shapeSize(shape), std::forward<TArgs>(args)...),
+      m_shape(std::move(shape)) {}
 
   /**
    * @brief Constructor.
    * @param shape The raster shape
-   * @param data The raw data
+   * @param iterable An iterable to copy values from
+   * @param args Arguments forwarded to the data holder
    */
-  template <typename U>
-  Raster(Position<N> shape, U* data) :
-      DataContainer<T, THolder, Raster<T, N, THolder>>(data, data + shapeSize(shape)), m_shape(std::move(shape)) {}
+  template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr, typename... TArgs>
+  explicit Raster(Position<N> shape, TIterable&& iterable, TArgs&&... args) :
+      DataContainer<T, THolder, Raster<T, N, THolder>>(std::forward<TIterable>(iterable), std::forward<TArgs>(args)...),
+      m_shape(std::move(shape)) {
+    // FIXME assert sizes match
+  }
 
   /**
-   * @brief Constructor.
-   * @param shape The raster shape
-   * @param args Arguments to be forwarded to the underlying container
+   * @brief List-based constructor.
+   * @details
+   * List values are copied to the container.
    */
-  template <typename... Ts>
-  Raster(Position<N> shape, Ts&&... args) :
-      DataContainer<T, THolder, Raster<T, N, THolder>>(std::forward<Ts>(args)...), m_shape(std::move(shape)) {}
+  template <typename U, typename... TArgs>
+  explicit Raster(Position<N> shape, std::initializer_list<U> list, TArgs&&... args) :
+      DataContainer<T, THolder, Raster<T, N, THolder>>(list, std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
+    // FIXME assert sizes match
+  }
 
   /// @group_properties
 
@@ -380,7 +389,10 @@ Raster<
     sizeof...(Longs),
     DataContainerHolder<typename TContainer::value_type, TContainer>>
 makeRaster(TContainer&& data, Longs... shape) {
-  return {{shape...}, std::forward<TContainer>(data)};
+  return Raster<
+      typename TContainer::value_type,
+      sizeof...(Longs),
+      DataContainerHolder<typename TContainer::value_type, TContainer>> {{shape...}, std::forward<TContainer>(data)};
 }
 
 /**
@@ -389,7 +401,7 @@ makeRaster(TContainer&& data, Longs... shape) {
  */
 template <typename T, typename... Longs>
 PtrRaster<T, sizeof...(Longs)> makeRaster(T* data, Longs... shape) { // FIXME can we merge somehow?
-  return {{shape...}, data};
+  return PtrRaster<T, sizeof...(Longs)> {{shape...}, data};
 }
 
 #define CNES_RASTER_MATH_UNARY_NEWINSTANCE(function) \

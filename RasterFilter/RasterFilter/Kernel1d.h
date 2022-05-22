@@ -36,10 +36,8 @@ public:
    * @param extrapolation The extrapolation policy
    */
   explicit Kernel1d(const std::vector<T>& values, Index origin, TExtrapolation extrapolation = TExtrapolation()) :
-      DataContainer<T, DataContainerHolder<T, std::vector<T>>, Kernel1d<T, TExtrapolation>>(
-          values.begin(),
-          values.end()),
-      m_backward(origin), m_forward(this->size() - 1 - m_backward), m_bias(), m_extrapolation(extrapolation) {}
+      DataContainer<T, DataContainerHolder<T, std::vector<T>>, Kernel1d<T, TExtrapolation>>(values), m_backward(origin),
+      m_forward(this->size() - 1 - m_backward), m_bias(), m_extrapolation(extrapolation) {}
 
   /**
    * @brief Constructor.
