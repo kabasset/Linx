@@ -160,13 +160,18 @@ public:
   /// @group_construction
 
   CNES_VIRTUAL_DTOR(Raster)
-  CNES_COPYABLE(Raster)
-  CNES_MOVABLE(Raster)
+  CNES_DEFAULT_COPYABLE(Raster)
+  CNES_DEFAULT_MOVABLE(Raster)
 
   /**
-   * @brief Constructor.
+   * @brief Forwarding constructor.
    * @param shape The raster shape
-   * @param args Arguments forwarded to the data holder
+   * @param args The arguments to be forwarded to the data holder
+   * @details
+   * The holder is instantiated as:
+   * \code
+   * Holder holder(shapeSize(shape), std::forward<TArgs>(args)...);
+   * \endcode
    */
   template <typename... TArgs>
   explicit Raster(Position<N> shape, TArgs&&... args) :
@@ -174,26 +179,55 @@ public:
       m_shape(std::move(shape)) {}
 
   /**
-   * @brief Constructor.
+   * @brief Container-move constructor.
    * @param shape The raster shape
-   * @param iterable An iterable to copy values from
-   * @param args Arguments forwarded to the data holder
+   * @param container The container to be moved into the holder
+   * @details
+   * The holder is instantiated as:
+   * \code
+   * Holder holder(shapeSize(shape));
+   * holder.m_container = std::move(container);
+   * \endcode
+   */
+  template <typename... TArgs>
+  explicit Raster(Position<N> shape, typename THolder::Container&& container) :
+      DataContainer<T, THolder, Raster<T, N, THolder>>(shapeSize(shape), std::move(container)),
+      m_shape(std::move(shape)) {}
+
+  /**
+   * @brief List-copy constructor.
+   * @param shape The raster shape
+   * @param list The values to be copied into the holder
+   * @param args The arguments to be forwarded to the data holder
+   * @details
+   * The holder is instantiated as:
+   * \code
+   * Holder holder(shapeSize(shape), std::forward<TArgs>(args)...);
+   * std::copy(list.begin(), list.end(), holder.data());
+   * \endcode
+   */
+  template <typename U, typename... TArgs>
+  explicit Raster(Position<N> shape, std::initializer_list<U> list, TArgs&&... args) :
+      DataContainer<T, THolder, Raster<T, N, THolder>>(list, std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
+    // FIXME assert sizes match
+  }
+
+  /**
+   * @brief Iterable-copy constructor.
+   * @param shape The raster shape
+   * @param iterable The values to be copied into the holder
+   * @param args The arguments to be forwarded to the data holder
+   * @details
+   * The holder is instantiated as:
+   * \code
+   * Holder holder(shapeSize(shape), std::forward<TArgs>(args)...);
+   * std::copy(iterable.begin(), iterable.end(), holder.data());
+   * \endcode
    */
   template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr, typename... TArgs>
   explicit Raster(Position<N> shape, TIterable&& iterable, TArgs&&... args) :
       DataContainer<T, THolder, Raster<T, N, THolder>>(std::forward<TIterable>(iterable), std::forward<TArgs>(args)...),
       m_shape(std::move(shape)) {
-    // FIXME assert sizes match
-  }
-
-  /**
-   * @brief List-based constructor.
-   * @details
-   * List values are copied to the container.
-   */
-  template <typename U, typename... TArgs>
-  explicit Raster(Position<N> shape, std::initializer_list<U> list, TArgs&&... args) :
-      DataContainer<T, THolder, Raster<T, N, THolder>>(list, std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
     // FIXME assert sizes match
   }
 

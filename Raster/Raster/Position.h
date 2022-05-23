@@ -59,8 +59,8 @@ public:
   static constexpr Index Dim = N;
 
   CNES_VIRTUAL_DTOR(Position)
-  CNES_COPYABLE(Position)
-  CNES_MOVABLE(Position)
+  CNES_DEFAULT_COPYABLE(Position)
+  CNES_DEFAULT_MOVABLE(Position)
 
   /**
    * @brief Default constructor.

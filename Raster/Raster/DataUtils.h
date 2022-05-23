@@ -24,7 +24,7 @@ namespace Cnes {
 /**
  * @brief Define default copy constructor and assignment operator.
  */
-#define CNES_COPYABLE(classname) \
+#define CNES_DEFAULT_COPYABLE(classname) \
   /** @brief Copy constructor. */ \
   classname(const classname&) = default; \
   /** @brief Copy assignment operator. */ \
@@ -42,7 +42,7 @@ namespace Cnes {
 /**
  * @brief Define default move constructor and assignment operator.
  */
-#define CNES_MOVABLE(classname) \
+#define CNES_DEFAULT_MOVABLE(classname) \
   /** @brief Move constructor. */ \
   classname(classname&&) = default; \
   /** @brief Move assignment operator. */ \

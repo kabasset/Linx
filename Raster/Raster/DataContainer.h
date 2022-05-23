@@ -188,14 +188,12 @@ public:
   explicit DataContainer(std::size_t s = 0, TArgs&&... args) : Holder(s, std::forward<TArgs>(args)...) {}
 
   /**
-   * @brief Iterator-based constructor.
+   * @brief Container-move constructor.
    * @details
-   * Iterable values are copied to the container.
+   * The container is moved without copy.
    */
-  template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr, typename... TArgs>
-  explicit DataContainer(TIterable&& iterable, TArgs&&... args) :
-      Holder(std::distance(iterable.begin(), iterable.end()), std::forward<TArgs>(args)...) {
-    std::copy(iterable.begin(), iterable.end(), this->data());
+  explicit DataContainer(std::size_t s, Container&& container) : Holder(s, (T*)nullptr) {
+    this->m_container = std::move(container);
   }
 
   /**
@@ -209,9 +207,20 @@ public:
     std::copy(list.begin(), list.end(), this->data());
   }
 
+  /**
+   * @brief Iterator-based constructor.
+   * @details
+   * Iterable values are copied to the container.
+   */
+  template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr, typename... TArgs>
+  explicit DataContainer(TIterable&& iterable, TArgs&&... args) :
+      Holder(std::distance(iterable.begin(), iterable.end()), std::forward<TArgs>(args)...) {
+    std::copy(iterable.begin(), iterable.end(), this->data());
+  }
+
   CNES_VIRTUAL_DTOR(DataContainer)
-  CNES_COPYABLE(DataContainer)
-  CNES_MOVABLE(DataContainer)
+  CNES_DEFAULT_COPYABLE(DataContainer)
+  CNES_DEFAULT_MOVABLE(DataContainer)
 
   /// @group_properties
 
