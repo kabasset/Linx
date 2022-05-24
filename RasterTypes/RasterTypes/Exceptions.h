@@ -28,7 +28,7 @@ public:
    * @param message Input message
    */
   explicit Exception(const std::string& message) :
-      std::exception(), m_prefix("Raster error: "), m_message(m_prefix + message) {}
+      std::exception(), m_prefix("Cnes.Raster error: "), m_message(m_prefix + message) {}
 
   /**
    * @brief Output message.
