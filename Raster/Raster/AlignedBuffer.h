@@ -27,7 +27,7 @@ bool isAligned(const T* ptr, std::size_t as) {
 }
 
 template <typename T>
-std::uintptr_t alignment(const T* ptr) {
+std::size_t alignment(const T* ptr) {
   if (not ptr) {
     throw Exception("Null pointer tested for alignment.");
   }
@@ -124,7 +124,7 @@ public:
    * Frees memory if owned.
    */
   ~AlignedBuffer() {
-    if (m_container && m_size) {
+    if (m_container) {
       std::free(m_container);
     }
   }
@@ -157,7 +157,7 @@ public:
      * @brief Get the actual data alignment, which may be better than required.
      */
   std::size_t alignment() const {
-    return alignment(m_data);
+    return Cnes::alignment(m_data);
   }
 
 protected:

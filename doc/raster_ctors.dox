@@ -1,0 +1,67 @@
+namespace Cnes {
+/**
+
+\addtogroup raster_ctors
+
+
+\section raster_ctors-all Constructors which all rasters share
+
+
+The constructors of `Raster` are very flexible, and generally forward parameters to the underlying data container (see \ref basics).
+Yet, each and every specialization of `Raster` provides at least the following constructors:
+
+- From a shape;
+- From a shape and a brace-enclosed list of values to be assigned;
+- From a shape and a data pointer to be referenced or copied into the raster (see the data holder documentation);
+- From a shape and an iterable object to be copied into the raster;
+- From a shape and a container to be moved into the raster;
+
+Here is an illustration for `VecRaster`:
+
+\snippet RasterDemoConstructors_test.cpp Any raster
+
+A raster is copyable (resp. movable) if its holder is copyable (resp. movable).
+
+\snippet RasterDemoConstructors_test.cpp Any raster copy-move
+
+Moreover, some constructors forward additional arguments to the data holder.
+This allows defining specific constructors from the data holder, without specializing `Raster` itself.
+For example, `std::vector` has a single-value constructor, `std::vector(size, value)`,
+which is called by `VecRaster(shape, value)`.
+The following sections give more examples.
+For the details, see `Raster`'s documentation.
+
+
+\section raster_ctors-ptr PtrRaster-specific constructors
+
+
+`PtrRaster` is a non-owning raster, which means it requires some data pointer.
+Instantiating a `PtrRaster` and filling it at the same time makes little sense.
+Therefore, there are mostly two kinds of usage:
+read-only `PtrRaster`s and read/write `PtrRaster`s.
+The only difference in terms of instantiation is that the value type is const-qualified for read-only rasters.
+Function `makeRaster` helps reducing the boilerplate by deducing template parameters from the call.
+
+\snippet RasterDemoConstructors_test.cpp PtrRaster write
+\snippet RasterDemoConstructors_test.cpp PtrRaster read
+
+
+\section raster_ctors-vec VecRaster-specific constructors
+
+
+\snippet RasterDemoConstructors_test.cpp VecRaster
+
+
+\section raster_ctors-aligned AlignedRaster-specific constructors
+
+
+An `AlignedRaster` can be either owning or non-owning,
+which is decided at instantiation by providing a null or non-null data pointer.
+
+\snippet RasterDemoConstructors_test.cpp AlignedRaster owns
+\snippet RasterDemoConstructors_test.cpp AlignedRaster shares
+
+`AlignedRaster` is movable but not copyable.
+
+*/
+}

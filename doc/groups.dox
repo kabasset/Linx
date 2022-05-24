@@ -8,6 +8,10 @@
 \ingroup basics
 \brief Classes focused on data storage and access
 
+\defgroup raster_ctors Rasters constructors
+\ingroup basics
+\brief On how to instantiate rasters
+
 \defgroup pixelwise Pixel-wise operations
 \ingroup basics
 \brief Operations applied to each pixel independently.
