@@ -157,8 +157,8 @@ public:
   /**
    * @brief The dimension template parameter.
    * @details
-   * The value of `Raster<T, N, THolder>::Dim` is always `N`, irrespective of its sign.
-   * In contrast, `dimension()` provides the actual dimension of the Raster,
+   * The value of `Dim` is always `N`, irrespective of its sign.
+   * In contrast, `dimension()` provides the actual, run-time dimension of the raster,
    * even in the case of a variable dimension.
    */
   static constexpr Index Dim = N;
@@ -455,11 +455,11 @@ PtrRaster<T, sizeof...(Longs)> makeRaster(T* data, Longs... shape) {
     return out; \
   } // FIXME AlignedRaster?
 
-CNES_RASTER_MATH_COMPLEX_TO_REAL(real) ///< Apply `std::real()`
-CNES_RASTER_MATH_COMPLEX_TO_REAL(imag) ///< Apply `std::imag()`
-CNES_RASTER_MATH_COMPLEX_TO_REAL(abs) ///< Apply `std::abs()`
-CNES_RASTER_MATH_COMPLEX_TO_REAL(arg) ///< Apply `std::arg()`
-CNES_RASTER_MATH_COMPLEX_TO_REAL(norm) ///< Apply `std::norm()`
+CNES_RASTER_MATH_COMPLEX_TO_REAL(real) ///< Apply `std::real()` @ingroup pixelwise
+CNES_RASTER_MATH_COMPLEX_TO_REAL(imag) ///< Apply `std::imag()` @ingroup pixelwise
+CNES_RASTER_MATH_COMPLEX_TO_REAL(abs) ///< Apply `std::abs()` @ingroup pixelwise
+CNES_RASTER_MATH_COMPLEX_TO_REAL(arg) ///< Apply `std::arg()` @ingroup pixelwise
+CNES_RASTER_MATH_COMPLEX_TO_REAL(norm) ///< Apply `std::norm()` @ingroup pixelwise
 // FIXME conj, polar
 
 #undef CNES_RASTER_MATH_COMPLEX_TO_REAL

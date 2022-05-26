@@ -26,6 +26,7 @@ namespace Cnes {
  */
 
 /**
+ * @ingroup pixelwise
  * @ingroup mixins
  * @brief Mixin to provide vector space arithmetics to a container.
  * @tparam T The contained element value type

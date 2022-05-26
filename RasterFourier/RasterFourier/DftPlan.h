@@ -179,7 +179,7 @@ public:
   }
 
   /**
-   * @copydoc in()
+   * @copydoc in()const
    */
   AlignedRaster<InValue, N>& in() {
     return m_in;
@@ -200,7 +200,7 @@ public:
   }
 
   /**
-   * @copydoc out()
+   * @copydoc out()const
    */
   AlignedRaster<OutValue, N>& out() {
     return m_out;

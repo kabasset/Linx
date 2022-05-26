@@ -30,8 +30,19 @@ namespace Cnes {
 class ProgramOptions {
 
 public:
+  /**
+   * @brief Shortcut for Boost.ProgramOptions type.
+   */
   using OptionsDescription = boost::program_options::options_description;
+
+  /**
+   * @brief Shortcut for Boost.ProgramOptions type.
+   */
   using PositionalOptionsDescription = boost::program_options::positional_options_description;
+
+  /**
+   * @brief Shortcut for Boost.ProgramOptions type.
+   */
   using ValueSemantics = boost::program_options::value_semantic;
 
   /**
