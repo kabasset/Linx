@@ -11,6 +11,9 @@
 
 namespace Cnes {
 
+/**
+ * @brief Strategy to esimate statistics.
+ */
 enum StatsMode
 {
   Standard, ///< Use standard estimators
@@ -18,26 +21,62 @@ enum StatsMode
   Robust ///< Use median and MAD
 };
 
+/**
+ * @brief Main statistics.
+ */
 template <StatsMode Mode>
 struct Stats {
+
+  /**
+   * @brief Estimate the statistics of a sample container.
+   */
   template <typename TContainer>
   Stats(const TContainer& container);
+
+  /**
+   * @brief Number of samples.
+   */
   std::size_t count;
+
+  /**
+   * @brief Minimal value.
+   */
   double min;
+
+  /**
+   * @brief Maximal value.
+   */
   double max;
+
+  /**
+   * @brief Mean.
+   */
   double mean;
+
+  /**
+   * @brief Deviation.
+   */
   double deviation;
 };
 
+/**
+ * @brief Read-only wrapper of `std::vector` where elements are sorted.
+ */
 template <typename T>
 class SortedVector {
 
 public:
+  /**
+   * @brief Constructor.
+   */
   template <typename TContainer>
   SortedVector(TContainer&& container) : m_container(std::move(container)) {
     std::sort(m_container.begin(), m_container.end());
   }
 
+  /**
+   * @brief Move assignment.
+   */
   template <typename TContainer>
   SortedVector& operator=(TContainer&& container) {
     m_container = std::move(container);
@@ -45,27 +84,44 @@ public:
     return *this;
   }
 
+  /**
+   * @brief Move the sorted vector to a given vector.
+   */
   void moveTo(std::vector<T>& out) {
     out = std::move(m_container);
   }
 
+  /**
+   * @brief Get the minimal element.
+   */
   const T& min() const {
     return m_container[0];
   }
 
+  /**
+   * @brief Get the maximal element.
+   */
   const T& max() const {
     return m_container[m_container.size() - 1];
   }
 
-  template <typename TContainer>
+  /**
+   * @brief Get the k-th smallest element.
+   */
   const T& kthSmallest(std::size_t k) const {
     return m_container[k - 1];
   }
 
+  /**
+   * @brief Compute the median with linear interpolation.
+   */
   double median() {
     return kthQuantile(.5);
   }
 
+  /**
+   * @brief Compute a quantile with linear interpolation.
+   */
   double kthQuantile(double k) {
     const auto size = m_container.size();
     const double kDouble = k * (size - 1);
@@ -77,6 +133,9 @@ public:
     return d * m_container[kInt] + (1 - d) * m_container[kInt + 1]; // linear interpolation
   }
 
+  /**
+   * @brief Compute the histogram with given bins.
+   */
   std::vector<std::size_t> histogram(const std::vector<T>& bins) {
     std::vector<std::size_t> out(bins.size() - 1);
     for (const auto e : m_container) {
@@ -86,8 +145,13 @@ public:
   }
 
 private:
+  /**
+   * @brief The sorted vector.
+   */
   std::vector<T> m_container;
 };
+
+/// @cond
 
 template <>
 template <typename TContainer>
@@ -141,6 +205,8 @@ Stats<StatsMode::Robust>::Stats(const TContainer& container) :
   sorted = absdev;
   deviation = sorted.median();
 }
+
+/// @endcond
 
 } // namespace Cnes
 

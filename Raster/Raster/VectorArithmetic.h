@@ -43,6 +43,7 @@ struct VectorArithmeticMixin :
     boost::subtractable2_left<TDerived, T>,
     boost::multiplicative<TDerived, T> {
 
+  /// @{
   /// @group_modifiers
 
   /**

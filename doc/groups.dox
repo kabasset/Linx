@@ -43,7 +43,7 @@
 \defgroup guidelines Development guidelines
 \brief Guidelines, good practices, optimization strategies.
 
-\defgroup exceptions
+\defgroup exceptions Exceptions
 \ingroup guidelines
 \brief All the exceptions directly thrown by the library
 

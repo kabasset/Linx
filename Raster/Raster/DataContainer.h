@@ -23,8 +23,8 @@ namespace Cnes {
  * @ingroup data_classes
  * @brief A default holder of any contiguous container specified by a size and data pointer.
  * @details
- * The class can be specialized for any container,
- * in which case it should satisfy the `SizedData` requirements.
+ * The class can be specialized for any continuous container,
+ * in which case the specialization should satisfy the `SizedData` requirements.
  * @satisfies{SizedData}
  */
 template <typename T, typename TContainer>
@@ -36,6 +36,7 @@ public:
    */
   using Container = TContainer;
 
+  /// @{
   /// @group_construction
 
   /**
@@ -127,7 +128,7 @@ public:
   using Container = std::array<T, N>;
 
   explicit DataContainerHolder(std::size_t size, const T* data = nullptr) : m_container {} {
-    if (size != N && size != 0) { // FIXME allow size < N? => add m_size
+    if (size != N && size != 0) { // TODO allow size < N? => add m_size
       std::string msg = "Size mismatch in DataContainerHolder<std::array> specialization. ";
       msg += "Got " + std::to_string(size) + ", should be 0 or " + std::to_string(N) + ".";
       throw std::runtime_error(msg);
@@ -179,6 +180,7 @@ public:
    */
   using Container = typename Holder::Container;
 
+  /// @{
   /// @group_construction
 
   /**
@@ -237,7 +239,7 @@ public:
   using Holder::data;
 
   /**
-   * @copybrief data()const
+   * @brief Access the raw data.
    */
   inline T* data() {
     return const_cast<T*>(const_cast<const DataContainer&>(*this).data());

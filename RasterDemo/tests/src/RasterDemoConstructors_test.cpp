@@ -51,68 +51,65 @@ BOOST_AUTO_TEST_CASE(ptrraster_ctors_test) {
 
   //! [PtrRaster write]
   int data[] = {1, 2, 3, 4, 5, 6};
+
   Cnes::PtrRaster<int> constructed({3, 2}, data);
   auto made = Cnes::makeRaster(data, 3, 2);
 
   constructed[0] = 42;
   made[1] = 12;
+  //! [PtrRaster write]
 
   BOOST_TEST(constructed[0] == 42);
   BOOST_TEST(constructed[1] == 12);
   BOOST_TEST(made[0] == 42);
   BOOST_TEST(made[1] == 12);
-  //! [PtrRaster write]
 
   //! [PtrRaster read]
-  Cnes::PtrRaster<const int> cConstructed({3, 2}, data);
   const int* cData = data;
+
+  Cnes::PtrRaster<const int> cConstructed({3, 2}, data);
   auto cMade = Cnes::makeRaster(cData, 3, 2);
+  //! [PtrRaster read]
 
   BOOST_TEST((made == constructed));
   BOOST_TEST((cMade == cConstructed));
-  //! [PtrRaster read]
 }
 
 BOOST_AUTO_TEST_CASE(vecraster_ctors_test) {
   //! [VecRaster]
-  std::vector<int> vec {1, 2, 3, 4, 5, 6};
-  const int* data = vec.data();
-
-  Cnes::VecRaster<int> copied({3, 2}, data); // Copy data
-  BOOST_TEST(copied[0] == 1);
-  Cnes::VecRaster<int> moved({3, 2}, std::move(vec)); // Move container
-  BOOST_TEST(moved[0] == 1);
-  BOOST_TEST(moved.data() == data);
-  Cnes::VecRaster<int> filled({3, 2}, 42); // Fill with a single value
-  BOOST_TEST(filled[0] == 42);
-  Cnes::VecRaster<int> listed({3, 2}, {12, 10, 8, 6, 4, 2}); // Fill with a list of values
-  BOOST_TEST(listed[0] == 12);
+  Cnes::VecRaster<int> filledWithValue({3, 2}, 42);
   //! [VecRaster]
+
+  for (auto e : filledWithValue) {
+    BOOST_TEST(e == 42);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(alignedraster_ctors_test) {
 
   //! [AlignedRaster owns]
-  Cnes::AlignedRaster<int> defaultAligned({3, 2}); // 16 byte-aligned for SIMD
-  Cnes::AlignedRaster<int> longerAligned({3, 2}, nullptr, 64); // Longer alignment
-  BOOST_TEST(defaultAligned.alignment() % 16 == 0);
-  BOOST_TEST(longerAligned.alignment() % 64 == 0);
+  Cnes::AlignedRaster<int> defaultAligned({3, 2}); // SIMD-aligned
+  Cnes::AlignedRaster<int> longerAligned({3, 2}, nullptr, 1024); // Longer alignment
   //! [AlignedRaster owns]
 
+  BOOST_TEST(defaultAligned.alignment() % 16 == 0);
+  BOOST_TEST(longerAligned.alignment() % 1024 == 0);
+
   //! [AlignedRaster shares]
-  int data[] = {1, 2, 3, 4, 5, 6};
+  int data[] = {1, 2, 3, 4, 5, 6}; // Unknown alignment
 
   Cnes::AlignedRaster<int> notAligned({3, 2}, data, 1); // No alignment required
-  BOOST_TEST(notAligned.data() == data);
 
   try {
     Cnes::AlignedRaster<int> maybeAligned({3, 2}, data, 64); // Alignment required
     std::cout << "Data is aligned!" << std::endl;
-  } catch (Cnes::Exception& e) { // FIXME dedicated error
-    BOOST_TEST(notAligned.alignment() % 64 != 0); // Alignment requirement not met
-    std::cout << "Data is not aligned!" << std::endl;
+  } catch (Cnes::AlignmentError& e) { // Alignment requirement not met
+    BOOST_TEST(notAligned.alignment() % 64 != 0);
+    std::cout << e.what() << std::endl;
   }
   //! [AlignedRaster shares]
+
+  BOOST_TEST(notAligned.data() == data);
 }
 
 //-----------------------------------------------------------------------------

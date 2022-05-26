@@ -157,6 +157,7 @@ public:
    */
   static constexpr Index Dim = N;
 
+  /// @{
   /// @group_construction
 
   CNES_VIRTUAL_DTOR(Raster)
@@ -434,85 +435,85 @@ makeRaster(TContainer&& data, Longs... shape) {
  * @copybrief makeRaster()
  */
 template <typename T, typename... Longs>
-PtrRaster<T, sizeof...(Longs)> makeRaster(T* data, Longs... shape) { // FIXME can we merge somehow?
+PtrRaster<T, sizeof...(Longs)> makeRaster(T* data, Longs... shape) {
   return PtrRaster<T, sizeof...(Longs)> {{shape...}, data};
 }
 
 #define CNES_RASTER_MATH_UNARY_NEWINSTANCE(function) \
   template <typename T, Index N, typename THolder> \
-  VecRaster<T, N> function(const Raster<T, N, THolder>& in) { \
-    VecRaster<T, N> out(in.shape(), in.data()); \
+  Raster<T, N, THolder> function(const Raster<T, N, THolder>& in) { \
+    Raster<T, N, THolder> out(in.shape(), in.data()); \
     out.function(); \
     return out; \
   }
 
 #define CNES_RASTER_MATH_BINARY_NEWINSTANCE(function) \
   template <typename T, Index N, typename THolder, typename TOther> \
-  VecRaster<T, N> function(const Raster<T, N, THolder>& in, const TOther& other) { \
-    VecRaster<T, N> out(in.shape(), in.data()); \
+  Raster<T, N, THolder> function(const Raster<T, N, THolder>& in, const TOther& other) { \
+    Raster<T, N, THolder> out(in.shape(), in.data()); \
     out.function(other); \
     return out; \
   }
 
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(abs)
-CNES_RASTER_MATH_BINARY_NEWINSTANCE(max)
-CNES_RASTER_MATH_BINARY_NEWINSTANCE(min)
-CNES_RASTER_MATH_BINARY_NEWINSTANCE(fdim)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(ceil)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(floor)
-CNES_RASTER_MATH_BINARY_NEWINSTANCE(fmod)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(trunc)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(round)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(abs) ///< Apply `std::abs()`
+CNES_RASTER_MATH_BINARY_NEWINSTANCE(max) ///< Apply `std::max()`
+CNES_RASTER_MATH_BINARY_NEWINSTANCE(min) ///< Apply `std::min()`
+CNES_RASTER_MATH_BINARY_NEWINSTANCE(fdim) ///< Apply `std::fdim()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(ceil) ///< Apply `std::ceil()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(floor) ///< Apply `std::floor()`
+CNES_RASTER_MATH_BINARY_NEWINSTANCE(fmod) ///< Apply `std::fmod()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(trunc) ///< Apply `std::trunc()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(round) ///< Apply `std::round()`
 
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(cos)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(sin)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(tan)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(acos)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(asin)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(atan)
-CNES_RASTER_MATH_BINARY_NEWINSTANCE(atan2)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(cosh)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(sinh)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(tanh)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(acosh)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(asinh)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(atanh)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(cos) ///< Apply `std::cos()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(sin) ///< Apply `std::sin()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(tan) ///< Apply `std::tan()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(acos) ///< Apply `std::acos()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(asin) ///< Apply `std::asin()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(atan) ///< Apply `std::atan()`
+CNES_RASTER_MATH_BINARY_NEWINSTANCE(atan2) ///< Apply `std::atan2()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(cosh) ///< Apply `std::cosh()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(sinh) ///< Apply `std::sinh()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(tanh) ///< Apply `std::tanh()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(acosh) ///< Apply `std::acosh()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(asinh) ///< Apply `std::asinh()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(atanh) ///< Apply `std::atanh()`
 
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(exp)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(exp2)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(expm1)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(log)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(log2)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(log10)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(logb)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(ilogb)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(log1p)
-CNES_RASTER_MATH_BINARY_NEWINSTANCE(pow)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(sqrt)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(cbrt)
-CNES_RASTER_MATH_BINARY_NEWINSTANCE(hypot)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(exp) ///< Apply `std::exp()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(exp2) ///< Apply `std::exp2()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(expm1) ///< Apply `std::expm1()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(log) ///< Apply `std::log()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(log2) ///< Apply `std::log2()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(log10) ///< Apply `std::log10()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(logb) ///< Apply `std::logb()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(ilogb) ///< Apply `std::ilogb()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(log1p) ///< Apply `std::log1p()`
+CNES_RASTER_MATH_BINARY_NEWINSTANCE(pow) ///< Apply `std::pow()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(sqrt) ///< Apply `std::sqrt()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(cbrt) ///< Apply `std::cbrt()`
+CNES_RASTER_MATH_BINARY_NEWINSTANCE(hypot) ///< Apply `std::hypot()`
 
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(erf)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(erfc)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(tgamma)
-CNES_RASTER_MATH_UNARY_NEWINSTANCE(lgamma)
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(erf) ///< Apply `std::erf()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(erfc) ///< Apply `std::erfc()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(tgamma) ///< Apply `std::tgamma()`
+CNES_RASTER_MATH_UNARY_NEWINSTANCE(lgamma) ///< Apply `std::lgamma()`
 
 #define CNES_RASTER_MATH_COMPLEX_TO_REAL(function) \
   template <typename T, Index N, typename THolder> \
-  VecRaster<T, N> function(const Raster<std::complex<T>, N, THolder>& in) { \
-    VecRaster<T, N> out(in.shape()); \
+  AlignedRaster<T, N> function(const Raster<std::complex<T>, N, THolder>& in) { \
+    AlignedRaster<T, N> out(in.shape()); \
     std::transform(in.begin(), in.end(), out.begin(), [](const auto& e) { \
       return std::function(e); \
     }); \
     return out; \
-  } // FIXME enable_if<isComplex<T>>
+  } // FIXME AlignedRaster?
 
-CNES_RASTER_MATH_COMPLEX_TO_REAL(real)
-CNES_RASTER_MATH_COMPLEX_TO_REAL(imag)
-CNES_RASTER_MATH_COMPLEX_TO_REAL(abs)
-CNES_RASTER_MATH_COMPLEX_TO_REAL(arg)
-CNES_RASTER_MATH_COMPLEX_TO_REAL(norm)
-// FIXME conj
+CNES_RASTER_MATH_COMPLEX_TO_REAL(real) ///< Apply `std::real()`
+CNES_RASTER_MATH_COMPLEX_TO_REAL(imag) ///< Apply `std::imag()`
+CNES_RASTER_MATH_COMPLEX_TO_REAL(abs) ///< Apply `std::abs()`
+CNES_RASTER_MATH_COMPLEX_TO_REAL(arg) ///< Apply `std::arg()`
+CNES_RASTER_MATH_COMPLEX_TO_REAL(norm) ///< Apply `std::norm()`
+// FIXME conj, polar
 
 #undef CNES_RASTER_MATH_UNARY_NEWINSTANCE
 #undef CNES_RASTER_MATH_BINARY_NEWINSTANCE

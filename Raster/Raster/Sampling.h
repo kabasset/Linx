@@ -393,6 +393,7 @@ private:
 };
 
 /**
+ * @relates Raster
  * @brief Get the stride along a given axis.
  */
 template <Index Axis, Index N>

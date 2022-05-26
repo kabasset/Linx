@@ -60,57 +60,57 @@ struct MathFunctionsMixin {
     return *derived; \
   }
 
+  /// @{
   /// @group_modifiers
 
-  CNES_RASTER_MATH_UNARY_INPLACE(abs)
-  CNES_RASTER_MATH_BINARY_INPLACE(max)
-  CNES_RASTER_MATH_BINARY_INPLACE(min)
-  CNES_RASTER_MATH_BINARY_INPLACE(fdim)
-  CNES_RASTER_MATH_UNARY_INPLACE(ceil)
-  CNES_RASTER_MATH_UNARY_INPLACE(floor)
-  CNES_RASTER_MATH_BINARY_INPLACE(fmod)
-  CNES_RASTER_MATH_UNARY_INPLACE(trunc)
-  CNES_RASTER_MATH_UNARY_INPLACE(round)
+  CNES_RASTER_MATH_UNARY_INPLACE(abs) ///< Apply `std::abs()`
+  CNES_RASTER_MATH_BINARY_INPLACE(max) ///< Apply `std::max()`
+  CNES_RASTER_MATH_BINARY_INPLACE(min) ///< Apply `std::min()`
+  CNES_RASTER_MATH_BINARY_INPLACE(fdim) ///< Apply `std::fdim()`
+  CNES_RASTER_MATH_UNARY_INPLACE(ceil) ///< Apply `std::ceil()`
+  CNES_RASTER_MATH_UNARY_INPLACE(floor) ///< Apply `std::floor()`
+  CNES_RASTER_MATH_BINARY_INPLACE(fmod) ///< Apply `std::fmod()`
+  CNES_RASTER_MATH_UNARY_INPLACE(trunc) ///< Apply `std::trunc()`
+  CNES_RASTER_MATH_UNARY_INPLACE(round) ///< Apply `std::round()`
 
-  CNES_RASTER_MATH_UNARY_INPLACE(cos)
-  CNES_RASTER_MATH_UNARY_INPLACE(sin)
-  CNES_RASTER_MATH_UNARY_INPLACE(tan)
-  CNES_RASTER_MATH_UNARY_INPLACE(acos)
-  CNES_RASTER_MATH_UNARY_INPLACE(asin)
-  CNES_RASTER_MATH_UNARY_INPLACE(atan)
-  CNES_RASTER_MATH_BINARY_INPLACE(atan2)
-  CNES_RASTER_MATH_UNARY_INPLACE(cosh)
-  CNES_RASTER_MATH_UNARY_INPLACE(sinh)
-  CNES_RASTER_MATH_UNARY_INPLACE(tanh)
-  CNES_RASTER_MATH_UNARY_INPLACE(acosh)
-  CNES_RASTER_MATH_UNARY_INPLACE(asinh)
-  CNES_RASTER_MATH_UNARY_INPLACE(atanh)
+  CNES_RASTER_MATH_UNARY_INPLACE(cos) ///< Apply `std::cos()`
+  CNES_RASTER_MATH_UNARY_INPLACE(sin) ///< Apply `std::sin()`
+  CNES_RASTER_MATH_UNARY_INPLACE(tan) ///< Apply `std::tan()`
+  CNES_RASTER_MATH_UNARY_INPLACE(acos) ///< Apply `std::acos()`
+  CNES_RASTER_MATH_UNARY_INPLACE(asin) ///< Apply `std::asin()`
+  CNES_RASTER_MATH_UNARY_INPLACE(atan) ///< Apply `std::atan()`
+  CNES_RASTER_MATH_BINARY_INPLACE(atan2) ///< Apply `std::atan2()`
+  CNES_RASTER_MATH_UNARY_INPLACE(cosh) ///< Apply `std::cosh()`
+  CNES_RASTER_MATH_UNARY_INPLACE(sinh) ///< Apply `std::sinh()`
+  CNES_RASTER_MATH_UNARY_INPLACE(tanh) ///< Apply `std::tanh()`
+  CNES_RASTER_MATH_UNARY_INPLACE(acosh) ///< Apply `std::acosh()`
+  CNES_RASTER_MATH_UNARY_INPLACE(asinh) ///< Apply `std::asinh()`
+  CNES_RASTER_MATH_UNARY_INPLACE(atanh) ///< Apply `std::atanh()`
 
-  CNES_RASTER_MATH_UNARY_INPLACE(exp)
-  CNES_RASTER_MATH_UNARY_INPLACE(exp2)
-  CNES_RASTER_MATH_UNARY_INPLACE(expm1)
-  CNES_RASTER_MATH_UNARY_INPLACE(log)
-  CNES_RASTER_MATH_UNARY_INPLACE(log2)
-  CNES_RASTER_MATH_UNARY_INPLACE(log10)
-  CNES_RASTER_MATH_UNARY_INPLACE(logb)
-  CNES_RASTER_MATH_UNARY_INPLACE(ilogb)
-  CNES_RASTER_MATH_UNARY_INPLACE(log1p)
-  CNES_RASTER_MATH_BINARY_INPLACE(pow)
-  CNES_RASTER_MATH_UNARY_INPLACE(sqrt)
-  CNES_RASTER_MATH_UNARY_INPLACE(cbrt)
-  CNES_RASTER_MATH_BINARY_INPLACE(hypot)
+  CNES_RASTER_MATH_UNARY_INPLACE(exp) ///< Apply `std::exp()`
+  CNES_RASTER_MATH_UNARY_INPLACE(exp2) ///< Apply `std::exp2()`
+  CNES_RASTER_MATH_UNARY_INPLACE(expm1) ///< Apply `std::expm1()`
+  CNES_RASTER_MATH_UNARY_INPLACE(log) ///< Apply `std::log()`
+  CNES_RASTER_MATH_UNARY_INPLACE(log2) ///< Apply `std::log2()`
+  CNES_RASTER_MATH_UNARY_INPLACE(log10) ///< Apply `std::log10()`
+  CNES_RASTER_MATH_UNARY_INPLACE(logb) ///< Apply `std::logb()`
+  CNES_RASTER_MATH_UNARY_INPLACE(ilogb) ///< Apply `std::ilogb()`
+  CNES_RASTER_MATH_UNARY_INPLACE(log1p) ///< Apply `std::log1p()`
+  CNES_RASTER_MATH_BINARY_INPLACE(pow) ///< Apply `std::pow()`
+  CNES_RASTER_MATH_UNARY_INPLACE(sqrt) ///< Apply `std::sqrt()`
+  CNES_RASTER_MATH_UNARY_INPLACE(cbrt) ///< Apply `std::cbrt()`
+  CNES_RASTER_MATH_BINARY_INPLACE(hypot) ///< Apply `std::hypot()`
 
-  CNES_RASTER_MATH_UNARY_INPLACE(erf)
-  CNES_RASTER_MATH_UNARY_INPLACE(erfc)
-  CNES_RASTER_MATH_UNARY_INPLACE(tgamma)
-  CNES_RASTER_MATH_UNARY_INPLACE(lgamma)
+  CNES_RASTER_MATH_UNARY_INPLACE(erf) ///< Apply `std::erf()`
+  CNES_RASTER_MATH_UNARY_INPLACE(erfc) ///< Apply `std::erfc()`
+  CNES_RASTER_MATH_UNARY_INPLACE(tgamma) ///< Apply `std::tgamma()`
+  CNES_RASTER_MATH_UNARY_INPLACE(lgamma) ///< Apply `std::lgamma()`
 
   /// @}
 
 #undef CNES_RASTER_MATH_UNARY_INPLACE
 #undef CNES_RASTER_MATH_BINARY_INPLACE
-
-}; // namespace Cnes
+};
 
 } // namespace Cnes
 

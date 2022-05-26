@@ -880,9 +880,11 @@ INPUT                  = @PROJECT_SOURCE_DIR@/README.md \
                          @PROJECT_SOURCE_DIR@/CHANGES.md \
                          @PROJECT_SOURCE_DIR@/doc \
                          @PROJECT_SOURCE_DIR@/Raster \
-                         @PROJECT_SOURCE_DIR@/RasterFilter \
                          @PROJECT_SOURCE_DIR@/RasterFourier \
-                         @PROJECT_SOURCE_DIR@/RasterGeometry
+                         @PROJECT_SOURCE_DIR@/RasterTypes \
+                         @PROJECT_SOURCE_DIR@/RasterValidation
+#                         @PROJECT_SOURCE_DIR@/RasterFilter \
+#                         @PROJECT_SOURCE_DIR@/RasterGeometry \
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -2446,7 +2448,7 @@ DOT_WRAP_THRESHOLD     = 17
 # The default value is: NO.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-TEMPLATE_RELATIONS     = YES
+TEMPLATE_RELATIONS     = NO
 
 # If the INCLUDE_GRAPH, ENABLE_PREPROCESSING and SEARCH_INCLUDES tags are set to
 # YES then doxygen will generate a graph for each documented file showing the

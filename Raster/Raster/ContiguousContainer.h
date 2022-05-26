@@ -111,6 +111,7 @@ struct ContiguousContainerMixin {
    */
   using size_type = std::size_t;
 
+  /// @{
   /// @group_properties
 
   /**

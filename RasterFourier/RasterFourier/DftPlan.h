@@ -5,6 +5,7 @@
 #ifndef _RASTERFOURIER_DFTPLAN_H
 #define _RASTERFOURIER_DFTPLAN_H
 
+#include "Raster/DataUtils.h"
 #include "Raster/Raster.h"
 #include "RasterFourier/DftMemory.h"
 
@@ -105,10 +106,8 @@ public:
       m_shape {shape}, m_in {Transform::inShape(m_shape), inData}, m_out {Transform::outShape(m_shape), outData},
       m_plan {FftwAllocator::createPlan<Transform>(m_in, m_out)} {}
 
-  DftPlan(const DftPlan&) = default;
-  DftPlan(DftPlan&&) = default;
-  DftPlan& operator=(const DftPlan&) = default;
-  DftPlan& operator=(DftPlan&&) = default;
+  CNES_DEFAULT_COPYABLE(DftPlan)
+  CNES_DEFAULT_MOVABLE(DftPlan)
 
   /**
    * @brief Destructor.

@@ -13,8 +13,9 @@
 
 namespace Cnes {
 
-/// @cond
-
+/**
+ * @brief Check whether some pointer is aligned as required.
+ */
 template <typename T>
 bool isAligned(const T* ptr, std::size_t as) {
   if (not ptr) {
@@ -26,6 +27,9 @@ bool isAligned(const T* ptr, std::size_t as) {
   return std::uintptr_t(ptr) % as == 0;
 }
 
+/**
+ * @brief Get the highest power of two some pointer is aligned as.
+ */
 template <typename T>
 std::size_t alignment(const T* ptr) {
   if (not ptr) {
@@ -38,16 +42,28 @@ std::size_t alignment(const T* ptr) {
   return as >> 1;
 }
 
+/**
+ * @brief Convert a pointer address to string.
+ */
 inline std::string toString(const void* ptr) {
   std::stringstream ss;
   ss << ptr;
   return ss.str();
 }
 
+/**
+ * @brief Exception thrown when an alignment requirement is not met.
+ */
 struct AlignmentError : Exception {
+  /**
+   * @brief Constructor.
+   */
   AlignmentError(const void* ptr, std::size_t alignment) :
       Exception(toString(ptr) + " is not " + std::to_string(alignment) + " byte-aligned.") {};
 
+  /**
+   * @brief Throw if the alignement requirement is not met.
+   */
   static void mayThrow(const void* ptr, std::size_t alignment) {
     if (not isAligned(ptr, alignment)) {
       throw AlignmentError(ptr, alignment);

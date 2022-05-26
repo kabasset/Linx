@@ -10,7 +10,7 @@
 namespace Cnes {
 
 /**
- * @brief A _n_-D bounding box, defined by its front and back positions (both inclusive),
+ * @brief A ND bounding box, defined by its front and back positions (both inclusive),
  * or front position and shape.
  * @details
  * Like `Position`, this class stores no pixel values, but coordinates.

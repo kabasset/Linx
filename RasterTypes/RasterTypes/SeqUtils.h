@@ -44,16 +44,24 @@ using RasterSupportedTypesTuple = std::tuple<CNES_RASTER_SUPPORTED_TYPES>;
  */
 #define CNES_RASTER_TEST_CASE_TEMPLATE(name) BOOST_AUTO_TEST_CASE_TEMPLATE(name, T, RasterSupportedTypesTuple)
 
+/**
+ * @brief Utility type for SFINAE, equivalent to C++17's `std::void_t`.
+ */
 template <typename...>
-using templateVoid = void; // C++17's void_t // FIXME to TypeUtils
+using templateVoid = void; // FIXME to TypeUtils
 
+/**
+ * @brief Test whether a type is iterable, i.e. has `begin()` and `end()` methods.
+ */
 template <typename T, typename = void>
 struct isIterable : std::false_type {};
 
+/// @cond
 // https://en.cppreference.com/w/cpp/types/void_t
 template <typename T>
 struct isIterable<T, templateVoid<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>> :
     std::true_type {};
+/// @endcond
 
 } // namespace Cnes
 
