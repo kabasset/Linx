@@ -1,4 +1,4 @@
-// Copyright (C) N0NN, CNES
+// Copyright (C) 2022, Antoine Basset
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -217,7 +217,7 @@ template <Index N = 2>
 using ComplexDft = DftPlan<Internal::ComplexDftTransform, N>;
 
 /**
- * @ingroup dft
+ * @relates DftPlan
  * @brief Compute the complex DFT.
  */
 template <typename TRaster>
@@ -229,7 +229,7 @@ ComplexDftBuffer<TRaster::Dim> complexDft(const TRaster& in) {
 }
 
 /**
- * @ingroup dft
+ * @relates DftPlan
  * @brief Compute the inverse complex DFT.
  */
 template <typename TRaster>
@@ -241,7 +241,7 @@ ComplexDftBuffer<TRaster::Dim> inverseComplexDft(const TRaster& in) {
 }
 
 /**
- * @ingroup dft
+ * @relates DftPlan
  * @brief Compute the real DFT.
  */
 template <typename TRaster>
@@ -253,7 +253,7 @@ ComplexDftBuffer<TRaster::Dim> realDft(const TRaster& in) {
 }
 
 /**
- * @ingroup dft
+ * @relates DftPlan
  * @brief Compute the inverse real DFT.
  */
 template <typename TRaster>

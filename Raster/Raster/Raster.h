@@ -17,6 +17,12 @@
 #include <string>
 #include <vector>
 
+/**
+ * @brief Centre national d'études spatiale.
+ * @details
+ * French space agency.
+ * @see https://cnes.fr/en
+ */
 namespace Cnes {
 
 /// @cond

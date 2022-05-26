@@ -14,6 +14,7 @@
 namespace Cnes {
 
 /**
+ * @relates AlignedBuffer
  * @brief Check whether some pointer is aligned as required.
  */
 template <typename T>
@@ -28,6 +29,7 @@ bool isAligned(const T* ptr, std::size_t as) {
 }
 
 /**
+ * @relates AlignedBuffer
  * @brief Get the highest power of two some pointer is aligned as.
  */
 template <typename T>
@@ -52,6 +54,7 @@ inline std::string toString(const void* ptr) {
 }
 
 /**
+ * @ingroup exceptions
  * @brief Exception thrown when an alignment requirement is not met.
  */
 struct AlignmentError : Exception {

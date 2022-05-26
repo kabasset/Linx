@@ -25,8 +25,9 @@ T pi() {
  * @ingroup mixins
  * @brief Mixin to provide mathematical operations and transforms to a container.
  * @details
- * Implements pixel-wise mathematical functions which may take an iterable or scalar argument (or none).
+ * Implements element-wise mathematical functions which may take an iterable or scalar argument (or none).
  * In the former case, the number of elements in the iterable must match that of the container.
+ * @see pixelwise
  * @see https://en.cppreference.com/w/cpp/header/cmath for functions description
  */
 template <typename T, typename TDerived>

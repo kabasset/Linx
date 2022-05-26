@@ -57,6 +57,9 @@ namespace Cnes {
  * by calling `transform()` and then `inverse().transform()` -- `normalize()` performs normalization on request.
  * The factor equals the logical number of elements.
  * 
+ * @tspecialization{ComplexDft}
+ * @tspecialization{RealDft}
+ * 
  * @see http://www.fftw.org/fftw3_doc
  */
 template <typename TTransform, Index N = 2>

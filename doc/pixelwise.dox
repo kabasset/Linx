@@ -27,7 +27,8 @@ Argument-dependent lookup (ADL) allows skipping the namespace in this case:
 
 \snippet RasterDemoPixelwise_test.cpp Functions
 
-The complete list of available functions can be found in `MathFunctionsMixin`'s documentation.
+The complete list of available in-place functions can be found in `MathFunctionsMixin`'s documentation.
+New-instance versions are part of the `Cnes` namespace documentation.
 
 
 \section pixelwise-apply Apply and generate
