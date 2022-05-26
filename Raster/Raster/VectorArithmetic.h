@@ -20,9 +20,8 @@ namespace Cnes {
  * Implements vector space arithmetic operators
  * (uppercase letters are for vectors, lowercase letters are for scalars):
  * - Vector-additive: V += U, W = V + U, V += U, W = V - U;
- * - Scalar-additive: V += a, V = U + a, V = a + U, V -= a, V = U + a, V = a - U;
- * - Scalar-multiplicative: V *= a, V = U * a, V = a * U, V /= a, V = U / a;
- * - Incrementation if enabled (for integral value types by default): V++, ++V, V--, --V.
+ * - Scalar-additive: V += a, V = U + a, V = a + U, V -= a, V = U + a, V = a - U, V++, ++V, V--, --V;
+ * - Scalar-multiplicative: V *= a, V = U * a, V = a * U, V /= a, V = U / a.
  */
 
 /**
@@ -31,17 +30,17 @@ namespace Cnes {
  * @brief Mixin to provide vector space arithmetics to a container.
  * @tparam T The contained element value type
  * @tparam TDerived The container which inherits this class
- * @tparam Incrementable A flag to activate increment and decrement operators
  * @details
  * In addition to vector space arithmetic operators, this mixin provides
  * `generate()` and `apply()` to apply a function to each element.
  * @satisfies{VectorArithmetic}
  */
-template <typename T, typename TDerived, bool Incrementable = std::is_integral<T>::value>
+template <typename T, typename TDerived>
 struct VectorArithmeticMixin :
     boost::additive<TDerived>,
     boost::additive<TDerived, T>,
     boost::subtractable2_left<TDerived, T>,
+    boost::unit_steppable<TDerived>,
     boost::multiplicative<TDerived, T> {
 
   /// @{
@@ -50,32 +49,112 @@ struct VectorArithmeticMixin :
   /**
    * @brief V += U and W = V + U.
    */
-  TDerived& operator+=(const TDerived& rhs);
+  TDerived& operator+=(const TDerived& rhs) {
+    std::transform(
+        static_cast<TDerived*>(this)->begin(),
+        static_cast<TDerived*>(this)->end(),
+        rhs.begin(),
+        static_cast<TDerived*>(this)->begin(),
+        std::plus<>());
+    return static_cast<TDerived&>(*this);
+  }
 
   /**
    * @brief V += a, V = U + a, V = a + U.
    */
-  TDerived& operator+=(const T& rhs);
+  TDerived& operator+=(const T& rhs) {
+    std::transform(
+        static_cast<TDerived*>(this)->begin(),
+        static_cast<TDerived*>(this)->end(),
+        static_cast<TDerived*>(this)->begin(),
+        [&](auto lhs) {
+          return lhs + rhs;
+        });
+    return static_cast<TDerived&>(*this);
+  }
 
   /**
    * @brief V -= U and W = V - U.
    */
-  TDerived& operator-=(const TDerived& rhs);
+  TDerived& operator-=(const TDerived& rhs) {
+    std::transform(
+        static_cast<TDerived*>(this)->begin(),
+        static_cast<TDerived*>(this)->end(),
+        rhs.begin(),
+        static_cast<TDerived*>(this)->begin(),
+        std::minus<>());
+    return static_cast<TDerived&>(*this);
+  }
 
   /**
    * @brief V -= a, V = U - a, V = a - U.
    */
-  TDerived& operator-=(const T& rhs);
+  TDerived& operator-=(const T& rhs) {
+    std::transform(
+        static_cast<TDerived*>(this)->begin(),
+        static_cast<TDerived*>(this)->end(),
+        static_cast<TDerived*>(this)->begin(),
+        [&](auto lhs) {
+          return lhs - rhs;
+        });
+    return static_cast<TDerived&>(*this);
+  }
+
+  /**
+   * @brief ++V and V++.
+   */
+  TDerived& operator++() {
+    std::transform(
+        static_cast<TDerived*>(this)->begin(),
+        static_cast<TDerived*>(this)->end(),
+        static_cast<TDerived*>(this)->begin(),
+        [](auto rhs) {
+          return ++rhs;
+        });
+    return static_cast<TDerived&>(*this);
+  }
+
+  /**
+   * @brief --V and V--.
+   */
+  TDerived& operator--() {
+    std::transform(
+        static_cast<TDerived*>(this)->begin(),
+        static_cast<TDerived*>(this)->end(),
+        static_cast<TDerived*>(this)->begin(),
+        [](auto rhs) {
+          return --rhs;
+        });
+    return static_cast<TDerived&>(*this);
+  }
 
   /**
    * @brief V *= a, V = U * a, V = a * U.
    */
-  TDerived& operator*=(const T& rhs);
+  TDerived& operator*=(const T& rhs) {
+    std::transform(
+        static_cast<TDerived*>(this)->begin(),
+        static_cast<TDerived*>(this)->end(),
+        static_cast<TDerived*>(this)->begin(),
+        [&](auto lhs) {
+          return lhs * rhs;
+        });
+    return static_cast<TDerived&>(*this);
+  }
 
   /**
    * @brief V /= a, V = U / a.
    */
-  TDerived& operator/=(const T& rhs);
+  TDerived& operator/=(const T& rhs) {
+    std::transform(
+        static_cast<TDerived*>(this)->begin(),
+        static_cast<TDerived*>(this)->end(),
+        static_cast<TDerived*>(this)->begin(),
+        [&](auto lhs) {
+          return lhs / rhs;
+        });
+    return static_cast<TDerived&>(*this);
+  }
 
   /**
    * @brief Generate values from a function with optional input containers.
@@ -92,7 +171,13 @@ struct VectorArithmeticMixin :
    * \endcode
    */
   template <typename TFunc, typename... TContainers>
-  TDerived& generate(TFunc&& func, const TContainers&... args);
+  TDerived& generate(TFunc&& func, const TContainers&... args) {
+    auto its = std::make_tuple(args.begin()...);
+    for (auto& v : static_cast<TDerived&>(*this)) {
+      v = iteratorTupleApply(its, func);
+    }
+    return static_cast<TDerived&>(*this);
+  }
 
   /**
    * @brief Apply a function with optional input containers.
@@ -110,48 +195,33 @@ struct VectorArithmeticMixin :
    * \endcode
    */
   template <typename TFunc, typename... TContainers>
-  TDerived& apply(TFunc&& func, const TContainers&... args);
+  TDerived& apply(TFunc&& func, const TContainers&... args) {
+    return generate(std::forward<TFunc>(func), static_cast<TDerived&>(*this), args...);
+  }
 
   /// @group_operations
 
   /**
    * @brief Copy.
    */
-  TDerived operator+() const;
+  TDerived operator+() const {
+    return *this;
+  }
 
   /**
    * @brief Compute the opposite.
    */
-  TDerived operator-() const;
+  TDerived operator-() const {
+    TDerived res = static_cast<const TDerived&>(*this);
+    std::transform(res.begin(), res.end(), res.begin(), [&](auto r) {
+      return -r;
+    });
+    return res;
+  }
 
   /// @}
 };
 
-/**
- * @copydoc VectorArithmeticMixin
- */
-template <typename T, typename TDerived>
-struct VectorArithmeticMixin<T, TDerived, true> :
-    VectorArithmeticMixin<T, TDerived, false>,
-    boost::unit_steppable<TDerived> {
-
-  /**
-   * @brief ++V and V++.
-   */
-  TDerived& operator++();
-
-  /**
-   * @brief --V and V--.
-   */
-  TDerived& operator--();
-};
-
 } // namespace Cnes
-
-/// @cond INTERNAL
-#define _RASTER_VECTORARITHMETIC_IMPL
-#include "Raster/impl/VectorArithmetic.hpp"
-#undef _RASTER_VECTORARITHMETIC_IMPL
-/// @endcond
 
 #endif
