@@ -2,8 +2,8 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTER_MATHFUNCTIONS_H
-#define _RASTER_MATHFUNCTIONS_H
+#ifndef _RASTER_MATH_H
+#define _RASTER_MATH_H
 
 #include "RasterTypes/SeqUtils.h" // isIterable
 
@@ -186,4 +186,4 @@ CNES_RASTER_MATH_UNARY_NEWINSTANCE(lgamma) ///< Apply `std::lgamma()` @ingroup p
 
 } // namespace Cnes
 
-#endif // _RASTER_MATHFUNCTIONS_H
+#endif // _RASTER_MATH_H

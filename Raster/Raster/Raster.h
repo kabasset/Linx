@@ -5,9 +5,10 @@
 #ifndef _RASTER_RASTER_H
 #define _RASTER_RASTER_H
 
-#include "Raster/AlignedBuffer.h" // Requires fftw3.h
+#include "Raster/AlignedBuffer.h"
+#include "Raster/Arithmetic.h"
 #include "Raster/DataContainer.h"
-#include "Raster/MathFunctions.h"
+#include "Raster/Math.h"
 #include "Raster/Position.h"
 #include "Raster/Region.h"
 #include "RasterTypes/Exceptions.h"
@@ -93,19 +94,19 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
  * through subscipt operator `Raster::operator[]()`.
  * Bound checking and backward indexing (index <0) are enabled in `Raster::at()`.
  * 
- * `Raster` also implements some arithmetic operators by extending `VectorArithmeticMixin`.
+ * `Raster` also implements some arithmetic operators by extending `ArithmeticMixin`.
  * For example, two rasters can be added, or a raster can be multiplied by a scalar.
+ * Pixel-wise mathematical operations are also provided by `MathFunctionsMixin`.
  * 
  * The raster data can be viewed region-wise as a `PtrRaster`,
  * provided that the region is contiguous in memory.
- * Reading and writing non contiguous region is possible: see `ImageRaster`.
  * 
  * @tspecialization{PtrRaster}
  * @tspecialization{VecRaster}
  * @tspecialization{AlignedRaster}
  * 
  * @satisfies{ContiguousContainer}
- * @satisfies{VectorArithmetic}
+ * @satisfies{EuclidArithmetic}
  * 
  * @see `Position` for details on the fixed- and variable-dimension cases.
  * @see `makeRaster()` for creation shortcuts.
@@ -145,6 +146,7 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
 template <typename T, Index N, typename THolder>
 class Raster :
     public DataContainer<T, THolder, Raster<T, N, THolder>>,
+    public ContainerArithmeticMixin<EuclidArithmetic, T, Raster<T, N, THolder>>,
     public MathFunctionsMixin<T, Raster<T, N, THolder>> {
   friend class ImageRaster; // FIXME rm when Subraster is removed
 

@@ -31,7 +31,7 @@ class ContiguousContainerMixin {
 + operator!=()
 }
 
-class VectorArithmeticMixin {
+class ArithmeticMixin {
 + operator+=(rhs)
 + operator-=(rhs)
 + operator*=(rhs)
@@ -53,7 +53,7 @@ class MathFunctionsMixin {
 }
 
 ContiguousContainerMixin <|-- DataContainer
-VectorArithmeticMixin <|-- DataContainer
+ArithmeticMixin <|-- DataContainer
 DataContainerHolder <|-- DataContainer
 DataContainer <|-- Raster
 MathFunctionsMixin <|-- Raster

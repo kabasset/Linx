@@ -2,8 +2,8 @@
 // This file is part of Cnes.Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTER_VECTORARITHMETIC_H // FIXME rename as ContainerArithmetic
-#define _RASTER_VECTORARITHMETIC_H
+#ifndef _RASTER_ARITHMETIC_H
+#define _RASTER_ARITHMETIC_H
 
 #include <algorithm>
 #include <boost/operators.hpp>
@@ -72,18 +72,18 @@ class EuclidArithmetic;
  * @details
  * In addition to vector space arithmetic operators, this mixin provides
  * `generate()` and `apply()` to apply a function to each element.
- * @satisfies{VectorArithmetic}
  */
 template <typename TSpecs, typename T, typename TDerived>
-struct ArithmeticMixin;
+struct ContainerArithmeticMixin;
 
 /**
  * @ingroup pixelwise
  * @ingroup mixins
  * @brief `VectorArithmetic` specialization.
+ * @satisfies{VectorArithmetic}
  */
 template <typename T, typename TDerived>
-struct ArithmeticMixin<VectorArithmetic, T, TDerived> :
+struct ContainerArithmeticMixin<VectorArithmetic, T, TDerived> :
     boost::additive<TDerived>,
     boost::additive<TDerived, T>,
     boost::subtractable2_left<TDerived, T>,
@@ -158,9 +158,10 @@ struct ArithmeticMixin<VectorArithmetic, T, TDerived> :
  * @ingroup pixelwise
  * @ingroup mixins
  * @brief `EuclidArithmetic` specialization.
+ * @satisfies{EuclidArithmetic}
  */
 template <typename T, typename TDerived>
-struct ArithmeticMixin<EuclidArithmetic, T, TDerived> :
+struct ContainerArithmeticMixin<EuclidArithmetic, T, TDerived> :
     boost::additive<TDerived>,
     boost::additive<TDerived, T>,
     boost::subtractable2_left<TDerived, T>,
@@ -179,11 +180,11 @@ struct ArithmeticMixin<EuclidArithmetic, T, TDerived> :
   CNES_RASTER_VECTOR_OPERATOR_INPLACE(-) ///< V -= U
   CNES_RASTER_SCALAR_OPERATOR_INPLACE(-) ///< V -= a
 
-  CNES_RASTER_SCALAR_OPERATOR_INPLACE(*) ///< V *= a
   CNES_RASTER_VECTOR_OPERATOR_INPLACE(*) ///< V *= U
+  CNES_RASTER_SCALAR_OPERATOR_INPLACE(*) ///< V *= a
 
-  CNES_RASTER_SCALAR_OPERATOR_INPLACE(/) ///< V /= a
   CNES_RASTER_VECTOR_OPERATOR_INPLACE(/) ///< V /= U
+  CNES_RASTER_SCALAR_OPERATOR_INPLACE(/) ///< V /= a
 
   CNES_RASTER_VECTOR_OPERATOR_INPLACE(%) ///< V %= U
   CNES_RASTER_SCALAR_OPERATOR_INPLACE(%) ///< V %= a
@@ -239,8 +240,8 @@ struct ArithmeticMixin<EuclidArithmetic, T, TDerived> :
   /// @}
 };
 
-template <typename T, typename TDerived>
-using VectorArithmeticMixin = ArithmeticMixin<EuclidArithmetic, T, TDerived>; // FIXME rm
+#undef CNES_RASTER_VECTOR_OPERATOR_INPLACE
+#undef CNES_RASTER_SCALAR_OPERATOR_INPLACE
 
 } // namespace Cnes
 

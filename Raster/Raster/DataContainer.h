@@ -7,7 +7,6 @@
 
 #include "Raster/ContiguousContainer.h"
 #include "Raster/DataUtils.h"
-#include "Raster/VectorArithmetic.h"
 #include "RasterTypes/SeqUtils.h" // isIterable
 
 #include <algorithm> // copy_n
@@ -155,19 +154,16 @@ protected:
 
 /**
  * @ingroup data_classes
- * @brief Mix `ContiguousContainerMixin` and `VectorArithmeticMixin` into a `DataHolder`
- * as a user-defined derived class.
+ * @brief Combine a `ContiguousContainerMixin` and `DataHolder` as a user-defined derived class.
+ * @tparam T The element type
+ * @tparam THolder The data container holder
  * @tparam TDerived The derived class
  * @details
  * The class can be specialized for any container which implements the `SizedData` requirements.
  * @satisfies{ContiguousContainer}
- * @satisfies{VectorArithmetic}
  */
-template <typename T, typename THolder, typename TDerived> // TODO allow void
-class DataContainer :
-    public ContiguousContainerMixin<T, TDerived>, // TODO fallback to DataContainer<T, THolder, void>
-    public VectorArithmeticMixin<T, TDerived>, // TODO fallback to DataContainer<T, THolder, void>
-    public THolder {
+template <typename T, typename THolder, typename TDerived>
+class DataContainer : public ContiguousContainerMixin<T, TDerived>, public THolder {
 
 public:
   /**

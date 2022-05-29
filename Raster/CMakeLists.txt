@@ -16,6 +16,10 @@ elements_add_unit_test(AlignedBuffer tests/src/AlignedBuffer_test.cpp
                      EXECUTABLE Raster_AlignedBuffer_test
                      LINK_LIBRARIES Raster
                      TYPE Boost)
+elements_add_unit_test(Arithmetic tests/src/Arithmetic_test.cpp 
+                     EXECUTABLE Raster_Arithmetic_test
+                     LINK_LIBRARIES Raster
+                     TYPE Boost)
 elements_add_unit_test(ContiguousContainer tests/src/ContiguousContainer_test.cpp 
                      EXECUTABLE Raster_ContiguousContainer_test
                      LINK_LIBRARIES Raster
@@ -28,8 +32,8 @@ elements_add_unit_test(DataUtils tests/src/DataUtils_test.cpp
                      EXECUTABLE Raster_DataUtils_test
                      LINK_LIBRARIES Raster
                      TYPE Boost)
-elements_add_unit_test(MathFunctions tests/src/MathFunctions_test.cpp 
-                     EXECUTABLE Raster_MathFunctions_test
+elements_add_unit_test(Math tests/src/Math_test.cpp 
+                     EXECUTABLE Raster_Math_test
                      LINK_LIBRARIES Raster
                      TYPE Boost)
 elements_add_unit_test(Position tests/src/Position_test.cpp 
@@ -54,10 +58,6 @@ elements_add_unit_test(Stats tests/src/Stats_test.cpp
                      TYPE Boost)
 elements_add_unit_test(Subraster tests/src/Subraster_test.cpp 
                      EXECUTABLE Raster_Subraster_test
-                     LINK_LIBRARIES Raster
-                     TYPE Boost)
-elements_add_unit_test(VectorArithmetic tests/src/VectorArithmetic_test.cpp 
-                     EXECUTABLE Raster_VectorArithmetic_test
                      LINK_LIBRARIES Raster
                      TYPE Boost)
 elements_add_unit_test(TestRaster tests/src/TestRaster_test.cpp 

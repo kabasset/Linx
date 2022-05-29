@@ -5,6 +5,7 @@
 #ifndef _RASTER_POSITION_H
 #define _RASTER_POSITION_H
 
+#include "Raster/Arithmetic.h"
 #include "Raster/DataContainer.h"
 #include "Raster/DataUtils.h"
 
@@ -51,7 +52,9 @@ using Indices = typename std::conditional<(N == -1), std::vector<Index>, std::ar
  * @see Region
  */
 template <Index N = 2>
-class Position : public DataContainer<Index, DataContainerHolder<Index, Indices<N>>, Position<N>> {
+class Position :
+    public DataContainer<Index, DataContainerHolder<Index, Indices<N>>, Position<N>>,
+    public ContainerArithmeticMixin<VectorArithmetic, Index, Position<N>> {
 public:
   /**
    * @brief The dimension template parameter.
