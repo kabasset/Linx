@@ -255,6 +255,49 @@ public:
   /// @group_modifiers
 
   /**
+   * @brief Generate values from a function with optional input containers.
+   * @param func The generator function, which takes as many inputs as there are arguments
+   * @param args The arguments in the form of containers of compatible sizes
+   * @details
+   * For example, here is how to imlement element-wise square root and multiplication:
+   * \code
+   * Container a = ...;
+   * Container b = ...;
+   * Container res(a.size());
+   * res.generate([](auto v) { return std::sqrt(v) }, a); // res = sqrt(a)
+   * res.generate([](auto v, auto w) { return v * w; }, a, b); // res = a * b
+   * \endcode
+   */
+  template <typename TFunc, typename... TContainers>
+  TDerived& generate(TFunc&& func, const TContainers&... args) {
+    auto its = std::make_tuple(args.begin()...);
+    for (auto& v : static_cast<TDerived&>(*this)) {
+      v = iteratorTupleApply(its, func);
+    }
+    return static_cast<TDerived&>(*this);
+  }
+
+  /**
+   * @brief Apply a function with optional input containers.
+   * @param func The function
+   * @param args The arguments in the form of containers of compatible sizes
+   * @details
+   * If there are _n_ arguments, `func` takes _n_+1 parameters,
+   * where the first argument is the element of this container.
+   * For example, here is how to imlement in-place element-wise square root and multiplication:
+   * \code
+   * Container a = ...;
+   * Container res = ...;
+   * res.apply([](auto v) { return std::sqrt(v); }); // res = sqrt(res)
+   * res.apply([](auto v, auto w) { return v * w; }, a); // res *= a
+   * \endcode
+   */
+  template <typename TFunc, typename... TContainers>
+  TDerived& apply(TFunc&& func, const TContainers&... args) {
+    return generate(std::forward<TFunc>(func), static_cast<TDerived&>(*this), args...);
+  }
+
+  /**
    * @brief Move the container.
    * @details
    * This method is used to take ownership on the data without copying it.

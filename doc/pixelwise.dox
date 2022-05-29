@@ -7,14 +7,15 @@ namespace Cnes {
 \section pixelwise-operators Operators
 
 
-C++ operators are overloaded for rasters and scalars.
+C++ operators are overloaded for rasters and scalars
+to provide Euclidean ring arithmetic to rasters.
 In-place (`+=`, `-=`, `*=`...) and new-instance (`+`, `-`, `*`...) versions are available.
 The following examples for operator `+` holds for all operators;
 `a` and `b` denote `Raster`s while `k` is some scalar.
 
 \snippet RasterDemoPixelwise_test.cpp Operators
 
-The complete list of available operators can be found in FIXME.
+The complete list of available operators can be found in `EuclidArithmetic`.
 
 
 \section pixelwise-functions Functions

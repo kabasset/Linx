@@ -24,14 +24,18 @@ BOOST_AUTO_TEST_CASE(raster_arithmetic_test) {
   const auto plusScalar = lhs + scalar;
   const auto minusVector = lhs - rhs;
   const auto minusScalar = lhs - scalar;
+  const auto timesVector = lhs * rhs;
   const auto timesScalar = lhs * scalar;
+  const auto dividedByVector = lhs / rhs;
   const auto dividedByScalar = lhs / scalar;
   for (std::size_t i = 0; i < lhs.size(); ++i) {
     BOOST_TEST(plusVector[i] == lhs[i] + rhs[i]);
     BOOST_TEST(plusScalar[i] == lhs[i] + scalar);
     BOOST_TEST(minusVector[i] == lhs[i] - rhs[i]);
     BOOST_TEST(minusScalar[i] == lhs[i] - scalar);
+    BOOST_TEST(timesVector[i] == lhs[i] * rhs[i]);
     BOOST_TEST(timesScalar[i] == lhs[i] * scalar);
+    BOOST_TEST(dividedByVector[i] == lhs[i] / rhs[i]);
     BOOST_TEST(dividedByScalar[i] == lhs[i] / scalar);
   }
 }
