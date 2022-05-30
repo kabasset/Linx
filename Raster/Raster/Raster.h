@@ -42,6 +42,9 @@ class Raster;
 /**
  * @ingroup data_classes
  * @brief `Raster` which points to some external data.
+ * @details
+ * It is a non-owning container: no allocation or freeing is made; a `PtrRaster`'s memory is managed externally.
+ * This is the type which is preferred to represent contiguous views, e.g. with `Raster::section()`.
  */
 template <typename T, Index N = 2>
 using PtrRaster = Raster<T, N, DataContainerHolder<T, T*>>;
@@ -49,6 +52,11 @@ using PtrRaster = Raster<T, N, DataContainerHolder<T, T*>>;
 /**
  * @ingroup data_classes
  * @brief `Raster` which owns a data vector.
+ * @details
+ * The underlying container is a `std::vector`.
+ * It is convenient to interface with the standard library
+ * or other tools which work with `std::vector`s without copies,
+ * because `std::vector` itself cannot be initialized without copies from an external pointer.
  */
 template <typename T, Index N = 2>
 using VecRaster = Raster<T, N, DataContainerHolder<T, std::vector<T>>>;
@@ -56,7 +64,15 @@ using VecRaster = Raster<T, N, DataContainerHolder<T, std::vector<T>>>;
 /**
  * @ingroup data_classes
  * @brief `Raster` which owns or shares some aligned memory.
- * @see `AlignedBuffer`
+ * @details
+ * `AlignedBuffer<T>` is a wrapper of `T*` which may or not manage memory,
+ * but at least ensures that memory is correctly aligned according to some requirements:
+ * - If the `AlignedRaster` is constructed from a null pointer, then some memory will be allocated,
+ *   which by default will be aligned to ensure smooth usage of SIMD instructions;
+ * - If it is constructed from a non-null pointer, it will act as a `PtrRaster`, i.e. not allocate or free memory,
+ *   but will verify that the memory is well aligned at construction (or throw an exception otherwise).
+ * 
+ * `AlignedRaster` is a reasonnable default choice.
  */
 template <typename T, Index N = 2>
 using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
@@ -109,11 +125,10 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
  * @satisfies{EuclidArithmetic}
  * 
  * @see `Position` for details on the fixed- and variable-dimension cases.
- * @see `makeRaster()` for creation shortcuts.
  * 
  * @par_example
  * \code
- * Position<2> shape {2, 3};
+ * Position<2> shape {2, 3}; // FIXME as snippet
  * 
  * // Read/write PtrRaster
  * float data[] = {1, 2, 3, 4, 5, 6};
@@ -131,17 +146,6 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
  * std::vector<const float> cVec(&data[0], &data[6]);
  * VecRaster<const float> cVecRaster(shape, std::move(cVec));
  * \endcode
- * 
- * @note
- * Why "raster" and not simply image or array?
- * Mostly for disambiguation purpose:
- * "image" refers to the extension type, while "array" has already several meanings in C/C++.
- * `NdArray` would have been an option, but every related class should have been prefixed with `Nd` for homogeneity:
- * `NdPosition`, `NdRegion`, `VecNdArray`...
- * From the cathodic television era, raster also historically carries the concept of contiguous pixels,
- * is very common in the field of Earth observation,
- * and also belongs to the Java library.
- * All in all, `Raster` seems to be a fair compromise.
  */
 template <typename T, Index N, typename THolder>
 class Raster :

@@ -75,6 +75,7 @@ struct AlignmentError : Exception {
 };
 
 /**
+ * @ingroup data_classes
  * @brief Data holder with aligned memory.
  * @details
  * The data pointer is guaranteed to be aligned in memory

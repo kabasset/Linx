@@ -6,6 +6,8 @@ class DataContainerHolder {
 }
 
 class DataContainer {
++ generate(function, args...)
++ apply(function, args...)
 + container()
 + moveTo(container)
 }
@@ -36,8 +38,7 @@ class ArithmeticMixin {
 + operator-=(rhs)
 + operator*=(rhs)
 + operator/=(rhs)
-+ generate(function, args...)
-+ apply(function, args...)
++ {method}...
 }
 
 class MathFunctionsMixin {
