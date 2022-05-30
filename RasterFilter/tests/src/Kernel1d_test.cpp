@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_CASE(sum_kernel_test) {
   const Kernel1d<int> one({1, 1, 1}, 1);
   const auto separable = one.along<0, 1, 2>();
   VecRaster<int, 3> raster({3, 3, 3});
-  std::fill(raster.begin(), raster.end(), 1);
+  raster.fill(1);
   const auto sum = separable.correlate<int>(raster);
   const std::vector<int> expected {
       8,  12, 8,  12, 18, 12, 8,  12, 8, // z = 0
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(make_sobel_test) {
   const auto sobelX = makeSobel<int, 0, 1>();
   const auto sobelY = makeSobel<int, 1, 0>();
   VecRaster<int, 3> raster({3, 3, 3});
-  std::fill(raster.begin(), raster.end(), 1);
+  raster.fill(1);
   const auto edgesX = sobelX.correlate<int>(raster);
   const auto edgesY = sobelY.correlate<int>(raster);
   const std::vector<int> expectedX {

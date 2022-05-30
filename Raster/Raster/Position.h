@@ -96,8 +96,7 @@ public:
    */
   static Position<N> zero() {
     Position<N> res(std::abs(Dim));
-    std::fill(res.begin(), res.end(), 0);
-    return res;
+    return res.fill(0);
   }
 
   /**
@@ -105,8 +104,7 @@ public:
    */
   static Position<N> one() {
     Position<N> res(std::abs(Dim));
-    std::fill(res.begin(), res.end(), 1);
-    return res;
+    return res.fill(1);
   }
 
   /**
@@ -114,8 +112,7 @@ public:
    */
   static Position<N> max() {
     Position<N> res(std::abs(N));
-    std::fill(res.begin(), res.end(), -1);
-    return res;
+    return res.fill(-1);
   }
 
   /**

@@ -8,6 +8,7 @@
 #include "Raster/ContiguousContainer.h"
 #include "Raster/DataUtils.h"
 #include "RasterTypes/SeqUtils.h" // isIterable
+#include "RasterTypes/TypeUtils.h" // Limits
 
 #include <algorithm> // copy_n
 #include <array>
@@ -242,13 +243,60 @@ public:
   }
 
   /**
-   * @brief Access the container in read-only mode.
+   * @brief Access the underlying container in read-only mode.
    */
   const std::decay_t<Container>& container() const {
     return this->m_container;
   }
 
   /// @group_modifiers
+
+  /**
+   * @brief Fill the container with a single value.
+   */
+  TDerived& fill(const T& value) {
+    std::fill(this->begin(), this->end(), value);
+    return static_cast<TDerived&>(*this);
+  }
+
+  /**
+   * @brief Fill the container with evenly spaced value.
+   * @details
+   * The difference between two adjacent values is _exactly_ `step`,
+   * i.e. `container[i + 1] = container[i] + step`.
+   * This means that rounding errors may sum up,
+   * as opposed to `linspace()`.
+   * @see `linspace()`
+   */
+  TDerived& arange(const T& min = Limits<T>::zero(), const T& step = Limits<T>::one()) {
+    auto v = min;
+    auto& t = static_cast<TDerived&>(*this);
+    for (auto& e : t) {
+      e = v;
+      v += step;
+    }
+    return t;
+  }
+
+  /**
+   * @brief Fill the container with evenly spaced value.
+   * @details
+   * The first and last values of the container are _exactly_ `min` and `max`.
+   * Intermediate values are computed as `container[i] = min + (max - min) / (size() - 1) * i`,
+   * which means that the difference between two adjacent values
+   * is not necessarily perfectly constant for floating point values,
+   * as opposed to `arange()`.
+   * @see `arange()`
+   */
+  TDerived& linspace(const T& min = Limits<T>::zero(), const T& max = Limits<T>::one()) {
+    const auto step = (max - min) / (this->size() - 1);
+    auto it = this->begin();
+    for (std::size_t i = 0; i < this->size() - 1; ++i, ++it) {
+      *it = min + step * i;
+    }
+    *it = max;
+    return static_cast<TDerived&>(*this);
+  }
 
   /**
    * @brief Generate values from a function with optional input containers.
@@ -267,10 +315,11 @@ public:
   template <typename TFunc, typename... TContainers>
   TDerived& generate(TFunc&& func, const TContainers&... args) {
     auto its = std::make_tuple(args.begin()...);
-    for (auto& v : static_cast<TDerived&>(*this)) {
+    auto& t = static_cast<TDerived&>(*this);
+    for (auto& v : t) {
       v = iteratorTupleApply(its, func);
     }
-    return static_cast<TDerived&>(*this);
+    return t;
   }
 
   /**

@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(color_struct_test) {
   //! [Input Rgb]
   static constexpr Rgb turquoise {64, 224, 208};
   Rgb::Image rgb({640, 480});
-  std::fill(rgb.begin(), rgb.end(), turquoise);
+  rgb.fill(turquoise);
   //! [Input Rgb]
 
   //! [Output Hsv]
@@ -164,9 +164,9 @@ BOOST_AUTO_TEST_CASE(color_along_2_test) {
   auto r = rgb.section(0);
   auto g = rgb.section(1);
   auto b = rgb.section(2);
-  std::fill(r.begin(), r.end(), 64);
-  std::fill(g.begin(), g.end(), 224);
-  std::fill(b.begin(), b.end(), 208);
+  r.fill(64);
+  g.fill(224);
+  b.fill(208);
   //! [Input Xyc]
   const Rgb in0 {rgb[{0, 0, 0}], rgb[{0, 0, 1}], rgb[{0, 0, 2}]};
 
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE(vector_along_2_test) {
   Cnes::Index n = 100; // Or read from command line
   //! [Input vector]
   HyperspectralCube cube({n, 640, 480});
-  std::fill(cube.begin(), cube.end(), 3.14);
+  cube.fill(3.14); // FIXME random
   std::vector<double> weights(n, 1.41);
   //! [Input vector]
 
