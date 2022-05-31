@@ -60,6 +60,13 @@ public:
     return m_distribution(engine);
   }
 
+  /**
+   * @brief Reset the distribution state.
+   */
+  void reset() {
+    m_distribution.reset();
+  }
+
 private:
   /**
    * @brief The distribution.
@@ -82,6 +89,11 @@ public:
     return {m_real(engine), m_imag(engine)};
   }
 
+  void reset() {
+    m_real.reset();
+    m_imag.reset();
+  }
+
 private:
   TDistribution m_real, m_imag;
 };
@@ -100,10 +112,15 @@ class RandomGenerator {
 public:
   /**
    * @brief Constructor.
-   * @param seed The random engine seed, or -1 to use the system time.
+   * @param seed The random engine seed.
    */
-  explicit RandomGenerator(Index seed = -1) :
-      m_engine(seed == -1 ? std::chrono::system_clock::now().time_since_epoch().count() : seed) {}
+  template <typename TSeed>
+  explicit RandomGenerator(TSeed&& seed) : m_engine(std::forward<TSeed>(seed)) {}
+
+  /**
+   * @brief Constructor.
+   */
+  explicit RandomGenerator() : RandomGenerator(std::chrono::system_clock::now().time_since_epoch().count()) {}
 
 protected:
   /**
@@ -140,8 +157,15 @@ public:
   /**
    * @brief Constructor.
    */
-  explicit UniformDistribution(T min = Limits<T>::halfMin(), T max = Limits<T>::halfMax(), Index seed = -1) :
-      RandomGenerator(seed), m_distribution(min, max) {}
+  explicit UniformDistribution(T min = Limits<T>::halfMin(), T max = Limits<T>::halfMax()) :
+      RandomGenerator(), m_distribution(min, max) {}
+
+  /**
+   * @brief Constructor.
+   */
+  template <typename TSeed>
+  explicit UniformDistribution(T min, T max, TSeed&& seed) :
+      RandomGenerator(std::forward<TSeed>(seed)), m_distribution(min, max) {}
 
   /**
    * @brief Generate value.
@@ -179,8 +203,15 @@ public:
   /**
    * @brief Constructor.
    */
-  explicit GaussianDistribution(T mean = Limits<T>::zero(), T stdev = Limits<T>::one(), Index seed = -1) :
-      RandomGenerator(seed), m_distribution(mean, stdev) {}
+  explicit GaussianDistribution(T mean = Limits<T>::zero(), T stdev = Limits<T>::one()) :
+      RandomGenerator(), m_distribution(mean, stdev) {}
+
+  /**
+   * @brief Constructor.
+   */
+  template <typename TSeed>
+  explicit GaussianDistribution(T mean, T stdev, TSeed&& seed) :
+      RandomGenerator(std::forward<TSeed>(seed)), m_distribution(mean, stdev) {}
 
   /**
    * @brief Generate value.
@@ -213,8 +244,14 @@ public:
   /**
    * @brief Constructor.
    */
-  explicit PoissonDistribution(T mean = Limits<T>::zero(), Index seed = -1) :
-      RandomGenerator(seed), m_distribution(mean) {}
+  explicit PoissonDistribution(T mean = Limits<T>::zero()) : RandomGenerator(), m_distribution(mean) {}
+
+  /**
+   * @brief Constructor.
+   */
+  template <typename TSeed>
+  explicit PoissonDistribution(T mean, TSeed&& seed) :
+      RandomGenerator(std::forward<TSeed>(seed)), m_distribution(mean) {}
 
   /**
    * @brief Generate value.

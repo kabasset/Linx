@@ -10,7 +10,10 @@ namespace Cnes {
 `DataContainer::generate()` accepts any kind of function as its first parameter, including functors.
 When passing as only parameter some `RandomDistribution`, the method can be used to generate random values.
 
-// FIXME snippet
+In the following snippet, a Gaussian-distributed raster is generated,
+with mean 100 and standard deviation 15.
+
+\snippet RasterDemoRandom_test.cpp Random values
 
 The available distributions are listed at the bottom of the page.
 Other distributions can be implemented: they just need to satisfy `RandomDistribution` requirements. 
@@ -22,7 +25,9 @@ Other distributions can be implemented: they just need to satisfy `RandomDistrib
 Similarly to `DataContainer::generate()`, `DataContainer::apply()` can be called with a random distribution.
 In this case, instead of generating random values, the method applies random noise, which may be additive or not.
 
-// FIXME snippet
+For demonstration, let us add some Poisson noise, to our random raster:
+
+\snippet RasterDemoRandom_test.cpp Random noise
 
 */
 }

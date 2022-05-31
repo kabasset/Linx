@@ -59,9 +59,7 @@ template <typename T>
 void checkGaussian(T) {
   AlignedRaster<T> raster({3, 2});
   raster.generate(GaussianDistribution<T>(100, 15));
-  std::cout << raster << std::endl;
   raster.apply(GaussianDistribution<T>());
-  std::cout << raster << std::endl;
   // FIXME
 }
 
@@ -78,9 +76,7 @@ template <typename T>
 void checkPoisson(T) {
   AlignedRaster<T> raster({3, 2});
   raster.generate(PoissonDistribution<T>(20));
-  std::cout << raster << std::endl;
   raster.apply(PoissonDistribution<T>());
-  std::cout << raster << std::endl;
   // FIXME
 }
 
@@ -91,6 +87,28 @@ void checkPoisson(std::complex<T>) {}
 
 CNES_RASTER_TEST_CASE_TEMPLATE(poisson_test) {
   checkPoisson(T {});
+}
+
+BOOST_AUTO_TEST_CASE(reproducible_gaussian_test) {
+  VecRaster<int, 1> rasterA({3}, {10, 100, 1000});
+  auto rasterB = rasterA;
+  rasterB[1] = 1;
+  GaussianDistribution<int> noiseA(0, 1, 0);
+  GaussianDistribution<int> noiseB(0, 1, 0);
+  BOOST_TEST(rasterA[0] == rasterB[0]);
+  BOOST_TEST(rasterA[2] == rasterB[2]);
+}
+
+BOOST_AUTO_TEST_CASE(reproducible_poisson_test) {
+  VecRaster<int, 1> rasterA({3}, {10, 100, 1000});
+  auto rasterB = rasterA;
+  rasterB[1] = 1;
+  PoissonDistribution<int> noiseA(0, 0);
+  PoissonDistribution<int> noiseB(0, 0);
+  rasterA.apply(noiseA);
+  rasterB.apply(noiseB);
+  BOOST_TEST(rasterA[0] == rasterB[0]);
+  BOOST_TEST(rasterA[2] == rasterB[2]);
 }
 
 //-----------------------------------------------------------------------------

@@ -24,3 +24,7 @@ elements_add_unit_test(RasterDemoPixelwise tests/src/RasterDemoPixelwise_test.cp
                      EXECUTABLE RasterDemoPixelwise_test
                      LINK_LIBRARIES Raster
                      TYPE Boost)
+elements_add_unit_test(RasterDemoRandom tests/src/RasterDemoRandom_test.cpp 
+                     EXECUTABLE RasterDemoRandom_test
+                     LINK_LIBRARIES Raster
+                     TYPE Boost)
