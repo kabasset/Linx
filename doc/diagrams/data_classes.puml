@@ -6,6 +6,7 @@ class DataContainerHolder {
 }
 
 class DataContainer {
++ fill(value)
 + generate(function, args...)
 + apply(function, args...)
 + container()

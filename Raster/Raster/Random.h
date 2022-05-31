@@ -14,25 +14,65 @@
 
 namespace Cnes {
 
+/**
+ * @ingroup concepts
+ * @requirements{RandomDistribution}
+ * @brief Random distribution requirements for use in containers.
+ * @details
+ * A random distribution of type `T` is a class which provides two methods:
+ * - `T operator()()` generates a random value;
+ * - `T operator()(T)` applies some (additive or not) random noise to an input value.
+ * 
+ * These methods are used by `DataContainer::generate()` and `DataContainer::apply()`, respectively,
+ * when they are called with a random distribution as parameter.
+ */
+
+/**
+ * @ingroup random
+ * @brief Helper class to create a complex distribution from two real distributions.
+ */
 template <typename T, typename TDistribution>
-struct ComplexDistribution {
+class ComplexDistribution {
 
-  TDistribution m_distribution;
-
+public:
+  /**
+   * @brief Forwarding constructor.
+   * @details
+   * If `T` is complex, `args.real()` and `args.imag()` are forwarded
+   * to the constructors of some real and imaginary distributions, respectively.
+   * For example, a complex Gaussian distribution can be initialized
+   * with mean `{0, 100}` and standard deviation `{1, 15}`,
+   * which will produce two real Gaussian distributions under the hood:
+   * one real distribution of mean 0 and standard deviation 1,
+   * and one imaginary distribution of mean 100 and standard deviation 15.
+   */
   template <typename... TArgs>
   ComplexDistribution(TArgs&&... args) : m_distribution(std::forward<TArgs>(args)...) {}
 
+  /**
+   * @brief Generate some value.
+   * @details
+   * If `T` is complex, two values are generated,
+   * one from the real distribution and the other from the imaginary distribution.
+   */
   template <typename TEngine>
   T operator()(TEngine& engine) {
     return m_distribution(engine);
   }
+
+private:
+  /**
+   * @brief The distribution.
+   */
+  TDistribution m_distribution;
 };
 
+/// @cond
+
 template <typename T, typename TDistribution>
-struct ComplexDistribution<std::complex<T>, TDistribution> {
+class ComplexDistribution<std::complex<T>, TDistribution> {
 
-  TDistribution m_real, m_imag;
-
+public:
   template <typename... TArgs>
   ComplexDistribution(TArgs&&... args) :
       m_real(std::forward<TArgs>(args).real()...), m_imag(std::forward<TArgs>(args).imag()...) {}
@@ -41,29 +81,57 @@ struct ComplexDistribution<std::complex<T>, TDistribution> {
   std::complex<T> operator()(TEngine& engine) {
     return {m_real(engine), m_imag(engine)};
   }
+
+private:
+  TDistribution m_real, m_imag;
 };
 
+/// @endcond
+
+/**
+ * @ingroup random
+ * @brief Helper class to simplify implementation of random distributions.
+ * @details
+ * Random distributions can extend this class and provide `operator()()`s
+ * relying on `generate()` and `add()` for random value generation and additive noise generation, respectively.
+ * Member `m_engine` is available for more complex uses.
+ */
 class RandomGenerator {
 public:
+  /**
+   * @brief Constructor.
+   * @param seed The random engine seed, or -1 to use the system time.
+   */
   explicit RandomGenerator(Index seed = -1) :
       m_engine(seed == -1 ? std::chrono::system_clock::now().time_since_epoch().count() : seed) {}
 
 protected:
+  /**
+   * @brief Generate some random value.
+   */
   template <typename T, typename TDistribution>
   T generate(TDistribution& distribution) {
     return distribution(m_engine);
   }
 
+  /**
+   * @brief Add some random value to a given input.
+   */
   template <typename T, typename TDistribution>
   T add(T in, TDistribution& distribution) {
     return in + generate<T>(distribution);
   }
 
+  /**
+   * @brief The random engine.
+   */
   std::mt19937 m_engine;
 };
 
 /**
+ * @ingroup random
  * @brief Uniform distribution.
+ * @satisfies{RandomDistribution}
  */
 template <typename T>
 class UniformDistribution : RandomGenerator {
@@ -100,7 +168,9 @@ private:
 };
 
 /**
+ * @ingroup random
  * @brief Gaussian distribution.
+ * @satisfies{RandomDistribution}
  */
 template <typename T>
 class GaussianDistribution : RandomGenerator {
@@ -132,7 +202,9 @@ private:
 };
 
 /**
+ * @ingroup random
  * @brief Poisson distribution.
+ * @satisfies{RandomDistribution}
  */
 template <typename T>
 class PoissonDistribution : RandomGenerator {

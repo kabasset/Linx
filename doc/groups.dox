@@ -17,6 +17,11 @@
 \brief Operations applied to each pixel independently.
 \example RasterDemoPixelwise_test.cpp
 
+\defgroup random Random generators
+\ingroup basics
+\brief Random values and random noise generation.
+\example RasterDemoRandom_test.cpp
+
 \defgroup filtering Filtering
 \brief Linear filtering with kernels or Fourier transforms.
 

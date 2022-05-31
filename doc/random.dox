@@ -1,0 +1,28 @@
+namespace Cnes {
+/**
+
+\addtogroup random
+
+
+\section random-generate Random values
+
+
+`DataContainer::generate()` accepts any kind of function as its first parameter, including functors.
+When passing as only parameter some `RandomDistribution`, the method can be used to generate random values.
+
+// FIXME snippet
+
+The available distributions are listed at the bottom of the page.
+Other distributions can be implemented: they just need to satisfy `RandomDistribution` requirements. 
+
+
+\section random-apply Random noise
+
+
+Similarly to `DataContainer::generate()`, `DataContainer::apply()` can be called with a random distribution.
+In this case, instead of generating random values, the method applies random noise, which may be additive or not.
+
+// FIXME snippet
+
+*/
+}
