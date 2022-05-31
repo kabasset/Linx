@@ -11,37 +11,85 @@
 namespace Cnes {
 
 /**
+ * @brief Helper class to make complex numbers from real numbers.
+ * @details
+ * Does nothing for real numbers.
+ */
+template <typename T>
+struct Complexifier {
+
+  /**
+   * @brief The type for real numbers, the component type for complex numbers.
+   */
+  using Component = T;
+
+  /**
+   * @brief Make some complex with same real and imaginary parts.
+   */
+  static inline T complexify(T in) {
+    return in;
+  }
+
+  /**
+   * @brief Apply some function twice, to get the real and imaginary parts.
+   */
+  template <typename TFunc, typename TArg>
+  static inline T apply(TFunc&& func, TArg&& arg) {
+    return std::forward<TFunc>(func)(std::forward<TArg>(arg));
+  }
+};
+
+/// @cond
+
+template <typename T>
+struct Complexifier<std::complex<T>> {
+
+  using Component = T;
+
+  static inline std::complex<T> complexify(T in) {
+    return {in, in};
+  }
+
+  template <typename TFunc, typename TArg>
+  static inline std::complex<T> apply(TFunc&& func, TArg&& arg) {
+    return {std::forward<TFunc>(func)(std::forward<TArg>(arg)), std::forward<TFunc>(func)(std::forward<TArg>(arg))};
+  }
+};
+
+/// @endcond
+
+/**
  * @brief Numeric limits and related key values of a value type.
  */
 template <typename T>
 struct Limits {
 
   /**
-   * @brief 0 or `false` for Booleans.
+   * @brief 0 in general, or `false` for Booleans.
    */
   static T zero() {
-    return {};
+    return Complexifier<T>::complexify(0);
   }
 
   /**
-   * @brief 1 or `true` for Booleans or 1 + i for complexes.
+   * @brief 1 in general, or `true` for Booleans, or 1 + i for complexes.
    */
   static T one() {
-    return {1};
+    return Complexifier<T>::complexify(1);
   }
 
   /**
    * @brief The lowest possible value.
    */
   static T min() {
-    return std::numeric_limits<T>::lowest();
+    return Complexifier<T>::complexify(std::numeric_limits<T>::lowest());
   }
 
   /**
    * @brief The highest possible value.
    */
   static T max() {
-    return std::numeric_limits<T>::max();
+    return Complexifier<T>::complexify(std::numeric_limits<T>::max());
   }
 
   /**
@@ -66,91 +114,12 @@ struct Limits {
   }
 
   /**
-   * @brief The max over two, or `true` for Booleans.
+   * @brief The max over two in general, rounded up for integers, or `true` for Booleans.
    */
   static T halfMax() {
-    return max() / 2;
+    return max() / 2 + std::is_integral<T>::value;
   }
 };
-
-/// @cond
-
-template <>
-struct Limits<bool> {
-
-  static bool zero() {
-    return false;
-  }
-  static bool one() {
-    return true;
-  }
-
-  static bool min() {
-    return false;
-  }
-
-  static bool max() {
-    return true;
-  }
-
-  static bool almostMin() {
-    return false;
-  }
-
-  static bool almostMax() {
-    return true;
-  }
-
-  static bool halfMin() {
-    return false;
-  }
-
-  static bool halfMax() {
-    return true;
-  }
-};
-
-template <typename T>
-struct Limits<std::complex<T>> {
-
-  static std::complex<T> zero() {
-    return {};
-  }
-  static std::complex<T> one() {
-    return {1, 1};
-  }
-
-  static std::complex<T> min() {
-    return complexify(Limits<T>::min());
-  }
-
-  static std::complex<T> max() {
-    return complexify(Limits<T>::max());
-  }
-
-  static std::complex<T> almostMin() {
-    return complexify(Limits<T>::almostMin());
-  }
-
-  static std::complex<T> almostMax() {
-    return complexify(Limits<T>::almostMax());
-  }
-
-  static std::complex<T> halfMin() {
-    return complexify(Limits<T>::halfMin());
-  }
-
-  static std::complex<T> halfMax() {
-    return complexify(Limits<T>::halfMax());
-  }
-
-private:
-  static std::complex<T> complexify(T value) {
-    return {value, value};
-  }
-};
-
-/// @endcond
 
 } // namespace Cnes
 

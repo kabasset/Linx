@@ -48,6 +48,10 @@ elements_add_unit_test(Raster tests/src/Raster_test.cpp
                      EXECUTABLE Raster_Raster_test
                      LINK_LIBRARIES Raster
                      TYPE Boost)
+elements_add_unit_test(Random tests/src/Random_test.cpp 
+                     EXECUTABLE Raster_Random_test
+                     LINK_LIBRARIES Raster
+                     TYPE Boost)
 elements_add_unit_test(Region tests/src/Region_test.cpp 
                      EXECUTABLE Raster_Region_test
                      LINK_LIBRARIES Raster
