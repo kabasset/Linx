@@ -8,7 +8,7 @@ namespace Cnes {
 
 
 `DataContainer::generate()` accepts any kind of callable as its first parameter, including functors.
-When passing as only parameter some `RandomDistribution`, the method can be used to generate random values.
+When passing as only parameter some `RandomNoise`, the method can be used to generate random values.
 
 In the following snippet, a Gaussian-distributed raster is generated,
 with mean 100 and standard deviation 15.
@@ -16,22 +16,28 @@ with mean 100 and standard deviation 15.
 \snippet RasterDemoRandom_test.cpp Random values
 
 The available distributions are listed at the bottom of the page.
-Other distributions can be implemented: they just need to satisfy `RandomDistribution` requirements. 
+Other distributions can be implemented: they just need to satisfy `RandomNoise` requirements. 
 
 
 \section random-apply Random noise
 
 
-Similarly to `DataContainer::generate()`, `DataContainer::apply()` can be called with a random distribution.
-In this case, instead of generating random values, the method applies random noise, which may be additive or not.
+Similarly to `DataContainer::generate()`, `DataContainer::apply()` can be called with a random noise generator.
+In this case, instead of generating random values, the method applies random noise to each input pixel,
+which may be additive -- e.g. Gaussian noise -- or not -- e.g. Poisson noise.
 
-For demonstration, let us add some Poisson noise, to our random raster:
+For demonstration, let us add some Poisson noise to our random raster:
 
 \snippet RasterDemoRandom_test.cpp Random noise
+
+If you're curious about the "stable" epithet, please read the next section,
+or check the `PoissonNoise` and `StablePoissonNoise` documentations.
 
 
 \section random-seed Seed and reproducibility
 
+
+TODO
 
 */
 }

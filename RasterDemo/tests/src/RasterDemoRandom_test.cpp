@@ -17,13 +17,13 @@ BOOST_AUTO_TEST_CASE(random_test) {
 
   //! [Random values]
   Cnes::AlignedRaster<double> raster({3, 2});
-  raster.generate(Cnes::GaussianDistribution<double>(100, 15));
+  raster.generate(Cnes::GaussianNoise<double>(100, 15));
   //! [Random values]
 
   std::cout << "Random raster: " << raster << std::endl;
 
   //! [Random noise]
-  raster.apply(Cnes::PoissonDistribution<double>());
+  raster.apply(Cnes::StablePoissonNoise<double>());
   //! [Random noise]
 
   std::cout << "Noisy raster: " << raster << std::endl;
