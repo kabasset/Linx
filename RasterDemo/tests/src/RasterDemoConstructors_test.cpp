@@ -112,6 +112,34 @@ BOOST_AUTO_TEST_CASE(alignedraster_ctors_test) {
   BOOST_TEST(notAligned.data() == data);
 }
 
+BOOST_AUTO_TEST_CASE(fill_test) {
+
+  //! [Filling]
+  Cnes::AlignedRaster<double> raster({3, 2});
+
+  raster.fill(42);
+  std::cout << raster << std::endl; // [42, 42, 42...]
+
+  raster.arange(1, 2);
+  std::cout << raster << std::endl; // [1, 3, 5...]
+
+  raster.linspace(0, Cnes::pi<double>());
+  std::cout << raster << std::endl; // [0, 0.2 π, 0.4 π...]
+
+  bool toggle = false;
+  raster.generate([&]() {
+    toggle = not toggle;
+    return toggle;
+  });
+  std::cout << raster << std::endl; // [0, 1, 0...]
+
+  raster.apply([](bool e) {
+    return not e;
+  });
+  std::cout << raster << std::endl; // [1, 0, 1...]
+  //! [Filling]
+}
+
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE_END()

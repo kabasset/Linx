@@ -70,7 +70,7 @@ which is decided at instantiation by providing a null or non-null data pointer.
 In addition to constructors, `Raster`s (and any `DataContainer`) provide several methods
 to fill the container after construction, like `fill()`, `arange()` or `generate()`.
 
-// FIXME snippet
+\snippet RasterDemoConstructors_test.cpp Filling
 
 Moreover, methods `generate()` and  `apply()` can be used to generate random values or apply random noise.
 This is demonstrated in \ref random.

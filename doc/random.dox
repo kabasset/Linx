@@ -7,7 +7,7 @@ namespace Cnes {
 \section random-generate Random values
 
 
-`DataContainer::generate()` accepts any kind of function as its first parameter, including functors.
+`DataContainer::generate()` accepts any kind of callable as its first parameter, including functors.
 When passing as only parameter some `RandomDistribution`, the method can be used to generate random values.
 
 In the following snippet, a Gaussian-distributed raster is generated,
@@ -28,6 +28,10 @@ In this case, instead of generating random values, the method applies random noi
 For demonstration, let us add some Poisson noise, to our random raster:
 
 \snippet RasterDemoRandom_test.cpp Random noise
+
+
+\section random-seed Seed and reproducibility
+
 
 */
 }

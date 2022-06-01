@@ -1,23 +1,21 @@
 namespace Cnes {
 /**
 
-\addtogroup basics
+\addtogroup primer
 
 
-\section basics-intro Introduction
+\section primer-intro Introduction
 
 
 A raster is an N-dimensional array of pixels stored in a contiguous one-dimensional container.
 The number of axes, or dimension, N, is set at compile time or at runtime.
 The raster shape, i.e. the lengths along axes, is set at runtime.
 Pixels are located at N-dimensional positions, which convert to 1D indices in the underlying 1D container.
-
-There are other common names for similar concepts, like multidimensional array, ND array, or tensor.
-The term raster was chosen to convey some information on the memory contiguity and layout (see next section),
-because it is part of the public interface of the library, and not only an implementation detail.
+Speaking of indices, they are _signed_ integers, as recommended in the C++ Core Guidelines.
+This enables backward indexing with negative values.
 
 
-\section basics-memory Memory layout
+\section primer-memory Memory layout
 
 
 The pixel ordering scheme is row-major, which means that two adjacent pixels of the same row (along the axis of index 0) are contiguous in memory.
@@ -34,7 +32,7 @@ It will be used in the remaining of the documentation in code snippets.
 \image html doc/diagrams/raster_ordering.svg
 
 
-\section basics-naming A word on the wording
+\section primer-naming A word on the wording
 
 
 First, why "raster" and not simply image or array?
@@ -47,7 +45,9 @@ while "array" has already several meanings in C/C++.
 but is more associated to linear algebra than image processing.
 From the cathodic television era, raster also historically carries the concept of contiguous pixels,
 is very common in the field of Earth observation, and also belongs to the Java library.
-All in all, `Raster` seems to be a fair compromise. 
+The term raster was also chosen to convey some information on the memory contiguity and layout (see next section),
+because it is part of the public interface of the library, and not only an implementation detail.
+All in all, "raster" seems to be a fair compromise. 
 
 Now, to introduce a few property names, we can state about the example raster that:
 
@@ -65,13 +65,13 @@ Finally, we've tried our best to follow the naming conventions of the standard a
 e.g. use "fill", "generate" or "linspace" to denote concepts analogous to `std::fill()`, `std::generate()` or `numpy.linspace()`.
 
 
-\section basics-container Underlying container
+\section primer-container Underlying container
 
 
 The pixel values can be stored in any contiguous container.
 For example, a raster built on top of a `std::vector` (with default allocator) is of type `VecRaster`.
 Here is a simple illustration of how to build the `VecRaster` illustrated in the section above
-(`std::iota()` is used to fill the 1D container with increasing values):
+(`arange()` is used to fill the 1D container with increasing values):
 
 \snippet RasterDemoBasics_test.cpp VecRaster iota
 
@@ -91,7 +91,7 @@ Which can be used like any other raster:
 
 \snippet RasterDemoBasics_test.cpp MallocRaster iota
 
-\section basics-access Element access
+\section primer-access Element access
 
 As disclosed in the examples above, elements of a raster can be accessed with 1D indices or ND positions.
 Indexes are 0-based signed integers, which enables backward indexing with `Raster::at()`, e.g.:

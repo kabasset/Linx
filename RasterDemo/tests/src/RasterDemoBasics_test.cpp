@@ -42,7 +42,7 @@ using MallocRaster = Cnes::Raster<T, N, MallocContainer<T>>;
 Cnes::VecRaster<int, 3> vecRasterIota() {
   //! [VecRaster iota]
   Cnes::VecRaster<int, 3> raster({4, 3, 2});
-  std::iota(raster.begin(), raster.end(), 0); // Assigns {0, 1, 2...}
+  raster.arange(); // Assigns {0, 1, 2...}
   std::cout << "Access by ND position: " << raster[{2, 1, 0}] << std::endl; // 6
   std::cout << "Access by 1D index: " << raster[6] << std::endl; // 6
   //! [VecRaster iota]
@@ -62,7 +62,7 @@ BOOST_AUTO_TEST_CASE(vec_raster_iota_test) {
 BOOST_AUTO_TEST_CASE(ptr_raster_iota_test) {
   //! [PtrRaster iota]
   std::array<int, 4 * 3 * 2> array;
-  std::iota(array.begin(), array.end(), 0);
+  std::iota(array.begin(), array.end(), 0); // Same as raster.arange()
   Cnes::PtrRaster<int, 3> raster({4, 3, 2}, array.data());
   std::cout << "Access by ND position: " << raster[{2, 1, 0}] << std::endl; // 6
   raster *= 2;
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(ptr_raster_iota_test) {
 BOOST_AUTO_TEST_CASE(malloc_raster_iota_test) {
   //! [MallocRaster iota]
   MallocRaster<int, 3> raster({4, 3, 2});
-  std::iota(raster.begin(), raster.end(), 0);
+  raster.arange();
   std::cout << "Access by ND position: " << raster[{2, 1, 0}] << std::endl; // 6
   std::cout << "Access by 1D index: " << raster[6] << std::endl; // 6
   //! [MallocRaster iota]

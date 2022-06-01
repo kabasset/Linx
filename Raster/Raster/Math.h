@@ -13,7 +13,7 @@
 namespace Cnes {
 
 /**
- * @brief 3.14
+ * @brief π
  */
 template <typename T>
 T pi() {

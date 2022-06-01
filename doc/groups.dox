@@ -1,6 +1,10 @@
 /**
 
 \defgroup basics Basics
+\brief Basic features and usage
+
+\defgroup primer Primer
+\ingroup basics
 \brief Memory layout and core functionalities of rasters.
 \example RasterDemoBasics_test.cpp
 
