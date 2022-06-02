@@ -42,12 +42,19 @@ read-only `PtrRaster`s and read/write `PtrRaster`s.
 The only difference in terms of instantiation is that the value type is const-qualified for read-only rasters.
 Function `makeRaster` helps reducing the boilerplate by deducing template parameters from the call.
 
+Read/write raster, with non-const-qualified value type:
+
 \snippet RasterDemoConstructors_test.cpp PtrRaster write
+
+Read-only raster, with const-qualified value type:
+
 \snippet RasterDemoConstructors_test.cpp PtrRaster read
 
 
-\section raster_ctors-vec VecRaster-specific constructors
+\section raster_ctors-vec VecRaster-specific constructor
 
+
+Through forwarding parameters, `VecRaster`s can be immediately filled with some value:
 
 \snippet RasterDemoConstructors_test.cpp VecRaster
 
@@ -57,8 +64,16 @@ Function `makeRaster` helps reducing the boilerplate by deducing template parame
 
 An `AlignedRaster` can be either owning or non-owning,
 which is decided at instantiation by providing a null or non-null data pointer.
+In both cases, an alignment requirement can be provided as third parameter:
+owning rasters allocate aligned data accordingly,
+while non-owning rasters check data alignment and throw an error if the requirement is not met.
+
+Owning raster, with null pointer given to the constructor:
 
 \snippet RasterDemoConstructors_test.cpp AlignedRaster owns
+
+Non-owning raster, built from some exising data:
+
 \snippet RasterDemoConstructors_test.cpp AlignedRaster shares
 
 `AlignedRaster` is movable but not copyable.
@@ -72,7 +87,9 @@ to fill the container after construction, like `fill()`, `arange()` or `generate
 
 \snippet RasterDemoConstructors_test.cpp Filling
 
-Moreover, methods `generate()` and  `apply()` can be used to generate random values or apply random noise.
+Methods `generate()` and `apply()` have a wide range of use cases.
+The most common one is pixel-wise processing, which is described in \ref pixelwise.
+Yet, they can also be used to generate random values or apply random noise.
 This is demonstrated in \ref random.
 
 */

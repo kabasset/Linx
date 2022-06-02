@@ -1,6 +1,7 @@
 @startuml
-class DataContainerHolder {
-# m_container
+
+class Holder {
++ Holder(size, data)
 + size()
 + data()
 }
@@ -14,7 +15,6 @@ class DataContainer {
 }
 
 class Raster {
-- m_shape
 + shape()
 + domain()
 + dimension()
@@ -55,8 +55,8 @@ class MathFunctionsMixin {
 }
 
 ContiguousContainerMixin <|-- DataContainer
-ArithmeticMixin <|-- DataContainer
-DataContainerHolder <|-- DataContainer
+Holder <|-- DataContainer
 DataContainer <|-- Raster
+ArithmeticMixin <|-- Raster
 MathFunctionsMixin <|-- Raster
 @enduml

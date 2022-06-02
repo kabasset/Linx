@@ -12,7 +12,7 @@ The number of axes, or dimension, N, is set at compile time or at runtime.
 The raster shape, i.e. the lengths along axes, is set at runtime.
 Pixels are located at N-dimensional positions, which convert to 1D indices in the underlying 1D container.
 Speaking of indices, they are _signed_ integers, as recommended in the C++ Core Guidelines.
-This enables backward indexing with negative values.
+Among others, this enables backward indexing with negative values.
 
 
 \section primer-memory Memory layout
@@ -65,10 +65,41 @@ Finally, we've tried our best to follow the naming conventions of the standard a
 e.g. use "fill", "generate" or "linspace" to denote concepts analogous to `std::fill()`, `std::generate()` or `numpy.linspace()`.
 
 
+\section primer-type Pixel type and dimension
+
+
+`Raster` is a class template.
+Its first template paramer is the pixel type, which may be const-qualified for read-only rasters.
+All fundamental types (`bool`, integers and floating point types) as well as complex types are supported,
+i.e. have been unit tested.
+Other types, including user-defined types, can be used,
+provided that they offer the minimal interface required by the `Raster` methods _which are effectively called_.
+For example, `operator+()` must be defined in order to use `Raster::operator+()`,
+but is not necessary if no method which would rely on it is called.
+Indeed, the library relies a lot on template metaprogramming,
+which can be seen as a compile time equivalent of Python's duck typing.
+
+The second template parameter is the raster dimension.
+The dimension can be set at compile time, as a positive or null integer,
+or at runtime, using -1 as a special value.
+This basically gives more freedom at the cost of less safety.
+As a rule of thumb, compile time dimensions should be preferred.
+
+Other multidimensional classes, like `Position` or `Region`,
+are also templated by the dimension and follow the same convention.
+Roughly speaking, `Position<N>` is similar to `std::array<Index, N>` when `N` is positive or null,
+while `Position<-1>` is similar to `std::vector<Index>`.
+
+
 \section primer-container Underlying container
 
 
+This is a somewhat more advanced topic.
+Skip this section if you're in a hurry.
+
 The pixel values can be stored in any contiguous container.
+This is the purpose of the third parameter
+-- which, to be precise, is the data container holder type, see \ref data_classes.
 For example, a raster built on top of a `std::vector` (with default allocator) is of type `VecRaster`.
 Here is a simple illustration of how to build the `VecRaster` illustrated in the section above
 (`arange()` is used to fill the 1D container with increasing values):

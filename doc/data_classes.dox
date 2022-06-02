@@ -18,11 +18,13 @@ This means in particular that it implements a `size()` and a `data()` method.
 This is the only responsibility of the data holder.
 
 The data holder is embedded in a `DataContainer`, which brings the standard container interface
--- `begin()`, `end()`, `operator[]()`, `operator==()` and co --
-as well as pixel-wise operators like `+`, `-`, `*`, and `/` (see \ref pixelwise).
+-- `begin()`, `end()`, `operator[]()`, `operator==()` and co.
+
 
 Finally, `Raster` provides the multidimensional features:
-shape, indexing scheme, views.
+shape, indexing scheme and views,
+as well as pixel-wise operators (like `+`, `-` and `*`), and mathematical functions (like `abs()`, `min()` and `exp()`).
+For more details, see \ref pixelwise.
 
 A simplified class diagram is depicted below:
 
