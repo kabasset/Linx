@@ -96,19 +96,19 @@ public:
    * @brief Constructor.
    * @param size The number of elements
    * @param data The data pointer if it pre-exists, or `nullptr` otherwise
-   * @param align The alignment in bytes, or 0 for default (SIMD-compatible)
+   * @param align The alignment requirement in bytes, or 0 for default (SIMD-compatible)
    * @details
    * Allocate some aligned memory if `data = nullptr`.
    * Check for alignment of `data` otherwise.
    */
   AlignedBuffer(std::size_t size, T* data = nullptr, std::size_t align = 0) :
-      m_size(size), m_container(nullptr), m_data(data) {
-    const auto as = align ? align : 64; // 64 for AVX512; TODO detect?
+      m_size(size), m_as(align ? align : 64), m_container(nullptr), m_data(data) {
+    // 64 for AVX512; TODO detect?
     if (m_data) {
-      AlignmentError::mayThrow(m_data, as);
+      AlignmentError::mayThrow(m_data, m_as);
     } else {
-      m_container = std::malloc(sizeof(T) * m_size + as - 1);
-      m_data = reinterpret_cast<T*>((std::uintptr_t(m_container) + (as - 1)) & ~(as - 1));
+      m_container = std::malloc(sizeof(T) * m_size + m_as - 1);
+      m_data = reinterpret_cast<T*>((std::uintptr_t(m_container) + (m_as - 1)) & ~(m_as - 1));
     }
   }
 
@@ -119,6 +119,7 @@ public:
    */
   AlignedBuffer(AlignedBuffer&& other) : m_size(other.m_size), m_container(other.m_container), m_data(other.m_data) {
     other.m_size = 0;
+    other.m_as = 1;
     other.m_container = nullptr;
     other.m_data = nullptr;
   }
@@ -129,9 +130,11 @@ public:
   AlignedBuffer& operator=(AlignedBuffer&& other) {
     if (this != &other) {
       m_size = other.m_size;
+      m_as = other.m_as;
       m_container = other.m_container;
       m_data = other.m_data;
       other.m_size = 0;
+      other.m_as = 1;
       other.m_container = nullptr;
       other.m_data = nullptr;
     }
@@ -150,50 +153,62 @@ public:
   }
 
   /**
-     * @brief Get the data size.
-     */
+   * @brief Get the data size.
+   */
   std::size_t size() const {
     return m_size;
   }
 
   /**
-     * @brief Get the data pointer.
-     */
+   * @brief Get the data pointer.
+   */
   const T* data() const {
     return m_data;
   }
 
   /**
-     * @brief Check whether the data is owned by this object.
-     * @details
-     * Returns false if the data is owned by another object,
-     * or if it is empty, e.g. was owned but has been moved.
-     */
+   * @brief Check whether the data is owned by this object.
+   * @details
+   * Returns false if the data is owned by another object,
+   * or if it is empty, e.g. was owned but has been moved.
+   */
   bool owns() const {
     return m_container;
   }
 
   /**
-     * @brief Get the actual data alignment, which may be better than required.
-     */
+   * @brief Get the required data alignment.
+   */
+  std::size_t alignmentReq() const {
+    return m_as;
+  }
+
+  /**
+   * @brief Get the actual data alignment, which may be better than required.
+   */
   std::size_t alignment() const {
     return Cnes::alignment(m_data);
   }
 
 protected:
   /**
-     * @brief The data size.
-     */
+   * @brief The data size.
+   */
   std::size_t m_size;
 
   /**
-     * @brief The unaligned container.
-     */
+   * @brief The required alignment.
+   */
+  std::size_t m_as;
+
+  /**
+   * @brief The unaligned container.
+   */
   Container m_container;
 
   /**
-     * @brief The aligned data.
-     */
+   * @brief The aligned data.
+   */
   T* m_data;
 };
 

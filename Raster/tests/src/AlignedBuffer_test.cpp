@@ -37,6 +37,7 @@ BOOST_AUTO_TEST_CASE(aligned_buffer_test) {
   for (std::size_t as = 16; as <= 1024; as <<= 1) {
     AlignedBuffer<int> buffer(10, nullptr, as);
     BOOST_TEST(fftw_alignment_of((double*)buffer.data()) == 0);
+    BOOST_TEST(buffer.alignmentReq() == as);
     BOOST_TEST(buffer.alignment() % as == 0);
     AlignedBuffer<int> view(10, const_cast<int*>(buffer.data()), as);
     BOOST_TEST(view.data() == buffer.data());
