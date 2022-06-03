@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(fftw_malloc_int_test) {
   fftw_free(p);
 }
 
-BOOST_AUTO_TEST_CASE(aligned_buffer_test) {
+BOOST_AUTO_TEST_CASE(alignment_test) {
   for (std::size_t as = 16; as <= 1024; as <<= 1) {
     AlignedBuffer<int> buffer(10, nullptr, as);
     BOOST_TEST(fftw_alignment_of((double*)buffer.data()) == 0);
@@ -44,6 +44,22 @@ BOOST_AUTO_TEST_CASE(aligned_buffer_test) {
     AlignedBuffer<const int> cView(10, buffer.data(), as);
     BOOST_TEST(cView.data() == buffer.data());
   }
+}
+
+BOOST_AUTO_TEST_CASE(release_reset_test) {
+  AlignedBuffer<int> owner(7);
+  AlignedBuffer<const int> viewer(7, owner.data());
+  BOOST_TEST(not viewer.release());
+  BOOST_TEST(viewer.data());
+  auto* p = owner.release();
+  BOOST_TEST(p);
+  BOOST_TEST(owner.data());
+  BOOST_TEST(not owner.owns());
+  BOOST_CHECK_NO_THROW(std::free(p));
+  viewer.reset();
+  BOOST_TEST(not viewer.data());
+  owner.reset();
+  BOOST_TEST(not owner.data());
 }
 
 //-----------------------------------------------------------------------------

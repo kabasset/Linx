@@ -25,10 +25,17 @@ public:
 
   /**
    * @brief Constructor.
-   * @param message Input message
+   * @param message Error message
    */
-  explicit Exception(const std::string& message) :
-      std::exception(), m_prefix("Cnes.Raster error: "), m_message(m_prefix + message) {}
+  explicit Exception(const std::string& message) : Exception("Cnes.Raster error", message) {}
+
+  /**
+   * @brief Constructor.
+   * @param prefix Error prefix
+   * @param message Error message
+   */
+  explicit Exception(const std::string& prefix, const std::string& message) :
+      std::exception(), m_prefix(prefix), m_message(m_prefix + ": " + message) {}
 
   /**
    * @brief Output message.
@@ -58,6 +65,28 @@ private:
 
 /**
  * @ingroup exceptions
+ * @brief Exception thrown when trying to read a null pointer.
+ */
+class NullPtrError : public Exception {
+
+public:
+  /**
+   * @brief Constructor.
+   */
+  NullPtrError(const std::string& message) : Exception("Null pointer error", message) {}
+
+  /**
+   * @brief Throw if a given pointer is null.
+   */
+  void mayThrow(const void* ptr, const std::string& message) {
+    if (not ptr) {
+      throw NullPtrError(message);
+    }
+  }
+};
+
+/**
+ * @ingroup exceptions
  * @brief Exception thrown if a value lies out of given bounds.
  */
 class OutOfBoundsError : public Exception {
@@ -66,19 +95,22 @@ public:
   /**
    * @brief Constructor.
    * @details
-   * The error message is of the form "<prefix>: <value> not in (<min>, <max>)".
+   * The error message is of the form "name: <value> not in [<min>, <max>]".
    */
-  OutOfBoundsError(const std::string& prefix, long value, std::pair<long, long> bounds) :
+  template <typename T>
+  OutOfBoundsError(const std::string& name, T value, std::pair<T, T> bounds) :
       Exception(
-          prefix + ": " + std::to_string(value) + " not in (" + std::to_string(bounds.first) + ", " +
-          std::to_string(bounds.second) + ")") {}
+          "Out of bounds error",
+          name + std::to_string(value) + " not in [" + std::to_string(bounds.first) + ", " +
+              std::to_string(bounds.second) + "]") {}
 
   /**
    * @brief Throw if a value lies out of given bounds, included.
    */
-  static void mayThrow(const std::string& prefix, long value, std::pair<long, long> bounds) {
+  template <typename T>
+  static void mayThrow(const std::string& name, T value, std::pair<T, T> bounds) {
     if (value < bounds.first || value > bounds.second) {
-      throw OutOfBoundsError(prefix, value, bounds);
+      throw OutOfBoundsError(name, value, bounds);
     }
   }
 };

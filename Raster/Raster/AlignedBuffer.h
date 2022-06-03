@@ -20,7 +20,7 @@ namespace Cnes {
 template <typename T>
 bool isAligned(const T* ptr, std::size_t as) {
   if (not ptr) {
-    throw Exception("Null pointer tested for alignment.");
+    throw NullPtrError("Null pointer tested for alignment.");
   }
   if (as == 1) {
     return true;
@@ -35,7 +35,7 @@ bool isAligned(const T* ptr, std::size_t as) {
 template <typename T>
 std::size_t alignment(const T* ptr) {
   if (not ptr) {
-    throw Exception("Null pointer tested for alignment.");
+    throw NullPtrError("Null pointer tested for alignment.");
   }
   std::size_t as = 2;
   while (std::uintptr_t(ptr) % as == 0) {
@@ -62,7 +62,7 @@ struct AlignmentError : Exception {
    * @brief Constructor.
    */
   AlignmentError(const void* ptr, std::size_t alignment) :
-      Exception(toString(ptr) + " is not " + std::to_string(alignment) + " byte-aligned.") {};
+      Exception("Alignment error", toString(ptr) + " is not " + std::to_string(alignment) + " byte-aligned.") {};
 
   /**
    * @brief Throw if the alignement requirement is not met.
@@ -80,8 +80,15 @@ struct AlignmentError : Exception {
  * @details
  * The data pointer is guaranteed to be aligned in memory
  * according to the alignment requirement (might be better).
+ * 
  * Data can be either owned by the object, or shared and owned by another object.
  * In the latter case, alignment is tested against requirement at construction.
+ * 
+ * Internally, owning buffers rely on a larger memory allocation
+ * which guarantees adequate alignment.
+ * This larger memory is freed by the destructor,
+ * unless the said buffer is `released()`,
+ * in which case the user is responsible for freeing it.
  */
 template <typename T>
 struct AlignedBuffer {
@@ -96,7 +103,7 @@ public:
    * @brief Constructor.
    * @param size The number of elements
    * @param data The data pointer if it pre-exists, or `nullptr` otherwise
-   * @param align The alignment requirement in bytes, or 0 for default (SIMD-compatible)
+   * @param align The alignment requirement in bytes, or 0 for default alignment (SIMD-compatible)
    * @details
    * Allocate some aligned memory if `data = nullptr`.
    * Check for alignment of `data` otherwise.
@@ -118,10 +125,8 @@ public:
    * @brief Move constructor.
    */
   AlignedBuffer(AlignedBuffer&& other) : m_size(other.m_size), m_container(other.m_container), m_data(other.m_data) {
-    other.m_size = 0;
-    other.m_as = 1;
-    other.m_container = nullptr;
-    other.m_data = nullptr;
+    other.release();
+    other.reset();
   }
 
   /**
@@ -133,10 +138,8 @@ public:
       m_as = other.m_as;
       m_container = other.m_container;
       m_data = other.m_data;
-      other.m_size = 0;
-      other.m_as = 1;
-      other.m_container = nullptr;
-      other.m_data = nullptr;
+      other.release();
+      other.reset();
     }
     return *this;
   }
@@ -147,9 +150,7 @@ public:
    * Frees memory if owned.
    */
   ~AlignedBuffer() {
-    if (m_container) {
-      std::free(m_container);
-    }
+    reset();
   }
 
   /**
@@ -190,6 +191,38 @@ public:
     return Cnes::alignment(m_data);
   }
 
+  /**
+   * @brief Release the memory.
+   * @details
+   * The buffer can still be used, but does not own the data anymore,
+   * and thus memory will not be freed when it goes out of scope.
+   * The method returns the pointer to the unaligned memory,
+   * i.e. the one which must be freed with `std::free()`.
+   * 
+   * Aligned memory address is still accessible as `data()`.
+   */
+  void* release() {
+    void* out = m_container;
+    m_container = nullptr;
+    return out;
+  }
+
+  /**
+   * @brief Reset the buffer.
+   * @details
+   * If the buffer is owner, memory is freed.
+   * Size is set to 0, alignment requirement to 1, and pointers are nullified.
+   */
+  void reset() {
+    if (m_container) {
+      std::free(m_container);
+      m_container = nullptr;
+    }
+    m_size = 0;
+    m_as = 1;
+    m_data = nullptr;
+  }
+
 protected:
   /**
    * @brief The data size.
@@ -204,7 +237,7 @@ protected:
   /**
    * @brief The unaligned container.
    */
-  Container m_container;
+  void* m_container;
 
   /**
    * @brief The aligned data.
