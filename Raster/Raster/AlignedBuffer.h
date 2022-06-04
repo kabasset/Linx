@@ -83,6 +83,7 @@ struct AlignmentError : Exception {
  * 
  * Data can be either owned by the object, or shared and owned by another object.
  * In the latter case, alignment is tested against requirement at construction.
+ * Owning buffers are not copyable, only movable.
  * 
  * Internally, owning buffers rely on a larger memory allocation
  * which guarantees adequate alignment.
@@ -103,14 +104,19 @@ public:
    * @brief Constructor.
    * @param size The number of elements
    * @param data The data pointer if it pre-exists, or `nullptr` otherwise
-   * @param align The alignment requirement in bytes, or 0 for default alignment (SIMD-compatible)
+   * @param align The alignment requirement in bytes, or 0 or -1 (see below)
    * @details
-   * Allocate some aligned memory if `data = nullptr`.
-   * Check for alignment of `data` otherwise.
+   * If `data = nullptr`, the buffer is owning the data,
+   * and some aligned memory is allocated.
+   * In this case, if `align` is-1 or 0, alignment is made compatible with SIMD instructions.
+   * 
+   * If the buffer is not owning (`data` is not null),
+   * `data` alignment is checked, unless `align` is 0.
+   * 
+   * // FIXME snippet
    */
   AlignedBuffer(std::size_t size, T* data = nullptr, std::size_t align = 0) :
-      m_size(size), m_as(align ? align : 64), m_container(nullptr), m_data(data) {
-    // 64 for AVX512; TODO detect?
+      m_size(size), m_as(alignAs(data, align)), m_container(nullptr), m_data(data) {
     if (m_data) {
       AlignmentError::mayThrow(m_data, m_as);
     } else {
@@ -119,14 +125,40 @@ public:
     }
   }
 
-  CNES_NON_COPYABLE(AlignedBuffer)
+  /**
+   * @brief Copy constructor.
+   */
+  AlignedBuffer(const AlignedBuffer& other) :
+      m_size(other.m_size), m_as(other.m_as), m_container(), m_data(other.m_data) {
+    if (other.owns()) {
+      throw Exception("Non-copyable owning AlignedBuffer", "AlignedBuffers can only be copied if they are not owning.");
+    }
+  }
 
   /**
    * @brief Move constructor.
    */
-  AlignedBuffer(AlignedBuffer&& other) : m_size(other.m_size), m_container(other.m_container), m_data(other.m_data) {
+  AlignedBuffer(AlignedBuffer&& other) : m_size(other.m_size), m_as(other.m_as), m_container(), m_data(other.m_data) {
     other.release();
     other.reset();
+  }
+
+  /**
+   * @brief Move assignment.
+   */
+  AlignedBuffer& operator=(const AlignedBuffer& other) {
+    if (this != &other) {
+      if (other.owns()) {
+        throw Exception(
+            "Non-copyable owning AlignedBuffer",
+            "AlignedBuffers can only be copied if they are not owning.");
+      }
+      m_size = other.m_size;
+      m_as = other.m_as;
+      m_container = other.m_container;
+      m_data = other.m_data;
+    }
+    return *this;
   }
 
   /**
@@ -221,6 +253,19 @@ public:
     m_size = 0;
     m_as = 1;
     m_data = nullptr;
+  }
+
+private:
+  static std::size_t alignAs(const void* data, std::size_t align) {
+    constexpr std::size_t simd = 64; // 64 for AVX512; TODO detect?
+    switch (align) {
+      case -1:
+        return simd;
+      case 0:
+        return data ? 1 : simd;
+      default:
+        return align;
+    }
   }
 
 protected:

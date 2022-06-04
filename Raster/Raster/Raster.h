@@ -46,8 +46,8 @@ class Raster;
  * It is a non-owning container: no allocation or freeing is made; a `PtrRaster`'s memory is managed externally.
  * This is the type which is preferred to represent contiguous views, e.g. with `Raster::section()`.
  */
-template <typename T, Index N = 2>
-using PtrRaster = Raster<T, N, DataContainerHolder<T, T*>>;
+// template <typename T, Index N = 2>
+// using PtrRaster = Raster<T, N, DataContainerHolder<T, T*>>; // FIXME
 
 /**
  * @ingroup data_classes
@@ -76,6 +76,9 @@ using VecRaster = Raster<T, N, DataContainerHolder<T, std::vector<T>>>;
  */
 template <typename T, Index N = 2>
 using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
+
+template <typename T, Index N = 2>
+using PtrRaster = AlignedRaster<T, N>; // FIXME
 
 /**
  * @ingroup data_classes
@@ -459,7 +462,7 @@ PtrRaster<T, sizeof...(Longs)> makeRaster(T* data, Longs... shape) {
       return std::function(e); \
     }); \
     return out; \
-  } // FIXME AlignedRaster?
+  }
 
 CNES_RASTER_MATH_COMPLEX_TO_REAL(real) ///< Apply `std::real()` @ingroup pixelwise
 CNES_RASTER_MATH_COMPLEX_TO_REAL(imag) ///< Apply `std::imag()` @ingroup pixelwise
