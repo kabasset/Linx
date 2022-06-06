@@ -150,7 +150,7 @@ using PtrRaster = AlignedRaster<T, N>; // FIXME
  * VecRaster<const float> cVecRaster(shape, std::move(cVec));
  * \endcode
  */
-template <typename T, Index N, typename THolder>
+template <typename T, Index N = 2, typename THolder = AlignedBuffer<T>>
 class Raster :
     public DataContainer<T, THolder, Raster<T, N, THolder>>,
     public ContainerArithmeticMixin<EuclidArithmetic, T, Raster<T, N, THolder>>,
@@ -456,8 +456,8 @@ PtrRaster<T, sizeof...(Longs)> makeRaster(T* data, Longs... shape) {
 
 #define CNES_RASTER_MATH_COMPLEX_TO_REAL(function) \
   template <typename T, Index N, typename THolder> \
-  AlignedRaster<T, N> function(const Raster<std::complex<T>, N, THolder>& in) { \
-    AlignedRaster<T, N> out(in.shape()); \
+  Raster<T, N> function(const Raster<std::complex<T>, N, THolder>& in) { \
+    Raster<T, N> out(in.shape()); \
     std::transform(in.begin(), in.end(), out.begin(), [](const auto& e) { \
       return std::function(e); \
     }); \

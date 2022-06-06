@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_SUITE(RasterDemoRandom_test)
 BOOST_AUTO_TEST_CASE(random_test) {
 
   //! [Random values]
-  Cnes::AlignedRaster<double> raster({3, 2});
+  Cnes::Raster<double> raster({3, 2});
   raster.generate(Cnes::GaussianNoise<double>(100, 15));
   //! [Random values]
 

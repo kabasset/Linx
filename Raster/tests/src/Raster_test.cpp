@@ -2,6 +2,7 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
+#include "Raster/Random.h"
 #include "Raster/Raster.h"
 #include "Raster/TestRaster.h"
 
@@ -111,7 +112,7 @@ BOOST_AUTO_TEST_CASE(subscript_bounds_test) {
   Test::RandomRaster<int> raster({width, height});
   raster.at({1, -1}) = 1;
   BOOST_TEST(raster.at({1, -1}) == 1);
-  const auto& vec = raster.container();
+  const auto& vec = raster.data();
   BOOST_TEST((raster[{0, 0}]) == vec[0]);
   BOOST_TEST(raster.at({0, 0}) == vec[0]);
   BOOST_TEST(raster.at({-1, 0}) == vec[width - 1]);
@@ -125,7 +126,8 @@ BOOST_AUTO_TEST_CASE(subscript_bounds_test) {
 }
 
 BOOST_AUTO_TEST_CASE(vecraster_move_test) {
-  Test::RandomRaster<int> raster({14, 3});
+  VecRaster<int> raster({14, 3});
+  raster.generate(UniformNoise<int>());
   const auto copied = raster.container();
   const auto data = raster.data();
   std::vector<int> moved;

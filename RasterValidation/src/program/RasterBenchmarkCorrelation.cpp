@@ -23,7 +23,7 @@ public:
 
   ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
     const auto side = args["side"].as<Cnes::Index>();
-    Cnes::VecRaster<int, 4> in({side, side, side, side});
+    Cnes::Raster<int, 4> in({side, side, side, side});
     const auto kernel = Cnes::makeSobel<int, 0, 1>();
     const auto out = kernel.correlate<int>(in);
     return ExitCode::OK;

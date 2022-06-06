@@ -96,7 +96,7 @@ void testConvolution1d(const TIn& in, const TKernel& kernel, const TOut& expecte
 
 BOOST_AUTO_TEST_CASE(convolve1d_along_test) {
   const Position<3> shape {4, 3, 5};
-  VecRaster<int, 3> in(shape);
+  Raster<int, 3> in(shape);
   Kernel1d<int, OutOfBoundsCrop> kernel({1, 2, 3}, 1);
   const int value = 10;
   in.fill(value);
@@ -136,11 +136,11 @@ BOOST_AUTO_TEST_CASE(convolve1d_along_test) {
 }
 
 BOOST_AUTO_TEST_CASE(standard_separable_convolve2d_test) {
-  VecRaster<int, 2> in({4, 3});
+  Raster<int, 2> in({4, 3});
   in.fill(2);
   std::vector<int> kernelData {1, 1, 1};
   Kernel1d<int> kernel(kernelData, 1);
-  VecRaster<int, 2> out(in.shape());
+  Raster<int, 2> out(in.shape());
   kernel.correlate2dTo(in, out);
   const std::vector<int> expected {8, 12, 12, 8, 12, 18, 18, 12, 8, 12, 12, 8};
   BOOST_TEST(out.size() == expected.size());
@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE(standard_separable_convolve2d_test) {
 }
 
 BOOST_AUTO_TEST_CASE(manual_separable_convolve2d_test) {
-  VecRaster<int, 2> in({4, 3});
+  Raster<int, 2> in({4, 3});
   in.fill(2);
   std::vector<int> kernelData {1, 1, 1};
   Kernel1d<int> kernel(kernelData, 1);
@@ -165,11 +165,11 @@ BOOST_AUTO_TEST_CASE(manual_separable_convolve2d_test) {
 
 BOOST_AUTO_TEST_CASE(steped_no_edge_convolve2d_test) {
   printf("\nSTEPPED NO EDGE\n\n");
-  VecRaster<int, 2> in({4 * 3 + 2, 3 * 2 + 2});
+  Raster<int, 2> in({4 * 3 + 2, 3 * 2 + 2});
   in.fill(2);
   std::vector<int> kernelData {1, 1, 1};
   Kernel1d<int> kernel(kernelData, 1);
-  VecRaster<int, 2> out({4, 3});
+  Raster<int, 2> out({4, 3});
   kernel.sparseCorrelate2dTo(in, {{{1, 1}, {4 * 3, 3 * 2}}, {3, 2}}, out);
   const std::vector<int> expected(12, 18);
   BOOST_TEST(out.size() == expected.size());
@@ -180,11 +180,11 @@ BOOST_AUTO_TEST_CASE(steped_no_edge_convolve2d_test) {
 
 BOOST_AUTO_TEST_CASE(stepped_front_edge_convolve2d_test) {
   printf("\nSTEPPED FRONT EDGE\n\n");
-  VecRaster<int, 2> in({4 * 3 + 2, 3 * 2 + 2});
+  Raster<int, 2> in({4 * 3 + 2, 3 * 2 + 2});
   in.fill(2);
   std::vector<int> kernelData {1, 1, 1};
   Kernel1d<int> kernel(kernelData, 1);
-  VecRaster<int, 2> out({4, 3});
+  Raster<int, 2> out({4, 3});
   kernel.sparseCorrelate2dTo(in, {{{0, 0}, {3 * 3, 2 * 2}}, {3, 2}}, out);
   const std::vector<int> expected {8, 12, 12, 12, 12, 18, 18, 18, 12, 18, 18, 18};
   BOOST_TEST(out.size() == expected.size());
@@ -195,11 +195,11 @@ BOOST_AUTO_TEST_CASE(stepped_front_edge_convolve2d_test) {
 
 BOOST_AUTO_TEST_CASE(steped_back_edge_convolve2d_test) {
   printf("\nSTEPPED BACK EDGE\n\n");
-  VecRaster<int, 2> in({4 * 3 + 2, 3 * 2 + 2});
+  Raster<int, 2> in({4 * 3 + 2, 3 * 2 + 2});
   in.fill(2);
   std::vector<int> kernelData {1, 1, 1};
   Kernel1d<int> kernel(kernelData, 1);
-  VecRaster<int, 2> out({4, 3});
+  Raster<int, 2> out({4, 3});
   kernel.sparseCorrelate2dTo(in, {{{4, 3}, {4 * 3 + 1, 3 * 2 + 1}}, {3, 2}}, out);
   const std::vector<int> expected {18, 18, 18, 12, 18, 18, 18, 12, 12, 12, 12, 8};
   BOOST_TEST(out.size() == expected.size());

@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_SUITE(Kernel1d_test)
 BOOST_AUTO_TEST_CASE(combination_test) {
   const auto sobel = makeSobel<int, 0, 1>().combine();
   std::vector<int> values {1, 0, -1, 2, 0, -2, 1, 0, -1};
-  VecRaster<int, 2> expected({3, 3}, std::move(values));
+  Raster<int, 2> expected({3, 3}, std::move(values));
   BOOST_TEST(sobel.shape() == expected.shape());
   BOOST_TEST(sobel.container() == expected.container());
 }
@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(combination_test) {
 BOOST_AUTO_TEST_CASE(sum_kernel_test) {
   const Kernel1d<int> one({1, 1, 1}, 1);
   const auto separable = one.along<0, 1, 2>();
-  VecRaster<int, 3> raster({3, 3, 3});
+  Raster<int, 3> raster({3, 3, 3});
   raster.fill(1);
   const auto sum = separable.correlate<int>(raster);
   const std::vector<int> expected {
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(sum_kernel_test) {
 BOOST_AUTO_TEST_CASE(make_sobel_test) {
   const auto sobelX = makeSobel<int, 0, 1>();
   const auto sobelY = makeSobel<int, 1, 0>();
-  VecRaster<int, 3> raster({3, 3, 3});
+  Raster<int, 3> raster({3, 3, 3});
   raster.fill(1);
   const auto edgesX = sobelX.correlate<int>(raster);
   const auto edgesY = sobelY.correlate<int>(raster);

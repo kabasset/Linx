@@ -50,11 +50,11 @@ public:
    * @brief Correlate a given image with the kernel along a given axis.
    */
   template <Index Axis, typename TOut = T, typename TRasterIn>
-  VecRaster<TOut, TRasterIn::Dim> correlateAlong(const TRasterIn& in) const {
+  Raster<TOut, TRasterIn::Dim> correlateAlong(const TRasterIn& in) const {
     const auto shape = in.shape();
     const auto length = shape[Axis];
     const auto stride = shapeStride<Axis>(shape);
-    VecRaster<TOut, TRasterIn::Dim> out(shape);
+    Raster<TOut, TRasterIn::Dim> out(shape);
     auto domain = in.domain();
     domain.back[Axis] = 0;
     for (const auto& p : domain) {
@@ -132,7 +132,7 @@ public:
     // Convolve along x-axis
     const Index xConvolvedWidth = (xTo - xFrom + xStep) / xStep;
     const Index xConvolvedHeight = yTo - yFrom + 1;
-    VecRaster<typename TRasterOut::Value, TRasterOut::Dim> xConvolved({xConvolvedWidth, xConvolvedHeight});
+    Raster<typename TRasterOut::Value, TRasterOut::Dim> xConvolved({xConvolvedWidth, xConvolvedHeight});
     DataSamples<const typename TRasterIn::Value> inSamples(
         &in[{0, yFrom}],
         in.template length<0>(),

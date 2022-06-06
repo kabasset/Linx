@@ -129,9 +129,10 @@ public:
    * @brief Copy constructor.
    */
   AlignedBuffer(const AlignedBuffer& other) :
-      m_size(other.m_size), m_as(other.m_as), m_container(), m_data(other.m_data) {
+      AlignedBuffer(other.m_size, other.owns() ? nullptr : other.m_data, other.m_as) {
     if (other.owns()) {
-      throw Exception("Non-copyable owning AlignedBuffer", "AlignedBuffers can only be copied if they are not owning.");
+      std::copy_n(other.m_data, m_size, const_cast<std::remove_cv_t<T>*>(m_data));
+      // Safe because if T is const, other is not owning (or should we throw?)
     }
   }
 
@@ -148,15 +149,16 @@ public:
    */
   AlignedBuffer& operator=(const AlignedBuffer& other) {
     if (this != &other) {
-      if (other.owns()) {
-        throw Exception(
-            "Non-copyable owning AlignedBuffer",
-            "AlignedBuffers can only be copied if they are not owning.");
-      }
       m_size = other.m_size;
       m_as = other.m_as;
-      m_container = other.m_container;
-      m_data = other.m_data;
+      if (other.owns()) {
+        m_container = std::malloc(sizeof(T) * m_size + m_as - 1);
+        m_data = reinterpret_cast<T*>((std::uintptr_t(m_container) + (m_as - 1)) & ~(m_as - 1));
+        std::copy_n(other.m_data, m_size, m_data);
+      } else {
+        m_container = other.m_container;
+        m_data = other.m_data;
+      }
     }
     return *this;
   }

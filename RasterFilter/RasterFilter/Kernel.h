@@ -47,8 +47,8 @@ public:
    * @brief Auto-correlate a raster with the kernel.
    */
   template <typename TIn>
-  VecRaster<Value, Dim> correlate(const TIn& in) {
-    VecRaster<Value, Dim> out(in.shape());
+  Raster<Value, Dim> correlate(const TIn& in) {
+    Raster<Value, Dim> out(in.shape());
     correlateTo(in, out);
     return out;
   }
@@ -71,8 +71,8 @@ public:
    * @brief Convolve a raster with the kernel.
    */
   template <typename TIn>
-  VecRaster<Value, Dim> convolve(const TIn& in) {
-    VecRaster<Value, Dim> res(in.shape());
+  Raster<Value, Dim> convolve(const TIn& in) {
+    Raster<Value, Dim> res(in.shape());
     correlateTo(in, res);
     return res;
   }
@@ -133,7 +133,7 @@ private:
   /**
    * @brief The correlation values.
    */
-  VecRaster<T, N> m_values;
+  Raster<T, N> m_values;
 
   /**
    * @brief The origin coordinates.

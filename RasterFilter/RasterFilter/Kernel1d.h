@@ -175,14 +175,14 @@ public:
   /**
    * @brief Combine the separable components as a nD kernel.
    */
-  VecRaster<Value, Dim> combine() const { // FIXME return Kernel<Value, Dim>
+  Raster<Value, Dim> combine() const { // FIXME return Kernel<Value, Dim>
     auto shape = Position<Dim>::one();
     auto origin = Position<Dim>::zero();
     for (const auto& k : m_kernels) {
       shape[k.first] = k.second.size();
       origin[k.first] = k.second.backwardSize();
     }
-    VecRaster<Value, Dim> raster(shape);
+    Raster<Value, Dim> raster(shape);
     // FIXME
     return raster;
   }
@@ -201,8 +201,8 @@ public:
    * @brief Apply the correlation kernels to an input raster.
    */
   template <typename TOut, typename TIn, Index N, typename TContainer>
-  VecRaster<TOut, N> correlate(const Raster<TIn, N, TContainer>& in) const {
-    VecRaster<TOut, N> out(in.shape());
+  Raster<TOut, N> correlate(const Raster<TIn, N, TContainer>& in) const {
+    Raster<TOut, N> out(in.shape());
     correlateTo(in, out);
     return out;
   }
@@ -219,8 +219,8 @@ public:
    * @brief Sparsely apply the correlation kernels to an input raster.
    */
   template <typename TOut, Index N, typename TRasterIn>
-  VecRaster<TOut, N> correlateSamples(const TRasterIn& in, const PositionSampling<N>& sampling) const {
-    VecRaster<TOut, N> out(sampling.shape());
+  Raster<TOut, N> correlateSamples(const TRasterIn& in, const PositionSampling<N>& sampling) const {
+    Raster<TOut, N> out(sampling.shape());
     correlateSamplesTo(in, sampling, out);
   }
 

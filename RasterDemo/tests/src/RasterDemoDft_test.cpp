@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(verbose_derivative_test) {
 BOOST_AUTO_TEST_CASE(concise_derivative_test) {
 
   //! [Fill vector]
-  Cnes::VecRaster<double, 1> in({360});
+  Cnes::Raster<double, 1> in({360});
   const double dx = Cnes::pi<double>() / 180;
   double x = 0;
   for (auto& e : in) {

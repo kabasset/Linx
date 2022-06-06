@@ -82,7 +82,7 @@ protected:
   const Index m_depth;
   const Test::RandomRaster<Value, Dim> m_a;
   const Test::RandomRaster<Value, Dim> m_b;
-  VecRaster<Value, Dim> m_c;
+  Raster<Value, Dim> m_c;
   Chronometer<Duration> m_chrono;
 };
 

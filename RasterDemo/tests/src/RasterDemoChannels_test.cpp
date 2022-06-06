@@ -11,7 +11,7 @@
 struct Rgb {
 
   // The associated image type
-  using Image = Cnes::VecRaster<Rgb, 2>;
+  using Image = Cnes::Raster<Rgb, 2>;
 
   // The components
   unsigned char r, g, b;
@@ -27,7 +27,7 @@ struct Rgb {
 // A HSV (hue, saturation, value) color with H in [0, 360), and S and V in [0, 1].
 struct Hsv {
 
-  using Image = Cnes::VecRaster<Hsv, 2>;
+  using Image = Cnes::Raster<Hsv, 2>;
 
   double h, s, v;
 
@@ -126,8 +126,8 @@ BOOST_AUTO_TEST_CASE(color_struct_test) {
 BOOST_AUTO_TEST_CASE(color_along_0_test) {
 
   //! [CxyImage]
-  using RgbXyImage = Cnes::VecRaster<unsigned char, 3>;
-  using HsvXyImage = Cnes::VecRaster<double, 3>;
+  using RgbXyImage = Cnes::Raster<unsigned char, 3>;
+  using HsvXyImage = Cnes::Raster<double, 3>;
   //! [CxyImage]
 
   //! [Input Cxy]
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(color_along_0_test) {
 BOOST_AUTO_TEST_CASE(color_along_2_test) {
 
   //! [XycImage]
-  using XyRgbImage = Cnes::VecRaster<double, 3>;
+  using XyRgbImage = Cnes::Raster<double, 3>;
   //! [XycImage]
 
   //! [Input Xyc]
@@ -183,8 +183,8 @@ BOOST_AUTO_TEST_CASE(color_along_2_test) {
 BOOST_AUTO_TEST_CASE(vector_along_2_test) {
 
   //! [Vector image]
-  using HyperspectralCube = Cnes::VecRaster<double, 3>;
-  using IntegratedImage = Cnes::VecRaster<double, 2>;
+  using HyperspectralCube = Cnes::Raster<double, 3>;
+  using IntegratedImage = Cnes::Raster<double, 2>;
   //! [Vector image]
 
   Cnes::Index n = 100; // Or read from command line

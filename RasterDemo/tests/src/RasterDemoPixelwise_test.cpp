@@ -14,9 +14,9 @@ struct Fixture {
       c({3, 2}), // FIXME , ?
       k(2.) {}
 
-  Cnes::VecRaster<double> a;
-  Cnes::VecRaster<double> b;
-  Cnes::VecRaster<std::complex<double>> c;
+  Cnes::Raster<double> a;
+  Cnes::Raster<double> b;
+  Cnes::Raster<std::complex<double>> c;
   double k;
 };
 

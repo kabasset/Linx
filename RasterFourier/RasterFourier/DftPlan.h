@@ -174,14 +174,14 @@ public:
    * @warning
    * Contains garbage after `transform()` has been called.
    */
-  const AlignedRaster<InValue, N>& in() const {
+  const Raster<InValue, N>& in() const {
     return m_in;
   }
 
   /**
    * @copydoc in()const
    */
-  AlignedRaster<InValue, N>& in() {
+  Raster<InValue, N>& in() {
     return m_in;
   }
 
@@ -195,14 +195,14 @@ public:
   /**
    * @brief Access the output buffer.
    */
-  const AlignedRaster<OutValue, N>& out() const {
+  const Raster<OutValue, N>& out() const {
     return m_out;
   }
 
   /**
    * @copydoc out()const
    */
-  AlignedRaster<OutValue, N>& out() {
+  Raster<OutValue, N>& out() {
     return m_out;
   }
 
@@ -239,12 +239,12 @@ private:
   /**
    * @brief The input stack.
    */
-  AlignedRaster<InValue, N> m_in;
+  Raster<InValue, N> m_in;
 
   /**
    * @brief The output stack.
    */
-  AlignedRaster<OutValue, N> m_out;
+  Raster<OutValue, N> m_out;
 
   /**
    * @brief The transform plan.

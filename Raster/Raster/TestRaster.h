@@ -17,14 +17,14 @@ namespace Test {
  * Values are uniformly distributed between a given min and max.
  */
 template <typename T, long N = 2>
-class RandomRaster : public VecRaster<T, N> {
+class RandomRaster : public Raster<T, N> {
 
 public:
   /**
    * @brief Generate a Raster with given shape.
    */
   explicit RandomRaster(Position<N> shape, T min = almostMin<T>(), T max = almostMax<T>()) :
-      VecRaster<T, N>(shape, generateRandomVector<T>(shapeSize(shape), min, max)) {}
+      Raster<T, N>(shape, generateRandomVector<T>(shapeSize(shape), min, max)) {}
 
   /**
    * @brief Destructor.

@@ -16,14 +16,14 @@ namespace Cnes {
  * @brief DFT buffer of real data.
  */
 template <Index N = 2>
-using RealDftBuffer = AlignedRaster<double, N>;
+using RealDftBuffer = Raster<double, N>;
 
 /**
  * @ingroup dft
  * @brief DFT buffer of complex data.
  */
 template <Index N = 2>
-using ComplexDftBuffer = AlignedRaster<std::complex<double>, N>;
+using ComplexDftBuffer = Raster<std::complex<double>, N>;
 
 /// @cond
 namespace Internal {
@@ -97,7 +97,7 @@ struct DftTransformMixin {
    * @brief Allocate an FFTW plan.
    */
   template <Index N>
-  static FftwPlanPtr allocateFftwPlan(AlignedRaster<TIn, N>& in, AlignedRaster<TOut, N>& out);
+  static FftwPlanPtr allocateFftwPlan(Raster<TIn, N>& in, Raster<TOut, N>& out);
 };
 
 /**
@@ -123,7 +123,7 @@ struct DftTransformMixin<TIn, TOut, Inverse<TTransform>> {
   }
 
   template <Index N>
-  static FftwPlanPtr allocateFftwPlan(AlignedRaster<TOut, N>& in, AlignedRaster<TIn, N>& out);
+  static FftwPlanPtr allocateFftwPlan(Raster<TOut, N>& in, Raster<TIn, N>& out);
 };
 
 template <typename TTransform>
