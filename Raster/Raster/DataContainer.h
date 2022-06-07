@@ -42,7 +42,7 @@ public:
   /**
    * @brief Default or size-based constructor.
    */
-  template <typename U>
+  template <typename U = T>
   explicit DataContainerHolder(std::size_t size, U* data = nullptr) : m_container(size) {
     if (data) {
       std::copy_n(data, size, const_cast<T*>(this->data()));
@@ -50,10 +50,11 @@ public:
   }
 
   /**
-   * @brief Forwarding constructor.
+   * @brief Container-move constructor.
    */
-  template <typename... TArgs>
-  explicit DataContainerHolder(TArgs&&... args) : m_container(std::forward<TArgs>(args)...) {}
+  explicit DataContainerHolder(std::size_t size, Container&& container) : m_container(std::move(container)) {
+    // FIXME check size
+  }
 
   /// @group_properties
 
@@ -70,12 +71,41 @@ public:
    * @brief Access the raw data.
    */
   inline const T* data() const {
-    return m_container.data();
+    return &m_container[0]; // m_container.data() not available for valarray
+  }
+
+  /**
+   * @brief Access the underlying container in read-only mode.
+   */
+  const std::decay_t<Container>& container() const {
+    return this->m_container;
+  }
+
+  /// @group_modifiers
+
+  /**
+   * @brief Move the container.
+   * @details
+   * This method is used to take ownership on the data without copying it.
+   * Example usage:
+   * \code
+   * VecRaster<float> raster(...);
+   * std::vector<float> data;
+   * raster.moveTo(data);
+   * // Values have been moved to data without copy.
+   * // raster.vector() is in an unspecified state now.
+   * \endcode
+   * @warning
+   * The container is not usable anymore after this call.
+   */
+  Container& moveTo(Container& destination) {
+    destination = std::move(this->m_container);
+    return destination;
   }
 
   /// @}
 
-protected:
+private:
   /**
    * @brief The underlying container.
    */
@@ -105,7 +135,7 @@ public:
     return m_container;
   }
 
-protected:
+private:
   /**
    * @brief The number of elements.
    */
@@ -138,6 +168,10 @@ public:
     }
   }
 
+  explicit DataContainerHolder(std::size_t size, Container&& container) : m_container(std::move(container)) {
+    // FIXME check size
+  }
+
   std::size_t size() const {
     return N;
   }
@@ -146,7 +180,16 @@ public:
     return m_container.data();
   }
 
-protected:
+  const std::decay_t<Container>& container() const {
+    return this->m_container;
+  }
+
+  Container& moveTo(Container& destination) {
+    destination = std::move(this->m_container);
+    return destination;
+  }
+
+private:
   /**
    * @brief The data array.
    */
@@ -185,15 +228,6 @@ public:
    */
   template <typename... TArgs>
   explicit DataContainer(std::size_t s = 0, TArgs&&... args) : Holder(s, std::forward<TArgs>(args)...) {}
-
-  /**
-   * @brief Container-move constructor.
-   * @details
-   * The container is moved without copy.
-   */
-  explicit DataContainer(std::size_t s, Container&& container) : Holder(s, (T*)nullptr) {
-    this->m_container = std::move(container);
-  }
 
   /**
    * @brief List-based constructor.
@@ -240,13 +274,6 @@ public:
    */
   inline T* data() {
     return const_cast<T*>(const_cast<const DataContainer&>(*this).data());
-  }
-
-  /**
-   * @brief Access the underlying container in read-only mode.
-   */
-  const std::decay_t<Container>& container() const {
-    return this->m_container;
   }
 
   /// @group_modifiers
@@ -340,26 +367,6 @@ public:
   template <typename TFunc, typename... TContainers>
   TDerived& apply(TFunc&& func, const TContainers&... args) {
     return generate(std::forward<TFunc>(func), static_cast<TDerived&>(*this), args...);
-  }
-
-  /**
-   * @brief Move the container.
-   * @details
-   * This method is used to take ownership on the data without copying it.
-   * Example usage:
-   * \code
-   * VecRaster<float> raster(...);
-   * std::vector<float> data;
-   * raster.moveTo(data);
-   * // Values have been moved to data without copy.
-   * // raster.vector() is in an unspecified state now.
-   * \endcode
-   * @warning
-   * The container is not usable anymore after this call.
-   */
-  Container& moveTo(Container& destination) {
-    destination = std::move(this->m_container);
-    return destination;
   }
 
   /// @}

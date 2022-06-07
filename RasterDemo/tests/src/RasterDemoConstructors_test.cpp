@@ -75,16 +75,6 @@ BOOST_AUTO_TEST_CASE(ptrraster_ctors_test) {
   BOOST_TEST((cMade == cConstructed));
 }
 
-BOOST_AUTO_TEST_CASE(vecraster_ctors_test) {
-  //! [VecRaster]
-  Cnes::VecRaster<int> filledWithValue({3, 2}, 42);
-  //! [VecRaster]
-
-  for (auto e : filledWithValue) {
-    BOOST_TEST(e == 42);
-  }
-}
-
 BOOST_AUTO_TEST_CASE(alignedraster_ctors_test) {
 
   //! [AlignedRaster owns]
