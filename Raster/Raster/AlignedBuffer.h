@@ -145,7 +145,7 @@ public:
   }
 
   /**
-   * @brief Move assignment.
+   * @brief Copy assignment.
    */
   AlignedBuffer& operator=(const AlignedBuffer& other) {
     if (this != &other) {
@@ -197,7 +197,7 @@ public:
   /**
    * @brief Get the data pointer.
    */
-  const T* data() const {
+  inline const T* data() const {
     return m_data;
   }
 
