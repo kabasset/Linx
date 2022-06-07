@@ -96,11 +96,6 @@ struct AlignedBuffer {
 
 public:
   /**
-   * @brief The concrete container type.
-   */
-  using Container = void*;
-
-  /**
    * @brief Constructor.
    * @param size The number of elements
    * @param data The data pointer if it pre-exists, or `nullptr` otherwise

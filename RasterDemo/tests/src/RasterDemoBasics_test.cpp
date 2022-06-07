@@ -11,8 +11,6 @@ template <typename T>
 struct MallocContainer {
 
 public:
-  using Container = T*;
-
   MallocContainer(std::size_t s, T* d = nullptr) : m_size(s), m_container((T*)malloc(m_size * sizeof(T))) {
     if (d) {
       std::copy_n(d, m_size, m_container);

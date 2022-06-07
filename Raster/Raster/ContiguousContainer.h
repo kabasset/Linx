@@ -25,35 +25,15 @@ namespace Cnes {
  * @brief Requirements for a `DataContainerHolder`.
  * @details
  * A contiguous data holder is some class which stores or points to
- * some data contiguous in memory as a public or protected member `TContainer m_container`,
+ * some data contiguous in memory,
  * and implements the following methods:
  * - Constructor from a size and pointer;
  * - `std::size_t size() const`;
  * - `inline const T* data() const`.
  * 
  * @par_example
- * Here is a minimal `SizedData`-compliant class which wraps a `std::vector`:
- * \code
- * template<typename T>
- * struct VecSizedData {
- * 
- *   VecSizedData(std::size_t s, T* d) : m_container(s) {
- *     if (d) {
- *       std::copy_n(d, s, m_container.data());
- *     }
- *   }
- * 
- *   std::size_t size() const {
- *     return m_container.size();
- *   }
- * 
- *   inline const T* data() {
- *     return m_container.data();
- *   }
- * 
- *   std::vector<T> m_container;
- * };
- * \endcode
+ * Here is a minimal `SizedData`-compliant class:
+ * \snippet RasterDemoBasics_test.cpp MallocRaster
  */
 
 /**

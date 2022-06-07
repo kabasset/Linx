@@ -123,8 +123,6 @@ template <typename T>
 class DataContainerHolder<T, T*> {
 
 public:
-  using Container = T*;
-
   explicit DataContainerHolder(std::size_t size, T* data) : m_size(size), m_container(data) {}
 
   std::size_t size() const {
@@ -215,11 +213,6 @@ public:
    */
   using Holder = THolder;
 
-  /**
-   * @brief The concrete container type.
-   */
-  using Container = typename Holder::Container;
-
   /// @{
   /// @group_construction
 
@@ -246,7 +239,7 @@ public:
    * Iterable values are copied to the container.
    */
   template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr, typename... TArgs>
-  explicit DataContainer(TIterable&& iterable, TArgs&&... args) :
+  explicit DataContainer(const TIterable& iterable, TArgs&&... args) :
       Holder(std::distance(iterable.begin(), iterable.end()), std::forward<TArgs>(args)...) {
     std::copy(iterable.begin(), iterable.end(), this->data());
   }

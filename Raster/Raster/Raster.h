@@ -16,6 +16,7 @@
 #include <complex>
 #include <cstdint>
 #include <string>
+#include <valarray>
 #include <vector>
 
 /**
@@ -46,8 +47,8 @@ class Raster;
  * It is a non-owning container: no allocation or freeing is made; a `PtrRaster`'s memory is managed externally.
  * This is the type which is preferred to represent contiguous views, e.g. with `Raster::section()`.
  */
-// template <typename T, Index N = 2>
-// using PtrRaster = Raster<T, N, DataContainerHolder<T, T*>>; // FIXME
+template <typename T, Index N = 2>
+using PtrRaster = Raster<T, N, DataContainerHolder<T, T*>>;
 
 /**
  * @ingroup data_classes
@@ -58,8 +59,11 @@ class Raster;
  * or other tools which work with `std::vector`s without copies,
  * because `std::vector` itself cannot be initialized without copies from an external pointer.
  */
+template <typename T, Index N = 2, typename TAllocator = std::allocator<T>>
+using VecRaster = Raster<T, N, DataContainerHolder<T, std::vector<T, TAllocator>>>;
+
 template <typename T, Index N = 2>
-using VecRaster = Raster<T, N, DataContainerHolder<T, std::vector<T>>>;
+using ValRaster = Raster<T, N, DataContainerHolder<T, std::valarray<T>>>; // FIXME rm
 
 /**
  * @ingroup data_classes
@@ -75,10 +79,7 @@ using VecRaster = Raster<T, N, DataContainerHolder<T, std::vector<T>>>;
  * `AlignedRaster` is a reasonnable default choice.
  */
 template <typename T, Index N = 2>
-using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
-
-template <typename T, Index N = 2>
-using PtrRaster = AlignedRaster<T, N>; // FIXME
+using AlignedRaster = Raster<T, N, AlignedBuffer<T>>; // FIXME BufRaster
 
 /**
  * @ingroup data_classes
@@ -150,7 +151,7 @@ using PtrRaster = AlignedRaster<T, N>; // FIXME
  * VecRaster<const float> cVecRaster(shape, std::move(cVec));
  * \endcode
  */
-template <typename T, Index N = 2, typename THolder = AlignedBuffer<T>>
+template <typename T, Index N = 2, typename THolder = DataContainerHolder<T, std::vector<T>>>
 class Raster :
     public DataContainer<T, THolder, Raster<T, N, THolder>>,
     public ContainerArithmeticMixin<EuclidArithmetic, T, Raster<T, N, THolder>>,
@@ -195,22 +196,6 @@ public:
       m_shape(std::move(shape)) {}
 
   /**
-   * @brief Container-move constructor.
-   * @param shape The raster shape
-   * @param container The container to be moved into the holder
-   * @details
-   * The holder is instantiated as:
-   * \code
-   * Holder holder(shapeSize(shape));
-   * holder.m_container = std::move(container);
-   * \endcode
-   */
-  template <typename... TArgs>
-  explicit Raster(Position<N> shape, typename THolder::Container&& container) :
-      DataContainer<T, THolder, Raster<T, N, THolder>>(shapeSize(shape), std::move(container)),
-      m_shape(std::move(shape)) {}
-
-  /**
    * @brief List-copy constructor.
    * @param shape The raster shape
    * @param list The values to be copied into the holder
@@ -241,8 +226,8 @@ public:
    * \endcode
    */
   template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr, typename... TArgs>
-  explicit Raster(Position<N> shape, TIterable&& iterable, TArgs&&... args) :
-      DataContainer<T, THolder, Raster<T, N, THolder>>(std::forward<TIterable>(iterable), std::forward<TArgs>(args)...),
+  explicit Raster(Position<N> shape, TIterable& iterable, TArgs&&... args) :
+      DataContainer<T, THolder, Raster<T, N, THolder>>(iterable, std::forward<TArgs>(args)...),
       m_shape(std::move(shape)) {
     // FIXME assert sizes match
   }
