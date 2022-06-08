@@ -77,11 +77,11 @@ public:
   Duration callGenerate();
 
 protected:
-  const Index m_width;
-  const Index m_height;
-  const Index m_depth;
-  const Test::RandomRaster<Value, Dim> m_a;
-  const Test::RandomRaster<Value, Dim> m_b;
+  Index m_width;
+  Index m_height;
+  Index m_depth;
+  Raster<Value, Dim> m_a;
+  Raster<Value, Dim> m_b;
   Raster<Value, Dim> m_c;
   Chronometer<Duration> m_chrono;
 };

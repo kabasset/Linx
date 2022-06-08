@@ -4,11 +4,18 @@
 
 #include "RasterValidation/IterationBenchmark.h"
 
+#include "Raster/Random.h"
+
 namespace Cnes {
 
 IterationBenchmark::IterationBenchmark(Index side) :
     m_width(side), m_height(side), m_depth(side), m_a({side, side, side}), m_b({side, side, side}),
-    m_c({side, side, side}) {}
+    m_c({side, side, side}) {
+  //! [Randomize]
+  m_a.generate(UniformNoise<Value>(-50, 50));
+  m_b.generate(GaussianNoise<Value>(0, 10));
+  //! [Randomize]
+}
 
 IterationBenchmark::Duration IterationBenchmark::loopOverXyz() {
   m_chrono.start();

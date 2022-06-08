@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(color_along_0_test) {
 BOOST_AUTO_TEST_CASE(color_along_2_test) {
 
   //! [XycImage]
-  using XyRgbImage = Cnes::Raster<double, 3>;
+  using XyRgbImage = Cnes::Raster<unsigned char, 3>;
   //! [XycImage]
 
   //! [Input Xyc]

@@ -24,14 +24,14 @@ namespace Cnes {
  * 
  * When a region is indeed contiguous, it is better to rely on a PtrRaster instead:
  * \code
- * VecRaster<char, 3> raster({800, 600, 3});
+ * Raster<char, 3> raster({800, 600, 3});
  * 
  * // Good :)
- * auto region = Region<3>::fromOver({100, 100, 0}, {100, 100, 3});
+ * auto region = Region<3>::fromShape({100, 100, 0}, {100, 100, 3});
  * Subraster<char, 3> subraster {raster, region};
  * 
  * // Bad :(
- * auto slice = Region<3>::fromTo({0, 0, 1}, {-1, -1, 1});
+ * auto slice = Region<3>({0, 0, 1}, {-1, -1, 1});
  * Subraster<char, 3> contiguousSubraster {raster, slice};
  * 
  * // Good :)

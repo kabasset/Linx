@@ -38,9 +38,9 @@ using Indices = typename std::conditional<(N == -1), std::vector<Index>, std::ar
  * 
  * Anonymous brace-initialization is permitted, e.g.:
  * \code
- * VecRaster<float> raster({1920, 1080});
+ * Raster<float> raster({1920, 1080});
  * // Is equivalent to
- * VecRaster<float> raster(Position<2>({1920, 1080}));
+ * Raster<float> raster(Position<2>({1920, 1080}));
  * \endcode
  * 
  * Classical positions are instantiated with named constructors, e.g.:

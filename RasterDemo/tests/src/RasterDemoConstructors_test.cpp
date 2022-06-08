@@ -32,6 +32,7 @@ BOOST_AUTO_TEST_CASE(any_raster_ctors_test) {
     BOOST_TEST(copiedFromIterable[i] == i + 1);
     BOOST_TEST(movedFromContainer[i] == i + 1);
   }
+  BOOST_TEST(copiedFromIterable.data() != data);
   BOOST_TEST(movedFromContainer.data() == data);
 
   const int* listData = listInitialized.data();

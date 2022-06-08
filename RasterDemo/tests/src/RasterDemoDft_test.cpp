@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(verbose_derivative_test) {
   // Inverse transformed data is in direct.in(); direct.out() is garbage now.
   //! [Inverse transform]
 
-  for (Cnes::Index i = 0; i < direct.in().size(); ++i) {
+  for (std::size_t i = 0; i < direct.in().size(); ++i) {
     BOOST_TEST(std::abs(direct.in()[i] - std::cos(dx * i)) < .001);
   }
 }

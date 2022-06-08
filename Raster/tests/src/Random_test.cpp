@@ -90,7 +90,7 @@ CNES_RASTER_TEST_CASE_TEMPLATE(poisson_test) {
 }
 
 BOOST_AUTO_TEST_CASE(reproducible_gaussian_test) {
-  VecRaster<int, 1> rasterA({3}, {10, 100, 1000});
+  Raster<int, 1> rasterA({3}, {10, 100, 1000});
   auto rasterB = rasterA;
   rasterB[1] = 1;
   GaussianNoise<int> noiseA(0, 1, 0);
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(reproducible_gaussian_test) {
 }
 
 BOOST_AUTO_TEST_CASE(reproducible_poisson_test) {
-  VecRaster<int, 1> rasterA({3}, {10, 100, 1000});
+  Raster<int, 1> rasterA({3}, {10, 100, 1000});
   auto rasterB = rasterA;
   rasterB[1] = 1;
   StablePoissonNoise<int> noiseA(0, 0);
