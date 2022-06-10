@@ -8,17 +8,17 @@
 
 //! [MallocRaster]
 template <typename T>
-struct MallocContainer {
+struct MallocHolder {
 
 public:
-  MallocContainer(std::size_t s, T* d = nullptr) : m_size(s), m_container((T*)malloc(m_size * sizeof(T))) {
+  MallocHolder(std::size_t s, T* d = nullptr) : m_size(s), m_data((T*)malloc(m_size * sizeof(T))) {
     if (d) {
-      std::copy_n(d, m_size, m_container);
+      std::copy_n(d, m_size, m_data);
     }
   }
 
-  ~MallocContainer() {
-    free(m_container);
+  ~MallocHolder() {
+    free(m_data);
   }
 
   std::size_t size() const {
@@ -26,26 +26,25 @@ public:
   }
 
   const T* data() const {
-    return m_container;
+    return m_data;
   }
 
 private:
   std::size_t m_size;
-
-  T* m_container;
+  T* m_data;
 };
 
 template <typename T, Cnes::Index N>
-using MallocRaster = Cnes::Raster<T, N, MallocContainer<T>>;
+using MallocRaster = Cnes::Raster<T, N, MallocHolder<T>>;
 //! [MallocRaster]
 
-Cnes::VecRaster<int, 3> vecRasterIota() {
-  //! [VecRaster iota]
-  Cnes::VecRaster<int, 3> raster({4, 3, 2});
+Cnes::VecRaster<int, 3> rasterIota() {
+  //! [Raster iota]
+  Cnes::Raster<int, 3> raster({4, 3, 2});
   raster.arange(); // Assigns {0, 1, 2...}
   std::cout << "Access by ND position: " << raster[{2, 1, 0}] << std::endl; // 6
   std::cout << "Access by 1D index: " << raster[6] << std::endl; // 6
-  //! [VecRaster iota]
+  //! [Raster iota]
   return raster;
 }
 
@@ -55,8 +54,17 @@ BOOST_AUTO_TEST_SUITE(RasterDemoBasics_test)
 
 //-----------------------------------------------------------------------------
 
+BOOST_AUTO_TEST_CASE(raster_iota_test) {
+  rasterIota();
+}
+
 BOOST_AUTO_TEST_CASE(vec_raster_iota_test) {
-  vecRasterIota();
+  //! [VecRaster iota]
+  Cnes::VecRaster<int, 3> raster({4, 3, 2});
+  raster.arange(); // Assigns {0, 1, 2...}
+  std::cout << "Access by ND position: " << raster[{2, 1, 0}] << std::endl; // 6
+  std::cout << "Access by 1D index: " << raster[6] << std::endl; // 6
+  //! [VecRaster iota]
 }
 
 BOOST_AUTO_TEST_CASE(ptr_raster_iota_test) {
@@ -81,7 +89,7 @@ BOOST_AUTO_TEST_CASE(malloc_raster_iota_test) {
 
 BOOST_AUTO_TEST_CASE(element_access_test) {
 
-  const auto raster = vecRasterIota();
+  const auto raster = rasterIota();
 
   //! [Element access]
   std::cout << "Access by ND position: " << raster[{2, 2, 0}] << std::endl; // 10
@@ -92,7 +100,7 @@ BOOST_AUTO_TEST_CASE(element_access_test) {
 
 BOOST_AUTO_TEST_CASE(foreach_element_test) {
 
-  auto raster = vecRasterIota();
+  auto raster = rasterIota();
 
   //! [Foreach element]
   // Position

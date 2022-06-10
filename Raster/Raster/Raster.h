@@ -34,7 +34,7 @@ namespace Cnes {
 template <typename T, Index N, typename THolder>
 class Subraster;
 
-// Forward declaration for PtrRaster and VecRaster
+// Forward declaration for specializations
 template <typename T, Index N, typename THolder>
 class Raster;
 
@@ -48,11 +48,11 @@ class Raster;
  * This is the type which is preferred to represent contiguous views, e.g. with `Raster::section()`.
  */
 template <typename T, Index N = 2>
-using PtrRaster = Raster<T, N, DataContainerHolder<T, T*>>;
+using PtrRaster = Raster<T, N, PtrHolder<T>>;
 
 /**
  * @ingroup data_classes
- * @brief `Raster` which owns a data vector.
+ * @brief `Raster` which owns a `std::vector`.
  * @details
  * The underlying container is a `std::vector`.
  * It is convenient to interface with the standard library
@@ -60,10 +60,24 @@ using PtrRaster = Raster<T, N, DataContainerHolder<T, T*>>;
  * because `std::vector` itself cannot be initialized without copies from an external pointer.
  */
 template <typename T, Index N = 2, typename TAllocator = std::allocator<T>>
-using VecRaster = Raster<T, N, DataContainerHolder<T, std::vector<T, TAllocator>>>;
+using VecRaster = Raster<T, N, StdHolder<std::vector<T, TAllocator>>>;
 
+/**
+ * @ingroup data_classes
+ * @brief `Raster` which owns a `std::valarray`.
+ */
 template <typename T, Index N = 2>
-using ValRaster = Raster<T, N, DataContainerHolder<T, std::valarray<T>>>; // FIXME rm
+using ValRaster = Raster<T, N, StdHolder<std::valarray<T>>>;
+
+/**
+ * @ingroup data_classes
+ * @brief `Raster` which owns a `std::valarray`.
+ * @tparam T The pixel type
+ * @tparam Capacity The maximum number of pixels
+ * @tparam N The raster dimension
+ */
+template <typename T, std::size_t Capacity, Index N = 2>
+using ArrRaster = Raster<T, N, StdHolder<std::array<T, Capacity>>>;
 
 /**
  * @ingroup data_classes
@@ -75,11 +89,9 @@ using ValRaster = Raster<T, N, DataContainerHolder<T, std::valarray<T>>>; // FIX
  *   which by default will be aligned to ensure smooth usage of SIMD instructions;
  * - If it is constructed from a non-null pointer, it will act as a `PtrRaster`, i.e. not allocate or free memory,
  *   but will verify that the memory is well aligned at construction (or throw an exception otherwise).
- * 
- * `AlignedRaster` is a reasonnable default choice.
  */
 template <typename T, Index N = 2>
-using AlignedRaster = Raster<T, N, AlignedBuffer<T>>; // FIXME BufRaster
+using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
 
 /**
  * @ingroup data_classes
@@ -87,7 +99,7 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>; // FIXME BufRaster
  * 
  * @tparam T The value type, which can be `const`-qualified for read-only rasters
  * @tparam N The dimension, which can be &ge; 0 for fixed dimension, or -1 for variable dimension
- * @tparam THolder The underlying data container holder
+ * @tparam THolder The underlying data holder
  * 
  * @details
  * A raster is a contiguous container for the pixel data of an image.
@@ -123,6 +135,8 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>; // FIXME BufRaster
  * 
  * @tspecialization{PtrRaster}
  * @tspecialization{VecRaster}
+ * @tspecialization{ValRaster}
+ * @tspecialization{ArrRaster}
  * @tspecialization{AlignedRaster}
  * 
  * @satisfies{ContiguousContainer}
@@ -151,10 +165,10 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>; // FIXME BufRaster
  * VecRaster<const float> cVecRaster(shape, std::move(cVec));
  * \endcode
  */
-template <typename T, Index N = 2, typename THolder = DataContainerHolder<T, std::vector<T>>>
+template <typename T, Index N = 2, typename THolder = StdHolder<std::vector<T>>>
 class Raster :
     public DataContainer<T, THolder, Raster<T, N, THolder>>,
-    public ContainerArithmeticMixin<EuclidArithmetic, T, Raster<T, N, THolder>>,
+    public ArithmeticMixin<EuclidArithmetic, T, Raster<T, N, THolder>>,
     public MathFunctionsMixin<T, Raster<T, N, THolder>> {
   friend class ImageRaster; // FIXME rm when Subraster is removed
 
@@ -419,15 +433,11 @@ private:
  * \endcode
  */
 template <typename TContainer, typename... Longs>
-Raster<
-    typename TContainer::value_type,
-    sizeof...(Longs),
-    DataContainerHolder<typename TContainer::value_type, TContainer>>
+Raster<typename TContainer::value_type, sizeof...(Longs), StdHolder<TContainer>>
 makeRaster(TContainer&& data, Longs... shape) {
-  return Raster<
-      typename TContainer::value_type,
-      sizeof...(Longs),
-      DataContainerHolder<typename TContainer::value_type, TContainer>> {{shape...}, std::forward<TContainer>(data)};
+  return Raster<typename TContainer::value_type, sizeof...(Longs), StdHolder<TContainer>> {
+      {shape...},
+      std::forward<TContainer>(data)};
 }
 
 /**

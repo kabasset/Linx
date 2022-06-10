@@ -74,7 +74,7 @@ class EuclidArithmetic;
  * `generate()` and `apply()` to apply a function to each element.
  */
 template <typename TSpecs, typename T, typename TDerived>
-struct ContainerArithmeticMixin;
+struct ArithmeticMixin;
 
 /**
  * @ingroup pixelwise
@@ -83,7 +83,7 @@ struct ContainerArithmeticMixin;
  * @satisfies{VectorArithmetic}
  */
 template <typename T, typename TDerived>
-struct ContainerArithmeticMixin<VectorArithmetic, T, TDerived> :
+struct ArithmeticMixin<VectorArithmetic, T, TDerived> :
     boost::additive<TDerived>,
     boost::additive<TDerived, T>,
     boost::subtractable2_left<TDerived, T>,
@@ -161,7 +161,7 @@ struct ContainerArithmeticMixin<VectorArithmetic, T, TDerived> :
  * @satisfies{EuclidArithmetic}
  */
 template <typename T, typename TDerived>
-struct ContainerArithmeticMixin<EuclidArithmetic, T, TDerived> :
+struct ArithmeticMixin<EuclidArithmetic, T, TDerived> :
     boost::additive<TDerived>,
     boost::additive<TDerived, T>,
     boost::subtractable2_left<TDerived, T>,

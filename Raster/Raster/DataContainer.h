@@ -27,8 +27,8 @@ namespace Cnes {
  * in which case the specialization should satisfy the `SizedData` requirements.
  * @satisfies{SizedData}
  */
-template <typename T, typename TContainer>
-class DataContainerHolder {
+template <typename TContainer>
+class StdHolder {
 
 public:
   /**
@@ -42,17 +42,17 @@ public:
   /**
    * @brief Default or size-based constructor.
    */
-  template <typename U = T>
-  explicit DataContainerHolder(std::size_t size, U* data = nullptr) : m_container(size) {
+  template <typename U = typename TContainer::value_type>
+  explicit StdHolder(std::size_t size, U* data = nullptr) : m_container(size) {
     if (data) {
-      std::copy_n(data, size, const_cast<T*>(this->data()));
+      std::copy_n(data, size, const_cast<typename TContainer::value_type*>(this->data()));
     }
   }
 
   /**
    * @brief Container-move constructor.
    */
-  explicit DataContainerHolder(std::size_t size, Container&& container) : m_container(std::move(container)) {
+  explicit StdHolder(std::size_t size, Container&& container) : m_container(std::move(container)) {
     // FIXME check size
   }
 
@@ -70,7 +70,7 @@ public:
   /**
    * @brief Access the raw data.
    */
-  inline const T* data() const {
+  inline const typename TContainer::value_type* data() const {
     return &m_container[0]; // m_container.data() not available for valarray
   }
 
@@ -114,50 +114,17 @@ private:
 
 /**
  * @ingroup data_classes
- * @brief Raw pointer specialization.
- * @details
- * This is a non-owning holder, i.e. some view on exising data.
- * No memory is managed.
- */
-template <typename T>
-class DataContainerHolder<T, T*> {
-
-public:
-  explicit DataContainerHolder(std::size_t size, T* data) : m_size(size), m_container(data) {}
-
-  std::size_t size() const {
-    return m_size;
-  }
-
-  inline const T* data() const {
-    return m_container;
-  }
-
-private:
-  /**
-   * @brief The number of elements.
-   */
-  std::size_t m_size;
-
-  /**
-   * @brief The raw data pointer.
-   */
-  T* m_container;
-};
-
-/**
- * @ingroup data_classes
  * @brief `std::array` specialization.
  */
 template <typename T, std::size_t N>
-class DataContainerHolder<T, std::array<T, N>> {
+class StdHolder<std::array<T, N>> {
 
 public:
   using Container = std::array<T, N>;
 
-  explicit DataContainerHolder(std::size_t size, const T* data = nullptr) : m_container {} {
+  explicit StdHolder(std::size_t size, const T* data = nullptr) : m_container {} {
     if (size != N && size != 0) { // TODO allow size < N? => add m_size
-      std::string msg = "Size mismatch in DataContainerHolder<std::array> specialization. ";
+      std::string msg = "Size mismatch in StdHolder<std::array> specialization. ";
       msg += "Got " + std::to_string(size) + ", should be 0 or " + std::to_string(N) + ".";
       throw std::runtime_error(msg);
     }
@@ -166,7 +133,7 @@ public:
     }
   }
 
-  explicit DataContainerHolder(std::size_t size, Container&& container) : m_container(std::move(container)) {
+  explicit StdHolder(std::size_t size, Container&& container) : m_container(std::move(container)) {
     // FIXME check size
   }
 
@@ -192,6 +159,39 @@ private:
    * @brief The data array.
    */
   std::array<T, N> m_container;
+};
+
+/**
+ * @ingroup data_classes
+ * @brief Raw pointer holder.
+ * @details
+ * This is a non-owning holder, i.e. some view on exising data.
+ * No memory is managed.
+ */
+template <typename T>
+class PtrHolder {
+
+public:
+  explicit PtrHolder(std::size_t size, T* data) : m_size(size), m_container(data) {}
+
+  std::size_t size() const {
+    return m_size;
+  }
+
+  inline const T* data() const {
+    return m_container;
+  }
+
+private:
+  /**
+   * @brief The number of elements.
+   */
+  std::size_t m_size;
+
+  /**
+   * @brief The raw data pointer.
+   */
+  T* m_container;
 };
 
 /**

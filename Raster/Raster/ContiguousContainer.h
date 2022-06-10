@@ -22,10 +22,9 @@ namespace Cnes {
 /**
  * @ingroup concepts
  * @requirements{SizedData}
- * @brief Requirements for a `DataContainerHolder`.
+ * @brief Requirements for the holder of a `DataContainer`.
  * @details
- * A contiguous data holder is some class which stores or points to
- * some data contiguous in memory,
+ * A contiguous data holder is a class which stores or points to some data contiguous in memory,
  * and implements the following methods:
  * - Constructor from a size and pointer;
  * - `std::size_t size() const`;

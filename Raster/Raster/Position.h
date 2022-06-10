@@ -53,8 +53,8 @@ using Indices = typename std::conditional<(N == -1), std::vector<Index>, std::ar
  */
 template <Index N = 2>
 class Position :
-    public DataContainer<Index, DataContainerHolder<Index, Indices<N>>, Position<N>>,
-    public ContainerArithmeticMixin<VectorArithmetic, Index, Position<N>> {
+    public DataContainer<Index, StdHolder<Indices<N>>, Position<N>>,
+    public ArithmeticMixin<VectorArithmetic, Index, Position<N>> {
 public:
   /**
    * @brief The dimension template parameter.
@@ -71,25 +71,23 @@ public:
    * The indices are unspecified.
    * To create position 0, use `zero()` instead.
    */
-  Position() : DataContainer<Index, DataContainerHolder<Index, Indices<N>>, Position<N>>() {}
+  Position() : DataContainer<Index, StdHolder<Indices<N>>, Position<N>>() {}
 
   /**
    * @brief Create a position of given dimension.
    */
-  explicit Position(Index dim) : DataContainer<Index, DataContainerHolder<Index, Indices<N>>, Position<N>>(dim) {}
+  explicit Position(Index dim) : DataContainer<Index, StdHolder<Indices<N>>, Position<N>>(dim) {}
 
   /**
    * @brief Create a position from a brace-enclosed list of indices.
    */
-  Position(std::initializer_list<Index> indices) :
-      DataContainer<Index, DataContainerHolder<Index, Indices<N>>, Position<N>>(indices) {}
+  Position(std::initializer_list<Index> indices) : DataContainer<Index, StdHolder<Indices<N>>, Position<N>>(indices) {}
 
   /**
    * @brief Create a position from an iterable.
    */
   template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr>
-  explicit Position(TIterable&& iterable) :
-      DataContainer<Index, DataContainerHolder<Index, Indices<N>>, Position<N>>(iterable) {}
+  explicit Position(TIterable&& iterable) : DataContainer<Index, StdHolder<Indices<N>>, Position<N>>(iterable) {}
 
   /**
    * @brief Create position 0.

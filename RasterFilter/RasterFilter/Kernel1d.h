@@ -23,7 +23,7 @@ class Kernel1dSeq;
  * @brief 1D kernel for nD correlations.
  */
 template <typename T, typename TExtrapolation = CropExtrapolation>
-class Kernel1d : public DataContainer<T, DataContainerHolder<T, std::vector<T>>, Kernel1d<T, TExtrapolation>> {
+class Kernel1d : public DataContainer<T, StdHolder<std::vector<T>>, Kernel1d<T, TExtrapolation>> {
 
 public:
   using Value = T;
@@ -36,7 +36,7 @@ public:
    * @param extrapolation The extrapolation policy
    */
   explicit Kernel1d(const std::vector<T>& values, Index origin, TExtrapolation extrapolation = TExtrapolation()) :
-      DataContainer<T, DataContainerHolder<T, std::vector<T>>, Kernel1d<T, TExtrapolation>>(values), m_backward(origin),
+      DataContainer<T, StdHolder<std::vector<T>>, Kernel1d<T, TExtrapolation>>(values), m_backward(origin),
       m_forward(this->size() - 1 - m_backward), m_bias(), m_extrapolation(extrapolation) {}
 
   /**
