@@ -7,6 +7,7 @@
 
 #include "Raster/ContiguousContainer.h"
 #include "Raster/DataUtils.h"
+#include "RasterTypes/Exceptions.h"
 #include "RasterTypes/SeqUtils.h" // isIterable
 #include "RasterTypes/TypeUtils.h" // Limits
 
@@ -267,6 +268,25 @@ public:
    */
   inline T* data() {
     return const_cast<T*>(const_cast<const DataContainer&>(*this).data());
+  }
+
+  /**
+   * @brief Access the element with given index.
+   * @details
+   * As opposed to `operator[]()`, negative indices are supported for backward indexing,
+   * and bounds are checked.
+   */
+  const T& at(long i) const { // FIXME Index
+    const auto s = size();
+    OutOfBoundsError::mayThrow("Index " + std::to_string(i), i, {-s, s - 1});
+    return this->operator[](i >= 0 ? i : i + s);
+  }
+
+  /**
+   * @copybrief at()
+   */
+  T& at(long i) { // FIXME Index
+    return const_cast<T&>(const_cast<const DataContainer&>(*this).at(i));
   }
 
   /// @group_modifiers

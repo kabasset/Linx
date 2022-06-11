@@ -292,6 +292,7 @@ public:
   /// @group_elements
 
   using DataContainer<T, THolder, Raster<T, N, THolder>>::operator[];
+  using DataContainer<T, THolder, Raster<T, N, THolder>>::at;
 
   /**
    * @brief Compute the raw index of a given position.
