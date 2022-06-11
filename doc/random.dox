@@ -69,5 +69,30 @@ itself initialized with the user-provided seed,
 which is used to update the seed deterministically for each and evey pixel.
 Obviously, this solves the issue at the cost of much longer processing.
 
+
+\section radom-compound Compound noises
+
+
+More complex pixel-wise noise generators can be implemented easily.
+For example, consider the noise model composed of:
+
+- Some Poisson photon noise, mean of which is the input flux;
+- Some Gaussian-approximated electronic noise of mean and variance equal to the local dark current value.
+
+As opposed to the previous examples, this model depends on _two_ values per pixel:
+the photon flux and the dark current.
+This will be reflected as an additional input to the `apply()` method.
+
+We build a simple functor to combine the two components, `operator()` of which takes two arguments:
+
+\snippet RasterDemoRandom_test.cpp System noise
+
+We can now generate the noisy image from an input flux map and an input dark current map.
+
+\snippet RasterDemoRandom_test.cpp Apply system noise
+
+Given that `generate()` and `apply()` accepts an unlimited number of input rasters,
+the method generalizes to more complex models (including non-random ones).
+
 */
 }

@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_SUITE(RasterDemoRandom_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(random_test) {
+BOOST_AUTO_TEST_CASE(simple_random_test) {
 
   //! [Random values]
   Cnes::Raster<double> raster({3, 2});
@@ -26,7 +26,48 @@ BOOST_AUTO_TEST_CASE(random_test) {
   raster.apply(Cnes::StablePoissonNoise<double>());
   //! [Random noise]
 
-  std::cout << "Noisy raster: " << raster << std::endl;
+  std::cout << "Noisy raster:  " << raster << std::endl;
+}
+
+//! [System noise]
+template <typename T>
+class SystemNoise {
+
+public:
+  explicit SystemNoise(std::size_t seed) : m_poisson(0, seed), m_gaussian(0, 1, seed) {}
+
+  T operator()(T flux, T dark) {
+    auto out = m_poisson(flux);
+    out += dark + std::sqrt(dark) * m_gaussian();
+    return out;
+  }
+
+private:
+  Cnes::PoissonNoise<T> m_poisson;
+  Cnes::GaussianNoise<T> m_gaussian;
+};
+//! [System noise]
+
+BOOST_AUTO_TEST_CASE(compound_random_test) {
+
+  Cnes::Raster<double> flux({3, 2});
+  Cnes::Raster<double> dark({3, 2});
+  flux.generate(Cnes::PoissonNoise<int>(100));
+  dark.generate(Cnes::UniformNoise<double>(0, 10));
+  std::cout << "Flux: " << flux << std::endl;
+  std::cout << "Dark: " << dark << std::endl;
+
+  //! [Apply system noise]
+  // New instance
+  Cnes::Raster<double> res(flux);
+  res.generate(SystemNoise<double>(0), flux, dark);
+
+  // In-place
+  flux.apply(SystemNoise<double>(0), dark);
+  //! [Apply system noise]
+
+  std::cout << "From generate: " << res << std::endl;
+  std::cout << "From apply: " << flux << std::endl;
 }
 
 //-----------------------------------------------------------------------------
