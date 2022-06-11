@@ -205,6 +205,22 @@ BOOST_AUTO_TEST_CASE(vector_along_2_test) {
   std::cout << "Integrated flux = " << image[0] << std::endl;
 }
 
+BOOST_AUTO_TEST_CASE(raster_of_raster_test) {
+
+  //! [Raster of raster]
+  using NestedRaster = Cnes::Raster<Cnes::Raster<int>>;
+  NestedRaster nested({4, 3});
+
+  for (auto& p : nested.domain()) {
+    const auto shape = p + 1;
+    auto& raster = nested[p];
+    raster = Cnes::Raster<int>(shape).arange();
+    std::cout << "Raster at " << p << " = " << raster << std::endl;
+    BOOST_TEST(raster.at(-1) == shapeSize(shape) - 1);
+  }
+  //! [Raster of raster]
+}
+
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE_END()
