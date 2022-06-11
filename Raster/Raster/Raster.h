@@ -205,7 +205,7 @@ public:
    * \endcode
    */
   template <typename... TArgs>
-  explicit Raster(Position<N> shape, TArgs&&... args) :
+  explicit Raster(Position<N> shape = Position<N>::zero(), TArgs&&... args) :
       DataContainer<T, THolder, Raster<T, N, THolder>>(shapeSize(shape), std::forward<TArgs>(args)...),
       m_shape(std::move(shape)) {}
 
