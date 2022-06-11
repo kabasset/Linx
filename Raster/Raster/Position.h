@@ -15,6 +15,7 @@
 namespace Cnes {
 
 /**
+ * @relates Position
  * @brief The signed integer type which represents indices in a raster.
  */
 using Index = long;
@@ -179,14 +180,33 @@ public:
 
 /**
  * @relates Position
+ * @brief Get the stride along a given axis.
+ */
+template <Index N>
+Index shapeStride(const Position<N>& shape, Index axis) {
+  return std::accumulate(shape.begin(), shape.begin() + axis, 1L, std::multiplies<Index> {});
+}
+
+/**
+ * @relates Position
+ * @brief Get the stride along a given axis.
+ */
+template <Index Axis, Index N>
+Index shapeStride(const Position<N>& shape) {
+  return shapeStride(shape, Axis);
+}
+
+/**
+ * @relates Position
  * @brief Compute the number of pixels in a given shape.
  */
 template <Index N = 2>
 Index shapeSize(const Position<N>& shape) {
-  if (shape.size() == 0) {
+  const auto size = shape.size();
+  if (size == 0) {
     return 0;
   }
-  return std::accumulate(shape.begin(), shape.end(), 1L, std::multiplies<Index>());
+  return shapeStride(shape, size);
 }
 
 } // namespace Cnes

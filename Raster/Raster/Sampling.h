@@ -392,15 +392,6 @@ private:
   Index m_stride;
 };
 
-/**
- * @relates Raster
- * @brief Get the stride along a given axis.
- */
-template <Index Axis, Index N>
-Index shapeStride(const Position<N>& shape) {
-  return std::accumulate(shape.begin(), shape.begin() + Axis, 1, std::multiplies<Index> {});
-}
-
 } // namespace Cnes
 
 #endif // _RASTER_SAMPLING_H
