@@ -25,7 +25,7 @@ public:
     return m_size;
   }
 
-  const T* data() const {
+  inline const T* data() const {
     return m_data;
   }
 
