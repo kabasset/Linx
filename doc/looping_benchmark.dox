@@ -14,7 +14,7 @@ Finally, guidelines are proposed to select the best approach for various use cas
 The benchmark is run as program `RasterBenchmarkIteration`.
 Check the `--help` option for details.
 
-\section looping_benchmark-test_cases Test cases
+\section looping_benchmark-test_cases Test Cases
 
 
 The benchmark consists in computing the pixel-wise sum `m_c` of two 3D rasters `m_a` and `m_b`
@@ -46,7 +46,7 @@ Overall results and conclusions are not much impacted, and test cases are cleare
 which is why the simpler version is used instead.
 
 
-\section looping_benchmark-results Results and analysis
+\section looping_benchmark-results Results and Analysis
 
 
 The shapes of the rasters are set to 400³ and the value type to `char`.
@@ -109,7 +109,7 @@ Solutions exist to avoid such pitfalls, like the expression templates used in XT
 They are not part of Cnes.Raster, because they would add burden on the library
 and could not match the "generate" performance anyway.
 
-Results and a few guidelines are summarized in the following table.
+Additional results and a few guidelines are summarized in the following table.
 
 <table class="fieldtable">
 <tr><th>Test case<th>Run-time dimension<th>Region-wise iteration<th>Access to position<th>Character count<th>Use when...

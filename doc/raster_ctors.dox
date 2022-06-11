@@ -4,7 +4,7 @@ namespace Cnes {
 \addtogroup raster_ctors
 
 
-\section raster_ctors-all Constructors which all rasters share
+\section raster_ctors-all Constructors which All Rasters Share
 
 
 The constructors of `Raster` are very flexible, and generally forward parameters to the underlying data container (see \ref basics).
@@ -32,7 +32,7 @@ The following sections give more examples.
 For the details, see `Raster`'s documentation.
 
 
-\section raster_ctors-ptr PtrRaster-specific constructors
+\section raster_ctors-ptr PtrRaster-specific Constructors
 
 
 `PtrRaster` is a non-owning raster, which means it requires some data pointer.
@@ -51,7 +51,7 @@ Read-only raster, with const-qualified value type:
 \snippet RasterDemoConstructors_test.cpp PtrRaster read
 
 
-\section raster_ctors-vec VecRaster-specific constructor
+\section raster_ctors-vec VecRaster-specific Constructors
 
 
 Through forwarding parameters, `VecRaster`s can be immediately filled with some value:
@@ -59,7 +59,7 @@ Through forwarding parameters, `VecRaster`s can be immediately filled with some 
 \snippet RasterDemoConstructors_test.cpp VecRaster
 
 
-\section raster_ctors-aligned AlignedRaster-specific constructors
+\section raster_ctors-aligned AlignedRaster-specific Constructors
 
 
 An `AlignedRaster` can be either owning or non-owning,
@@ -79,7 +79,7 @@ Non-owning raster, built from some exising data:
 `AlignedRaster` is movable but not copyable.
 
 
-\section raster_ctors-fill Filling methods and random generators
+\section raster_ctors-fill Filling Methods and Random Generators
 
 
 In addition to constructors, `Raster`s (and any `DataContainer`) provide several methods

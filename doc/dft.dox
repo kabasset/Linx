@@ -32,7 +32,7 @@ And transform back the data:
 And that's all!
 
 
-\section dft-fftw An FFTW wrapper
+\section dft-fftw An FFTW Wrapper
 
 
 <a href="http://fftw.org/">FFTW</a> is a fast(est) C library
@@ -102,7 +102,7 @@ It can be normalized with `DftPlan::normalize()`, which acts directly on the out
 Now, `direct.in()` contains the derivative of the initial sine signal, i.e. a cosine signal.
 
 
-\section dft-memory FFTW memory life cycle
+\section dft-memory FFTW Memory Life Cycle
 
 
 The main motivation to develop this wrapper was automated memory management.
@@ -118,7 +118,7 @@ This is handled by a dedicated mechanism which is automatically triggered at pro
 nothing has to be done on user side.
 
 
-\section dft-parallel DFT parallelization
+\section dft-parallel DFT Parallelization
 
 
 TODO

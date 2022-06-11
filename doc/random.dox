@@ -4,7 +4,7 @@ namespace Cnes {
 \addtogroup random
 
 
-\section random-generate Random values
+\section random-generate Random Values
 
 
 `DataContainer::generate()` accepts any kind of callable as its first parameter, including functors.
@@ -19,7 +19,7 @@ The available distributions are listed at the bottom of the page.
 Other distributions can be implemented: they just need to satisfy `RandomNoise` requirements. 
 
 
-\section random-apply Random noise
+\section random-apply Random Noise
 
 
 Similarly to `DataContainer::generate()`, `DataContainer::apply()` can be called with a random noise generator.
@@ -34,7 +34,7 @@ If you're curious about the "stable" epithet, please read the next section,
 or check the `PoissonNoise` and `StablePoissonNoise` documentations.
 
 
-\section random-seed Seed and reproducibility
+\section random-seed Seed and Reproducibility
 
 
 (Pseudo-)random number generation is a three-step process:

@@ -31,7 +31,7 @@ The complete list of available in-place functions can be found in `MathFunctions
 New-instance versions are part of the `Cnes` namespace documentation, and listed at the end of this page.
 
 
-\section pixelwise-apply Apply and generate
+\section pixelwise-apply Generate and Apply
 
 
 To go further or to speed up computations, methods `Raster::apply()` and `Raster::generate()`
@@ -56,6 +56,8 @@ The in-place version, corresponding to `a = a * k + b`, is obtained with `apply(
 
 This can be seen as an equivalent to XTensor's or Eigen's lazy evaluations,
 yet with arbitrary functions.
+
+For application of `generate()` and `apply()` to random noise, see \ref random.
 
 */
 }

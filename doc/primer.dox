@@ -7,18 +7,41 @@ namespace Cnes {
 \section primer-intro Introduction
 
 
-A raster is an N-dimensional array of pixels stored in a contiguous one-dimensional container.
-The number of axes, or dimension, N, is set at compile time or at runtime.
+A raster is an N-dimensional array of pixels internally stored in a contiguous one-dimensional container.
+The `Raster` class is extensible and can accomodate any contiguous container.
+The number of axes is set either at compile time or at runtime.
 The raster shape, i.e. the lengths along axes, is set at runtime.
 Pixels are located at N-dimensional positions, which convert to 1D indices in the underlying 1D container.
 Speaking of indices, they are _signed_ integers, as recommended in the C++ Core Guidelines.
 Among others, this enables backward indexing with negative values.
 
+A variety of operations are supported, for example:
+- Pixel-wise operators and functions;
+- Local and global filters;
+- Geometrical transforms;
+- Global or local statistics estimators...
 
-\section primer-memory Memory layout
+Before going further, a short digression on the naming of the library.
+Why "raster" and not simply image or array?
+Mostly for disambiguation purpose: "image" refers to an extension type of the FITS format
+-- which is at the heart of EleFits, from which Cnes.Raster was initially out-sourced --
+while "array" has already several meanings in C/C++.
+`NdArray` would have been an option, but every related class should have been prefixed with `Nd` for homogeneity:
+`NdPosition`, `NdRegion`, `VecNdArray`...
+"Tensor" is often used as a multidimensional extension of matrices,
+but is more associated to linear algebra than image processing.
+From the cathodic television era, "raster" also historically carries the concept of contiguous pixels which scan the image.
+It is very common in the field of Earth observation, and also belongs to the Java library.
+The term raster was also chosen to convey some information on the memory contiguity and layout (see next section),
+and stress out that it is part of the public interface of the library, and not only an implementation detail.
+All in all, "raster" seems to be a fair compromise. 
 
 
-The pixel ordering scheme is row-major, which means that two adjacent pixels of the same row (along the axis of index 0) are contiguous in memory.
+\section primer-memory Memory Layout
+
+
+The pixel ordering scheme is row-major,
+which means that two adjacent pixels of the same row (along the axis of index 0) are contiguous in memory.
 The last pixel of a row immediately precedes the first pixel of the next row,
 and the last pixel of the last row of a plane immediately precedes the first pixel of the first row of the next plane.
 
@@ -32,22 +55,30 @@ It will be used in the remaining of the documentation in code snippets.
 \image html doc/diagrams/raster_ordering.svg
 
 
-\section primer-naming A word on the wording
+\section primer-type Pixel Type and Dimension
 
 
-First, why "raster" and not simply image or array?
-Mostly for disambiguation purpose: "image" refers to the extension type of the FITS format
-(which is at the heart of EleFits, from which Cnes.Raster was initially out-sourced),
-while "array" has already several meanings in C/C++.
-`NdArray` would have been an option, but every related class should have been prefixed with `Nd` for homogeneity:
-`NdPosition`, `NdRegion`, `VecNdArray`...
-"Tensor" is often used as a multidimensional extension of matrices,
-but is more associated to linear algebra than image processing.
-From the cathodic television era, raster also historically carries the concept of contiguous pixels,
-is very common in the field of Earth observation, and also belongs to the Java library.
-The term raster was also chosen to convey some information on the memory contiguity and layout (see next section),
-because it is part of the public interface of the library, and not only an implementation detail.
-All in all, "raster" seems to be a fair compromise. 
+`Raster` is a class template.
+Its first template paramer is the pixel type, `T`, which may be const-qualified for read-only rasters.
+All fundamental types (Boolean, integers and floating point types) as well as `std::complex` types are supported,
+i.e. have been unit tested.
+Other types, including user-defined types, can be used (see for example \ref channels),
+provided that they offer the minimal interface required by the `Raster` methods _which are effectively called_.
+For example, `operator+()` must be defined in order to use `Raster::operator+()`,
+but is not necessary if no method which would rely on it is called.
+Indeed, the library relies a lot on template metaprogramming,
+which can be seen as a compile time equivalent of Python's duck typing.
+
+The second template parameter, `N`, is the raster dimension.
+It can be set at compile time, as a positive or null integer,
+or at runtime, using -1 as a special value.
+This basically gives more freedom at the cost of less safety.
+As a rule of thumb, compile time dimensions should be preferred.
+
+Other multidimensional classes, like `Position` or `Region`,
+are also templated by the dimension and follow the same convention.
+Roughly speaking, `Position<N>` is similar to `std::array<Index, N>` when `N` is positive or null,
+while `Position<-1>` is similar to `std::vector<Index>`.
 
 Now, to introduce a few property names, we can state about the example raster that:
 
@@ -65,71 +96,40 @@ Finally, we've tried our best to follow the naming conventions of the standard a
 e.g. use "fill", "generate" or "linspace" to denote concepts analogous to `std::fill()`, `std::generate()` or `numpy.linspace()`.
 
 
-\section primer-type Pixel type and dimension
+\section primer-flavors Raster Flavors
 
 
-`Raster` is a class template.
-Its first template paramer is the pixel type, which may be const-qualified for read-only rasters.
-All fundamental types (`bool`, integers and floating point types) as well as complex types are supported,
-i.e. have been unit tested.
-Other types, including user-defined types, can be used,
-provided that they offer the minimal interface required by the `Raster` methods _which are effectively called_.
-For example, `operator+()` must be defined in order to use `Raster::operator+()`,
-but is not necessary if no method which would rely on it is called.
-Indeed, the library relies a lot on template metaprogramming,
-which can be seen as a compile time equivalent of Python's duck typing.
+Different flavors of rasters ship with the library.
+They are specializations of the template class `Raster`.
+Indeed, `Raster` takes a third template parameter, `THolder`,
+which is used to decorate any 1D container with `Raster`'s interface.
+Let us introduce here some of the specializations:
 
-The second template parameter is the raster dimension.
-The dimension can be set at compile time, as a positive or null integer,
-or at runtime, using -1 as a special value.
-This basically gives more freedom at the cost of less safety.
-As a rule of thumb, compile time dimensions should be preferred.
+- The default raster type is simply `Raster<T, N>`.
+  It will be described in details in the remainder of the documentation.
+- `VecRaster<T, N, TAllocator>`, `ValRaster<T, N>` and `ArrRaster<T, Capacity, N>` are specializations
+  which wrap `std::vector<T, TAllocator>`, `std::valarray<T>` and `std::array<T, Capacity>`, respectively.
+  They are useful to interface with the standard containers without copies.
+- `PtrRaster<T, N>` is a non-owning raster, i.e. it does not manage memory,
+  but instead points to some existing, externally handled, data.
+  It is intended to be used as a read-only or read/write view.
 
-Other multidimensional classes, like `Position` or `Region`,
-are also templated by the dimension and follow the same convention.
-Roughly speaking, `Position<N>` is similar to `std::array<Index, N>` when `N` is positive or null,
-while `Position<-1>` is similar to `std::vector<Index>`.
+The class is extensible, in the sense that users can augment any contiguous memory with the raster interface.
+This is a more advanced topic which is described in \ref adaptors.
 
 
-\section primer-container Underlying container
+\section primer-access Pixel Access
 
 
-This is a somewhat more advanced topic.
-Skip this section if you're in a hurry.
-
-The pixel values can be stored in any contiguous container.
-This is the purpose of the third parameter
--- which, to be precise, is the data container holder type, see \ref data_classes.
-For example, a raster built on top of a `std::vector` (with default allocator) is of type `VecRaster`.
-Here is a simple illustration of how to build the `VecRaster` illustrated in the section above
-(`arange()` is used to fill the 1D container with increasing values):
-
-\snippet RasterDemoBasics_test.cpp VecRaster iota
-
-It is also possible to dynamically augment any 1D contiguous container
-with the raster features (e.g. ND indexing or operations) thanks to the `PtrRaster` class,
-in which the underlying container is a raw pointer.
-For example:
-
-\snippet RasterDemoBasics_test.cpp PtrRaster iota
-
-Last but not least, it is also possible to use your own container,
-assuming that it provides the minimal interface, e.g.:
-
-\snippet RasterDemoBasics_test.cpp MallocRaster
-
-Which can be used like any other raster:
-
-\snippet RasterDemoBasics_test.cpp MallocRaster iota
-
-\section primer-access Element access
-
-As disclosed in the examples above, elements of a raster can be accessed with 1D indices or ND positions.
-Indexes are 0-based signed integers, which enables backward indexing with `Raster::at()`, e.g.:
+Elements of a raster can be accessed or modified with subscript operators and associated methods,
+which take as input a 1D index or ND position.
+Indices are 0-based signed integers of type `Index`.
+Class `Position` is a contiguous container of indices, which is generally brace-initialized.
+Using signed integers enables backward indexing, e.g. with method `Raster::at()`:
 
 \snippet RasterDemoBasics_test.cpp Element access
 
-As a standard contiguous container, `Raster` also provides access as iterators,
+As a standard contiguous container, `Raster` also provides element access through iterators,
 which are explicitely raw pointers (as opposed to `std::vector` but like `eastl::vector`)
 to ensure compiler optimizations are maximal.
 Methods `Raster::begin()` and `Raster::end()` enable range for loops

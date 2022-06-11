@@ -4,17 +4,24 @@ class Holder {
 + Holder(size, data)
 + size()
 + data()
++ {method}...
 }
 
 class DataContainer {
++ DataContainer(size, args...)
++ DataContainer(values, args...)
++ DataContainer(iterable, args...)
 + fill(value)
++ arange(min, step)
++ linspace(min, max)
 + generate(function, args...)
 + apply(function, args...)
-+ container()
-+ moveTo(container)
 }
 
 class Raster {
++ Raster(shape, args...)
++ Raster(shape, values, args...)
++ Raster(shape, iterable, args...)
 + shape()
 + domain()
 + dimension()

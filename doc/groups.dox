@@ -8,20 +8,20 @@
 \brief Memory layout and core functionalities of rasters.
 \example RasterDemoBasics_test.cpp
 
-\defgroup data_classes Core data classes
+\defgroup data_classes Class Hierarchy
 \ingroup basics
-\brief Classes focused on data storage and access
+\brief The classes which build up `Raster`
 
-\defgroup raster_ctors Rasters initialization
+\defgroup raster_ctors Rasters Assignment
 \ingroup basics
-\brief On how to instantiate rasters
+\brief On how to instantiate and fill rasters
 
-\defgroup pixelwise Pixel-wise operations
+\defgroup pixelwise Pixel-wise Operations
 \ingroup basics
 \brief Operations applied to each pixel independently.
 \example RasterDemoPixelwise_test.cpp
 
-\defgroup random Random generators
+\defgroup random Random Generators
 \ingroup basics
 \brief Random values and random noise generation.
 \example RasterDemoRandom_test.cpp
@@ -33,15 +33,15 @@
 \ingroup filtering
 \brief Correlation and convolution operations on rasters.
 
-\defgroup dft Discrete Fourier transforms
+\defgroup dft Discrete Fourier Transforms
 \ingroup filtering
 \brief Thread-safe FFTW plans building and execution.
 \example RasterDemoDft_test.cpp
 
-\defgroup geometry Geometrical transforms
+\defgroup geometry Geometrical Transforms
 \brief Transforms which act on pixel locations.
 
-\defgroup interpolation_modes Interpolation and extrapolation policies
+\defgroup interpolation_modes Interpolation and Extrapolation Policies
 \ingroup geometry
 \brief Handling of values between pixels or outside the raster domain.
 
@@ -49,24 +49,28 @@
 \ingroup geometry
 \brief Classes to apply interpolation and extrapolation functions.
 
-\defgroup guidelines Development guidelines
+\defgroup guidelines Development Guidelines
 \brief Guidelines, good practices, optimization strategies.
 
 \defgroup exceptions Exceptions
 \ingroup guidelines
 \brief All the exceptions directly thrown by the library
 
-\defgroup channels Vector pixels
+\defgroup channels Vector Pixels
 \ingroup guidelines
 \brief How to organize your data with non-scalar pixels?
 \example RasterDemoChannels_test.cpp
 
-\defgroup looping_benchmark Looping strategies
+\defgroup looping_benchmark Looping Strategies
 \ingroup guidelines
 \brief How to loop over the pixels efficiently
 \example IterationBenchmark.cpp
 
-\defgroup design Library design
+\defgroup adaptors Adapting Other Classes
+\ingroup guidelines
+\brief Seamless interfacing with other libraries
+
+\defgroup design Library Design
 \brief Design documentation for developers and advanced users.
 
 \defgroup mixins Mixins

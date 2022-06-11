@@ -4,7 +4,7 @@ namespace Cnes {
 \addtogroup crtp_refactoring
 
 
-\section crtp_refactoring-before Status before refactoring
+\section crtp_refactoring-before Status Before Refactoring
 
 
 The benchmark presented in \ref looping_benchmark
@@ -46,7 +46,7 @@ instead of child classes of it.
 This was done in two steps which are described in the next sections.
 
 
-\section crtp_refactoring-final_inline Local refactoring
+\section crtp_refactoring-final_inline Local Refactoring
 
 
 The main motivation for investigating and optimizing further
@@ -165,7 +165,7 @@ A finer analysis showed that:
   but the inlining hint is enough to make the compiler change its mind.
 
 
-\section crtp_refactoring-major CRTP refactoring
+\section crtp_refactoring-major CRTP Refactoring
 
 
 Being written...
