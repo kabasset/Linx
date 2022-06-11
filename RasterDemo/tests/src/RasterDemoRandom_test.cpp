@@ -34,7 +34,7 @@ template <typename T>
 class SystemNoise {
 
 public:
-  explicit SystemNoise(std::size_t seed) : m_poisson(0, seed), m_gaussian(0, 1, seed) {}
+  explicit SystemNoise(std::size_t seed = 0) : m_poisson(0, seed), m_gaussian(0, 1, seed) {}
 
   T operator()(T flux, T dark) {
     auto out = m_poisson(flux);
@@ -60,10 +60,10 @@ BOOST_AUTO_TEST_CASE(compound_random_test) {
   //! [Apply system noise]
   // New instance
   Cnes::Raster<double> res(flux);
-  res.generate(SystemNoise<double>(0), flux, dark);
+  res.generate(SystemNoise<double>(), flux, dark);
 
   // In-place
-  flux.apply(SystemNoise<double>(0), dark);
+  flux.apply(SystemNoise<double>(), dark);
   //! [Apply system noise]
 
   std::cout << "From generate: " << res << std::endl;

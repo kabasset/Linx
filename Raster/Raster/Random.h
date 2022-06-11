@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <map>
 #include <random>
 
 namespace Cnes {
@@ -112,14 +113,10 @@ class RandomGenerator {
 public:
   /**
    * @brief Constructor.
-   * @param seed The random engine seed.
+   * @param seed The random engine seed or -1 for using current time.
    */
-  explicit RandomGenerator(std::size_t seed) : m_engine(seed) {}
-
-  /**
-   * @brief Constructor.
-   */
-  explicit RandomGenerator() : RandomGenerator(std::chrono::system_clock::now().time_since_epoch().count()) {}
+  explicit RandomGenerator(std::size_t seed = -1) :
+      m_engine(seed != std::size_t(-1) ? seed : std::chrono::system_clock::now().time_since_epoch().count()) {}
 
 protected:
   /**
@@ -154,15 +151,10 @@ class UniformNoise : RandomGenerator {
 
 public:
   /**
-   * @brief Random-seed constructor.
+   * @brief Constructor.
    */
-  explicit UniformNoise(T min = Limits<T>::halfMin(), T max = Limits<T>::halfMax()) :
-      RandomGenerator(), m_distribution(min, max) {}
-
-  /**
-   * @brief Fixed-seed constructor.
-   */
-  explicit UniformNoise(T min, T max, std::size_t seed) : RandomGenerator(seed), m_distribution(min, max) {}
+  explicit UniformNoise(T min = Limits<T>::halfMin(), T max = Limits<T>::halfMax(), std::size_t seed = -1) :
+      RandomGenerator(seed), m_distribution(min, max) {}
 
   /**
    * @brief Generate value.
@@ -198,15 +190,10 @@ class GaussianNoise : RandomGenerator {
 
 public:
   /**
-   * @brief Random-seed constructor.
+   * @brief Constructor.
    */
-  explicit GaussianNoise(T mean = Limits<T>::zero(), T stdev = Limits<T>::one()) :
-      RandomGenerator(), m_distribution(mean, stdev) {}
-
-  /**
-   * @brief Fixed-seed constructor.
-   */
-  explicit GaussianNoise(T mean, T stdev, std::size_t seed) : RandomGenerator(seed), m_distribution(mean, stdev) {}
+  explicit GaussianNoise(T mean = Limits<T>::zero(), T stdev = Limits<T>::one(), std::size_t seed = -1) :
+      RandomGenerator(seed), m_distribution(mean, stdev) {}
 
   /**
    * @brief Generate value.
@@ -246,14 +233,10 @@ class PoissonNoise : RandomGenerator {
 
 public:
   /**
-   * @brief Random-seed constructor.
+   * @brief Constructor.
    */
-  explicit PoissonNoise(T mean = Limits<T>::zero()) : RandomGenerator(), m_distribution(mean) {}
-
-  /**
-   * @brief Fixed-seed constructor.
-   */
-  explicit PoissonNoise(T mean, std::size_t seed) : RandomGenerator(seed), m_distribution(mean) {}
+  explicit PoissonNoise(T mean = Limits<T>::zero(), std::size_t seed = -1) :
+      RandomGenerator(seed), m_distribution(mean) {}
 
   /**
    * @brief Generate value.
@@ -303,6 +286,10 @@ class StablePoissonNoise : RandomGenerator {
 public:
   /**
    * @brief Fixed-seed constructor.
+   * @details
+   * @warning
+   * By default, the seed is 0 and not -1,
+   * because this noise generator is intended for reproducible results.
    */
   explicit StablePoissonNoise(T mean = Limits<T>::zero(), std::size_t seed = 0) :
       RandomGenerator(seed), m_distribution(mean), m_seeder(seed) {}
@@ -327,6 +314,67 @@ private:
   using Component = std::conditional_t<std::is_integral<T>::value, T, long>;
   ComplexDistribution<T, std::poisson_distribution<Component>> m_distribution;
   std::minstd_rand m_seeder;
+};
+
+/**
+ * @ingroup random
+ * @brief Impulse noise generator (encompasses salt-and-pepper noise).
+ * @details
+ * Randomly generate discrete values with given probabilities.
+ * If the sum of probabilities _s_ is less than 1,
+ * then the input value is untouched with probability 1 - _s_.
+ * If the sum of probabilities _s_ is greater than 1,
+ * then the input probabilities are normalized by _s_.
+ * 
+ * For salt-and-pepper noise, simply use as initialization `{{min, pMin}, {max, pMax}}`,
+ * e.g. `ImpulseNoise<T> noise({{Limits<T>::min(), 0.1}, {Limits<T>::max(), 0.2});`.
+ * 
+ * @satisfies{RandomNoise}
+ */
+template <typename T>
+class ImpulseNoise : RandomGenerator {
+
+public:
+  /**
+   * @brief Constructor.
+   */
+  explicit ImpulseNoise(const std::map<T, double>& valueProbabilities, std::size_t seed = -1) :
+      RandomGenerator(seed), m_values(values(valueProbabilities)), m_distribution(weights(valueProbabilities)) {}
+
+  /**
+   * @brief Apply impulse noise.
+   */
+  T operator()(T in = Limits<T>::zero()) {
+    auto index = generate<std::size_t>(m_distribution);
+    return index < m_values.size() ? m_values[index] : in;
+  }
+
+private:
+  static std::vector<T> values(const std::map<T, double>& valueProbabilities) {
+    std::vector<T> out(valueProbabilities.size());
+    std::transform(valueProbabilities.begin(), valueProbabilities.end(), out.begin(), [](auto vp) {
+      return vp.first;
+    });
+    return out;
+  }
+
+  static std::vector<T> weights(const std::map<T, double>& valueProbabilities) {
+    const auto count = valueProbabilities.size();
+    std::vector<double> out(count + 1);
+    auto& nullProbability = out[count];
+    nullProbability = 1;
+    std::transform(valueProbabilities.begin(), valueProbabilities.end(), out.begin(), [&](auto vp) {
+      nullProbability -= vp.second;
+      return vp.second;
+    });
+    if (nullProbability <= std::numeric_limits<double>::epsilon() * count) {
+      out.resize(count); // Discard null hypothesis
+    }
+    return out;
+  }
+
+  std::vector<T> m_values;
+  std::discrete_distribution<std::size_t> m_distribution;
 };
 
 } // namespace Cnes
