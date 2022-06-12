@@ -15,22 +15,22 @@ BOOST_AUTO_TEST_SUITE(RasterDemoRandom_test)
 
 BOOST_AUTO_TEST_CASE(simple_random_test) {
 
-  //! [Random values]
+  //! [Generate Gaussian noise]
   Cnes::Raster<double> raster({3, 2});
   raster.generate(Cnes::GaussianNoise<double>(100, 15));
-  //! [Random values]
+  //! [Generate Gaussian noise]
 
   std::cout << "Random raster: " << raster << std::endl;
 
-  //! [Random noise]
-  raster.apply(Cnes::StablePoissonNoise<double>());
-  //! [Random noise]
+  //! [Apply Poisson noise]
+  raster.apply(Cnes::StablePoissonNoise<int>());
+  //! [Apply Poisson noise]
 
   std::cout << "Noisy raster:  " << raster << std::endl;
 
-  //! [SnP noise]
+  //! [Apply salt and pepper noise]
   raster.apply(Cnes::ImpulseNoise<int>::saltAndPepper(0.1, 0.2, 0, 1000));
-  //! [SnP noise]
+  //! [Apply salt and pepper noise]
 
   std::cout << "S&P noised: " << raster << std::endl;
 }
