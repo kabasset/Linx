@@ -27,6 +27,12 @@ BOOST_AUTO_TEST_CASE(simple_random_test) {
   //! [Random noise]
 
   std::cout << "Noisy raster:  " << raster << std::endl;
+
+  //! [SnP noise]
+  raster.apply(Cnes::ImpulseNoise<int>::saltAndPepper(0.1, 0.2, 0, 1000));
+  //! [SnP noise]
+
+  std::cout << "S&P noised: " << raster << std::endl;
 }
 
 //! [System noise]

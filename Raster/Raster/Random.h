@@ -320,14 +320,13 @@ private:
  * @ingroup random
  * @brief Impulse noise generator (encompasses salt-and-pepper noise).
  * @details
- * Randomly generate discrete values with given probabilities.
+ * The call operator randomly generates discrete values with given probabilities.
  * If the sum of probabilities _s_ is less than 1,
  * then the input value is untouched with probability 1 - _s_.
  * If the sum of probabilities _s_ is greater than 1,
  * then the input probabilities are normalized by _s_.
  * 
- * For salt-and-pepper noise, simply use as initialization `{{min, pMin}, {max, pMax}}`,
- * e.g. `ImpulseNoise<T> noise({{Limits<T>::min(), 0.1}, {Limits<T>::max(), 0.2});`.
+ * For salt-and-pepper noise, see maker `saltAndPepper()`.
  * 
  * @satisfies{RandomNoise}
  */
@@ -336,13 +335,34 @@ class ImpulseNoise : RandomGenerator {
 
 public:
   /**
-   * @brief Constructor.
+   * @brief Single value constructor.
+   */
+  explicit ImpulseNoise(T value, double probability, std::size_t seed = -1) :
+      ImpulseNoise({{value, probability}}, seed) {}
+
+  /**
+   * @brief Multiple values constructor.
    */
   explicit ImpulseNoise(const std::map<T, double>& valueProbabilities, std::size_t seed = -1) :
-      RandomGenerator(seed), m_values(values(valueProbabilities)), m_distribution(weights(valueProbabilities)) {}
+      RandomGenerator(seed), m_values(values(valueProbabilities)), m_distribution(distribution(valueProbabilities)) {}
+
+  /**
+   * @brief Make a salt and pepper noise generator.
+   */
+  static ImpulseNoise saltAndPepper(
+      double pSalt,
+      double pPepper,
+      T salt = Limits<T>::max(),
+      T pepper = Limits<T>::min(),
+      std::size_t seed = -1) {
+    return ImpulseNoise({{salt, pSalt}, {pepper, pPepper}}, seed);
+  }
 
   /**
    * @brief Apply impulse noise.
+   * @details
+   * Generate discete values with constructor-provided probabilities,
+   * and return the input value the rest of the time (if _s_ < 1).
    */
   T operator()(T in = Limits<T>::zero()) {
     auto index = generate<std::size_t>(m_distribution);
@@ -350,6 +370,9 @@ public:
   }
 
 private:
+  /**
+   * @brief Extract the values from the value-probability map.
+   */
   static std::vector<T> values(const std::map<T, double>& valueProbabilities) {
     std::vector<T> out(valueProbabilities.size());
     std::transform(valueProbabilities.begin(), valueProbabilities.end(), out.begin(), [](auto vp) {
@@ -358,7 +381,10 @@ private:
     return out;
   }
 
-  static std::vector<T> weights(const std::map<T, double>& valueProbabilities) {
+  /**
+   * @brief Extract the weights from the value-probability map.
+   */
+  static std::vector<double> weights(const std::map<T, double>& valueProbabilities) {
     const auto count = valueProbabilities.size();
     std::vector<double> out(count + 1);
     auto& nullProbability = out[count];
@@ -373,7 +399,22 @@ private:
     return out;
   }
 
+  /**
+   * @brief Construct the distribution from the value-probability map.
+   */
+  static std::discrete_distribution<std::size_t> distribution(const std::map<T, double>& valueProbabilities) {
+    const auto w = weights(valueProbabilities);
+    return std::discrete_distribution<std::size_t>(w.begin(), w.end());
+  }
+
+  /**
+   * @brief The impulse values.
+   */
   std::vector<T> m_values;
+
+  /**
+   * @brief The impulse value index distribution.
+   */
   std::discrete_distribution<std::size_t> m_distribution;
 };
 
