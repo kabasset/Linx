@@ -21,22 +21,161 @@ namespace Cnes {
 using Index = long;
 
 /**
+ * @brief A container of coordinates.
+ */
+template <typename T, Index N = 2>
+using Coordinates = typename std::conditional<(N == -1), std::vector<T>, std::array<T, (std::size_t)N>>::type;
+
+/**
  * @relates Position
  * @brief The index container type.
  */
 template <Index N = 2>
-using Indices = typename std::conditional<(N == -1), std::vector<Index>, std::array<Index, (std::size_t)N>>::type;
+using Indices = Coordinates<Index, N>;
 
 /**
  * @ingroup data_classes
- * @brief N-dimensional pixel position or image shape, i.e. set of integer coordinates.
+ * @brief N-dimensional vector, mainly intended for pixel position or image shape, i.e. set of coordinates.
  * @tparam N A non-negative dimension (0 is allowed), or -1 for variable dimension.
  * @details
- * The values are stored in a `std::array<Index, N>` in general (`N &ge; 0`),
- * or `std::vector<Index>` for variable dimension (`N = -1`).
+ * The values are stored in a `std::array<T, N>` in general (`N &ge; 0`),
+ * or `std::vector<T>` for variable dimension (`N = -1`).
  *
  * Memory and services are optimized when dimension is fixed at compile-time (`N &ge; 0`).
  * 
+ * @tspecialization{Position}
+ */
+template <typename T, Index N = 2>
+class Vector :
+    public DataContainer<T, StdHolder<Coordinates<T, N>>, Vector<T, N>>,
+    public ArithmeticMixin<VectorArithmetic, T, Vector<T, N>> {
+public:
+  /**
+   * @brief The dimension template parameter.
+   */
+  static constexpr Index Dim = N;
+
+  CNES_VIRTUAL_DTOR(Vector)
+  CNES_DEFAULT_COPYABLE(Vector)
+  CNES_DEFAULT_MOVABLE(Vector)
+
+  /**
+   * @brief Default constructor.
+   * @warning
+   * The indices are unspecified.
+   * To create position 0, use `zero()` instead.
+   */
+  Vector() : DataContainer<T, StdHolder<Coordinates<T, N>>, Vector<T, N>>() {}
+
+  /**
+   * @brief Create a position of given dimension.
+   */
+  explicit Vector(T dim) : DataContainer<T, StdHolder<Coordinates<T, N>>, Vector<T, N>>(dim) {}
+
+  /**
+   * @brief Create a position from a brace-enclosed list of indices.
+   */
+  Vector(std::initializer_list<T> indices) : DataContainer<T, StdHolder<Coordinates<T, N>>, Vector<T, N>>(indices) {}
+
+  /**
+   * @brief Create a position from an iterable.
+   */
+  template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr>
+  explicit Vector(TIterable&& iterable) : DataContainer<T, StdHolder<Coordinates<T, N>>, Vector<T, N>>(iterable) {}
+
+  /**
+   * @brief Create position 0.
+   */
+  static Vector<T, N> zero() {
+    Vector<T, N> res(std::abs(Dim));
+    return res.fill(Limits<T>::zero());
+  }
+
+  /**
+   * @brief Create a position full of 1's.
+   */
+  static Vector<T, N> one() {
+    Vector<T, N> res(std::abs(Dim));
+    return res.fill(Limits<T>::one());
+  }
+
+  /**
+   * @brief Create max position (full of -1's).
+   */
+  static Vector<T, N> max() {
+    Vector<T, N> res(std::abs(N));
+    return res.fill(-Limits<T>::one());
+  }
+
+  /**
+   * @brief Check whether the position is zero.
+   */
+  bool isZero() const {
+    for (auto i : *this) {
+      if (i != Limits<T>::zero()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @brief Check whether the position is one.
+   */
+  bool isOne() const {
+    for (auto i : *this) {
+      if (i != Limits<T>::one()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @brief Check whether the position is max.
+   */
+  bool isMax() const {
+    for (auto i : *this) {
+      if (i != -Limits<T>::one()) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @brief Create a position of lower dimension.
+   * @tparam M The new dimension; cannot be -1
+   * @details
+   * The indices up to dimension `M` are copied.
+   */
+  template <Index M>
+  Vector<T, M> slice() const {
+    Vector<T, M> res(M);
+    std::copy_n(this->data(), M, res.data());
+    return res;
+  }
+
+  /**
+   * @brief Create a position of higher dimension.
+   * @tparam M The new dimension; cannot be -1
+   * @details
+   * The indices up to dimension `N` are copied.
+   * Those between dimensions `N` and `M` are taken from the given position.
+   */
+  template <Index M>
+  Vector<T, M> extend(const Vector<T, M>& padding = Vector<T, M>::zero()) const {
+    auto res = padding;
+    std::copy_n(this->data(), this->size(), res.data());
+    return res;
+  }
+};
+
+/**
+ * @ingroup data_classes
+ * @brief Pixel position or image shape, i.e. set of indices.
+ * @tparam N A non-negative dimension (0 is allowed), or -1 for variable dimension.
+ * @details
  * Anonymous brace-initialization is permitted, e.g.:
  * \code
  * Raster<float> raster({1920, 1080});
@@ -53,130 +192,7 @@ using Indices = typename std::conditional<(N == -1), std::vector<Index>, std::ar
  * @see Region
  */
 template <Index N = 2>
-class Position :
-    public DataContainer<Index, StdHolder<Indices<N>>, Position<N>>,
-    public ArithmeticMixin<VectorArithmetic, Index, Position<N>> {
-public:
-  /**
-   * @brief The dimension template parameter.
-   */
-  static constexpr Index Dim = N;
-
-  CNES_VIRTUAL_DTOR(Position)
-  CNES_DEFAULT_COPYABLE(Position)
-  CNES_DEFAULT_MOVABLE(Position)
-
-  /**
-   * @brief Default constructor.
-   * @warning
-   * The indices are unspecified.
-   * To create position 0, use `zero()` instead.
-   */
-  Position() : DataContainer<Index, StdHolder<Indices<N>>, Position<N>>() {}
-
-  /**
-   * @brief Create a position of given dimension.
-   */
-  explicit Position(Index dim) : DataContainer<Index, StdHolder<Indices<N>>, Position<N>>(dim) {}
-
-  /**
-   * @brief Create a position from a brace-enclosed list of indices.
-   */
-  Position(std::initializer_list<Index> indices) : DataContainer<Index, StdHolder<Indices<N>>, Position<N>>(indices) {}
-
-  /**
-   * @brief Create a position from an iterable.
-   */
-  template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr>
-  explicit Position(TIterable&& iterable) : DataContainer<Index, StdHolder<Indices<N>>, Position<N>>(iterable) {}
-
-  /**
-   * @brief Create position 0.
-   */
-  static Position<N> zero() {
-    Position<N> res(std::abs(Dim));
-    return res.fill(0);
-  }
-
-  /**
-   * @brief Create a position full of 1's.
-   */
-  static Position<N> one() {
-    Position<N> res(std::abs(Dim));
-    return res.fill(1);
-  }
-
-  /**
-   * @brief Create max position (full of -1's).
-   */
-  static Position<N> max() {
-    Position<N> res(std::abs(N));
-    return res.fill(-1);
-  }
-
-  /**
-   * @brief Check whether the position is zero.
-   */
-  bool isZero() const {
-    for (auto i : *this) {
-      if (i != 0) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
-   * @brief Check whether the position is one.
-   */
-  bool isOne() const {
-    for (auto i : *this) {
-      if (i != 1) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
-   * @brief Check whether the position is max.
-   */
-  bool isMax() const {
-    for (auto i : *this) {
-      if (i != -1) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
-   * @brief Create a position of lower dimension.
-   * @tparam M The new dimension; cannot be -1
-   * @details
-   * The indices up to dimension `M` are copied.
-   */
-  template <Index M>
-  Position<M> slice() const {
-    Position<M> res(M);
-    std::copy_n(this->data(), M, res.data());
-    return res;
-  }
-
-  /**
-   * @brief Create a position of higher dimension.
-   * @tparam M The new dimension; cannot be -1
-   * @details
-   * The indices up to dimension `N` are copied.
-   * Those between dimensions `N` and `M` are taken from the given position.
-   */
-  template <Index M>
-  Position<M> extend(const Position<M>& padding = Position<M>::zero()) const {
-    auto res = padding;
-    std::copy_n(this->data(), this->size(), res.data());
-    return res;
-  }
-};
+using Position = Vector<Index, N>;
 
 /**
  * @relates Position
