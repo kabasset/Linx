@@ -10,6 +10,8 @@
 #include "Raster/Position.h" // FIME Vector.h
 #include "RasterTypes/Exceptions.h"
 
+#include <eigen3/Eigen/Core>
+
 namespace Cnes {
 
 /**
@@ -48,15 +50,16 @@ public:
   /**
    * @brief Constructor.
    */
-  explicit Matrix() : DataContainer<T, Coordinates<T, N * M>, Matrix<T, N, M>>(N * M) {}
+  explicit Matrix() : DataContainer<T, Coordinates<T, N * M>, Matrix<T, N, M>>(N * M), m_eigen(this->data()) {}
 
   /**
    * @brief Create the identity matrix.
    */
   static Matrix identity() {
     Matrix out;
-    for (Index i = 0; i < Rank; ++i) {
-      out(i, i) = 1;
+    auto d = out.data();
+    for (Index i = 0; i < Rank; ++i, d += Columns + 1) {
+      *d = T(1);
     }
     return out;
   }
@@ -67,10 +70,9 @@ public:
   template <typename TIterable>
   static Matrix diagonal(const TIterable& values) {
     Matrix out;
-    Index i = 0;
-    for (auto e : values) {
-      out(i, i) = e;
-      ++i;
+    auto d = out.data();
+    for (auto it = values.begin(); it != values.end(); ++it, d += Columns + 1) {
+      *d = *it;
     }
     return out;
   }
@@ -89,25 +91,42 @@ public:
   /**
    * @brief Access element at given row and column.
    */
-  inline const T& at(Index row, Index column) const {
-    return row + column * Rows;
+  inline const T& operator()(Index row, Index column) const {
+    return column + Columns * row;
   }
 
   /**
-   * @copybrief at()
+   * @copybrief operator()()
    */
-  inline T& at(Index row, Index column) {
+  inline T& operator()(Index row, Index column) {
     return const_cast<T&>(const_cast<const Matrix&>(*this)->at(row, column));
+  }
+
+  /**
+   * @copybrief operator()()
+   */
+  template <Index R, Index C>
+  const T& at() const {
+    return C + Columns * R;
+  }
+
+  /// @group_operations
+
+  T determinant() const {
+    return m_eigen.determinant();
   }
 
   /// @group_modifier
 
   Matrix& inverse() {
-    // FIXME
+    m_eigen.inverse();
     return *this;
   }
 
   /// @}
+
+private:
+  Eigen::Map<Eigen::Matrix<T, N, M, Eigen::RowMajor>> m_eigen;
 };
 
 } // namespace Cnes
