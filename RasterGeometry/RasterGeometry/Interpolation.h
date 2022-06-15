@@ -109,7 +109,7 @@ public:
   /**
    * @brief Compute the value at given integral position.
    */
-  inline typename TExtrapolator::Value operator[](const Position<Dim>& position) const {
+  inline const typename TExtrapolator::Value& operator[](const Position<Dim>& position) const {
     return m_extrapolator[position];
   }
 
@@ -131,6 +131,16 @@ private:
    */
   const TExtrapolator& m_extrapolator;
 };
+
+template <typename TPolicy, typename TRaster>
+Extrapolator<TPolicy, typename TRaster::Value, TRaster::Dim> makeExtrapolator(TPolicy&& policy, const TRaster& raster) {
+  return Extrapolator<TPolicy, typename TRaster::Value, TRaster::Dim>(std::forward<TPolicy>(policy), raster);
+}
+
+template <typename TPolicy, typename TExtrapolator>
+Interpolator<TPolicy, TExtrapolator> makeInterpolator(TPolicy&& policy, const TExtrapolator& extrapolator) {
+  return Interpolator<TPolicy, TExtrapolator>(std::forward<TPolicy>(policy), extrapolator);
+}
 
 } // namespace Cnes
 
