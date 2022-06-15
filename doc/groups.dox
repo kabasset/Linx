@@ -41,13 +41,9 @@
 \defgroup geometry Geometrical Transforms
 \brief Transforms which act on pixel locations.
 
-\defgroup interpolation_modes Interpolation and Extrapolation Policies
+\defgroup interpolation Interpolation and Extrapolation
 \ingroup geometry
 \brief Handling of values between pixels or outside the raster domain.
-
-\defgroup interpolation Interpolators
-\ingroup geometry
-\brief Classes to apply interpolation and extrapolation functions.
 
 \defgroup guidelines Development Guidelines
 \brief Guidelines, good practices, optimization strategies.

@@ -3,7 +3,38 @@ namespace Cnes {
 
 \addtogroup interpolation
 
-Comming sooner or later...
+
+\section interpolation-extrapolation Interpolation and/or Extrapolation
+
+
+Interpolation and extrapolation are related.
+They both return values at positions which are not pixel positions.
+Interpolation handles non-integral positions,
+while extrapolation handles positions outside the image domain.
+They can be combined to access out-of-bouds non-integral positions.
+
+There are several possible policies in each case.
+For example, one might want to rotate a raster
+with linear interpolation and nearest-neighbor extrapolation.
+
+
+\section interpolation-policies Policies
+
+
+TODO
+
+
+\section interpolation-interpolate Interpolate
+
+
+TODO
+
+
+\section interpolation-extrapolate Extrapolate
+
+
+TODO
+
 
 */
 }
