@@ -7,10 +7,35 @@
 
 #include <algorithm> // copy_n
 #include <array>
-#include <cstddef> // size_t
 #include <exception> // runtime_error
+#include <valarray>
+#include <vector>
 
 namespace Cnes {
+
+/**
+ * @brief Get the pointer to a container's data.
+ */
+template <typename T>
+inline const typename T::value_type* data(const T& c) {
+  return c.data();
+}
+
+/**
+ * @brief `valarray`'s specialization.
+ */
+template <typename T>
+inline const T* data(const std::valarray<T>& c) {
+  return &c[0];
+}
+
+/**
+ * @brief Raw array specialization.
+ */
+template <class T, std::size_t N>
+inline const T* data(const T (&c)[N]) noexcept {
+  return c;
+}
 
 /**
  * @ingroup data_classes
@@ -64,7 +89,7 @@ public:
    * @brief Access the raw data.
    */
   inline const typename TContainer::value_type* data() const {
-    return &m_container[0]; // m_container.data() not available for valarray
+    return Cnes::data(m_container); // m_container.data() not available for valarray
   }
 
   /**
