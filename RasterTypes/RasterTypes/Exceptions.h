@@ -87,6 +87,7 @@ public:
 
 /**
  * @ingroup exceptions
+ * @ingroup interpolation
  * @brief Exception thrown if a value lies out of given bounds.
  */
 class OutOfBoundsError : public Exception {

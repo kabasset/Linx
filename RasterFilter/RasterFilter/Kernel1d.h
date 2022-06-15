@@ -7,12 +7,14 @@
 
 #include "Raster/Raster.h"
 #include "Raster/Sampling.h"
-#include "RasterGeometry/Extrapolation.h"
+#include "RasterGeometry/Interpolation.h"
 
 #include <map>
 #include <vector>
 
 namespace Cnes {
+
+struct CropKernelOutOfBounds {}; // FIXME
 
 /// @cond
 template <typename TKernel, Index... Is>
@@ -22,7 +24,7 @@ class Kernel1dSeq;
 /**
  * @brief 1D kernel for nD correlations.
  */
-template <typename T, typename TExtrapolation = CropExtrapolation>
+template <typename T, typename TExtrapolation = CropKernelOutOfBounds>
 class Kernel1d : public DataContainer<T, StdHolder<std::vector<T>>, Kernel1d<T, TExtrapolation>> {
 
 public:
@@ -296,7 +298,7 @@ private:
  * The kernel along the `IAverage` axis is `{1, 2, 1}` and that along `IDifference` is `{1, 0, -1}`.
  * Note the ordering of the differentiation kernel, which is opposite to Sobel's _convolution_ kernel.
  */
-template <typename T, Index IDifference, Index IAverage, typename TExtrapolation = CropExtrapolation>
+template <typename T, Index IDifference, Index IAverage, typename TExtrapolation = CropKernelOutOfBounds>
 Kernel1dSeq<Kernel1d<T, TExtrapolation>, IDifference, IAverage> makeSobel() {
   return Kernel1d<T, TExtrapolation>({1, 0, -1}, 1).template along<IDifference>() *
       Kernel1d<T, TExtrapolation>({1, 2, 1}, 1).template along<IAverage>();

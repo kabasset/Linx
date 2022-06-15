@@ -5,12 +5,9 @@
 #ifndef _RASTERGEOMETRY_INTERPOLATION_H
 #define _RASTERGEOMETRY_INTERPOLATION_H
 
-namespace Cnes {
+#include "Raster/Raster.h"
+#include "RasterGeometry/InterpolationPolicies.h"
 
-struct LinearInterpolation {};
-
-struct NearestNeighborInterpolation {};
-
-} // namespace Cnes
+namespace Cnes {} // namespace Cnes
 
 #endif
