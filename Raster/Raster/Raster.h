@@ -269,6 +269,18 @@ public:
   Region<N> domain() const;
 
   /**
+   * @brief Check whether a given (possibly non-integral) position lies inside the raster domain.
+   */
+  bool contains(const Vector<T, N>& position) const {
+    for (std::size_t i = 0; i < position.size(); ++i) { // FIXME iterators
+      if (position[i] < 0 || position[i] >= m_shape[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
    * @brief Get the actual dimension.
    * @details
    * This corresponds to the `N` template parameter in general,
