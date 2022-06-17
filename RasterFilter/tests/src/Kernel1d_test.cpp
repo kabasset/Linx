@@ -15,11 +15,11 @@ BOOST_AUTO_TEST_SUITE(Kernel1d_test)
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(combination_test) {
-  const auto sobel = makeSobel<int, 0, 1>().combine();
+  const auto combined = sobel<int, 0, 1>().combine();
   std::vector<int> values {1, 0, -1, 2, 0, -2, 1, 0, -1};
   Raster<int, 2> expected({3, 3}, std::move(values));
-  BOOST_TEST(sobel.shape() == expected.shape());
-  BOOST_TEST(sobel.container() == expected.container());
+  BOOST_TEST(combined.shape() == expected.shape());
+  BOOST_TEST(combined.container() == expected.container());
 }
 
 BOOST_AUTO_TEST_CASE(sum_kernel_test) {
@@ -38,8 +38,8 @@ BOOST_AUTO_TEST_CASE(sum_kernel_test) {
 }
 
 BOOST_AUTO_TEST_CASE(make_sobel_test) {
-  const auto sobelX = makeSobel<int, 0, 1>();
-  const auto sobelY = makeSobel<int, 1, 0>();
+  const auto sobelX = sobel<int, 0, 1>();
+  const auto sobelY = sobel<int, 1, 0>();
   Raster<int, 3> raster({3, 3, 3});
   raster.fill(1);
   const auto edgesX = sobelX.correlate<int>(raster);

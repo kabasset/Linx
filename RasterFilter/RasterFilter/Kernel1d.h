@@ -299,7 +299,7 @@ private:
  * Note the ordering of the differentiation kernel, which is opposite to Sobel's _convolution_ kernel.
  */
 template <typename T, Index IDifference, Index IAverage, typename TExtrapolation = CropKernelOutOfBounds>
-Kernel1dSeq<Kernel1d<T, TExtrapolation>, IDifference, IAverage> makeSobel() {
+Kernel1dSeq<Kernel1d<T, TExtrapolation>, IDifference, IAverage> sobel() {
   return Kernel1d<T, TExtrapolation>({1, 0, -1}, 1).template along<IDifference>() *
       Kernel1d<T, TExtrapolation>({1, 2, 1}, 1).template along<IAverage>();
 }

@@ -271,7 +271,7 @@ public:
   /**
    * @brief Check whether a given (possibly non-integral) position lies inside the raster domain.
    */
-  template<typename U>
+  template <typename U>
   bool contains(const Vector<U, N>& position) const {
     for (std::size_t i = 0; i < position.size(); ++i) { // FIXME iterators
       if (position[i] < 0 || position[i] >= m_shape[i]) {
@@ -440,15 +440,15 @@ private:
  * - float* ptr: The pixel values as a pointer;
  * - std::vector<float> vec: The pixel values as a vector;
  * 
- * auto ptrRaster2D = makeRaster(ptr, width, height);
- * auto ptrRaster3D = makeRaster(ptr, width, height, depth);
- * auto vecRaster2D = makeRaster(vec, width, height); // The vector is copied
- * auto vecRaster3D = makeRaster(std::move(vec), width, height, depth); // The vector is moved
+ * auto ptrRaster2D = rasterize(ptr, width, height);
+ * auto ptrRaster3D = rasterize(ptr, width, height, depth);
+ * auto vecRaster2D = rasterize(vec, width, height); // The vector is copied
+ * auto vecRaster3D = rasterize(std::move(vec), width, height, depth); // The vector is moved
  * \endcode
  */
 template <typename TContainer, typename... Longs>
 Raster<typename TContainer::value_type, sizeof...(Longs), StdHolder<TContainer>>
-makeRaster(TContainer&& data, Longs... shape) {
+rasterize(TContainer&& data, Longs... shape) {
   return Raster<typename TContainer::value_type, sizeof...(Longs), StdHolder<TContainer>> {
       {shape...},
       std::forward<TContainer>(data)};
@@ -456,10 +456,10 @@ makeRaster(TContainer&& data, Longs... shape) {
 
 /**
  * @relates Raster
- * @copybrief makeRaster()
+ * @copybrief rasterize()
  */
 template <typename T, typename... Longs>
-PtrRaster<T, sizeof...(Longs)> makeRaster(T* data, Longs... shape) {
+PtrRaster<T, sizeof...(Longs)> rasterize(T* data, Longs... shape) {
   return PtrRaster<T, sizeof...(Longs)> {{shape...}, data};
 }
 

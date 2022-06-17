@@ -144,10 +144,10 @@ BOOST_AUTO_TEST_CASE(make_raster_test) {
   const short constData2[width * height] = {0};
   float data3[width * height * depth] = {0};
   const float constData3[width * height * depth] = {0};
-  const auto raster2 = makeRaster(data2, width, height);
-  const auto constRaster2 = makeRaster(constData2, width, height);
-  const auto raster3 = makeRaster(data3, width, height, depth);
-  const auto constRaster3 = makeRaster(constData3, width, height, depth);
+  const auto raster2 = rasterize(data2, width, height);
+  const auto constRaster2 = rasterize(constData2, width, height);
+  const auto raster3 = rasterize(data3, width, height, depth);
+  const auto constRaster3 = rasterize(constData3, width, height, depth);
   BOOST_TEST(raster2.dimension() == 2);
   BOOST_TEST(constRaster2.dimension() == 2);
   BOOST_TEST(raster3.dimension() == 3);

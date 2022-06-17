@@ -2,10 +2,15 @@
 
 # 1.0 (wrt. EleFits 5.0.1)
 
+## Breaking changes
+
+* `makeRaster()` becomes `rasterize()`
 ## New features
 
-* FFTW-wrapper as `DftPlan` class
+* FFTW-wrapper `DftPlan`
 * Linear filtering through `Kernel` class
+* Extrapolation and interpolation with `Extrapolator` and `Interpolator`
+* Affine transformations as `Affinity`
 * `Raster` has Euclidean ring arithmetic (not only vector space arithmetic)
 * `Raster` supports mathematical functions (`abs()`, `min()`, `sin()`, `exp()`...)
 * Containers support filling methods (`fill()`, `arange()`...),

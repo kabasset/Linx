@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(ptrraster_ctors_test) {
   int data[] = {1, 2, 3, 4, 5, 6};
 
   Cnes::PtrRaster<int> constructed({3, 2}, data);
-  auto made = Cnes::makeRaster(data, 3, 2);
+  auto made = Cnes::rasterize(data, 3, 2);
 
   constructed[0] = 42;
   made[1] = 12;
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(ptrraster_ctors_test) {
   const int* cData = data;
 
   Cnes::PtrRaster<const int> cConstructed({3, 2}, data);
-  auto cMade = Cnes::makeRaster(cData, 3, 2);
+  auto cMade = Cnes::rasterize(cData, 3, 2);
 
   BOOST_TEST((cMade == cConstructed));
   //! [PtrRaster read]

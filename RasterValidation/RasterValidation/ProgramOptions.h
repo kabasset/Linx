@@ -49,7 +49,7 @@ public:
    * @brief Make a `ProgramOptions` with optional description string.
    */
   ProgramOptions(const std::string& description = "") :
-      m_named(makeDesc(description)), m_add(m_named.add_options()), m_positional(), m_variables() {}
+      m_named(describe(description)), m_add(m_named.add_options()), m_positional(), m_variables() {}
 
   /**
    * @brief Declare a positional option.
@@ -173,7 +173,7 @@ public:
   }
 
 private:
-  static std::string makeDesc(const std::string& description) {
+  static std::string describe(const std::string& description) {
     const std::string optionsGroup = "Options:";
     if (description.length() > 0) {
       return description + "\n\n" + optionsGroup;
