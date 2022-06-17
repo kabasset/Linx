@@ -1,10 +1,10 @@
 # Change log
 
-# 1.0 (wrt. EleFits 5.0.1)
+# 1.0 (wrt. EleFits 5.0)
 
 ## Breaking changes
 
-* `makeRaster()` becomes `rasterize()`
+* `makeRaster()` renamed as `rasterize()`
 ## New features
 
 * FFTW-wrapper `DftPlan`
@@ -17,6 +17,7 @@
   random values can be generated with `generate()`,
   and random noise can be added with `apply()`
 * New `Raster` specialization `AlignedRaster` supports owning and sharing memory-aligned data
+* Support `std::valarray` as a data holder
 * Alias `Index` for `long`, mostly for documentation purpose
 * Header-only library
 
