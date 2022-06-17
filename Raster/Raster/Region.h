@@ -233,6 +233,46 @@ Region<N> operator-(const Region<N>& lhs, Index rhs) {
   return res;
 }
 
+/**
+ * @brief Clamp some input value between a min and max values.
+ */
+template <typename T, typename U>
+T clamp(T in, U min, U max) {
+  if (in < min) {
+    return min;
+  }
+  if (in > max) {
+    return max;
+  }
+  return in;
+}
+
+/**
+ * @relates Region
+ * @brief Clamp a position inside a region.
+ */
+template <typename T, Index N = 2>
+Vector<T, N> clamp(const Vector<T, N>& position, const Region<N>& region) {
+  Vector<T, N> out(region.size());
+  for (Index i = 0; i < out.size(); ++i) {
+    out[i] = clamp(position[i], region.front[i], region.back[i]); // FIXME transform
+  }
+  return out;
+}
+
+/**
+ * @relates Region
+ * @brief Clamp a position inside a shape.
+ */
+template <typename T, Index N = 2>
+Vector<T, N> clamp(const Vector<T, N>& position, const Position<N>& shape) {
+  Vector<T, N> out(shape.size());
+  for (Index i = 0; i < out.size(); ++i) {
+    out[i] = clamp(position[i], Index(0), shape[i] - 1); // FIXME transform
+  }
+  return out;
+}
+
 } // namespace Cnes
 
 #endif // _RASTER_REGION_H

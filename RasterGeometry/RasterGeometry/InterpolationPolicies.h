@@ -66,8 +66,33 @@ struct NearestNeighbor {
   }
 };
 
-struct LinearInterpolation {
-  // FIXME
+/**
+ * @ingroup interpolation
+ * @brief Linear interpolation.
+ */
+struct Linear {
+
+  template <typename T, typename TRaster, typename... TIndices>
+  inline T at(const TRaster& raster, const Vector<double, 1>& position, TIndices... indices) const {
+    const Index floor = position.front();
+    const Index ceil = floor + 1;
+    const double delta = position.front() - floor;
+    const T prev = raster[{floor, indices...}];
+    const T next = raster[{ceil, indices...}];
+    return delta * (prev - next) + next;
+  }
+
+  template <typename T, Index N, typename TRaster, typename... TIndices>
+  inline std::enable_if_t<N != 1, T>
+  at(const TRaster& raster, const Vector<double, N>& position, TIndices... indices) const {
+    const Index floor = position.back();
+    const Index ceil = floor + 1;
+    const double delta = position.back() - floor;
+    const auto pos = position.template slice<N - 1>();
+    const T prev = at<T>(raster, pos, floor, indices...);
+    const T next = at<T>(raster, pos, ceil, indices...);
+    return delta * (prev - next) + next;
+  }
 };
 
 } // namespace Cnes

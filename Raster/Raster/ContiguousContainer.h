@@ -118,6 +118,34 @@ struct ContiguousContainerMixin {
     return const_cast<T&>(const_cast<const ContiguousContainerMixin&>(*this)[index]);
   }
 
+  /**
+   * @brief Access the first element.
+   */
+  inline const T& front() const {
+    return *(static_cast<const TDerived&>(*this).data());
+  }
+
+  /**
+   * @copybrief front()
+   */
+  inline T& front() {
+    return const_cast<T&>(const_cast<const ContiguousContainerMixin&>(*this).front());
+  }
+
+  /**
+   * @brief Access the last element.
+   */
+  inline const T& back() const {
+    return operator[](static_cast<const TDerived&>(*this).size() - 1);
+  }
+
+  /**
+   * @copybrief back()
+   */
+  inline T& back() {
+    return const_cast<T&>(const_cast<const ContiguousContainerMixin&>(*this).back());
+  }
+
   /// @group_iterators
 
   /**

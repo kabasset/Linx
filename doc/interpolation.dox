@@ -10,7 +10,7 @@ namespace Cnes {
 Interpolation and extrapolation are related.
 They both return values at positions which are not pixel positions.
 Interpolation handles non-integral positions,
-while extrapolation handles positions outside the image domain.
+while extrapolation handles positions outside the raster domain.
 They can be combined to access out-of-bouds non-integral positions.
 
 There are several possible policies in each case.
@@ -24,16 +24,24 @@ with linear interpolation and nearest-neighbor extrapolation.
 TODO
 
 
-\section interpolation-interpolate Interpolate
-
-
-TODO
-
 
 \section interpolation-extrapolate Extrapolate
 
 
 TODO
+
+\snippet RasterDemoInterpolation_test.cpp Extra
+
+
+\section interpolation-interpolate Interpolate
+
+
+Interpolators are templated by the interpolation policy and extrapolator or raster type,
+depending on whether out-of-bounds values should be accessed or not.
+
+\snippet RasterDemoInterpolation_test.cpp Inter
+
+\snippet RasterDemoInterpolation_test.cpp Inter-extra
 
 
 */

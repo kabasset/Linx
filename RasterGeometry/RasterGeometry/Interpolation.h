@@ -27,7 +27,7 @@ public:
   /**
    * @brief The value type.
    */
-  using Value = T;
+  using Value = std::decay_t<T>;
 
   /**
    * @brief The dimension parameter.
@@ -38,7 +38,7 @@ public:
    * @brief Constructor.
    */
   template <typename TRaster>
-  Extrapolator(TPolicy&& policy, const TRaster& raster) :
+  Extrapolator(const TRaster& raster, TPolicy&& policy) :
       m_policy(std::move(policy)), m_raster(raster.shape(), raster.data()) {}
 
   /**
@@ -74,50 +74,49 @@ struct InterpolationTraits<std::complex<T>> {
 
 /**
  * @ingroup interpolation
- * @brief Interpolation decorator.
+ * @brief Interpolator with optional extrapolator.
  * @tparam TPolicy The interpolation policy
- * @tparam TExtrapolator The extrapolator, which can be a mere `Raster`
+ * @tparam TRaster The raster or extrapolator type
  * @details
  * This class provides a subscript operator which accepts a position,
  * which can lie between pixels or outside the raster domain.
  * 
  * The interpolation formula is implemented as `TPolicy::at()`,
- * while the extrapolation formula is implemented as `TExtrapolator::operator[]()`.
- * If `TExtrapolator` is a raster, then no bound checking is performed.
+ * while the extrapolation formula is implemented as `TRaster::operator[]()`.
+ * If `TRaster` is a raster, then no bound checking is performed.
  * This is the best option when no value outside the raster domain has to be evaluated.
  */
-template <typename TPolicy, typename TExtrapolator>
+template <typename TPolicy, typename TRaster>
 class Interpolator {
 
 public:
   /**
    * @brief The interpolation value type.
    */
-  using Value = typename InterpolationTraits<typename TExtrapolator::Value>::Value;
+  using Value = typename InterpolationTraits<typename TRaster::Value>::Value;
 
   /**
    * @brief The interpolation dimension parameter.
    */
-  static constexpr Index Dim = TExtrapolator::Dim;
+  static constexpr Index Dim = TRaster::Dim;
 
   /**
    * @brief Constructor.
    */
-  Interpolator(TPolicy&& policy, const TExtrapolator& extrapolator) :
-      m_policy(std::move(policy)), m_extrapolator(std::move(extrapolator)) {}
+  Interpolator(const TRaster& raster, TPolicy&& policy) : m_policy(std::move(policy)), m_raster(raster) {}
 
   /**
    * @brief Compute the value at given integral position.
    */
-  inline const typename TExtrapolator::Value& operator[](const Position<Dim>& position) const {
-    return m_extrapolator[position];
+  inline const typename TRaster::Value& operator[](const Position<Dim>& position) const {
+    return m_raster[position];
   }
 
   /**
    * @brief Compute the interpolated value at given position.
    */
   inline Value operator[](const Vector<double, Dim>& position) const {
-    return m_policy.template at<Value>(m_extrapolator, position);
+    return m_policy.template at<Value>(m_raster, position);
   }
 
 private:
@@ -127,19 +126,24 @@ private:
   TPolicy m_policy;
 
   /**
-   * @brief The extrapolation decorator.
+   * @brief The raster or extrapolator.
    */
-  const TExtrapolator& m_extrapolator;
+  const TRaster& m_raster;
 };
 
-template <typename TPolicy, typename TRaster>
-Extrapolator<TPolicy, typename TRaster::Value, TRaster::Dim> makeExtrapolator(TPolicy&& policy, const TRaster& raster) {
-  return Extrapolator<TPolicy, typename TRaster::Value, TRaster::Dim>(std::forward<TPolicy>(policy), raster);
+template <typename TPolicy, typename TRaster, typename... TArgs>
+auto extrapolate(const TRaster& raster, TArgs&&... args) -> decltype(auto) {
+  return Extrapolator<TPolicy, typename TRaster::Value, TRaster::Dim>(raster, TPolicy(std::forward<TArgs>(args)...));
 }
 
-template <typename TPolicy, typename TExtrapolator>
-Interpolator<TPolicy, TExtrapolator> makeInterpolator(TPolicy&& policy, const TExtrapolator& extrapolator) {
-  return Interpolator<TPolicy, TExtrapolator>(std::forward<TPolicy>(policy), extrapolator);
+template <typename T, Index N, typename THolder>
+auto extrapolate(const Raster<T, N, THolder>& raster, T constant) -> decltype(auto) {
+  return Extrapolator<OutOfBoundsConstant<T>, T, N>(raster, OutOfBoundsConstant<T>(constant));
+}
+
+template <typename TPolicy = NearestNeighbor, typename TRaster, typename... TArgs>
+auto interpolate(const TRaster& raster, TArgs&&... args) -> decltype(auto) {
+  return Interpolator<TPolicy, TRaster>(raster, TPolicy(std::forward<TArgs>(args)...));
 }
 
 } // namespace Cnes

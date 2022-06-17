@@ -21,16 +21,16 @@ BOOST_AUTO_TEST_CASE(constant_nn_test) {
   Position<3> position {-1, -1, -1};
   Vector<double, 3> vector {.5, .5, .5};
 
-  const auto extra = makeExtrapolator(OutOfBoundsConstant<int>(0), raster);
+  const auto extra = extrapolate(raster, 0);
   BOOST_TEST(extra[position] == 0);
 
-  const auto inter = makeInterpolator(NearestNeighbor(), raster);
+  const auto inter = interpolate<NearestNeighbor>(raster);
   BOOST_TEST(&inter[position] < raster.data()); // Out of bounds
   BOOST_TEST(inter[vector] == 1);
 
-  const auto inextra = makeInterpolator(NearestNeighbor(), extra);
-  BOOST_TEST(inextra[position] == 0);
-  BOOST_TEST(inextra[vector] == 1);
+  const auto interextra = interpolate<NearestNeighbor>(extra);
+  BOOST_TEST(interextra[position] == 0);
+  BOOST_TEST(interextra[vector] == 1);
 }
 
 //-----------------------------------------------------------------------------
