@@ -30,13 +30,13 @@ BOOST_AUTO_TEST_CASE(extrapolate_interpolate_test) {
   //! [Inter]
   Cnes::Vector<double, 2> inbetween {.5, .5};
   const auto nn = Cnes::interpolate<Cnes::NearestNeighbor>(raster);
-  BOOST_TEST(nn[inbetween] == raster.at(-1));
+  BOOST_TEST(nn.at(inbetween) == raster.at(-1));
   //! [Inter]
 
   //! [Inter-extra]
   const auto linearDirichlet = Cnes::interpolate<Cnes::Linear>(dirichlet);
   BOOST_TEST(linearDirichlet[outside] == 0);
-  BOOST_TEST(linearDirichlet[inbetween] == 2.5);
+  BOOST_TEST(linearDirichlet.at(inbetween) == 2.5);
   //! [Inter-extra]
 }
 

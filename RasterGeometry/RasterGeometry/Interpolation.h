@@ -115,7 +115,7 @@ public:
   /**
    * @brief Compute the interpolated value at given position.
    */
-  inline Value operator[](const Vector<double, Dim>& position) const {
+  inline Value at(const Vector<double, Dim>& position) const {
     return m_policy.template at<Value>(m_raster, position);
   }
 

@@ -74,24 +74,53 @@ struct Linear {
 
   template <typename T, typename TRaster, typename... TIndices>
   inline T at(const TRaster& raster, const Vector<double, 1>& position, TIndices... indices) const {
-    const Index floor = position.front();
-    const Index ceil = floor + 1;
-    const double delta = position.front() - floor;
-    const T prev = raster[{floor, indices...}];
-    const T next = raster[{ceil, indices...}];
-    return delta * (prev - next) + next;
+    const auto f = floor<Index>(position.front());
+    const auto d = position.front() - f;
+    const T p = raster[{f, indices...}];
+    const T n = raster[{f + 1, indices...}];
+    return d * (p - n) + n;
   }
 
   template <typename T, Index N, typename TRaster, typename... TIndices>
   inline std::enable_if_t<N != 1, T>
   at(const TRaster& raster, const Vector<double, N>& position, TIndices... indices) const {
-    const Index floor = position.back();
-    const Index ceil = floor + 1;
-    const double delta = position.back() - floor;
+    const auto f = floor<Index>(position.back());
+    const auto d = position.back() - f;
     const auto pos = position.template slice<N - 1>();
-    const T prev = at<T>(raster, pos, floor, indices...);
-    const T next = at<T>(raster, pos, ceil, indices...);
-    return delta * (prev - next) + next;
+    const auto p = at<T>(raster, pos, f, indices...);
+    const auto n = at<T>(raster, pos, f + 1, indices...);
+    return d * (p - n) + n;
+  }
+};
+
+/**
+ * @ingroup interpolation
+ * @brief Cubic interpolation.
+ */
+struct Cubic {
+
+  template <typename T, typename TRaster, typename... TIndices>
+  inline T at(const TRaster& raster, const Vector<double, 1>& position, TIndices... indices) const {
+    const auto f = floor<Index>(position.front());
+    const auto d = position.front() - f;
+    const T pp = raster[{f - 1, indices...}];
+    const T p = raster[{f, indices...}];
+    const T n = raster[{f + 1, indices...}];
+    const T nn = raster[{f + 2, indices...}];
+    return p + 0.5 * (d * (-pp + n) + d * d * (2 * pp - 5 * p + 4 * n - nn) + d * d * d * (-pp + 3 * p - 3 * n + nn));
+  }
+
+  template <typename T, Index N, typename TRaster, typename... TIndices>
+  inline std::enable_if_t<N != 1, T>
+  at(const TRaster& raster, const Vector<double, N>& position, TIndices... indices) const {
+    const auto f = floor<Index>(position.back());
+    const auto d = position.back() - f;
+    const auto pos = position.template slice<N - 1>();
+    const auto pp = at<T>(raster, pos, f - 1, indices...);
+    const auto p = at<T>(raster, pos, f, indices...);
+    const auto n = at<T>(raster, pos, f + 1, indices...);
+    const auto nn = at<T>(raster, pos, f + 2, indices...);
+    return p + 0.5 * (d * (-pp + n) + d * d * (2 * pp - 5 * p + 4 * n - nn) + d * d * d * (-pp + 3 * p - 3 * n + nn));
   }
 };
 

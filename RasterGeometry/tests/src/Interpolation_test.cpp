@@ -26,11 +26,45 @@ BOOST_AUTO_TEST_CASE(constant_nn_test) {
 
   const auto inter = interpolate<NearestNeighbor>(raster);
   BOOST_TEST(&inter[position] < raster.data()); // Out of bounds
-  BOOST_TEST(inter[vector] == 1);
+  BOOST_TEST(inter.at(vector) == 1);
 
   const auto interextra = interpolate<NearestNeighbor>(extra);
   BOOST_TEST(interextra[position] == 0);
-  BOOST_TEST(interextra[vector] == 1);
+  BOOST_TEST(interextra.at(vector) == 1);
+}
+
+BOOST_AUTO_TEST_CASE(linear_test) {
+
+  Raster<int, 3> raster({2, 2, 2});
+  raster.arange(1);
+
+  const auto interpolator = interpolate<Linear>(raster);
+
+  const auto front = interpolator[{0, 0, 0}];
+  const auto back = interpolator[{1, 1, 1}];
+  const auto center = interpolator.at({.5, .5, .5});
+
+  BOOST_TEST(front == 1);
+  BOOST_TEST(back == 8);
+  BOOST_TEST(center == 4.5);
+}
+
+BOOST_AUTO_TEST_CASE(cubic_test) {
+
+  Raster<int, 3> raster({4, 4, 4});
+  raster.arange(1);
+
+  const auto interpolator = interpolate<Cubic>(raster);
+
+  const auto front = interpolator[{0, 0, 0}];
+  const auto back = interpolator[{3, 3, 3}];
+  const auto pos = interpolator.at({1, 1, 1});
+  const auto center = interpolator.at({1.5, 1.5, 1.5});
+
+  BOOST_TEST(front == 1);
+  BOOST_TEST(back == 64);
+  BOOST_TEST(pos == 22);
+  BOOST_TEST(center == 32.5);
 }
 
 //-----------------------------------------------------------------------------

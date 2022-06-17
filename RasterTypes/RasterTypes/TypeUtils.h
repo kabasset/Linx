@@ -11,6 +11,29 @@
 namespace Cnes {
 
 /**
+ * @brief Clamp some input value between a min and max values.
+ */
+template <typename T, typename U>
+T clamp(T in, U min, U max) {
+  if (in < min) {
+    return min;
+  }
+  if (in > max) {
+    return max;
+  }
+  return in;
+}
+
+/**
+ * @brief Compute the floor of an input floating point value, as an integer value.
+ */
+template <typename TInt, typename TFloat>
+TInt floor(TFloat in) {
+  TInt out = in;
+  return out - (in < 0);
+}
+
+/**
  * @brief Helper class to make complex numbers from real numbers.
  * @details
  * Does nothing for real numbers.
