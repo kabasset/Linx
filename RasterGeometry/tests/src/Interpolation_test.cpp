@@ -33,6 +33,19 @@ BOOST_AUTO_TEST_CASE(constant_nn_test) {
   BOOST_TEST(interextra.at(vector) == 1);
 }
 
+BOOST_AUTO_TEST_CASE(periodic_test) {
+
+  Raster<int, 3> raster({2, 2, 2});
+  raster.arange(1);
+
+  Position<3> negative {-1, -1, -1};
+  Position<3> positive {2, 3, 4};
+
+  const auto extra = extrapolate<Periodic>(raster);
+  BOOST_TEST(extra[negative] == raster.at(-1));
+  BOOST_TEST(extra[positive] == (raster[{0, 1, 0}]));
+}
+
 BOOST_AUTO_TEST_CASE(linear_test) {
 
   Raster<int, 3> raster({2, 2, 2});

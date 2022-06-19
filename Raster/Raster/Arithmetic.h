@@ -88,7 +88,9 @@ struct ArithmeticMixin<VectorArithmetic, T, TDerived> :
     boost::additive<TDerived, T>,
     boost::subtractable2_left<TDerived, T>,
     boost::unit_steppable<TDerived>,
-    boost::multiplicative<TDerived, T> {
+    boost::multiplicative<TDerived, T>,
+    boost::modable<TDerived>,
+    boost::modable<TDerived, T> {
 
   /// @{
   /// @group_modifiers
@@ -102,6 +104,9 @@ struct ArithmeticMixin<VectorArithmetic, T, TDerived> :
   CNES_RASTER_SCALAR_OPERATOR_INPLACE(*) ///< V *= a
 
   CNES_RASTER_SCALAR_OPERATOR_INPLACE(/) ///< V /= a
+
+  CNES_RASTER_VECTOR_OPERATOR_INPLACE(%) ///< V %= U
+  CNES_RASTER_SCALAR_OPERATOR_INPLACE(%) ///< V %= a
 
   /**
    * @brief ++V

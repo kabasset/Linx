@@ -11,7 +11,7 @@ namespace Cnes {
 
 /**
  * @ingroup interpolation
- * @brief Constant, aka Dirichlet boundary conditions.
+ * @brief Constant, a.k.a. Dirichlet boundary conditions.
  */
 template <typename T>
 struct OutOfBoundsConstant {
@@ -40,7 +40,7 @@ struct OutOfBoundsConstant {
 
 /**
  * @ingroup interpolation
- * @brief Nearest-neighbor interpolation or extrapolation, aka zero-flux Neumann boundary conditions.
+ * @brief Nearest-neighbor interpolation or extrapolation, a.k.a. zero-flux Neumann boundary conditions.
  */
 struct NearestNeighbor {
 
@@ -63,6 +63,29 @@ struct NearestNeighbor {
       return e + .5;
     });
     return raster[integral];
+  }
+};
+
+/**
+ * @ingroup interpolation
+ * @brief Periodic, a.k.a. symmetric or wrap-around, boundary conditions.
+ */
+struct Periodic {
+
+  /**
+   * @brief Return the value at the modulo position.
+   */
+  template <typename TRaster>
+  inline const typename TRaster::value_type& at(TRaster& raster, const Position<TRaster::Dim>& position) const {
+    Position<TRaster::Dim> inbounds(position.size());
+    inbounds.generate(
+        [](auto p, auto s) {
+          auto q = p % s;
+          return q < 0 ? q + s : q; // Positive modulo
+        },
+        position,
+        raster.shape());
+    return raster[inbounds];
   }
 };
 
