@@ -27,7 +27,7 @@ public:
   Affinity& scale(const Vector<double, N>& factor) {
     if (not factor.isOne()) {
       translate(-m_center);
-      m_map *= Matrix<double, N>::diagonal(factor); // FIXME DiagonalMatrix
+      m_map *= Matrix<double, N>::diagonal(factor);
       translate(m_center);
     }
     return *this;
@@ -36,7 +36,7 @@ public:
   Affinity& rotate(double radians, Index axis = 2) {
     if (radians != 0) {
       translate(-m_center);
-      auto rotation = Matrix<double, N>::identity(); // FIXME row-major
+      auto rotation = Matrix<double, N>::identity();
       // FIXME sin, cos
       m_map *= rotation;
       translate(m_center);

@@ -10,7 +10,7 @@
 #include "Raster/Holder.h"
 #include "RasterTypes/Exceptions.h"
 #include "RasterTypes/SeqUtils.h" // isIterable
-#include "RasterTypes/TypeUtils.h" // Limits
+#include "RasterTypes/TypeUtils.h" // Index, Limits
 
 #include <cstddef> // size_t
 #include <initializer_list>
@@ -101,7 +101,7 @@ public:
    * As opposed to `operator[]()`, negative indices are supported for backward indexing,
    * and bounds are checked.
    */
-  const T& at(long i) const { // FIXME Index
+  const T& at(Index i) const {
     const auto s = size();
     OutOfBoundsError::mayThrow("Index " + std::to_string(i), i, {-s, s - 1});
     return this->operator[](i >= 0 ? i : i + s);
@@ -110,7 +110,7 @@ public:
   /**
    * @copybrief at()
    */
-  T& at(long i) { // FIXME Index
+  T& at(Index i) {
     return const_cast<T&>(const_cast<const DataContainer&>(*this).at(i));
   }
 

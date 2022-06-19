@@ -5,7 +5,9 @@
 #ifndef _RASTERTYPES_SEQUTILS_H
 #define _RASTERTYPES_SEQUTILS_H
 
-#include <complex> // FIXME from TypeUtils?
+#include "RasterTypes/TypeUtils.h"
+
+#include <complex>
 #include <tuple>
 #include <utility> // declval
 
@@ -43,12 +45,6 @@ using RasterSupportedTypesTuple = std::tuple<CNES_RASTER_SUPPORTED_TYPES>;
  * @brief `BOOST_AUTO_TEST_CASE_TEMPLATE` for each supported type.
  */
 #define CNES_RASTER_TEST_CASE_TEMPLATE(name) BOOST_AUTO_TEST_CASE_TEMPLATE(name, T, RasterSupportedTypesTuple)
-
-/**
- * @brief Utility type for SFINAE, equivalent to C++17's `std::void_t`.
- */
-template <typename...>
-using templateVoid = void; // FIXME to TypeUtils
 
 /**
  * @brief Test whether a type is iterable, i.e. has `begin()` and `end()` methods.

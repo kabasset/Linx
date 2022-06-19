@@ -8,17 +8,12 @@
 #include "Raster/Arithmetic.h"
 #include "Raster/DataContainer.h"
 #include "Raster/DataUtils.h"
+#include "RasterTypes/TypeUtils.h"
 
 #include <numeric> // accumulate, multiplies
 #include <type_traits> // conditional
 
 namespace Cnes {
-
-/**
- * @relates Position
- * @brief The signed integer type which represents indices in a raster.
- */
-using Index = long;
 
 /**
  * @brief A container of coordinates.

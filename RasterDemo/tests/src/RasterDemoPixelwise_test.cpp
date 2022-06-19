@@ -8,11 +8,10 @@
 
 struct Fixture {
 
-  Fixture() :
-      a({3, 2}), // FIXME , {1, 2, 3, 4, 5, 6})
-      b({3, 2}), // FIXME , -1)
-      c({3, 2}), // FIXME , ?
-      k(2.) {}
+  Fixture() : a({3, 2}), b({3, 2}), c({3, 2}), k(2.) {
+    a.arange(1);
+    b.fill(-1);
+  }
 
   Cnes::Raster<double> a;
   Cnes::Raster<double> b;

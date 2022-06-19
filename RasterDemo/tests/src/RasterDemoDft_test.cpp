@@ -59,7 +59,8 @@ BOOST_AUTO_TEST_CASE(verbose_derivative_test) {
 BOOST_AUTO_TEST_CASE(concise_derivative_test) {
 
   //! [Fill vector]
-  Cnes::Raster<double, 1> in({360});
+  Cnes::Index size = 360;
+  Cnes::Raster<double, 1> in({size});
   const double dx = Cnes::pi<double>() / 180;
   double x = 0;
   for (auto& e : in) {
@@ -81,10 +82,10 @@ BOOST_AUTO_TEST_CASE(concise_derivative_test) {
   //! [Concise derivation]
 
   //! [inverseRealDft]
-  auto inv = Cnes::inverseRealDft(out, {in.size()});
+  auto inv = Cnes::inverseRealDft(out, {size});
   //! [inverseRealDft]
 
-  for (Cnes::Index i = 0; i < inv.size(); ++i) {
+  for (Cnes::Index i = 0; i < size; ++i) {
     BOOST_TEST(std::abs(inv[i] - std::cos(dx * i)) < .001);
   }
 }

@@ -143,27 +143,7 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
  * @satisfies{EuclidArithmetic}
  * 
  * @see `Position` for details on the fixed- and variable-dimension cases.
- * 
- * @par_example
- * \code
- * Position<2> shape {2, 3}; // FIXME as snippet
- * 
- * // Read/write PtrRaster
- * float data[] = {1, 2, 3, 4, 5, 6};
- * PtrRaster<float> ptrRaster(shape, data);
- * 
- * // Read-only PtrRaster
- * const float cData[] = {1, 2, 3, 4, 5, 6};
- * PtrRaster<const float> cPtrRaster(shape, cData);
- * 
- * // Read/write VecRaster
- * std::vector<float> vec(&data[0], &data[6]);
- * VecRaster<float> vecRaster(shape, std::move(vec));
- * 
- * // Read-only VecRaster
- * std::vector<const float> cVec(&data[0], &data[6]);
- * VecRaster<const float> cVecRaster(shape, std::move(cVec));
- * \endcode
+ * @see \ref primer
  */
 template <typename T, Index N = 2, typename THolder = StdHolder<std::vector<T>>>
 class Raster :
@@ -224,7 +204,7 @@ public:
   template <typename U, typename... TArgs>
   explicit Raster(Position<N> shape, std::initializer_list<U> list, TArgs&&... args) :
       DataContainer<T, THolder, Raster<T, N, THolder>>(list, std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
-    // FIXME assert sizes match
+    SizeError::mayThrow(list.size(), shapeSize(shape));
   }
 
   /**
@@ -243,7 +223,7 @@ public:
   explicit Raster(Position<N> shape, TIterable& iterable, TArgs&&... args) :
       DataContainer<T, THolder, Raster<T, N, THolder>>(iterable, std::forward<TArgs>(args)...),
       m_shape(std::move(shape)) {
-    // FIXME assert sizes match
+    SizeError::mayThrow(std::distance(std::begin(iterable), std::end(iterable)), shapeSize(shape));
   }
 
   /// @group_properties
@@ -273,7 +253,7 @@ public:
    */
   template <typename U>
   bool contains(const Vector<U, N>& position) const {
-    for (std::size_t i = 0; i < position.size(); ++i) { // FIXME iterators
+    for (std::size_t i = 0; i < position.size(); ++i) { // TODO iterators
       if (position[i] < 0 || position[i] >= m_shape[i]) {
         return false;
       }

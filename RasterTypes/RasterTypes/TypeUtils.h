@@ -11,17 +11,17 @@
 namespace Cnes {
 
 /**
+ * @relates Position
+ * @brief The signed integer type which represents indices in a raster.
+ */
+using Index = long;
+
+/**
  * @brief Clamp some input value between a min and max values.
  */
 template <typename T, typename U>
-T clamp(T in, U min, U max) {
-  if (in < min) {
-    return min;
-  }
-  if (in > max) {
-    return max;
-  }
-  return in;
+inline T clamp(T in, U min, U max) {
+  return in < min ? min : in > max ? max : in;
 }
 
 /**
@@ -32,6 +32,12 @@ TInt floor(TFloat in) {
   TInt out = in;
   return out - (in < 0);
 }
+
+/**
+ * @brief Utility type for SFINAE, equivalent to C++17's `std::void_t`.
+ */
+template <typename...>
+using templateVoid = void;
 
 /**
  * @brief Helper class to make complex numbers from real numbers.

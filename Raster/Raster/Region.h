@@ -241,7 +241,7 @@ template <typename T, Index N = 2>
 Vector<T, N> clamp(const Vector<T, N>& position, const Region<N>& region) {
   Vector<T, N> out(region.size());
   for (std::size_t i = 0; i < out.size(); ++i) {
-    out[i] = clamp(position[i], region.front[i], region.back[i]); // FIXME transform
+    out[i] = clamp(position[i], region.front[i], region.back[i]); // TODO transform
   }
   return out;
 }

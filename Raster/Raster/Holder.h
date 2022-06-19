@@ -5,6 +5,8 @@
 #ifndef _RASTER_HOLDER_H
 #define _RASTER_HOLDER_H
 
+#include "RasterTypes/Exceptions.h"
+
 #include <algorithm> // copy_n
 #include <array>
 #include <exception> // runtime_error
@@ -12,6 +14,18 @@
 #include <vector>
 
 namespace Cnes {
+
+struct SizeError : Exception {
+
+  SizeError(std::size_t in, std::size_t ref) :
+      Exception("Size error", std::string("Expected ") + std::to_string(ref) + ", got " + std::to_string(in)) {}
+
+  static void mayThrow(std::size_t in, std::size_t ref) {
+    if (in != ref) {
+      throw SizeError(in, ref);
+    }
+  }
+};
 
 /**
  * @brief Get the pointer to a container's data.
@@ -71,7 +85,7 @@ public:
    * @brief Container-move constructor.
    */
   explicit StdHolder(std::size_t size, Container&& container) : m_container(std::move(container)) {
-    // FIXME check size
+    SizeError::mayThrow(m_container.size(), size);
   }
 
   /// @group_properties
@@ -152,7 +166,7 @@ public:
   }
 
   explicit StdHolder(std::size_t size, Container&& container) : m_container(std::move(container)) {
-    // FIXME check size
+    SizeError::mayThrow(m_container.size(), size);
   }
 
   std::size_t size() const {

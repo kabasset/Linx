@@ -60,11 +60,7 @@ struct IndexRecursionImpl<-1, I> {
    */
   static Index index(const Position<-1>& shape, const Position<-1>& pos) {
     const auto n = shape.size();
-    if (pos.size() != n) {
-      throw std::runtime_error( // FIXME CnesError?
-          "Dimension mismatch. Raster is of dimension " + std::to_string(n) + " while position is of dimension " +
-          std::to_string(pos.size()));
-    }
+    SizeError::mayThrow(pos.size(), n);
     Index res = 0;
     for (std::size_t j = 0; j < shape.size(); ++j) {
       res = pos[n - 1 - j] + shape[n - 1 - j] * res;

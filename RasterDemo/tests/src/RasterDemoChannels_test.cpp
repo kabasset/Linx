@@ -2,6 +2,7 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
+#include "Raster/Random.h"
 #include "Raster/Raster.h"
 
 #include <boost/test/unit_test.hpp>
@@ -171,9 +172,9 @@ BOOST_AUTO_TEST_CASE(color_along_2_test) {
   const Rgb in0 {rgb[{0, 0, 0}], rgb[{0, 0, 1}], rgb[{0, 0, 2}]};
 
   //! [Output Xyc]
-  r *= 1.5;
-  g *= 1.1;
-  b *= 1.8;
+  r *= 0.2125;
+  g *= 0.7154;
+  b *= 0.0721;
   //! [Output Xyc]
   const Rgb out0 {rgb[{0, 0, 0}], rgb[{0, 0, 1}], rgb[{0, 0, 2}]};
 
@@ -190,7 +191,7 @@ BOOST_AUTO_TEST_CASE(vector_along_2_test) {
   Cnes::Index n = 100; // Or read from command line
   //! [Input vector]
   HyperspectralCube cube({n, 640, 480});
-  cube.fill(3.14); // FIXME random
+  cube.generate(Cnes::GaussianNoise<double>());
   std::vector<double> weights(n, 1.41);
   //! [Input vector]
 
