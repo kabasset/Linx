@@ -88,6 +88,11 @@ template <typename T>
 struct Limits {
 
   /**
+   * @brief The type for real numbers, the component type for complex numbers.
+   */
+  using Component = typename Complexifier<T>::Component;
+
+  /**
    * @brief 0 in general, or `false` for Booleans.
    */
   static T zero() {
@@ -105,28 +110,43 @@ struct Limits {
    * @brief The lowest possible value.
    */
   static T min() {
-    return Complexifier<T>::complexify(std::numeric_limits<T>::lowest());
+    return Complexifier<T>::complexify(std::numeric_limits<Component>::lowest());
   }
 
   /**
    * @brief The highest possible value.
    */
   static T max() {
-    return Complexifier<T>::complexify(std::numeric_limits<T>::max());
+    return Complexifier<T>::complexify(std::numeric_limits<Component>::max());
+  }
+
+  /**
+   * @brief The infinity value if defined, or `max()` otherwise.
+   */
+  static T inf() {
+    constexpr auto infinity = std::numeric_limits<Component>::infinity();
+    return infinity ? Complexifier<T>::complexify(infinity) : max();
+  }
+
+  /**
+   * @brief The difference between two consecutive values.
+   */
+  static T epsilon() {
+    return Complexifier<T>::complexify(std::numeric_limits<Component>::epsilon());
   }
 
   /**
    * @brief The min plus one epsilon.
    */
   static T almostMin() {
-    return min() + std::numeric_limits<T>::epsilon();
+    return min() + epsilon();
   }
 
   /**
    * @brief The max minus one epsilon.
    */
   static T almostMax() {
-    return max() - std::numeric_limits<T>::epsilon();
+    return max() - epsilon();
   }
 
   /**

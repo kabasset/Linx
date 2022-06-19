@@ -5,7 +5,7 @@
 ## Breaking changes
 
 * `makeRaster()` renamed as `rasterize()`
-* `Position::max()` renamed as `Position::minusOne()`
+* `Position::max()` replaced with `Position::inf()`
 
 ## New features
 

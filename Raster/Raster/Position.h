@@ -84,7 +84,7 @@ public:
   explicit Vector(TIterable&& iterable) : DataContainer<T, StdHolder<Coordinates<T, N>>, Vector<T, N>>(iterable) {}
 
   /**
-   * @brief Create a vector full of 0's.
+   * @brief Create a vector full of `Limits::zero()'s.
    */
   static Vector<T, N> zero() {
     Vector<T, N> res(std::abs(N));
@@ -92,7 +92,7 @@ public:
   }
 
   /**
-   * @brief Create a vector full of 1's.
+   * @brief Create a vector full of `Limits::one()'s.
    */
   static Vector<T, N> one() {
     Vector<T, N> res(std::abs(N));
@@ -100,13 +100,11 @@ public:
   }
 
   /**
-   * @brief Create a vector full of -1's.
-   * @details
-   * This is considered as the max `Position` when backward indexing is not acceptable.
+   * @brief Create a vector full of `Limits::inf()'s.
    */
-  static Vector<T, N> minusOne() {
+  static Vector<T, N> inf() {
     Vector<T, N> res(std::abs(N));
-    return res.fill(-Limits<T>::one());
+    return res.fill(-Limits<T>::inf());
   }
 
   /**
@@ -136,9 +134,9 @@ public:
   /**
    * @brief Check whether the vector is minus one.
    */
-  bool isMinusOne() const {
+  bool isInf() const {
     for (auto i : *this) {
-      if (i != -Limits<T>::one()) {
+      if (i != Limits<T>::inf()) {
         return false;
       }
     }

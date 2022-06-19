@@ -32,7 +32,7 @@ struct Region {
    * Front and back bounds along each axis are respectively 0 and -1.
    */
   static Region<N> whole() {
-    return {Position<N>::zero(), Position<N>::minusOne()};
+    return {Position<N>::zero(), Position<N>::inf()};
   }
 
   /**
