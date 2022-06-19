@@ -104,7 +104,7 @@ public:
   /**
    * @brief The last scalar, possibly included (depending on `step`).
    */
-  T back {-1};
+  T back {Limits<T>::inf()};
 
   /**
    * @brief The step between two scalars.
@@ -239,11 +239,7 @@ public:
   DataSamples(T* data, std::size_t size, const IndexSampling& sampling = {}, Index stride = 1) :
       m_data(data), m_size(size),
       m_sampling(
-          {sampling.front,
-           sampling.back == -1 ? // FIXME Limits::inf()
-               Index(m_size - 1) :
-               sampling.back,
-           sampling.step}),
+          {sampling.front, sampling.back == Limits<Index>::inf() ? Index(m_size - 1) : sampling.back, sampling.step}),
       m_stride(stride) {}
 
   /**

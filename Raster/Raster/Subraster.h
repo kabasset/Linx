@@ -21,22 +21,7 @@ namespace Cnes {
  * @details
  * As opposed to a Raster, values of a Subraster are generally not contiguous in memory:
  * they are piece-wise contiguous only.
- * 
- * When a region is indeed contiguous, it is better to rely on a PtrRaster instead:
- * \code
- * Raster<char, 3> raster({800, 600, 3});
- * 
- * // Good :)
- * auto region = Region<3>::fromShape({100, 100, 0}, {100, 100, 3});
- * Subraster<char, 3> subraster {raster, region};
- * 
- * // Bad :(
- * auto slice = Region<3>({0, 0, 1}, {-1, -1, 1});
- * Subraster<char, 3> contiguousSubraster {raster, slice};
- * 
- * // Good :)
- * PtrRaster<char, 2> ptrRaster({800, 600}, &raster[{0, 0, 1}]);
- * \endcode
+ * When a region is indeed contiguous, it is better to rely on a PtrRaster instead.
  */
 template <typename T, Index N, typename THolder> // FIXME simplify as TParent
 class Subraster {

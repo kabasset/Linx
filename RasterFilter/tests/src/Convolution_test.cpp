@@ -31,9 +31,9 @@ BOOST_AUTO_TEST_CASE(standard_convolve1d_test) {
   const std::vector<float> kernelData {0.5, 1., 1.5};
   std::vector<double> outData(inData.size(), 0.);
   const std::vector<double> expected {4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 16};
-  DataSamples<const int> in(inData.data(), inData.size(), {0, -1});
+  DataSamples<const int> in(inData.data(), inData.size(), {0, Limits<Index>::inf()});
   Kernel1d<float> kernel(kernelData, 1);
-  DataSamples<double> out(outData.data(), outData.size(), {0, -1});
+  DataSamples<double> out(outData.data(), outData.size(), {0, Limits<Index>::inf()});
   kernel.sparseCorrelate1dTo(in, out);
   for (std::size_t i = 0; i < expected.size(); ++i) {
     BOOST_TEST(outData[i] == expected[i]);
@@ -45,9 +45,9 @@ BOOST_AUTO_TEST_CASE(steped_convolve1d_test) {
   const std::vector<float> kernelData {0.5, 1., 1.5, 2., 1.};
   std::vector<double> outData {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
   const std::vector<double> expected {1, 2, 8.5, 4, 26, 6, 44, 8, 62, 10, 65, 12};
-  DataSamples<const int> in(inData.data(), inData.size(), {1, -1, 3});
+  DataSamples<const int> in(inData.data(), inData.size(), {1, Limits<Index>::inf(), 3});
   Kernel1d<float> kernel(kernelData, 3);
-  DataSamples<double> out(outData.data(), outData.size(), {2, -1, 2});
+  DataSamples<double> out(outData.data(), outData.size(), {2, Limits<Index>::inf(), 2});
   kernel.sparseCorrelate1dTo(in, out);
   for (std::size_t i = 0; i < expected.size(); ++i) {
     BOOST_TEST(outData[i] == expected[i]);
@@ -75,9 +75,9 @@ BOOST_AUTO_TEST_CASE(strided_convolve1d_test) {
   const std::vector<float> kernelData {0.5, 1., 1.5, 2., 1.};
   auto outData = transposePad<double>({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12}, 3);
   const auto expected = transposePad<double>({1, 2, 8.5, 4, 26, 6, 44, 8, 62, 10, 65, 12}, 3);
-  DataSamples<const int> in(inData.data(), inData.size() / 2, {1, -1, 3}, 2);
+  DataSamples<const int> in(inData.data(), inData.size() / 2, {1, Limits<Index>::inf(), 3}, 2);
   Kernel1d<float> kernel(kernelData, 3);
-  DataSamples<double> out(outData.data(), outData.size() / 3, {2, -1, 2}, 3);
+  DataSamples<double> out(outData.data(), outData.size() / 3, {2, Limits<Index>::inf(), 2}, 3);
   kernel.sparseCorrelate1dTo(in, out);
   for (std::size_t i = 0; i < expected.size(); ++i) {
     BOOST_TEST(outData[i] == expected[i]);

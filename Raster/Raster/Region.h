@@ -29,7 +29,7 @@ struct Region {
   /**
    * @brief Create an unlimited region.
    * @details
-   * Front and back bounds along each axis are respectively 0 and -1.
+   * Front and back bounds along each axis are respectively 0 and inf.
    */
   static Region<N> whole() {
     return {Position<N>::zero(), Position<N>::inf()};

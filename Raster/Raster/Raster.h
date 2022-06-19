@@ -323,7 +323,7 @@ public:
    * @tparam M The actual region dimension
    * @details
    * A region is contiguous if and only if:
-   * - For `i` < `M-1`, `front[i]` = 0 and `back[i]` = -1;
+   * - For `i` < `M-1`, `front[i]` = 0 and `back[i]` = `shape[i] - 1`;
    * - For `i` > `M`, `front[i]` = `back[i]`.
    */
   template <Index M = 2>

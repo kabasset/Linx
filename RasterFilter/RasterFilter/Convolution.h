@@ -138,7 +138,10 @@ public:
         in.template length<0>(),
         {xFrom, xTo, xStep});
     printf("inSamples: %li-%li:%li:%li\n", inSamples.front(), inSamples.back(), inSamples.step(), inSamples.stride());
-    DataSamples<typename TRasterOut::Value> xConvolvedSamples(xConvolved.data(), xConvolvedWidth, {0, -1});
+    DataSamples<typename TRasterOut::Value> xConvolvedSamples(
+        xConvolved.data(),
+        xConvolvedWidth,
+        {0, Limits<Index>::inf()});
     printf(
         "xConvolvedSamples: %li-%li:%li:%li\n",
         xConvolvedSamples.front(),
@@ -171,7 +174,7 @@ public:
         xConvolvedWidth);
     printf("ySamples: %li-%li:%li:%li\n", ySamples.front(), ySamples.back(), ySamples.step(), ySamples.stride());
     DataSamples<typename TRasterOut::Value>
-        outSamples(out.data(), out.template length<1>(), {0, -1}, out.template length<0>());
+        outSamples(out.data(), out.template length<1>(), {0, Limits<Index>::inf()}, out.template length<0>());
     printf(
         "outSamples: %li-%li:%li:%li\n",
         outSamples.front(),
