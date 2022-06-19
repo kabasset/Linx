@@ -207,6 +207,65 @@ public:
     return generate(std::forward<TFunc>(func), static_cast<TDerived&>(*this), args...);
   }
 
+  /// @group_operators
+
+  /**
+   * @brief Get a reference to the (first) min element.
+   */
+  const T& min() const {
+    return *std::min_element(this->begin(), this->end());
+  }
+
+  /**
+   * @brief Get a reference to the (first) max element.
+   */
+  const T& max() const {
+    return *std::max_element(this->begin(), this->end());
+  }
+
+  /**
+   * @brief Get a pair of references to the (first) min and max elements.
+   */
+  std::pair<const T&, const T&> minmax() const {
+    const auto its = std::minmax_element(this->begin(), this->end());
+    return {*its.first, *its.second};
+  }
+
+  /**
+   * @brief Get a reference to the (first) n-th smallest element.
+   */
+  const T& nth(std::size_t n) const {
+    std::vector<T> nonconst(this->begin(), this->end()); // TODO return somehow
+    auto it = nonconst.begin() + n;
+    std::nth_element(nonconst.begin(), it, nonconst.end());
+    return *it;
+  }
+
+  /**
+   * @brief Get the q-th quantile (with linear interpolation).
+   * @details
+   * The following values of `q` correspond to equivalent functions:
+   * - 0: `min()`;
+   * - 1: `max()`;
+   * - 0.5: `median()`.
+   */
+  T quantile(double q) const {
+    const auto n = q * (size() - 1);
+    const std::size_t f = n;
+    if (n == f) {
+      return nth(f);
+    }
+    const auto d = n - f;
+    return nth(f) * d + nth(f + 1) * (1. - d);
+  }
+
+  /**
+   * @brief Get the median.
+   */
+  T median() const {
+    return quantile(0.5);
+  }
+
   /// @}
 };
 
