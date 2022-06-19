@@ -62,53 +62,55 @@ public:
   /**
    * @brief Default constructor.
    * @warning
-   * The indices are unspecified.
-   * To create position 0, use `zero()` instead.
+   * The values are unspecified.
+   * To create vector 0, use `zero()` instead.
    */
   Vector() : DataContainer<T, StdHolder<Coordinates<T, N>>, Vector<T, N>>() {}
 
   /**
-   * @brief Create a position of given dimension.
+   * @brief Create a vector of given dimension.
    */
   explicit Vector(T dim) : DataContainer<T, StdHolder<Coordinates<T, N>>, Vector<T, N>>(dim) {}
 
   /**
-   * @brief Create a position from a brace-enclosed list of indices.
+   * @brief Create a vector from a brace-enclosed list of indices.
    */
   Vector(std::initializer_list<T> indices) : DataContainer<T, StdHolder<Coordinates<T, N>>, Vector<T, N>>(indices) {}
 
   /**
-   * @brief Create a position from an iterable.
+   * @brief Create a vector from an iterable.
    */
   template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr>
   explicit Vector(TIterable&& iterable) : DataContainer<T, StdHolder<Coordinates<T, N>>, Vector<T, N>>(iterable) {}
 
   /**
-   * @brief Create position 0.
+   * @brief Create a vector full of 0's.
    */
   static Vector<T, N> zero() {
-    Vector<T, N> res(std::abs(Dim));
+    Vector<T, N> res(std::abs(N));
     return res.fill(Limits<T>::zero());
   }
 
   /**
-   * @brief Create a position full of 1's.
+   * @brief Create a vector full of 1's.
    */
   static Vector<T, N> one() {
-    Vector<T, N> res(std::abs(Dim));
+    Vector<T, N> res(std::abs(N));
     return res.fill(Limits<T>::one());
   }
 
   /**
-   * @brief Create max position (full of -1's).
+   * @brief Create a vector full of -1's.
+   * @details
+   * This is considered as the max `Position` when backward indexing is not acceptable.
    */
-  static Vector<T, N> max() {
+  static Vector<T, N> minusOne() {
     Vector<T, N> res(std::abs(N));
     return res.fill(-Limits<T>::one());
   }
 
   /**
-   * @brief Check whether the position is zero.
+   * @brief Check whether the vector is zero.
    */
   bool isZero() const {
     for (auto i : *this) {
@@ -120,7 +122,7 @@ public:
   }
 
   /**
-   * @brief Check whether the position is one.
+   * @brief Check whether the vector is one.
    */
   bool isOne() const {
     for (auto i : *this) {
@@ -132,9 +134,9 @@ public:
   }
 
   /**
-   * @brief Check whether the position is max.
+   * @brief Check whether the vector is minus one.
    */
-  bool isMax() const {
+  bool isMinusOne() const {
     for (auto i : *this) {
       if (i != -Limits<T>::one()) {
         return false;
@@ -144,10 +146,10 @@ public:
   }
 
   /**
-   * @brief Create a position of lower dimension.
+   * @brief Create a vector of lower dimension.
    * @tparam M The new dimension; cannot be -1
    * @details
-   * The indices up to dimension `M` are copied.
+   * The values up to dimension `M` are copied.
    */
   template <Index M>
   Vector<T, M> slice() const {
@@ -157,11 +159,11 @@ public:
   }
 
   /**
-   * @brief Create a position of higher dimension.
+   * @brief Create a vector of higher dimension.
    * @tparam M The new dimension; cannot be -1
    * @details
-   * The indices up to dimension `N` are copied.
-   * Those between dimensions `N` and `M` are taken from the given position.
+   * The values up to dimension `N` are copied.
+   * Those between dimensions `N` and `M` are taken from the given padding vector.
    */
   template <Index M>
   Vector<T, M> extend(const Vector<T, M>& padding = Vector<T, M>::zero()) const {
@@ -186,7 +188,7 @@ public:
  * Classical positions are instantiated with named constructors, e.g.:
  * \code
  * auto bottomLeft = Position<2>::zero();
- * auto topRight = Position<2>::max();
+ * auto topRight = Position<2>::ùinusOne();
  * \endcode
  * 
  * @see Region

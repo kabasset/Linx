@@ -5,6 +5,8 @@
 ## Breaking changes
 
 * `makeRaster()` renamed as `rasterize()`
+* `Position::max()` renamed as `Position::minusOne()`
+
 ## New features
 
 * FFTW-wrapper `DftPlan`
@@ -18,6 +20,7 @@
   and random noise can be added with `apply()`
 * New `Raster` specialization `AlignedRaster` supports owning and sharing memory-aligned data
 * Support `std::valarray` as a data holder
+* 1D container `Vector` generalizes `Position` with template value type
 * Alias `Index` for `long`, mostly for documentation purpose
 * Header-only library
 
