@@ -81,7 +81,7 @@ public:
     inMinIt -= in.front();
     inIt -= m_backward;
     auto outIt = out.begin();
-    auto i = in.front();
+    std::size_t i = in.front();
 
     printf("in = [%li:%li:%li:%li]\n", in.front(), in.back(), step, in.stride());
 

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "Raster/Arithmetic.h"
-#include "Raster/TestRaster.h"
+#include "Raster/Random.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -17,8 +17,8 @@ BOOST_AUTO_TEST_SUITE(Arithmetic_test)
 
 BOOST_AUTO_TEST_CASE(raster_arithmetic_test) {
   const Position<2> shape {19, 6};
-  const Test::RandomRaster<int> lhs(shape);
-  const Test::RandomRaster<int> rhs(shape);
+  const auto lhs = random<int>(shape);
+  const auto rhs = random<int>(shape);
   int scalar = 2;
   const auto plusVector = lhs + rhs;
   const auto plusScalar = lhs + scalar;
@@ -42,8 +42,8 @@ BOOST_AUTO_TEST_CASE(raster_arithmetic_test) {
 
 BOOST_AUTO_TEST_CASE(raster_generate_test) {
   Position<3> shape {3, 14, 15};
-  Test::RandomRaster<std::int16_t, 3> a(shape);
-  Test::RandomRaster<std::int32_t, 3> b(shape);
+  auto a = random<std::int16_t>(shape);
+  auto b = random<std::int32_t>(shape);
   VecRaster<std::int64_t, 3> result(shape);
   result.generate(
       [](auto v, auto w) {

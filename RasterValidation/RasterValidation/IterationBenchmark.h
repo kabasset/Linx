@@ -5,7 +5,7 @@
 #ifndef _RASTERVALIDATION_ITERATIONBENCHMARK_H
 #define _RASTERVALIDATION_ITERATIONBENCHMARK_H
 
-#include "Raster/TestRaster.h"
+#include "Raster/Raster.h"
 #include "RasterValidation/Chronometer.h"
 
 namespace Cnes {

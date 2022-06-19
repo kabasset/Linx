@@ -5,9 +5,10 @@
 #ifndef _RASTER_ALIGNEDBUFFER_H
 #define _RASTER_ALIGNEDBUFFER_H
 
-#include "Raster/DataUtils.h"
 #include "RasterTypes/Exceptions.h"
+#include "RasterTypes/TypeUtils.h"
 
+#include <algorithm> // copy_n
 #include <cstdint> // uintptr_t
 #include <sstream>
 

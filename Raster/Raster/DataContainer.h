@@ -6,7 +6,6 @@
 #define _RASTER_DATACONTAINER_H
 
 #include "Raster/ContiguousContainer.h"
-#include "Raster/DataUtils.h"
 #include "Raster/Holder.h"
 #include "RasterTypes/Exceptions.h"
 #include "RasterTypes/SeqUtils.h" // isIterable

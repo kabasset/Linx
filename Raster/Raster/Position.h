@@ -7,7 +7,6 @@
 
 #include "Raster/Arithmetic.h"
 #include "Raster/DataContainer.h"
-#include "Raster/DataUtils.h"
 #include "RasterTypes/TypeUtils.h"
 
 #include <numeric> // accumulate, multiplies

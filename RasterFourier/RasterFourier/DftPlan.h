@@ -5,7 +5,6 @@
 #ifndef _RASTERFOURIER_DFTPLAN_H
 #define _RASTERFOURIER_DFTPLAN_H
 
-#include "Raster/DataUtils.h"
 #include "Raster/Raster.h"
 #include "RasterFourier/DftMemory.h"
 

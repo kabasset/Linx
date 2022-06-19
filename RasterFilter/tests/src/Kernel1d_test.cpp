@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(make_sobel_test) {
     }
     printf("\n");
   }
-  for (std::size_t i = 0; i < 3 * 3 * 3; ++i) {
+  for (i = 0; i < 3 * 3 * 3; ++i) {
     BOOST_TEST(edgesX[i] == expectedX[i]);
     BOOST_TEST(edgesY[i] == expectedY[i]);
   }

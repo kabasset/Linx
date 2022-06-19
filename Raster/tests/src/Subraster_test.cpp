@@ -2,8 +2,8 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
+#include "Raster/Random.h"
 #include "Raster/Raster.h"
-#include "Raster/TestRaster.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_SUITE(Subraster_test)
 
 BOOST_AUTO_TEST_CASE(singleton_subraster_test) {
   const Position<3> shape {3, 4, 5};
-  const Test::RandomRaster<float, 3> raster(shape);
+  const auto raster = random<float>(shape);
   const Position<3> pos {1, 2, 3};
   const Region<3> region {pos, pos};
   const Subraster<float, 3, StdHolder<std::vector<float>>> subraster(raster, region);
@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(singleton_subraster_test) {
 
 BOOST_AUTO_TEST_CASE(domain_subraster_test) {
   const Position<3> shape {3, 4, 5};
-  const Test::RandomRaster<float, 3> raster(shape);
+  const auto raster = random<float>(shape);
   const auto region = raster.domain();
   const Subraster<float, 3, StdHolder<std::vector<float>>> subraster(raster, region);
   BOOST_TEST(subraster.shape() == shape);

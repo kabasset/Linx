@@ -7,8 +7,52 @@
 
 #include <complex>
 #include <limits>
+#include <utility> // forward
 
 namespace Cnes {
+
+/**
+ * @brief Define a default virtual destructor.
+ */
+#define CNES_VIRTUAL_DTOR(classname) \
+  /** @brief Destructor. */ \
+  virtual ~classname() = default;
+
+/**
+ * @brief Define default copy constructor and assignment operator.
+ */
+#define CNES_DEFAULT_COPYABLE(classname) \
+  /** @brief Copy constructor. */ \
+  classname(const classname&) = default; \
+  /** @brief Copy assignment operator. */ \
+  classname& operator=(const classname&) = default;
+
+/**
+ * @brief Define deleted copy constructor and assignment operator.
+ */
+#define CNES_NON_COPYABLE(classname) \
+  /** @brief Deleted copy constructor. */ \
+  classname(const classname&) = delete; \
+  /** @brief Deleted copy assignment operator. */ \
+  classname& operator=(const classname&) = delete;
+
+/**
+ * @brief Define default move constructor and assignment operator.
+ */
+#define CNES_DEFAULT_MOVABLE(classname) \
+  /** @brief Move constructor. */ \
+  classname(classname&&) = default; \
+  /** @brief Move assignment operator. */ \
+  classname& operator=(classname&&) = default;
+
+/**
+ * @brief Define deleted move constructor and assignment operator.
+ */
+#define CNES_NON_MOVABLE(classname) \
+  /** @brief Deleted move constructor. */ \
+  classname(classname&&) = delete; \
+  /** @brief Deleted move assignment operator. */ \
+  classname& operator=(classname&&) = delete;
 
 /**
  * @relates Position
