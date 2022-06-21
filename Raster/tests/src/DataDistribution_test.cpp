@@ -39,6 +39,15 @@ BOOST_AUTO_TEST_CASE(quantiles_test) {
   checkQuantiles<13>();
 }
 
+BOOST_AUTO_TEST_CASE(robust_test) {
+  Vector<int, 7> data {2, 1, 9, 4, 1, 2, 6};
+  auto dist = data.distribution();
+  BOOST_TEST(dist.min() == 1);
+  BOOST_TEST(dist.max() == 9);
+  BOOST_TEST(dist.median() == 2);
+  BOOST_TEST(dist.mad() == 1);
+}
+
 BOOST_AUTO_TEST_CASE(histogram_test) {
   Vector<int, 10> data;
   data.arange();

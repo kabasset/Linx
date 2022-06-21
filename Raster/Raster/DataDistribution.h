@@ -22,80 +22,50 @@ namespace Cnes {
  * such that eventual changes to the input container would not be reflected.
  * 
  * Most estimators rely on partially sorted values.
- * The class relies on lazy evaluation to perform just enough sorting to output the requested parameters.
+ * The class performs evaluation to sort the values just enough to return the requested parameters.
  * Sequentially calling several methods results in a more and more sorted values.
  * If a lot of different parameters have to be estimated,
  * then it might be faster to completely sort the values by calling `sort()` beforehand.
+ * 
+ * Methods are not `const` because they involve sorting or caching.
  */
 template <typename T>
 class DataDistribution {
 
 public:
+  /**
+   * @copybrief TypeTraits::Floating
+   */
   using Floating = typename TypeTraits<T>::Floating;
 
   /// @{
   /// @group_construction
 
   /**
-   * @brief Size-based constructor.
+   * @brief Vector-move constructor.
+   */
+  explicit DataDistribution(std::vector<T>&& values) :
+      m_values(std::move(values)), m_sorted(std::is_sorted(m_values.begin(), m_values.end())), m_sum(Limits<T>::zero()),
+      m_sum2(m_sum) {
+    for (const auto& v : m_values) {
+      m_sum += v;
+      m_sum2 += v * v;
+    }
+  }
+
+  /**
+   * @brief Iterable-copy constructor.
    */
   template <typename TIterable>
-  explicit DataDistribution(const TIterable& values) :
-      m_values(values.begin(), values.end()), m_sorted(std::is_sorted(m_values.begin(), m_values.end())) {}
+  explicit DataDistribution(const TIterable& values) : DataDistribution(std::vector<T>(values.begin(), values.end())) {}
 
   /// @group_properties
 
-  std::size_t size() const {
+  /**
+   * @brief Get the number of values.
+   */
+  std::size_t size() {
     return m_values.size();
-  }
-
-  /// @group_operators
-
-  /**
-   * @brief Sort the values once for all.
-   */
-  void sort() {
-    if (not m_sorted) {
-      std::sort(m_values.begin(), m_values.end());
-      m_sorted = true;
-    }
-  }
-
-  /**
-   * @brief Get a reference to the (first) n-th smallest element.
-   */
-  const T& nth(std::size_t n) {
-    if (m_sorted) {
-      return m_values[n];
-    }
-    auto it = m_values.begin() + n;
-    std::nth_element(m_values.begin(), it, m_values.end());
-    return *it;
-  }
-
-  /**
-   * @brief Get the q-th quantile (with linear interpolation).
-   * @details
-   * The following values of `q` correspond to equivalent functions:
-   * - 0: `min()`;
-   * - 1: `max()`;
-   * - 0.5: `median()`.
-   */
-  Floating quantile(double q) {
-    const auto n = q * (size() - 1);
-    const std::size_t f = n;
-    if (n == f) {
-      return nth(f);
-    }
-    const auto d = n - f;
-    return nth(f) * d + nth(f + 1) * (1. - d); // FIXME linear(&nth(f), d);
-  }
-
-  /**
-   * @brief Get the median.
-   */
-  Floating median() {
-    return quantile(0.5);
   }
 
   /**
@@ -110,6 +80,78 @@ public:
    */
   const T& max() {
     return nth(size() - 1);
+  }
+
+  /**
+   * @brief Get the sum of all values.
+   */
+  const T& sum() {
+    return m_sum;
+  }
+
+  /**
+   * @brief Get a reference to the n-th smallest element.
+   */
+  const T& nth(std::size_t n) {
+    if (m_sorted) {
+      return m_values[n];
+    }
+    auto it = m_values.begin() + n;
+    std::nth_element(m_values.begin(), it, m_values.end());
+    return *it;
+  }
+
+  /// @group_operations
+
+  /**
+   * @brief Compute the mean.
+   */
+  Floating mean() {
+    return sum() / size();
+  }
+
+  /**
+   * @brief Compute the median.
+   */
+  Floating median() {
+    return quantile(0.5);
+  }
+
+  /**
+   * @brief Compute the variance.
+   */
+  Floating variance(bool unbiased = true) {
+    return Floating(m_sum2 - m_sum * m_sum() / size()) / (size() - unbiased);
+  }
+
+  /**
+   * @brief Compute the median absolute deviation.
+   */
+  Floating mad() {
+    std::vector<T> absdev(size());
+    const auto m = median();
+    std::transform(m_values.begin(), m_values.end(), absdev.begin(), [=](auto e) {
+      return std::abs(e - m);
+    });
+    return DataDistribution<T>(std::move(absdev)).median();
+  }
+
+  /**
+   * @brief Compute the q-th quantile (with linear interpolation).
+   * @details
+   * The following values of `q` correspond to equivalent functions:
+   * - 0: `min()`;
+   * - 1: `max()`;
+   * - 0.5: `median()`.
+   */
+  Floating quantile(double q) {
+    const auto n = q * (size() - 1);
+    const std::size_t f = n;
+    if (n == f) {
+      return nth(f);
+    }
+    const auto d = n - f;
+    return nth(f) * d + nth(f + 1) * (1. - d); // FIXME linear(&nth(f), d);
   }
 
   /**
@@ -140,6 +182,16 @@ public:
     return out;
   }
 
+  /**
+   * @brief Sort the values once for all.
+   */
+  void sort() {
+    if (not m_sorted) {
+      std::sort(m_values.begin(), m_values.end());
+      m_sorted = true;
+    }
+  }
+
   /// @}
 
 private:
@@ -152,6 +204,16 @@ private:
    * @brief Check if values are totally sorted.
    */
   bool m_sorted;
+
+  /**
+   * @brief The cached sum.
+   */
+  T m_sum;
+
+  /**
+   * @brief The cached sum of squares.
+   */
+  T m_sum2;
 };
 
 } // namespace Cnes

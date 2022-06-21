@@ -55,10 +55,6 @@ elements_add_unit_test(Region tests/src/Region_test.cpp
                      EXECUTABLE Raster_Region_test
                      LINK_LIBRARIES Raster
                      TYPE Boost)
-elements_add_unit_test(Stats tests/src/Stats_test.cpp 
-                     EXECUTABLE Raster_Stats_test
-                     LINK_LIBRARIES Raster
-                     TYPE Boost)
 elements_add_unit_test(Subraster tests/src/Subraster_test.cpp 
                      EXECUTABLE Raster_Subraster_test
                      LINK_LIBRARIES Raster
