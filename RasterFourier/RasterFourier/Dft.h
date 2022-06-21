@@ -221,8 +221,8 @@ using ComplexDft = DftPlan<Internal::ComplexDftTransform, N>;
  * @brief Compute the complex DFT.
  */
 template <typename TRaster>
-ComplexDftBuffer<TRaster::Dim> complexDft(const TRaster& in) {
-  ComplexDft<TRaster::Dim> plan(in.shape());
+ComplexDftBuffer<TRaster::Dimension> complexDft(const TRaster& in) {
+  ComplexDft<TRaster::Dimension> plan(in.shape());
   std::copy(in.begin(), in.end(), plan.in().begin());
   plan.transform();
   return std::move(plan.out());
@@ -233,8 +233,8 @@ ComplexDftBuffer<TRaster::Dim> complexDft(const TRaster& in) {
  * @brief Compute the inverse complex DFT.
  */
 template <typename TRaster>
-ComplexDftBuffer<TRaster::Dim> inverseComplexDft(const TRaster& in) {
-  typename ComplexDft<TRaster::Dim>::Inverse plan(in.shape());
+ComplexDftBuffer<TRaster::Dimension> inverseComplexDft(const TRaster& in) {
+  typename ComplexDft<TRaster::Dimension>::Inverse plan(in.shape());
   std::copy(in.begin(), in.end(), plan.in().begin());
   plan.transform().normalize();
   return std::move(plan.out());
@@ -245,8 +245,8 @@ ComplexDftBuffer<TRaster::Dim> inverseComplexDft(const TRaster& in) {
  * @brief Compute the real DFT.
  */
 template <typename TRaster>
-ComplexDftBuffer<TRaster::Dim> realDft(const TRaster& in) {
-  RealDft<TRaster::Dim> plan(in.shape());
+ComplexDftBuffer<TRaster::Dimension> realDft(const TRaster& in) {
+  RealDft<TRaster::Dimension> plan(in.shape());
   std::copy(in.begin(), in.end(), plan.in().begin());
   plan.transform();
   return std::move(plan.out());
@@ -257,8 +257,8 @@ ComplexDftBuffer<TRaster::Dim> realDft(const TRaster& in) {
  * @brief Compute the inverse real DFT.
  */
 template <typename TRaster>
-RealDftBuffer<TRaster::Dim> inverseRealDft(const TRaster& in, const Position<TRaster::Dim>& shape) {
-  typename RealDft<TRaster::Dim>::Inverse plan(shape);
+RealDftBuffer<TRaster::Dimension> inverseRealDft(const TRaster& in, const Position<TRaster::Dimension>& shape) {
+  typename RealDft<TRaster::Dimension>::Inverse plan(shape);
   std::copy(in.begin(), in.end(), plan.in().begin());
   plan.transform().normalize();
   return std::move(plan.out());

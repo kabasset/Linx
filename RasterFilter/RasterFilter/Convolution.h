@@ -50,11 +50,11 @@ public:
    * @brief Correlate a given image with the kernel along a given axis.
    */
   template <Index Axis, typename TOut = T, typename TRasterIn>
-  Raster<TOut, TRasterIn::Dim> correlateAlong(const TRasterIn& in) const {
+  Raster<TOut, TRasterIn::Dimension> correlateAlong(const TRasterIn& in) const {
     const auto shape = in.shape();
     const auto length = shape[Axis];
     const auto stride = shapeStride<Axis>(shape);
-    Raster<TOut, TRasterIn::Dim> out(shape);
+    Raster<TOut, TRasterIn::Dimension> out(shape);
     auto domain = in.domain();
     domain.back[Axis] = 0;
     for (const auto& p : domain) {
@@ -109,7 +109,7 @@ public:
    */
   template <typename TRasterIn, typename TRasterOut>
   void correlate2dTo(const TRasterIn& in, TRasterOut& out) {
-    PositionSampling<TRasterIn::Dim> sampling {in.domain()};
+    PositionSampling<TRasterIn::Dimension> sampling {in.domain()};
     sparseCorrelate2dTo(in, sampling, out);
   }
 
@@ -117,8 +117,8 @@ public:
    * @brief Sparsely correlate a given sampled image with the kernel along the first and second axes.
    */
   template <typename TRasterIn, typename TRasterOut>
-  void
-  sparseCorrelate2dTo(const TRasterIn& in, const PositionSampling<TRasterIn::Dim>& sampling, TRasterOut& out) const {
+  void sparseCorrelate2dTo(const TRasterIn& in, const PositionSampling<TRasterIn::Dimension>& sampling, TRasterOut& out)
+      const {
 
     // Set sampling
     const auto xFrom = sampling.template along<0>().front;
@@ -132,7 +132,7 @@ public:
     // Convolve along x-axis
     const Index xConvolvedWidth = (xTo - xFrom + xStep) / xStep;
     const Index xConvolvedHeight = yTo - yFrom + 1;
-    Raster<typename TRasterOut::Value, TRasterOut::Dim> xConvolved({xConvolvedWidth, xConvolvedHeight});
+    Raster<typename TRasterOut::Value, TRasterOut::Dimension> xConvolved({xConvolvedWidth, xConvolvedHeight});
     DataSamples<const typename TRasterIn::Value> inSamples(
         &in[{0, yFrom}],
         in.template length<0>(),

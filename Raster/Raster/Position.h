@@ -49,7 +49,7 @@ public:
   /**
    * @brief The dimension template parameter.
    */
-  static constexpr Index Dim = N;
+  static constexpr Index Dimension = N;
 
   /**
    * @brief The container type.

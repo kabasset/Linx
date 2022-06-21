@@ -34,7 +34,7 @@ public:
   /**
    * @brief The dimension parameter.
    */
-  static constexpr Index Dim = N;
+  static constexpr Index Dimension = N;
 
   /**
    * @brief Constructor.
@@ -47,8 +47,8 @@ public:
    * @brief Auto-correlate a raster with the kernel.
    */
   template <typename TIn>
-  Raster<Value, Dim> correlate(const TIn& in) {
-    Raster<Value, Dim> out(in.shape());
+  Raster<Value, Dimension> correlate(const TIn& in) {
+    Raster<Value, Dimension> out(in.shape());
     correlateTo(in, out);
     return out;
   }
@@ -71,8 +71,8 @@ public:
    * @brief Convolve a raster with the kernel.
    */
   template <typename TIn>
-  Raster<Value, Dim> convolve(const TIn& in) {
-    Raster<Value, Dim> res(in.shape());
+  Raster<Value, Dimension> convolve(const TIn& in) {
+    Raster<Value, Dimension> res(in.shape());
     correlateTo(in, res);
     return res;
   }

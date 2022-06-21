@@ -19,7 +19,7 @@ public:
   /**
    * @brief The raster dimension.
    */
-  static constexpr Index Dim = 3;
+  static constexpr Index Dimension = 3;
 
   /**
    * @brief The raster value type.
@@ -80,9 +80,9 @@ protected:
   Index m_width;
   Index m_height;
   Index m_depth;
-  Raster<Value, Dim> m_a;
-  Raster<Value, Dim> m_b;
-  Raster<Value, Dim> m_c;
+  Raster<Value, Dimension> m_a;
+  Raster<Value, Dimension> m_b;
+  Raster<Value, Dimension> m_c;
   Chronometer<Duration> m_chrono;
 };
 

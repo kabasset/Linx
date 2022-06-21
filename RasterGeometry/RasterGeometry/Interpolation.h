@@ -32,7 +32,7 @@ public:
   /**
    * @brief The dimension parameter.
    */
-  static constexpr Index Dim = N;
+  static constexpr Index Dimension = N;
 
   /**
    * @brief Constructor.
@@ -98,7 +98,7 @@ public:
   /**
    * @brief The interpolation dimension parameter.
    */
-  static constexpr Index Dim = TRaster::Dim;
+  static constexpr Index Dimension = TRaster::Dimension;
 
   /**
    * @brief Constructor.
@@ -108,14 +108,14 @@ public:
   /**
    * @brief Compute the value at given integral position.
    */
-  inline const typename TRaster::Value& operator[](const Position<Dim>& position) const {
+  inline const typename TRaster::Value& operator[](const Position<Dimension>& position) const {
     return m_raster[position];
   }
 
   /**
    * @brief Compute the interpolated value at given position.
    */
-  inline Value at(const Vector<double, Dim>& position) const {
+  inline Value at(const Vector<double, Dimension>& position) const {
     return m_policy.template at<Value>(m_raster, position);
   }
 
@@ -133,7 +133,9 @@ private:
 
 template <typename TPolicy, typename TRaster, typename... TArgs>
 auto extrapolate(const TRaster& raster, TArgs&&... args) -> decltype(auto) {
-  return Extrapolator<TPolicy, typename TRaster::Value, TRaster::Dim>(raster, TPolicy(std::forward<TArgs>(args)...));
+  return Extrapolator<TPolicy, typename TRaster::Value, TRaster::Dimension>(
+      raster,
+      TPolicy(std::forward<TArgs>(args)...));
 }
 
 template <typename T, Index N, typename THolder>

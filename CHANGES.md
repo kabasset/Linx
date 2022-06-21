@@ -5,6 +5,7 @@
 ## Breaking changes
 
 * `makeRaster()` renamed as `rasterize()`
+* `Dim` renamed as `Dimension`
 * `Position::max()` replaced with `Position::inf()`
 
 ## New features
@@ -14,7 +15,7 @@
 * Extrapolation and interpolation with `Extrapolator` and `Interpolator`
 * Affine transformations as `Affinity`
 * `Raster` has Euclidean ring arithmetic (not only vector space arithmetic)
-* `Raster` supports mathematical functions (`abs()`, `min()`, `sin()`, `exp()`...)
+* Containers supports mathematical functions (`abs()`, `min()`, `sin()`, `exp()`...)
 * Containers support filling methods (`fill()`, `range()`...),
   random values can be generated with `generate()`,
   and random noise can be added with `apply()`

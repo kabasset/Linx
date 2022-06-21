@@ -139,7 +139,7 @@ public:
   /**
    * @brief The logical dimension of the combined kernel.
    */
-  static constexpr Index Dim = std::max({Is...}) + 1;
+  static constexpr Index Dimension = std::max({Is...}) + 1;
 
   /**
    * @brief Construct a sequence of identical `Kernel1d`s with various orientations.
@@ -177,14 +177,14 @@ public:
   /**
    * @brief Combine the separable components as a nD kernel.
    */
-  Raster<Value, Dim> combine() const { // FIXME return Kernel<Value, Dim>
-    auto shape = Position<Dim>::one();
-    auto origin = Position<Dim>::zero();
+  Raster<Value, Dimension> combine() const { // FIXME return Kernel<Value, Dimension>
+    auto shape = Position<Dimension>::one();
+    auto origin = Position<Dimension>::zero();
     for (const auto& k : m_kernels) {
       shape[k.first] = k.second.size();
       origin[k.first] = k.second.backwardSize();
     }
-    Raster<Value, Dim> raster(shape);
+    Raster<Value, Dimension> raster(shape);
     // FIXME
     return raster;
   }

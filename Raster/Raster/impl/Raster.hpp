@@ -12,7 +12,7 @@
 namespace Cnes {
 
 template <typename T, Index N, typename TContainer>
-constexpr Index Raster<T, N, TContainer>::Dim;
+constexpr Index Raster<T, N, TContainer>::Dimension;
 
 /// @cond INTERNAL
 namespace Internal {

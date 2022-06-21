@@ -157,11 +157,11 @@ public:
   /**
    * @brief The dimension template parameter.
    * @details
-   * The value of `Dim` is always `N`, irrespective of its sign.
+   * The value of `Dimension` is always `N`, irrespective of its sign.
    * In contrast, `dimension()` provides the actual, run-time dimension of the raster,
    * even in the case of a variable dimension.
    */
-  static constexpr Index Dim = N;
+  static constexpr Index Dimension = N;
 
   /**
    * @brief The container type.

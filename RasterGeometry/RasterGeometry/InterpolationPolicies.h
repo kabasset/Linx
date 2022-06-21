@@ -25,7 +25,7 @@ struct OutOfBoundsConstant {
    * @brief Return `value` if out of bounds.
    */
   template <typename TRaster>
-  inline const T& at(TRaster& raster, const Position<TRaster::Dim>& position) const {
+  inline const T& at(TRaster& raster, const Position<TRaster::Dimension>& position) const {
     if (raster.contains(position)) {
       return raster[position];
     }
@@ -48,7 +48,7 @@ struct NearestNeighbor {
    * @brief Return the value at the nearest in-bounds position.
    */
   template <typename TRaster>
-  inline const typename TRaster::value_type& at(TRaster& raster, const Position<TRaster::Dim>& position) const {
+  inline const typename TRaster::value_type& at(TRaster& raster, const Position<TRaster::Dimension>& position) const {
     auto in = clamp(position, raster.shape());
     return raster[in];
   }
@@ -57,8 +57,8 @@ struct NearestNeighbor {
    * @brief Return the value at the nearest integer position.
    */
   template <typename T, typename TRaster>
-  inline T at(TRaster& raster, const Vector<double, TRaster::Dim>& position) const {
-    Position<TRaster::Dim> integral(position.size());
+  inline T at(TRaster& raster, const Vector<double, TRaster::Dimension>& position) const {
+    Position<TRaster::Dimension> integral(position.size());
     std::transform(position.begin(), position.end(), integral.begin(), [](auto e) {
       return e + .5;
     });
@@ -76,8 +76,8 @@ struct Periodic {
    * @brief Return the value at the modulo position.
    */
   template <typename TRaster>
-  inline const typename TRaster::value_type& at(TRaster& raster, const Position<TRaster::Dim>& position) const {
-    Position<TRaster::Dim> inbounds(position.size());
+  inline const typename TRaster::value_type& at(TRaster& raster, const Position<TRaster::Dimension>& position) const {
+    Position<TRaster::Dimension> inbounds(position.size());
     inbounds.generate(
         [](auto p, auto s) {
           auto q = p % s;

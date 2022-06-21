@@ -71,7 +71,7 @@ public:
   /**
    * @brief The plan dimension.
    */
-  static constexpr Index Dim = N;
+  static constexpr Index Dimension = N;
 
   /**
    * @brief The kind of transform.
