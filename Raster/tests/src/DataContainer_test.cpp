@@ -38,27 +38,6 @@ BOOST_AUTO_TEST_CASE(stream_insertion_test) {
   checkStreamInsertion<9>(a, "[0, 1, 2 ... 6, 7, 8]");
 }
 
-BOOST_AUTO_TEST_CASE(quantiles_test) {
-
-  Vector<double, 10> even;
-  even.arange();
-  BOOST_TEST(even.minmax().first == even.min());
-  BOOST_TEST(even.minmax().second == even.max());
-  BOOST_TEST(even.quantile(0) == even.min());
-  BOOST_TEST(even.quantile(1) == even.max());
-  BOOST_TEST(even.quantile(.5) == even.median());
-  BOOST_TEST(even.median() == .5 * (even.nth(4) + even.nth(5)));
-
-  Vector<double, 11> odd;
-  odd.arange();
-  BOOST_TEST(odd.minmax().first == odd.min());
-  BOOST_TEST(odd.minmax().second == odd.max());
-  BOOST_TEST(odd.quantile(0) == odd.min());
-  BOOST_TEST(odd.quantile(1) == odd.max());
-  BOOST_TEST(odd.quantile(.5) == odd.median());
-  BOOST_TEST(odd.median() == odd.nth(5));
-}
-
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE_END()

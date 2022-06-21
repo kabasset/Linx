@@ -20,9 +20,10 @@
 #include <vector>
 
 /**
- * @brief Centre national d'études spatiale.
+ * @brief Centre national d'études spatiales.
  * @details
- * French space agency.
+ * The French space agency.
+ * @see https://github.com/CNES
  * @see https://cnes.fr/en
  */
 namespace Cnes {

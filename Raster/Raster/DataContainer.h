@@ -6,6 +6,7 @@
 #define _RASTER_DATACONTAINER_H
 
 #include "Raster/ContiguousContainer.h"
+#include "Raster/DataDistribution.h"
 #include "Raster/Holder.h"
 #include "RasterTypes/Exceptions.h"
 #include "RasterTypes/SeqUtils.h" // isIterable
@@ -210,6 +211,7 @@ public:
 
   /**
    * @brief Get a reference to the (first) min element.
+   * @see `distribution()`
    */
   const T& min() const {
     return *std::min_element(this->begin(), this->end());
@@ -217,6 +219,7 @@ public:
 
   /**
    * @brief Get a reference to the (first) max element.
+   * @see `distribution()`
    */
   const T& max() const {
     return *std::max_element(this->begin(), this->end());
@@ -224,6 +227,7 @@ public:
 
   /**
    * @brief Get a pair of references to the (first) min and max elements.
+   * @see `distribution()`
    */
   std::pair<const T&, const T&> minmax() const {
     const auto its = std::minmax_element(this->begin(), this->end());
@@ -231,38 +235,10 @@ public:
   }
 
   /**
-   * @brief Get a reference to the (first) n-th smallest element.
+   * @brief Create a `DataDistribution` from the container.
    */
-  const T& nth(std::size_t n) const {
-    std::vector<T> nonconst(this->begin(), this->end()); // TODO return somehow
-    auto it = nonconst.begin() + n;
-    std::nth_element(nonconst.begin(), it, nonconst.end());
-    return *it;
-  }
-
-  /**
-   * @brief Get the q-th quantile (with linear interpolation).
-   * @details
-   * The following values of `q` correspond to equivalent functions:
-   * - 0: `min()`;
-   * - 1: `max()`;
-   * - 0.5: `median()`.
-   */
-  T quantile(double q) const {
-    const auto n = q * (size() - 1);
-    const std::size_t f = n;
-    if (n == f) {
-      return nth(f);
-    }
-    const auto d = n - f;
-    return nth(f) * d + nth(f + 1) * (1. - d);
-  }
-
-  /**
-   * @brief Get the median.
-   */
-  T median() const {
-    return quantile(0.5);
+  DataDistribution<T> distribution() const {
+    return DataDistribution<T>(*this);
   }
 
   /// @}

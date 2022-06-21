@@ -27,6 +27,10 @@ elements_add_unit_test(DataContainer tests/src/DataContainer_test.cpp
                      EXECUTABLE Raster_DataContainer_test
                      LINK_LIBRARIES Raster
                      TYPE Boost)
+elements_add_unit_test(DataDistribution tests/src/DataDistribution_test.cpp 
+                     EXECUTABLE Raster_DataDistribution_test
+                     LINK_LIBRARIES Raster
+                     TYPE Boost)
 elements_add_unit_test(Math tests/src/Math_test.cpp 
                      EXECUTABLE Raster_Math_test
                      LINK_LIBRARIES Raster

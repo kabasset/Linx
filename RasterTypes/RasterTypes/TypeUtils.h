@@ -55,10 +55,33 @@ namespace Cnes {
   classname& operator=(classname&&) = delete;
 
 /**
- * @relates Position
- * @brief The signed integer type which represents indices in a raster.
+ * @brief The signed integer type which represents indices.
  */
 using Index = long;
+
+/**
+ * @brief Type traits.
+ */
+template <typename T>
+struct TypeTraits {
+  /**
+   * @brief The floating point type which corresponds to `T`.
+   */
+  using Floating = std::conditional_t<std::is_floating_point<T>::value, T, double>;
+
+  /**
+   * @brief The scalar type which corresponds to `T`.
+   */
+  using Scalar = T;
+};
+
+/// @cond
+template <typename T>
+struct TypeTraits<std::complex<T>> {
+  using Floating = std::complex<T>;
+  using Scalar = T;
+};
+/// @endcond
 
 /**
  * @brief Clamp some input value between a min and max values.
