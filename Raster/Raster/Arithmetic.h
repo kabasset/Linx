@@ -66,7 +66,7 @@ class EuclidArithmetic;
  * @ingroup pixelwise
  * @ingroup mixins
  * @brief Mixin to provide arithmetics operators to a container.
- * @tparam TSpecs The operators specifications
+ * @tparam TSpecs The operators specifications, can be `void`
  * @tparam T The contained element value type
  * @tparam TDerived The container which inherits this class
  * @details
@@ -74,7 +74,7 @@ class EuclidArithmetic;
  * `generate()` and `apply()` to apply a function to each element.
  */
 template <typename TSpecs, typename T, typename TDerived>
-struct ArithmeticMixin;
+struct ArithmeticMixin {}; // Empy base class for void
 
 /**
  * @ingroup pixelwise
