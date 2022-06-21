@@ -5,7 +5,6 @@
 #ifndef _RASTER_MATRIX_H
 #define _RASTER_MATRIX_H
 
-#include "Raster/Arithmetic.h"
 #include "Raster/DataContainer.h"
 #include "Raster/Position.h" // FIME Vector.h
 #include "RasterTypes/Exceptions.h"
@@ -27,14 +26,22 @@ namespace Cnes {
  */
 template <typename T, Index N = 2, Index M = N>
 class Matrix :
-    public DataContainer<T, Coordinates<T, N * M>, Matrix<T, N, M>>,
-    public ArithmeticMixin<EuclidArithmetic, T, Matrix<T, N, M>> { // FIXME MatrixArithmetic
+    public DataContainer<
+        T,
+        StdHolder<Coordinates<T, N * M>>,
+        EuclidArithmetic,
+        Matrix<T, N, M>> { // FIXME MatrixArithmetic
 
 public:
   /**
    * @brief The pixel value type.
    */
   using Value = T;
+
+  /**
+   * @brief The container type.
+   */
+  using Container = DataContainer<T, StdHolder<Coordinates<T, N * M>>, EuclidArithmetic, Matrix<T, N, M>>;
 
   static constexpr Index Rows = N;
   static constexpr Index Columns = M;
@@ -50,7 +57,7 @@ public:
   /**
    * @brief Constructor.
    */
-  explicit Matrix() : DataContainer<T, Coordinates<T, N * M>, Matrix<T, N, M>>(N * M), m_eigen(this->data()) {}
+  explicit Matrix() : Container(N * M), m_eigen(this->data()) {}
 
   /**
    * @brief Create the identity matrix.

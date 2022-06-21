@@ -5,7 +5,6 @@
 #ifndef _RASTER_POSITION_H
 #define _RASTER_POSITION_H
 
-#include "Raster/Arithmetic.h"
 #include "Raster/DataContainer.h"
 #include "RasterTypes/TypeUtils.h"
 
@@ -40,14 +39,22 @@ using Indices = Coordinates<Index, N>;
  * @tspecialization{Position}
  */
 template <typename T, Index N = 2>
-class Vector :
-    public DataContainer<T, StdHolder<Coordinates<T, N>>, Vector<T, N>>,
-    public ArithmeticMixin<VectorArithmetic, T, Vector<T, N>> {
+class Vector : public DataContainer<T, StdHolder<Coordinates<T, N>>, VectorArithmetic, Vector<T, N>> {
 public:
+  /**
+   * @brief The value type.
+   */
+  using Value = T;
+
   /**
    * @brief The dimension template parameter.
    */
   static constexpr Index Dim = N;
+
+  /**
+   * @brief The container type.
+   */
+  using Container = DataContainer<T, StdHolder<Coordinates<T, N>>, VectorArithmetic, Vector<T, N>>;
 
   CNES_VIRTUAL_DTOR(Vector)
   CNES_DEFAULT_COPYABLE(Vector)
@@ -59,23 +66,23 @@ public:
    * The values are unspecified.
    * To create vector 0, use `zero()` instead.
    */
-  Vector() : DataContainer<T, StdHolder<Coordinates<T, N>>, Vector<T, N>>() {}
+  Vector() : Container() {}
 
   /**
    * @brief Create a vector of given dimension.
    */
-  explicit Vector(T dim) : DataContainer<T, StdHolder<Coordinates<T, N>>, Vector<T, N>>(dim) {}
+  explicit Vector(T dim) : Container(dim) {}
 
   /**
    * @brief Create a vector from a brace-enclosed list of indices.
    */
-  Vector(std::initializer_list<T> indices) : DataContainer<T, StdHolder<Coordinates<T, N>>, Vector<T, N>>(indices) {}
+  Vector(std::initializer_list<T> indices) : Container(indices) {}
 
   /**
    * @brief Create a vector from an iterable.
    */
   template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr>
-  explicit Vector(TIterable&& iterable) : DataContainer<T, StdHolder<Coordinates<T, N>>, Vector<T, N>>(iterable) {}
+  explicit Vector(TIterable&& iterable) : Container(iterable) {}
 
   /**
    * @brief Create a vector full of `Limits::zero()'s.

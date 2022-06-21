@@ -6,9 +6,7 @@
 #define _RASTER_RASTER_H
 
 #include "Raster/AlignedBuffer.h"
-#include "Raster/Arithmetic.h"
 #include "Raster/DataContainer.h"
-#include "Raster/Math.h"
 #include "Raster/Position.h"
 #include "Raster/Region.h"
 #include "RasterTypes/Exceptions.h"
@@ -147,10 +145,7 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
  * @see \ref primer
  */
 template <typename T, Index N = 2, typename THolder = StdHolder<std::vector<T>>>
-class Raster :
-    public DataContainer<T, THolder, Raster<T, N, THolder>>,
-    public ArithmeticMixin<EuclidArithmetic, T, Raster<T, N, THolder>>,
-    public MathFunctionsMixin<T, Raster<T, N, THolder>> {
+class Raster : public DataContainer<T, THolder, EuclidArithmetic, Raster<T, N, THolder>> {
   friend class ImageRaster; // FIXME rm when Subraster is removed
 
 public:
@@ -167,6 +162,11 @@ public:
    * even in the case of a variable dimension.
    */
   static constexpr Index Dim = N;
+
+  /**
+   * @brief The container type.
+   */
+  using Container = DataContainer<T, THolder, EuclidArithmetic, Raster<T, N, THolder>>;
 
   /// @{
   /// @group_construction
@@ -187,8 +187,7 @@ public:
    */
   template <typename... TArgs>
   explicit Raster(Position<N> shape = Position<N>::zero(), TArgs&&... args) :
-      DataContainer<T, THolder, Raster<T, N, THolder>>(shapeSize(shape), std::forward<TArgs>(args)...),
-      m_shape(std::move(shape)) {}
+      Container(shapeSize(shape), std::forward<TArgs>(args)...), m_shape(std::move(shape)) {}
 
   /**
    * @brief List-copy constructor.
@@ -204,7 +203,7 @@ public:
    */
   template <typename U, typename... TArgs>
   explicit Raster(Position<N> shape, std::initializer_list<U> list, TArgs&&... args) :
-      DataContainer<T, THolder, Raster<T, N, THolder>>(list, std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
+      Container(list, std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
     SizeError::mayThrow(list.size(), shapeSize(shape));
   }
 
@@ -222,8 +221,7 @@ public:
    */
   template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr, typename... TArgs>
   explicit Raster(Position<N> shape, TIterable& iterable, TArgs&&... args) :
-      DataContainer<T, THolder, Raster<T, N, THolder>>(iterable, std::forward<TArgs>(args)...),
-      m_shape(std::move(shape)) {
+      Container(iterable, std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
     SizeError::mayThrow(std::distance(std::begin(iterable), std::end(iterable)), shapeSize(shape));
   }
 
@@ -285,8 +283,8 @@ public:
 
   /// @group_elements
 
-  using DataContainer<T, THolder, Raster<T, N, THolder>>::operator[];
-  using DataContainer<T, THolder, Raster<T, N, THolder>>::at;
+  using Container::operator[];
+  using Container::at;
 
   /**
    * @brief Compute the raw index of a given position.

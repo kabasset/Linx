@@ -5,9 +5,11 @@
 #ifndef _RASTER_DATACONTAINER_H
 #define _RASTER_DATACONTAINER_H
 
+#include "Raster/Arithmetic.h"
 #include "Raster/ContiguousContainer.h"
 #include "Raster/DataDistribution.h"
 #include "Raster/Holder.h"
+#include "Raster/Math.h"
 #include "RasterTypes/Exceptions.h"
 #include "RasterTypes/SeqUtils.h" // isIterable
 #include "RasterTypes/TypeUtils.h" // Index, Limits
@@ -30,8 +32,12 @@ namespace Cnes {
  * The class can be specialized for any container which implements the `SizedData` requirements.
  * @satisfies{ContiguousContainer}
  */
-template <typename T, typename THolder, typename TDerived>
-class DataContainer : public ContiguousContainerMixin<T, TDerived>, public THolder {
+template <typename T, typename THolder, typename TArithmetic, typename TDerived>
+class DataContainer :
+    public THolder,
+    public ContiguousContainerMixin<T, TDerived>,
+    public ArithmeticMixin<TArithmetic, T, TDerived>,
+    public MathFunctionsMixin<T, TDerived> {
 
 public:
   /**

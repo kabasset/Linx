@@ -15,14 +15,14 @@ namespace Cnes {
 struct OutOfBoundsCrop {};
 
 template <typename T, typename TOob = OutOfBoundsCrop>
-class Kernel1d : public DataContainer<T, StdHolder<std::vector<T>>, Kernel1d<T, TOob>> {
+class Kernel1d : public DataContainer<T, StdHolder<std::vector<T>>, VectorArithmetic, Kernel1d<T, TOob>> {
 
 public:
   /**
    * @brief Constructor.
    */
   Kernel1d(std::vector<T> values, Index origin, TOob oob = TOob()) :
-      DataContainer<T, StdHolder<std::vector<T>>, Kernel1d<T, TOob>>(values), m_backward(origin),
+      DataContainer<T, StdHolder<std::vector<T>>, VectorArithmetic, Kernel1d<T, TOob>>(values), m_backward(origin),
       m_forward(this->size() - 1 - m_backward), m_bias(), m_oob(oob) {}
 
   /**
