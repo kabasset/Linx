@@ -133,7 +133,7 @@ public:
    * as opposed to `linspace()`.
    * @see `linspace()`
    */
-  TDerived& arange(const T& min = Limits<T>::zero(), const T& step = Limits<T>::one()) {
+  TDerived& range(const T& min = Limits<T>::zero(), const T& step = Limits<T>::one()) {
     auto v = min;
     auto& t = static_cast<TDerived&>(*this);
     for (auto& e : t) {
@@ -150,8 +150,8 @@ public:
    * Intermediate values are computed as `container[i] = min + (max - min) / (size() - 1) * i`,
    * which means that the difference between two adjacent values
    * is not necessarily perfectly constant for floating point values,
-   * as opposed to `arange()`.
-   * @see `arange()`
+   * as opposed to `range()`.
+   * @see `range()`
    */
   TDerived& linspace(const T& min = Limits<T>::zero(), const T& max = Limits<T>::one()) {
     const auto step = (max - min) / (this->size() - 1);

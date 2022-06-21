@@ -83,7 +83,7 @@ Non-owning raster, built from some exising data:
 
 
 In addition to constructors, `Raster`s (and any `DataContainer`) provide several methods
-to fill the container after construction, like `fill()`, `arange()` or `generate()`.
+to fill the container after construction, like `fill()`, `range()` or `generate()`.
 
 \snippet RasterDemoConstructors_test.cpp Filling
 

@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE(raster_of_raster_test) {
   for (auto& p : nested.domain()) {
     const auto shape = p + 1;
     auto& raster = nested[p];
-    raster = Cnes::Raster<int>(shape).arange();
+    raster = Cnes::Raster<int>(shape).range();
     std::cout << "Raster at " << p << " = " << raster << std::endl;
     BOOST_TEST(raster.at(-1) == shapeSize(shape) - 1);
   }

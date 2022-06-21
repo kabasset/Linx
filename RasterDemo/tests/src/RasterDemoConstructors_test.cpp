@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(fill_test) {
   BOOST_TEST(raster[0] == 42);
 
   // Evenly spaced values (from min, step)
-  raster.arange(1, 2);
+  raster.range(1, 2);
   std::cout << raster << std::endl; // [1, 3, 5...]
   BOOST_TEST(raster[0] == 1);
 

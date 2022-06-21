@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_SUITE(DataDistribution_test)
 template <Index Size>
 void checkQuantiles() {
   Vector<double, Size> data;
-  data.arange();
+  data.range();
   auto dist = data.distribution();
   BOOST_TEST(dist.min() == 0);
   BOOST_TEST(dist.max() == Size - 1);
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(robust_test) {
 
 BOOST_AUTO_TEST_CASE(histogram_test) {
   Vector<int, 10> data;
-  data.arange();
+  data.range();
   const std::vector<double> bins {-10, -.5, 0, 1.5, 4, 9, 12};
   const auto hist = data.distribution().histogram(bins);
   const std::vector<std::size_t> expected {0, 0, 2, 2, 5, 1};

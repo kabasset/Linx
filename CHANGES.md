@@ -15,7 +15,7 @@
 * Affine transformations as `Affinity`
 * `Raster` has Euclidean ring arithmetic (not only vector space arithmetic)
 * `Raster` supports mathematical functions (`abs()`, `min()`, `sin()`, `exp()`...)
-* Containers support filling methods (`fill()`, `arange()`...),
+* Containers support filling methods (`fill()`, `range()`...),
   random values can be generated with `generate()`,
   and random noise can be added with `apply()`
 * New `Raster` specialization `AlignedRaster` supports owning and sharing memory-aligned data

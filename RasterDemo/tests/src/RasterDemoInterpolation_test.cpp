@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE(extrapolate_interpolate_test) {
 
   //! [Unit raster]
   Cnes::Raster<int> raster({2, 2});
-  raster.arange(1);
+  raster.range(1);
   //! [Unit raster]
 
   //! [Extra]

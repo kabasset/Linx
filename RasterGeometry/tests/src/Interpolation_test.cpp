@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(constant_nn_test) {
 BOOST_AUTO_TEST_CASE(periodic_test) {
 
   Raster<int, 3> raster({2, 2, 2});
-  raster.arange(1);
+  raster.range(1);
 
   Position<3> negative {-1, -1, -1};
   Position<3> positive {2, 3, 4};
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE(periodic_test) {
 BOOST_AUTO_TEST_CASE(linear_test) {
 
   Raster<int, 3> raster({2, 2, 2});
-  raster.arange(1);
+  raster.range(1);
 
   const auto interpolator = interpolate<Linear>(raster);
 
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(linear_test) {
 BOOST_AUTO_TEST_CASE(cubic_test) {
 
   Raster<int, 3> raster({4, 4, 4});
-  raster.arange(1);
+  raster.range(1);
 
   const auto interpolator = interpolate<Cubic>(raster);
 

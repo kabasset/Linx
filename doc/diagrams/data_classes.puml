@@ -12,7 +12,7 @@ class DataContainer {
 + DataContainer(values, args...)
 + DataContainer(iterable, args...)
 + fill(value)
-+ arange(min, step)
++ range(min, step)
 + linspace(min, max)
 + generate(function, args...)
 + apply(function, args...)

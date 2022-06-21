@@ -9,7 +9,7 @@
 struct Fixture {
 
   Fixture() : a({3, 2}), b({3, 2}), c({3, 2}), k(2.) {
-    a.arange(1);
+    a.range(1);
     b.fill(-1);
   }
 
