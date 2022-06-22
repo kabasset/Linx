@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _RASTERVALIDATION_ITERATIONBENCHMARK_H
@@ -8,7 +8,7 @@
 #include "Raster/Raster.h"
 #include "RasterValidation/Chronometer.h"
 
-namespace Cnes {
+namespace Litl {
 
 /**
  * @brief Benchmark to measure the different pixel looping strategies.
@@ -86,6 +86,6 @@ protected:
   Chronometer<Duration> m_chrono;
 };
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

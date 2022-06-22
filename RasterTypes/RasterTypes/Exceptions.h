@@ -1,4 +1,4 @@
-// Copyright (C) 2022, CNES
+// Copyright (C) 2022, Antoine Basset
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -9,7 +9,7 @@
 #include <string>
 #include <utility> // pair // FIXME replace with Segment?
 
-namespace Cnes {
+namespace Litl {
 
 /**
  * @ingroup exceptions
@@ -27,7 +27,7 @@ public:
    * @brief Constructor.
    * @param message Error message
    */
-  explicit Exception(const std::string& message) : Exception("Cnes.Raster error", message) {}
+  explicit Exception(const std::string& message) : Exception("Litl error", message) {}
 
   /**
    * @brief Constructor.
@@ -116,6 +116,6 @@ public:
   }
 };
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

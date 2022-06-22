@@ -1,4 +1,4 @@
-// Copyright (C) 2022, CNES
+// Copyright (C) 2022, Antoine Basset
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -6,7 +6,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-using namespace Cnes;
+using namespace Litl;
 
 //-----------------------------------------------------------------------------
 
@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_SUITE(Exceptions_test)
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(message_test) {
-  const std::string prefix = "Raster";
+  const std::string prefix = "Litl";
   const std::string message = "MESSAGE!";
   Exception error(message);
   const std::string output = error.what();

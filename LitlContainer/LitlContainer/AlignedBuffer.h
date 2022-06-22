@@ -1,4 +1,4 @@
-// Copyright (C) 2022, CNES
+// Copyright (C) 2022, Antoine Basset
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -12,7 +12,7 @@
 #include <cstdint> // uintptr_t
 #include <sstream>
 
-namespace Cnes {
+namespace Litl {
 
 /**
  * @relates AlignedBuffer
@@ -220,7 +220,7 @@ public:
    * @brief Get the actual data alignment, which may be better than required.
    */
   std::size_t alignment() const {
-    return Cnes::alignment(m_data);
+    return Litl::alignment(m_data);
   }
 
   /**
@@ -290,6 +290,6 @@ protected:
   T* m_data;
 };
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

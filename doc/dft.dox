@@ -1,4 +1,4 @@
-namespace Cnes {
+namespace Litl {
 /**
 
 \addtogroup dft
@@ -38,7 +38,7 @@ And that's all!
 <a href="http://fftw.org/">FFTW</a> is a fast(est) C library
 to compute a variety of discrete Fourier and related transforms (hereafter denoted DFTs).
 It provides low-level functions to configure, prepare and execute DFTs with a primary focus on performance.
-Cnes.Raster offers an as-light-as-possible modern C++ wrapper of FFTW with automatic memory management,
+Litl offers an as-light-as-possible modern C++ wrapper of FFTW with automatic memory management,
 more friendly interfaces, and (obviously) perfect integration with rasters.
 
 Still, the key concepts of FFTW hold:

@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _RASTERGEOMETRY_INTERPOLATION_POLICIES_H
@@ -7,7 +7,7 @@
 
 #include "Raster/Raster.h"
 
-namespace Cnes {
+namespace Litl {
 
 /**
  * @ingroup interpolation
@@ -147,6 +147,6 @@ struct Cubic {
   }
 };
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

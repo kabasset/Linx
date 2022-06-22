@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _LITLCONTAINER_HOLDER_H
@@ -13,7 +13,7 @@
 #include <valarray>
 #include <vector>
 
-namespace Cnes {
+namespace Litl {
 
 struct SizeError : Exception {
 
@@ -103,7 +103,7 @@ public:
    * @brief Access the raw data.
    */
   inline const typename TContainer::value_type* data() const {
-    return Cnes::data(m_container); // m_container.data() not available for valarray
+    return Litl::data(m_container); // m_container.data() not available for valarray
   }
 
   /**
@@ -234,6 +234,6 @@ private:
 template <typename T>
 using DefaultHolder = StdHolder<std::vector<T>>;
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

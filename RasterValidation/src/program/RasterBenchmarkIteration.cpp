@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "ElementsKernel/ProgramHeaders.h"
@@ -11,7 +11,7 @@
 
 Elements::Logging logger = Elements::Logging::getLogger("RasterBenchmarkIteration");
 
-Cnes::IterationBenchmark::Duration iterate(Cnes::IterationBenchmark& benchmark, char setup) {
+Litl::IterationBenchmark::Duration iterate(Litl::IterationBenchmark& benchmark, char setup) {
   switch (setup) {
     case 'x':
       return benchmark.loopOverXyz();
@@ -38,7 +38,7 @@ class RasterBenchmarkIteration : public Elements::Program {
 
 public:
   std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
-    Cnes::ProgramOptions options;
+    Litl::ProgramOptions options;
     options.named<char>(
         "case",
         "Initial of the test case to be benchmarked: "
@@ -50,7 +50,7 @@ public:
   ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
 
     logger.info("Generating random rasters...");
-    Cnes::IterationBenchmark benchmark(args["side"].as<long>());
+    Litl::IterationBenchmark benchmark(args["side"].as<long>());
 
     logger.info("Iterating over them...");
     const auto duration = iterate(benchmark, args["case"].as<char>());

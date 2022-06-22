@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _LITLCONTAINER_ARITHMETIC_H
@@ -10,9 +10,9 @@
 #include <functional>
 #include <type_traits>
 
-namespace Cnes {
+namespace Litl {
 
-#define CNES_RASTER_VECTOR_OPERATOR_INPLACE(op) \
+#define LITL_VECTOR_OPERATOR_INPLACE(op) \
   TDerived& operator op##=(const TDerived& rhs) { \
     std::transform( \
         static_cast<TDerived*>(this)->begin(), \
@@ -25,7 +25,7 @@ namespace Cnes {
     return static_cast<TDerived&>(*this); \
   }
 
-#define CNES_RASTER_SCALAR_OPERATOR_INPLACE(op) \
+#define LITL_SCALAR_OPERATOR_INPLACE(op) \
   TDerived& operator op##=(const T& rhs) { \
     std::transform( \
         static_cast<TDerived*>(this)->begin(), \
@@ -95,18 +95,18 @@ struct ArithmeticMixin<VectorArithmetic, T, TDerived> :
   /// @{
   /// @group_modifiers
 
-  CNES_RASTER_VECTOR_OPERATOR_INPLACE(+) ///< V += U
-  CNES_RASTER_SCALAR_OPERATOR_INPLACE(+) ///< V += a
+  LITL_VECTOR_OPERATOR_INPLACE(+) ///< V += U
+  LITL_SCALAR_OPERATOR_INPLACE(+) ///< V += a
 
-  CNES_RASTER_VECTOR_OPERATOR_INPLACE(-) ///< V -= U
-  CNES_RASTER_SCALAR_OPERATOR_INPLACE(-) ///< V -= a
+  LITL_VECTOR_OPERATOR_INPLACE(-) ///< V -= U
+  LITL_SCALAR_OPERATOR_INPLACE(-) ///< V -= a
 
-  CNES_RASTER_SCALAR_OPERATOR_INPLACE(*) ///< V *= a
+  LITL_SCALAR_OPERATOR_INPLACE(*) ///< V *= a
 
-  CNES_RASTER_SCALAR_OPERATOR_INPLACE(/) ///< V /= a
+  LITL_SCALAR_OPERATOR_INPLACE(/) ///< V /= a
 
-  CNES_RASTER_VECTOR_OPERATOR_INPLACE(%) ///< V %= U
-  CNES_RASTER_SCALAR_OPERATOR_INPLACE(%) ///< V %= a
+  LITL_VECTOR_OPERATOR_INPLACE(%) ///< V %= U
+  LITL_SCALAR_OPERATOR_INPLACE(%) ///< V %= a
 
   /**
    * @brief ++V
@@ -179,20 +179,20 @@ struct ArithmeticMixin<EuclidArithmetic, T, TDerived> :
   /// @{
   /// @group_modifiers
 
-  CNES_RASTER_VECTOR_OPERATOR_INPLACE(+) ///< V += U
-  CNES_RASTER_SCALAR_OPERATOR_INPLACE(+) ///< V += a
+  LITL_VECTOR_OPERATOR_INPLACE(+) ///< V += U
+  LITL_SCALAR_OPERATOR_INPLACE(+) ///< V += a
 
-  CNES_RASTER_VECTOR_OPERATOR_INPLACE(-) ///< V -= U
-  CNES_RASTER_SCALAR_OPERATOR_INPLACE(-) ///< V -= a
+  LITL_VECTOR_OPERATOR_INPLACE(-) ///< V -= U
+  LITL_SCALAR_OPERATOR_INPLACE(-) ///< V -= a
 
-  CNES_RASTER_VECTOR_OPERATOR_INPLACE(*) ///< V *= U
-  CNES_RASTER_SCALAR_OPERATOR_INPLACE(*) ///< V *= a
+  LITL_VECTOR_OPERATOR_INPLACE(*) ///< V *= U
+  LITL_SCALAR_OPERATOR_INPLACE(*) ///< V *= a
 
-  CNES_RASTER_VECTOR_OPERATOR_INPLACE(/) ///< V /= U
-  CNES_RASTER_SCALAR_OPERATOR_INPLACE(/) ///< V /= a
+  LITL_VECTOR_OPERATOR_INPLACE(/) ///< V /= U
+  LITL_SCALAR_OPERATOR_INPLACE(/) ///< V /= a
 
-  CNES_RASTER_VECTOR_OPERATOR_INPLACE(%) ///< V %= U
-  CNES_RASTER_SCALAR_OPERATOR_INPLACE(%) ///< V %= a
+  LITL_VECTOR_OPERATOR_INPLACE(%) ///< V %= U
+  LITL_SCALAR_OPERATOR_INPLACE(%) ///< V %= a
 
   /**
    * @brief ++V
@@ -245,9 +245,9 @@ struct ArithmeticMixin<EuclidArithmetic, T, TDerived> :
   /// @}
 };
 
-#undef CNES_RASTER_VECTOR_OPERATOR_INPLACE
-#undef CNES_RASTER_SCALAR_OPERATOR_INPLACE
+#undef LITL_VECTOR_OPERATOR_INPLACE
+#undef LITL_SCALAR_OPERATOR_INPLACE
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

@@ -1,5 +1,5 @@
 /// Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _RASTER_REGION_H
@@ -7,7 +7,7 @@
 
 #include "Raster/Position.h"
 
-namespace Cnes {
+namespace Litl {
 
 /**
  * @brief A ND bounding box, defined by its front and back positions (both inclusive),
@@ -259,6 +259,6 @@ Vector<T, N> clamp(const Vector<T, N>& position, const Position<N>& shape) {
   return out;
 }
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

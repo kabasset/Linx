@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _RASTER_SAMPLING_H
@@ -9,7 +9,7 @@
 
 #include <vector>
 
-namespace Cnes {
+namespace Litl {
 
 /**
  * @brief Linear sampling of scalars.
@@ -394,6 +394,6 @@ private:
   Index m_stride;
 };
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

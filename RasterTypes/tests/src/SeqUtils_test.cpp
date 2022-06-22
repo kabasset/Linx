@@ -1,4 +1,4 @@
-// Copyright (C) 2022, CNES
+// Copyright (C) 2022, Antoine Basset
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -7,7 +7,7 @@
 #include <boost/test/unit_test.hpp>
 #include <type_traits>
 
-using namespace Cnes;
+using namespace Litl;
 
 template <typename T>
 struct PassBySpy {
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_SUITE(SeqUtils_test)
 
 //-----------------------------------------------------------------------------
 
-CNES_RASTER_TEST_CASE_TEMPLATE(supported_types_test) {
+LITL_TEST_CASE_TEMPLATE(supported_types_test) {
   BOOST_TEST(std::is_standard_layout<T>::value);
 }
 

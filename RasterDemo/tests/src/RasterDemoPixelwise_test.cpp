@@ -1,4 +1,4 @@
-// Copyright (C) 2022, CNES
+// Copyright (C) 2022, Antoine Basset
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -13,9 +13,9 @@ struct Fixture {
     b.fill(-1);
   }
 
-  Cnes::Raster<double> a;
-  Cnes::Raster<double> b;
-  Cnes::Raster<std::complex<double>> c;
+  Litl::Raster<double> a;
+  Litl::Raster<double> b;
+  Litl::Raster<std::complex<double>> c;
   double k;
 };
 
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(functions_test) {
 
   //! [Functions]
   // Unary function
-  auto res1 = cos(a); // Calls Cnes::cos(a) according to ADL
+  auto res1 = cos(a); // Calls Litl::cos(a) according to ADL
   a.cos();
 
   // Binary function with scalar second argument

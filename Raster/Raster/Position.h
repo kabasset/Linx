@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _RASTER_POSITION_H
@@ -11,7 +11,7 @@
 #include <numeric> // accumulate, multiplies
 #include <type_traits> // conditional
 
-namespace Cnes {
+namespace Litl {
 
 /**
  * @brief A container of coordinates.
@@ -56,9 +56,9 @@ public:
    */
   using Container = DataContainer<T, StdHolder<Coordinates<T, N>>, VectorArithmetic, Vector<T, N>>;
 
-  CNES_VIRTUAL_DTOR(Vector)
-  CNES_DEFAULT_COPYABLE(Vector)
-  CNES_DEFAULT_MOVABLE(Vector)
+  LITL_VIRTUAL_DTOR(Vector)
+  LITL_DEFAULT_COPYABLE(Vector)
+  LITL_DEFAULT_MOVABLE(Vector)
 
   /**
    * @brief Default constructor.
@@ -226,6 +226,6 @@ Index shapeSize(const Position<N>& shape) {
   return shapeStride(shape, size);
 }
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

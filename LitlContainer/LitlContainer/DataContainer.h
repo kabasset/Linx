@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _LITLCONTAINER_DATACONTAINER_H
@@ -20,7 +20,7 @@
 #include <type_traits> // enable_if, is_integral, decay
 #include <utility> // forward
 
-namespace Cnes {
+namespace Litl {
 
 /**
  * @ingroup data_classes
@@ -76,9 +76,9 @@ public:
     std::copy(iterable.begin(), iterable.end(), this->data());
   }
 
-  CNES_VIRTUAL_DTOR(DataContainer)
-  CNES_DEFAULT_COPYABLE(DataContainer)
-  CNES_DEFAULT_MOVABLE(DataContainer)
+  LITL_VIRTUAL_DTOR(DataContainer)
+  LITL_DEFAULT_COPYABLE(DataContainer)
+  LITL_DEFAULT_MOVABLE(DataContainer)
 
   /// @group_properties
 
@@ -250,6 +250,6 @@ public:
   /// @}
 };
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

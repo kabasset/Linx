@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _RASTER_SUBRASTER_H
@@ -11,7 +11,7 @@
 #include <algorithm> // accumulate
 #include <functional> // multiplies
 
-namespace Cnes {
+namespace Litl {
 
 /// @cond
 
@@ -107,6 +107,6 @@ private:
 
 /// @endcond
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

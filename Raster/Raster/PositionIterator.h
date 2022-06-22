@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _RASTER_POSITIONITERATOR_H
@@ -7,7 +7,7 @@
 
 #include "Raster/Region.h"
 
-namespace Cnes {
+namespace Litl {
 
 /**
  * @ingroup data_classes
@@ -162,6 +162,6 @@ PositionIterator<N> end(const Region<N>& region) {
   return PositionIterator<N>(pastTheLast);
 }
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

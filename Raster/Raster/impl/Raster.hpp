@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #if defined(_RASTER_RASTER_IMPL) || defined(CHECK_QUALITY)
@@ -9,7 +9,7 @@
 #include <functional> // multiplies
 #include <numeric> // accumulate
 
-namespace Cnes {
+namespace Litl {
 
 template <typename T, Index N, typename TContainer>
 constexpr Index Raster<T, N, TContainer>::Dimension;
@@ -227,6 +227,6 @@ bool Raster<T, N, TContainer>::isContiguous(const Region<N>& region) const {
   return true;
 }
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

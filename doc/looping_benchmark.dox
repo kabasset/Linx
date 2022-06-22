@@ -1,4 +1,4 @@
-namespace Cnes {
+namespace Litl {
 /**
 
 \addtogroup looping_benchmark
@@ -106,7 +106,7 @@ and produces intermediate objects, where:
 
 performs only one loop without a single temporary raster.
 Solutions exist to avoid such pitfalls, like the expression templates used in XTensor or Eigen.
-They are not part of Cnes.Raster, because they would add burden on the library
+They are not part of Litl, because they would add burden on the library
 and could not match the "generate" performance anyway.
 
 Additional results and a few guidelines are summarized in the following table.

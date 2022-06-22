@@ -1,4 +1,4 @@
-// Copyright (C) 2022, CNES
+// Copyright (C) 2022, Antoine Basset
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -9,19 +9,19 @@
 #include <limits>
 #include <utility> // forward
 
-namespace Cnes {
+namespace Litl {
 
 /**
  * @brief Define a default virtual destructor.
  */
-#define CNES_VIRTUAL_DTOR(classname) \
+#define LITL_VIRTUAL_DTOR(classname) \
   /** @brief Destructor. */ \
   virtual ~classname() = default;
 
 /**
  * @brief Define default copy constructor and assignment operator.
  */
-#define CNES_DEFAULT_COPYABLE(classname) \
+#define LITL_DEFAULT_COPYABLE(classname) \
   /** @brief Copy constructor. */ \
   classname(const classname&) = default; \
   /** @brief Copy assignment operator. */ \
@@ -30,7 +30,7 @@ namespace Cnes {
 /**
  * @brief Define deleted copy constructor and assignment operator.
  */
-#define CNES_NON_COPYABLE(classname) \
+#define LITL_NON_COPYABLE(classname) \
   /** @brief Deleted copy constructor. */ \
   classname(const classname&) = delete; \
   /** @brief Deleted copy assignment operator. */ \
@@ -39,7 +39,7 @@ namespace Cnes {
 /**
  * @brief Define default move constructor and assignment operator.
  */
-#define CNES_DEFAULT_MOVABLE(classname) \
+#define LITL_DEFAULT_MOVABLE(classname) \
   /** @brief Move constructor. */ \
   classname(classname&&) = default; \
   /** @brief Move assignment operator. */ \
@@ -48,7 +48,7 @@ namespace Cnes {
 /**
  * @brief Define deleted move constructor and assignment operator.
  */
-#define CNES_NON_MOVABLE(classname) \
+#define LITL_NON_MOVABLE(classname) \
   /** @brief Deleted move constructor. */ \
   classname(classname&&) = delete; \
   /** @brief Deleted move assignment operator. */ \
@@ -237,6 +237,6 @@ struct Limits {
   }
 };
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

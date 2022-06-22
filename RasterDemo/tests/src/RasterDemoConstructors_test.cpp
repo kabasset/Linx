@@ -1,4 +1,4 @@
-// Copyright (C) 2022, CNES
+// Copyright (C) 2022, Antoine Basset
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -18,11 +18,11 @@ BOOST_AUTO_TEST_CASE(any_raster_ctors_test) {
   std::vector<int> vec {1, 2, 3, 4, 5, 6};
   const int* data = vec.data();
 
-  Cnes::VecRaster<int> defaultInitialized({3, 2});
-  Cnes::VecRaster<int> listInitialized({3, 2}, {1, 2, 3, 4, 5, 6});
-  Cnes::VecRaster<int> copiedFromPointer({3, 2}, data);
-  Cnes::VecRaster<int> copiedFromIterable({3, 2}, vec);
-  Cnes::VecRaster<int> movedFromContainer({3, 2}, std::move(vec));
+  Litl::VecRaster<int> defaultInitialized({3, 2});
+  Litl::VecRaster<int> listInitialized({3, 2}, {1, 2, 3, 4, 5, 6});
+  Litl::VecRaster<int> copiedFromPointer({3, 2}, data);
+  Litl::VecRaster<int> copiedFromIterable({3, 2}, vec);
+  Litl::VecRaster<int> movedFromContainer({3, 2}, std::move(vec));
   //! [Any raster]
 
   for (std::size_t i = 0; i < 6; ++i) {
@@ -37,8 +37,8 @@ BOOST_AUTO_TEST_CASE(any_raster_ctors_test) {
 
   const int* listData = listInitialized.data();
   //! [Any raster copy-move]
-  Cnes::VecRaster<int> copiedFromRaster(listInitialized);
-  Cnes::VecRaster<int> movedFromRaster(std::move(listInitialized));
+  Litl::VecRaster<int> copiedFromRaster(listInitialized);
+  Litl::VecRaster<int> movedFromRaster(std::move(listInitialized));
   //! [Any raster copy-move]
 
   for (std::size_t i = 0; i < 6; ++i) {
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(vecraster_move_test) {
   std::vector<int> vec {1, 2, 3, 4, 5, 6};
   const auto data = vec.data();
 
-  Cnes::VecRaster<int> raster({3, 2}, std::move(vec)); // Transfer ownership to raster, no copy
+  Litl::VecRaster<int> raster({3, 2}, std::move(vec)); // Transfer ownership to raster, no copy
   BOOST_TEST(raster.data() == data);
 
   const std::vector<int>& ref = raster.container(); // Access as const reference, no copy
@@ -70,8 +70,8 @@ BOOST_AUTO_TEST_CASE(ptrraster_ctors_test) {
   //! [PtrRaster write]
   int data[] = {1, 2, 3, 4, 5, 6};
 
-  Cnes::PtrRaster<int> constructed({3, 2}, data);
-  auto made = Cnes::rasterize(data, 3, 2);
+  Litl::PtrRaster<int> constructed({3, 2}, data);
+  auto made = Litl::rasterize(data, 3, 2);
 
   constructed[0] = 42;
   made[1] = 12;
@@ -87,8 +87,8 @@ BOOST_AUTO_TEST_CASE(ptrraster_ctors_test) {
   //! [PtrRaster read]
   const int* cData = data;
 
-  Cnes::PtrRaster<const int> cConstructed({3, 2}, data);
-  auto cMade = Cnes::rasterize(cData, 3, 2);
+  Litl::PtrRaster<const int> cConstructed({3, 2}, data);
+  auto cMade = Litl::rasterize(cData, 3, 2);
 
   BOOST_TEST((cMade == cConstructed));
   //! [PtrRaster read]
@@ -97,11 +97,11 @@ BOOST_AUTO_TEST_CASE(ptrraster_ctors_test) {
 BOOST_AUTO_TEST_CASE(alignedraster_ctors_test) {
 
   //! [AlignedRaster owns]
-  Cnes::AlignedRaster<int> defaultAligned({3, 2}); // SIMD-aligned
+  Litl::AlignedRaster<int> defaultAligned({3, 2}); // SIMD-aligned
   BOOST_TEST(defaultAligned.alignment() % 16 == 0);
   BOOST_TEST(defaultAligned.owns());
 
-  Cnes::AlignedRaster<int> longerAligned({3, 2}, nullptr, 1024); // Longer alignment
+  Litl::AlignedRaster<int> longerAligned({3, 2}, nullptr, 1024); // Longer alignment
   BOOST_TEST(longerAligned.alignment() % 1024 == 0);
   BOOST_TEST(longerAligned.owns());
   //! [AlignedRaster owns]
@@ -109,16 +109,16 @@ BOOST_AUTO_TEST_CASE(alignedraster_ctors_test) {
   //! [AlignedRaster shares]
   int data[] = {1, 2, 3, 4, 5, 6}; // Unknown alignment
 
-  Cnes::AlignedRaster<int> notAligned({3, 2}, data); // No alignment required
+  Litl::AlignedRaster<int> notAligned({3, 2}, data); // No alignment required
   BOOST_TEST(notAligned.data() == data);
   BOOST_TEST(not notAligned.owns());
 
   try {
-    Cnes::AlignedRaster<int> maybeAligned({3, 2}, data, 64); // Alignment required
+    Litl::AlignedRaster<int> maybeAligned({3, 2}, data, 64); // Alignment required
     std::cout << "Data is aligned!" << std::endl;
     BOOST_TEST(not maybeAligned.owns());
 
-  } catch (Cnes::AlignmentError& e) { // Alignment requirement not met
+  } catch (Litl::AlignmentError& e) { // Alignment requirement not met
     BOOST_TEST(notAligned.alignment() % 64 != 0);
     std::cout << e.what() << std::endl;
   }
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(alignedraster_ctors_test) {
 BOOST_AUTO_TEST_CASE(fill_test) {
 
   //! [Filling]
-  Cnes::AlignedRaster<double> raster({3, 2});
+  Litl::AlignedRaster<double> raster({3, 2});
 
   // Single value
   raster.fill(42);
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(fill_test) {
   BOOST_TEST(raster[0] == 1);
 
   // Evenly spaced values (from min, max)
-  raster.linspace(0, Cnes::pi<double>());
+  raster.linspace(0, Litl::pi<double>());
   std::cout << raster << std::endl; // [0, 0.2 π, 0.4 π...]
   BOOST_TEST(raster[0] == 0);
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2022, CNES
+// Copyright (C) 2022, Antoine Basset
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -9,7 +9,7 @@
 #include <fftw3.h>
 #include <memory>
 
-namespace Cnes {
+namespace Litl {
 
 /// @cond
 namespace Internal {
@@ -87,6 +87,6 @@ public:
   }
 };
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

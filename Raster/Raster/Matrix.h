@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _RASTER_MATRIX_H
@@ -11,7 +11,7 @@
 
 #include <eigen3/Eigen/Core>
 
-namespace Cnes {
+namespace Litl {
 
 /**
  * @ingroup data_classes
@@ -50,9 +50,9 @@ public:
   /// @{
   /// @group_construction
 
-  CNES_VIRTUAL_DTOR(Matrix)
-  CNES_DEFAULT_COPYABLE(Matrix)
-  CNES_DEFAULT_MOVABLE(Matrix)
+  LITL_VIRTUAL_DTOR(Matrix)
+  LITL_DEFAULT_COPYABLE(Matrix)
+  LITL_DEFAULT_MOVABLE(Matrix)
 
   /**
    * @brief Constructor.
@@ -136,6 +136,6 @@ private:
   Eigen::Map<Eigen::Matrix<T, N, M, Eigen::RowMajor>> m_eigen;
 };
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

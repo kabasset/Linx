@@ -1,4 +1,4 @@
-namespace Cnes {
+namespace Litl {
 /**
 
 \addtogroup pixelwise
@@ -22,13 +22,13 @@ The complete list of available operators can be found in `EuclidArithmetic`.
 
 
 Pixel-wise mathematical functions are also provided
-with in-place (methods `a.sin()`, `a.exp()`...) and new-instance (free functions `Cnes::sin(a)`, `Cnes::exp(a)`...) versions.
+with in-place (methods `a.sin()`, `a.exp()`...) and new-instance (free functions `Litl::sin(a)`, `Litl::exp(a)`...) versions.
 Argument-dependent lookup (ADL) allows skipping the namespace in the latter case:
 
 \snippet RasterDemoPixelwise_test.cpp Functions
 
 The complete list of available in-place functions can be found in `MathFunctionsMixin`'s documentation.
-New-instance versions are part of the `Cnes` namespace documentation, and listed at the end of this page.
+New-instance versions are part of the `Litl` namespace documentation, and listed at the end of this page.
 
 
 \section pixelwise-apply Generate and Apply

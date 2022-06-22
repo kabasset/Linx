@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _LITLCONTAINER_RANDOM_H
@@ -12,7 +12,7 @@
 #include <map>
 #include <random>
 
-namespace Cnes {
+namespace Litl {
 
 /**
  * @ingroup concepts
@@ -417,6 +417,6 @@ private:
   std::discrete_distribution<std::size_t> m_distribution;
 };
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

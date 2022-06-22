@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _RASTER_RASTER_H
@@ -19,13 +19,14 @@
 #include <vector>
 
 /**
- * @brief Centre national d'études spatiales.
+ * @brief The light image template library
  * @details
- * The French space agency.
- * @see https://github.com/CNES
+ * An ND image processing library developed and maintained by the French space agency,
+ * Centre national d'études spatiales.
+ * @see https://github.com/cnes
  * @see https://cnes.fr/en
  */
-namespace Cnes {
+namespace Litl {
 
 /// @cond
 // Issue with forward declarations: https://github.com/doxygen/doxygen/issues/8177
@@ -172,9 +173,9 @@ public:
   /// @{
   /// @group_construction
 
-  CNES_VIRTUAL_DTOR(Raster)
-  CNES_DEFAULT_COPYABLE(Raster)
-  CNES_DEFAULT_MOVABLE(Raster)
+  LITL_VIRTUAL_DTOR(Raster)
+  LITL_DEFAULT_COPYABLE(Raster)
+  LITL_DEFAULT_MOVABLE(Raster)
 
   /**
    * @brief Forwarding constructor.
@@ -443,7 +444,7 @@ PtrRaster<T, sizeof...(Longs)> rasterize(T* data, Longs... shape) {
   return PtrRaster<T, sizeof...(Longs)> {{shape...}, data};
 }
 
-#define CNES_RASTER_MATH_COMPLEX_TO_REAL(function) \
+#define LITL_MATH_COMPLEX_TO_REAL(function) \
   template <typename T, Index N, typename THolder> \
   Raster<T, N> function(const Raster<std::complex<T>, N, THolder>& in) { \
     Raster<T, N> out(in.shape()); \
@@ -453,14 +454,14 @@ PtrRaster<T, sizeof...(Longs)> rasterize(T* data, Longs... shape) {
     return out; \
   }
 
-CNES_RASTER_MATH_COMPLEX_TO_REAL(real) ///< Apply `std::real()` @ingroup pixelwise
-CNES_RASTER_MATH_COMPLEX_TO_REAL(imag) ///< Apply `std::imag()` @ingroup pixelwise
-CNES_RASTER_MATH_COMPLEX_TO_REAL(abs) ///< Apply `std::abs()` @ingroup pixelwise
-CNES_RASTER_MATH_COMPLEX_TO_REAL(arg) ///< Apply `std::arg()` @ingroup pixelwise
-CNES_RASTER_MATH_COMPLEX_TO_REAL(norm) ///< Apply `std::norm()` @ingroup pixelwise
+LITL_MATH_COMPLEX_TO_REAL(real) ///< Apply `std::real()` @ingroup pixelwise
+LITL_MATH_COMPLEX_TO_REAL(imag) ///< Apply `std::imag()` @ingroup pixelwise
+LITL_MATH_COMPLEX_TO_REAL(abs) ///< Apply `std::abs()` @ingroup pixelwise
+LITL_MATH_COMPLEX_TO_REAL(arg) ///< Apply `std::arg()` @ingroup pixelwise
+LITL_MATH_COMPLEX_TO_REAL(norm) ///< Apply `std::norm()` @ingroup pixelwise
 // FIXME conj, polar
 
-#undef CNES_RASTER_MATH_COMPLEX_TO_REAL
+#undef LITL_MATH_COMPLEX_TO_REAL
 
 /**
  * @brief Generate a random raster.
@@ -474,7 +475,7 @@ Raster<T, N> random(const Position<N>& shape) {
   return out;
 }
 
-} // namespace Cnes
+} // namespace Litl
 
 #include "Raster/PositionIterator.h"
 #include "Raster/Subraster.h"

@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _RASTERVALIDATION_CHRONOMETER_H
@@ -11,7 +11,7 @@
 #include <numeric> // inner_product
 #include <vector>
 
-namespace Cnes {
+namespace Litl {
 
 /**
  * @brief A simple chronometer with increment times and elapsed time caching.
@@ -164,6 +164,6 @@ private:
   TUnit m_elapsed;
 };
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

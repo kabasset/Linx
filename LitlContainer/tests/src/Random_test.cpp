@@ -1,4 +1,4 @@
-// Copyright (C) 2022, CNES
+// Copyright (C) 2022, Antoine Basset
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -7,7 +7,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-using namespace Cnes;
+using namespace Litl;
 
 //-----------------------------------------------------------------------------
 
@@ -51,7 +51,7 @@ void checkUniform(std::complex<T>) {
   }
 }
 
-CNES_RASTER_TEST_CASE_TEMPLATE(uniform_test) {
+LITL_TEST_CASE_TEMPLATE(uniform_test) {
   checkUniform(T {});
 }
 
@@ -68,7 +68,7 @@ void checkGaussian(bool) {}
 template <typename T>
 void checkGaussian(std::complex<T>) {}
 
-CNES_RASTER_TEST_CASE_TEMPLATE(gaussian_test) {
+LITL_TEST_CASE_TEMPLATE(gaussian_test) {
   checkGaussian(T {});
 }
 
@@ -85,7 +85,7 @@ void checkPoisson(bool) {}
 template <typename T>
 void checkPoisson(std::complex<T>) {}
 
-CNES_RASTER_TEST_CASE_TEMPLATE(poisson_test) {
+LITL_TEST_CASE_TEMPLATE(poisson_test) {
   checkPoisson(T {});
 }
 

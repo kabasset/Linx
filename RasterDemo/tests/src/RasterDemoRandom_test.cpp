@@ -1,4 +1,4 @@
-// Copyright (C) 2022, CNES
+// Copyright (C) 2022, Antoine Basset
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -15,20 +15,20 @@ BOOST_AUTO_TEST_SUITE(RasterDemoRandom_test)
 BOOST_AUTO_TEST_CASE(simple_random_test) {
 
   //! [Generate Gaussian noise]
-  Cnes::Raster<double> raster({3, 2});
-  raster.generate(Cnes::GaussianNoise<double>(100, 15));
+  Litl::Raster<double> raster({3, 2});
+  raster.generate(Litl::GaussianNoise<double>(100, 15));
   //! [Generate Gaussian noise]
 
   std::cout << "Random raster: " << raster << std::endl;
 
   //! [Apply Poisson noise]
-  raster.apply(Cnes::StablePoissonNoise<int>());
+  raster.apply(Litl::StablePoissonNoise<int>());
   //! [Apply Poisson noise]
 
   std::cout << "Noisy raster:  " << raster << std::endl;
 
   //! [Apply salt and pepper noise]
-  raster.apply(Cnes::ImpulseNoise<int>::saltAndPepper(0.1, 0.2, 0, 1000));
+  raster.apply(Litl::ImpulseNoise<int>::saltAndPepper(0.1, 0.2, 0, 1000));
   //! [Apply salt and pepper noise]
 
   std::cout << "S&P noised: " << raster << std::endl;
@@ -48,23 +48,23 @@ public:
   }
 
 private:
-  Cnes::PoissonNoise<T> m_poisson;
-  Cnes::GaussianNoise<T> m_gaussian;
+  Litl::PoissonNoise<T> m_poisson;
+  Litl::GaussianNoise<T> m_gaussian;
 };
 //! [System noise]
 
 BOOST_AUTO_TEST_CASE(compound_random_test) {
 
-  Cnes::Raster<double> flux({3, 2});
-  Cnes::Raster<double> dark({3, 2});
-  flux.generate(Cnes::PoissonNoise<int>(100));
-  dark.generate(Cnes::UniformNoise<double>(0, 10));
+  Litl::Raster<double> flux({3, 2});
+  Litl::Raster<double> dark({3, 2});
+  flux.generate(Litl::PoissonNoise<int>(100));
+  dark.generate(Litl::UniformNoise<double>(0, 10));
   std::cout << "Flux: " << flux << std::endl;
   std::cout << "Dark: " << dark << std::endl;
 
   //! [Apply system noise]
   // New instance
-  Cnes::Raster<double> res(flux);
+  Litl::Raster<double> res(flux);
   res.generate(SystemNoise<double>(), flux, dark);
 
   // In-place

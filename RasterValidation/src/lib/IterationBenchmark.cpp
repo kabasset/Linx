@@ -1,10 +1,10 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "RasterValidation/IterationBenchmark.h"
 
-namespace Cnes {
+namespace Litl {
 
 IterationBenchmark::IterationBenchmark(Index side) :
     m_width(side), m_height(side), m_depth(side), m_a({side, side, side}), m_b({side, side, side}),
@@ -110,4 +110,4 @@ IterationBenchmark::Duration IterationBenchmark::callGenerate() {
   return m_chrono.stop();
 }
 
-} // namespace Cnes
+} // namespace Litl

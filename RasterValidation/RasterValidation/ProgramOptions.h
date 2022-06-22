@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _RASTERVALIDATION_PROGRAMOPTIONS_H
@@ -8,7 +8,7 @@
 #include <boost/program_options.hpp>
 #include <sstream>
 
-namespace Cnes {
+namespace Litl {
 
 /**
  * @brief Helper class to declare positional, named and flag options, as well as some help message.
@@ -187,6 +187,6 @@ private:
   boost::program_options::variables_map m_variables;
 };
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

@@ -1,4 +1,4 @@
-// Copyright (C) 2022, CNES
+// Copyright (C) 2022, Antoine Basset
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -11,7 +11,7 @@
 struct Rgb {
 
   // The associated image type
-  using Image = Cnes::Raster<Rgb, 2>;
+  using Image = Litl::Raster<Rgb, 2>;
 
   // The components
   unsigned char r, g, b;
@@ -27,7 +27,7 @@ struct Rgb {
 // A HSV (hue, saturation, value) color with H in [0, 360), and S and V in [0, 1].
 struct Hsv {
 
-  using Image = Cnes::Raster<Hsv, 2>;
+  using Image = Litl::Raster<Hsv, 2>;
 
   double h, s, v;
 
@@ -126,8 +126,8 @@ BOOST_AUTO_TEST_CASE(color_struct_test) {
 BOOST_AUTO_TEST_CASE(color_along_0_test) {
 
   //! [CxyImage]
-  using RgbXyImage = Cnes::Raster<unsigned char, 3>;
-  using HsvXyImage = Cnes::Raster<double, 3>;
+  using RgbXyImage = Litl::Raster<unsigned char, 3>;
+  using HsvXyImage = Litl::Raster<double, 3>;
   //! [CxyImage]
 
   //! [Input Cxy]
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(color_along_0_test) {
 BOOST_AUTO_TEST_CASE(color_along_2_test) {
 
   //! [XycImage]
-  using XyRgbImage = Cnes::Raster<unsigned char, 3>;
+  using XyRgbImage = Litl::Raster<unsigned char, 3>;
   //! [XycImage]
 
   //! [Input Xyc]
@@ -183,14 +183,14 @@ BOOST_AUTO_TEST_CASE(color_along_2_test) {
 BOOST_AUTO_TEST_CASE(vector_along_2_test) {
 
   //! [Vector image]
-  using HyperspectralCube = Cnes::Raster<double, 3>;
-  using IntegratedImage = Cnes::Raster<double, 2>;
+  using HyperspectralCube = Litl::Raster<double, 3>;
+  using IntegratedImage = Litl::Raster<double, 2>;
   //! [Vector image]
 
-  Cnes::Index n = 100; // Or read from command line
+  Litl::Index n = 100; // Or read from command line
   //! [Input vector]
   HyperspectralCube cube({n, 640, 480});
-  cube.generate(Cnes::GaussianNoise<double>());
+  cube.generate(Litl::GaussianNoise<double>());
   std::vector<double> weights(n, 1.41);
   //! [Input vector]
 
@@ -208,13 +208,13 @@ BOOST_AUTO_TEST_CASE(vector_along_2_test) {
 BOOST_AUTO_TEST_CASE(raster_of_raster_test) {
 
   //! [Raster of raster]
-  using NestedRaster = Cnes::Raster<Cnes::Raster<int>>;
+  using NestedRaster = Litl::Raster<Litl::Raster<int>>;
   NestedRaster nested({4, 3});
 
   for (auto& p : nested.domain()) {
     const auto shape = p + 1;
     auto& raster = nested[p];
-    raster = Cnes::Raster<int>(shape).range();
+    raster = Litl::Raster<int>(shape).range();
     std::cout << "Raster at " << p << " = " << raster << std::endl;
     BOOST_TEST(raster.at(-1) == shapeSize(shape) - 1);
   }

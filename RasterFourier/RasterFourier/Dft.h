@@ -9,7 +9,7 @@
 
 #include <complex>
 
-namespace Cnes {
+namespace Litl {
 
 /**
  * @ingroup dft
@@ -264,6 +264,6 @@ RealDftBuffer<TRaster::Dimension> inverseRealDft(const TRaster& in, const Positi
   return std::move(plan.out());
 }
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

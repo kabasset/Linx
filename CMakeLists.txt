@@ -7,6 +7,6 @@ set(USE_SPHINX OFF
     FORCE)
 
 elements_project(
-    CnesRaster 1.0 # Cnes.Raster is forbidden because of dot
+    Litl 1.0
     USE Elements 6.0.1
-    DESCRIPTION "Multidimensional raster image processing")
+    DESCRIPTION "The light image template library")

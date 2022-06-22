@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _LITLCONTAINER_SEQUENCE_H
@@ -11,7 +11,7 @@
 #include "LitlContainer/Math.h"
 #include "LitlContainer/Random.h"
 
-namespace Cnes {
+namespace Litl {
 
 template <typename T, typename THolder = DefaultHolder<T>>
 class Sequence : public DataContainer<T, THolder, EuclidArithmetic, Sequence<T, THolder>> {
@@ -38,6 +38,6 @@ Sequence<T> random(std::size_t size) {
   return out;
 }
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

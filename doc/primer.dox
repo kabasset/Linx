@@ -1,4 +1,4 @@
-namespace Cnes {
+namespace Litl {
 /**
 
 \addtogroup primer
@@ -24,7 +24,7 @@ A variety of operations are supported, for example:
 Before going further, a short digression on the naming of the library.
 Why "raster" and not simply image or array?
 Mostly for disambiguation purpose: "image" refers to an extension type of the FITS format
--- which is at the heart of EleFits, from which Cnes.Raster was initially out-sourced --
+-- which is at the heart of EleFits, from which Litl was initially out-sourced --
 while "array" has already several meanings in C/C++.
 `NdArray` would have been an option, but every related class should have been prefixed with `Nd` for homogeneity:
 `NdPosition`, `NdRegion`, `VecNdArray`...

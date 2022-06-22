@@ -1,5 +1,5 @@
 // Copyright (C) 2022, Antoine Basset
-// This file is part of Cnes.Raster <github.com/kabasset/Raster>
+// This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #ifndef _RASTERFILTER_KERNEL1D_H
@@ -12,7 +12,7 @@
 #include <map>
 #include <vector>
 
-namespace Cnes {
+namespace Litl {
 
 struct CropKernelOutOfBounds {}; // FIXME
 
@@ -308,6 +308,6 @@ Kernel1dSeq<Kernel1d<T, TExtrapolation>, IDifference, IAverage> sobel() {
 // isCorrelation<T>()
 // decltype(auto) operator* (enable_if_t<isCorrelation<TKernel>>(), TRaster)
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif

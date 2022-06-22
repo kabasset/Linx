@@ -1,4 +1,4 @@
-// Copyright (C) 2022, CNES
+// Copyright (C) 2022, Antoine Basset
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -8,7 +8,7 @@
 #include "Raster/Raster.h"
 #include "RasterFourier/DftMemory.h"
 
-namespace Cnes {
+namespace Litl {
 
 /**
  * @brief Memory- and computation-efficient discrete Fourier transform.
@@ -108,8 +108,8 @@ public:
       m_shape {shape}, m_in {Transform::inShape(m_shape), inData}, m_out {Transform::outShape(m_shape), outData},
       m_plan {FftwAllocator::createPlan<Transform>(m_in, m_out)} {}
 
-  CNES_DEFAULT_COPYABLE(DftPlan)
-  CNES_DEFAULT_MOVABLE(DftPlan)
+  LITL_DEFAULT_COPYABLE(DftPlan)
+  LITL_DEFAULT_MOVABLE(DftPlan)
 
   /**
    * @brief Destructor.
@@ -251,6 +251,6 @@ private:
   Internal::FftwPlanPtr m_plan;
 };
 
-} // namespace Cnes
+} // namespace Litl
 
 #endif
