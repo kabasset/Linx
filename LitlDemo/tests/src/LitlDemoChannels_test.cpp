@@ -103,7 +103,7 @@ std::string toString(const Hsv& hsv) {
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(RasterDemoChannels_test)
+BOOST_AUTO_TEST_SUITE(LitlDemoChannels_test)
 
 //-----------------------------------------------------------------------------
 

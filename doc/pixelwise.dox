@@ -13,7 +13,7 @@ In-place (`+=`, `-=`, `*=`...) and new-instance (`+`, `-`, `*`...) versions are 
 The following examples for operator `+` holds for all operators;
 `a` and `b` denote `Raster`s while `k` is some scalar.
 
-\snippet RasterDemoPixelwise_test.cpp Operators
+\snippet LitlDemoPixelwise_test.cpp Operators
 
 The complete list of available operators can be found in `EuclidArithmetic`.
 
@@ -25,7 +25,7 @@ Pixel-wise mathematical functions are also provided
 with in-place (methods `a.sin()`, `a.exp()`...) and new-instance (free functions `Litl::sin(a)`, `Litl::exp(a)`...) versions.
 Argument-dependent lookup (ADL) allows skipping the namespace in the latter case:
 
-\snippet RasterDemoPixelwise_test.cpp Functions
+\snippet LitlDemoPixelwise_test.cpp Functions
 
 The complete list of available in-place functions can be found in `MathFunctionsMixin`'s documentation.
 New-instance versions are part of the `Litl` namespace documentation, and listed at the end of this page.
@@ -41,18 +41,18 @@ and an unbounded number of input rasters (can be 0).
 
 For example, to compute `a * k + b`, do:
 
-\snippet RasterDemoPixelwise_test.cpp Generate
+\snippet LitlDemoPixelwise_test.cpp Generate
 
 This is equivalent but much faster than doing simply:
 
-\snippet RasterDemoPixelwise_test.cpp Formula
+\snippet LitlDemoPixelwise_test.cpp Formula
 
 because intermediate variable `tmp = a * k` is not instanciated.
 This is all the more true for formulae with more operations.
 
 The in-place version, corresponding to `a = a * k + b`, is obtained with `apply()`:
 
-\snippet RasterDemoPixelwise_test.cpp Apply
+\snippet LitlDemoPixelwise_test.cpp Apply
 
 This can be seen as an equivalent to XTensor's or Eigen's lazy evaluations,
 yet with arbitrary functions.

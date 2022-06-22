@@ -8,7 +8,7 @@
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(RasterDemoInterpolation_test)
+BOOST_AUTO_TEST_SUITE(LitlDemoInterpolation_test)
 
 //-----------------------------------------------------------------------------
 

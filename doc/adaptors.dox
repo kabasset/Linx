@@ -19,23 +19,23 @@ This is the purpose of the third template parameter of `Raster`
 For example, a raster built on top of a `std::vector` is of type `VecRaster`.
 Here is a simple way to build the `VecRaster` illustrated in \ref primer.
 
-\snippet RasterDemoBasics_test.cpp VecRaster iota
+\snippet LitlDemoBasics_test.cpp VecRaster iota
 
 It is also possible to dynamically augment any 1D contiguous container
 with the raster features (e.g. ND indexing or operations) thanks to the `PtrRaster` class,
 in which the underlying container is a raw pointer.
 For example:
 
-\snippet RasterDemoBasics_test.cpp PtrRaster iota
+\snippet LitlDemoBasics_test.cpp PtrRaster iota
 
 Last but not least, it is also possible to use your own container,
 assuming that it provides the minimal interface, e.g.:
 
-\snippet RasterDemoBasics_test.cpp MallocRaster
+\snippet LitlDemoBasics_test.cpp MallocRaster
 
 Which can be used like any other raster:
 
-\snippet RasterDemoBasics_test.cpp MallocRaster iota
+\snippet LitlDemoBasics_test.cpp MallocRaster iota
 
 
 \section adaptors-views View as...

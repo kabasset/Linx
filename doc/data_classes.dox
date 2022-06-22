@@ -54,9 +54,9 @@ Whatever the container it wraps, it must expose the methods a `Raster` expects:
 see `SizedData`.
 Users can implement their own holders if those provided (see next section) are not enough.
 Here is a simple example of a custom holder and associated `Raster` specialization
-(see example \ref RasterDemoBasics_test.cpp):
+(see example \ref LitlDemoBasics_test.cpp):
 
-\snippet RasterDemoBasics_test.cpp MallocRaster
+\snippet LitlDemoBasics_test.cpp MallocRaster
 
 Given that `Raster` inherits from the holder,
 methods can be implemented in the holder and then called from the raster.
@@ -80,7 +80,7 @@ A holder which wraps the contiguous containers of the standard library:
 `std::vector`, `std::valarray`, `std::array`.
 It provides access to the container to avoid copies, e.g:
 
-\snippet RasterDemoConstructors_test.cpp VecRaster moves
+\snippet LitlDemoConstructors_test.cpp VecRaster moves
 
 \par `AlignedBuffer<T>`
 
@@ -88,11 +88,11 @@ It provides access to the container to avoid copies, e.g:
 e.g. for use of SIMD extensions.
 Data can be owned (allocated at construction, freed at destruction):
 
-\snippet RasterDemoConstructors_test.cpp AlignedRaster owns
+\snippet LitlDemoConstructors_test.cpp AlignedRaster owns
 
 or shared like in the case of `PtrRaster`:
 
-\snippet RasterDemoConstructors_test.cpp AlignedRaster shares
+\snippet LitlDemoConstructors_test.cpp AlignedRaster shares
 
 */
 }

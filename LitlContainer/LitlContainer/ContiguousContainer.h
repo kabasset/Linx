@@ -32,7 +32,7 @@ namespace Litl {
  * 
  * @par_example
  * Here is a minimal `SizedData`-compliant class:
- * \snippet RasterDemoBasics_test.cpp MallocRaster
+ * \snippet LitlDemoBasics_test.cpp MallocRaster
  */
 
 /**

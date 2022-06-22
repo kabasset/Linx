@@ -15,19 +15,19 @@ then this is the only section you have to read!
 As an illustrative example, we will compute the derivative of the sine function in Fourier space.
 Given an input sine signal:
 
-\snippet RasterDemoDft_test.cpp Fill vector
+\snippet LitlDemoDft_test.cpp Fill vector
 
 We compute the Fourier transform:
 
-\snippet RasterDemoDft_test.cpp realDft
+\snippet LitlDemoDft_test.cpp realDft
 
 Multiply by `jk`:
 
-\snippet RasterDemoDft_test.cpp Concise derivation
+\snippet LitlDemoDft_test.cpp Concise derivation
 
 And transform back the data:
 
-\snippet RasterDemoDft_test.cpp inverseRealDft
+\snippet LitlDemoDft_test.cpp inverseRealDft
 
 And that's all!
 
@@ -66,7 +66,7 @@ Like in the first section, we will compute the derivative of the sine function.
 For this purpose, we need a direct 1D DFT of real values, and the associated inverse DFT.
 Let us instantiate a DFT plan of 360 values.
 
-\snippet RasterDemoDft_test.cpp Plan direct
+\snippet LitlDemoDft_test.cpp Plan direct
 
 In order to perform the inverse transform,
 it is natural (and efficient) to reuse the buffers of the direct transform.
@@ -74,7 +74,7 @@ This can be done manually by creating buffers with shared memory,
 or automatically with `DftPlan::inverse()`,
 which returns an object of appropriate type and with inverted buffers:
 
-\snippet RasterDemoDft_test.cpp Plan inverse
+\snippet LitlDemoDft_test.cpp Plan inverse
 
 
 \section dft-execution Execution
@@ -83,21 +83,21 @@ which returns an object of appropriate type and with inverted buffers:
 After planning, the buffers may contain garbage values.
 Let us fill the input buffer with a sine signal:
 
-\snippet RasterDemoDft_test.cpp Fill signal
+\snippet LitlDemoDft_test.cpp Fill signal
 
 Now, the DFT can be executed:
 
-\snippet RasterDemoDft_test.cpp Direct transform
+\snippet LitlDemoDft_test.cpp Direct transform
 
 The derivative is computed in Fourier space as `direct.out() * jk`:
 
-\snippet RasterDemoDft_test.cpp Derivation
+\snippet LitlDemoDft_test.cpp Derivation
 
 And the derived signal is recovered by executing the inverse transform.
 Like with FFTW, the inverse transform is scaled by the size of the logical raster shape.
 It can be normalized with `DftPlan::normalize()`, which acts directly on the output buffer.
 
-\snippet RasterDemoDft_test.cpp Inverse transform
+\snippet LitlDemoDft_test.cpp Inverse transform
 
 Now, `direct.in()` contains the derivative of the initial sine signal, i.e. a cosine signal.
 

@@ -106,12 +106,12 @@ public:
    * and some aligned memory is allocated.
    * In this case, if `align` is-1 or 0, alignment is made compatible with SIMD instructions.
    * 
-   * \snippet RasterDemoConstructors_test.cpp AlignedRaster owns
+   * \snippet LitlDemoConstructors_test.cpp AlignedRaster owns
    * 
    * If the buffer is not owning (`data` is not null),
    * `data` alignment is checked, unless `align` is 0.
    * 
-   * \snippet RasterDemoConstructors_test.cpp AlignedRaster shares
+   * \snippet LitlDemoConstructors_test.cpp AlignedRaster shares
    */
   AlignedBuffer(std::size_t size, T* data = nullptr, std::size_t align = 0) :
       m_size(size), m_as(alignAs(data, align)), m_container(nullptr), m_data(data) {

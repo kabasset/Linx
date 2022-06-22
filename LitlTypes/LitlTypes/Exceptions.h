@@ -2,8 +2,8 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTERTYPES_EXCEPTIONS_H
-#define _RASTERTYPES_EXCEPTIONS_H
+#ifndef _LITLTYPES_EXCEPTIONS_H
+#define _LITLTYPES_EXCEPTIONS_H
 
 #include <exception>
 #include <string>

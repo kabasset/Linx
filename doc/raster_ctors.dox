@@ -18,11 +18,11 @@ Yet, each and every specialization of `Raster` provides at least the following c
 
 Here is an illustration for `VecRaster`:
 
-\snippet RasterDemoConstructors_test.cpp Any raster
+\snippet LitlDemoConstructors_test.cpp Any raster
 
 A raster is copyable (resp. movable) if its holder is copyable (resp. movable).
 
-\snippet RasterDemoConstructors_test.cpp Any raster copy-move
+\snippet LitlDemoConstructors_test.cpp Any raster copy-move
 
 Moreover, some constructors forward additional arguments to the data holder.
 This allows defining specific constructors from the data holder, without specializing `Raster` itself.
@@ -44,11 +44,11 @@ Function `rasterize` helps reducing the boilerplate by deducing template paramet
 
 Read/write raster, with non-const-qualified value type:
 
-\snippet RasterDemoConstructors_test.cpp PtrRaster write
+\snippet LitlDemoConstructors_test.cpp PtrRaster write
 
 Read-only raster, with const-qualified value type:
 
-\snippet RasterDemoConstructors_test.cpp PtrRaster read
+\snippet LitlDemoConstructors_test.cpp PtrRaster read
 
 
 \section raster_ctors-vec VecRaster-specific Constructors
@@ -56,7 +56,7 @@ Read-only raster, with const-qualified value type:
 
 Through forwarding parameters, `VecRaster`s can be immediately filled with some value:
 
-\snippet RasterDemoConstructors_test.cpp VecRaster
+\snippet LitlDemoConstructors_test.cpp VecRaster
 
 
 \section raster_ctors-aligned AlignedRaster-specific Constructors
@@ -70,11 +70,11 @@ while non-owning rasters check data alignment and throw an error if the requirem
 
 Owning raster, with null pointer given to the constructor:
 
-\snippet RasterDemoConstructors_test.cpp AlignedRaster owns
+\snippet LitlDemoConstructors_test.cpp AlignedRaster owns
 
 Non-owning raster, built from some exising data:
 
-\snippet RasterDemoConstructors_test.cpp AlignedRaster shares
+\snippet LitlDemoConstructors_test.cpp AlignedRaster shares
 
 `AlignedRaster` is movable but not copyable.
 
@@ -85,7 +85,7 @@ Non-owning raster, built from some exising data:
 In addition to constructors, `Raster`s (and any `DataContainer`) provide several methods
 to fill the container after construction, like `fill()`, `range()` or `generate()`.
 
-\snippet RasterDemoConstructors_test.cpp Filling
+\snippet LitlDemoConstructors_test.cpp Filling
 
 Methods `generate()` and `apply()` have a wide range of use cases.
 The most common one is pixel-wise processing, which is described in \ref pixelwise.

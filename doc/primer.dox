@@ -127,7 +127,7 @@ Indices are 0-based signed integers of type `Index`.
 Class `Position` is a contiguous container of indices, which is generally brace-initialized.
 Using signed integers enables backward indexing, e.g. with method `Raster::at()`:
 
-\snippet RasterDemoBasics_test.cpp Element access
+\snippet LitlDemoBasics_test.cpp Element access
 
 As a standard contiguous container, `Raster` also provides element access through iterators,
 which are explicitely raw pointers (as opposed to `std::vector` but like `eastl::vector`)
@@ -136,7 +136,7 @@ Methods `Raster::begin()` and `Raster::end()` enable range for loops
 and should be used with standard functions like algorithms.
 The following blocks are all functionally equivalent:
 
-\snippet RasterDemoBasics_test.cpp Foreach element
+\snippet LitlDemoBasics_test.cpp Foreach element
 
 */
 }

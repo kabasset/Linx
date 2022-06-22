@@ -50,7 +50,7 @@ Litl::VecRaster<int, 3> rasterIota() {
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(RasterDemoBasics_test)
+BOOST_AUTO_TEST_SUITE(LitlDemoBasics_test)
 
 //-----------------------------------------------------------------------------
 

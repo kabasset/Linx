@@ -30,7 +30,7 @@ TODO
 
 TODO
 
-\snippet RasterDemoInterpolation_test.cpp Extra
+\snippet LitlDemoInterpolation_test.cpp Extra
 
 
 \section interpolation-interpolate Interpolate
@@ -39,9 +39,9 @@ TODO
 Interpolators are templated by the interpolation policy and extrapolator or raster type,
 depending on whether out-of-bounds values should be accessed or not.
 
-\snippet RasterDemoInterpolation_test.cpp Inter
+\snippet LitlDemoInterpolation_test.cpp Inter
 
-\snippet RasterDemoInterpolation_test.cpp Inter-extra
+\snippet LitlDemoInterpolation_test.cpp Inter-extra
 
 
 */

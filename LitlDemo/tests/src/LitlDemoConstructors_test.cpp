@@ -8,7 +8,7 @@
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(RasterDemoConstructors_test)
+BOOST_AUTO_TEST_SUITE(LitlDemoConstructors_test)
 
 //-----------------------------------------------------------------------------
 

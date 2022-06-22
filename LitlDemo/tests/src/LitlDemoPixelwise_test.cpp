@@ -21,7 +21,7 @@ struct Fixture {
 
 //-----------------------------------------------------------------------------
 
-BOOST_FIXTURE_TEST_SUITE(RasterDemoChannels_test, Fixture)
+BOOST_FIXTURE_TEST_SUITE(LitlDemoChannels_test, Fixture)
 
 //-----------------------------------------------------------------------------
 

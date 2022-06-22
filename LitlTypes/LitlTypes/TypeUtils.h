@@ -2,8 +2,8 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTERTYPES_TYPEUTILS_H
-#define _RASTERTYPES_TYPEUTILS_H
+#ifndef _LITLTYPES_TYPEUTILS_H
+#define _LITLTYPES_TYPEUTILS_H
 
 #include <complex>
 #include <limits>
