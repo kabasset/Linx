@@ -5,8 +5,8 @@
 #ifndef _LITLCONTAINER_ALIGNEDBUFFER_H
 #define _LITLCONTAINER_ALIGNEDBUFFER_H
 
-#include "RasterTypes/Exceptions.h"
-#include "RasterTypes/TypeUtils.h"
+#include "LitlTypes/Exceptions.h"
+#include "LitlTypes/TypeUtils.h"
 
 #include <algorithm> // copy_n
 #include <cstdint> // uintptr_t

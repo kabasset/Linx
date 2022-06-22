@@ -6,7 +6,7 @@
 #define _LITLRASTER_VECTOR_H
 
 #include "LitlContainer/DataContainer.h"
-#include "RasterTypes/TypeUtils.h"
+#include "LitlTypes/TypeUtils.h"
 
 #include <numeric> // accumulate, multiplies
 #include <type_traits> // conditional

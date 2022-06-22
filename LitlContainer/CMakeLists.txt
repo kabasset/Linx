@@ -2,13 +2,13 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 elements_subdir(LitlContainer)
 
-elements_depends_on_subdirs(RasterTypes)
+elements_depends_on_subdirs(LitlTypes)
 
 find_package(Boost) # Operators
 
 elements_add_library(LitlContainer src/lib/*.cpp
-                     INCLUDE_DIRS RasterTypes Boost
-                     LINK_LIBRARIES RasterTypes Boost
+                     INCLUDE_DIRS LitlTypes Boost
+                     LINK_LIBRARIES LitlTypes Boost
                      PUBLIC_HEADERS LitlContainer)
 
 elements_add_unit_test(AlignedBuffer tests/src/AlignedBuffer_test.cpp 

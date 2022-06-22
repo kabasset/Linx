@@ -5,7 +5,7 @@
 #ifndef _LITLCONTAINER_MATH_H
 #define _LITLCONTAINER_MATH_H
 
-#include "RasterTypes/SeqUtils.h" // isIterable
+#include "LitlTypes/SeqUtils.h" // isIterable
 
 #include <algorithm>
 #include <cmath>

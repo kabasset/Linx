@@ -10,9 +10,9 @@
 #include "LitlContainer/DataDistribution.h"
 #include "LitlContainer/Holders.h"
 #include "LitlContainer/Math.h"
-#include "RasterTypes/Exceptions.h"
-#include "RasterTypes/SeqUtils.h" // isIterable
-#include "RasterTypes/TypeUtils.h" // Index, Limits
+#include "LitlTypes/Exceptions.h"
+#include "LitlTypes/SeqUtils.h" // isIterable
+#include "LitlTypes/TypeUtils.h" // Index, Limits
 
 #include <cstddef> // size_t
 #include <initializer_list>

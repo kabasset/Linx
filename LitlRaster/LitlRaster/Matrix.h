@@ -7,7 +7,7 @@
 
 #include "LitlContainer/DataContainer.h"
 #include "LitlRaster/Vector.h"
-#include "RasterTypes/Exceptions.h"
+#include "LitlTypes/Exceptions.h"
 
 #include <eigen3/Eigen/Core>
 

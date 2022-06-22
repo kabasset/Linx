@@ -5,7 +5,7 @@
 #ifndef _RASTERTYPES_SEQUTILS_H
 #define _RASTERTYPES_SEQUTILS_H
 
-#include "RasterTypes/TypeUtils.h"
+#include "LitlTypes/TypeUtils.h"
 
 #include <algorithm> // transform
 #include <array>

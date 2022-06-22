@@ -5,7 +5,7 @@
 #ifndef _LITLCONTAINER_RANDOM_H
 #define _LITLCONTAINER_RANDOM_H
 
-#include "RasterTypes/TypeUtils.h" // Complexifier
+#include "LitlTypes/TypeUtils.h" // Complexifier
 
 #include <algorithm>
 #include <chrono>

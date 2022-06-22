@@ -9,7 +9,7 @@
 #include "LitlContainer/DataContainer.h"
 #include "LitlContainer/Random.h"
 #include "LitlRaster/Region.h"
-#include "RasterTypes/Exceptions.h"
+#include "LitlTypes/Exceptions.h"
 
 #include <complex>
 #include <cstdint>

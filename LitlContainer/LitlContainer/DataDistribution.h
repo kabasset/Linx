@@ -5,7 +5,7 @@
 #ifndef _LITLCONTAINER_DATADISTRIBUTION_H
 #define _LITLCONTAINER_DATADISTRIBUTION_H
 
-#include "RasterTypes/TypeUtils.h"
+#include "LitlTypes/TypeUtils.h"
 
 #include <algorithm>
 #include <vector>
