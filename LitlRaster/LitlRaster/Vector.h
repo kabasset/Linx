@@ -2,8 +2,8 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTER_POSITION_H
-#define _RASTER_POSITION_H
+#ifndef _LITLRASTER_VECTOR_H
+#define _LITLRASTER_VECTOR_H
 
 #include "LitlContainer/DataContainer.h"
 #include "RasterTypes/TypeUtils.h"

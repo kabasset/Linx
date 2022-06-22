@@ -5,8 +5,8 @@
 #ifndef _RASTERFILTER_CONVOLUTION_H
 #define _RASTERFILTER_CONVOLUTION_H
 
-#include "Raster/Raster.h"
-#include "Raster/Sampling.h"
+#include "LitlRaster/Raster.h"
+#include "LitlRaster/Sampling.h"
 
 #include <algorithm> // reverse
 

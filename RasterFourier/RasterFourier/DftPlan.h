@@ -5,7 +5,7 @@
 #ifndef _RASTERFOURIER_DFTPLAN_H
 #define _RASTERFOURIER_DFTPLAN_H
 
-#include "Raster/Raster.h"
+#include "LitlRaster/Raster.h"
 #include "RasterFourier/DftMemory.h"
 
 namespace Litl {

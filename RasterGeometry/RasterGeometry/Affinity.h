@@ -5,8 +5,8 @@
 #ifndef _RASTERGEOMETRY_AFFINITY_H
 #define _RASTERGEOMETRY_AFFINITY_H
 
-#include "Raster/Matrix.h"
-#include "Raster/Position.h"
+#include "LitlRaster/Matrix.h"
+#include "LitlRaster/Vector.h"
 
 namespace Litl {
 

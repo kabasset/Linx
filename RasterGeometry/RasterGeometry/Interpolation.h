@@ -5,7 +5,7 @@
 #ifndef _RASTERGEOMETRY_INTERPOLATION_H
 #define _RASTERGEOMETRY_INTERPOLATION_H
 
-#include "Raster/Raster.h"
+#include "LitlRaster/Raster.h"
 #include "RasterGeometry/InterpolationPolicies.h"
 
 namespace Litl {

@@ -2,13 +2,13 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 elements_subdir(RasterGeometry)
 
-elements_depends_on_subdirs(Raster)
+elements_depends_on_subdirs(LitlRaster)
 
 find_package(Eigen3)
 
 elements_add_library(RasterGeometry src/lib/*.cpp
-                     INCLUDE_DIRS Raster Eigen3
-                     LINK_LIBRARIES Raster Eigen3
+                     INCLUDE_DIRS LitlRaster Eigen3
+                     LINK_LIBRARIES LitlRaster Eigen3
                      PUBLIC_HEADERS RasterGeometry)
 
 elements_add_unit_test(Interpolation tests/src/Interpolation_test.cpp 

@@ -2,8 +2,8 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "Raster/PositionIterator.h"
-#include "Raster/Raster.h"
+#include "LitlRaster/PositionIterator.h"
+#include "LitlRaster/Raster.h"
 
 #include <boost/test/unit_test.hpp>
 

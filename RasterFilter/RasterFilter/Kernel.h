@@ -5,7 +5,7 @@
 #ifndef _RASTERFILTER_KERNEL_H
 #define _RASTERFILTER_KERNEL_H
 
-#include "Raster/Raster.h"
+#include "LitlRaster/Raster.h"
 
 namespace Litl {
 

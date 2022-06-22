@@ -5,8 +5,8 @@
 #ifndef _RASTER_SUBRASTER_H
 #define _RASTER_SUBRASTER_H
 
-#include "Raster/Raster.h"
-#include "Raster/Region.h"
+#include "LitlRaster/Raster.h"
+#include "LitlRaster/Region.h"
 
 #include <algorithm> // accumulate
 #include <functional> // multiplies

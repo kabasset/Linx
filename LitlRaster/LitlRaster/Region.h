@@ -5,7 +5,7 @@
 #ifndef _RASTER_REGION_H
 #define _RASTER_REGION_H
 
-#include "Raster/Position.h"
+#include "LitlRaster/Vector.h"
 
 namespace Litl {
 

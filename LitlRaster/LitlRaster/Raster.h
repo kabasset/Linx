@@ -2,14 +2,13 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTER_RASTER_H
-#define _RASTER_RASTER_H
+#ifndef _LITLRASTER_RASTER_H
+#define _LITLRASTER_RASTER_H
 
 #include "LitlContainer/AlignedBuffer.h"
 #include "LitlContainer/DataContainer.h"
 #include "LitlContainer/Random.h"
-#include "Raster/Position.h"
-#include "Raster/Region.h"
+#include "LitlRaster/Region.h"
 #include "RasterTypes/Exceptions.h"
 
 #include <complex>
@@ -477,13 +476,13 @@ Raster<T, N> random(const Position<N>& shape) {
 
 } // namespace Litl
 
-#include "Raster/PositionIterator.h"
-#include "Raster/Subraster.h"
+#include "LitlRaster/PositionIterator.h"
+#include "LitlRaster/Subraster.h"
 
-/// @cond INTERNAL
-#define _RASTER_RASTER_IMPL
-#include "Raster/impl/Raster.hpp"
-#undef _RASTER_RASTER_IMPL
+/// @cond
+#define _LITLRASTER_RASTER_IMPL
+#include "LitlRaster/impl/Raster.hpp"
+#undef _LITLRASTER_RASTER_IMPL
 /// @endcond
 
 #endif

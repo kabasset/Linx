@@ -2,7 +2,7 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "Raster/Position.h"
+#include "LitlRaster/Vector.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -10,7 +10,7 @@ using namespace Litl;
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(Position_test)
+BOOST_AUTO_TEST_SUITE(Vector_test)
 
 //-----------------------------------------------------------------------------
 

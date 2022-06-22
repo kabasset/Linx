@@ -5,7 +5,7 @@
 #ifndef _RASTER_SAMPLING_H
 #define _RASTER_SAMPLING_H
 
-#include "Raster/Region.h"
+#include "LitlRaster/Region.h"
 
 #include <vector>
 

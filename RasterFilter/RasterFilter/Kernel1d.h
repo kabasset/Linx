@@ -5,8 +5,8 @@
 #ifndef _RASTERFILTER_KERNEL1D_H
 #define _RASTERFILTER_KERNEL1D_H
 
-#include "Raster/Raster.h"
-#include "Raster/Sampling.h"
+#include "LitlRaster/Raster.h"
+#include "LitlRaster/Sampling.h"
 #include "RasterGeometry/Interpolation.h"
 
 #include <map>

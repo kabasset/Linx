@@ -2,13 +2,13 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 elements_subdir(RasterFourier)
 
-elements_depends_on_subdirs(Raster)
+elements_depends_on_subdirs(LitlRaster)
 
 find_package(FFTW)
 
 elements_add_library(RasterFourier src/lib/*.cpp
-                     INCLUDE_DIRS Raster FFTW
-                     LINK_LIBRARIES Raster FFTW
+                     INCLUDE_DIRS LitlRaster FFTW
+                     LINK_LIBRARIES LitlRaster FFTW
                      PUBLIC_HEADERS RasterFourier)
 
 elements_add_unit_test(Dft tests/src/Dft_test.cpp 

@@ -2,8 +2,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 elements_subdir(RasterValidation)
 
-elements_depends_on_subdirs(RasterFilter)
 elements_depends_on_subdirs(ElementsKernel)
+elements_depends_on_subdirs(RasterFilter)
+
 elements_add_library(RasterValidation src/lib/*.cpp
                      INCLUDE_DIRS RasterFilter ElementsKernel
                      LINK_LIBRARIES RasterFilter ElementsKernel
