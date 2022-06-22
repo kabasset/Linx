@@ -253,4 +253,4 @@ private:
 
 } // namespace Cnes
 
-#endif // _RASTERFOURIER_DFTPLAN_H
+#endif

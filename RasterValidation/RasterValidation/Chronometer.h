@@ -166,4 +166,4 @@ private:
 
 } // namespace Cnes
 
-#endif // _RASTERVALIDATION_CHRONOMETER_H
+#endif

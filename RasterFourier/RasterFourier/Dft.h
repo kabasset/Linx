@@ -266,4 +266,4 @@ RealDftBuffer<TRaster::Dimension> inverseRealDft(const TRaster& in, const Positi
 
 } // namespace Cnes
 
-#endif // _RASTERFOURIER_DFT_H
+#endif

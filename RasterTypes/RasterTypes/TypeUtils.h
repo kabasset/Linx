@@ -239,4 +239,4 @@ struct Limits {
 
 } // namespace Cnes
 
-#endif // _RASTERTYPES_TYPEUTILS_H
+#endif

@@ -261,4 +261,4 @@ Vector<T, N> clamp(const Vector<T, N>& position, const Position<N>& shape) {
 
 } // namespace Cnes
 
-#endif // _RASTER_REGION_H
+#endif

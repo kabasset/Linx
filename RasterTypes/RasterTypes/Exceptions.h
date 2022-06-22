@@ -118,4 +118,4 @@ public:
 
 } // namespace Cnes
 
-#endif // _RASTERTYPES_EXCEPTIONS_H
+#endif

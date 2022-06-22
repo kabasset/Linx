@@ -209,4 +209,4 @@ private:
 
 } // namespace Cnes
 
-#endif // _RASTERFILTER_CONVOLUTION_H
+#endif

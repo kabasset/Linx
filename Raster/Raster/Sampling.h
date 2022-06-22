@@ -396,4 +396,4 @@ private:
 
 } // namespace Cnes
 
-#endif // _RASTER_SAMPLING_H
+#endif

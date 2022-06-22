@@ -251,4 +251,4 @@ void serialize(TLogger&& logger, T0&& arg0, Ts&&... args) {
 
 } // namespace Cnes
 
-#endif // _RASTERTYPES_SEQUTILS_H
+#endif

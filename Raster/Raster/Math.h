@@ -186,4 +186,4 @@ CNES_RASTER_MATH_UNARY_NEWINSTANCE(lgamma) ///< Apply `std::lgamma()` @ingroup p
 
 } // namespace Cnes
 
-#endif // _RASTER_MATH_H
+#endif

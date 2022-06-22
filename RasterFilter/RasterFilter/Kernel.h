@@ -148,4 +148,4 @@ private:
 
 } // namespace Cnes
 
-#endif // _RASTERFILTER_KERNEL_H
+#endif

@@ -189,4 +189,4 @@ private:
 
 } // namespace Cnes
 
-#endif // _RASTERVALIDATION_PROGRAMOPTIONS_H
+#endif

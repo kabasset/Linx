@@ -228,4 +228,4 @@ Index shapeSize(const Position<N>& shape) {
 
 } // namespace Cnes
 
-#endif // _RASTER_POSITION_H
+#endif

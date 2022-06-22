@@ -292,4 +292,4 @@ protected:
 
 } // namespace Cnes
 
-#endif // _RASTER_ALIGNEDBUFFER_H
+#endif

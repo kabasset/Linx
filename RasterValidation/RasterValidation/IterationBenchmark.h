@@ -88,4 +88,4 @@ protected:
 
 } // namespace Cnes
 
-#endif // _RASTERVALIDATION_ITERATIONBENCHMARK_H
+#endif

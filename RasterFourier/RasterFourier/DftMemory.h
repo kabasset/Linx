@@ -89,4 +89,4 @@ public:
 
 } // namespace Cnes
 
-#endif // _RASTERFOURIER_DFTMEMORY_H
+#endif
