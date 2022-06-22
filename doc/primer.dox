@@ -7,6 +7,29 @@ namespace Litl {
 \section primer-intro Introduction
 
 
+Above all, Litl is an extensible data containers library.
+The containers are made up from mixins and base classes, each responsible for a set of feature.
+The main 1D container is `Sequence` while the main ND container is `Raster`.
+Both aim at adding signal processing methods to any object which points to some contiguous memory
+-- from a raw pointer to `std::vector` or any custom type --
+without any cost.
+
+Many more data containers are defined, which are all composed by picking the building blocks they need,
+like `Vector`, `Matrix` or even `Chronometer`!
+
+Let us first present the class hierarchy which results in `Sequence`,
+before moving to `Raster`, and finally all of the other containers.
+
+
+\section primer-sequence Sequences
+
+
+TODO
+
+
+\section primer-raster Rasters
+
+
 A raster is an N-dimensional array of pixels internally stored in a contiguous one-dimensional container.
 The `Raster` class is extensible and can accomodate any contiguous container.
 The number of axes is set either at compile time or at runtime.
