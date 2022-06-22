@@ -2,8 +2,8 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTER_MATH_H
-#define _RASTER_MATH_H
+#ifndef _LITLCONTAINER_MATH_H
+#define _LITLCONTAINER_MATH_H
 
 #include "RasterTypes/SeqUtils.h" // isIterable
 

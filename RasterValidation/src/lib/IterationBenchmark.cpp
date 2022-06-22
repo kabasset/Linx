@@ -4,8 +4,6 @@
 
 #include "RasterValidation/IterationBenchmark.h"
 
-#include "Raster/Random.h"
-
 namespace Cnes {
 
 IterationBenchmark::IterationBenchmark(Index side) :

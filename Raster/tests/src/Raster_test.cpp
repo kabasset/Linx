@@ -2,7 +2,6 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "Raster/Random.h"
 #include "Raster/Raster.h"
 
 #include <boost/test/unit_test.hpp>
@@ -219,6 +218,25 @@ BOOST_AUTO_TEST_CASE(sectionning_test) {
   const auto section0D = section1D.section(2);
   BOOST_TEST(section0D.dimension() == 0);
   BOOST_TEST((*section0D.data() == raster3D[{2, 6, 3}]));
+}
+
+BOOST_AUTO_TEST_CASE(raster_generate_test) {
+  Position<3> shape {3, 14, 15};
+  auto a = random<std::int16_t>(shape);
+  auto b = random<std::int32_t>(shape);
+  VecRaster<std::int64_t, 3> result(shape);
+  result.generate(
+      [](auto v, auto w) {
+        return v * w;
+      },
+      a,
+      b);
+  result.apply([](auto v) {
+    return -v;
+  });
+  for (const auto& p : result.domain()) {
+    BOOST_TEST((result[p] == -a[p] * b[p]));
+  }
 }
 
 //-----------------------------------------------------------------------------

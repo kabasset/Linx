@@ -2,10 +2,9 @@
 // This file is part of Cnes.Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTER_RANDOM_H
-#define _RASTER_RANDOM_H
+#ifndef _LITLCONTAINER_RANDOM_H
+#define _LITLCONTAINER_RANDOM_H
 
-#include "Raster/Raster.h"
 #include "RasterTypes/TypeUtils.h" // Complexifier
 
 #include <algorithm>
@@ -417,18 +416,6 @@ private:
    */
   std::discrete_distribution<std::size_t> m_distribution;
 };
-
-/**
- * @brief Generate a random raster.
- * @details
- * Pixel values are uniformly distributed between the type's half min and half max.
- */
-template <typename T, Index N = 2>
-Raster<T, N> random(const Position<N>& shape) {
-  Raster<T, N> out(shape);
-  out.generate(UniformNoise<T>());
-  return out;
-}
 
 } // namespace Cnes
 

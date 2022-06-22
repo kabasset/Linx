@@ -2,14 +2,14 @@
 // This file is part of Cnes.Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTER_DATACONTAINER_H
-#define _RASTER_DATACONTAINER_H
+#ifndef _LITLCONTAINER_DATACONTAINER_H
+#define _LITLCONTAINER_DATACONTAINER_H
 
-#include "Raster/Arithmetic.h"
-#include "Raster/ContiguousContainer.h"
-#include "Raster/DataDistribution.h"
-#include "Raster/Holder.h"
-#include "Raster/Math.h"
+#include "LitlContainer/Arithmetic.h"
+#include "LitlContainer/ContiguousContainer.h"
+#include "LitlContainer/DataDistribution.h"
+#include "LitlContainer/Holders.h"
+#include "LitlContainer/Math.h"
 #include "RasterTypes/Exceptions.h"
 #include "RasterTypes/SeqUtils.h" // isIterable
 #include "RasterTypes/TypeUtils.h" // Index, Limits

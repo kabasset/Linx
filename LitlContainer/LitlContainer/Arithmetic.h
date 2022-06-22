@@ -2,8 +2,8 @@
 // This file is part of Cnes.Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTER_ARITHMETIC_H
-#define _RASTER_ARITHMETIC_H
+#ifndef _LITLCONTAINER_ARITHMETIC_H
+#define _LITLCONTAINER_ARITHMETIC_H
 
 #include <algorithm>
 #include <boost/operators.hpp>

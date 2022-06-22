@@ -5,8 +5,9 @@
 #ifndef _RASTER_RASTER_H
 #define _RASTER_RASTER_H
 
-#include "Raster/AlignedBuffer.h"
-#include "Raster/DataContainer.h"
+#include "LitlContainer/AlignedBuffer.h"
+#include "LitlContainer/DataContainer.h"
+#include "LitlContainer/Random.h"
 #include "Raster/Position.h"
 #include "Raster/Region.h"
 #include "RasterTypes/Exceptions.h"
@@ -460,6 +461,18 @@ CNES_RASTER_MATH_COMPLEX_TO_REAL(norm) ///< Apply `std::norm()` @ingroup pixelwi
 // FIXME conj, polar
 
 #undef CNES_RASTER_MATH_COMPLEX_TO_REAL
+
+/**
+ * @brief Generate a random raster.
+ * @details
+ * Pixel values are uniformly distributed between the type's half min and half max.
+ */
+template <typename T, Index N = 2>
+Raster<T, N> random(const Position<N>& shape) {
+  Raster<T, N> out(shape);
+  out.generate(UniformNoise<T>());
+  return out;
+}
 
 } // namespace Cnes
 

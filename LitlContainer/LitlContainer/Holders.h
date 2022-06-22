@@ -2,8 +2,8 @@
 // This file is part of Cnes.Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTER_HOLDER_H
-#define _RASTER_HOLDER_H
+#ifndef _LITLCONTAINER_HOLDER_H
+#define _LITLCONTAINER_HOLDER_H
 
 #include "RasterTypes/Exceptions.h"
 
@@ -225,6 +225,14 @@ private:
    */
   T* m_container;
 };
+
+/**
+ * @brief The default data holder.
+ * @warning
+ * Aliased class may change in further versions.
+ */
+template <typename T>
+using DefaultHolder = StdHolder<std::vector<T>>;
 
 } // namespace Cnes
 

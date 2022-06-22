@@ -2,8 +2,8 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTER_ALIGNEDBUFFER_H
-#define _RASTER_ALIGNEDBUFFER_H
+#ifndef _LITLCONTAINER_ALIGNEDBUFFER_H
+#define _LITLCONTAINER_ALIGNEDBUFFER_H
 
 #include "RasterTypes/Exceptions.h"
 #include "RasterTypes/TypeUtils.h"

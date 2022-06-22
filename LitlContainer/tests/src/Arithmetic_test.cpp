@@ -2,8 +2,9 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "Raster/Arithmetic.h"
-#include "Raster/Random.h"
+#include "LitlContainer/Arithmetic.h"
+#include "LitlContainer/Random.h"
+#include "LitlContainer/Sequence.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -15,10 +16,9 @@ BOOST_AUTO_TEST_SUITE(Arithmetic_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(raster_arithmetic_test) {
-  const Position<2> shape {19, 6};
-  const auto lhs = random<int>(shape);
-  const auto rhs = random<int>(shape);
+BOOST_AUTO_TEST_CASE(arithmetic_test) {
+  const auto lhs = random<int>(314);
+  const auto rhs = random<int>(314);
   int scalar = 2;
   const auto plusVector = lhs + rhs;
   const auto plusScalar = lhs + scalar;
@@ -37,25 +37,6 @@ BOOST_AUTO_TEST_CASE(raster_arithmetic_test) {
     BOOST_TEST(timesScalar[i] == lhs[i] * scalar);
     BOOST_TEST(dividedByVector[i] == lhs[i] / rhs[i]);
     BOOST_TEST(dividedByScalar[i] == lhs[i] / scalar);
-  }
-}
-
-BOOST_AUTO_TEST_CASE(raster_generate_test) {
-  Position<3> shape {3, 14, 15};
-  auto a = random<std::int16_t>(shape);
-  auto b = random<std::int32_t>(shape);
-  VecRaster<std::int64_t, 3> result(shape);
-  result.generate(
-      [](auto v, auto w) {
-        return v * w;
-      },
-      a,
-      b);
-  result.apply([](auto v) {
-    return -v;
-  });
-  for (const auto& p : result.domain()) {
-    BOOST_TEST((result[p] == -a[p] * b[p]));
   }
 }
 
