@@ -1,4 +1,4 @@
-# Project overview
+# Project Overview
 
 ![Litl logo](doc/diagrams/litl_logo.svg)
 

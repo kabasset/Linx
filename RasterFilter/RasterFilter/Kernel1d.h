@@ -7,7 +7,7 @@
 
 #include "LitlRaster/Raster.h"
 #include "LitlRaster/Sampling.h"
-#include "RasterGeometry/Interpolation.h"
+#include "LitlTransforms/Interpolation.h"
 
 #include <map>
 #include <vector>

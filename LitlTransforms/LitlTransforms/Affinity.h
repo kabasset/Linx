@@ -2,8 +2,8 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTERGEOMETRY_AFFINITY_H
-#define _RASTERGEOMETRY_AFFINITY_H
+#ifndef _LITLTRANSFORMS_AFFINITY_H
+#define _LITLTRANSFORMS_AFFINITY_H
 
 #include "LitlRaster/Matrix.h"
 #include "LitlRaster/Vector.h"

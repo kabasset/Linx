@@ -2,11 +2,11 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTERGEOMETRY_INTERPOLATION_H
-#define _RASTERGEOMETRY_INTERPOLATION_H
+#ifndef _LITLTRANSFORMS_INTERPOLATION_H
+#define _LITLTRANSFORMS_INTERPOLATION_H
 
 #include "LitlRaster/Raster.h"
-#include "RasterGeometry/InterpolationPolicies.h"
+#include "LitlTransforms/InterpolationPolicies.h"
 
 namespace Litl {
 
