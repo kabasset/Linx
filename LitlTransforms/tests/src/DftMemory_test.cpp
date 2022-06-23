@@ -2,8 +2,8 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "RasterFourier/Dft.h"
-#include "RasterFourier/DftMemory.h"
+#include "LitlTransforms/Dft.h"
+#include "LitlTransforms/DftMemory.h"
 
 #include <boost/test/unit_test.hpp>
 

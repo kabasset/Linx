@@ -2,11 +2,11 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTERFOURIER_DFTPLAN_H
-#define _RASTERFOURIER_DFTPLAN_H
+#ifndef _LITLTRANSFORMS_DFTPLAN_H
+#define _LITLTRANSFORMS_DFTPLAN_H
 
 #include "LitlRaster/Raster.h"
-#include "RasterFourier/DftMemory.h"
+#include "LitlTransforms/DftMemory.h"
 
 namespace Litl {
 
