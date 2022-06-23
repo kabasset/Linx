@@ -2,8 +2,8 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTERVALIDATION_CHRONOMETER_H
-#define _RASTERVALIDATION_CHRONOMETER_H
+#ifndef _LITLRUN_CHRONOMETER_H
+#define _LITLRUN_CHRONOMETER_H
 
 #include <algorithm> // accumulate, min_element, max_element
 #include <chrono>

@@ -2,8 +2,8 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _RASTERVALIDATION_ITERATIONBENCHMARK_H
-#define _RASTERVALIDATION_ITERATIONBENCHMARK_H
+#ifndef _LITLRUN_ITERATIONBENCHMARK_H
+#define _LITLRUN_ITERATIONBENCHMARK_H
 
 #include "LitlRaster/Raster.h"
 #include "LitlRun/Chronometer.h"
