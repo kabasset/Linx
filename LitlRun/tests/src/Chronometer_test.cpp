@@ -2,7 +2,7 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "RasterValidation/Chronometer.h"
+#include "LitlRun/Chronometer.h"
 
 #include <boost/test/unit_test.hpp>
 #include <thread> // sleep_for

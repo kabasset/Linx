@@ -3,13 +3,13 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "ElementsKernel/ProgramHeaders.h"
-#include "RasterValidation/IterationBenchmark.h"
-#include "RasterValidation/ProgramOptions.h"
+#include "LitlRun/IterationBenchmark.h"
+#include "LitlRun/ProgramOptions.h"
 
 #include <map>
 #include <string>
 
-Elements::Logging logger = Elements::Logging::getLogger("RasterBenchmarkIteration");
+Elements::Logging logger = Elements::Logging::getLogger("LitlBenchmarkIteration");
 
 Litl::IterationBenchmark::Duration iterate(Litl::IterationBenchmark& benchmark, char setup) {
   switch (setup) {

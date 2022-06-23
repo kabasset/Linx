@@ -6,7 +6,7 @@
 #define _RASTERVALIDATION_ITERATIONBENCHMARK_H
 
 #include "LitlRaster/Raster.h"
-#include "RasterValidation/Chronometer.h"
+#include "LitlRun/Chronometer.h"
 
 namespace Litl {
 
