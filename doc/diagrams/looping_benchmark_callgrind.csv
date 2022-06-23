@@ -1,26 +1,6 @@
-Cost item	Test case	Cycles
-Instructions	x-y-z	658651949
-Cache misses	x-y-z	19200000750
-Cache hits	x-y-z	11521604020
-Rigth branches	x-y-z	1280801970
-Mispredicts	x-y-z	2406105
-Instructions	z-y-x	658651949
-Cache misses	z-y-x	300001050
-Cache hits	z-y-x	12151604010
-Rigth branches	z-y-x	1280801975
-Mispredicts	z-y-x	2406090
-Instructions	position	630971715
-Cache misses	position	300001050
-Cache hits	position	11511603990
-Rigth branches	position	3200003825
-Mispredicts	position	2394390
-Instructions	index	219428575
-Cache misses	index	300001050
-Cache hits	index	4470000000
-Rigth branches	index	1279999960
-Mispredicts	index	135
-Instructions	value	54857147
-Cache misses	value	300000450
-Cache hits	value	630000005
-Rigth branches	value	319999975
-Mispredicts	value	90
+	x-y-z	z-y-x	position	index	value
+initial	22612	1918	582	429	26
+final			575	416	27
+inline			291	55	35
+inline + final	21060	1818	291	52	35
+crtp	2949	128	262	52	27

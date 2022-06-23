@@ -1,6 +1,6 @@
 # Project overview
 
-![Raster logo](doc/diagrams/raster_logo.svg)
+![Litl logo](doc/diagrams/litl_logo.svg)
 
 # Purpose
 
