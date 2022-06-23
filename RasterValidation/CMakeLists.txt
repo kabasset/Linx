@@ -3,15 +3,15 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 elements_subdir(RasterValidation)
 
 elements_depends_on_subdirs(ElementsKernel)
-elements_depends_on_subdirs(RasterFilter)
+elements_depends_on_subdirs(LitlTransforms)
 
 elements_add_library(RasterValidation src/lib/*.cpp
-                     INCLUDE_DIRS RasterFilter ElementsKernel
-                     LINK_LIBRARIES RasterFilter ElementsKernel
+                     INCLUDE_DIRS LitlTransforms ElementsKernel
+                     LINK_LIBRARIES LitlTransforms ElementsKernel
                      PUBLIC_HEADERS RasterValidation)
 elements_add_executable(RasterBenchmarkCorrelation src/program/RasterBenchmarkCorrelation.cpp
-                     INCLUDE_DIRS RasterFilter RasterValidation
-                     LINK_LIBRARIES RasterFilter RasterValidation)
+                     INCLUDE_DIRS LitlTransforms RasterValidation
+                     LINK_LIBRARIES LitlTransforms RasterValidation)
 elements_add_executable(RasterBenchmarkIteration src/program/RasterBenchmarkIteration.cpp
                      INCLUDE_DIRS ElementsKernel RasterValidation
                      LINK_LIBRARIES ElementsKernel RasterValidation)

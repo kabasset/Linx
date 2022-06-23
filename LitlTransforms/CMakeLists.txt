@@ -11,11 +11,23 @@ elements_add_library(LitlTransforms src/lib/*.cpp
                      LINK_LIBRARIES LitlRaster Eigen3
                      PUBLIC_HEADERS LitlTransforms)
 
-elements_add_unit_test(Interpolation tests/src/Interpolation_test.cpp 
-                     EXECUTABLE LitlTransforms_Interpolation_test
-                     LINK_LIBRARIES LitlTransforms
-                     TYPE Boost)
 elements_add_unit_test(Affinity tests/src/Affinity_test.cpp 
                      EXECUTABLE LitlTransforms_Affinity_test
+                     LINK_LIBRARIES LitlTransforms
+                     TYPE Boost)
+elements_add_unit_test(Convolution tests/src/Convolution_test.cpp 
+                     EXECUTABLE LitlTransforms_Convolution_test
+                     LINK_LIBRARIES LitlTransforms
+                     TYPE Boost)
+elements_add_unit_test(Kernel tests/src/Kernel_test.cpp 
+                     EXECUTABLE LitlTransforms_Kernel_test
+                     LINK_LIBRARIES LitlTransforms
+                     TYPE Boost)
+elements_add_unit_test(Kernel1d tests/src/Kernel1d_test.cpp 
+                     EXECUTABLE LitlTransforms_Kernel1d_test
+                     LINK_LIBRARIES LitlTransforms
+                     TYPE Boost)
+elements_add_unit_test(Interpolation tests/src/Interpolation_test.cpp 
+                     EXECUTABLE LitlTransforms_Interpolation_test
                      LINK_LIBRARIES LitlTransforms
                      TYPE Boost)

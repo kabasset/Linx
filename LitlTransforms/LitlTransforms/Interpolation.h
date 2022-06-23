@@ -6,7 +6,7 @@
 #define _LITLTRANSFORMS_INTERPOLATION_H
 
 #include "LitlRaster/Raster.h"
-#include "LitlTransforms/InterpolationPolicies.h"
+#include "LitlTransforms/InterpolationMethods.h"
 
 namespace Litl {
 

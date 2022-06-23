@@ -882,7 +882,7 @@ INPUT                  = @PROJECT_SOURCE_DIR@/README.md \
                          @PROJECT_SOURCE_DIR@/LitlContainer \
                          @PROJECT_SOURCE_DIR@/LitlRaster \
                          @PROJECT_SOURCE_DIR@/LitlTypes \
-                         @PROJECT_SOURCE_DIR@/RasterFilter \
+                         @PROJECT_SOURCE_DIR@/LitlTransforms \
                          @PROJECT_SOURCE_DIR@/RasterFourier \
                          @PROJECT_SOURCE_DIR@/LitlTransforms \
                          @PROJECT_SOURCE_DIR@/RasterValidation

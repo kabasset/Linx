@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "ElementsKernel/ProgramHeaders.h"
-#include "RasterFilter/Kernel1d.h"
+#include "LitlTransforms/Kernel1d.h"
 #include "RasterValidation/ProgramOptions.h"
 
 #include <map>

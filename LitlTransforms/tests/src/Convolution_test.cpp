@@ -2,7 +2,7 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "RasterFilter/Convolution.h"
+#include "LitlTransforms/Convolution.h"
 
 #include <boost/test/unit_test.hpp>
 
