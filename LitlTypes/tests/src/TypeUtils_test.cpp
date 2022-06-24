@@ -6,15 +6,32 @@
 
 #include <boost/test/unit_test.hpp>
 
+using namespace Litl;
+
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE(TypeUtils_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(example_test) {
+template <typename T>
+void checkTypeTraits(T) {
+  using Floating = typename TypeTraits<T>::Floating;
+  using Scalar = typename TypeTraits<T>::Scalar;
+  BOOST_TEST(Limits<Floating>::min() <= Limits<T>::min());
+  BOOST_TEST(Limits<Floating>::max() >= Limits<T>::max());
+  BOOST_TEST(std::is_scalar<Scalar>::value);
+}
 
-  BOOST_FAIL("!!!! Please implement your tests !!!!");
+template <typename T>
+void checkTypeTraits(std::complex<T>) {
+  using Scalar = typename TypeTraits<T>::Scalar;
+  BOOST_TEST((std::is_same<Scalar, T>::value));
+  checkTypeTraits(T());
+}
+
+LITL_TEST_CASE_TEMPLATE(type_traits_test) {
+  checkTypeTraits(T());
 }
 
 //-----------------------------------------------------------------------------

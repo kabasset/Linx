@@ -19,38 +19,6 @@
 namespace Litl {
 
 /**
- * @brief List of supported integral types.
- */
-#define LITL_SUPPORTED_INTS \
-  bool, unsigned char, char, signed char, unsigned short, signed short, unsigned int, signed int, unsigned long, \
-      signed long, unsigned long long, signed long long
-
-/**
- * @brief List of supported floating point types.
- */
-#define LITL_SUPPORTED_FLOATS float, double, long double
-
-/**
- * @brief List of supported complex types.
- */
-#define LITL_SUPPORTED_COMPLEXES std::complex<float>, std::complex<double>, std::complex<long double>
-
-/**
- * @brief List of supported types.
- */
-#define LITL_SUPPORTED_TYPES LITL_SUPPORTED_INTS, LITL_SUPPORTED_FLOATS, LITL_SUPPORTED_COMPLEXES
-
-/**
- * @brief List of supported types as a tuple.
- */
-using RasterSupportedTypesTuple = std::tuple<LITL_SUPPORTED_TYPES>;
-
-/**
- * @brief `BOOST_AUTO_TEST_CASE_TEMPLATE` for each supported type.
- */
-#define LITL_TEST_CASE_TEMPLATE(name) BOOST_AUTO_TEST_CASE_TEMPLATE(name, T, RasterSupportedTypesTuple)
-
-/**
  * @brief Test whether a type is iterable, i.e. has `begin()` and `end()` methods.
  */
 template <typename T, typename = void>

@@ -5,7 +5,7 @@
 #ifndef _LITLCONTAINER_RANDOM_H
 #define _LITLCONTAINER_RANDOM_H
 
-#include "LitlTypes/TypeUtils.h" // Complexifier
+#include "LitlTypes/TypeUtils.h"
 
 #include <algorithm>
 #include <chrono>
@@ -175,7 +175,7 @@ private:
       std::conditional_t<
           std::is_integral<T>::value,
           std::uniform_int_distribution<T>,
-          std::uniform_real_distribution<typename Complexifier<T>::Component>>>
+          std::uniform_real_distribution<typename TypeTraits<T>::Scalar>>>
       m_distribution;
 };
 
@@ -209,8 +209,8 @@ public:
   }
 
 private:
-  using Component = std::conditional_t<std::is_integral<T>::value, double, typename Complexifier<T>::Component>;
-  ComplexDistribution<T, std::normal_distribution<Component>> m_distribution;
+  using Scalar = std::conditional_t<std::is_integral<T>::value, double, typename TypeTraits<T>::Scalar>;
+  ComplexDistribution<T, std::normal_distribution<Scalar>> m_distribution;
 };
 
 /**
@@ -253,8 +253,8 @@ public:
   }
 
 private:
-  using Component = std::conditional_t<std::is_integral<T>::value, T, long>;
-  ComplexDistribution<T, std::poisson_distribution<Component>> m_distribution;
+  using Scalar = std::conditional_t<std::is_integral<T>::value, T, long>;
+  ComplexDistribution<T, std::poisson_distribution<Scalar>> m_distribution;
 };
 
 /**
@@ -310,8 +310,8 @@ public:
   }
 
 private:
-  using Component = std::conditional_t<std::is_integral<T>::value, T, long>;
-  ComplexDistribution<T, std::poisson_distribution<Component>> m_distribution;
+  using Scalar = std::conditional_t<std::is_integral<T>::value, T, long>;
+  ComplexDistribution<T, std::poisson_distribution<Scalar>> m_distribution;
   std::minstd_rand m_seeder;
 };
 
