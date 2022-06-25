@@ -86,7 +86,7 @@ public:
     auto n = b + size / 2;
     std::nth_element(b, n, e);
     if (size % 2 == 1) {
-      *n;
+      return *n;
     }
     std::nth_element(b, n + 1, e);
     return (*n + *(n + 1)) * .5;
