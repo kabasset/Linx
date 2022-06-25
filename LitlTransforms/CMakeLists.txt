@@ -40,6 +40,10 @@ elements_add_unit_test(Kernel1d tests/src/Kernel1d_test.cpp
                      EXECUTABLE LitlTransforms_Kernel1d_test
                      LINK_LIBRARIES LitlTransforms
                      TYPE Boost)
+elements_add_unit_test(MedianFilter tests/src/MedianFilter_test.cpp 
+                     EXECUTABLE LitlTransforms_MedianFilter_test
+                     LINK_LIBRARIES LitlTransforms
+                     TYPE Boost)
 elements_add_unit_test(Interpolation tests/src/Interpolation_test.cpp 
                      EXECUTABLE LitlTransforms_Interpolation_test
                      LINK_LIBRARIES LitlTransforms

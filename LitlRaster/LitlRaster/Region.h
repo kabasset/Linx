@@ -27,6 +27,13 @@ struct Region {
   }
 
   /**
+   * @brief Create a region from a radius and center position.
+   */
+  static Region<N> fromCenter(Index radius = 1, const Position<N> center = Position<N>::zero()) {
+    return Region<N> {center - radius, center + radius};
+  }
+
+  /**
    * @brief Create an unlimited region.
    * @details
    * Front and back bounds along each axis are respectively 0 and inf.
