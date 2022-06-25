@@ -23,20 +23,20 @@ BOOST_AUTO_TEST_CASE(extrapolate_interpolate_test) {
   Litl::Position<2> outside {-1, -1};
   const auto dirichlet = Litl::extrapolate(raster, 0);
   const auto neumann = Litl::extrapolate<Litl::NearestNeighbor>(raster);
-  BOOST_TEST(dirichlet[outside] == 0);
-  BOOST_TEST(neumann[outside] == raster[0]);
+  BOOST_TEST(dirichlet.at(outside) == 0);
+  BOOST_TEST(neumann.at(outside) == raster[0]);
   //! [Extra]
 
   //! [Inter]
   Litl::Vector<double, 2> inbetween {.5, .5};
   const auto nn = Litl::interpolate<Litl::NearestNeighbor>(raster);
-  BOOST_TEST(nn.at(inbetween) == raster.at(-1));
+  BOOST_TEST(nn(inbetween) == raster.at(-1));
   //! [Inter]
 
   //! [Inter-extra]
   const auto linearDirichlet = Litl::interpolate<Litl::Linear>(dirichlet);
-  BOOST_TEST(linearDirichlet[outside] == 0);
-  BOOST_TEST(linearDirichlet.at(inbetween) == 2.5);
+  BOOST_TEST(linearDirichlet.at(outside) == 0);
+  BOOST_TEST(linearDirichlet(inbetween) == 2.5);
   //! [Inter-extra]
 }
 

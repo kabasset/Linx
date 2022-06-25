@@ -13,14 +13,14 @@ namespace Litl {
 /**
  * @ingroup interpolation
  * @brief Extrapolation decorator.
- * @tparam TPolicy The extrapolation policy
+ * @tparam TMethod The extrapolation method
  * @details
  * This class provides a subscript operator which accepts an integral position
  * which can lie outside the raster domain.
  * 
- * The the extrapolation formula is implemented as `TPolicy::at()`.
+ * The the extrapolation formula is implemented as `TMethod::at()`.
  */
-template <typename TPolicy, typename T, Index N>
+template <typename TMethod, typename T, Index N>
 class Extrapolator {
 
 public:
@@ -38,23 +38,44 @@ public:
    * @brief Constructor.
    */
   template <typename TRaster>
-  Extrapolator(const TRaster& raster, TPolicy&& policy) :
-      m_policy(std::move(policy)), m_raster(raster.shape(), raster.data()) {}
+  Extrapolator(const TRaster& raster, TMethod&& method) :
+      m_method(std::move(method)), m_raster(raster.shape(), raster.data()) {}
+
+  /**
+   * @brief Get the raster shape.
+   */
+  Position<N> shape() const {
+    return m_raster.shape();
+  }
+
+  /**
+   * @brief Get the raster domain.
+   */
+  Region<N> domain() const {
+    return m_raster.domain();
+  }
+
+  /**
+   * @brief Access the element at given in-bounds position.
+   */
+  inline const T& operator[](const Position<N>& position) const {
+    return m_raster[position];
+  }
 
   /**
    * @brief Access the element at given position.
    * @details
-   * If the position is outside the image domain, rely on the extrapolation policy.
+   * If the position is outside the image domain, apply the extrapolation method.
    */
-  inline const T& operator[](const Position<N>& position) const {
-    return m_policy.at(m_raster, position);
+  inline const T& at(const Position<N>& position) const {
+    return m_method.at(m_raster, position);
   }
 
 private:
   /**
-   * @brief The extrapolation policy.
+   * @brief The extrapolation method.
    */
-  TPolicy m_policy;
+  TMethod m_method;
 
   /**
    * @brief The input raster.
@@ -75,18 +96,18 @@ struct InterpolationTraits<std::complex<T>> {
 /**
  * @ingroup interpolation
  * @brief Interpolator with optional extrapolator.
- * @tparam TPolicy The interpolation policy
+ * @tparam TMethod The interpolation method
  * @tparam TRaster The raster or extrapolator type
  * @details
  * This class provides a subscript operator which accepts a position,
  * which can lie between pixels or outside the raster domain.
  * 
- * The interpolation formula is implemented as `TPolicy::at()`,
+ * The interpolation formula is implemented as `TMethod::at()`,
  * while the extrapolation formula is implemented as `TRaster::operator[]()`.
  * If `TRaster` is a raster, then no bound checking is performed.
  * This is the best option when no value outside the raster domain has to be evaluated.
  */
-template <typename TPolicy, typename TRaster>
+template <typename TMethod, typename TRaster>
 class Interpolator {
 
 public:
@@ -103,27 +124,48 @@ public:
   /**
    * @brief Constructor.
    */
-  Interpolator(const TRaster& raster, TPolicy&& policy) : m_policy(std::move(policy)), m_raster(raster) {}
+  Interpolator(const TRaster& raster, TMethod&& method) : m_method(std::move(method)), m_raster(raster) {}
 
   /**
-   * @brief Compute the value at given integral position.
+   * @brief Get the raster shape.
+   */
+  Position<Dimension> shape() const {
+    return m_raster.shape();
+  }
+
+  /**
+   * @brief Get the raster domain.
+   */
+  Region<Dimension> domain() const {
+    return m_raster.domain();
+  }
+
+  /**
+   * @brief Compute the value at given in-bounds integral position.
    */
   inline const typename TRaster::Value& operator[](const Position<Dimension>& position) const {
     return m_raster[position];
   }
 
   /**
+   * @brief Compute the value at given integral position.
+   */
+  inline const typename TRaster::Value& at(const Position<Dimension>& position) const {
+    return m_raster.at(position);
+  }
+
+  /**
    * @brief Compute the interpolated value at given position.
    */
-  inline Value at(const Vector<double, Dimension>& position) const {
-    return m_policy.template at<Value>(m_raster, position);
+  inline Value operator()(const Vector<double, Dimension>& position) const { // FIXME naming?
+    return m_method.template at<Value>(m_raster, position);
   }
 
 private:
   /**
-   * @brief The interpolation policy.
+   * @brief The interpolation method.
    */
-  TPolicy m_policy;
+  TMethod m_method;
 
   /**
    * @brief The raster or extrapolator.
@@ -131,11 +173,11 @@ private:
   const TRaster& m_raster;
 };
 
-template <typename TPolicy, typename TRaster, typename... TArgs>
+template <typename TMethod, typename TRaster, typename... TArgs>
 auto extrapolate(const TRaster& raster, TArgs&&... args) -> decltype(auto) {
-  return Extrapolator<TPolicy, typename TRaster::Value, TRaster::Dimension>(
+  return Extrapolator<TMethod, typename TRaster::Value, TRaster::Dimension>(
       raster,
-      TPolicy(std::forward<TArgs>(args)...));
+      TMethod(std::forward<TArgs>(args)...));
 }
 
 template <typename T, Index N, typename THolder>
@@ -143,9 +185,9 @@ auto extrapolate(const Raster<T, N, THolder>& raster, T constant) -> decltype(au
   return Extrapolator<OutOfBoundsConstant<T>, T, N>(raster, OutOfBoundsConstant<T>(constant));
 }
 
-template <typename TPolicy = NearestNeighbor, typename TRaster, typename... TArgs>
+template <typename TMethod = NearestNeighbor, typename TRaster, typename... TArgs>
 auto interpolate(const TRaster& raster, TArgs&&... args) -> decltype(auto) {
-  return Interpolator<TPolicy, TRaster>(raster, TPolicy(std::forward<TArgs>(args)...));
+  return Interpolator<TMethod, TRaster>(raster, TMethod(std::forward<TArgs>(args)...));
 }
 
 } // namespace Litl
