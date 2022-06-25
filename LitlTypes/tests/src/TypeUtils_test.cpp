@@ -18,6 +18,7 @@ template <typename T>
 void checkTypeTraits(T) {
   using Floating = typename TypeTraits<T>::Floating;
   using Scalar = typename TypeTraits<T>::Scalar;
+  BOOST_TEST(std::is_floating_point<Floating>::value);
   BOOST_TEST(Limits<Floating>::min() <= Limits<T>::min());
   BOOST_TEST(Limits<Floating>::max() >= Limits<T>::max());
   BOOST_TEST(std::is_scalar<Scalar>::value);

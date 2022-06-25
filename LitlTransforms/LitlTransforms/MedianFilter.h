@@ -66,7 +66,7 @@ public:
     auto it = neighbors.begin();
     for (const auto& p : region) {
       for (const auto& q : m_window + p) { // FIXME dangling?
-        *it++ = in.at(q);
+        *it++ = in[q];
       }
       out[p] = median<typename TOut::Value>(neighbors);
       it = neighbors.begin();
