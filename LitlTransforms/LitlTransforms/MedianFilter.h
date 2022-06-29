@@ -2,8 +2,8 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LITLTRANSFORMS_KERNEL_H
-#define _LITLTRANSFORMS_KERNEL_H
+#ifndef _LITLTRANSFORMS_MEDIANFILTER_H
+#define _LITLTRANSFORMS_MEDIANFILTER_H
 
 #include "LitlRaster/Raster.h"
 #include "LitlTransforms/Interpolation.h"
@@ -14,7 +14,6 @@ namespace Litl {
  * @brief A median filter.
  * @tparam T The value type
  * @tparam N The dimension
- * @tparam TBoundary The boundary conditions
  */
 template <typename T, Index N>
 class MedianFilter {
@@ -31,10 +30,10 @@ public:
   static constexpr Index Dimension = N;
 
   /**
-   * @brief Explcit window wonstructor.
+   * @brief Explcit window constructor.
    * @param window The filter window
    */
-  MedianFilter(const Region<N>& window) : m_window(window) {}
+  explicit MedianFilter(const Region<N>& window) : m_window(window) {}
 
   /**
    * @brief Radius-based constructor.
@@ -42,7 +41,7 @@ public:
    * @details
    * The window is centered, and its lengths along all axes are the same.
    */
-  MedianFilter(Index radius = 1) : m_window(Region<N>::fromCenter(radius)) {}
+  explicit MedianFilter(Index radius = 1) : m_window(Region<N>::fromCenter(radius)) {}
 
   /**
    * @brief Apply the filter.
@@ -65,7 +64,7 @@ public:
     std::vector<typename TIn::Value> neighbors(m_window.size());
     auto it = neighbors.begin();
     for (const auto& p : region) {
-      for (const auto& q : m_window + p) { // FIXME dangling?
+      for (const auto& q : m_window + p) {
         *it++ = in[q];
       }
       out[p] = median<typename TOut::Value>(neighbors);
