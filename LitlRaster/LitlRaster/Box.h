@@ -5,64 +5,287 @@
 #ifndef _LITLRASTER_BOX_H
 #define _LITLRASTER_BOX_H
 
-#include "LitlRaster/Region.h"
+#include "LitlRaster/Vector.h"
+
+#include <boost/operators.hpp>
 
 namespace Litl {
 
-template <Index N>
-using Box = Region<N>; // FIXME rename Region
-
 /**
- * @brief Create a list of boxes around the box.
- * @param margin The extent of the surrounding
+ * @brief An ND bounding box, defined by its front and back positions, both inclusive.
  * @details
- * The indices of `margin.front` must be negative or null
- * while those of `margin.back` must be positive or null.
- * No empty boxes are created, such that the number of output boxes
- * is less than `2 * in.dimension()` if some indices are null.
- * 
- * The union of all output boxes and the input box is a box such that:
- * `union.front = in.front + margin.front` and `union.back = in.back + margin.back`.
- * Partitioning is optimized for data locality when scanning raster pixels in the regions.
+ * Like `Position`, this class stores no pixel values, but coordinates.
  */
-template <Index N>
-std::vector<Box<N>> surround(Box<N> in, const Box<N>& margin) { // FIXME in Box
+template <Index N = 2>
+class Box : boost::additive<Box<N>, Box<N>>, boost::additive<Box<N>, Position<N>>, boost::additive<Box<N>, Index> {
 
-  const auto dim = in.dimension();
-  std::vector<Box<N>> out;
-  out.reserve(dim * 2);
+public:
+  /**
+   * @brief An position iterator.
+   * @details
+   * The scanning order maximizes data locality for row-major ordered data like rasters.
+   * 
+   * That is, the increment operator is such that the corresponding offset in a raster is always increasing.
+   * In particular, when screening a whole raster, pixels are visited in the storage order.
+   */
+  class Iterator;
 
-  for (Index i = 0; i < dim; ++i) {
+  /// @{
+  /// @group_construction
 
-    // Front
-    const auto f = margin.front[i];
-    if (f < 0) {
-      auto before = in;
-      before.back[i] = in.front[i] - 1;
-      before.front[i] = in.front[i] += f;
-      out.push_back(before);
-    }
+  /**
+   * @brief Constructor.
+   */
+  Box(Position<N> front, Position<N> back) : m_front(std::move(front)), m_back(std::move(back)) {}
 
-    // Back
-    const auto b = margin.back[i];
-    if (b > 0) {
-      auto after = in;
-      after.front[i] = in.back[i] + 1;
-      after.back[i] = in.back[i] += b;
-      out.push_back(after);
-    }
+  /**
+   * @brief Create a region from a front position and shape.
+   */
+  static Box<N> fromShape(Position<N> front, Position<N> shape) {
+    return {front, front + shape - 1};
   }
 
-  return out;
-}
+  /**
+   * @brief Create a region from a radius and center position.
+   */
+  static Box<N> fromCenter(Index radius = 1, const Position<N> center = Position<N>::zero()) {
+    return {center - radius, center + radius};
+  }
 
-template <Index N>
-Box<N>& expand(Box<N>& in, const Box<N>& extent) { // FIXME operator+
-  in.front += extent.front;
-  in.back += extent.back;
-  return in;
-}
+  /**
+   * @brief Create a conventionally unlimited region.
+   * @details
+   * Front and back bounds along each axis are respectively 0 and inf.
+   */
+  static Box<N> whole() {
+    return {Position<N>::zero(), Position<N>::inf()};
+  }
+
+  /// @group_properties
+
+  /**
+   * @brief Get the front position.
+   */
+  const Position<N>& front() const {
+    return m_front;
+  }
+
+  /**
+   * @brief Get the back position.
+   */
+  const Position<N>& back() const {
+    return m_back;
+  }
+
+  /**
+   * @brief Compute the region shape.
+   */
+  Position<N> shape() const {
+    return m_back - m_front + 1;
+  }
+
+  /**
+   * @brief Get the number of dimensions.
+   */
+  Index dimension() const {
+    return m_front.size();
+  }
+
+  /**
+   * @brief Compute the region size, i.e. number of positions.
+   */
+  Index size() const {
+    return shapeSize(shape());
+  }
+
+  /// @group_elements
+
+  /**
+   * @brief Iterator to the front position.
+   */
+  Iterator begin() const {
+    return Iterator(*this);
+  }
+
+  /**
+ * @brief Iterator to one past the back position.
+ */
+  Iterator end() const {
+    Box<N> pastTheLast {m_back, m_back};
+    pastTheLast.m_front[0]++;
+    return Iterator(pastTheLast);
+  }
+
+  /// @group_operations
+
+  /**
+   * @brief Check whether two boxes are equal.
+   */
+  bool operator==(const Box<N>& other) const {
+    return m_front == other.m_front && m_back == other.m_back;
+  }
+
+  /**
+   * @brief Check whether two boxes are different.
+   */
+  bool operator!=(const Box<N>& other) const {
+    return m_front != other.m_front || m_back != other.m_back;
+  }
+
+  /**
+   * @brief Create a list of boxes around the box.
+   * @param margin The extent of the surrounding
+   * @details
+   * The indices of `margin.front` must be negative or null
+   * while those of `margin.back` must be positive or null.
+   * No empty boxes are created, such that the number of output boxes
+   * is less than `2 * in.dimension()` if some indices are null.
+   * 
+   * The union of all output boxes and the input box is a box such that:
+   * `union.front = in.front + margin.front` and `union.back = in.back + margin.back`.
+   * Partitioning is optimized for data locality when scanning raster pixels in the regions.
+   */
+  std::vector<Box<N>> surround(const Box<N>& margin) const {
+
+    Box<N> current = *this;
+    const auto dim = dimension();
+    std::vector<Box<N>> out;
+    out.reserve(dim * 2);
+
+    for (Index i = 0; i < dim; ++i) {
+
+      // Front
+      const auto f = margin.m_front[i];
+      if (f < 0) {
+        auto before = current;
+        before.m_back[i] = current.m_front[i] - 1;
+        before.m_front[i] = current.m_front[i] += f;
+        out.push_back(before);
+      }
+
+      // Back
+      const auto b = margin.m_back[i];
+      if (b > 0) {
+        auto after = current;
+        after.m_front[i] = current.m_back[i] + 1;
+        after.m_back[i] = current.m_back[i] += b;
+        out.push_back(after);
+      }
+    }
+
+    return out;
+  }
+
+  /// @group_modifiers
+
+  /**
+   * @brief Flatten the box along a given axis.
+   * @details
+   * The back of the box is set to the same coordinate as the front along the axis.
+   */
+  Box<N>& project(Index axis = 0) {
+    m_back[axis] = m_front[axis];
+    return *this;
+  }
+
+  /**
+   * @brief Grow the box by a given margin.
+   */
+  Box<N>& operator+=(const Box<N>& margin) {
+    m_front += margin.m_front;
+    m_back += margin.m_back;
+    return *this;
+  }
+
+  /**
+   * @brief Shrink the box by a given margin.
+   */
+  Box<N>& operator-=(const Box<N>& margin) {
+    m_front -= margin.m_front;
+    m_back -= margin.m_back;
+    return *this;
+  }
+
+  /**
+   * @brief Shift the box by a given vector.
+   */
+  Box<N>& operator+=(const Position<N>& shift) {
+    m_front += shift;
+    m_back += shift;
+    return *this;
+  }
+
+  /**
+   * @brief Shift the box by a given vector.
+   */
+  Box<N>& operator-=(const Position<N>& shift) {
+    m_front -= shift;
+    m_back -= shift;
+    return *this;
+  }
+
+  /**
+    * @brief Add a scalar to each coordinate.
+    */
+  Box<N>& operator+=(Index scalar) {
+    m_front += scalar;
+    m_back += scalar;
+    return *this;
+  }
+
+  /**
+   * @brief Subtract a scalar to each coordinate.
+   */
+  Box<N>& operator-=(Index scalar) {
+    m_front -= scalar;
+    m_back -= scalar;
+    return *this;
+  }
+
+  /**
+   * @brief Add 1 to each coordinate.
+   */
+  Box<N>& operator++() {
+    return *this += 1;
+  }
+
+  /**
+   * @brief Subtract 1 to each coordinate.
+   */
+  Box<N>& operator--() {
+    return *this -= 1;
+  }
+
+  /**
+   * @brief Copy.
+   */
+  Box<N> operator+() {
+    return *this;
+  }
+
+  /**
+   * @brief Invert the sign of each coordinate.
+   */
+  Box<N> operator-() {
+    return {-m_front, -m_back};
+  }
+
+  /// @}
+
+private:
+  /**
+   * @brief The front position in the region.
+   */
+  Position<N> m_front;
+
+  /**
+   * @brief The back position in the region.
+   */
+  Position<N> m_back;
+};
 
 } // namespace Litl
+
+#include "LitlRaster/BoxIterator.h"
 
 #endif

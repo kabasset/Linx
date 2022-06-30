@@ -5,6 +5,7 @@
 ## Breaking changes
 
 * `makeRaster()` renamed as `rasterize()`
+* `Region` replaced with `Box`
 * `Dim` renamed as `Dimension`
 * `Position::max()` replaced with `Position::inf()`
 
@@ -12,6 +13,7 @@
 
 * FFTW-wrapper `DftPlan`
 * Linear filtering through `Kernel` class
+* Median filtering and morphology through `StructuringElement` class
 * Extrapolation and interpolation with `Extrapolator` and `Interpolator`
 * Affine transformations as `Affinity`
 * `Raster` has Euclidean ring arithmetic (not only vector space arithmetic)
