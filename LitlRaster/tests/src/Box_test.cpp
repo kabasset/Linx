@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(ctors_test) {
   Box<7> fromTo {front, back};
   BOOST_TEST(fromTo.shape() == back);
   Box<7> fromShape {front, fromTo.shape()};
-  BOOST_TEST(fromShape.back == back);
+  BOOST_TEST(fromShape.back() == back);
 }
 
 BOOST_AUTO_TEST_CASE(shift_test) {
@@ -33,15 +33,14 @@ BOOST_AUTO_TEST_CASE(shift_test) {
   const auto shape = region.shape();
   region += shape - 1;
   BOOST_TEST(region.shape() == shape);
-  BOOST_TEST(region.front == back);
+  BOOST_TEST(region.front() == back);
 }
 
 BOOST_AUTO_TEST_CASE(surrounding_test) {
-  auto central = Box<2>::fromShape({1, 1}, {4, 3});
-  auto box = central;
-  Box<2> margin {{-3, -2}, {2, 1}};
-  expand(box, margin);
-  auto chunks = surround(central, margin);
+  const auto central = Box<2>::fromShape({1, 1}, {4, 3});
+  const Box<2> margin {{-3, -2}, {2, 1}};
+  const auto chunks = central.surround(margin);
+  const auto box = central + margin;
   std::set<Indices<2>> all;
   std::set<Indices<2>> chunked;
   for (const auto& p : box) {
