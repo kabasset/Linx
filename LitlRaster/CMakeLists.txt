@@ -12,26 +12,22 @@ elements_add_library(LitlRaster src/lib/*.cpp
                      PUBLIC_HEADERS LitlRaster)
 
 elements_add_unit_test(Box tests/src/Box_test.cpp 
-                     EXECUTABLE Raster_Box_test
+                     EXECUTABLE LitlRaster_Box_test
                      LINK_LIBRARIES LitlRaster
                      TYPE Boost)
 elements_add_unit_test(BoxIterator tests/src/BoxIterator_test.cpp 
-                     EXECUTABLE Raster_BoxIterator_test
+                     EXECUTABLE LitlRaster_BoxIterator_test
                      LINK_LIBRARIES LitlRaster
                      TYPE Boost)
 elements_add_unit_test(Raster tests/src/Raster_test.cpp 
-                     EXECUTABLE Raster_Raster_test
-                     LINK_LIBRARIES LitlRaster
-                     TYPE Boost)
-elements_add_unit_test(Region tests/src/Region_test.cpp 
-                     EXECUTABLE Raster_Region_test
+                     EXECUTABLE LitlRaster_Raster_test
                      LINK_LIBRARIES LitlRaster
                      TYPE Boost)
 elements_add_unit_test(Subraster tests/src/Subraster_test.cpp 
-                     EXECUTABLE Raster_Subraster_test
+                     EXECUTABLE LitlRaster_Subraster_test
                      LINK_LIBRARIES LitlRaster
                      TYPE Boost)
 elements_add_unit_test(Vector tests/src/Vector_test.cpp 
-                     EXECUTABLE Raster_Vector_test
+                     EXECUTABLE LitlRaster_Vector_test
                      LINK_LIBRARIES LitlRaster
                      TYPE Boost)
