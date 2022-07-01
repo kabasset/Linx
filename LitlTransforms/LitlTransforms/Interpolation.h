@@ -58,7 +58,7 @@ public:
   /**
    * @brief Get the raster domain.
    */
-  Region<Dimension> domain() const {
+  Box<Dimension> domain() const {
     return m_raster.domain();
   }
 
@@ -149,7 +149,7 @@ public:
   /**
    * @brief Get the raster domain.
    */
-  Region<Dimension> domain() const {
+  Box<Dimension> domain() const {
     return m_raster.domain();
   }
 

@@ -5,8 +5,8 @@
 #ifndef _LITLRASTER_SUBRASTER_H
 #define _LITLRASTER_SUBRASTER_H
 
+#include "LitlRaster/Box.h"
 #include "LitlRaster/Raster.h"
-#include "LitlRaster/Region.h"
 
 #include <algorithm> // accumulate
 #include <functional> // multiplies
@@ -32,12 +32,12 @@ public:
   /**
    * @brief Constructor.
    */
-  Subraster(const Parent& parent, const Region<N>& region) : m_cParent(&parent), m_parent(nullptr), m_region(region) {}
+  Subraster(const Parent& parent, const Box<N>& region) : m_cParent(&parent), m_parent(nullptr), m_region(region) {}
 
   /**
    * @brief Constructor.
    */
-  Subraster(Parent& parent, const Region<N>& region) : m_cParent(&parent), m_parent(&parent), m_region(region) {}
+  Subraster(Parent& parent, const Box<N>& region) : m_cParent(&parent), m_parent(&parent), m_region(region) {}
 
   /**
    * @brief The subraster shape.
@@ -70,7 +70,7 @@ public:
   /**
    * @brief The region.
    */
-  const Region<N>& region() const {
+  const Box<N>& region() const {
     return m_region;
   }
 
@@ -78,14 +78,14 @@ public:
    * @brief Pixel at given position.
    */
   const T& operator[](const Position<N>& pos) const {
-    return (*m_cParent)[pos + m_region.front];
+    return (*m_cParent)[pos + m_region.front()];
   }
 
   /**
    * @brief Pixel at given position.
    */
   T& operator[](const Position<N>& pos) {
-    return (*m_parent)[pos + m_region.front];
+    return (*m_parent)[pos + m_region.front()];
   }
 
 private:
@@ -102,7 +102,7 @@ private:
   /**
    * @brief The region.
    */
-  Region<N> m_region;
+  Box<N> m_region;
 };
 
 /// @endcond

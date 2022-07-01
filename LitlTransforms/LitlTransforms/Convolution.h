@@ -52,11 +52,10 @@ public:
   template <Index Axis, typename TOut = T, typename TRasterIn>
   Raster<TOut, TRasterIn::Dimension> correlateAlong(const TRasterIn& in) const {
     const auto shape = in.shape();
-    const auto length = shape[Axis];
+    const Index length = shape[Axis];
     const auto stride = shapeStride<Axis>(shape);
     Raster<TOut, TRasterIn::Dimension> out(shape);
-    auto domain = in.domain();
-    domain.back[Axis] = 0;
+    auto domain = in.domain().project(Axis);
     for (const auto& p : domain) {
       DataSamples<const typename TRasterIn::Value> inSamples {&in[p], length, {}, stride};
       DataSamples<TOut> outSamples {&out[p], length, {}, stride};
@@ -81,7 +80,7 @@ public:
     inMinIt -= in.front();
     inIt -= m_backward;
     auto outIt = out.begin();
-    std::size_t i = in.front();
+    Index i = in.front();
 
     printf("in = [%li:%li:%li:%li]\n", in.front(), in.back(), step, in.stride());
 

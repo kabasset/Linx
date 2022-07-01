@@ -252,8 +252,7 @@ private:
     const auto shape = in.shape();
     const auto length = shape[J];
     const auto stride = shapeStride<J>(shape);
-    auto domain = in.domain();
-    domain.back[J] = 0;
+    auto domain = in.domain().project(J);
     TRasterOut out(shape);
     for (const auto& p : domain) {
       DataSamples<const typename TRasterIn::Value> inSamples {&in[p], length, {}, stride};
@@ -271,7 +270,7 @@ private:
   }
 
   template <Index N>
-  Region<N> correlationBox(const PositionSampling<N>& sampling, const Position<N>& shape) const {
+  Box<N> correlationBox(const PositionSampling<N>& sampling, const Position<N>& shape) const {
     auto box = sampling.region();
     for (const auto& p : m_kernels) {
       auto& front = box.front[p.first];

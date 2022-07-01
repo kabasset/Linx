@@ -54,7 +54,7 @@ Mostly for disambiguation purpose: "image" refers to an extension type of the FI
 -- which is at the heart of EleFits, from which Litl was initially out-sourced --
 while "array" has already several meanings in C/C++.
 `NdArray` would have been an option, but every related class should have been prefixed with `Nd` for homogeneity:
-`NdPosition`, `NdRegion`, `VecNdArray`...
+`NdPosition`, `NdBox`, `VecNdArray`...
 "Tensor" is often used as a multidimensional extension of matrices,
 but is more associated to linear algebra than image processing.
 From the cathodic television era, "raster" also historically carries the concept of contiguous pixels which scan the image.
@@ -121,7 +121,7 @@ or at runtime, using -1 as a special value.
 This basically gives more freedom at the cost of less safety.
 As a rule of thumb, compile time dimensions should be preferred.
 
-Other multidimensional classes, like `Position` or `Region`,
+Other multidimensional classes, like `Position` or `Box`,
 are also templated by the dimension and follow the same convention.
 Roughly speaking, `Position<N>` is similar to `std::array<Index, N>` when `N` is positive or null,
 while `Position<-1>` is similar to `std::vector<Index>`.

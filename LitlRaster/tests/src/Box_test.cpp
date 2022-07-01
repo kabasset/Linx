@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "LitlRaster/Box.h"
-#include "LitlRaster/PositionIterator.h"
 
 #include <boost/test/unit_test.hpp>
 #include <set>

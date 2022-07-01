@@ -240,32 +240,6 @@ Region<N> operator-(const Region<N>& lhs, Index rhs) {
   return res;
 }
 
-/**
- * @relates Region
- * @brief Clamp a position inside a region.
- */
-template <typename T, Index N = 2>
-Vector<T, N> clamp(const Vector<T, N>& position, const Region<N>& region) {
-  Vector<T, N> out(region.size());
-  for (std::size_t i = 0; i < out.size(); ++i) {
-    out[i] = clamp(position[i], region.front[i], region.back[i]); // TODO transform
-  }
-  return out;
-}
-
-/**
- * @relates Region
- * @brief Clamp a position inside a shape.
- */
-template <typename T, Index N = 2>
-Vector<T, N> clamp(const Vector<T, N>& position, const Position<N>& shape) {
-  Vector<T, N> out(shape.size());
-  std::transform(position.begin(), position.end(), shape.begin(), out.begin(), [](auto p, auto s) {
-    return clamp(p, Index(0), s - 1);
-  });
-  return out;
-}
-
 } // namespace Litl
 
 #endif

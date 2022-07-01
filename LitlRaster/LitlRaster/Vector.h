@@ -190,7 +190,7 @@ public:
  * auto topRight = Position<2>::ùinusOne();
  * \endcode
  * 
- * @see Region
+ * @see Box
  */
 template <Index N = 2>
 using Position = Vector<Index, N>;

@@ -39,21 +39,21 @@ public:
   Box(Position<N> front, Position<N> back) : m_front(std::move(front)), m_back(std::move(back)) {}
 
   /**
-   * @brief Create a region from a front position and shape.
+   * @brief Create a box from a front position and shape.
    */
   static Box<N> fromShape(Position<N> front, Position<N> shape) {
     return {front, front + shape - 1};
   }
 
   /**
-   * @brief Create a region from a radius and center position.
+   * @brief Create a box from a radius and center position.
    */
   static Box<N> fromCenter(Index radius = 1, const Position<N> center = Position<N>::zero()) {
     return {center - radius, center + radius};
   }
 
   /**
-   * @brief Create a conventionally unlimited region.
+   * @brief Create a conventionally unlimited box.
    * @details
    * Front and back bounds along each axis are respectively 0 and inf.
    */
@@ -78,7 +78,7 @@ public:
   }
 
   /**
-   * @brief Compute the region shape.
+   * @brief Compute the box shape.
    */
   Position<N> shape() const {
     return m_back - m_front + 1;
@@ -92,28 +92,10 @@ public:
   }
 
   /**
-   * @brief Compute the region size, i.e. number of positions.
+   * @brief Compute the box size, i.e. number of positions.
    */
   Index size() const {
     return shapeSize(shape());
-  }
-
-  /// @group_elements
-
-  /**
-   * @brief Iterator to the front position.
-   */
-  Iterator begin() const {
-    return Iterator(*this);
-  }
-
-  /**
- * @brief Iterator to one past the back position.
- */
-  Iterator end() const {
-    Box<N> pastTheLast {m_back, m_back};
-    pastTheLast.m_front[0]++;
-    return Iterator(pastTheLast);
   }
 
   /// @group_operations
@@ -143,7 +125,7 @@ public:
    * 
    * The union of all output boxes and the input box is a box such that:
    * `union.front = in.front + margin.front` and `union.back = in.back + margin.back`.
-   * Partitioning is optimized for data locality when scanning raster pixels in the regions.
+   * Partitioning is optimized for data locality when scanning raster pixels in the boxes.
    */
   std::vector<Box<N>> surround(const Box<N>& margin) const {
 
@@ -274,15 +256,41 @@ public:
 
 private:
   /**
-   * @brief The front position in the region.
+   * @brief The front position in the box.
    */
   Position<N> m_front;
 
   /**
-   * @brief The back position in the region.
+   * @brief The back position in the box.
    */
   Position<N> m_back;
 };
+
+/**
+ * @relates Box
+ * @brief Clamp a position inside a box.
+ */
+template <typename T, Index N = 2>
+Vector<T, N> clamp(const Vector<T, N>& position, const Box<N>& box) {
+  Vector<T, N> out(box.size());
+  for (std::size_t i = 0; i < out.size(); ++i) {
+    out[i] = clamp(position[i], box.front[i], box.back[i]); // TODO transform
+  }
+  return out;
+}
+
+/**
+ * @relates Box
+ * @brief Clamp a position inside a shape.
+ */
+template <typename T, Index N = 2>
+Vector<T, N> clamp(const Vector<T, N>& position, const Position<N>& shape) {
+  Vector<T, N> out(shape.size());
+  std::transform(position.begin(), position.end(), shape.begin(), out.begin(), [](auto p, auto s) {
+    return clamp(p, Index(0), s - 1);
+  });
+  return out;
+}
 
 } // namespace Litl
 

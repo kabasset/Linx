@@ -33,7 +33,7 @@ public:
    * @brief Explcit window constructor.
    * @param window The filter window
    */
-  explicit MedianFilter(const Region<N>& window) : m_window(window) {}
+  explicit MedianFilter(const Box<N>& window) : m_window(window) {}
 
   /**
    * @brief Radius-based constructor.
@@ -41,7 +41,7 @@ public:
    * @details
    * The window is centered, and its lengths along all axes are the same.
    */
-  explicit MedianFilter(Index radius = 1) : m_window(Region<N>::fromCenter(radius)) {}
+  explicit MedianFilter(Index radius = 1) : m_window(Box<N>::fromCenter(radius)) {}
 
   /**
    * @brief Apply the filter.
@@ -60,7 +60,7 @@ public:
    * @param region The region to filter in the input raster
    */
   template <typename TIn, typename TOut>
-  void applyTo(const TIn& in, TOut& out, const Region<N>& region = Region<N>::whole()) {
+  void applyTo(const TIn& in, TOut& out, const Box<N>& region = Box<N>::whole()) {
     std::vector<typename TIn::Value> neighbors(m_window.size());
     auto it = neighbors.begin();
     for (const auto& p : region) {
@@ -95,7 +95,7 @@ private:
   /**
    * @brief The window.
    */
-  Region<N> m_window;
+  Box<N> m_window;
 };
 
 } // namespace Litl

@@ -2,8 +2,8 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LITLRASTER_POSITIONITERATOR_H
-#define _LITLRASTER_POSITIONITERATOR_H
+#ifndef _LITLRASTER_BOXITERATOR_H
+#define _LITLRASTER_BOXITERATOR_H
 
 #include "LitlRaster/Box.h"
 
@@ -133,6 +133,24 @@ private:
    */
   std::vector<Position<N>> m_followers;
 };
+
+/**
+ * @brief Iterator to the front position.
+ */
+template <Index N>
+typename Box<N>::Iterator begin(const Box<N>& box) {
+  return typename Box<N>::Iterator(box);
+}
+
+/**
+ * @brief Iterator to one past the back position.
+ */
+template <Index N>
+typename Box<N>::Iterator end(const Box<N>& box) {
+  auto front = box.back();
+  ++front[0];
+  return typename Box<N>::Iterator({front, box.back()});
+}
 
 } // namespace Litl
 

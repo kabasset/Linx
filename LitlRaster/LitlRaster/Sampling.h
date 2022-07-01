@@ -5,7 +5,7 @@
 #ifndef _LITLRASTER_SAMPLING_H
 #define _LITLRASTER_SAMPLING_H
 
-#include "LitlRaster/Region.h"
+#include "LitlRaster/Box.h"
 
 #include <vector>
 
@@ -126,10 +126,9 @@ public:
   /**
    * @brief Constructor.
    */
-  PositionSampling(const Region<N>& boundingBox, const Position<N>& step = Position<N>::one()) :
-      m_samplings(step.size()) {
+  PositionSampling(const Box<N>& box, const Position<N>& step = Position<N>::one()) : m_samplings(step.size()) {
     for (std::size_t i = 0; i < m_samplings.size(); ++i) {
-      m_samplings[i] = {boundingBox.front[i], boundingBox.back[i], step[i]};
+      m_samplings[i] = {box.front()[i], box.back()[i], step[i]};
     }
   }
 

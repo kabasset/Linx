@@ -80,8 +80,8 @@ const Position<N>& Raster<T, N, TContainer>::shape() const {
 }
 
 template <typename T, Index N, typename TContainer>
-Region<N> Raster<T, N, TContainer>::domain() const {
-  return Region<N>::fromShape(Position<N>::zero(), m_shape);
+Box<N> Raster<T, N, TContainer>::domain() const {
+  return Box<N>::fromShape(Position<N>::zero(), m_shape);
 }
 
 template <typename T, Index N, typename TContainer>
@@ -130,90 +130,95 @@ inline T& Raster<T, N, TContainer>::at(const Position<N>& pos) {
 }
 
 template <typename T, Index N, typename TContainer>
-Subraster<T, N, TContainer> Raster<T, N, TContainer>::subraster(const Region<N>& region) {
+Subraster<T, N, TContainer> Raster<T, N, TContainer>::subraster(const Box<N>& region) {
   return {*this, region};
 }
 
 template <typename T, Index N, typename TContainer>
-const Subraster<T, N, TContainer> Raster<T, N, TContainer>::subraster(const Region<N>& region) const {
+const Subraster<T, N, TContainer> Raster<T, N, TContainer>::subraster(const Box<N>& region) const {
   return {*this, region};
 }
 
 template <typename T, Index N, typename TContainer>
 template <Index M>
-const PtrRaster<const T, M> Raster<T, N, TContainer>::slice(const Region<N>& region) const {
+const PtrRaster<const T, M> Raster<T, N, TContainer>::slice(const Box<N>& region) const {
   // FIXME resolve
   if (not isContiguous<M>(region)) {
-    throw Exception("Cannot slice: Region is not contiguous."); // FIXME clarify
+    throw Exception("Cannot slice: Box is not contiguous."); // FIXME clarify
   }
-  const auto& f = region.front;
-  const auto& b = region.back;
+  const auto& f = region.front();
+  const auto& b = region.back();
   Position<M> reduced(M);
   for (Index i = 0; i < M; ++i) {
     reduced[i] = b[i] - f[i] + 1;
   }
-  return PtrRaster<const T, M> {reduced, &operator[](region.front)};
+  return PtrRaster<const T, M> {reduced, &operator[](region.front())};
 }
 
 template <typename T, Index N, typename TContainer>
 template <Index M>
-PtrRaster<T, M> Raster<T, N, TContainer>::slice(const Region<N>& region) {
+PtrRaster<T, M> Raster<T, N, TContainer>::slice(const Box<N>& region) {
   if (not isContiguous<M>(region)) {
-    throw Exception("Cannot slice: Region is not contiguous."); // FIXME clarify
+    throw Exception("Cannot slice: Box is not contiguous."); // FIXME clarify
   }
-  const auto& f = region.front;
-  const auto& b = region.back;
+  const auto& f = region.front();
+  const auto& b = region.back();
   Position<M> reduced(M);
   for (Index i = 0; i < M; ++i) {
     reduced[i] = b[i] - f[i] + 1;
   }
   // FIXME duplication
-  return PtrRaster<T, M> {reduced, &operator[](region.front)};
+  return PtrRaster<T, M> {reduced, &operator[](region.front())};
 }
 
 template <typename T, Index N, typename TContainer>
 const PtrRaster<const T, N> Raster<T, N, TContainer>::section(Index front, Index back) const {
-  auto region = domain();
   const auto last = dimension() - 1;
-  region.front[last] = front;
-  region.back[last] = back;
-  return slice<N>(region);
+  auto f = Position<N>::zero();
+  auto b = shape() - 1;
+  f[last] = front;
+  b[last] = back;
+  return slice<N>(Box<N>(f, b));
 }
 
 template <typename T, Index N, typename TContainer>
 PtrRaster<T, N> Raster<T, N, TContainer>::section(Index front, Index back) {
-  auto region = domain();
   const auto last = dimension() - 1;
-  region.front[last] = front;
-  region.back[last] = back;
-  return slice<N>(region);
+  auto f = Position<N>::zero();
+  auto b = shape() - 1;
+  f[last] = front;
+  b[last] = back;
+  return slice<N>(Box<N>(f, b));
 }
 
 template <typename T, Index N, typename TContainer>
 const PtrRaster<const T, N == -1 ? -1 : N - 1> Raster<T, N, TContainer>::section(Index index) const {
-  auto region = domain();
   const auto last = dimension() - 1;
-  region.front[last] = index;
-  region.back[last] = index;
-  return slice < N == -1 ? -1 : N - 1 > (region);
-  // FIXME duplication => return section(index, index).slice<N-1>(Region<N>::whole());
+  auto f = Position<N>::zero();
+  auto b = shape() - 1;
+  f[last] = index;
+  b[last] = index;
+  return slice < N == -1 ? -1 : N - 1 > (Box<N>(f, b));
+  // FIXME duplication => return section(index, index).slice<N-1>(Box<N>::whole());
 }
 
 template <typename T, Index N, typename TContainer>
 PtrRaster<T, N == -1 ? -1 : N - 1> Raster<T, N, TContainer>::section(Index index) {
   auto region = domain();
   const auto last = dimension() - 1;
-  region.front[last] = index;
-  region.back[last] = index;
-  return slice < N == -1 ? -1 : N - 1 > (region);
+  auto f = Position<N>::zero();
+  auto b = shape() - 1;
+  f[last] = index;
+  b[last] = index;
+  return slice < N == -1 ? -1 : N - 1 > (Box<N>(f, b));
   // FIXME duplication
 }
 
 template <typename T, Index N, typename TContainer>
 template <Index M>
-bool Raster<T, N, TContainer>::isContiguous(const Region<N>& region) const {
-  const auto& f = region.front;
-  const auto& b = region.back;
+bool Raster<T, N, TContainer>::isContiguous(const Box<N>& region) const {
+  const auto& f = region.front();
+  const auto& b = region.back();
   for (Index i = 0; i < M - 1; ++i) {
     if (f[i] != 0 || b[i] != m_shape[i] - 1) { // Doesn't span across the full axis => index jump
       return false;

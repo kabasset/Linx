@@ -8,7 +8,7 @@
 #include "LitlContainer/AlignedBuffer.h"
 #include "LitlContainer/DataContainer.h"
 #include "LitlContainer/Random.h"
-#include "LitlRaster/Region.h"
+#include "LitlRaster/Box.h"
 #include "LitlTypes/Exceptions.h"
 
 #include <complex>
@@ -246,7 +246,7 @@ public:
    * }
    * \endcode
    */
-  Region<N> domain() const;
+  Box<N> domain() const;
 
   /**
    * @brief Check whether a given (possibly non-integral) position lies inside the raster domain.
@@ -327,7 +327,7 @@ public:
    * - For `i` > `M`, `front[i]` = `back[i]`.
    */
   template <Index M = 2>
-  bool isContiguous(const Region<N>& region) const;
+  bool isContiguous(const Box<N>& region) const;
 
   /**
    * @brief Create a slice from a given region.
@@ -336,13 +336,13 @@ public:
    * @see section()
    */
   template <Index M = 2>
-  const PtrRaster<const T, M> slice(const Region<N>& region) const;
+  const PtrRaster<const T, M> slice(const Box<N>& region) const;
 
   /**
    * @copybrief slice()
    */
   template <Index M = 2>
-  PtrRaster<T, M> slice(const Region<N>& region);
+  PtrRaster<T, M> slice(const Box<N>& region);
 
   /**
    * @brief Create a section between given indices.
@@ -392,12 +392,12 @@ private:
    * @see slice()
    * @see section()
    */
-  const Subraster<T, N, THolder> subraster(const Region<N>& region) const; // FIXME rm?
+  const Subraster<T, N, THolder> subraster(const Box<N>& region) const; // FIXME rm?
 
   /**
    * @copydetails subraster().
    */
-  Subraster<T, N, THolder> subraster(const Region<N>& region); // FIXME rm?
+  Subraster<T, N, THolder> subraster(const Box<N>& region); // FIXME rm?
 
   /**
    * @brief Raster shape, i.e. length along each axis.
@@ -476,7 +476,6 @@ Raster<T, N> random(const Position<N>& shape) {
 
 } // namespace Litl
 
-#include "LitlRaster/PositionIterator.h"
 #include "LitlRaster/Subraster.h"
 
 /// @cond
