@@ -1,0 +1,72 @@
+namespace Litl {
+/**
+
+\page supported_ops List of Supported Operations
+
+
+<table class="fieldtable">
+<tr><th>Operation<th>Applicable to<th>Documentation
+<tr><td>Pixel-wise operators<td>`Sequence` and `Raster`
+<td><ul>
+<li>Module \ref pixelwise
+<li>Specifications `VectorArithmetic`
+<li>Specifications `EuclidArithmetic`
+<li>Class `ArithmeticMixin`
+<tr><td>Pixel-wise mathematical functions<td>`Sequence` and `Raster`
+<td><ul>
+<li>Module \ref pixelwise
+<li>Class `MathFunctionsMixin`
+<li>Free functions in `Litl` namespace
+<tr><td>Pixel-wise custom functions<td>All `DataContainer`s
+<td><ul>
+<li>Module \ref pixelwise
+<li>Methods `DataContainer::generate()` and `DataContainer::apply()`
+<tr><td>Random noise<td>All `DataContainer`s
+<td><ul>
+<li>Module \ref random
+<li>Specifications `RandomNoise`
+<li>Methods `DataContainer::generate()` and `DataContainer::apply()`
+<tr><td>Extrapolation and interpolation<td>`Raster`
+<td><ul>
+<li>Module \ref interpolation
+<li>Class `Extrapolator`
+<li>Class `Interpolator`
+<tr><td>Convolution and correlation<td>`Raster`
+<td><ul>
+<li>Module \ref correlation
+<li>Class `Kernel`
+<li>Module \ref interpolation
+<li>Class `Extrapolator`
+<tr><td>Bilateral filtering<td>`Raster`
+<td><ul>
+<li>Module \ref nl_filters
+<li>Class `Kernel`
+<li>Module \ref interpolation
+<li>Class `Extrapolator`
+<tr><td>Median filtering<td>`Raster`
+<td><ul>
+<li>Module \ref nl_filters
+<li>Class `StructuringElement`
+<li>Module \ref interpolation
+<li>Class `Extrapolator`
+<tr><td>Morphological operations<td>`Raster`
+<td><ul>
+<li>Module \ref nl_filters
+<li>Class `StructuringElement`
+<li>Module \ref interpolation
+<li>Class `Extrapolator`
+<tr><td>Discrete Fourier transforms<td>`Raster`
+<td><ul>
+<li>Module \ref dft
+<li>Class `DftPlan`
+<tr><td>Geometrical transforms<td>`Raster`
+<td><ul>
+<li>Module \ref transforms
+<li>Class `Affinity`
+<li>Module \ref interpolation
+<li>Class `Extrapolator`
+<li>Class `Interpolator`
+</table>
+
+*/
+}

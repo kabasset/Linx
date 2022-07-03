@@ -1,4 +1,4 @@
-# Change log
+# Change Log
 
 # 1.0 (wrt. EleFits 5.0)
 

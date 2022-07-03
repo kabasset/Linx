@@ -27,11 +27,15 @@
 \example LitlDemoRandom_test.cpp
 
 \defgroup filtering Filtering
-\brief Linear filtering with kernels or Fourier transforms.
+\brief Linear and non-linear filtering.
 
-\defgroup correlation Kernels
+\defgroup correlation Linear filters
 \ingroup filtering
-\brief Correlation and convolution operations on rasters.
+\brief Correlation and convolution operations.
+
+\defgroup nl_filters Non-linear filters
+\ingroup filtering
+\brief Bilateral filtering and morphological operations.
 
 \defgroup dft Discrete Fourier Transforms
 \ingroup filtering
@@ -44,6 +48,10 @@
 \defgroup interpolation Interpolation and Extrapolation
 \ingroup geometry
 \brief Handling of values between pixels or outside the raster domain.
+
+\defgroup transforms Affine Transforms
+\ingroup geometry
+\brief Translation, rotation, scaling
 
 \defgroup guidelines Development Guidelines
 \brief Guidelines, good practices, optimization strategies.

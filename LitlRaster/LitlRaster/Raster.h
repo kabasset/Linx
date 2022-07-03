@@ -452,6 +452,10 @@ PtrRaster<T, sizeof...(Longs)> rasterize(T* data, Longs... shape) {
     }); \
     return out; \
   }
+// FIXME same THolder?
+
+/// @ingroup pixelwise
+/// @{
 
 LITL_MATH_COMPLEX_TO_REAL(real) ///< Apply `std::real()` @ingroup pixelwise
 LITL_MATH_COMPLEX_TO_REAL(imag) ///< Apply `std::imag()` @ingroup pixelwise
@@ -459,6 +463,8 @@ LITL_MATH_COMPLEX_TO_REAL(abs) ///< Apply `std::abs()` @ingroup pixelwise
 LITL_MATH_COMPLEX_TO_REAL(arg) ///< Apply `std::arg()` @ingroup pixelwise
 LITL_MATH_COMPLEX_TO_REAL(norm) ///< Apply `std::norm()` @ingroup pixelwise
 // FIXME conj, polar
+
+/// @}
 
 #undef LITL_MATH_COMPLEX_TO_REAL
 

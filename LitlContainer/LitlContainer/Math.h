@@ -63,9 +63,6 @@ struct MathFunctionsMixin {
     return *derived; \
   }
 
-  /// @{
-  /// @group_modifiers
-
   LITL_MATH_UNARY_INPLACE(abs) ///< Apply `std::abs()`
   LITL_MATH_BINARY_INPLACE(max) ///< Apply `std::max()`
   LITL_MATH_BINARY_SCALAR_INPLACE(max) ///< Apply `std::max()`
@@ -116,8 +113,6 @@ struct MathFunctionsMixin {
   LITL_MATH_UNARY_INPLACE(tgamma) ///< Apply `std::tgamma()`
   LITL_MATH_UNARY_INPLACE(lgamma) ///< Apply `std::lgamma()`
 
-  /// @}
-
 #undef LITL_MATH_UNARY_INPLACE
 #undef LITL_MATH_BINARY_INPLACE
 };
@@ -137,6 +132,9 @@ struct MathFunctionsMixin {
     out.function(other); \
     return out; \
   }
+
+/// @ingroup pixelwise
+/// @{
 
 LITL_MATH_UNARY_NEWINSTANCE(abs) ///< Apply `std::abs()` @ingroup pixelwise
 LITL_MATH_BINARY_NEWINSTANCE(max) ///< Apply `std::max()` @ingroup pixelwise
@@ -180,6 +178,8 @@ LITL_MATH_UNARY_NEWINSTANCE(erf) ///< Apply `std::erf()` @ingroup pixelwise
 LITL_MATH_UNARY_NEWINSTANCE(erfc) ///< Apply `std::erfc()` @ingroup pixelwise
 LITL_MATH_UNARY_NEWINSTANCE(tgamma) ///< Apply `std::tgamma()` @ingroup pixelwise
 LITL_MATH_UNARY_NEWINSTANCE(lgamma) ///< Apply `std::lgamma()` @ingroup pixelwise
+
+/// @}
 
 #undef LITL_MATH_UNARY_NEWINSTANCE
 #undef LITL_MATH_BINARY_NEWINSTANCE
