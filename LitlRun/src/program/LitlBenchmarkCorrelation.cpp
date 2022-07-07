@@ -24,8 +24,8 @@ public:
   ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
     const auto side = args["side"].as<Litl::Index>();
     Litl::Raster<int, 4> in({side, side, side, side});
-    const auto kernel = Litl::sobel<int, 0, 1>();
-    const auto out = kernel.correlate<int>(in);
+    const auto kernel = Litl::SepKernel<int, 0, 1>::sobel();
+    const auto out = kernel * in;
     return ExitCode::OK;
   }
 };

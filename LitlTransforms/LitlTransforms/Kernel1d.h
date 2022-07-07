@@ -14,38 +14,33 @@
 
 namespace Litl {
 
-struct CropKernelOutOfBounds {}; // FIXME
-
 /// @cond
-template <typename TKernel, Index... Is>
-class Kernel1dSeq;
+template <typename T, Index I0, Index... Is>
+class SepKernel;
 /// @endcond
 
 /**
  * @brief 1D kernel for nD correlations.
  */
-template <typename T, typename TExtrapolation = CropKernelOutOfBounds>
-class Kernel1d : public DataContainer<T, StdHolder<std::vector<T>>, VectorArithmetic, Kernel1d<T, TExtrapolation>> {
+template <typename T>
+class Kernel1d : public DataContainer<T, StdHolder<std::vector<T>>, VectorArithmetic, Kernel1d<T>> {
 
 public:
   using Value = T;
-  using Extrapolation = TExtrapolation;
 
   /**
    * @brief Constructor.
    * @param values The kernel values
    * @param origin The index of the kernel origin
-   * @param extrapolation The extrapolation policy
    */
-  explicit Kernel1d(const std::vector<T>& values, Index origin, TExtrapolation extrapolation = TExtrapolation()) :
-      DataContainer<T, StdHolder<std::vector<T>>, VectorArithmetic, Kernel1d<T, TExtrapolation>>(values),
-      m_backward(origin), m_forward(this->size() - 1 - m_backward), m_bias(), m_extrapolation(extrapolation) {}
+  explicit Kernel1d(std::vector<T>&& values, Index origin) :
+      DataContainer<T, StdHolder<std::vector<T>>, VectorArithmetic, Kernel1d<T>>(std::move(values)), m_backward(origin),
+      m_forward(this->size() - 1 - m_backward), m_bias() {}
 
   /**
    * @brief Constructor.
    */
-  explicit Kernel1d(const std::vector<T>& values, TExtrapolation extrapolation = TExtrapolation()) :
-      Kernel1d(values, values.size() / 2, extrapolation) {}
+  explicit Kernel1d(std::vector<T>&& values) : Kernel1d(std::move(values), values.size() / 2) {}
 
   /**
    * @brief Get the number of backward values.
@@ -77,8 +72,8 @@ public:
    * \endcode
    */
   template <Index... Is>
-  Kernel1dSeq<Kernel1d<T, TExtrapolation>, Is...> along() const {
-    return Kernel1dSeq<Kernel1d<T, TExtrapolation>, Is...>(*this);
+  SepKernel<T, Is...> along() const {
+    return SepKernel<T, Is...>(*this);
   }
 
   /**
@@ -119,44 +114,93 @@ private:
   Index m_backward;
   Index m_forward;
   T m_bias;
-  TExtrapolation m_extrapolation;
 };
 
 /**
- * @brief Sequence of oriented 1D kernels.
+ * @brief Separable correlation kernel as a sequence of oriented 1D kernels.
  */
-template <typename TKernel, Index... Is>
-class Kernel1dSeq {
-  template <typename UKernel, Index... Js>
-  friend class Kernel1dSeq;
+template <typename T, Index I0, Index... Is>
+class SepKernel {
+  template <typename U, Index J0, Index... Js>
+  friend class SepKernel;
 
 public:
   /**
    * @brief The element value type.
    */
-  using Value = typename TKernel::Value;
+  using Value = T;
 
   /**
    * @brief The logical dimension of the combined kernel.
    */
-  static constexpr Index Dimension = std::max({Is...}) + 1;
+  static constexpr Index Dimension = std::max({I0, Is...}) + 1;
 
   /**
    * @brief Construct a sequence of identical `Kernel1d`s with various orientations.
    */
-  explicit Kernel1dSeq(const Kernel1d<typename TKernel::Value, typename TKernel::Extrapolation>& kernel) :
-      m_kernels {{Is, kernel}...} {}
+  explicit SepKernel(const Kernel1d<T>& kernel) : m_kernels {{I0, kernel}, {Is, kernel}...} {}
 
   /**
    * @brief Map-based constructor.
    */
   template <typename... Ts>
-  explicit Kernel1dSeq(Ts&&... args) : m_kernels(std::forward<Ts>(args)...) {}
+  explicit SepKernel(Ts&&... args) : m_kernels(std::forward<Ts>(args)...) {}
+
+  /**
+   * @brief Make a Prewitt correlation kernel along given axes.
+   * @see `sobel()`
+   */
+  static SepKernel prewitt(T sign = 1) {
+    const auto derivation = Kernel1d<T>({sign, 0, -sign}).template along<I0>();
+    const auto averaging = Kernel1d<T>({1, 1, 1}).template along<Is...>();
+    return derivation * averaging;
+  }
+
+  /**
+   * @brief Make a Sobel correlation kernel along given axes.
+   * @param sign The differentiation sign (-1 or 1)
+   * @details
+   * The kernel along the `Is` axes is `{1, 2, 1}` and that along `I0` is `{sign, 0, -sign}`.
+   * Note the ordering of the differentiation _correlation_ kernel, which is opposite to Sobel's _convolution_ kernel.
+   * For differenciation in the increasing-index direction, keep `sign = 1`;
+   * for the opposite direction, set `sign = -1`.
+   * 
+   * For example, to compute the derivative along axis 1 backward, while averaging along axes 0 and 2, do:
+   * \code
+   * auto kernel = SepKernel<int, 1, 0, 2>::sobel(-1);
+   * auto dy = kernel * raster;
+   * \endcode
+   */
+  static SepKernel sobel(T sign = 1) {
+    const auto derivation = Kernel1d<T>({sign, 0, -sign}).template along<I0>();
+    const auto averaging = Kernel1d<T>({1, 2, 1}).template along<Is...>();
+    return derivation * averaging;
+  }
+
+  /**
+   * @brief Make a Scharr correlation kernel along given axes.
+   * @see `sobel()`
+   */
+  static SepKernel<T, I0, Is...> scharr(T sign = 1) {
+    const auto derivation = Kernel1d<T>({sign, 0, -sign}).template along<I0>();
+    const auto averaging = Kernel1d<T>({3, 10, 3}).template along<Is...>();
+    return derivation * averaging;
+  }
+
+  /**
+   * @brief Make a separable Laplacian correlation kernel along given axes.
+   * @details
+   * The kernel is built as a sequence of 1D kernels `{1, -2, 1}` if `sign` is 1,
+   * or `{-1, 2, -1}` if sign is -1.
+   */
+  static SepKernel laplacian(T sign = 1) {
+    return SepKernel(Kernel1d<T>({sign, sign * -2, sign}));
+  }
 
   /**
    * @brief Get the `Kernel1d` along given axis.
    */
-  const TKernel& operator[](Index axis) const {
+  const T& operator[](Index axis) const {
     return m_kernels.at(axis);
   }
 
@@ -175,7 +219,7 @@ public:
   }
 
   /**
-   * @brief Combine the separable components as a nD kernel.
+   * @brief Combine the separable components as an ND kernel.
    */
   Raster<Value, Dimension> combine() const { // FIXME return Kernel<Value, Dimension>
     auto shape = Position<Dimension>::one();
@@ -193,8 +237,8 @@ public:
    * @brief Combine two sequences of kernels.
    */
   template <Index... Js>
-  Kernel1dSeq<TKernel, Is..., Js...> operator*(const Kernel1dSeq<TKernel, Js...>& rhs) const {
-    Kernel1dSeq<TKernel, Is..., Js...> out(m_kernels);
+  SepKernel<T, I0, Is..., Js...> operator*(const SepKernel<T, Js...>& rhs) const {
+    SepKernel<T, I0, Is..., Js...> out(m_kernels);
     out.m_kernels.insert(rhs.begin(), rhs.end());
     return out;
   }
@@ -202,9 +246,9 @@ public:
   /**
    * @brief Apply the correlation kernels to an input raster.
    */
-  template <typename TOut, typename TIn, Index N, typename TContainer>
-  Raster<TOut, N> correlate(const Raster<TIn, N, TContainer>& in) const {
-    Raster<TOut, N> out(in.shape());
+  template <typename TIn, Index N, typename TContainer>
+  Raster<T, N> operator*(const Raster<TIn, N, TContainer>& in) const {
+    Raster<T, N> out(in.shape());
     correlateTo(in, out);
     return out;
   }
@@ -214,15 +258,15 @@ public:
    */
   template <typename TRasterIn, typename TRasterOut>
   void correlateTo(const TRasterIn& in, TRasterOut& out) const {
-    correlateAlongSeqTo<TRasterIn, TRasterOut, Is...>(in, out);
+    correlateAlongSeqTo<TRasterIn, TRasterOut, I0, Is...>(in, out);
   }
 
   /**
    * @brief Sparsely apply the correlation kernels to an input raster.
    */
-  template <typename TOut, Index N, typename TRasterIn>
-  Raster<TOut, N> correlateSamples(const TRasterIn& in, const PositionSampling<N>& sampling) const {
-    Raster<TOut, N> out(sampling.shape());
+  template <Index N, typename TRasterIn>
+  Raster<T, N> correlateSamples(const TRasterIn& in, const PositionSampling<N>& sampling) const {
+    Raster<T, N> out(sampling.shape());
     correlateSamplesTo(in, sampling, out);
   }
 
@@ -231,7 +275,7 @@ public:
    */
   template <typename TRasterIn, Index N, typename TRasterOut>
   void correlateSamplesTo(const TRasterIn& in, const PositionSampling<N>& sampling, TRasterOut& out) const {
-    correlateSamplesAlongSeqTo<TRasterIn, N, TRasterOut, Is...>(in, sampling, out);
+    correlateSamplesAlongSeqTo<TRasterIn, N, TRasterOut, I0, Is...>(in, sampling, out);
   }
 
 private:
@@ -288,24 +332,8 @@ private:
   }
 
 private:
-  std::map<Index, TKernel> m_kernels;
+  std::map<Index, Kernel1d<T>> m_kernels;
 };
-
-/***
- * @brief Make a Sobel correlation kernel along given axes.
- * @details
- * The kernel along the `IAverage` axis is `{1, 2, 1}` and that along `IDifference` is `{1, 0, -1}`.
- * Note the ordering of the differentiation kernel, which is opposite to Sobel's _convolution_ kernel.
- */
-template <typename T, Index IDifference, Index IAverage, typename TExtrapolation = CropKernelOutOfBounds>
-Kernel1dSeq<Kernel1d<T, TExtrapolation>, IDifference, IAverage> sobel() {
-  return Kernel1d<T, TExtrapolation>({1, 0, -1}, 1).template along<IDifference>() *
-      Kernel1d<T, TExtrapolation>({1, 2, 1}, 1).template along<IAverage>();
-}
-
-// FIXME
-// isCorrelation<T>()
-// decltype(auto) operator* (enable_if_t<isCorrelation<TKernel>>(), TRaster)
 
 } // namespace Litl
 

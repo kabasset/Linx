@@ -26,6 +26,10 @@ namespace Litl {
 <li>Module \ref random
 <li>Specifications `RandomNoise`
 <li>Methods `DataContainer::generate()` and `DataContainer::apply()`
+<tr><td>Distribution estimators<td>All `DataContainer`s
+<td><ul>
+<li>Class `DataDistribution`
+<li>Method `DataContainer::distribution()`
 <tr><td>Extrapolation and interpolation<td>`Raster`
 <td><ul>
 <li>Module \ref interpolation
