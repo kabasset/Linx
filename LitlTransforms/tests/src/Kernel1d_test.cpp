@@ -14,19 +14,30 @@ BOOST_AUTO_TEST_SUITE(Kernel1d_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(combination_test) {
-  const auto combined = SepKernel<int, 0, 1>::sobel().combine();
+BOOST_AUTO_TEST_CASE(composition_test) {
+  const auto combined = SepKernel<int, 0, 1>::sobel().compose();
   std::vector<int> values {1, 0, -1, 2, 0, -2, 1, 0, -1};
   Raster<int, 2> expected({3, 3}, std::move(values));
   BOOST_TEST(combined.shape() == expected.shape());
   BOOST_TEST(combined.container() == expected.container());
 }
 
+BOOST_AUTO_TEST_CASE(associativity_commutativity_test) {
+  const auto a = Kernel1d<int>({1, 0, -1}).along<0>();
+  const auto b = Kernel1d<int>({1, 2, 1}).along<1>();
+  const auto c = a * b;
+  const auto raster = Raster<int, 3>({3, 3, 3}).range();
+  const auto direct = c * raster;
+  const auto associated = a * b * raster;
+  const auto commutated = b * a * raster;
+  BOOST_TEST(associated.container() == direct.container());
+  BOOST_TEST(commutated.container() == direct.container());
+}
+
 BOOST_AUTO_TEST_CASE(sum_kernel_test) {
   const Kernel1d<int> one({1, 1, 1}, 1);
   const auto separable = one.along<0, 1, 2>();
-  Raster<int, 3> raster({3, 3, 3});
-  raster.fill(1);
+  const auto raster = Raster<int, 3>({3, 3, 3}).fill(1);
   const auto sum = separable * raster;
   const std::vector<int> expected {
       8,  12, 8,  12, 18, 12, 8,  12, 8, // z = 0
@@ -40,8 +51,7 @@ BOOST_AUTO_TEST_CASE(sum_kernel_test) {
 BOOST_AUTO_TEST_CASE(make_sobel_test) {
   const auto sobelX = SepKernel<int, 0, 1>::sobel();
   const auto sobelY = SepKernel<int, 1, 0>::sobel();
-  Raster<int, 3> raster({3, 3, 3});
-  raster.fill(1);
+  const auto raster = Raster<int, 3>({3, 3, 3}).fill(1);
   const auto edgesX = sobelX * raster;
   const auto edgesY = sobelY * raster;
   const std::vector<int> expectedX {

@@ -219,9 +219,9 @@ public:
   }
 
   /**
-   * @brief Combine the separable components as an ND kernel.
+   * @brief Convolve the separable components as a single ND kernel.
    */
-  Raster<Value, Dimension> combine() const { // FIXME return Kernel<Value, Dimension>
+  Raster<Value, Dimension> compose() const { // FIMXE product()?
     auto shape = Position<Dimension>::one();
     auto origin = Position<Dimension>::zero();
     for (const auto& k : m_kernels) {
@@ -230,7 +230,7 @@ public:
     }
     Raster<Value, Dimension> raster(shape);
     // FIXME
-    return raster;
+    return raster; // FIXME return Kernel<Value, Dimension>
   }
 
   /**
