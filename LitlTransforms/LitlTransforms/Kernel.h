@@ -9,20 +9,13 @@
 
 namespace Litl {
 
-struct OutOfBoundsCrop {};
-
-template <typename T>
-struct OutOfBoundsConstant { // FIXME to Extrapolation.h
-  T value {0};
-};
-
 /**
  * @brief A kernel which can be used for convolution or auto-correlation.
  * @tparam T The value type
  * @tparam N The dimension
  * @tparam TBoundary The boundary conditions
  */
-template <typename T, Index N, typename TBoundary = OutOfBoundsConstant<T>>
+template <typename T, Index N = 2>
 class Kernel {
 
 public:
@@ -40,21 +33,20 @@ public:
    * @brief Constructor.
    */
   template <typename TRaster>
-  Kernel(TRaster&& values, const Position<N>& origin, TBoundary boundaryConditions = TBoundary()) :
-      m_values(values), m_origin(origin), m_boundary(boundaryConditions) {}
+  Kernel(TRaster&& values, const Position<N>& origin) : m_values(values), m_origin(origin) {}
 
   /**
    * @brief Auto-correlate a raster with the kernel.
    */
-  template <typename TIn>
-  Raster<Value, Dimension> correlate(const TIn& in) {
+  template <typename TIn, typename THolder>
+  Raster<Value, Dimension> operator*(const Raster<TIn, N, THolder>& in) {
     Raster<Value, Dimension> out(in.shape());
     correlateTo(in, out);
     return out;
   }
 
   /**
-   * @copybrief correlate()
+   * @copybrief operator*()
    */
   template <typename TIn, typename TOut>
   void correlateTo(const TIn& in, TOut& out) {
@@ -73,7 +65,7 @@ public:
   template <typename TIn>
   Raster<Value, Dimension> convolve(const TIn& in) {
     Raster<Value, Dimension> res(in.shape());
-    correlateTo(in, res);
+    convolveTo(in, res);
     return res;
   }
 
@@ -107,30 +99,6 @@ private:
   }
 
   /**
-   * @brief Sparsely correlate an input raster by a given 1D kernel.
-   */
-  template <typename TIn, typename TKernel, typename TOut>
-  void sparseCorrelateWith1dTo(const TIn& in, const TKernel& kernel, TOut& out) {
-    auto inUnit = in;
-    inUnit.step(1); // For inner_product
-    auto inIt = inUnit.begin();
-    auto inMinIt = inIt;
-    inMinIt -= in.front();
-    inIt -= kernel.backward;
-    auto outIt = out.begin();
-    auto i = in.front();
-    for (; i < kernel.backward; i += in.step(), inIt += in.step(), ++outIt) {
-      *outIt = std::inner_product(kernel.center - i, kernel.end(), inMinIt, kernel.bias);
-    }
-    for (; i <= in.size() - kernel.forward - in.step(); i += in.step(), inIt += in.step(), ++outIt) {
-      *outIt = std::inner_product(kernel.begin(), kernel.end(), inIt, kernel.bias);
-    }
-    for (; i <= in.to(); i += in.step(), inIt += in.step(), ++outIt) {
-      *outIt = std::inner_product(kernel.begin(), kernel.center + (in.size() - i), inIt, kernel.bias);
-    }
-  }
-
-  /**
    * @brief The correlation values.
    */
   Raster<T, N> m_values;
@@ -139,11 +107,6 @@ private:
    * @brief The origin coordinates.
    */
   Position<N> m_origin;
-
-  /**
-   * @brief The boundary conditions.
-   */
-  TBoundary m_boundary;
 };
 
 } // namespace Litl
