@@ -6,15 +6,22 @@
 
 #include <boost/test/unit_test.hpp>
 
+using namespace Litl;
+
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE(Kernel_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(example_test) {
-
-  BOOST_FAIL("!!!! Please implement your tests !!!!");
+BOOST_AUTO_TEST_CASE(coverage_test) {
+  auto in = Raster<int>({4, 3}).fill(1);
+  auto k = kernelize(Raster<int>({3, 3}).fill(1));
+  auto out = k * extrapolate(in, 0);
+  std::vector<int> expected = {4, 6, 6, 4, 6, 9, 9, 6, 4, 6, 6, 4};
+  for (std::size_t i = 0; i < 12; ++i) {
+    BOOST_TEST(out[i] == expected[i]);
+  }
 }
 
 //-----------------------------------------------------------------------------

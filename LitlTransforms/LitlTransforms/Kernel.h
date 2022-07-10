@@ -6,17 +6,15 @@
 #define _LITLTRANSFORMS_KERNEL_H
 
 #include "LitlRaster/Raster.h"
+#include "LitlTransforms/Interpolation.h"
 
 namespace Litl {
 
 /**
- * @brief A kernel which can be used for convolution or auto-correlation.
- * @tparam T The value type
- * @tparam N The dimension
- * @tparam TBoundary The boundary conditions
+ * @brief A kernel which can be used for convolution or cross-correlation.
  */
 template <typename T, Index N = 2>
-class Kernel {
+class RasterKernel { // FIXME DataContainer or ShapedDataContaier
 
 public:
   /**
@@ -32,14 +30,16 @@ public:
   /**
    * @brief Constructor.
    */
-  template <typename TRaster>
-  Kernel(TRaster&& values, const Position<N>& origin) : m_values(values), m_origin(origin) {}
+  RasterKernel(const T* values, Box<N> window) :
+      m_values(values, values + window.size()), m_window(std::move(window)) {}
 
   /**
-   * @brief Auto-correlate a raster with the kernel.
+   * @brief Cross-correlate a raster with the kernel.
+   * @note
+   * Correlation is like convolution with the reversed kernel.
    */
-  template <typename TIn, typename THolder>
-  Raster<Value, Dimension> operator*(const Raster<TIn, N, THolder>& in) {
+  template <typename TRaster, typename TMethod>
+  Raster<Value, Dimension> operator*(const Extrapolator<TRaster, TMethod>& in) {
     Raster<Value, Dimension> out(in.shape());
     correlateTo(in, out);
     return out;
@@ -48,66 +48,125 @@ public:
   /**
    * @copybrief operator*()
    */
-  template <typename TIn, typename TOut>
-  void correlateTo(const TIn& in, TOut& out) {
-    correlateWithTo(in, m_values, out);
-  }
-
-  /**
-   * @brief Sparsely auto-correlate a raster with the kernel.
-   */
-  template <typename TIn, typename TOut>
-  void sparseCorrelateTo(const TIn& in, TOut& out) {}
-
-  /**
-   * @brief Convolve a raster with the kernel.
-   */
-  template <typename TIn>
-  Raster<Value, Dimension> convolve(const TIn& in) {
-    Raster<Value, Dimension> res(in.shape());
-    convolveTo(in, res);
-    return res;
-  }
-
-  /**
-   * @copybrief convolve()
-   */
-  template <typename TIn, typename TOut>
-  void convolveTo(const TIn& in, TOut& out) {
-    auto correlation = m_values;
-    std::reverse(correlation.begin(), correlation.end());
-    correlateWithTo(in, correlation, out);
-  }
-
-  /**
-   * @brief Sparsely convolve a raster with the kernel.
-   */
-  template <typename TIn, typename TOut>
-  void sparseConvolveTo(const TIn& in, TOut& out) {
-    auto correlation = m_values;
-    std::reverse(correlation.begin(), correlation.end());
-    sparseCorrelateWithTo(in, correlation, out);
+  template <typename TRaster, typename TMethod, typename TOut>
+  void correlateTo(const Extrapolator<TRaster, TMethod>& in, TOut& out) {
+    const auto inner = in.domain() - m_window;
+    const auto outers = inner.surround(m_window);
+    correlateWithoutExtrapolation(raster(in), std::move(inner), out);
+    for (const auto& o : outers) {
+      correlateWithExtrapolation(in, o, out);
+    }
   }
 
 private:
   /**
-   * @brief Correlate an input raster with a given kernel.
+   * @brief Correlate an input raster over a given region.
    */
-  template <typename TRasterIn, typename TKernel, typename TRasterOut>
-  void correlateWithTo(const TRasterIn& in, const TKernel& kernel, TRasterOut& out) {
-    // FIXME
+  template <typename TRasterIn, typename TRasterOut>
+  void correlateWithoutExtrapolation(const TRasterIn& in, Box<N> box, TRasterOut& out) {
+
+    if (box.size() == 0) {
+      return;
+    }
+
+    // Compute constants
+    auto boxWidth = box.template length<0>();
+    box.project(); // Keep front hyperplane only
+    const auto inWidth = in.template length<0>();
+    const auto kWidth = m_window.template length<0>();
+    const auto kRowCount = m_window.size() / kWidth;
+
+    // Prepare iterators
+    auto inIt = in.data();
+    auto outIt = &out[box.front()];
+    auto kIt = m_values.data();
+    const auto distance = outIt - inIt;
+
+    // Loop over the hyperplane
+    for (const auto& p : box) {
+
+      // Loop over the rows which begin in the hyperplane
+      outIt = &out[p];
+      for (Index i = boxWidth; i > 0; --i, ++outIt, inIt = outIt - distance, kIt = m_values.data()) {
+
+        // Compute the weighted sum row by row
+        T sum {};
+        for (Index j = kRowCount; j > 0; --j, inIt += inWidth, kIt += kWidth) {
+          sum = std::inner_product(kIt, kIt + kWidth, inIt, sum);
+        }
+        *outIt = sum;
+      }
+    }
   }
 
   /**
+   * @brief Correlate an input raster over a given region.
+   */
+  template <typename TExtrapolatorIn, typename TRasterOut>
+  void correlateWithExtrapolation(const TExtrapolatorIn& in, const Box<N>& box, TRasterOut& out) {
+
+    if (box.size() == 0) {
+      return;
+    }
+
+    // Allocate extrapolation buffer
+    std::vector<T> buffer;
+    buffer.reserve(m_values.size());
+
+    // Prepare iterators
+    const auto bBegin = buffer.begin();
+    const auto kBegin = m_values.begin();
+    const auto kEnd = m_values.end();
+
+    // Loop over the box
+    for (const auto& p : box) {
+
+      // Fill the buffer
+      buffer.clear(); // Memory is not affected
+      for (const auto& q : m_window + p) {
+        buffer.push_back(in[q]);
+      }
+
+      // Compute the weighted sum
+      out[p] = std::inner_product(kBegin, kEnd, bBegin, T {});
+    }
+  }
+
+private:
+  /**
    * @brief The correlation values.
    */
-  Raster<T, N> m_values;
+  std::vector<T> m_values;
 
   /**
-   * @brief The origin coordinates.
+   * @brief The correlation window.
    */
-  Position<N> m_origin;
+  Box<N> m_window;
 };
+
+/**
+ * @brief Make a kernel.
+ */
+template <typename T, Index N = 2>
+RasterKernel<T, N> kernelize(const T* values, Box<N> window) {
+  return RasterKernel<T, N>(values, std::move(window));
+}
+
+/**
+ * @brief Make a kernel.
+ */
+template <typename T, Index N, typename THolder>
+RasterKernel<T, N> kernelize(const Raster<T, N, THolder>& values, Position<N> origin) {
+  return RasterKernel<T, N>(values.data(), values.domain() - origin);
+}
+
+/**
+ * @brief Make a kernel.
+ */
+template <typename T, Index N, typename THolder>
+RasterKernel<T, N> kernelize(const Raster<T, N, THolder>& values) {
+  return RasterKernel<T, N>(values.data(), values.domain() - values.shape() / 2);
+}
 
 } // namespace Litl
 

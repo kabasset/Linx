@@ -98,6 +98,15 @@ public:
     return shapeSize(shape());
   }
 
+  template <Index I>
+  Index length() const {
+    return m_back[I] - m_front[I] + 1;
+  }
+
+  Index length(Index i) const {
+    return m_back[i] - m_front[i] + 1;
+  }
+
   /// @group_operations
 
   /**
