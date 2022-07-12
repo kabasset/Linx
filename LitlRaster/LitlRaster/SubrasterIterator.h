@@ -72,7 +72,8 @@ private:
       return m_current;
     }
     ++m_beginIt;
-    m_current = &m_raster[*m_beginIt];
+    // Use data() and index()  instead of [] to avoid dereferencing unallocated memory
+    m_current = m_raster.data() + m_raster.index(*m_beginIt);
     m_eol = m_current + m_width;
     return m_current;
   }
