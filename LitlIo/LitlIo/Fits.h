@@ -35,6 +35,7 @@ public:
         nullptr,
         &m_status);
     fits_close_file(m_fptr, &m_status);
+    // FIXME may throw
     m_fptr = nullptr;
     return out;
   }
@@ -57,6 +58,7 @@ public:
         raster.data(),
         &m_status);
     fits_close_file(m_fptr, &m_status);
+    // FIXME may throw
     m_fptr = nullptr;
   }
 

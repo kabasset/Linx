@@ -47,7 +47,6 @@ BOOST_AUTO_TEST_CASE(surrounding_test) {
   }
   BOOST_TEST(all.size() == box.size());
 
-  std::cout << std::endl;
   for (const auto& p : central) {
     chunked.insert(p.container());
   }

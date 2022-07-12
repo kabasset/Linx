@@ -15,11 +15,8 @@ class Box<N>::Iterator : public std::iterator<std::input_iterator_tag, Position<
 public:
   /**
    * @brief Constructor.
-   * @param region The box to be screened
-   * @param followers Positions which follow the same moves as the current position
    */
-  explicit Iterator(const Box<N>& region, const std::vector<Position<N>>& followers = {}) :
-      m_region(region), m_current(region.front()), m_fronts(followers), m_followers(followers) {}
+  explicit Iterator(const Box<N>& region) : m_region(region), m_current(region.front()) {}
 
   /**
    * @brief Dereference operator.
@@ -39,16 +36,14 @@ public:
    * @brief Increment operator.
    */
   const Position<N>& operator++() {
-    next();
-    return m_current;
+    return next();
   }
 
   /**
    * @brief Increment operator.
    */
   const Position<N>* operator++(int) {
-    next();
-    return &m_current;
+    return &next();
   }
 
   /**
@@ -66,18 +61,10 @@ public:
   }
 
   /**
-   * @brief Get the followers positions.
-   */
-  const std::vector<Position<N>>& followers() const {
-    return m_followers;
-  }
-
-  /**
    * @brief Reset the current and followers positions to the initial positions.
    */
   void reset() {
     m_current = m_region.front();
-    m_followers = m_fronts;
   }
 
 private:
@@ -85,28 +72,19 @@ private:
    * @brief Update and get the current position and that of a follower.
    * @details
    * Move the current position by 1 pixel,
-   * such that the corresponding index in a `Raster` would be increased to the next one.
-   * 
-   * Conventionally, `next(region.back())[i] = region.back()[i]` for `i > 0`,
-   * and `next(region.back())[0] = region.back()[0] + 1`.
+   * such that the corresponding index in a raster would be increased to the next one.
    */
   inline const Position<N>& next() {
-    if (m_current == m_region.back()) {
-      m_current[0]++;
+    if (m_current == m_region.back()) { // TODO simpler?
+      m_current = m_region.front();
+      --m_current[0];
       return m_current;
     }
-    m_current[0]++;
-    for (auto& f : m_followers) {
-      f[0]++;
-    }
-    for (std::size_t i = 0; i < m_current.size(); ++i) {
+    ++m_current[0];
+    for (std::size_t i = 0; i < m_current.size() - 1; ++i) {
       if (m_current[i] > m_region.back()[i]) {
         m_current[i] = m_region.front()[i];
-        m_current[i + 1]++;
-        for (std::size_t j = 0; j < m_followers.size(); ++j) {
-          m_followers[j][i] = m_fronts[j][i];
-          m_followers[j][i + 1]++;
-        }
+        ++m_current[i + 1];
       }
     }
     return m_current;
@@ -122,16 +100,6 @@ private:
    * @brief The current position.
    */
   Position<N> m_current;
-
-  /**
-   * @brief The front positions of the followers.
-   */
-  std::vector<Position<N>> m_fronts; // FIXME keep?
-
-  /**
-   * @brief The current position of the followers.
-   */
-  std::vector<Position<N>> m_followers;
 };
 
 /**
@@ -147,8 +115,8 @@ typename Box<N>::Iterator begin(const Box<N>& box) {
  */
 template <Index N>
 typename Box<N>::Iterator end(const Box<N>& box) {
-  auto front = box.back();
-  ++front[0];
+  auto front = box.front();
+  --front[0];
   return typename Box<N>::Iterator({front, box.back()});
 }
 

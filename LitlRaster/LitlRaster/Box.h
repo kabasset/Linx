@@ -277,6 +277,16 @@ private:
 
 /**
  * @relates Box
+ * @brief Flatten the box along a given axis.
+ */
+template <Index N>
+Box<N> project(const Box<N>& in, Index axis = 0) {
+  auto out = in;
+  return out.project(axis);
+}
+
+/**
+ * @relates Box
  * @brief Clamp a position inside a box.
  */
 template <typename T, Index N = 2>
