@@ -2,7 +2,7 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "LitlTransforms/Kernel1d.h"
+#include "LitlTransforms/SeparableKernel.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -10,32 +10,33 @@ using namespace Litl;
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(Kernel1d_test)
+BOOST_AUTO_TEST_SUITE(SeparableKernel_test)
 
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(composition_test) {
-  const auto combined = SepKernel<int, 0, 1>::sobel().compose();
+  const auto combined = SeparableKernel<int, 0, 1>::sobel().compose();
   std::vector<int> values {1, 0, -1, 2, 0, -2, 1, 0, -1};
   Raster<int, 2> expected({3, 3}, std::move(values));
-  BOOST_TEST(combined.shape() == expected.shape());
-  BOOST_TEST(combined.container() == expected.container());
+  std::cout << combined.raster() << std::endl;
+  std::cout << expected << std::endl;
+  BOOST_TEST(combined.raster() == expected);
 }
 
 BOOST_AUTO_TEST_CASE(associativity_commutativity_test) {
-  const auto a = Kernel1d<int>({1, 0, -1}).along<0>();
-  const auto b = Kernel1d<int>({1, 2, 1}).along<1>();
+  const auto a = LineKernel<int>({1, 0, -1}).along<0>();
+  const auto b = LineKernel<int>({1, 2, 1}).along<1>();
   const auto c = a * b;
   const auto raster = Raster<int, 3>({3, 3, 3}).range();
   const auto direct = c * raster;
   const auto associated = a * b * raster;
   const auto commutated = b * a * raster;
-  BOOST_TEST(associated.container() == direct.container());
-  BOOST_TEST(commutated.container() == direct.container());
+  BOOST_TEST(associated == direct);
+  BOOST_TEST(commutated == direct);
 }
 
 BOOST_AUTO_TEST_CASE(sum_kernel_test) {
-  const Kernel1d<int> one({1, 1, 1}, 1);
+  const LineKernel<int> one({1, 1, 1}, 1);
   const auto separable = one.along<0, 1, 2>();
   const auto raster = Raster<int, 3>({3, 3, 3}).fill(1);
   const auto sum = separable * raster;
@@ -49,8 +50,8 @@ BOOST_AUTO_TEST_CASE(sum_kernel_test) {
 }
 
 BOOST_AUTO_TEST_CASE(make_sobel_test) {
-  const auto sobelX = SepKernel<int, 0, 1>::sobel();
-  const auto sobelY = SepKernel<int, 1, 0>::sobel();
+  const auto sobelX = SeparableKernel<int, 0, 1>::sobel();
+  const auto sobelY = SeparableKernel<int, 1, 0>::sobel();
   const auto raster = Raster<int, 3>({3, 3, 3}).fill(1);
   const auto edgesX = sobelX * raster;
   const auto edgesY = sobelY * raster;

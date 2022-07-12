@@ -33,6 +33,22 @@ public:
   RasterKernel(const T* values, Box<N> window) :
       m_values(values, values + window.size()), m_window(std::move(window)) {}
 
+  const Box<Dimension>& window() const {
+    return m_window;
+  }
+
+  Position<Dimension> shape() const {
+    return m_window.shape();
+  }
+
+  const PtrRaster<const Value, Dimension> raster() const {
+    return PtrRaster<const Value, Dimension>(m_window.shape(), m_values.data());
+  }
+
+  PtrRaster<Value, Dimension> raster() {
+    return PtrRaster<Value, Dimension>(m_window.shape(), m_values.data());
+  }
+
   /**
    * @brief Cross-correlate a raster with the kernel.
    * @note
@@ -52,7 +68,7 @@ public:
   void correlateTo(const Extrapolator<TRaster, TMethod>& in, TOut& out) {
     const auto inner = in.domain() - m_window;
     const auto outers = inner.surround(m_window);
-    correlateWithoutExtrapolation(raster(in), std::move(inner), out);
+    correlateWithoutExtrapolation(Litl::raster(in), std::move(inner), out);
     for (const auto& o : outers) {
       correlateWithExtrapolation(in, o, out);
     }

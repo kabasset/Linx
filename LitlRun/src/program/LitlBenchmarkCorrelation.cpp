@@ -4,7 +4,7 @@
 
 #include "ElementsKernel/ProgramHeaders.h"
 #include "LitlRun/ProgramOptions.h"
-#include "LitlTransforms/Kernel1d.h"
+#include "LitlTransforms/SeparableKernel.h"
 
 #include <map>
 #include <string>
@@ -24,7 +24,7 @@ public:
   ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
     const auto side = args["side"].as<Litl::Index>();
     Litl::Raster<int, 4> in({side, side, side, side});
-    const auto kernel = Litl::SepKernel<int, 0, 1>::sobel();
+    const auto kernel = Litl::SeparableKernel<int, 0, 1>::sobel();
     const auto out = kernel * in;
     return ExitCode::OK;
   }

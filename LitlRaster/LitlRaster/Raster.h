@@ -409,6 +409,26 @@ private:
 
 /**
  * @relates Raster
+ * @brief Equality operator.
+ */
+template <typename T, Index N, typename THolder, typename U, Index M, typename UHolder>
+bool operator==(const Raster<T, N, THolder>& lhs, const Raster<U, M, UHolder>& rhs) {
+  if (lhs.shape() != rhs.shape()) {
+    return false;
+  }
+  return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+}
+/**
+ * @relates Raster
+ * @brief Inequality operator.
+ */
+template <typename T, Index N, typename THolder, typename U, Index M, typename UHolder>
+bool operator!=(const Raster<T, N, THolder>& lhs, const Raster<U, M, UHolder>& rhs) {
+  return not(lhs == rhs);
+}
+
+/**
+ * @relates Raster
  * @brief Shortcut to create a raster from a shape and data without specifying the template parameters.
  * @tparam T The pixel type, should not be specified (automatically deduced)
  * @tparam Longs The axes lengths, should not be specified (automatically deduced)

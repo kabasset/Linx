@@ -2,127 +2,25 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LITLTRANSFORMS_KERNEL1D_H
-#define _LITLTRANSFORMS_KERNEL1D_H
+#ifndef _LITLTRANSFORMS_SEPARABLEKERNEL_H
+#define _LITLTRANSFORMS_SEPARABLEKERNEL_H
 
 #include "LitlRaster/Raster.h"
-#include "LitlRaster/Sampling.h"
-#include "LitlTransforms/Interpolation.h"
+#include "LitlTransforms/Kernel.h"
+#include "LitlTransforms/LineKernel.h"
 
 #include <map>
 #include <vector>
 
 namespace Litl {
 
-/// @cond
-template <typename T, Index I0, Index... Is>
-class SepKernel;
-/// @endcond
-
 /**
- * @brief 1D kernel for nD correlations.
- */
-template <typename T>
-class Kernel1d : public DataContainer<T, StdHolder<std::vector<T>>, VectorArithmetic, Kernel1d<T>> {
-
-public:
-  using Value = T;
-
-  /**
-   * @brief Constructor.
-   * @param values The kernel values
-   * @param origin The index of the kernel origin
-   */
-  explicit Kernel1d(std::vector<T>&& values, Index origin) :
-      DataContainer<T, StdHolder<std::vector<T>>, VectorArithmetic, Kernel1d<T>>(std::move(values)), m_backward(origin),
-      m_forward(this->size() - 1 - m_backward), m_bias() {}
-
-  /**
-   * @brief Constructor.
-   */
-  explicit Kernel1d(std::vector<T>&& values) : Kernel1d(std::move(values), values.size() / 2) {}
-
-  /**
-   * @brief Get the number of backward values.
-   */
-  Index backwardSize() const {
-    return m_backward;
-  }
-
-  /**
-   * @brief Get the number of forward values.
-   */
-  Index forwardSize() const {
-    return m_forward;
-  }
-
-  /**
-   * @brief Get a pointer to the data at origin.
-   */
-  const T* originData() const {
-    return this->data() + m_backward;
-  }
-
-  /**
-   * @brief Orient the kernel along given axes.
-   * @details
-   * For example, to apply a correlation kernel along axes 1 and 2 of a given raster `in`, do:
-   * \code
-   * auto out = kernel.along<1, 2>().correlate(in);
-   * \endcode
-   */
-  template <Index... Is>
-  SepKernel<T, Is...> along() const {
-    return SepKernel<T, Is...>(*this);
-  }
-
-  /**
-   * @brief Correlate a given sampled data with the kernel.
-   */
-  template <typename TIn, typename TOut>
-  void correlate(const DataSamples<TIn>& in, DataSamples<TOut>& out)
-      const { // FIXME only valid for kernel croping extrapolation
-
-    // Set up iterators
-    const auto step = in.step();
-    DataSamples<const TIn>
-        unitIn {in.data(), in.size(), {in.front(), in.back()}, in.stride()}; // step = 1 for inner_product
-    auto inIt = unitIn.begin();
-    auto inMinIt = inIt;
-    inMinIt -= in.front();
-    inIt -= m_backward;
-    auto outIt = out.begin();
-    auto i = in.front();
-
-    // Backward-croped
-    for (; i < m_backward; i += step, inIt += step, ++outIt) {
-      *outIt = std::inner_product(originData() - i, this->end(), inMinIt, m_bias);
-    }
-
-    // Central
-    for (; i <= in.size() - m_forward - step; i += step, inIt += step, ++outIt) {
-      *outIt = std::inner_product(this->begin(), this->end(), inIt, m_bias);
-    }
-
-    // Forward-croped
-    for (; i <= in.back(); i += step, inIt += step, ++outIt) {
-      *outIt = std::inner_product(this->begin(), originData() + (in.size() - i), inIt, m_bias);
-    }
-  }
-
-private:
-  Index m_backward;
-  Index m_forward;
-  T m_bias;
-};
-
-/**
- * @brief Separable correlation kernel as a sequence of oriented 1D kernels.
+ * @brief Separable correlation kernel as a sequence of oriented line kernels.
  */
 template <typename T, Index I0, Index... Is>
-class SepKernel {
+class SeparableKernel {
   template <typename U, Index J0, Index... Js>
-  friend class SepKernel;
+  friend class SeparableKernel;
 
 public:
   /**
@@ -136,23 +34,23 @@ public:
   static constexpr Index Dimension = std::max({I0, Is...}) + 1;
 
   /**
-   * @brief Construct a sequence of identical `Kernel1d`s with various orientations.
+   * @brief Construct a sequence of identical `LineKernel`s with various orientations.
    */
-  explicit SepKernel(const Kernel1d<T>& kernel) : m_kernels {{I0, kernel}, {Is, kernel}...} {}
+  explicit SeparableKernel(const LineKernel<T>& kernel) : m_kernels {{I0, kernel}, {Is, kernel}...} {}
 
   /**
    * @brief Map-based constructor.
    */
   template <typename... Ts>
-  explicit SepKernel(Ts&&... args) : m_kernels(std::forward<Ts>(args)...) {}
+  explicit SeparableKernel(Ts&&... args) : m_kernels(std::forward<Ts>(args)...) {}
 
   /**
    * @brief Make a Prewitt correlation kernel along given axes.
    * @see `sobel()`
    */
-  static SepKernel prewitt(T sign = 1) {
-    const auto derivation = Kernel1d<T>({sign, 0, -sign}).template along<I0>();
-    const auto averaging = Kernel1d<T>({1, 1, 1}).template along<Is...>();
+  static SeparableKernel prewitt(T sign = 1) {
+    const auto derivation = LineKernel<T>({sign, 0, -sign}).template along<I0>();
+    const auto averaging = LineKernel<T>({1, 1, 1}).template along<Is...>();
     return derivation * averaging;
   }
 
@@ -167,13 +65,13 @@ public:
    * 
    * For example, to compute the derivative along axis 1 backward, while averaging along axes 0 and 2, do:
    * \code
-   * auto kernel = SepKernel<int, 1, 0, 2>::sobel(-1);
+   * auto kernel = SeparableKernel<int, 1, 0, 2>::sobel(-1);
    * auto dy = kernel * raster;
    * \endcode
    */
-  static SepKernel sobel(T sign = 1) {
-    const auto derivation = Kernel1d<T>({sign, 0, -sign}).template along<I0>();
-    const auto averaging = Kernel1d<T>({1, 2, 1}).template along<Is...>();
+  static SeparableKernel sobel(T sign = 1) {
+    const auto derivation = LineKernel<T>({sign, 0, -sign}).template along<I0>();
+    const auto averaging = LineKernel<T>({1, 2, 1}).template along<Is...>();
     return derivation * averaging;
   }
 
@@ -181,9 +79,9 @@ public:
    * @brief Make a Scharr correlation kernel along given axes.
    * @see `sobel()`
    */
-  static SepKernel<T, I0, Is...> scharr(T sign = 1) {
-    const auto derivation = Kernel1d<T>({sign, 0, -sign}).template along<I0>();
-    const auto averaging = Kernel1d<T>({3, 10, 3}).template along<Is...>();
+  static SeparableKernel<T, I0, Is...> scharr(T sign = 1) {
+    const auto derivation = LineKernel<T>({sign, 0, -sign}).template along<I0>();
+    const auto averaging = LineKernel<T>({3, 10, 3}).template along<Is...>();
     return derivation * averaging;
   }
 
@@ -193,26 +91,46 @@ public:
    * The kernel is built as a sequence of 1D kernels `{1, -2, 1}` if `sign` is 1,
    * or `{-1, 2, -1}` if sign is -1.
    */
-  static SepKernel laplacian(T sign = 1) {
-    return SepKernel(Kernel1d<T>({sign, sign * -2, sign}));
+  static SeparableKernel laplacian(T sign = 1) {
+    return SeparableKernel(LineKernel<T>({sign, sign * -2, sign}));
+  }
+
+  /// @group_properties
+
+  /**
+   * @brief The logical window of the kernel.
+   */
+  Box<Dimension> window() const {
+    Box<Dimension> box(Position<Dimension>::zero(), Position<Dimension>::zero());
+    for (const auto& k : m_kernels) {
+      auto i = k.first;
+      const auto& w = k.second.window();
+      if (w.front() < box[i]) {
+        box[i] = w.front();
+      }
+      if (w.back() > box[i]) {
+        box[i] = w.back();
+      }
+    }
+    return box;
   }
 
   /**
-   * @brief Get the `Kernel1d` along given axis.
+   * @brief Get the `LineKernel` along given axis.
    */
   const T& operator[](Index axis) const {
     return m_kernels.at(axis);
   }
 
   /**
-   * @brief Beginning iterator over `{Index, Kernel1d}` pairs.
+   * @brief Beginning iterator over `{Index, LineKernel}` pairs.
    */
   const decltype(auto) begin() const {
     return m_kernels.begin();
   }
 
   /**
-   * @brief End iterator over `{Index, Kernel1d}` pairs.
+   * @brief End iterator over `{Index, LineKernel}` pairs.
    */
   const decltype(auto) end() const {
     return m_kernels.end();
@@ -221,24 +139,24 @@ public:
   /**
    * @brief Convolve the separable components as a single ND kernel.
    */
-  Raster<Value, Dimension> compose() const { // FIMXE product()?
+  RasterKernel<Value, Dimension> compose() const {
     auto shape = Position<Dimension>::one();
     auto origin = Position<Dimension>::zero();
     for (const auto& k : m_kernels) {
       shape[k.first] = k.second.size();
-      origin[k.first] = k.second.backwardSize();
+      origin[k.first] = k.second.origin();
     }
-    Raster<Value, Dimension> raster(shape);
-    // FIXME
-    return raster; // FIXME return Kernel<Value, Dimension>
+    auto raster = Raster<Value, Dimension>(shape).fill(T(0));
+    raster[origin] = T(1);
+    return kernelize(*this * raster, origin);
   }
 
   /**
    * @brief Combine two sequences of kernels.
    */
   template <Index... Js>
-  SepKernel<T, I0, Is..., Js...> operator*(const SepKernel<T, Js...>& rhs) const {
-    SepKernel<T, I0, Is..., Js...> out(m_kernels);
+  SeparableKernel<T, I0, Is..., Js...> operator*(const SeparableKernel<T, Js...>& rhs) const {
+    SeparableKernel<T, I0, Is..., Js...> out(m_kernels);
     out.m_kernels.insert(rhs.begin(), rhs.end());
     return out;
   }
@@ -318,12 +236,12 @@ private:
     auto box = sampling.region();
     for (const auto& p : m_kernels) {
       auto& front = box.front[p.first];
-      front -= p.second.backwardSize();
+      front -= p.second.origin();
       if (front < 0) {
         front = 0;
       }
       auto& back = box.back[p.first];
-      back += p.second.forwardSize();
+      back += p.second.size() - p.second.origin() - 1;
       if (back >= shape[p.first]) {
         back = shape[p.first] - 1;
       }
@@ -332,7 +250,7 @@ private:
   }
 
 private:
-  std::map<Index, Kernel1d<T>> m_kernels;
+  std::map<Index, LineKernel<T>> m_kernels;
 };
 
 } // namespace Litl

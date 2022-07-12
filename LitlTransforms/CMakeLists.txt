@@ -32,19 +32,23 @@ elements_add_unit_test(DftPlan tests/src/DftPlan_test.cpp
                      EXECUTABLE LitlTransforms_DftPlan_test
                      LINK_LIBRARIES LitlTransforms
                      TYPE Boost)
+elements_add_unit_test(Interpolation tests/src/Interpolation_test.cpp 
+                     EXECUTABLE LitlTransforms_Interpolation_test
+                     LINK_LIBRARIES LitlTransforms
+                     TYPE Boost)
 elements_add_unit_test(Kernel tests/src/Kernel_test.cpp 
                      EXECUTABLE LitlTransforms_Kernel_test
                      LINK_LIBRARIES LitlTransforms
                      TYPE Boost)
-elements_add_unit_test(Kernel1d tests/src/Kernel1d_test.cpp 
-                     EXECUTABLE LitlTransforms_Kernel1d_test
+elements_add_unit_test(LineKernel tests/src/LineKernel_test.cpp 
+                     EXECUTABLE LitlTransforms_LineKernel_test
                      LINK_LIBRARIES LitlTransforms
                      TYPE Boost)
 elements_add_unit_test(MedianFilter tests/src/MedianFilter_test.cpp 
                      EXECUTABLE LitlTransforms_MedianFilter_test
                      LINK_LIBRARIES LitlTransforms
                      TYPE Boost)
-elements_add_unit_test(Interpolation tests/src/Interpolation_test.cpp 
-                     EXECUTABLE LitlTransforms_Interpolation_test
+elements_add_unit_test(SeparableKernel tests/src/SeparableKernel_test.cpp 
+                     EXECUTABLE LitlTransforms_SeparableKernel_test
                      LINK_LIBRARIES LitlTransforms
                      TYPE Boost)
