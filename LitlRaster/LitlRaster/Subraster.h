@@ -13,8 +13,6 @@
 
 namespace Litl {
 
-/// @cond
-
 /**
  * @ingroup data_classes
  * @brief A subraster as a view of a raster region.
@@ -23,90 +21,93 @@ namespace Litl {
  * they are piece-wise contiguous only.
  * When a region is indeed contiguous, it is better to rely on a PtrRaster instead.
  */
-template <typename T, Index N, typename THolder> // FIXME simplify as TParent
+template <typename TRaster, typename T>
 class Subraster {
 
 public:
-  using Parent = Raster<T, N, THolder>;
+  using Parent = TRaster;
+  using Value = T;
+  static constexpr Index Dimension = TRaster::Dimension;
+
+  class Iterator;
+
+  /// @{
+  /// @group_construction
 
   /**
    * @brief Constructor.
    */
-  Subraster(const Parent& parent, const Box<N>& region) : m_cParent(&parent), m_parent(nullptr), m_region(region) {}
+  Subraster(Parent& parent, Box<Dimension> region) : m_raster(parent), m_region(std::move(region)) {}
+
+  /// @group_properties
 
   /**
-   * @brief Constructor.
+   * @brief Get the subraster shape.
    */
-  Subraster(Parent& parent, const Box<N>& region) : m_cParent(&parent), m_parent(&parent), m_region(region) {}
-
-  /**
-   * @brief The subraster shape.
-   */
-  Position<N> shape() const {
+  Position<Dimension> shape() const {
     return m_region.shape();
   }
 
   /**
    * @brief The number of pixels in the subraster.
    */
-  Index size() const {
+  std::size_t size() const {
     return m_region.size();
   }
 
   /**
-   * @brief The parent raster.
+   * @brief Get the region.
    */
-  const Parent& parent() const {
-    return *m_cParent;
-  }
-
-  /**
-   * @copydoc parent()
-   */
-  Parent& parent() {
-    return *m_parent;
-  }
-
-  /**
-   * @brief The region.
-   */
-  const Box<N>& region() const {
+  const Box<Dimension>& region() const {
     return m_region;
   }
 
   /**
-   * @brief Pixel at given position.
+   * @brief Access the parent raster.
    */
-  const T& operator[](const Position<N>& pos) const {
-    return (*m_cParent)[pos + m_region.front()];
+  const Parent& raster() const {
+    return m_raster;
+  }
+
+  /**
+   * @copydoc raster()
+   */
+  Parent& raster() {
+    return m_raster;
+  }
+
+  /// @group_elements
+
+  /**
+   * @brief Access the pixel at given position.
+   */
+  const Value& operator[](const Position<Dimension>& pos) const {
+    return m_raster[pos + m_region.front()];
   }
 
   /**
    * @brief Pixel at given position.
    */
-  T& operator[](const Position<N>& pos) {
-    return (*m_parent)[pos + m_region.front()];
+  Value& operator[](const Position<Dimension>& pos) {
+    return m_raster[pos + m_region.front()];
   }
+
+  /// @}
 
 private:
   /**
-   * @brief Read-only pointer to the raster.
+   * @brief The parent raster.
    */
-  const Parent* m_cParent;
-
-  /**
-   * @brief Read/write pointer to the raster.
-   */
-  Parent* m_parent;
+  Parent& m_raster;
 
   /**
    * @brief The region.
    */
-  Box<N> m_region;
+  Box<Dimension> m_region;
 };
 
-/// @endcond
-
 } // namespace Litl
+
+#include "LitlRaster/SubrasterIterator.h"
 
 #endif

@@ -31,7 +31,7 @@ namespace Litl {
 // Issue with forward declarations: https://github.com/doxygen/doxygen/issues/8177
 
 // Forward declaration for Raster::subraster()
-template <typename T, Index N, typename THolder>
+template <typename TRaster, typename T>
 class Subraster;
 
 // Forward declaration for specializations
@@ -379,26 +379,28 @@ public:
    */
   PtrRaster<T, N == -1 ? -1 : N - 1> section(Index index);
 
-  /// @}
-
-private:
   /**
    * @brief Create a subraster from given region.
    * @details
    * A subraster is a view of the raster data contained in a region.
    * As opposed to a slice or a section, a subraster is not necessarily contiguous in memory.
-   * @warning Should be removed.
+   * 
+   * Subrasters are iterable.
+   * 
    * @see isContiguous()
    * @see slice()
    * @see section()
    */
-  const Subraster<T, N, THolder> subraster(const Box<N>& region) const; // FIXME rm?
+  const Subraster<const Raster<T, N, THolder>, const T> subraster(Box<N> region) const;
 
   /**
-   * @copydetails subraster().
+   * @copybrief subraster().
    */
-  Subraster<T, N, THolder> subraster(const Box<N>& region); // FIXME rm?
+  Subraster<Raster<T, N, THolder>, T> subraster(Box<N> region);
 
+  /// @}
+
+private:
   /**
    * @brief Raster shape, i.e. length along each axis.
    */

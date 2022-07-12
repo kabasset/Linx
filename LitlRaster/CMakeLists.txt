@@ -27,6 +27,10 @@ elements_add_unit_test(Subraster tests/src/Subraster_test.cpp
                      EXECUTABLE LitlRaster_Subraster_test
                      LINK_LIBRARIES LitlRaster
                      TYPE Boost)
+elements_add_unit_test(SubrasterIterator tests/src/SubrasterIterator_test.cpp 
+                     EXECUTABLE LitlRaster_SubrasterIterator_test
+                     LINK_LIBRARIES LitlRaster
+                     TYPE Boost)
 elements_add_unit_test(Vector tests/src/Vector_test.cpp 
                      EXECUTABLE LitlRaster_Vector_test
                      LINK_LIBRARIES LitlRaster
