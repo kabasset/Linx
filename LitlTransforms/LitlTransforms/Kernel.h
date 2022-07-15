@@ -67,7 +67,7 @@ public:
   void correlateTo(const Extrapolator<TRaster, TMethod>& in, TOut& out) {
     const auto inner = in.domain() - m_window;
     const auto outers = inner.surround(m_window);
-    correlateWithoutExtrapolation(Litl::raster(in), std::move(inner), out);
+    correlateWithoutExtrapolation(Litl::rasterize(in), std::move(inner), out);
     for (const auto& o : outers) {
       correlateWithExtrapolation(in, o, out);
     }

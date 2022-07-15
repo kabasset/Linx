@@ -83,13 +83,22 @@ private:
   TMethod m_method;
 };
 
+/**
+ * @brief Identity.
+ * @details
+ * This function is provided for compatibility with `Extrapolator`
+ * in cases where functions accept either a `Raster` or an `Extrapolator`.
+ */
 template <typename T, Index N, typename THolder>
-const Raster<T, N, THolder>& raster(const Raster<T, N, THolder>& in) {
+const Raster<T, N, THolder>& rasterize(const Raster<T, N, THolder>& in) {
   return in;
 }
 
+/**
+ * @brief Get the raster decorated by an extrapolator.
+ */
 template <typename TRaster, typename TMethod>
-auto raster(const Extrapolator<TRaster, TMethod>& in) -> decltype(auto) {
+const TRaster& rasterize(const Extrapolator<TRaster, TMethod>& in) {
   return in.raster();
 }
 
@@ -136,7 +145,7 @@ public:
    * @brief Get the decorated raster.
    */
   auto raster() const -> decltype(auto) {
-    return Litl::raster(m_raster);
+    return Litl::rasterize(m_raster);
   }
 
   /**
