@@ -39,6 +39,8 @@ namespace Litl {
 <td><ul>
 <li>Module \ref correlation
 <li>Class `Kernel`
+<li>Class `LineKernel`
+<li>Class `SeparableKernel`
 <li>Module \ref interpolation
 <li>Class `Extrapolator`
 <tr><td>Bilateral filtering<td>`Raster`

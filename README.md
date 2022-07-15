@@ -18,6 +18,7 @@ Currently supported operations are:
 * Pixel-wise operations (`+`, `*`, `exp()`, `apply()`...);
 * Discrete Fourier transforms (FFTW wrapper) through the `DftPlan` class;
 * Linear filtering through the `Kernel` class;
+* Morphology and rank-order filtering through the `StructuringElement` class;
 * Interpolation and extrapolation (`NearestNeighbor`, `Linear`, `OutOfBoundsConstant`...);
 * Affine transformations.
 

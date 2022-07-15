@@ -26,6 +26,10 @@ public:
     return m_back;
   }
 
+  std::size_t size() const {
+    return m_back - m_front + 1;
+  }
+
 private:
   Index m_front;
   Index m_back;

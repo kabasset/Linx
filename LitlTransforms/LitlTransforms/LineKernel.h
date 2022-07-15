@@ -116,6 +116,21 @@ private:
   T m_bias;
 };
 
+/// @cond
+template <typename T, typename THolder>
+class Sequence;
+/// @endcond
+
+template <typename T, typename THolder>
+LineKernel<T> kernelize(const Sequence<T, THolder>& values, Index origin) {
+  return LineKernel<T>(values.data(), origin);
+}
+
+template <typename T>
+LineKernel<T> kernelize(const T* values, Segment window) {
+  return LineKernel<T>(std::vector<T>(values, values + window.size()), std::move(window));
+}
+
 } // namespace Litl
 
 #endif

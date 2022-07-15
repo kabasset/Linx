@@ -14,7 +14,7 @@ namespace Litl {
  * @brief A kernel which can be used for convolution or cross-correlation.
  */
 template <typename T, Index N = 2>
-class RasterKernel { // FIXME DataContainer or ShapedDataContaier
+class Kernel { // FIXME DataContainer
 
 public:
   /**
@@ -30,8 +30,7 @@ public:
   /**
    * @brief Constructor.
    */
-  RasterKernel(const T* values, Box<N> window) :
-      m_values(values, values + window.size()), m_window(std::move(window)) {}
+  Kernel(const T* values, Box<N> window) : m_values(values, values + window.size()), m_window(std::move(window)) {}
 
   const Box<Dimension>& window() const {
     return m_window;
@@ -126,8 +125,7 @@ private:
     }
 
     // Allocate extrapolation buffer
-    std::vector<T> buffer;
-    buffer.reserve(m_values.size());
+    std::vector<T> buffer(m_values.size());
 
     // Prepare iterators
     const auto bBegin = buffer.begin();
@@ -138,10 +136,10 @@ private:
     for (const auto& p : box) {
 
       // Fill the buffer
-      buffer.clear(); // Memory is not affected
-      for (const auto& q : m_window + p) {
-        buffer.push_back(in[q]);
-      }
+      const auto w = m_window + p;
+      std::transform(begin(w), end(w), buffer.begin(), [&](const auto& q) {
+        return in[q];
+      });
 
       // Compute the weighted sum
       out[p] = std::inner_product(kBegin, kEnd, bBegin, T {});
@@ -164,24 +162,24 @@ private:
  * @brief Make a kernel.
  */
 template <typename T, Index N = 2>
-RasterKernel<T, N> kernelize(const T* values, Box<N> window) {
-  return RasterKernel<T, N>(values, std::move(window));
+Kernel<T, N> kernelize(const T* values, Box<N> window) {
+  return Kernel<T, N>(values, std::move(window));
 }
 
 /**
  * @brief Make a kernel.
  */
 template <typename T, Index N, typename THolder>
-RasterKernel<T, N> kernelize(const Raster<T, N, THolder>& values, Position<N> origin) {
-  return RasterKernel<T, N>(values.data(), values.domain() - origin);
+Kernel<T, N> kernelize(const Raster<T, N, THolder>& values, Position<N> origin) {
+  return Kernel<T, N>(values.data(), values.domain() - origin);
 }
 
 /**
  * @brief Make a kernel.
  */
 template <typename T, Index N, typename THolder>
-RasterKernel<T, N> kernelize(const Raster<T, N, THolder>& values) {
-  return RasterKernel<T, N>(values.data(), values.domain() - values.shape() / 2);
+Kernel<T, N> kernelize(const Raster<T, N, THolder>& values) {
+  return Kernel<T, N>(values.data(), values.domain() - values.shape() / 2);
 }
 
 } // namespace Litl

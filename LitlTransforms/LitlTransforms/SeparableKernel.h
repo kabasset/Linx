@@ -139,7 +139,7 @@ public:
   /**
    * @brief Convolve the separable components as a single ND kernel.
    */
-  RasterKernel<Value, Dimension> compose() const {
+  Kernel<Value, Dimension> compose() const {
     auto shape = Position<Dimension>::one();
     auto origin = Position<Dimension>::zero();
     for (const auto& k : m_kernels) {
@@ -246,7 +246,7 @@ private:
         back = shape[p.first] - 1;
       }
     }
-    return box; //FIXME box.dilate(amount).clamp(shape)
+    return box; //FIXME box.grow(amount).clamp(shape)
   }
 
 private:

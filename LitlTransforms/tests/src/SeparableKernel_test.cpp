@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(composition_test) {
 
 BOOST_AUTO_TEST_CASE(associativity_commutativity_test) {
   const auto a = LineKernel<int>({1, 0, -1}).along<0>();
-  const auto b = LineKernel<int>({1, 2, 1}).along<1>();
+  const auto b = LineKernel<int>({1, 2, 3}).along<1>();
   const auto c = a * b;
   const auto raster = Raster<int, 3>({3, 3, 3}).range();
   const auto direct = c * raster;
