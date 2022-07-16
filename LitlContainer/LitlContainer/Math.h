@@ -35,6 +35,7 @@ template <typename T, typename TDerived>
 struct MathFunctionsMixin {
 
 #define LITL_MATH_UNARY_INPLACE(function) \
+  /** @brief Apply std::##function##(). */ \
   TDerived& function() { \
     auto* derived = static_cast<TDerived*>(this); \
     std::transform(derived->begin(), derived->end(), derived->begin(), [](auto e) { \
@@ -44,6 +45,7 @@ struct MathFunctionsMixin {
   }
 
 #define LITL_MATH_BINARY_INPLACE(function) \
+  /** @brief Apply std::##function##(). */ \
   template <typename U> \
   const std::enable_if_t<isIterable<U>::value, TDerived>& function(const U& other) { \
     auto* derived = static_cast<TDerived*>(this); \
@@ -54,6 +56,7 @@ struct MathFunctionsMixin {
   }
 
 #define LITL_MATH_BINARY_SCALAR_INPLACE(function) \
+  /** @brief Apply std::##function##(). */ \
   template <typename U> \
   std::enable_if_t<not isIterable<U>::value, TDerived>& function(U other) { \
     auto* derived = static_cast<TDerived*>(this); \
@@ -63,61 +66,62 @@ struct MathFunctionsMixin {
     return *derived; \
   }
 
-  LITL_MATH_UNARY_INPLACE(abs) ///< Apply `std::abs()`
-  LITL_MATH_BINARY_INPLACE(max) ///< Apply `std::max()`
-  LITL_MATH_BINARY_SCALAR_INPLACE(max) ///< Apply `std::max()`
-  LITL_MATH_BINARY_INPLACE(min) ///< Apply `std::min()`
-  LITL_MATH_BINARY_SCALAR_INPLACE(min) ///< Apply `std::min()`
-  LITL_MATH_BINARY_INPLACE(fdim) ///< Apply `std::fdim()`
-  LITL_MATH_BINARY_SCALAR_INPLACE(fdim) ///< Apply `std::fdim()`
-  LITL_MATH_UNARY_INPLACE(ceil) ///< Apply `std::ceil()`
-  LITL_MATH_UNARY_INPLACE(floor) ///< Apply `std::floor()`
-  LITL_MATH_BINARY_INPLACE(fmod) ///< Apply `std::fmod()`
-  LITL_MATH_BINARY_SCALAR_INPLACE(fmod) ///< Apply `std::fmod()`
-  LITL_MATH_UNARY_INPLACE(trunc) ///< Apply `std::trunc()`
-  LITL_MATH_UNARY_INPLACE(round) ///< Apply `std::round()`
+  LITL_MATH_UNARY_INPLACE(abs)
+  LITL_MATH_BINARY_INPLACE(max)
+  LITL_MATH_BINARY_SCALAR_INPLACE(max)
+  LITL_MATH_BINARY_INPLACE(min)
+  LITL_MATH_BINARY_SCALAR_INPLACE(min)
+  LITL_MATH_BINARY_INPLACE(fdim)
+  LITL_MATH_BINARY_SCALAR_INPLACE(fdim)
+  LITL_MATH_UNARY_INPLACE(ceil)
+  LITL_MATH_UNARY_INPLACE(floor)
+  LITL_MATH_BINARY_INPLACE(fmod)
+  LITL_MATH_BINARY_SCALAR_INPLACE(fmod)
+  LITL_MATH_UNARY_INPLACE(trunc)
+  LITL_MATH_UNARY_INPLACE(round)
 
-  LITL_MATH_UNARY_INPLACE(cos) ///< Apply `std::cos()`
-  LITL_MATH_UNARY_INPLACE(sin) ///< Apply `std::sin()`
-  LITL_MATH_UNARY_INPLACE(tan) ///< Apply `std::tan()`
-  LITL_MATH_UNARY_INPLACE(acos) ///< Apply `std::acos()`
-  LITL_MATH_UNARY_INPLACE(asin) ///< Apply `std::asin()`
-  LITL_MATH_UNARY_INPLACE(atan) ///< Apply `std::atan()`
-  LITL_MATH_BINARY_INPLACE(atan2) ///< Apply `std::atan2()`
-  LITL_MATH_BINARY_SCALAR_INPLACE(atan2) ///< Apply `std::atan2()`
-  LITL_MATH_UNARY_INPLACE(cosh) ///< Apply `std::cosh()`
-  LITL_MATH_UNARY_INPLACE(sinh) ///< Apply `std::sinh()`
-  LITL_MATH_UNARY_INPLACE(tanh) ///< Apply `std::tanh()`
-  LITL_MATH_UNARY_INPLACE(acosh) ///< Apply `std::acosh()`
-  LITL_MATH_UNARY_INPLACE(asinh) ///< Apply `std::asinh()`
-  LITL_MATH_UNARY_INPLACE(atanh) ///< Apply `std::atanh()`
+  LITL_MATH_UNARY_INPLACE(cos)
+  LITL_MATH_UNARY_INPLACE(sin)
+  LITL_MATH_UNARY_INPLACE(tan)
+  LITL_MATH_UNARY_INPLACE(acos)
+  LITL_MATH_UNARY_INPLACE(asin)
+  LITL_MATH_UNARY_INPLACE(atan)
+  LITL_MATH_BINARY_INPLACE(atan2)
+  LITL_MATH_BINARY_SCALAR_INPLACE(atan2)
+  LITL_MATH_UNARY_INPLACE(cosh)
+  LITL_MATH_UNARY_INPLACE(sinh)
+  LITL_MATH_UNARY_INPLACE(tanh)
+  LITL_MATH_UNARY_INPLACE(acosh)
+  LITL_MATH_UNARY_INPLACE(asinh)
+  LITL_MATH_UNARY_INPLACE(atanh)
 
-  LITL_MATH_UNARY_INPLACE(exp) ///< Apply `std::exp()`
-  LITL_MATH_UNARY_INPLACE(exp2) ///< Apply `std::exp2()`
-  LITL_MATH_UNARY_INPLACE(expm1) ///< Apply `std::expm1()`
-  LITL_MATH_UNARY_INPLACE(log) ///< Apply `std::log()`
-  LITL_MATH_UNARY_INPLACE(log2) ///< Apply `std::log2()`
-  LITL_MATH_UNARY_INPLACE(log10) ///< Apply `std::log10()`
-  LITL_MATH_UNARY_INPLACE(logb) ///< Apply `std::logb()`
-  LITL_MATH_UNARY_INPLACE(ilogb) ///< Apply `std::ilogb()`
-  LITL_MATH_UNARY_INPLACE(log1p) ///< Apply `std::log1p()`
-  LITL_MATH_BINARY_INPLACE(pow) ///< Apply `std::pow()`
-  LITL_MATH_BINARY_SCALAR_INPLACE(pow) ///< Apply `std::pow()`
-  LITL_MATH_UNARY_INPLACE(sqrt) ///< Apply `std::sqrt()`
-  LITL_MATH_UNARY_INPLACE(cbrt) ///< Apply `std::cbrt()`
-  LITL_MATH_BINARY_INPLACE(hypot) ///< Apply `std::hypot()`
-  LITL_MATH_BINARY_SCALAR_INPLACE(hypot) ///< Apply `std::hypot()`
+  LITL_MATH_UNARY_INPLACE(exp)
+  LITL_MATH_UNARY_INPLACE(exp2)
+  LITL_MATH_UNARY_INPLACE(expm1)
+  LITL_MATH_UNARY_INPLACE(log)
+  LITL_MATH_UNARY_INPLACE(log2)
+  LITL_MATH_UNARY_INPLACE(log10)
+  LITL_MATH_UNARY_INPLACE(logb)
+  LITL_MATH_UNARY_INPLACE(ilogb)
+  LITL_MATH_UNARY_INPLACE(log1p)
+  LITL_MATH_BINARY_INPLACE(pow)
+  LITL_MATH_BINARY_SCALAR_INPLACE(pow)
+  LITL_MATH_UNARY_INPLACE(sqrt)
+  LITL_MATH_UNARY_INPLACE(cbrt)
+  LITL_MATH_BINARY_INPLACE(hypot)
+  LITL_MATH_BINARY_SCALAR_INPLACE(hypot)
 
-  LITL_MATH_UNARY_INPLACE(erf) ///< Apply `std::erf()`
-  LITL_MATH_UNARY_INPLACE(erfc) ///< Apply `std::erfc()`
-  LITL_MATH_UNARY_INPLACE(tgamma) ///< Apply `std::tgamma()`
-  LITL_MATH_UNARY_INPLACE(lgamma) ///< Apply `std::lgamma()`
+  LITL_MATH_UNARY_INPLACE(erf)
+  LITL_MATH_UNARY_INPLACE(erfc)
+  LITL_MATH_UNARY_INPLACE(tgamma)
+  LITL_MATH_UNARY_INPLACE(lgamma)
 
 #undef LITL_MATH_UNARY_INPLACE
 #undef LITL_MATH_BINARY_INPLACE
 };
 
 #define LITL_MATH_UNARY_NEWINSTANCE(function) \
+  /** @relates MathFunctionsMixin @brief Apply std::##function##() (new instance). */ \
   template <typename T, typename TDerived> \
   TDerived function(const MathFunctionsMixin<T, TDerived>& in) { \
     TDerived out(static_cast<const TDerived&>(in)); \
@@ -126,6 +130,7 @@ struct MathFunctionsMixin {
   }
 
 #define LITL_MATH_BINARY_NEWINSTANCE(function) \
+  /** @relates MathFunctionsMixin @brief Apply std::##function##() (new instance). */ \
   template <typename T, typename TDerived, typename TOther> \
   TDerived function(const MathFunctionsMixin<T, TDerived>& in, const TOther& other) { \
     TDerived out(static_cast<const TDerived&>(in)); \
@@ -133,53 +138,48 @@ struct MathFunctionsMixin {
     return out; \
   }
 
-/// @ingroup pixelwise
-/// @{
+LITL_MATH_UNARY_NEWINSTANCE(abs)
+LITL_MATH_BINARY_NEWINSTANCE(max)
+LITL_MATH_BINARY_NEWINSTANCE(min)
+LITL_MATH_BINARY_NEWINSTANCE(fdim)
+LITL_MATH_UNARY_NEWINSTANCE(ceil)
+LITL_MATH_UNARY_NEWINSTANCE(floor)
+LITL_MATH_BINARY_NEWINSTANCE(fmod)
+LITL_MATH_UNARY_NEWINSTANCE(trunc)
+LITL_MATH_UNARY_NEWINSTANCE(round)
 
-LITL_MATH_UNARY_NEWINSTANCE(abs) ///< Apply `std::abs()` @ingroup pixelwise
-LITL_MATH_BINARY_NEWINSTANCE(max) ///< Apply `std::max()` @ingroup pixelwise
-LITL_MATH_BINARY_NEWINSTANCE(min) ///< Apply `std::min()` @ingroup pixelwise
-LITL_MATH_BINARY_NEWINSTANCE(fdim) ///< Apply `std::fdim()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(ceil) ///< Apply `std::ceil()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(floor) ///< Apply `std::floor()` @ingroup pixelwise
-LITL_MATH_BINARY_NEWINSTANCE(fmod) ///< Apply `std::fmod()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(trunc) ///< Apply `std::trunc()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(round) ///< Apply `std::round()` @ingroup pixelwise
+LITL_MATH_UNARY_NEWINSTANCE(cos)
+LITL_MATH_UNARY_NEWINSTANCE(sin)
+LITL_MATH_UNARY_NEWINSTANCE(tan)
+LITL_MATH_UNARY_NEWINSTANCE(acos)
+LITL_MATH_UNARY_NEWINSTANCE(asin)
+LITL_MATH_UNARY_NEWINSTANCE(atan)
+LITL_MATH_BINARY_NEWINSTANCE(atan2)
+LITL_MATH_UNARY_NEWINSTANCE(cosh)
+LITL_MATH_UNARY_NEWINSTANCE(sinh)
+LITL_MATH_UNARY_NEWINSTANCE(tanh)
+LITL_MATH_UNARY_NEWINSTANCE(acosh)
+LITL_MATH_UNARY_NEWINSTANCE(asinh)
+LITL_MATH_UNARY_NEWINSTANCE(atanh)
 
-LITL_MATH_UNARY_NEWINSTANCE(cos) ///< Apply `std::cos()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(sin) ///< Apply `std::sin()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(tan) ///< Apply `std::tan()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(acos) ///< Apply `std::acos()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(asin) ///< Apply `std::asin()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(atan) ///< Apply `std::atan()` @ingroup pixelwise
-LITL_MATH_BINARY_NEWINSTANCE(atan2) ///< Apply `std::atan2()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(cosh) ///< Apply `std::cosh()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(sinh) ///< Apply `std::sinh()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(tanh) ///< Apply `std::tanh()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(acosh) ///< Apply `std::acosh()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(asinh) ///< Apply `std::asinh()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(atanh) ///< Apply `std::atanh()` @ingroup pixelwise
+LITL_MATH_UNARY_NEWINSTANCE(exp)
+LITL_MATH_UNARY_NEWINSTANCE(exp2)
+LITL_MATH_UNARY_NEWINSTANCE(expm1)
+LITL_MATH_UNARY_NEWINSTANCE(log)
+LITL_MATH_UNARY_NEWINSTANCE(log2)
+LITL_MATH_UNARY_NEWINSTANCE(log10)
+LITL_MATH_UNARY_NEWINSTANCE(logb)
+LITL_MATH_UNARY_NEWINSTANCE(ilogb)
+LITL_MATH_UNARY_NEWINSTANCE(log1p)
+LITL_MATH_BINARY_NEWINSTANCE(pow)
+LITL_MATH_UNARY_NEWINSTANCE(sqrt)
+LITL_MATH_UNARY_NEWINSTANCE(cbrt)
+LITL_MATH_BINARY_NEWINSTANCE(hypot)
 
-LITL_MATH_UNARY_NEWINSTANCE(exp) ///< Apply `std::exp()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(exp2) ///< Apply `std::exp2()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(expm1) ///< Apply `std::expm1()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(log) ///< Apply `std::log()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(log2) ///< Apply `std::log2()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(log10) ///< Apply `std::log10()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(logb) ///< Apply `std::logb()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(ilogb) ///< Apply `std::ilogb()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(log1p) ///< Apply `std::log1p()` @ingroup pixelwise
-LITL_MATH_BINARY_NEWINSTANCE(pow) ///< Apply `std::pow()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(sqrt) ///< Apply `std::sqrt()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(cbrt) ///< Apply `std::cbrt()` @ingroup pixelwise
-LITL_MATH_BINARY_NEWINSTANCE(hypot) ///< Apply `std::hypot()` @ingroup pixelwise
-
-LITL_MATH_UNARY_NEWINSTANCE(erf) ///< Apply `std::erf()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(erfc) ///< Apply `std::erfc()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(tgamma) ///< Apply `std::tgamma()` @ingroup pixelwise
-LITL_MATH_UNARY_NEWINSTANCE(lgamma) ///< Apply `std::lgamma()` @ingroup pixelwise
-
-/// @}
+LITL_MATH_UNARY_NEWINSTANCE(erf)
+LITL_MATH_UNARY_NEWINSTANCE(erfc)
+LITL_MATH_UNARY_NEWINSTANCE(tgamma)
+LITL_MATH_UNARY_NEWINSTANCE(lgamma)
 
 #undef LITL_MATH_UNARY_NEWINSTANCE
 #undef LITL_MATH_BINARY_NEWINSTANCE

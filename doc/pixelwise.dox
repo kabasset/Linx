@@ -27,8 +27,7 @@ Argument-dependent lookup (ADL) allows skipping the namespace in the latter case
 
 \snippet LitlDemoPixelwise_test.cpp Functions
 
-The complete list of available in-place functions can be found in `MathFunctionsMixin`'s documentation.
-New-instance versions are part of the `Litl` namespace documentation, and listed at the end of this page.
+The complete list of available functions can be found in `MathFunctionsMixin`'s documentation.
 
 
 \section pixelwise-apply Generate and Apply

@@ -213,7 +213,7 @@ public:
     return generate(std::forward<TFunc>(func), static_cast<TDerived&>(*this), args...);
   }
 
-  /// @group_operators
+  /// @group_operations
 
   /**
    * @brief Get a reference to the (first) min element.
