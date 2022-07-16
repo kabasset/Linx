@@ -465,6 +465,18 @@ PtrRaster<T, sizeof...(Longs)> rasterize(T* data, Longs... shape) {
   return PtrRaster<T, sizeof...(Longs)> {{shape...}, data};
 }
 
+/**
+ * @relates Raster
+ * @brief Identity.
+ * @details
+ * This function is provided for compatibility with `Extrapolator`
+ * in cases where functions accept either a `Raster` or an `Extrapolator`.
+ */
+template <typename T, Index N, typename THolder>
+const Raster<T, N, THolder>& rasterize(const Raster<T, N, THolder>& in) {
+  return in;
+}
+
 #define LITL_MATH_COMPLEX_TO_REAL(function) \
   template <typename T, Index N, typename THolder> \
   Raster<T, N> function(const Raster<std::complex<T>, N, THolder>& in) { \
@@ -491,6 +503,7 @@ LITL_MATH_COMPLEX_TO_REAL(norm) ///< Apply `std::norm()` @ingroup pixelwise
 #undef LITL_MATH_COMPLEX_TO_REAL
 
 /**
+ * @relates Raster
  * @brief Generate a random raster.
  * @details
  * Pixel values are uniformly distributed between the type's half min and half max.

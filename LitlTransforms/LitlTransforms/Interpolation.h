@@ -84,17 +84,7 @@ private:
 };
 
 /**
- * @brief Identity.
- * @details
- * This function is provided for compatibility with `Extrapolator`
- * in cases where functions accept either a `Raster` or an `Extrapolator`.
- */
-template <typename T, Index N, typename THolder>
-const Raster<T, N, THolder>& rasterize(const Raster<T, N, THolder>& in) {
-  return in;
-}
-
-/**
+ * @relates Extrapolator
  * @brief Get the raster decorated by an extrapolator.
  */
 template <typename TRaster, typename TMethod>
@@ -188,16 +178,28 @@ private:
   TMethod m_method;
 };
 
+/**
+ * @relates Extrapolator
+ * @brief Make an extrapolator with given extrapolation method.
+ */
 template <typename TMethod = NearestNeighbor, typename TRaster, typename... TArgs>
 auto extrapolate(const TRaster& raster, TArgs&&... args) -> decltype(auto) {
   return Extrapolator<TRaster, TMethod>(raster, TMethod(std::forward<TArgs>(args)...));
 }
 
+/**
+ * @relates Extrapolator
+ * @brief Make an extrapolator with constant extrapolation value.
+ */
 template <typename T, Index N, typename THolder>
 auto extrapolate(const Raster<T, N, THolder>& raster, T constant) -> decltype(auto) {
   return Extrapolator<Raster<T, N, THolder>, OutOfBoundsConstant<T>>(raster, OutOfBoundsConstant<T>(constant));
 }
 
+/**
+ * @relates Interpolator
+ * @brief Make an interpolator with given interpolation method.
+ */
 template <typename TMethod = NearestNeighbor, typename TRaster, typename... TArgs>
 auto interpolate(const TRaster& raster, TArgs&&... args) -> decltype(auto) {
   return Interpolator<TRaster, TMethod>(raster, TMethod(std::forward<TArgs>(args)...));

@@ -15,6 +15,7 @@
 namespace Litl {
 
 /**
+ * @relates StepperPipeline
  * @brief Traits class which gives the cardinality (number of elements) of a type.
  * @details
  * Cardinality of:
@@ -27,17 +28,26 @@ struct TypeCardinality {
   static constexpr std::size_t value = 1;
 };
 
+/**
+ * @relates StepperPipeline
+ * @brief `void` specialization
+ */
 template <>
 struct TypeCardinality<void> {
   static constexpr std::size_t value = 0;
 };
 
+/**
+ * @relates StepperPipeline
+ * @brief Tuple specialization
+ */
 template <typename... Ts>
 struct TypeCardinality<std::tuple<Ts...>> {
   static constexpr std::size_t value = sizeof...(Ts);
 };
 
 /**
+ * @relates StepperPipeline
  * @brief Cardinality of a step's prerequisite.
  * @see `TypeCardinality`
  */

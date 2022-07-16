@@ -31,6 +31,12 @@ public:
   explicit Sequence(TIterable& iterable, TArgs&&... args) : Container(iterable, std::forward<TArgs>(args)...) {}
 };
 
+/**
+ * @relates Sequence
+ * @brief Generate a random raster.
+ * @details
+ * Pixel values are uniformly distributed between the type's half min and half max.
+ */
 template <typename T>
 Sequence<T> random(std::size_t size) {
   Sequence<T> out(size);

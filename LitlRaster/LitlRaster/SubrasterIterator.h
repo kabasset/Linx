@@ -110,6 +110,7 @@ private:
 };
 
 /**
+ * @relates Subraster
  * @brief Iterator to the beginning of a subraster.
  */
 template <typename TRaster, typename T>
@@ -118,6 +119,7 @@ typename Subraster<TRaster, T>::Iterator begin(const Subraster<TRaster, T>& subr
 }
 
 /**
+ * @relates Subraster
  * @brief Iterator to one past the end of a subraster.
  */
 template <typename TRaster, typename T>

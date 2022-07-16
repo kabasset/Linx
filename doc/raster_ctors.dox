@@ -40,7 +40,7 @@ Instantiating a `PtrRaster` and filling it at the same time makes little sense.
 Therefore, there are mostly two kinds of usage:
 read-only `PtrRaster`s and read/write `PtrRaster`s.
 The only difference in terms of instantiation is that the value type is const-qualified for read-only rasters.
-Function `rasterize` helps reducing the boilerplate by deducing template parameters from the call.
+Function `rasterize()` helps reducing the boilerplate by deducing template parameters from the call.
 
 Read/write raster, with non-const-qualified value type:
 

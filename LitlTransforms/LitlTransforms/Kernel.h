@@ -32,18 +32,30 @@ public:
    */
   Kernel(const T* values, Box<N> window) : m_values(values, values + window.size()), m_window(std::move(window)) {}
 
+  /**
+   * @brief Get the window.
+   */
   const Box<Dimension>& window() const {
     return m_window;
   }
 
+  /**
+   * @brief Get the shape.
+   */
   Position<Dimension> shape() const {
     return m_window.shape();
   }
 
+  /**
+   * @brief View the kernel values as a `Raster`.
+   */
   const PtrRaster<const Value, Dimension> raster() const {
     return PtrRaster<const Value, Dimension>(m_window.shape(), m_values.data());
   }
 
+  /**
+   * @copybrief raster()
+   */
   PtrRaster<Value, Dimension> raster() {
     return PtrRaster<Value, Dimension>(m_window.shape(), m_values.data());
   }
@@ -159,7 +171,8 @@ private:
 };
 
 /**
- * @brief Make a kernel.
+ * @relates Kernel
+ * @brief Make a kernel from values and a window.
  */
 template <typename T, Index N = 2>
 Kernel<T, N> kernelize(const T* values, Box<N> window) {
@@ -167,19 +180,23 @@ Kernel<T, N> kernelize(const T* values, Box<N> window) {
 }
 
 /**
- * @brief Make a kernel.
+ * @relates Kernel
+ * @brief Make a kernel from a raster and origin position.
  */
 template <typename T, Index N, typename THolder>
 Kernel<T, N> kernelize(const Raster<T, N, THolder>& values, Position<N> origin) {
-  return Kernel<T, N>(values.data(), values.domain() - origin);
+  return kernelize(values.data(), values.domain() - origin);
 }
 
 /**
- * @brief Make a kernel.
+ * @relates Kernel
+ * @brief Make a kernel from a raster, with centered origin.
+ * @details
+ * In case of even lengths, origin position is rounded down.
  */
 template <typename T, Index N, typename THolder>
 Kernel<T, N> kernelize(const Raster<T, N, THolder>& values) {
-  return Kernel<T, N>(values.data(), values.domain() - values.shape() / 2);
+  return kernelize(values.data(), values.domain() - values.shape() / 2);
 }
 
 } // namespace Litl

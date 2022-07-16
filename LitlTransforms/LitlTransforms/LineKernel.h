@@ -121,14 +121,33 @@ template <typename T, typename THolder>
 class Sequence;
 /// @endcond
 
-template <typename T, typename THolder>
-LineKernel<T> kernelize(const Sequence<T, THolder>& values, Index origin) {
-  return LineKernel<T>(values.data(), origin);
-}
-
+/**
+ * @relates LineKernel
+ * @brief Make a line kernel from values and a window.
+ */
 template <typename T>
 LineKernel<T> kernelize(const T* values, Segment window) {
   return LineKernel<T>(std::vector<T>(values, values + window.size()), std::move(window));
+}
+
+/**
+ * @relates LineKernel
+ * @brief Make a line kernel from a sequence and origin position.
+ */
+template <typename T, typename THolder>
+LineKernel<T> kernelize(const Sequence<T, THolder>& values, Index origin) {
+  return kernelize(values.data(), origin);
+}
+
+/**
+ * @relates LineKernel
+ * @brief Make a line kernel from a sequence, with centered origin.
+ * @details
+ * In case of even size, origin index is rounded down.
+ */
+template <typename T, typename THolder>
+LineKernel<T> kernelize(const Sequence<T, THolder>& values) {
+  return kernelize(values.data(), values.size() / 2);
 }
 
 } // namespace Litl

@@ -128,7 +128,7 @@ TReturn tupleAs(TTuple&& tuple) {
 }
 
 /**
- * @brief Apply a variadic function a tuple.
+ * @brief Apply a function to the elements of a tuple.
  */
 template <typename TTuple, typename TFunc>
 constexpr decltype(auto) tupleApply(TTuple&& tuple, TFunc&& func) {
@@ -139,8 +139,8 @@ constexpr decltype(auto) tupleApply(TTuple&& tuple, TFunc&& func) {
 }
 
 /**
- * @brief Apply a variadic function to elements pointed by a tuple of iterators
- * and increment the iterators.
+ * @brief Apply a function to the elements pointed by a tuple of iterators
+ * and then increment the iterators.
  */
 template <typename TIteratorTuple, typename TFunc>
 constexpr decltype(auto) iteratorTupleApply(TIteratorTuple&& tuple, TFunc&& func) {

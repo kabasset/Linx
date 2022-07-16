@@ -103,6 +103,7 @@ private:
 };
 
 /**
+ * @relates Box
  * @brief Iterator to the front position.
  */
 template <Index N>
@@ -111,6 +112,7 @@ typename Box<N>::Iterator begin(const Box<N>& box) {
 }
 
 /**
+ * @relates Box
  * @brief Iterator to one past the back position.
  */
 template <Index N>
