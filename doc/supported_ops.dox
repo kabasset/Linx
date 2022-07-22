@@ -49,7 +49,7 @@ namespace Litl {
 <li>Class `Kernel`
 <li>Module \ref interpolation
 <li>Class `Extrapolator`
-<tr><td>Median filtering<td>`Raster`
+<tr><td>Median and rank-order filtering<td>`Raster`
 <td><ul>
 <li>Module \ref nl_filters
 <li>Class `StructuringElement`

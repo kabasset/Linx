@@ -21,7 +21,7 @@ class Box : boost::additive<Box<N>, Box<N>>, boost::additive<Box<N>, Position<N>
 
 public:
   /**
-   * @brief An position iterator.
+   * @brief A position iterator.
    * @details
    * The scanning order maximizes data locality for row-major ordered data like rasters.
    * 
@@ -98,11 +98,17 @@ public:
     return shapeSize(shape());
   }
 
+  /**
+   * @brief Get the box length along given axis.
+   */
   template <Index I>
   Index length() const {
     return m_back[I] - m_front[I] + 1;
   }
 
+  /**
+   * @brief Get the box length along given axis.
+   */
   Index length(Index i) const {
     return m_back[i] - m_front[i] + 1;
   }

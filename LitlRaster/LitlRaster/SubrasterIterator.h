@@ -21,7 +21,7 @@ public:
    * @brief Constructor.
    */
   Iterator(const Subraster<TRaster, Value>& subraster, const Position<Dimension>& position) :
-      m_raster(subraster.raster()), m_beginPlane(project(subraster.region())), m_beginIt(m_beginPlane),
+      m_raster(subraster.raster()), m_beginPlane(project(subraster.region())), m_beginIt(m_beginPlane, position),
       m_width(subraster.region().length(0)), m_current(&m_raster[position]), m_eol(m_current + m_width) {}
 
   /**
@@ -115,7 +115,9 @@ private:
  */
 template <typename TRaster, typename T>
 typename Subraster<TRaster, T>::Iterator begin(const Subraster<TRaster, T>& subraster) {
-  return typename Subraster<TRaster, T>::Iterator(subraster, subraster.region().front());
+  return typename Subraster<TRaster, T>::Iterator(
+      subraster,
+      Box<TRaster::Dimension>::Iterator::beginPosition(subraster.region()));
 }
 
 /**
@@ -124,9 +126,9 @@ typename Subraster<TRaster, T>::Iterator begin(const Subraster<TRaster, T>& subr
  */
 template <typename TRaster, typename T>
 typename Subraster<TRaster, T>::Iterator end(const Subraster<TRaster, T>& subraster) {
-  auto endPosition = subraster.region().front();
-  --endPosition[0];
-  return typename Subraster<TRaster, T>::Iterator(subraster, endPosition);
+  return typename Subraster<TRaster, T>::Iterator(
+      subraster,
+      Box<TRaster::Dimension>::Iterator::endPosition(subraster.region()));
 }
 
 } // namespace Litl

@@ -16,7 +16,23 @@ public:
   /**
    * @brief Constructor.
    */
-  explicit Iterator(const Box<N>& region) : m_region(region), m_current(region.front()) {}
+  explicit Iterator(const Box<N>& region, Position<N> current) : m_region(region), m_current(current) {}
+
+  /**
+   * @brief The beginning position.
+   */
+  static Position<N> beginPosition(const Box<N>& box) {
+    return box.front();
+  }
+
+  /**
+   * @brief The end position.
+   */
+  static Position<N> endPosition(const Box<N>& box) {
+    auto out = box.front();
+    --out[0];
+    return out;
+  }
 
   /**
    * @brief Dereference operator.
@@ -69,7 +85,7 @@ public:
 
 private:
   /**
-   * @brief Update and get the current position and that of a follower.
+   * @brief Update and get the current position.
    * @details
    * Move the current position by 1 pixel,
    * such that the corresponding index in a raster would be increased to the next one.
@@ -108,7 +124,7 @@ private:
  */
 template <Index N>
 typename Box<N>::Iterator begin(const Box<N>& box) {
-  return typename Box<N>::Iterator(box);
+  return typename Box<N>::Iterator(box, Box<N>::Iterator::beginPosition(box));
 }
 
 /**
@@ -117,9 +133,7 @@ typename Box<N>::Iterator begin(const Box<N>& box) {
  */
 template <Index N>
 typename Box<N>::Iterator end(const Box<N>& box) {
-  auto front = box.front();
-  --front[0];
-  return typename Box<N>::Iterator({front, box.back()});
+  return typename Box<N>::Iterator(box, Box<N>::Iterator::endPosition(box));
 }
 
 } // namespace Litl

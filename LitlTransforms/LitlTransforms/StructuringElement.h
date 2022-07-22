@@ -14,7 +14,7 @@ namespace Litl {
  * @brief A structuring element formorphological operations.
  * @tparam N The dimension
  */
-template <typename T, Index N>
+template <typename T, Index N, typename TRegion = Box<N>>
 class StructuringElement {
 
 public:
@@ -27,7 +27,7 @@ public:
    * @brief Explcit window constructor.
    * @param window The filter window
    */
-  StructuringElement(const Box<N>& window) : m_window(window), m_neighbors(m_window.size()) {}
+  StructuringElement(const TRegion& window) : m_window(window), m_neighbors(m_window.size()) {}
 
   /**
    * @brief Radius-based constructor.
@@ -109,7 +109,7 @@ private:
   /**
    * @brief The window.
    */
-  Box<N> m_window;
+  TRegion m_window;
 
   /**
    * @brief The neighboring pixel values.
