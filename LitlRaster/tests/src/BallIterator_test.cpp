@@ -93,6 +93,20 @@ BOOST_AUTO_TEST_CASE(l2_test) {
   BOOST_TEST(out == expected);
 }
 
+BOOST_AUTO_TEST_CASE(domain_and_shift_test) {
+  const double radius = 2;
+  const Position<3> center {1, 2, 3};
+  Ball<3> ball(radius);
+  std::vector<Position<3>> expected;
+  auto out = ball.domain();
+  out += center;
+  for (const auto& p : ball) {
+    expected.push_back(p + center);
+  }
+  BOOST_TEST(out.size() == ball.size());
+  BOOST_TEST(out.container() == expected);
+}
+
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE_END()

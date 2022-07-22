@@ -8,6 +8,8 @@
 #include "LitlRaster/Ball.h"
 
 namespace Litl {
+
+/// @cond
 namespace Internal {
 
 template <Index N, Index P>
@@ -102,6 +104,7 @@ private:
 };
 
 } // namespace Internal
+/// @endcond
 
 /**
  * @relates Ball

@@ -5,6 +5,7 @@
 #ifndef _LITLRASTER_BALL_H
 #define _LITLRASTER_BALL_H
 
+#include "LitlContainer/Sequence.h"
 #include "LitlRaster/Box.h"
 
 namespace Litl {
@@ -23,18 +24,19 @@ struct BallTraits<N, 0> {
 };
 
 } // namespace Internal
+/// @endcond
 
 /**
- * @brief A N-ball neighborhood with (pseudo-)norm L0, L1 or L2.
+ * @brief An N-ball region with (pseudo-)norm L0, L1 or L2.
  * @tparam N The dimension (must be positive)
- * @tparam P The norm (1 or 2) or pseudo-norm (0)
+ * @tparam P The norm (> 0) or pseudo-norm (= 0)
  * @details
  * The ball radius is a floating point number.
  * The boundary of the ball is included.
  * 
  * The N-ball with L0-pseudo-norm is a cross.
  * The N-ball with L1-norm corresponds to the cross-polytope of dimension N.
- * The N-ball with L∞-norm is simply `Box<N>`.
+ * The N-ball with L∞-norm would simply be `Box<N>`.
  */
 template <Index N = 2, Index P = 2>
 class Ball : boost::additive<Ball<N, P>, Position<N>>, boost::additive<Ball<N, P>, Index> {
@@ -99,7 +101,7 @@ public:
    * @brief Compute the ball size, i.e. number of positions.
    */
   Index size() const {
-    return box().size(); // FIXME
+    return std::distance(begin(*this), end(*this));
   }
 
   /**
@@ -131,6 +133,17 @@ public:
    */
   bool operator!=(const Ball<N, P>& other) const {
     return m_radius != other.m_radius || m_center != other.m_center;
+  }
+
+  /**
+   * @brief Get the row-major ordered sequence of positions inside the ball.
+   */
+  Sequence<Position<N>> domain() const {
+    std::vector<Position<N>> out; // TODO reserve the ball's volume?
+    for (const auto& p : *this) {
+      out.push_back(p);
+    }
+    return Sequence<Position<N>>(out.size(), std::move(out));
   }
 
   /// @group_modifiers
