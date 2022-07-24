@@ -98,7 +98,7 @@ struct ContiguousContainerMixin {
    * @details
    * Empty corresponds to `begin() == end()`.
    */
-  bool emtpy() const {
+  bool empty() const {
     return begin() == end();
   }
 
@@ -216,7 +216,7 @@ struct ContiguousContainerMixin {
 template <typename T, typename TDerived>
 std::ostream& operator<<(std::ostream& os, const ContiguousContainerMixin<T, TDerived>& container) {
   os << "[";
-  if (not container.emtpy()) {
+  if (not container.empty()) {
     const auto size = static_cast<const TDerived&>(container).size();
     std::size_t i = 0;
     os << container[i];
