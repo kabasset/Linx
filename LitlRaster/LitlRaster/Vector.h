@@ -145,6 +145,36 @@ public:
   }
 
   /**
+   * @brief Compute the Lp-norm raised to the power p.
+   * @tparam P The power
+   */
+  template <Index P>
+  T norm() const {
+    T out(0);
+    for (const auto& e : *this) {
+      out += std::pow(std::abs(e), P);
+    }
+    return out;
+  }
+
+  /**
+   * @brief Compute the Lp-distance to another vector raised to the power p.
+   * @tparam P The power
+   */
+  template <Index P>
+  T distance(const Vector<T>& other) const {
+    return std::inner_product(
+        this->begin(),
+        this->end(),
+        other.begin(),
+        0.,
+        std::plus<double> {},
+        [](double a, double b) {
+          return std::pow(std::abs(b - a), P);
+        });
+  }
+
+  /**
    * @brief Create a vector of lower dimension.
    * @tparam M The new dimension; cannot be -1
    * @details

@@ -5,6 +5,7 @@
 #ifndef _LITLRASTER_MASK_H
 #define _LITLRASTER_MASK_H
 
+#include "LitlContainer/Sequence.h"
 #include "LitlRaster/Box.h"
 
 namespace Litl {
@@ -40,6 +41,24 @@ public:
     return Mask<N>(center - radius, center + radius);
   }
 
+  /**
+   * @brief Create a mask from a ball with (pseudo-)norm L0, L1 or L2.
+   * @tparam P The norm power
+   */
+  template <Index P>
+  static Mask<N> ball(double radius = 1) {
+    auto out = Mask<N>::fromCenter(radius);
+    const auto radiusPow = std::pow(radius, P);
+    auto it = out.m_flags.begin();
+    for (const auto& p : out.box()) {
+      if (p.template norm<P>() <= radiusPow) { // TODO optimize for 0?
+        *it = true;
+      }
+      ++it;
+    }
+    return out;
+  }
+
   /// @group_properties
 
   /**
@@ -60,7 +79,7 @@ public:
    * @brief Get the number of dimensions.
    */
   Index dimension() const {
-    return m_box.dimension(();
+    return m_box.dimension();
   }
 
   /**
@@ -99,6 +118,21 @@ public:
    */
   bool operator!=(const Mask<N>& other) const {
     return m_box != other.m_box || m_flags != other.m_flags;
+  }
+
+  /**
+   * @brief Get the row-major ordered list of positions in the mask.
+   */
+  Sequence<Position<N>> domain() const {
+    std::vector<Position<N>> vec;
+    auto it = m_flags.begin();
+    for (const auto& p : m_box) {
+      if (*it) {
+        vec.push_back(p);
+      }
+      ++it;
+    }
+    return Sequence<Position<N>>(vec.size(), std::move(vec)); // FIXME size() invalid if move is made beforehand
   }
 
   /// @group_modifiers
@@ -179,42 +213,6 @@ private:
    */
   std::vector<bool> m_flags;
 };
-
-/**
- * @relates Mask
- * @brief Flatten the box along a given axis.
- */
-template <Index N>
-Mask<N> project(const Mask<N>& in, Index axis = 0) {
-  auto out = in;
-  return out.project(axis);
-}
-
-/**
- * @relates Mask
- * @brief Clamp a position inside a box.
- */
-template <typename T, Index N = 2>
-Vector<T, N> clamp(const Vector<T, N>& position, const Mask<N>& box) {
-  Vector<T, N> out(box.size());
-  for (std::size_t i = 0; i < out.size(); ++i) {
-    out[i] = clamp(position[i], box.front[i], box.back[i]); // TODO transform
-  }
-  return out;
-}
-
-/**
- * @relates Mask
- * @brief Clamp a position inside a shape.
- */
-template <typename T, Index N = 2>
-Vector<T, N> clamp(const Vector<T, N>& position, const Position<N>& shape) {
-  Vector<T, N> out(shape.size());
-  std::transform(position.begin(), position.end(), shape.begin(), out.begin(), [](auto p, auto s) {
-    return clamp(p, Index(0), s - 1);
-  });
-  return out;
-}
 
 } // namespace Litl
 

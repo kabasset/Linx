@@ -49,7 +49,7 @@ double distanceL2(const Position<N>& p, const Position<N>& q) {
 //   std::vector<Position<3>> out;
 //   std::vector<Position<3>> expected;
 //   for (const auto& p : ball.box()) {
-//     if (distanceL1(p, center) <= 1) {
+//     if (distanceL0(p, center) <= 1) {
 //       expected.push_back(p);
 //     }
 //   }

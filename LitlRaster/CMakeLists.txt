@@ -27,6 +27,10 @@ elements_add_unit_test(BoxIterator tests/src/BoxIterator_test.cpp
                      EXECUTABLE LitlRaster_BoxIterator_test
                      LINK_LIBRARIES LitlRaster
                      TYPE Boost)
+elements_add_unit_test(Mask tests/src/Mask_test.cpp 
+                     EXECUTABLE LitlRaster_Mask_test
+                     LINK_LIBRARIES LitlRaster
+                     TYPE Boost)
 elements_add_unit_test(Raster tests/src/Raster_test.cpp 
                      EXECUTABLE LitlRaster_Raster_test
                      LINK_LIBRARIES LitlRaster
