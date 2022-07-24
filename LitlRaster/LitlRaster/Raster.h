@@ -58,6 +58,11 @@ using PtrRaster = Raster<T, N, PtrHolder<T>>;
  * It is convenient to interface with the standard library
  * or other tools which work with `std::vector`s without copies,
  * because `std::vector` itself cannot be initialized without copies from an external pointer.
+ * @warning
+ * Because specialization `std::vector<bool>` is not a container,
+ * `VecRaster` is not compatible with `bool` values.
+ * This can be worked around with values of type `char`,
+ * or another holder has to be used.
  */
 template <typename T, Index N = 2, typename TAllocator = std::allocator<T>>
 using VecRaster = Raster<T, N, StdHolder<std::vector<T, TAllocator>>>;
@@ -145,7 +150,7 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
  * @see `Position` for details on the fixed- and variable-dimension cases.
  * @see \ref primer
  */
-template <typename T, Index N = 2, typename THolder = StdHolder<std::vector<T>>>
+template <typename T, Index N = 2, typename THolder = DefaultHolder<T>>
 class Raster : public DataContainer<T, THolder, EuclidArithmetic, Raster<T, N, THolder>> {
   friend class ImageRaster; // FIXME rm when Subraster is removed
 

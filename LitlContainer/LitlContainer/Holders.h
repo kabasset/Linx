@@ -9,7 +9,8 @@
 
 #include <algorithm> // copy_n
 #include <array>
-#include <exception> // runtime_error
+#include <exception> // runtime_error // FIXME to Exceptions
+#include <memory> // unique_ptr
 #include <valarray>
 #include <vector>
 
@@ -187,10 +188,49 @@ public:
   }
 
 private:
-  /**
-   * @brief The data array.
-   */
   std::array<T, N> m_container;
+};
+
+/**
+ * @ingroup data_classes
+ * @brief `std::unique_ptr` specialization.
+ */
+template <typename T>
+class StdHolder<std::unique_ptr<T[]>> {
+
+public:
+  using Container = std::unique_ptr<T[]>;
+
+  explicit StdHolder(std::size_t size, const T* data = nullptr) : m_size(size), m_container {new T[m_size]} {
+    if (data) {
+      std::copy_n(data, m_size, m_container.get());
+    }
+  }
+
+  explicit StdHolder(std::size_t size, Container&& container) : m_size(size), m_container(std::move(container)) {
+    SizeError::mayThrow(m_container.size(), size);
+  }
+
+  std::size_t size() const {
+    return m_size;
+  }
+
+  inline const T* data() const {
+    return m_container.get();
+  }
+
+  const std::decay_t<Container>& container() const {
+    return this->m_container;
+  }
+
+  Container& moveTo(Container& destination) {
+    destination = std::move(this->m_container);
+    return destination;
+  }
+
+private:
+  std::size_t m_size;
+  std::unique_ptr<T[]> m_container;
 };
 
 /**
@@ -232,7 +272,10 @@ private:
  * Aliased class may change in further versions.
  */
 template <typename T>
-using DefaultHolder = StdHolder<std::vector<T>>;
+using DefaultHolder = std::conditional_t<
+    std::is_same<std::decay_t<T>, bool>::value, // std::vector<bool> is not a container
+    StdHolder<std::unique_ptr<bool[]>>,
+    StdHolder<std::vector<T>>>;
 
 } // namespace Litl
 

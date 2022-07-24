@@ -7,6 +7,7 @@
 
 #include <complex>
 #include <limits>
+#include <tuple>
 #include <utility> // forward
 
 namespace Litl {
