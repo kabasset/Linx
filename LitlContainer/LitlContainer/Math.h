@@ -21,6 +21,52 @@ T pi() {
   return out;
 }
 
+/// @cond
+namespace Internal {
+
+template <Index P>
+struct AbspowImpl {
+  template <typename T>
+  static T pow(T x) {
+    return x * x * AbspowImpl<P - 2>::pow(x);
+  }
+};
+
+template <>
+struct AbspowImpl<0> {
+  template <typename T>
+  static T pow(T x) {
+    return bool(x);
+  }
+};
+
+template <>
+struct AbspowImpl<1> {
+  template <typename T>
+  static T pow(T x) {
+    return std::abs(x);
+  }
+};
+
+template <>
+struct AbspowImpl<2> {
+  template <typename T>
+  static T pow(T x) {
+    return x * x;
+  }
+};
+
+} // namespace Internal
+/// @endcond
+
+/**
+ * @brief Compute the absolute value of an integral power.
+ */
+template <Index P, typename T>
+T abspow(T x) {
+  return Internal::AbspowImpl<P>::pow(x);
+}
+
 /**
  * @ingroup pixelwise
  * @ingroup mixins

@@ -80,6 +80,43 @@ BOOST_AUTO_TEST_CASE(arithmetics_test) {
   BOOST_TEST(dec == indices);
 }
 
+BOOST_AUTO_TEST_CASE(norm_test) {
+
+  Position<3> zero {0, 0, 0};
+  Position<3> x {-4, 0, 0};
+  Position<3> y {0, -4, 0};
+  Position<3> z {0, 0, -4};
+  Position<3> xy {-4, -4, 0};
+  Position<3> xyz {-4, -4, -4};
+
+  BOOST_TEST(zero.template norm<0>() == 0);
+  BOOST_TEST(x.template norm<0>() == 1);
+  BOOST_TEST(y.template norm<0>() == 1);
+  BOOST_TEST(z.template norm<0>() == 1);
+  BOOST_TEST(xy.template norm<0>() == 2);
+  BOOST_TEST(xyz.template norm<0>() == 3);
+  BOOST_TEST(xyz.template distance<0>(x) == 2);
+  BOOST_TEST(xyz.template distance<0>(-x) == 3);
+
+  BOOST_TEST(zero.template norm<1>() == 0);
+  BOOST_TEST(x.template norm<1>() == 4);
+  BOOST_TEST(y.template norm<1>() == 4);
+  BOOST_TEST(z.template norm<1>() == 4);
+  BOOST_TEST(xy.template norm<1>() == 8);
+  BOOST_TEST(xyz.template norm<1>() == 12);
+  BOOST_TEST(xyz.template distance<1>(x) == 8);
+  BOOST_TEST(xyz.template distance<1>(-x) == 16);
+
+  BOOST_TEST(zero.template norm<2>() == 0);
+  BOOST_TEST(x.template norm<2>() == 16);
+  BOOST_TEST(y.template norm<2>() == 16);
+  BOOST_TEST(z.template norm<2>() == 16);
+  BOOST_TEST(xy.template norm<2>() == 32);
+  BOOST_TEST(xyz.template norm<2>() == 48);
+  BOOST_TEST(xyz.template distance<2>(x) == 32);
+  BOOST_TEST(xyz.template distance<2>(-x) == 96);
+}
+
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -6,6 +6,7 @@
 #define _LITLRASTER_VECTOR_H
 
 #include "LitlContainer/DataContainer.h"
+#include "LitlContainer/Math.h" // abspow
 #include "LitlTypes/TypeUtils.h"
 
 #include <numeric> // accumulate, multiplies
@@ -152,7 +153,7 @@ public:
   T norm() const {
     T out(0);
     for (const auto& e : *this) {
-      out += std::pow(std::abs(e), P);
+      out += abspow<P>(e);
     }
     return out;
   }
@@ -162,16 +163,10 @@ public:
    * @tparam P The power
    */
   template <Index P>
-  T distance(const Vector<T>& other) const {
-    return std::inner_product(
-        this->begin(),
-        this->end(),
-        other.begin(),
-        0.,
-        std::plus<double> {},
-        [](double a, double b) {
-          return std::pow(std::abs(b - a), P);
-        });
+  T distance(const Vector<T, N>& other) const {
+    return std::inner_product(this->begin(), this->end(), other.begin(), 0., std::plus<T> {}, [](T a, T b) {
+      return abspow<P>(b - a);
+    });
   }
 
   /**
