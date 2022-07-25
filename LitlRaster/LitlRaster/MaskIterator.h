@@ -12,50 +12,83 @@ namespace Litl {
 template <Index N>
 class Mask<N>::Iterator : public std::iterator<std::input_iterator_tag, Position<N>> {
 
-public:
-  explicit Iterator(const Mask<N>& region, const Position<N>& current) :
-      m_flagIt(region.m_flags.begin()), m_flagEnd(region.m_flags.end()), m_current(region.box(), current) {
+private:
+  /**
+   * @brief Constructor.
+   */
+  explicit Iterator(const Mask<N>& region, std::vector<bool>::const_iterator current) :
+      m_flagIt(current), m_flagEnd(region.m_flags.end()),
+      m_current(region.m_box, Box<N>::Iterator::beginPosition(region.m_box)) {
     while (m_flagIt != m_flagEnd && not *m_flagIt) {
       ++m_flagIt;
       ++m_current;
     }
   }
 
-  static Position<N> beginPosition(const Mask<N>& region) {
-    return Box<N>::Iterator::beginPosition(region.box());
+public:
+  /**
+   * @brief Make an iterator to the beginning of a mask.
+   */
+  static Iterator begin(const Mask<N>& region) {
+    return Iterator(region, region.m_flags.begin());
   }
 
-  static Position<N> endPosition(const Mask<N>& region) {
-    return Box<N>::Iterator::endPosition(region.box());
+  /**
+   * @brief Make an iterator to the end of a mask.
+   */
+  static Iterator end(const Mask<N>& region) {
+    return Iterator(region, region.m_flags.end());
   }
 
+  /**
+   * @brief Dereference operator.
+   */
   const Position<N>& operator*() const {
     return *m_current;
   }
 
+  /**
+   * @brief Arrow operator.
+   */
   const Position<N>* operator->() const {
     return &*m_current;
   }
 
+  /**
+   * @brief Increment operator.
+   */
   const Position<N>& operator++() {
     return next();
   }
 
+  /**
+   * @brief Increment operator.
+   */
   const Position<N>* operator++(int) {
     return &next();
   }
 
+  /**
+   * @brief Equality operator.
+   */
   bool operator==(const Iterator& rhs) const {
-    return *m_current == *rhs.m_current;
+    return *m_flagIt == *rhs.m_flagIt;
   }
 
+  /**
+   * @brief Non-equality operator.
+   */
   bool operator!=(const Iterator& rhs) const {
-    return *m_current != *rhs.m_current;
+    return *m_flagIt != *rhs.m_flagIt;
   }
 
 private:
+  /**
+   * @brief Update and get the current position.
+   */
   inline const Position<N>& next() {
     do {
+      ++m_flagIt;
       ++m_current;
     } while (m_flagIt != m_flagEnd && not *m_flagIt);
     return *m_current;
@@ -83,7 +116,7 @@ private:
  */
 template <Index N>
 typename Mask<N>::Iterator begin(const Mask<N>& region) {
-  return typename Mask<N>::Iterator(region, Mask<N>::Iterator::beginPosition(region));
+  return Mask<N>::Iterator::begin(region);
 }
 
 /**
@@ -92,7 +125,7 @@ typename Mask<N>::Iterator begin(const Mask<N>& region) {
  */
 template <Index N>
 typename Mask<N>::Iterator end(const Mask<N>& region) {
-  return typename Mask<N>::Iterator(region, Mask<N>::Iterator::endPosition(region));
+  return Mask<N>::Iterator::end(region);
 }
 
 } // namespace Litl
