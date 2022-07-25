@@ -31,14 +31,14 @@ public:
   /**
    * @brief Constructor.
    */
-  explicit Mask(Position<N> front, Position<N> back) :
-      m_box(std::move(front), std::move(back)), m_flags(m_box.size(), true) {}
+  explicit Mask(Position<N> front, Position<N> back, bool flag = true) :
+      m_box(std::move(front), std::move(back)), m_flags(m_box.size(), flag) {}
 
   /**
    * @brief Create a mask from a radius and center position.
    */
-  static Mask<N> fromCenter(Index radius = 1, const Position<N> center = Position<N>::zero()) {
-    return Mask<N>(center - radius, center + radius);
+  static Mask<N> fromCenter(Index radius = 1, const Position<N> center = Position<N>::zero(), bool flag = true) {
+    return Mask<N>(center - radius, center + radius, flag);
   }
 
   /**
@@ -47,7 +47,7 @@ public:
    */
   template <Index P>
   static Mask<N> ball(double radius = 1) {
-    auto out = Mask<N>::fromCenter(radius);
+    auto out = Mask<N>::fromCenter(radius, Position<N>::zero(), false);
     const auto radiusPow = std::pow(radius, P);
     auto it = out.m_flags.begin();
     for (const auto& p : out.box()) {
