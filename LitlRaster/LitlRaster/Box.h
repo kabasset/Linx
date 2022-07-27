@@ -21,6 +21,11 @@ class Box : boost::additive<Box<N>, Box<N>>, boost::additive<Box<N>, Position<N>
 
 public:
   /**
+   * @brief The dimension parameter.
+   */
+  static constexpr Index Dimension = N;
+
+  /**
    * @brief A position iterator.
    * @details
    * The scanning order maximizes data locality for row-major ordered data like rasters.
@@ -186,6 +191,17 @@ public:
   }
 
   /**
+   * @brief Clamp the front and back positions inside a given box.
+   */
+  Box<N>& clamp(const Box<N>& box) {
+    for (Index i = 0; i < size(); ++i) {
+      m_front[i] = std::max(m_front[i], box.front()[i]);
+      m_back[i] = std::min(m_back[i], box.back()[i]);
+    }
+    return *this;
+  }
+
+  /**
    * @brief Grow the box by a given margin.
    */
   Box<N>& operator+=(const Box<N>& margin) {
@@ -315,6 +331,41 @@ Vector<T, N> clamp(const Vector<T, N>& position, const Position<N>& shape) {
     return clamp(p, Index(0), s - 1);
   });
   return out;
+}
+
+/**
+ * @ingroup concepts
+ * @requirements{Region}
+ * @brief FIXME
+ */
+
+/**
+ * @relates Box
+ * @brief Identity, for compatibility with `Region`.
+ */
+template <Index N>
+inline const Box<N>& box(const Box<N>& region) {
+  return region;
+}
+
+/**
+ * @relates Box
+ * @brief Get the bounding box of a region.
+ * @details
+ * This generic implementation is unoptimized:
+ * it iterates over all of the positions.
+ */
+template <typename TIn>
+inline const Box<TIn::Dimension>& box(const TIn& region) {
+  Position<TIn::Dimension> front;
+  Position<TIn::Dimension> back;
+  for (const auto& p : region) {
+    for (Index i = 0; i < TIn::Dimension; ++i) {
+      front[i] = std::min(front[i], p[i]);
+      back[i] = std::max(back[i], p[i]);
+    }
+  }
+  return {front, back};
 }
 
 } // namespace Litl
