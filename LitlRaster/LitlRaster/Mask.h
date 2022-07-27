@@ -214,6 +214,15 @@ private:
   std::vector<bool> m_flags;
 };
 
+/**
+ * @relates Mask
+ * @brief Get the bounding box of a mask.
+ */
+template <Index N>
+inline const Box<N>& box(const Mask<N>& region) {
+  return region.box();
+}
+
 } // namespace Litl
 
 #include "LitlRaster/MaskIterator.h"

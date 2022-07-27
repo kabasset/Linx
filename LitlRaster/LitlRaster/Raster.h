@@ -31,7 +31,7 @@ namespace Litl {
 // Issue with forward declarations: https://github.com/doxygen/doxygen/issues/8177
 
 // Forward declaration for Raster::subraster()
-template <typename TRaster, typename T>
+template <typename T, typename TRaster, typename TRegion>
 class Subraster;
 
 // Forward declaration for specializations
@@ -396,12 +396,14 @@ public:
    * @see slice()
    * @see section()
    */
-  const Subraster<const Raster<T, N, THolder>, const T> subraster(Box<N> region) const;
+  template <typename TRegion>
+  const Subraster<const T, const Raster<T, N, THolder>, TRegion> subraster(TRegion&& region) const;
 
   /**
    * @copybrief subraster().
    */
-  Subraster<Raster<T, N, THolder>, T> subraster(Box<N> region);
+  template <typename TRegion>
+  Subraster<T, Raster<T, N, THolder>, TRegion> subraster(TRegion&& region);
 
   /// @}
 

@@ -9,59 +9,47 @@
 
 namespace Litl {
 
-template <typename TRaster, typename T>
-class Subraster<TRaster, T>::Iterator : public std::iterator<std::input_iterator_tag, T> {
+template <typename T, typename TRaster, typename TRegion>
+template <typename U>
+class Subraster<T, TRaster, TRegion>::Iterator : public std::iterator<std::input_iterator_tag, U> {
 
 public:
   using Parent = TRaster;
-  using Value = T;
+  using Value = U;
   static constexpr Index Dimension = TRaster::Dimension;
 
-  /**++
-   * @brief Constructor.
-   */
-  Iterator(const Subraster<TRaster, Value>& subraster, const Position<Dimension>& position) :
-      m_raster(subraster.raster()), m_beginPlane(project(subraster.region())), m_beginIt(m_beginPlane, position),
-      m_width(subraster.region().length(0)), m_current(&m_raster[position]), m_eol(m_current + m_width) {}
+  Iterator(TRaster& raster, const Box<Dimension>& region, const Position<Dimension>& position) :
+      m_raster(raster), m_beginPlane(project(region)), m_beginIt(m_beginPlane, position), m_width(region.length(0)),
+      m_current(&m_raster[position]), m_eol(m_current + m_width) {}
 
-  /**
-   * @brief Dereference operator.
-   */
+  static Iterator begin(TRaster& raster, const TRegion& region) {
+    return Iterator(raster, region, Box<Dimension>::Iterator::beginPosition(region));
+  }
+
+  static Iterator end(TRaster& raster, const TRegion& region) {
+    return Iterator(raster, region, Box<Dimension>::Iterator::endPosition(region));
+  }
+
   Value& operator*() const {
     return *m_current;
   }
 
-  /**
-   * @brief Arrow operator.
-   */
   Value* operator->() const {
     return m_current;
   }
 
-  /**
-   * @brief Increment operator.
-   */
   Value& operator++() {
     return *next();
   }
 
-  /**
-   * @brief Increment operator.
-   */
   Value* operator++(int) {
     return next();
   }
 
-  /**
-   * @brief Equality operator.
-   */
   bool operator==(const Iterator& rhs) const {
     return m_current == rhs.m_current;
   }
 
-  /**
-   * @brief Non-equality operator.
-   */
   bool operator!=(const Iterator& rhs) const {
     return m_current != rhs.m_current;
   }
@@ -72,7 +60,7 @@ private:
       return m_current;
     }
     ++m_beginIt;
-    // Use data() and index()  instead of [] to avoid dereferencing unallocated memory
+    // Use data() and index() instead of [] to avoid dereferencing unallocated memory
     m_current = m_raster.data() + m_raster.index(*m_beginIt);
     m_eol = m_current + m_width;
     return m_current;
@@ -108,28 +96,6 @@ private:
    */
   Value* m_eol;
 };
-
-/**
- * @relates Subraster
- * @brief Iterator to the beginning of a subraster.
- */
-template <typename TRaster, typename T>
-typename Subraster<TRaster, T>::Iterator begin(const Subraster<TRaster, T>& subraster) {
-  return typename Subraster<TRaster, T>::Iterator(
-      subraster,
-      Box<TRaster::Dimension>::Iterator::beginPosition(subraster.region()));
-}
-
-/**
- * @relates Subraster
- * @brief Iterator to one past the end of a subraster.
- */
-template <typename TRaster, typename T>
-typename Subraster<TRaster, T>::Iterator end(const Subraster<TRaster, T>& subraster) {
-  return typename Subraster<TRaster, T>::Iterator(
-      subraster,
-      Box<TRaster::Dimension>::Iterator::endPosition(subraster.region()));
-}
 
 } // namespace Litl
 

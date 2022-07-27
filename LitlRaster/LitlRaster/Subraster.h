@@ -15,20 +15,46 @@ namespace Litl {
 
 /**
  * @ingroup data_classes
- * @brief A subraster as a view of a raster region.
+ * @brief A view of a raster region.
+ * @tparam T The value type
+ * @tparam TRaster The raster or extrapolator type
+ * @tparam TRegion The region type
  * @details
- * As opposed to a Raster, values of a Subraster are generally not contiguous in memory:
- * they are piece-wise contiguous only.
- * When a region is indeed contiguous, it is better to rely on a PtrRaster instead.
+ * As opposed to a raster, values of a subraster are generally not contiguous in memory:
+ * they are piece-wise contiguous only when the region is a `Box` and sometimes not even piece-wise contiguous.
+ * When a region is indeed contiguous, it is better to rely on a `PtrRaster` instead: see `Raster::section()`.
+ * 
+ * Whatever the region type, subrasters are iterable,
+ * and the iterator depends on the region type in order to maximize performance.
  */
-template <typename TRaster, typename T>
+template <typename T, typename TRaster, typename TRegion = Box<TRaster::Dimension>>
 class Subraster {
 
 public:
-  using Parent = TRaster;
+  /**
+   * @brief The value type.
+   */
   using Value = T;
-  static constexpr Index Dimension = TRaster::Dimension;
 
+  /**
+   * @brief The parent type (a raster or extrapolator).
+   */
+  using Parent = TRaster;
+
+  /**
+   * @brief The region type.
+   */
+  using Region = TRegion;
+
+  /**
+   * @brief The dimension.
+   */
+  static constexpr Index Dimension = Parent::Dimension;
+
+  /**
+   * @brief The iterator.
+   */
+  template <typename U>
   class Iterator;
 
   /// @{
@@ -37,19 +63,19 @@ public:
   /**
    * @brief Constructor.
    */
-  Subraster(Parent& parent, Box<Dimension> region) : m_raster(parent), m_region(std::move(region)) {}
+  Subraster(Parent& parent, TRegion region) : m_parent(parent), m_region(std::move(region)) {}
 
   /// @group_properties
 
   /**
-   * @brief Get the subraster shape.
+   * @brief Get the subraster bounding box.
    */
-  Position<Dimension> shape() const {
-    return m_region.shape();
+  Position<Dimension> box() const {
+    return box(m_region);
   }
 
   /**
-   * @brief The number of pixels in the subraster.
+   * @brief Get the number of pixels in the subraster.
    */
   std::size_t size() const {
     return m_region.size();
@@ -58,38 +84,52 @@ public:
   /**
    * @brief Get the region.
    */
-  const Box<Dimension>& region() const {
+  const TRegion& region() const {
     return m_region;
   }
 
   /**
-   * @brief Access the parent raster.
+   * @brief Access the parent raster or extrapolator.
    */
-  const Parent& raster() const {
-    return m_raster;
+  const Parent& parent() const {
+    return m_parent;
   }
 
   /**
-   * @copydoc raster()
+   * @copydoc parent()
    */
-  Parent& raster() {
-    return m_raster;
+  Parent& parent() {
+    return m_parent;
   }
 
   /// @group_elements
 
   /**
-   * @brief Access the pixel at given position.
+   * @brief Constant iterator to the front pixel.
    */
-  const Value& operator[](const Position<Dimension>& pos) const {
-    return m_raster[pos + m_region.front()];
+  Iterator<const Value> begin() const {
+    return Iterator<const Value>::begin(m_parent, m_region);
   }
 
   /**
-   * @brief Pixel at given position.
+   * @brief Iterator to the front pixel.
    */
-  Value& operator[](const Position<Dimension>& pos) {
-    return m_raster[pos + m_region.front()];
+  Iterator<Value> begin() {
+    return Iterator<Value>::begin(m_parent, m_region);
+  }
+
+  /**
+   * @brief Constant end iterator.
+   */
+  Iterator<const Value> end() const {
+    return Iterator<const Value>::end(m_parent, m_region);
+  }
+
+  /**
+   * @brief End iterator.
+   */
+  Iterator<Value> end() {
+    return Iterator<Value>::end(m_parent, m_region);
   }
 
   /// @}
@@ -98,7 +138,7 @@ private:
   /**
    * @brief The parent raster.
    */
-  Parent& m_raster;
+  Parent& m_parent;
 
   /**
    * @brief The region.
