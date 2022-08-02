@@ -111,14 +111,14 @@ public:
   /// @group_elements
 
   /**
-   * @brief Iterator to the front position.
+   * @brief Get an iterator to the beginning.
    */
   Iterator begin() const {
     return Iterator::begin(*this);
   }
 
   /**
-   * @brief End iterator.
+   * @brief Get an iterator to the end.
    */
   Iterator end() const {
     return Iterator::end(*this);
@@ -141,6 +141,16 @@ public:
   }
 
   /// @group_modifiers
+
+  /**
+   * @brief Flatten the grid along a given axis.
+   * @details
+   * The back of the box is set to the same coordinate as the front along the axis.
+   */
+  Grid<N>& project(Index axis = 0) {
+    m_box.project(axis);
+    return *this;
+  }
 
   /**
    * @brief Shift the box by a given vector.
@@ -215,6 +225,25 @@ private:
    */
   Position<N> m_step;
 };
+
+/**
+ * @relates Grid
+ * @brief Get the bounding box of a grid.
+ */
+template <Index N>
+inline const Box<N>& box(const Grid<N>& region) {
+  return region.box();
+}
+
+/**
+ * @relates Grid
+ * @brief Flatten the grid along a given axis.
+ */
+template <Index N>
+Grid<N> project(const Grid<N>& in, Index axis = 0) {
+  auto out = in;
+  return out.project(axis);
+}
 
 } // namespace Litl
 

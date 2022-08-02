@@ -83,6 +83,13 @@ public:
   }
 
   /**
+   * @brief `Position::one()` for compatibility with `Grid`.
+   */
+  Position<N> step() const {
+    return Position<N>::one();
+  }
+
+  /**
    * @brief Compute the box shape.
    */
   Position<N> shape() const {
@@ -116,6 +123,22 @@ public:
    */
   Index length(Index i) const {
     return m_back[i] - m_front[i] + 1;
+  }
+
+  /// @group_elements
+
+  /**
+   * @brief Get an iterator to the beginning.
+   */
+  Iterator begin() const {
+    return Iterator::begin(*this);
+  }
+
+  /**
+   * @brief Get an iterator to the end.
+   */
+  Iterator end() const {
+    return Iterator::end(*this);
   }
 
   /// @group_operations
@@ -356,7 +379,7 @@ inline const Box<N>& box(const Box<N>& region) {
  * it iterates over all of the positions.
  */
 template <typename TIn>
-inline const Box<TIn::Dimension>& box(const TIn& region) {
+inline Box<TIn::Dimension> box(const TIn& region) {
   Position<TIn::Dimension> front;
   Position<TIn::Dimension> back;
   for (const auto& p : region) {

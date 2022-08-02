@@ -19,6 +19,20 @@ public:
   explicit Iterator(const Box<N>& region, Position<N> current) : m_region(region), m_current(current) {}
 
   /**
+   * @brief The beginning iterator.
+   */
+  static Iterator begin(const Box<N>& box) {
+    return Iterator(box, Iterator::beginPosition(box));
+  }
+
+  /**
+   * @brief The end iterator.
+   */
+  static Iterator end(const Box<N>& box) {
+    return Iterator(box, Iterator::endPosition(box));
+  }
+
+  /**
    * @brief The beginning position.
    */
   static Position<N> beginPosition(const Box<N>& box) {
@@ -50,16 +64,32 @@ public:
 
   /**
    * @brief Increment operator.
+   * @details
+   * Move the current position by 1 pixel,
+   * such that the corresponding index in a raster would be increased to the next one.
    */
-  const Position<N>& operator++() {
-    return next();
+  Iterator& operator++() {
+    if (m_current == m_region.back()) { // TODO simpler?
+      m_current = endPosition(m_region);
+      return *this;
+    }
+    ++m_current[0];
+    for (std::size_t i = 0; i < m_current.size() - 1; ++i) {
+      if (m_current[i] > m_region.back()[i]) {
+        m_current[i] = m_region.front()[i];
+        ++m_current[i + 1];
+      }
+    }
+    return *this;
   }
 
   /**
    * @brief Increment operator.
    */
-  const Position<N>* operator++(int) {
-    return &next();
+  Iterator operator++(int) {
+    auto out = *this;
+    ++*this;
+    return out;
   }
 
   /**
@@ -85,29 +115,6 @@ public:
 
 private:
   /**
-   * @brief Update and get the current position.
-   * @details
-   * Move the current position by 1 pixel,
-   * such that the corresponding index in a raster would be increased to the next one.
-   */
-  inline const Position<N>& next() {
-    if (m_current == m_region.back()) { // TODO simpler?
-      m_current = m_region.front();
-      --m_current[0];
-      return m_current;
-    }
-    ++m_current[0];
-    for (std::size_t i = 0; i < m_current.size() - 1; ++i) {
-      if (m_current[i] > m_region.back()[i]) {
-        m_current[i] = m_region.front()[i];
-        ++m_current[i + 1];
-      }
-    }
-    return m_current;
-  }
-
-private:
-  /**
    * @brief The screened region.
    */
   const Box<N>& m_region;
@@ -117,24 +124,6 @@ private:
    */
   Position<N> m_current;
 };
-
-/**
- * @relates Box
- * @brief Iterator to the front position.
- */
-template <Index N>
-typename Box<N>::Iterator begin(const Box<N>& box) {
-  return typename Box<N>::Iterator(box, Box<N>::Iterator::beginPosition(box));
-}
-
-/**
- * @relates Box
- * @brief Iterator to one past the back position.
- */
-template <Index N>
-typename Box<N>::Iterator end(const Box<N>& box) {
-  return typename Box<N>::Iterator(box, Box<N>::Iterator::endPosition(box));
-}
 
 } // namespace Litl
 

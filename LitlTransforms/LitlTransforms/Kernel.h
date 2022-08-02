@@ -149,7 +149,7 @@ private:
 
       // Fill the buffer
       const auto w = m_window + p;
-      std::transform(begin(w), end(w), buffer.begin(), [&](const auto& q) {
+      std::transform(w.begin(), w.end(), buffer.begin(), [&](const auto& q) {
         return in[q];
       });
 

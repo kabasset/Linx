@@ -52,3 +52,7 @@ elements_add_unit_test(SeparableKernel tests/src/SeparableKernel_test.cpp
                      EXECUTABLE LitlTransforms_SeparableKernel_test
                      LINK_LIBRARIES LitlTransforms
                      TYPE Boost)
+elements_add_unit_test(StructuringElement tests/src/StructuringElement_test.cpp 
+                     EXECUTABLE LitlTransforms_StructuringElement_test
+                     LINK_LIBRARIES LitlTransforms
+                     TYPE Boost)

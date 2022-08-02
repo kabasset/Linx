@@ -7,7 +7,6 @@
 
 #include "LitlRaster/Grid.h"
 
-/// @cond
 namespace Litl {
 
 template <Index N>
@@ -21,9 +20,7 @@ public:
   }
 
   static Iterator end(const Grid<N>& region) {
-    auto out = region.front();
-    --out[0];
-    return Iterator(region, out);
+    return Iterator(region, Box<N>::Iterator::endPosition(region.box()));
   }
 
   const Position<N>& operator*() const {
@@ -34,28 +31,10 @@ public:
     return &m_current;
   }
 
-  const Position<N>& operator++() {
-    return next();
-  }
-
-  const Position<N>* operator++(int) {
-    return &next();
-  }
-
-  bool operator==(const Iterator& rhs) const {
-    return m_current == rhs.m_current;
-  }
-
-  bool operator!=(const Iterator& rhs) const {
-    return m_current != rhs.m_current;
-  }
-
-private:
-  inline const Position<N>& next() {
+  Iterator& operator++() {
     if (m_current == m_region.back()) {
-      m_current = m_region.front();
-      --m_current[0];
-      return m_current;
+      m_current = Box<N>::Iterator::endPosition(m_region.box());
+      return *this;
     }
     m_current[0] += m_region.step()[0];
     for (std::size_t i = 0; i < m_current.size() - 1; ++i) {
@@ -64,7 +43,21 @@ private:
         m_current[i + 1] += m_region.step()[i + 1];
       }
     }
-    return m_current;
+    return *this;
+  }
+
+  Iterator operator++(int) {
+    auto out = *this;
+    ++this;
+    return out;
+  }
+
+  bool operator==(const Iterator& rhs) const {
+    return m_current == rhs.m_current;
+  }
+
+  bool operator!=(const Iterator& rhs) const {
+    return m_current != rhs.m_current;
   }
 
 private:
@@ -80,6 +73,5 @@ private:
 };
 
 } // namespace Litl
-/// @endcond
 
 #endif

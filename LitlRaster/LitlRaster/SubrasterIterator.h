@@ -6,44 +6,38 @@
 #define _LITLRASTER_SUBRASTERITERATOR_H
 
 #include "LitlRaster/Subraster.h"
+#include "LitlRaster/SubrasterIndexing.h"
 
 namespace Litl {
 
-template <typename T, typename TRaster, typename TRegion>
-template <typename U>
-class Subraster<T, TRaster, TRegion>::Iterator : public std::iterator<std::input_iterator_tag, U> {
+template <typename TParent, typename TRegion>
+template <typename T>
+class PositionBasedIndexing<TParent, TRegion>::Iterator : public std::iterator<std::forward_iterator_tag, T> {
 
 public:
-  using Parent = TRaster;
-  using Value = U;
-  static constexpr Index Dimension = TRaster::Dimension;
+  using Value = T;
 
-  Iterator(TRaster& raster, const Box<Dimension>& region, const Position<Dimension>& position) :
-      m_raster(raster), m_beginPlane(project(region)), m_beginIt(m_beginPlane, position), m_width(region.length(0)),
-      m_current(&m_raster[position]), m_eol(m_current + m_width) {}
+  using PositionIterator = decltype(std::declval<const TRegion>().begin());
 
-  static Iterator begin(TRaster& raster, const TRegion& region) {
-    return Iterator(raster, region, Box<Dimension>::Iterator::beginPosition(region));
-  }
-
-  static Iterator end(TRaster& raster, const TRegion& region) {
-    return Iterator(raster, region, Box<Dimension>::Iterator::endPosition(region));
-  }
+  Iterator(TParent& parent, PositionIterator it) : m_parent(parent), m_current(std::move(it)) {}
 
   Value& operator*() const {
-    return *m_current;
+    return m_parent[*m_current];
   }
 
   Value* operator->() const {
-    return m_current;
+    return &m_parent[*m_current];
   }
 
-  Value& operator++() {
-    return *next();
+  Iterator& operator++() {
+    ++m_current;
+    return *this;
   }
 
-  Value* operator++(int) {
-    return next();
+  Iterator operator++(int) {
+    auto out = *this;
+    ++(*this);
+    return out;
   }
 
   bool operator==(const Iterator& rhs) const {
@@ -55,46 +49,150 @@ public:
   }
 
 private:
-  inline Value* next() {
-    if (++m_current != m_eol) {
-      return m_current;
-    }
-    ++m_beginIt;
-    // Use data() and index() instead of [] to avoid dereferencing unallocated memory
-    m_current = m_raster.data() + m_raster.index(*m_beginIt);
-    m_eol = m_current + m_width;
+  TParent& m_parent;
+  PositionIterator m_current;
+};
+
+template <typename TParent, typename TRegion>
+template <typename T>
+class StrideBasedIndexing<TParent, TRegion>::Iterator : public std::iterator<std::forward_iterator_tag, T> {
+
+public:
+  using Value = T;
+  static constexpr Index Dimension = TParent::Dimension;
+
+  /**
+   * @brief Constructor.
+   * @param step The stride along axis 0
+   * @param width The length along axis 0
+   * @param offset An iterator to the beginning of line offsets
+   */
+  Iterator(Value* front, Index step, Index width, const Index* offset) :
+      m_step(step), m_width(width), m_front(front), m_eol(m_front + m_width), m_offsetIt(offset),
+      m_current(m_front + *m_offsetIt) {}
+
+  /**
+   * @brief Dereference operator.
+   */
+  Value& operator*() const {
+    return *m_current;
+  }
+
+  /**
+   * @brief Arrow operator.
+   */
+  Value* operator->() const {
     return m_current;
   }
 
   /**
-   * @brief The parent raster.
+   * @brief Increment operator.
    */
-  Parent& m_raster;
+  Iterator& operator++() {
+    m_current += m_step;
+    if (m_current < m_eol) {
+      return *this;
+    }
+    m_current = m_front + *(++m_offsetIt);
+    // FIXME cannot dereference if m_offsetIt == m_offsetEnd => size + 1 to avoid branching?
+    m_eol = m_current + m_width;
+    return *this;
+  }
 
   /**
-   * @brief The beginning of the rows in the region.
+   * @brief Increment operator.
    */
-  Box<Dimension> m_beginPlane;
+  Iterator operator++(int) {
+    auto out = *this;
+    ++(*this);
+    return out;
+  }
 
   /**
-   * @brief An iterator to m_beginPlane.
+   * @brief Equality operator.
    */
-  typename Box<Dimension>::Iterator m_beginIt;
+  bool operator==(const Iterator& rhs) const {
+    return m_offsetIt == rhs.m_offsetIt;
+  }
 
   /**
-   * @brief The size of the rows.
+   * @brief Non equality operator.
+   */
+  bool operator!=(const Iterator& rhs) const {
+    return m_offsetIt != rhs.m_offsetIt;
+  }
+
+private:
+  /**
+   * @brief The stride along a row.
+   */
+  Index m_step;
+
+  /**
+   * @brief The distance between the row beginning and end.
    */
   Index m_width;
+
+  /**
+   * @brief The front pointer.
+   */
+  Value* m_front;
+
+  /**
+   * @brief The current end of line pointer.
+   */
+  Value* m_eol;
+
+  /**
+   * @brief A beginning of line offset iterator.
+   */
+  const Index* m_offsetIt;
 
   /**
    * @brief The current pointer.
    */
   Value* m_current;
+};
 
-  /**
-   * @brief The end-of-current-line pointer.
-   */
-  Value* m_eol;
+template <typename TParent, typename TRegion>
+template <typename T>
+class OffsetBasedIndexing<TParent, TRegion>::Iterator : public std::iterator<std::forward_iterator_tag, T> {
+
+public:
+  using Value = T;
+
+  Iterator(Value* data, const Index* current) : m_data(data), m_current(current) {}
+
+  Value& operator*() const {
+    return *(m_data + *m_current);
+  }
+
+  Value* operator->() const {
+    return m_data + *m_current;
+  }
+
+  Iterator& operator++() {
+    ++m_current;
+    return *this;
+  }
+
+  Iterator operator++(int) {
+    auto out = *this;
+    ++(*this);
+    return out;
+  }
+
+  bool operator==(const Iterator& rhs) const {
+    return m_current == rhs.m_current;
+  }
+
+  bool operator!=(const Iterator& rhs) const {
+    return m_current != rhs.m_current;
+  }
+
+private:
+  Value* m_data;
+  const Index* m_current;
 };
 
 } // namespace Litl

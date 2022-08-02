@@ -57,15 +57,21 @@ public:
   /**
    * @brief Increment operator.
    */
-  const Position<N>& operator++() {
-    return next();
+  Iterator& operator++() {
+    do {
+      ++m_flagIt;
+      ++m_current;
+    } while (m_flagIt != m_flagEnd && not *m_flagIt);
+    return *this;
   }
 
   /**
    * @brief Increment operator.
    */
-  const Position<N>* operator++(int) {
-    return &next();
+  Iterator operator++(int) {
+    auto out = *this;
+    ++*this;
+    return out;
   }
 
   /**
@@ -84,18 +90,6 @@ public:
 
 private:
   /**
-   * @brief Update and get the current position.
-   */
-  inline const Position<N>& next() {
-    do {
-      ++m_flagIt;
-      ++m_current;
-    } while (m_flagIt != m_flagEnd && not *m_flagIt);
-    return *m_current;
-  }
-
-private:
-  /**
    * @brief The current flag iterator.
    */
   std::vector<bool>::const_iterator m_flagIt;
@@ -109,24 +103,6 @@ private:
    */
   typename Box<N>::Iterator m_current;
 };
-
-/**
- * @relates Mask
- * @brief Iterator to the front position.
- */
-template <Index N>
-typename Mask<N>::Iterator begin(const Mask<N>& region) {
-  return Mask<N>::Iterator::begin(region);
-}
-
-/**
- * @relates Mask
- * @brief Iterator to one past the back position.
- */
-template <Index N>
-typename Mask<N>::Iterator end(const Mask<N>& region) {
-  return Mask<N>::Iterator::end(region);
-}
 
 } // namespace Litl
 

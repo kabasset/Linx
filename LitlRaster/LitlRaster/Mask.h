@@ -31,6 +31,11 @@ public:
   /**
    * @brief Constructor.
    */
+  explicit Mask(Box<N> box, bool flag = true) : m_box(std::move(box)), m_flags(m_box.size(), flag) {}
+
+  /**
+   * @brief Constructor.
+   */
   explicit Mask(Position<N> front, Position<N> back, bool flag = true) :
       m_box(std::move(front), std::move(back)), m_flags(m_box.size(), flag) {}
 
@@ -102,6 +107,22 @@ public:
    */
   Index length(Index i) const {
     return m_box.length(i);
+  }
+
+  /// @group_elements
+
+  /**
+   * @brief Get an iterator to the beginning.
+   */
+  Iterator begin() const {
+    return Iterator::begin(*this);
+  }
+
+  /**
+   * @brief Get an iterator to the end.
+   */
+  Iterator end() const {
+    return Iterator::end(*this);
   }
 
   /// @group_operations
