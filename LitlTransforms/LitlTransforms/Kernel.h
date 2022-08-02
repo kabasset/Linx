@@ -79,82 +79,26 @@ public:
   void correlateTo(const Extrapolator<TRaster, TMethod>& in, TOut& out) {
     const auto inner = in.domain() - m_window;
     const auto outers = inner.surround(m_window);
-    correlateWithoutExtrapolation(Litl::rasterize(in), std::move(inner), out);
+    correlateBoxTo(Litl::rasterize(in), inner, out);
     for (const auto& o : outers) {
-      correlateWithExtrapolation(in, o, out);
+      correlateBoxTo(in, o, out);
     }
   }
 
 private:
   /**
-   * @brief Correlate an input raster over a given region.
+   * @brief Correlate an input raster or extrapolator over a given box.
    */
-  template <typename TRasterIn, typename TRasterOut>
-  void correlateWithoutExtrapolation(const TRasterIn& in, Box<N> box, TRasterOut& out) {
-
-    if (box.size() == 0) {
+  template <typename TIn, typename TOut>
+  void correlateBoxTo(const TIn& in, const Box<N>& box, TOut& out) {
+    if (box.size() < 0) {
       return;
     }
-
-    // Compute constants
-    auto boxWidth = box.template length<0>();
-    box.project(); // Keep front hyperplane only
-    const auto inWidth = in.template length<0>();
-    const auto kWidth = m_window.template length<0>();
-    const auto kRowCount = m_window.size() / kWidth;
-
-    // Prepare iterators
-    auto inIt = in.data();
-    auto outIt = &out[box.front()];
-    auto kIt = m_values.data();
-    const auto distance = outIt - inIt;
-
-    // Loop over the hyperplane
+    auto patch = in.subraster(m_window);
     for (const auto& p : box) {
-
-      // Loop over the rows which begin in the hyperplane
-      outIt = &out[p];
-      for (Index i = boxWidth; i > 0; --i, ++outIt, inIt = outIt - distance, kIt = m_values.data()) {
-
-        // Compute the weighted sum row by row
-        T sum {};
-        for (Index j = kRowCount; j > 0; --j, inIt += inWidth, kIt += kWidth) {
-          sum = std::inner_product(kIt, kIt + kWidth, inIt, sum);
-        }
-        *outIt = sum;
-      }
-    }
-  }
-
-  /**
-   * @brief Correlate an input raster over a given region.
-   */
-  template <typename TExtrapolatorIn, typename TRasterOut>
-  void correlateWithExtrapolation(const TExtrapolatorIn& in, const Box<N>& box, TRasterOut& out) {
-
-    if (box.size() == 0) {
-      return;
-    }
-
-    // Allocate extrapolation buffer
-    std::vector<T> buffer(m_values.size());
-
-    // Prepare iterators
-    const auto bBegin = buffer.begin();
-    const auto kBegin = m_values.begin();
-    const auto kEnd = m_values.end();
-
-    // Loop over the box
-    for (const auto& p : box) {
-
-      // Fill the buffer
-      const auto w = m_window + p;
-      std::transform(w.begin(), w.end(), buffer.begin(), [&](const auto& q) {
-        return in[q];
-      });
-
-      // Compute the weighted sum
-      out[p] = std::inner_product(kBegin, kEnd, bBegin, T {});
+      patch.shift(p);
+      out[p] = std::inner_product(m_values.begin(), m_values.end(), patch.begin(), T {});
+      patch.shiftBack(p);
     }
   }
 

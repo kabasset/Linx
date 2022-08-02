@@ -14,7 +14,7 @@ namespace Litl {
    * @brief Compute the sum of the neighbors.
    */
 template <typename T>
-T sum(const std::vector<T>& neighbors) {
+T sum(const std::vector<std::decay_t<T>>& neighbors) {
   return std::accumulate(neighbors.begin(), neighbors.end(), T());
 }
 
@@ -22,7 +22,7 @@ T sum(const std::vector<T>& neighbors) {
    * @brief Compute the mean of the neighbors.
    */
 template <typename T>
-T mean(const std::vector<T>& neighbors) {
+T mean(const std::vector<std::decay_t<T>>& neighbors) {
   return sum(neighbors) / neighbors.size();
 }
 
@@ -30,7 +30,7 @@ T mean(const std::vector<T>& neighbors) {
    * @brief Get the n-th neighbor value.
    */
 template <typename T>
-T nth(std::vector<T>& neighbors, std::size_t n) {
+T nth(std::vector<std::decay_t<T>>& neighbors, std::size_t n) {
   auto b = neighbors.data();
   auto e = b + neighbors.size();
   auto out = b + n;
@@ -42,7 +42,7 @@ T nth(std::vector<T>& neighbors, std::size_t n) {
    * @brief Compute the median of the neighbors.
    */
 template <typename T>
-T median(std::vector<T>& neighbors) {
+T median(std::vector<std::decay_t<T>>& neighbors) {
   const auto size = neighbors.size();
   auto b = neighbors.data();
   auto e = b + size;
@@ -59,7 +59,7 @@ T median(std::vector<T>& neighbors) {
    * @brief Get the min neighbor value.
    */
 template <typename T>
-T min(const std::vector<T>& neighbors) {
+T min(const std::vector<std::decay_t<T>>& neighbors) {
   return *std::min_element(neighbors.begin(), neighbors.end());
 }
 
@@ -67,7 +67,7 @@ T min(const std::vector<T>& neighbors) {
    * @brief Get the max neighbor value.
    */
 template <typename T>
-T max(const std::vector<T>& neighbors) {
+T max(const std::vector<std::decay_t<T>>& neighbors) {
   return *std::max_element(neighbors.begin(), neighbors.end());
 }
 
@@ -88,20 +88,20 @@ public:
    * @brief Explcit window constructor.
    * @param window The filter window
    */
-  StructuringElement(const TWindow& window) : m_window(window), m_offsets(m_window.size()) {}
+  explicit StructuringElement(const TWindow& window) : m_window(window), m_offsets(m_window.size()) {}
 
   /**
    * @brief Hypercube window constructor.
    * @param radius The cube radius
    */
-  StructuringElement(Index radius = 1) : StructuringElement(Box<Dimension>::fromCenter(radius)) {}
+  explicit StructuringElement(Index radius = 1) : StructuringElement(Box<Dimension>::fromCenter(radius)) {}
 
   /**
    * @brief Apply a median filter.
    * @see `apply()`
    */
   template <typename TIn>
-  Raster<typename TIn::Value, TIn::Dimension> median(const TIn& in) {
+  Raster<std::decay_t<typename TIn::Value>, TIn::Dimension> median(const TIn& in) {
     return apply(&Litl::median<typename TIn::Value>, in);
   }
 
@@ -137,8 +137,8 @@ public:
    * @see `applyTo()`
    */
   template <typename TFunc, typename TIn>
-  Raster<typename TIn::Value, TIn::Dimension> apply(TFunc&& func, const TIn& in) {
-    Raster<typename TIn::Value, TIn::Dimension> out(in.shape());
+  Raster<std::decay_t<typename TIn::Value>, TIn::Dimension> apply(TFunc&& func, const TIn& in) {
+    Raster<std::decay_t<typename TIn::Value>, TIn::Dimension> out(in.shape());
     applyTo(std::forward<TFunc>(func), in, out, out.domain());
     return out;
   }
@@ -156,7 +156,7 @@ public:
   template <typename TFunc, typename TIn, typename TOut>
   void applyTo(TFunc&& func, const TIn& in, TOut& out, const Box<Dimension>& region = Box<Dimension>::whole()) {
 
-    std::vector<typename TOut::Value> neighbors(m_window.size());
+    std::vector<std::decay_t<typename TOut::Value>> neighbors(m_window.size());
 
     // Non-extrapolated pixels
     auto inner = in.domain() - box(m_window);
