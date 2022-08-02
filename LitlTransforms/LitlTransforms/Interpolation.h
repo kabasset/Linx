@@ -28,7 +28,7 @@ public:
   /**
    * @brief The value type.
    */
-  using Value = typename TRaster::Value;
+  using Value = const typename TRaster::Value;
 
   /**
    * @brief The dimension parameter.
@@ -46,6 +46,14 @@ public:
    */
   const TRaster& raster() const {
     return m_raster;
+  }
+
+  /**
+   * @brief Get a decorated subraster.
+   */
+  template <typename TRegion>
+  const Subraster<const Value, const Extrapolator<TRaster, TMethod>, TRegion> subraster(TRegion&& region) const {
+    return Subraster<const Value, const Extrapolator<TRaster, TMethod>, TRegion>(*this, std::forward<TRegion>(region));
   }
 
   /**
