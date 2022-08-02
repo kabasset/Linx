@@ -61,6 +61,7 @@ public:
     do {
       ++m_flagIt;
       ++m_current;
+      printf("Mask::Iterator: %i\n", *m_flagIt);
     } while (m_flagIt != m_flagEnd && not *m_flagIt);
     return *this;
   }
@@ -70,7 +71,7 @@ public:
    */
   Iterator operator++(int) {
     auto out = *this;
-    ++*this;
+    ++(*this);
     return out;
   }
 
@@ -78,14 +79,14 @@ public:
    * @brief Equality operator.
    */
   bool operator==(const Iterator& rhs) const {
-    return *m_flagIt == *rhs.m_flagIt;
+    return m_flagIt == rhs.m_flagIt;
   }
 
   /**
    * @brief Non-equality operator.
    */
   bool operator!=(const Iterator& rhs) const {
-    return *m_flagIt != *rhs.m_flagIt;
+    return m_flagIt != rhs.m_flagIt;
   }
 
 private:

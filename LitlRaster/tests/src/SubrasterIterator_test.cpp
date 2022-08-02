@@ -53,7 +53,6 @@ BOOST_AUTO_TEST_CASE(inner_cube_iterator_test) {
   const auto masked = raster.subraster(Mask<3>(region, true));
   for (const auto& v : masked) {
     out.push_back(v);
-    std::cout << "Mask: " << v << std::endl;
   }
   BOOST_TEST(out == expected);
 
