@@ -20,9 +20,18 @@ BOOST_AUTO_TEST_CASE(constant0_3x3_test) {
   in.fill(1);
   StructuringElement<Box<2>> filter;
   const auto extra = extrapolate(in, 0);
-  auto out = filter.median(extra);
-  std::vector<int> expected {0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0};
-  BOOST_TEST(out.container() == expected);
+
+  auto medianOut = filter.median(extra);
+  std::vector<int> medianExpected {0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0};
+  BOOST_TEST(medianOut.container() == medianExpected);
+
+  auto erodeOut = filter.erode(extra);
+  std::vector<int> erodeExpected {0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0};
+  BOOST_TEST(erodeOut.container() == erodeExpected);
+
+  auto dilateOut = filter.dilate(extra);
+  std::vector<int> dilateExpected {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+  BOOST_TEST(dilateOut.container() == dilateExpected);
 }
 
 //-----------------------------------------------------------------------------

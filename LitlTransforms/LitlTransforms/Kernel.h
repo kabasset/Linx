@@ -73,31 +73,31 @@ public:
   }
 
   /**
-   * @copybrief operator*()
+   * @brief Cross-correlate a raster with the kernel into an output raster.
    */
   template <typename TRaster, typename TMethod, typename TOut>
   void correlateTo(const Extrapolator<TRaster, TMethod>& in, TOut& out) {
     const auto inner = in.domain() - m_window;
     const auto outers = inner.surround(m_window);
-    correlateBoxTo(Litl::rasterize(in), inner, out);
+    correlateRegionTo(Litl::rasterize(in), inner, out);
     for (const auto& o : outers) {
-      correlateBoxTo(in, o, out);
+      correlateRegionTo(in, o, out);
     }
   }
 
-private:
   /**
    * @brief Correlate an input raster or extrapolator over a given box.
    */
   template <typename TIn, typename TOut>
-  void correlateBoxTo(const TIn& in, const Box<N>& box, TOut& out) {
-    if (box.size() < 0) {
+  void correlateRegionTo(const TIn& in, const Box<N>& region, TOut& out) {
+    if (region.size() < 0) {
       return;
     }
     auto patch = in.subraster(m_window);
-    for (const auto& p : box) {
+    for (const auto& p : region) {
       patch.shift(p);
       out[p] = std::inner_product(m_values.begin(), m_values.end(), patch.begin(), T {});
+      // FIXME replace out[p] with an iterator
       patch.shiftBack(p);
     }
   }

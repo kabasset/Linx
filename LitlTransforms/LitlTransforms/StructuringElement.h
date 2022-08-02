@@ -88,11 +88,11 @@ public:
    * @brief Explcit window constructor.
    * @param window The filter window
    */
-  explicit StructuringElement(const TWindow& window) : m_window(window), m_offsets(m_window.size()) {}
+  explicit StructuringElement(TWindow window) : m_window(std::move(window)) {}
 
   /**
    * @brief Hypercube window constructor.
-   * @param radius The cube radius
+   * @param radius The hypercube radius
    */
   explicit StructuringElement(Index radius = 1) : StructuringElement(Box<Dimension>::fromCenter(radius)) {}
 
@@ -115,12 +115,30 @@ public:
   }
 
   /**
+   * @brief Erode.
+   * @see `apply()`
+   */
+  template <typename TIn>
+  Raster<std::decay_t<typename TIn::Value>, TIn::Dimension> erode(const TIn& in) {
+    return apply(&Litl::min<typename TIn::Value>, in);
+  }
+
+  /**
    * @brief Erode into a given output raster.
    * @see `applyTo()`
    */
   template <typename TIn, typename TOut>
   void erodeTo(const TIn& in, TOut& out, const Box<Dimension>& region = Box<Dimension>::whole()) {
     return applyTo(&Litl::min<typename TIn::Value>, in, out, region);
+  }
+
+  /**
+   * @brief Dilate.
+   * @see `apply()`
+   */
+  template <typename TIn>
+  Raster<std::decay_t<typename TIn::Value>, TIn::Dimension> dilate(const TIn& in) {
+    return apply(&Litl::max<typename TIn::Value>, in);
   }
 
   /**
@@ -160,58 +178,30 @@ public:
 
     // Non-extrapolated pixels
     auto inner = in.domain() - box(m_window);
-    inner.clamp(region);
-    computeOffsets(rasterize(in));
-    auto innerSub = out.subraster(inner);
-    auto innerIt = begin(innerSub);
-    for (const auto& p : inner) {
-      loadNeighborsWithoutExtrapolation(rasterize(in), p, neighbors);
-      *innerIt++ = std::forward<TFunc>(func)(neighbors);
-    }
+    // inner.clamp(region); // FIXME
+    applyRegionTo(std::forward<TFunc>(func), rasterize(in), inner, out);
 
     // Extrapolated pixels
     auto outers = inner.surround(box(m_window));
     for (auto& o : outers) {
-      o.clamp(region);
-      auto oSub = out.subraster(o);
-      auto oIt = begin(oSub);
-      for (const auto& p : o) {
-        loadNeighborsWithExtrapolation(in, p, neighbors);
-        *oIt++ = std::forward<TFunc>(func)(neighbors);
-      }
+      // o.clamp(region); // FIXME
+      applyRegionTo(std::forward<TFunc>(func), in, o, out);
     }
   }
 
-private:
-  /**
-   * @brief Compute the index offsets of non-extrapolated neighbors.
-   */
-  template <typename TRaster>
-  void computeOffsets(const TRaster& in) {
-    std::transform(m_window.begin(), m_window.end(), m_offsets.begin(), [&](const auto& p) {
-      return in.index(p);
-    });
-  }
-
-  /**
-   * @brief Load the values of the non-extrapolated neighbors.
-   */
-  template <typename TRaster, typename TOut>
-  void loadNeighborsWithoutExtrapolation(const TRaster& in, const Position<Dimension>& p, TOut& neighbors) {
-    const auto* center = &in[p];
-    std::transform(m_offsets.begin(), m_offsets.end(), neighbors.begin(), [&](auto o) {
-      return *(center + o);
-    });
-  }
-
-  /**
-   * @brief Load the values of the possibly extrapolated neighbors.
-   */
-  template <typename TExtrapolator, typename TOut>
-  void loadNeighborsWithExtrapolation(const TExtrapolator& in, const Position<Dimension>& p, TOut& neighbors) {
-    auto it = neighbors.begin();
-    for (const auto& q : m_window) {
-      *it++ = in[p + q]; // FIXME move the window to limit positions additions? specialize?
+  template <typename TFunc, typename TIn, typename TOut>
+  void applyRegionTo(TFunc&& func, const TIn& in, const Box<TIn::Dimension>& region, TOut& out) {
+    if (region.size() < 0) {
+      return;
+    }
+    auto patch = in.subraster(m_window);
+    std::vector<std::decay_t<typename TIn::Value>> neighbors(m_window.size());
+    for (const auto& p : region) {
+      patch.shift(p);
+      std::copy(patch.begin(), patch.end(), neighbors.begin());
+      out[p] = std::forward<TFunc>(func)(neighbors);
+      // FIXME replace out[p] with an iterator
+      patch.shiftBack(p);
     }
   }
 
@@ -220,11 +210,6 @@ private:
    * @brief The window.
    */
   TWindow m_window;
-
-  /**
-   * @brief The index offsets of the neighboring pixels.
-   */
-  std::vector<Index> m_offsets;
 };
 
 } // namespace Litl
