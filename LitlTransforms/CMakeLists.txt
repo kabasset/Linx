@@ -44,10 +44,6 @@ elements_add_unit_test(LineKernel tests/src/LineKernel_test.cpp
                      EXECUTABLE LitlTransforms_LineKernel_test
                      LINK_LIBRARIES LitlTransforms
                      TYPE Boost)
-elements_add_unit_test(MedianFilter tests/src/MedianFilter_test.cpp 
-                     EXECUTABLE LitlTransforms_MedianFilter_test
-                     LINK_LIBRARIES LitlTransforms
-                     TYPE Boost)
 elements_add_unit_test(SeparableKernel tests/src/SeparableKernel_test.cpp 
                      EXECUTABLE LitlTransforms_SeparableKernel_test
                      LINK_LIBRARIES LitlTransforms
