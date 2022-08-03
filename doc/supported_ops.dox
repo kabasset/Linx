@@ -17,16 +17,16 @@ namespace Litl {
 <li>Module \ref pixelwise
 <li>Class `MathFunctionsMixin`
 <li>Free functions in `Litl` namespace
-<tr><td>Pixel-wise custom functions<td>All `DataContainer`s
+<tr><td>Pixel-wise custom functions<td>`Sequence`, `Raster`, `Subraster`
 <td><ul>
 <li>Module \ref pixelwise
 <li>Methods `DataContainer::generate()` and `DataContainer::apply()`
-<tr><td>Random noise<td>All `DataContainer`s
+<tr><td>Random noise<td>`Sequence`, `Raster`, `Subraster`
 <td><ul>
 <li>Module \ref random
 <li>Specifications `RandomNoise`
 <li>Methods `DataContainer::generate()` and `DataContainer::apply()`
-<tr><td>Distribution estimators<td>All `DataContainer`s
+<tr><td>Distribution estimators<td>`Sequence`, `Raster`, `Subraster`
 <td><ul>
 <li>Class `DataDistribution`
 <li>Method `DataContainer::distribution()`

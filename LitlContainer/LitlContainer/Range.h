@@ -5,8 +5,7 @@
 #ifndef _LITLCONTAINER_RANGE_H
 #define _LITLCONTAINER_RANGE_H
 
-#include <algorithm> // equal
-#include <ostream>
+#include <algorithm>
 
 namespace Litl {
 
