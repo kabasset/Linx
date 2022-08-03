@@ -141,21 +141,6 @@ public:
     return m_box != other.m_box || m_flags != other.m_flags;
   }
 
-  /**
-   * @brief Get the row-major ordered list of positions in the mask.
-   */
-  Sequence<Position<N>> domain() const {
-    std::vector<Position<N>> vec;
-    auto it = m_flags.begin();
-    for (const auto& p : m_box) {
-      if (*it) {
-        vec.push_back(p);
-      }
-      ++it;
-    }
-    return Sequence<Position<N>>(vec.size(), std::move(vec)); // FIXME size() invalid if move is made beforehand
-  }
-
   /// @group_modifiers
 
   /**

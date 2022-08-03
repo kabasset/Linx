@@ -29,7 +29,6 @@ void checkBall(double radius = 2) {
     out.push_back(p);
   }
   BOOST_TEST(out == expected);
-  BOOST_TEST(ball.domain().container() == expected);
 }
 
 BOOST_AUTO_TEST_CASE(l0_ball_test) {
