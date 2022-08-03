@@ -16,6 +16,9 @@ elements_add_executable(LitlBenchmarkCorrelation src/program/LitlBenchmarkCorrel
 elements_add_executable(LitlBenchmarkIteration src/program/LitlBenchmarkIteration.cpp
                      INCLUDE_DIRS ElementsKernel LitlRun
                      LINK_LIBRARIES ElementsKernel LitlRun)
+elements_add_executable(LitlBenchmarkRegions src/program/LitlBenchmarkRegions.cpp
+                     INCLUDE_DIRS ElementsKernel LitlRun
+                     LINK_LIBRARIES ElementsKernel LitlRun)
 
 elements_add_unit_test(Chronometer tests/src/Chronometer_test.cpp 
                      EXECUTABLE LitlRun_Chronometer_test

@@ -34,7 +34,7 @@ Litl::IterationBenchmark::Duration iterate(Litl::IterationBenchmark& benchmark, 
   }
 }
 
-class RasterBenchmarkIteration : public Elements::Program {
+class LitlBenchmarkIteration : public Elements::Program {
 
 public:
   std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
@@ -61,4 +61,4 @@ public:
   }
 };
 
-MAIN_FOR(RasterBenchmarkIteration)
+MAIN_FOR(LitlBenchmarkIteration)

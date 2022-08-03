@@ -61,7 +61,6 @@ public:
     do {
       ++m_flagIt;
       ++m_current;
-      printf("Mask::Iterator: %i\n", *m_flagIt);
     } while (m_flagIt != m_flagEnd && not *m_flagIt);
     return *this;
   }
