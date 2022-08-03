@@ -60,7 +60,7 @@ struct RangeMixin {
    * @see `range()`
    */
   TDerived& linspace(const T& min = Limits<T>::zero(), const T& max = Limits<T>::one()) {
-    const auto size = std::distance(static_cast<TDerived&>(*this).begin(), static_cast<TDerived&>(*this).end());
+    const std::size_t size = std::distance(static_cast<TDerived&>(*this).begin(), static_cast<TDerived&>(*this).end());
     const auto step = (max - min) / (size - 1);
     auto it = static_cast<TDerived&>(*this).begin();
     for (std::size_t i = 0; i < size - 1; ++i, ++it) {

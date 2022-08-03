@@ -40,7 +40,8 @@ namespace Litl {
 template <typename T, typename TParent, typename TRegion = Box<TParent::Dimension>>
 class Subraster :
     public ArithmeticMixin<EuclidArithmetic, T, Subraster<T, TParent, TRegion>>,
-    public MathFunctionsMixin<T, Subraster<T, TParent, TRegion>> {
+    public MathFunctionsMixin<T, Subraster<T, TParent, TRegion>>,
+    public RangeMixin<T, Subraster<T, TParent, TRegion>> {
 
 public:
   /**
