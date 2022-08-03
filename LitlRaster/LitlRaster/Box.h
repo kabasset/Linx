@@ -13,7 +13,7 @@ namespace Litl {
 
 /**
  * @brief An ND bounding box, defined by its front and back positions, both inclusive.
- * @details
+ * 
  * Like `Position`, this class stores no pixel values, but coordinates.
  */
 template <Index N = 2>
@@ -27,7 +27,7 @@ public:
 
   /**
    * @brief A position iterator.
-   * @details
+   * 
    * The scanning order maximizes data locality for row-major ordered data like rasters.
    * 
    * That is, the increment operator is such that the corresponding offset in a raster is always increasing.
@@ -59,7 +59,7 @@ public:
 
   /**
    * @brief Create a conventionally unlimited box.
-   * @details
+   * 
    * Front and back bounds along each axis are respectively 0 and inf.
    */
   static Box<N> whole() {
@@ -160,7 +160,7 @@ public:
   /**
    * @brief Create a list of boxes around the box.
    * @param margin The extent of the surrounding
-   * @details
+   * 
    * The indices of `margin.front` must be negative or null
    * while those of `margin.back` must be positive or null.
    * No empty boxes are created, such that the number of output boxes
@@ -205,7 +205,7 @@ public:
 
   /**
    * @brief Flatten the box along a given axis.
-   * @details
+   * 
    * The back of the box is set to the same coordinate as the front along the axis.
    */
   Box<N>& project(Index axis = 0) {
@@ -374,7 +374,7 @@ inline const Box<N>& box(const Box<N>& region) {
 /**
  * @relates Box
  * @brief Get the bounding box of a region.
- * @details
+ * 
  * This generic implementation is unoptimized:
  * it iterates over all of the positions.
  */

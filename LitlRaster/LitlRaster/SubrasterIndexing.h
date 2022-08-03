@@ -156,7 +156,7 @@ template <typename TParent, typename TRegion>
 struct SubrasterTraits {
   /**
    * @brief The indexing strategy of a subraster, depending on the type of parent and region.
-   * @details
+   * 
    * As opposed to the subraster itself, the indexing is shift-invariant.
    * Optimized regions for raster parents are:
    * - `Box<N>`,

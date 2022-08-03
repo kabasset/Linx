@@ -16,7 +16,7 @@ namespace Internal {
 
 /**
  * @brief RAII wrapper for `fftw_plan`.
- * @details
+ * 
  * `FftwPlan::get()` returns an `fftw_plan`.
  */
 using FftwPlanPtr = std::unique_ptr<fftw_plan>;
@@ -26,7 +26,7 @@ using FftwPlanPtr = std::unique_ptr<fftw_plan>;
 
 /**
  * @brief Thread-safe singleton class to ensure proper FFTW memory management.
- * @details
+ * 
  * This is a Meyer's singleton.
  * The destructor, which is executed once (at the end of the program), calls `fftw_cleanup()`.
  */
@@ -46,7 +46,7 @@ private:
 
   /**
    * @brief Get the instance.
-   * @details
+   * 
    * Get the singleton if it exists already or instantiate it otherwise,
    * which triggers cleanup at destruction, i.e. when program ends.
    */

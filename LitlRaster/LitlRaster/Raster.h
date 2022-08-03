@@ -19,7 +19,7 @@
 
 /**
  * @brief The light image template library
- * @details
+ * 
  * An ND image processing library developed and maintained by the French space agency,
  * Centre national d'études spatiales.
  * @see https://github.com/cnes
@@ -43,7 +43,7 @@ class Raster;
 /**
  * @ingroup data_classes
  * @brief `Raster` which points to some external data.
- * @details
+ * 
  * It is a non-owning container: no allocation or freeing is made; a `PtrRaster`'s memory is managed externally.
  * This is the type which is preferred to represent contiguous views, e.g. with `Raster::section()`.
  */
@@ -53,7 +53,7 @@ using PtrRaster = Raster<T, N, PtrHolder<T>>;
 /**
  * @ingroup data_classes
  * @brief `Raster` which owns a `std::vector`.
- * @details
+ * 
  * The underlying container is a `std::vector`.
  * It is convenient to interface with the standard library
  * or other tools which work with `std::vector`s without copies,
@@ -87,7 +87,7 @@ using ArrRaster = Raster<T, N, StdHolder<std::array<T, Capacity>>>;
 /**
  * @ingroup data_classes
  * @brief `Raster` which owns or shares some aligned memory.
- * @details
+ * 
  * `AlignedBuffer<T>` is a wrapper of `T*` which may or not manage memory,
  * but at least ensures that memory is correctly aligned according to some requirements:
  * - If the `AlignedRaster` is constructed from a null pointer, then some memory will be allocated,
@@ -106,7 +106,7 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
  * @tparam N The dimension, which can be &ge; 0 for fixed dimension, or -1 for variable dimension
  * @tparam THolder The underlying data holder
  * 
- * @details
+ * 
  * A raster is a contiguous container for the pixel data of an image.
  * It features access and view services.
  * 
@@ -162,7 +162,7 @@ public:
 
   /**
    * @brief The dimension template parameter.
-   * @details
+   * 
    * The value of `Dimension` is always `N`, irrespective of its sign.
    * In contrast, `dimension()` provides the actual, run-time dimension of the raster,
    * even in the case of a variable dimension.
@@ -185,7 +185,7 @@ public:
    * @brief Forwarding constructor.
    * @param shape The raster shape
    * @param args The arguments to be forwarded to the data holder
-   * @details
+   * 
    * The holder is instantiated as:
    * \code
    * Holder holder(shapeSize(shape), std::forward<TArgs>(args)...);
@@ -200,7 +200,7 @@ public:
    * @param shape The raster shape
    * @param list The values to be copied into the holder
    * @param args The arguments to be forwarded to the data holder
-   * @details
+   * 
    * The holder is instantiated as:
    * \code
    * Holder holder(shapeSize(shape), std::forward<TArgs>(args)...);
@@ -218,7 +218,7 @@ public:
    * @param shape The raster shape
    * @param iterable The values to be copied into the holder
    * @param args The arguments to be forwarded to the data holder
-   * @details
+   * 
    * The holder is instantiated as:
    * \code
    * Holder holder(shapeSize(shape), std::forward<TArgs>(args)...);
@@ -240,7 +240,7 @@ public:
 
   /**
    * @brief Get the raster domain.
-   * @details
+   * 
    * The domain is the region which spans from the first to the last pixel position.
    * 
    * \par_example
@@ -268,7 +268,7 @@ public:
 
   /**
    * @brief Get the actual dimension.
-   * @details
+   * 
    * This corresponds to the `N` template parameter in general,
    * or to the current dimension if variable.
    */
@@ -309,7 +309,7 @@ public:
 
   /**
    * @copybrief operator[]()
-   * @details
+   * 
    * As opposed to `operator[]()`, negative indices are supported for backward indexing,
    * and bounds are checked.
    * @see operator[]()
@@ -326,7 +326,7 @@ public:
   /**
    * @brief Check whether a region is made of contiguous values in memory.
    * @tparam M The actual region dimension
-   * @details
+   * 
    * A region is contiguous if and only if:
    * - For `i` < `M-1`, `front[i]` = 0 and `back[i]` = `shape[i] - 1`;
    * - For `i` > `M`, `front[i]` = `back[i]`.
@@ -353,7 +353,7 @@ public:
    * @brief Create a section between given indices.
    * @param front The section front index along the last axis
    * @param back The section back index along the last axis
-   * @details
+   * 
    * A section is a maximal slice of dimension `N` or `N`-1.
    * For example, a 3D section of a 3D raster of shape (x, y, z)
    * is a 3D raster of shape (x, y, t) where `t` < `z`,
@@ -386,7 +386,7 @@ public:
 
   /**
    * @brief Create a subraster from given region.
-   * @details
+   * 
    * A subraster is a view of the raster data contained in a region.
    * As opposed to a slice or a section, a subraster is not necessarily contiguous in memory.
    * 
@@ -441,7 +441,7 @@ bool operator!=(const Raster<T, N, THolder>& lhs, const Raster<U, M, UHolder>& r
  * @tparam Longs The axes lengths, should not be specified (automatically deduced)
  * @param data The raster values, which can be either a pointer (or C array) or a vector
  * @param shape The shape as a comma-separated list of `Index`s
- * @details
+ * 
  * \par_example
  * \code
  * Given:
@@ -475,7 +475,7 @@ PtrRaster<T, sizeof...(Longs)> rasterize(T* data, Longs... shape) {
 /**
  * @relates Raster
  * @brief Identity.
- * @details
+ * 
  * This function is provided for compatibility with `Extrapolator`
  * in cases where functions accept either a `Raster` or an `Extrapolator`.
  */
@@ -512,7 +512,7 @@ LITL_MATH_COMPLEX_TO_REAL(norm) ///< Apply `std::norm()` @ingroup pixelwise
 /**
  * @relates Raster
  * @brief Generate a random raster.
- * @details
+ * 
  * Pixel values are uniformly distributed between the type's half min and half max.
  */
 template <typename T, Index N = 2>

@@ -13,7 +13,6 @@ namespace Litl {
 /**
  * @brief Memory- and computation-efficient discrete Fourier transform.
  * 
- * @details
  * This class provides a light wrapping of FFTW's transforms.
  * It is design to compose transforms (e.g. direct and inverse DFTs) efficiently.
  * 
@@ -123,7 +122,7 @@ public:
 
   /**
    * @brief Create the inverse plan with shared buffers.
-   * @details
+   * 
    * \code
    * auto idft = dft.inverse();
    * dft.transform(); // Fills dft.out() = idft.in()
@@ -139,7 +138,7 @@ public:
 
   /**
    * @brief Create a `DftPlan` which shares its input buffer with this `DftPlan`'s output buffer.
-   * @details
+   * 
    * \code
    * auto planB = planA.template compose<ComplexDft>();
    * planA.transform(); // Fills planA.out() = planB.in()

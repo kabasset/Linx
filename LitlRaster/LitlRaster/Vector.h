@@ -31,7 +31,7 @@ using Indices = Coordinates<Index, N>;
  * @ingroup data_classes
  * @brief N-dimensional vector, mainly intended for pixel position or image shape, i.e. set of coordinates.
  * @tparam N A non-negative dimension (0 is allowed), or -1 for variable dimension.
- * @details
+ * 
  * The values are stored in a `std::array<T, N>` in general (`N &ge; 0`),
  * or `std::vector<T>` for variable dimension (`N = -1`).
  *
@@ -172,7 +172,7 @@ public:
   /**
    * @brief Create a vector of lower dimension.
    * @tparam M The new dimension; cannot be -1
-   * @details
+   * 
    * The values up to dimension `M` are copied.
    */
   template <Index M>
@@ -185,7 +185,7 @@ public:
   /**
    * @brief Create a vector of higher dimension.
    * @tparam M The new dimension; cannot be -1
-   * @details
+   * 
    * The values up to dimension `N` are copied.
    * Those between dimensions `N` and `M` are taken from the given padding vector.
    */
@@ -201,7 +201,7 @@ public:
  * @ingroup data_classes
  * @brief Pixel position or image shape, i.e. set of indices.
  * @tparam N A non-negative dimension (0 is allowed), or -1 for variable dimension.
- * @details
+ * 
  * Anonymous brace-initialization is permitted, e.g.:
  * \code
  * Raster<float> raster({1920, 1080});

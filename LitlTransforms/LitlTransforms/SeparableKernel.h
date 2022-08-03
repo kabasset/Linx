@@ -57,7 +57,7 @@ public:
   /**
    * @brief Make a Sobel correlation kernel along given axes.
    * @param sign The differentiation sign (-1 or 1)
-   * @details
+   * 
    * The kernel along the `Is` axes is `{1, 2, 1}` and that along `I0` is `{sign, 0, -sign}`.
    * Note the ordering of the differentiation _correlation_ kernel, which is opposite to Sobel's _convolution_ kernel.
    * For differenciation in the increasing-index direction, keep `sign = 1`;
@@ -87,7 +87,7 @@ public:
 
   /**
    * @brief Make a separable Laplacian correlation kernel along given axes.
-   * @details
+   * 
    * The kernel is built as a sequence of 1D kernels `{1, -2, 1}` if `sign` is 1,
    * or `{-1, 2, -1}` if sign is -1.
    */

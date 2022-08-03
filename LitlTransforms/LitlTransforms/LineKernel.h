@@ -65,7 +65,7 @@ public:
 
   /**
    * @brief Orient the kernel along given axes.
-   * @details
+   * 
    * For example, to apply a correlation kernel along axes 1 and 2 of a given raster `in`, do:
    * \code
    * auto out = kernel.template along<1, 2>().correlate(in);
@@ -142,7 +142,7 @@ LineKernel<T> kernelize(const Sequence<T, THolder>& values, Index origin) {
 /**
  * @relates LineKernel
  * @brief Make a line kernel from a sequence, with centered origin.
- * @details
+ * 
  * In case of even size, origin index is rounded down.
  */
 template <typename T, typename THolder>

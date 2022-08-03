@@ -99,7 +99,7 @@ template <typename T>
 struct TypeTraits {
   /**
    * @brief The floating point type which corresponds to `T`.
-   * @details
+   * 
    * A floating point type wide enough to handle any value of type `T`.
    * Can be complex.
    */
@@ -107,14 +107,14 @@ struct TypeTraits {
 
   /**
    * @brief The scalar type which corresponds to `T`.
-   * @details
+   * 
    * The type itself in general, or the value type of complex types.
    */
   using Scalar = T;
 
   /**
    * @brief Make some `T` from a scalar.
-   * @details
+   * 
    * Return the value itself if `T` is already scalar,
    * or a complex with same real and imaginary parts if `T` is complex.
    */
@@ -124,7 +124,7 @@ struct TypeTraits {
 
   /**
    * @brief Make some `T` from a scalar function.
-   * @details
+   * 
    * If `T` is complex, apply the function twice to get the real and imaginary parts.
    */
   template <typename TFunc, typename TArg>

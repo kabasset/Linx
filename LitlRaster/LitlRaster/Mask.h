@@ -12,7 +12,7 @@ namespace Litl {
 
 /**
  * @brief A masked ND bounding box.
- * @details
+ * 
  * This class is similar to `Box`, yet with a boolean value (the flag) associated to each position.
  */
 template <Index N = 2>

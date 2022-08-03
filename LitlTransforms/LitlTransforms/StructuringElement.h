@@ -167,7 +167,7 @@ public:
    * @param in The input raster or extrapolator
    * @param out The output raster
    * @param region The application region
-   * @details
+   * 
    * For each pixel of `in` inside `region`, get the neighboring values, apply the function to them,
    * and assign the output of the function to the corresponding pixel in `out`.
    */

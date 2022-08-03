@@ -16,7 +16,7 @@ namespace Litl {
 /**
  * @brief A simple chronometer with increment times and elapsed time caching.
  * @tparam TUnit The time unit, e.g. `std::chrono::milliseconds`
- * @details
+ * 
  * Each time the chronometer is started and stoped, an increment is computed,
  * and the total elapsed time is incremented.
  * An offset can be provided, which is the initial value of the elapsed time,

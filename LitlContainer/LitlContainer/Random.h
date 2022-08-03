@@ -18,7 +18,7 @@ namespace Litl {
  * @ingroup concepts
  * @requirements{RandomNoise}
  * @brief Random noise generator requirements for use in containers.
- * @details
+ * 
  * A random noise generator of type `T` is a class which provides two methods:
  * - `T operator()()` generates a random value;
  * - `T operator()(T in)` applies some (additive or not) random noise to an input value `in`.
@@ -37,7 +37,7 @@ class ComplexDistribution {
 public:
   /**
    * @brief Forwarding constructor.
-   * @details
+   * 
    * If `T` is complex, `args.real()` and `args.imag()` are forwarded
    * to the constructors of some real and imaginary distributions, respectively.
    * For example, a complex Gaussian distribution can be initialized
@@ -51,7 +51,7 @@ public:
 
   /**
    * @brief Generate some value.
-   * @details
+   * 
    * If `T` is complex, two values are generated,
    * one from the real distribution and the other from the imaginary distribution.
    */
@@ -103,7 +103,7 @@ private:
 /**
  * @ingroup random
  * @brief Helper class to simplify implementation of random noise generators.
- * @details
+ * 
  * Random noise generators can extend this class and provide `operator()()`s
  * relying on `generate()` and `add()` for random value generation and additive noise generation, respectively.
  * Member `m_engine` is available for more complex uses.
@@ -216,7 +216,7 @@ private:
 /**
  * @ingroup random
  * @brief Poisson noise generator.
- * @details
+ * 
  * 
  * @satisfies{RandomNoise}
  * 
@@ -260,7 +260,7 @@ private:
 /**
  * @ingroup random
  * @brief Poisson noise generator which is robust to local changes.
- * @details
+ * 
  * If, at a given set of indices, two containers have the same values,
  * then the noises applied at these indices are identical.
  * For example, applying stable Poisson noise to containers `{0, 1, 2, 3}` and `{10, 100, 2, 30}`
@@ -285,7 +285,7 @@ class StablePoissonNoise : RandomGenerator {
 public:
   /**
    * @brief Fixed-seed constructor.
-   * @details
+   * 
    * @warning
    * By default, the seed is 0 and not -1,
    * because this noise generator is intended for reproducible results.
@@ -318,7 +318,7 @@ private:
 /**
  * @ingroup random
  * @brief Impulse noise generator (encompasses salt-and-pepper noise).
- * @details
+ * 
  * The call operator randomly generates discrete values with given probabilities.
  * If the sum of probabilities _s_ is less than 1,
  * then the input value is untouched with probability 1 - _s_.
@@ -359,7 +359,7 @@ public:
 
   /**
    * @brief Apply impulse noise.
-   * @details
+   * 
    * Generate discete values with constructor-provided probabilities,
    * and return the input value the rest of the time (if _s_ < 1).
    */

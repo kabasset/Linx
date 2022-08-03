@@ -31,7 +31,7 @@ struct RangeMixin {
 
   /**
    * @brief Fill the container with evenly spaced value.
-   * @details
+   * 
    * The difference between two adjacent values is _exactly_ `step`,
    * i.e. `container[i + 1] = container[i] + step`.
    * This means that rounding errors may sum up,
@@ -50,7 +50,7 @@ struct RangeMixin {
 
   /**
    * @brief Fill the container with evenly spaced value.
-   * @details
+   * 
    * The first and last values of the container are _exactly_ `min` and `max`.
    * Intermediate values are computed as `container[i] = min + (max - min) / (size() - 1) * i`,
    * which means that the difference between two adjacent values
@@ -73,7 +73,7 @@ struct RangeMixin {
    * @brief Generate values from a function with optional input containers.
    * @param func The generator function, which takes as many inputs as there are arguments
    * @param args The arguments in the form of containers of compatible sizes
-   * @details
+   * 
    * For example, here is how to imlement element-wise square root and multiplication:
    * \code
    * Container a = ...;
@@ -97,7 +97,7 @@ struct RangeMixin {
    * @brief Apply a function with optional input containers.
    * @param func The function
    * @param args The arguments in the form of containers of compatible sizes
-   * @details
+   * 
    * If there are _n_ arguments, `func` takes _n_+1 parameters,
    * where the first argument is the element of this container.
    * For example, here is how to imlement in-place element-wise square root and multiplication:

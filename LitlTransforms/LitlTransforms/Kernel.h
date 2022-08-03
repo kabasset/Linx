@@ -135,7 +135,7 @@ Kernel<T, N> kernelize(const Raster<T, N, THolder>& values, Position<N> origin) 
 /**
  * @relates Kernel
  * @brief Make a kernel from a raster, with centered origin.
- * @details
+ * 
  * In case of even lengths, origin position is rounded down.
  */
 template <typename T, Index N, typename THolder>

@@ -78,7 +78,7 @@ struct AlignmentError : Exception {
 /**
  * @ingroup data_classes
  * @brief Data holder with aligned memory.
- * @details
+ * 
  * The data pointer is guaranteed to be aligned in memory
  * according to the alignment requirement (might be better).
  * 
@@ -101,7 +101,7 @@ public:
    * @param size The number of elements
    * @param data The data pointer if it pre-exists, or `nullptr` otherwise
    * @param align The alignment requirement in bytes, or 0 or -1 (see below)
-   * @details
+   * 
    * If `data = nullptr`, the buffer is owning the data,
    * and some aligned memory is allocated.
    * In this case, if `align` is-1 or 0, alignment is made compatible with SIMD instructions.
@@ -178,7 +178,7 @@ public:
 
   /**
    * @brief Destructor.
-   * @details
+   * 
    * Frees memory if owned.
    */
   ~AlignedBuffer() {
@@ -201,7 +201,7 @@ public:
 
   /**
    * @brief Check whether the data is owned by this object.
-   * @details
+   * 
    * Returns false if the data is owned by another object,
    * or if it is empty, e.g. was owned but has been moved.
    */
@@ -225,7 +225,7 @@ public:
 
   /**
    * @brief Release the memory.
-   * @details
+   * 
    * The buffer can still be used, but does not own the data anymore,
    * and thus memory will not be freed when it goes out of scope.
    * The method returns the pointer to the unaligned memory,
@@ -241,7 +241,7 @@ public:
 
   /**
    * @brief Reset the buffer.
-   * @details
+   * 
    * If the buffer is owner, memory is freed.
    * Size is set to 0, alignment requirement to 1, and pointers are nullified.
    */

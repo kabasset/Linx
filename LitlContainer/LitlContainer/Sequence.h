@@ -34,7 +34,7 @@ public:
 /**
  * @relates Sequence
  * @brief Generate a random raster.
- * @details
+ * 
  * Pixel values are uniformly distributed between the type's half min and half max.
  */
 template <typename T>

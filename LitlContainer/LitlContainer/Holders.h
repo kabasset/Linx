@@ -55,7 +55,7 @@ inline const T* data(const T (&c)[N]) noexcept {
 /**
  * @ingroup data_classes
  * @brief A default holder of any contiguous container specified by a size and data pointer.
- * @details
+ * 
  * The class can be specialized for any continuous container,
  * in which case the specialization should satisfy the `SizedData` requirements.
  * @satisfies{SizedData}
@@ -118,7 +118,7 @@ public:
 
   /**
    * @brief Move the container.
-   * @details
+   * 
    * This method is used to take ownership on the data without copying it.
    * Example usage:
    * \code
@@ -236,7 +236,7 @@ private:
 /**
  * @ingroup data_classes
  * @brief Raw pointer holder.
- * @details
+ * 
  * This is a non-owning holder, i.e. some view on exising data.
  * No memory is managed.
  */

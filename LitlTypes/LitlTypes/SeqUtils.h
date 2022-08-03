@@ -90,7 +90,7 @@ TReturn tupleTransformImpl(TTuple&& tuple, TFunc&& func, std::index_sequence<Is.
 
 /**
  * @brief Traits class to test wether a sequence is a tuple.
- * @details
+ * 
  * Use `IsTupleImpl<T>::value` to get a `bool`.
  */
 template <typename TSeq>
@@ -201,7 +201,7 @@ std::enable_if_t<not isTuple<TSeq>(), TReturn> seqTransform(const TSeq& seq, TFu
 
 /**
  * @brief Serialize a heterogeneous list of arguments.
- * @details
+ * 
  * Applies `operator<<()` to arguments, separated with ", ".
  * For example:
  * \code

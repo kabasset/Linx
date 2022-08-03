@@ -14,7 +14,7 @@ namespace Litl {
  * @ingroup concepts
  * @requirements{ContiguousContainer}
  * @brief Standard contiguous container requirements
- * @details
+ * 
  * A <a href="https://en.cppreference.com/w/cpp/named_req/ContiguousContainer">contiguous container</a>
  * is a standard container whose elements are stored contiguously in memory.
  */
@@ -23,7 +23,7 @@ namespace Litl {
  * @ingroup concepts
  * @requirements{SizedData}
  * @brief Requirements for the holder of a `DataContainer`.
- * @details
+ * 
  * A contiguous data holder is a class which stores or points to some data contiguous in memory,
  * and implements the following methods:
  * - Constructor from a size and pointer;
@@ -42,7 +42,7 @@ namespace Litl {
  * @tparam T The value type
  * @tparam TDerived The child class which implements required methods
  * 
- * @details
+ * 
  * This class provides the necessary types and methods
  * to meet the standard `ContiguousContainer` requirements.
  * This is a CRTP implementation, which means it takes as template parameter
@@ -95,7 +95,7 @@ struct ContiguousContainerMixin {
 
   /**
    * @brief Check whether the container is empty.
-   * @details
+   * 
    * Empty corresponds to `begin() == end()`.
    */
   bool empty() const {

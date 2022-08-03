@@ -41,7 +41,7 @@ namespace Litl {
  * @ingroup concepts
  * @requirements{VectorArithmetic}
  * @brief Vector space arithmetic requirements.
- * @details
+ * 
  * Implements vector space arithmetic operators
  * (uppercase letters are for vectors, lowercase letters are for scalars):
  * - Vector-additive: V += U, W = V + U, V -= U, W = V - U;
@@ -54,7 +54,7 @@ class VectorArithmetic;
  * @ingroup concepts
  * @requirements{EuclidArithmetic}
  * @brief Euclidean ring arithmetic requirements.
- * @details
+ * 
  * Adds the following operators to `VectorArithmetic`:
  * - Vector-multiplicative: V *= U, W = U * V, V /= U, W = V / U;
  * - Scalar-modable: V %= a, V = U % a;
@@ -69,7 +69,7 @@ class EuclidArithmetic;
  * @tparam TSpecs The operators specifications, can be `void`
  * @tparam T The contained element value type
  * @tparam TDerived The container which inherits this class
- * @details
+ * 
  * In addition to vector space arithmetic operators, this mixin provides
  * `generate()` and `apply()` to apply a function to each element.
  */

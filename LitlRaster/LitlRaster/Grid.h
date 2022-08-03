@@ -13,7 +13,7 @@ namespace Litl {
 
 /**
  * @brief An ND bounding box, defined by its front and back positions, both inclusive.
- * @details
+ * 
  * Like `Position`, this class stores no pixel values, but coordinates.
  */
 template <Index N = 2>
@@ -144,7 +144,7 @@ public:
 
   /**
    * @brief Flatten the grid along a given axis.
-   * @details
+   * 
    * The back of the box is set to the same coordinate as the front along the axis.
    */
   Grid<N>& project(Index axis = 0) {

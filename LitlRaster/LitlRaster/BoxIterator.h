@@ -64,7 +64,7 @@ public:
 
   /**
    * @brief Increment operator.
-   * @details
+   * 
    * Move the current position by 1 pixel,
    * such that the corresponding index in a raster would be increased to the next one.
    */

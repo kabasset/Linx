@@ -12,7 +12,7 @@ namespace Litl {
 
 /**
  * @brief Helper class to declare positional, named and flag options, as well as some help message.
- * @details
+ * 
  * Here is an example use case for the following command line:
  * \verbatim Program <positional> --named1 <value1> --flag --named2 <value2> \endverbatim
  * 
@@ -78,7 +78,7 @@ public:
 
   /**
    * @brief Declare a named option.
-   * @details
+   * 
    * A short form (1-character) of the option can be provided, separated by a comma.
    */
   template <typename T>
@@ -88,7 +88,7 @@ public:
 
   /**
    * @brief Declare a named option with default value.
-   * @details
+   * 
    * A short form (1-character) of the option can be provided, separated by a comma.
    */
   template <typename T>
@@ -98,7 +98,7 @@ public:
 
   /**
    * @brief Declare a named option with custom semantics.
-   * @details
+   * 
    * A short form (1-character) of the option can be provided, separated by a comma.
    */
   void named(const char* name, const ValueSemantics* value, const char* description) {
@@ -164,7 +164,7 @@ public:
 
   /**
    * @brief Get the value of a given option.
-   * @details
+   * 
    * Throws if the option is not set.
    */
   template <typename T>

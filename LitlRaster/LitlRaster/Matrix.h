@@ -21,7 +21,7 @@ namespace Litl {
  * @tparam N The number of rows
  * @tparam M The number of columns
  * 
- * @details
+ * 
  * TODO
  */
 template <typename T, Index N = 2, Index M = N>

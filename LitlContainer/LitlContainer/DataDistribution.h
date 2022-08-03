@@ -16,7 +16,7 @@ namespace Litl {
  * @ingroup data_classes
  * @brief Estimate data distribution parameters of a container.
  * @tparam T The element type
- * @details
+ * 
  * The input container values are copied inside the class at construction,
  * and there is no link between the container and the `DataDistribution` after that,
  * such that eventual changes to the input container would not be reflected.
@@ -138,7 +138,7 @@ public:
 
   /**
    * @brief Compute the q-th quantile (with linear interpolation).
-   * @details
+   * 
    * The following values of `q` correspond to equivalent functions:
    * - 0: `min()`;
    * - 1: `max()`;
@@ -156,7 +156,7 @@ public:
 
   /**
    * @brief Compute the histogram with given bins.
-   * @details
+   * 
    * The output size is the size of `bins` minus one.
    */
   template <typename TIterable>

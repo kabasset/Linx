@@ -15,7 +15,7 @@ namespace Litl {
  * @brief Extrapolation decorator.
  * @tparam TRaster The decorated raster type
  * @tparam TMethod The extrapolation method
- * @details
+ * 
  * This class provides a subscript operator which accepts an integral position
  * which can lie outside the raster domain.
  * 
@@ -72,7 +72,7 @@ public:
 
   /**
    * @brief Access the element at given position.
-   * @details
+   * 
    * If the position is outside the image domain, apply the extrapolation method.
    */
   inline const Value& operator[](const Position<Dimension>& position) const {
@@ -105,7 +105,7 @@ const TRaster& rasterize(const Extrapolator<TRaster, TMethod>& in) {
  * @brief Interpolation decorator with optional extrapolator.
  * @tparam TRaster The decorated raster or extrapolator type
  * @tparam TMethod The interpolation method
- * @details
+ * 
  * This class provides a subscript operator which accepts a position,
  * which can lie between pixels or outside the raster domain.
  * 

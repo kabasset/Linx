@@ -95,7 +95,7 @@ class OutOfBoundsError : public Exception {
 public:
   /**
    * @brief Constructor.
-   * @details
+   * 
    * The error message is of the form "name: <value> not in [<min>, <max>]".
    */
   template <typename T>

@@ -17,7 +17,7 @@ namespace Litl {
 /**
  * @relates StepperPipeline
  * @brief Traits class which gives the cardinality (number of elements) of a type.
- * @details
+ * 
  * Cardinality of:
  * - `void` is 0;
  * - a tuple is its size;
@@ -58,7 +58,7 @@ constexpr int prerequisiteCardinality() {
 
 /**
  * @brief A pipeline or directed acyclic graph (DAG) which can be run step-by-step using lazy evaluation.
- * @details
+ * 
  * The only public method, `get<S>()`, returns the value of step `S`.
  * If not already done, the prerequisites of `S` are first triggered.
  * 
@@ -212,7 +212,7 @@ private:
 
 /**
  * @brief Helper class to declare a pipeline steps.
- * @details
+ * 
  * Usage:
  * \code
  * struct Step0 : PipelineStep<void, char> {};
@@ -225,7 +225,7 @@ template <typename TPrerequisite, typename TReturn>
 struct PipelineStep {
   /**
    * @brief The step's prerequisite's.
-   * @details
+   * 
    * Can be:
    * - `void` for no prerequisite;
    * - `std::tuple` for multiple prerequisites;
@@ -235,7 +235,7 @@ struct PipelineStep {
 
   /**
    * @brief The return type of the step.
-   * @details
+   * 
    * This is exactly the return type of the `StepperPipeline::get()`
    * which can for example be a const reference.
    */

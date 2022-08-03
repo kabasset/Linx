@@ -29,7 +29,7 @@ namespace Litl {
  * @tparam T The element type
  * @tparam THolder The data container holder
  * @tparam TDerived The derived class
- * @details
+ * 
  * The class can be specialized for any container which implements the `SizedData` requirements.
  * @satisfies{ContiguousContainer}
  */
@@ -58,7 +58,7 @@ public:
 
   /**
    * @brief List-based constructor.
-   * @details
+   * 
    * List values are copied to the container.
    */
   template <typename U, typename... TArgs>
@@ -69,7 +69,7 @@ public:
 
   /**
    * @brief Iterator-based constructor.
-   * @details
+   * 
    * Iterable values are copied to the container.
    */
   template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr, typename... TArgs>
@@ -105,7 +105,7 @@ public:
 
   /**
    * @brief Access the element with given index.
-   * @details
+   * 
    * As opposed to `operator[]()`, negative indices are supported for backward indexing,
    * and bounds are checked.
    */

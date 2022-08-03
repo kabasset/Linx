@@ -71,7 +71,7 @@ T abspow(T x) {
  * @ingroup pixelwise
  * @ingroup mixins
  * @brief Mixin to provide mathematical operations and transforms to a container.
- * @details
+ * 
  * Implements element-wise mathematical functions which may take an iterable or scalar argument (or none).
  * In the former case, the number of elements in the iterable must match that of the container.
  * @see pixelwise
