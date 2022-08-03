@@ -6,13 +6,13 @@ namespace Litl {
 
 <table class="fieldtable">
 <tr><th>Operation<th>Applicable to<th>Documentation
-<tr><td>Pixel-wise operators<td>`Sequence` and `Raster`
+<tr><td>Pixel-wise operators<td>`Sequence`, `Raster`, `Subraster`
 <td><ul>
 <li>Module \ref pixelwise
 <li>Specifications `VectorArithmetic`
 <li>Specifications `EuclidArithmetic`
 <li>Class `ArithmeticMixin`
-<tr><td>Pixel-wise mathematical functions<td>`Sequence` and `Raster`
+<tr><td>Pixel-wise mathematical functions<td>`Sequence`, `Raster`, `Subraster`
 <td><ul>
 <li>Module \ref pixelwise
 <li>Class `MathFunctionsMixin`

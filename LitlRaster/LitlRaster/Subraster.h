@@ -5,6 +5,8 @@
 #ifndef _LITLRASTER_SUBRASTER_H
 #define _LITLRASTER_SUBRASTER_H
 
+#include "LitlContainer/Arithmetic.h"
+#include "LitlContainer/Math.h"
 #include "LitlRaster/Box.h"
 #include "LitlRaster/Raster.h"
 #include "LitlRaster/SubrasterIndexing.h"
@@ -20,7 +22,7 @@ namespace Litl {
  * @tparam T The value type
  * @tparam TParent The parent raster or extrapolator type
  * @tparam TRegion The region type
- * @details
+ * 
  * As opposed to a raster, values of a subraster are generally not contiguous in memory:
  * they are piece-wise contiguous when the region is a `Box`, and sometimes not even piece-wise contiguous.
  * When a region is indeed contiguous, it is better to rely on a `PtrRaster` instead: see `Raster::section()`.
@@ -29,9 +31,16 @@ namespace Litl {
  * and the iterator type depends on the parent and region types in order to maximize performance.
  * Assuming the region itself is cheap to shift, subrasters are cheap to shift and iterate,
  * which makes them ideal to represent sliding windows, even of arbitrary shapes (e.g. when the region is a `Mask`).
+ * 
+ * In-place pixel-wise operations of rasters (like arithmetic operators and math functions)
+ * are applicable to subrasters of mutable parents.
+ * 
+ * @see pixelwise
  */
 template <typename T, typename TParent, typename TRegion = Box<TParent::Dimension>>
-class Subraster {
+class Subraster :
+    public ArithmeticMixin<EuclidArithmetic, T, Subraster<T, TParent, TRegion>>,
+    public MathFunctionsMixin<T, Subraster<T, TParent, TRegion>> {
 
 public:
   /**
