@@ -10,6 +10,7 @@
 #include "LitlContainer/DataDistribution.h"
 #include "LitlContainer/Holders.h"
 #include "LitlContainer/Math.h"
+#include "LitlContainer/Range.h"
 #include "LitlTypes/Exceptions.h"
 #include "LitlTypes/SeqUtils.h" // isIterable
 #include "LitlTypes/TypeUtils.h" // Index, Limits
@@ -37,7 +38,8 @@ class DataContainer :
     public THolder,
     public ContiguousContainerMixin<T, TDerived>,
     public ArithmeticMixin<TArithmetic, T, TDerived>,
-    public MathFunctionsMixin<T, TDerived> {
+    public MathFunctionsMixin<T, TDerived>,
+    public RangeMixin<T, TDerived> {
 
 public:
   /**
@@ -118,133 +120,6 @@ public:
    */
   T& at(Index i) {
     return const_cast<T&>(const_cast<const DataContainer&>(*this).at(i));
-  }
-
-  /// @group_modifiers
-
-  /**
-   * @brief Fill the container with a single value.
-   */
-  TDerived& fill(const T& value) {
-    std::fill(this->begin(), this->end(), value);
-    return static_cast<TDerived&>(*this);
-  }
-
-  /**
-   * @brief Fill the container with evenly spaced value.
-   * @details
-   * The difference between two adjacent values is _exactly_ `step`,
-   * i.e. `container[i + 1] = container[i] + step`.
-   * This means that rounding errors may sum up,
-   * as opposed to `linspace()`.
-   * @see `linspace()`
-   */
-  TDerived& range(const T& min = Limits<T>::zero(), const T& step = Limits<T>::one()) {
-    auto v = min;
-    auto& t = static_cast<TDerived&>(*this);
-    for (auto& e : t) {
-      e = v;
-      v += step;
-    }
-    return t;
-  }
-
-  /**
-   * @brief Fill the container with evenly spaced value.
-   * @details
-   * The first and last values of the container are _exactly_ `min` and `max`.
-   * Intermediate values are computed as `container[i] = min + (max - min) / (size() - 1) * i`,
-   * which means that the difference between two adjacent values
-   * is not necessarily perfectly constant for floating point values,
-   * as opposed to `range()`.
-   * @see `range()`
-   */
-  TDerived& linspace(const T& min = Limits<T>::zero(), const T& max = Limits<T>::one()) {
-    const auto step = (max - min) / (this->size() - 1);
-    auto it = this->begin();
-    for (std::size_t i = 0; i < this->size() - 1; ++i, ++it) {
-      *it = min + step * i;
-    }
-    *it = max;
-    return static_cast<TDerived&>(*this);
-  }
-
-  /**
-   * @brief Generate values from a function with optional input containers.
-   * @param func The generator function, which takes as many inputs as there are arguments
-   * @param args The arguments in the form of containers of compatible sizes
-   * @details
-   * For example, here is how to imlement element-wise square root and multiplication:
-   * \code
-   * Container a = ...;
-   * Container b = ...;
-   * Container res(a.size());
-   * res.generate([](auto v) { return std::sqrt(v) }, a); // res = sqrt(a)
-   * res.generate([](auto v, auto w) { return v * w; }, a, b); // res = a * b
-   * \endcode
-   */
-  template <typename TFunc, typename... TContainers>
-  TDerived& generate(TFunc&& func, const TContainers&... args) {
-    auto its = std::make_tuple(args.begin()...);
-    auto& t = static_cast<TDerived&>(*this);
-    for (auto& v : t) {
-      v = iteratorTupleApply(its, func);
-    }
-    return t;
-  }
-
-  /**
-   * @brief Apply a function with optional input containers.
-   * @param func The function
-   * @param args The arguments in the form of containers of compatible sizes
-   * @details
-   * If there are _n_ arguments, `func` takes _n_+1 parameters,
-   * where the first argument is the element of this container.
-   * For example, here is how to imlement in-place element-wise square root and multiplication:
-   * \code
-   * Container a = ...;
-   * Container res = ...;
-   * res.apply([](auto v) { return std::sqrt(v); }); // res = sqrt(res)
-   * res.apply([](auto v, auto w) { return v * w; }, a); // res *= a
-   * \endcode
-   */
-  template <typename TFunc, typename... TContainers>
-  TDerived& apply(TFunc&& func, const TContainers&... args) {
-    return generate(std::forward<TFunc>(func), static_cast<TDerived&>(*this), args...);
-  }
-
-  /// @group_operations
-
-  /**
-   * @brief Get a reference to the (first) min element.
-   * @see `distribution()`
-   */
-  const T& min() const {
-    return *std::min_element(this->begin(), this->end());
-  }
-
-  /**
-   * @brief Get a reference to the (first) max element.
-   * @see `distribution()`
-   */
-  const T& max() const {
-    return *std::max_element(this->begin(), this->end());
-  }
-
-  /**
-   * @brief Get a pair of references to the (first) min and max elements.
-   * @see `distribution()`
-   */
-  std::pair<const T&, const T&> minmax() const {
-    const auto its = std::minmax_element(this->begin(), this->end());
-    return {*its.first, *its.second};
-  }
-
-  /**
-   * @brief Create a `DataDistribution` from the container.
-   */
-  DataDistribution<T> distribution() const {
-    return DataDistribution<T>(*this);
   }
 
   /// @}
