@@ -2,8 +2,8 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LITLRASTER_SUBRASTERINDEXING_H
-#define _LITLRASTER_SUBRASTERINDEXING_H
+#ifndef _LITLRASTER_IMPL_SUBRASTERINDEXING_H
+#define _LITLRASTER_IMPL_SUBRASTERINDEXING_H
 
 #include "LitlContainer/Sequence.h"
 #include "LitlRaster/Box.h"
@@ -198,6 +198,6 @@ struct SubrasterTraits<Raster<T, N, THolder>, Mask<N>> {
 
 } // namespace Litl
 
-#include "LitlRaster/SubrasterIterator.h"
+#include "LitlRaster/impl/SubrasterIterator.h"
 
 #endif

@@ -2,7 +2,8 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#if defined(_LITLRASTER_RASTER_IMPL) || defined(CHECK_QUALITY)
+#ifndef _LITLRASTER_IMPL_RASTER_HPP
+#define _LITLRASTER_IMPL_RASTER_HPP
 
 #include "LitlRaster/Raster.h"
 

@@ -12,12 +12,10 @@
 namespace Litl {
 
 /**
- * @brief An ND bounding box, defined by its front and back positions, both inclusive.
- * 
- * Like `Position`, this class stores no pixel values, but coordinates.
+ * @brief An ND regular grid.
  */
 template <Index N = 2>
-class Grid : boost::additive<Grid<N>, Grid<N>>, boost::additive<Grid<N>, Position<N>>, boost::additive<Grid<N>, Index> {
+class Grid : boost::additive<Grid<N>, Position<N>>, boost::additive<Grid<N>, Index> {
 
 public:
   /**
@@ -247,6 +245,6 @@ Grid<N> project(const Grid<N>& in, Index axis = 0) {
 
 } // namespace Litl
 
-#include "LitlRaster/GridIterator.h"
+#include "LitlRaster/impl/GridIterator.h"
 
 #endif

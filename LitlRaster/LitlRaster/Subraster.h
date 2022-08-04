@@ -9,7 +9,7 @@
 #include "LitlContainer/Math.h"
 #include "LitlRaster/Box.h"
 #include "LitlRaster/Raster.h"
-#include "LitlRaster/SubrasterIndexing.h"
+#include "LitlRaster/impl/SubrasterIndexing.h"
 
 #include <algorithm> // accumulate
 #include <functional> // multiplies
@@ -191,7 +191,5 @@ private:
 };
 
 } // namespace Litl
-
-#include "LitlRaster/SubrasterIterator.h"
 
 #endif

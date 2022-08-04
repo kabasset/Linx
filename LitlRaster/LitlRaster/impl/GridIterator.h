@@ -2,8 +2,8 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LITLRASTER_GRIDITERATOR_H
-#define _LITLRASTER_GRIDITERATOR_H
+#ifndef _LITLRASTER_IMPL_GRIDITERATOR_H
+#define _LITLRASTER_IMPL_GRIDITERATOR_H
 
 #include "LitlRaster/Grid.h"
 

@@ -2,8 +2,8 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LITLRASTER_MASKITERATOR_H
-#define _LITLRASTER_MASKITERATOR_H
+#ifndef _LITLRASTER_IMPL_MASKITERATOR_H
+#define _LITLRASTER_IMPL_MASKITERATOR_H
 
 #include "LitlRaster/Mask.h"
 

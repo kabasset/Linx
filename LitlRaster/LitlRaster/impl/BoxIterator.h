@@ -2,8 +2,8 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LITLRASTER_BOXITERATOR_H
-#define _LITLRASTER_BOXITERATOR_H
+#ifndef _LITLRASTER_IMPL_BOXITERATOR_H
+#define _LITLRASTER_IMPL_BOXITERATOR_H
 
 #include "LitlRaster/Box.h"
 

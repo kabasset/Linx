@@ -525,11 +525,6 @@ Raster<T, N> random(const Position<N>& shape) {
 } // namespace Litl
 
 #include "LitlRaster/Subraster.h"
-
-/// @cond
-#define _LITLRASTER_RASTER_IMPL
 #include "LitlRaster/impl/Raster.hpp"
-#undef _LITLRASTER_RASTER_IMPL
-/// @endcond
 
 #endif

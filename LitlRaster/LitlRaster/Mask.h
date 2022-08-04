@@ -231,6 +231,6 @@ inline const Box<N>& box(const Mask<N>& region) {
 
 } // namespace Litl
 
-#include "LitlRaster/MaskIterator.h"
+#include "LitlRaster/impl/MaskIterator.h"
 
 #endif

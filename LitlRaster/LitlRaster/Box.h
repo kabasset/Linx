@@ -393,6 +393,6 @@ inline Box<TIn::Dimension> box(const TIn& region) {
 
 } // namespace Litl
 
-#include "LitlRaster/BoxIterator.h"
+#include "LitlRaster/impl/BoxIterator.h"
 
 #endif
