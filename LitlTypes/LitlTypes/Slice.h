@@ -31,7 +31,7 @@ public:
    * @brief Make a slice from a front position, number of indices, and optional step.
    */
   static Slice fromSize(Index front, std::size_t size, Index step = 1) {
-    return Slice(front, front + (size - 1) * step, step);
+    return Slice(front, front + step * (size - 1), step);
   }
 
   /**
@@ -45,7 +45,7 @@ public:
    * @brief Get the included back index.
    */
   Index back() const {
-    return m_front + (m_size - 1) * m_step;
+    return m_front + m_step * (m_size - 1);
   }
 
   /**
