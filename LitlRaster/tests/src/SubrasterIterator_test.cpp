@@ -17,53 +17,46 @@ BOOST_AUTO_TEST_SUITE(SubrasterIterator_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(inner_cube_iterator_test) {
+template <Index N, typename TRegion>
+void checkIterator(const Position<N>& shape, const TRegion& region) {
 
-  // Setup
-  const Position<3> shape {4, 5, 6};
-  const auto raster = Raster<float, 3>(shape).range();
-  const Box<3> region {{1, 1, 1}, {2, 3, 4}};
+  const auto raster = Raster<float, N>(shape).range();
 
-  // Expected
   std::vector<float> expected;
   expected.reserve(region.size());
   for (const auto& p : region) {
     expected.push_back(raster[p]);
   }
 
-  // Box
   std::vector<float> out;
-  out.reserve(region.size());
-  const auto boxed = raster.subraster(region);
-  for (const auto& v : boxed) {
+  out.reserve(expected.size());
+  for (const auto& v : raster.subraster(region)) {
     out.push_back(v);
   }
-  BOOST_TEST(out == expected);
 
-  // Grid
-  out.clear();
-  const auto grided = raster.subraster(Grid<3>(region, Position<3>::one()));
-  for (const auto& v : grided) {
-    out.push_back(v);
-  }
   BOOST_TEST(out == expected);
+}
 
-  // Mask
-  out.clear();
-  const auto masked = raster.subraster(Mask<3>(region, true));
-  for (const auto& v : masked) {
-    out.push_back(v);
-  }
-  BOOST_TEST(out == expected);
+BOOST_AUTO_TEST_CASE(inner_cube_iterator_test) {
+  const Position<3> shape {4, 5, 6};
+  const Box<3> box {{1, 1, 1}, {2, 3, 4}};
+  checkIterator(shape, box);
+  checkIterator(shape, Grid<3>(box, Position<3>::one()));
+  checkIterator(shape, Mask<3>(box, true));
+  checkIterator(shape, Sequence<Position<3>>(box));
+}
 
-  // Sequence
-  out.clear();
-  const Sequence<Position<3>> seq(region);
-  const auto sequenced = raster.subraster(seq);
-  for (const auto& v : sequenced) {
-    out.push_back(v);
-  }
-  // BOOST_TEST(out == expected);
+template <Index I, Index N>
+void checkSliceIterator(const Position<N>& shape) {
+  OrientedSlice<I, 3> slice(Position<N>::one(), shape[I] - 1, 2);
+  checkIterator(shape, slice);
+}
+
+BOOST_AUTO_TEST_CASE(slice_iterator_test) {
+  const Position<3> shape {4, 5, 6};
+  checkSliceIterator<0>(shape);
+  checkSliceIterator<1>(shape);
+  checkSliceIterator<2>(shape);
 }
 
 //-----------------------------------------------------------------------------

@@ -9,6 +9,7 @@
 #include "LitlRaster/Box.h"
 #include "LitlRaster/Grid.h"
 #include "LitlRaster/Mask.h"
+#include "LitlRaster/OrientedSlice.h"
 #include "LitlRaster/Raster.h"
 
 namespace Litl {
@@ -60,10 +61,10 @@ public:
   class Iterator;
 
   /**
-   * @brief Constructor.
+   * @brief Constructor for boxes.
    */
-  StrideBasedIndexing(const TParent& parent, const TRegion& region) :
-      m_step(region.step()[0]), m_width(box(region).template length<0>()),
+  StrideBasedIndexing(const TParent& parent, const Box<TParent::Dimension>& region) :
+      m_step(1), m_width(region.template length<0>()),
       m_offsets(region.size() / m_width + 1) // +1 in order to dereference m_offsets.end() in iterator
   {
     auto plane = (region - region.front()).project();
@@ -71,6 +72,27 @@ public:
       return parent.index(p);
     });
   }
+
+  /**
+   * @brief Constructor for grids.
+   */
+  StrideBasedIndexing(const TParent& parent, const Grid<TParent::Dimension>& region) :
+      m_step(region.step()[0]), m_width(box(region).template length<0>()),
+      m_offsets(region.size() / m_width + 1) // +1 see above
+  {
+    auto plane = (region - region.front()).project();
+    std::transform(plane.begin(), plane.end(), m_offsets.begin(), [&](const auto& p) {
+      return parent.index(p);
+    });
+  }
+
+  /**
+   * @brief Constructor for slices.
+   */
+  template <Index I>
+  StrideBasedIndexing(const TParent& parent, const OrientedSlice<I, TParent::Dimension>& region) :
+      m_step(shapeStride<I>(parent.shape()) * region.step()), m_width(m_step * (region.size() - 1) + 1),
+      m_offsets(2, 0) {} // 1+1 see above
 
   /**
    * @brief Get an iterator to the beginning.
@@ -159,9 +181,10 @@ struct SubrasterTraits {
    * 
    * As opposed to the subraster itself, the indexing is shift-invariant.
    * Optimized regions for raster parents are:
-   * - `Box<N>`,
-   * - `Grid<N>`,
-   * - `Mask<N>`.
+   * - `Box`,
+   * - `Grid`,
+   * - `OrientedSlice`
+   * - `Mask`.
    * 
    * For extrapolators, no optimization is performed.
    */
@@ -183,6 +206,15 @@ struct SubrasterTraits<Raster<T, N, THolder>, Box<N>> {
  */
 template <typename T, Index N, typename THolder>
 struct SubrasterTraits<Raster<T, N, THolder>, Grid<N>> {
+  template <typename UParent, typename URegion>
+  using Indexing = StrideBasedIndexing<UParent, URegion>;
+};
+
+/**
+ * @brief `OrientedSlice` specialization.
+ */
+template <typename T, Index N, typename THolder, Index I>
+struct SubrasterTraits<Raster<T, N, THolder>, OrientedSlice<I, N>> {
   template <typename UParent, typename URegion>
   using Indexing = StrideBasedIndexing<UParent, URegion>;
 };
