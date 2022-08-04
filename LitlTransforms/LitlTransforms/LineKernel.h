@@ -8,7 +8,7 @@
 #include "LitlRaster/Raster.h"
 #include "LitlRaster/Sampling.h"
 #include "LitlTransforms/Interpolation.h"
-#include "LitlTypes/Segment.h"
+#include "LitlTypes/Slice.h"
 
 #include <map>
 #include <vector>
@@ -45,8 +45,8 @@ public:
   /**
    * @brief Get the window.
    */
-  Segment window() const {
-    return Segment::fromSize(-m_origin, this->size());
+  Slice window() const {
+    return Slice::fromSize(-m_origin, this->size());
   }
 
   /**
@@ -126,7 +126,7 @@ class Sequence;
  * @brief Make a line kernel from values and a window.
  */
 template <typename T>
-LineKernel<T> kernelize(const T* values, Segment window) {
+LineKernel<T> kernelize(const T* values, Slice window) {
   return LineKernel<T>(std::vector<T>(values, values + window.size()), std::move(window));
 }
 

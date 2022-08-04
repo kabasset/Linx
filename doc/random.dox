@@ -46,9 +46,9 @@ Random number generation is a three-step process:
 Random noise generator constructors optionally take a seed as their last argument.
 Setting the seed to special value -1 tells the random engine to use the current system time in seconds as seed.
 
-Fixed seed guarantee reproducibility of the results:
+Fixed seeds guarantee reproducibility of the results:
 running the same program at different times produces the same results.
-In contrast, time-dependent seed allow independent runs of the programs to produce different samples,
+In contrast, time-dependent seeds allow independent runs of the programs to produce different samples,
 which can be useful for further statistical analyses.
 
 For simplest distributions (like uniform and Gaussian distributions),

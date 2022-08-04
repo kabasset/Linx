@@ -79,7 +79,7 @@ struct RangeMixin {
    * Container a = ...;
    * Container b = ...;
    * Container res(a.size());
-   * res.generate([](auto v) { return std::sqrt(v) }, a); // res = sqrt(a)
+   * res.generate([](auto v) { return std::sqrt(v); }, a); // res = sqrt(a)
    * res.generate([](auto v, auto w) { return v * w; }, a, b); // res = a * b
    * \endcode
    */

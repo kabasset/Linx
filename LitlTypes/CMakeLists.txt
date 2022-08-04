@@ -15,6 +15,10 @@ elements_add_unit_test(SeqUtils tests/src/SeqUtils_test.cpp
                      EXECUTABLE LitlTypes_SeqUtils_test
                      LINK_LIBRARIES LitlTypes
                      TYPE Boost)
+elements_add_unit_test(Slice tests/src/Slice_test.cpp 
+                     EXECUTABLE LitlTypes_Slice_test
+                     LINK_LIBRARIES LitlTypes
+                     TYPE Boost)
 elements_add_unit_test(TypeUtils tests/src/TypeUtils_test.cpp 
                      EXECUTABLE LitlTypes_TypeUtils_test
                      LINK_LIBRARIES LitlTypes
