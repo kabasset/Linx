@@ -113,6 +113,15 @@ struct RangeMixin {
     return generate(std::forward<TFunc>(func), static_cast<TDerived&>(*this), args...);
   }
 
+  /**
+   * @brief Reverse the order of the elements.
+   */
+  TDerived& reverse() {
+    auto& t = static_cast<TDerived&>(*this);
+    std::reverse(t.begin(), t.end());
+    return t;
+  }
+
   /// @group_operations
 
   /**
