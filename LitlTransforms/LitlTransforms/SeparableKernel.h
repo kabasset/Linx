@@ -7,15 +7,15 @@
 
 #include "LitlRaster/Raster.h"
 #include "LitlTransforms/Kernel.h"
-#include "LitlTransforms/LineKernel.h"
+#include "LitlTransforms/OrientedKernel.h"
+#include "LitlTypes/SeqUtils.h"
 
-#include <map>
-#include <vector>
+#include <type_traits> // decay
 
 namespace Litl {
 
 /**
- * @brief Separable correlation kernel as a sequence of oriented line kernels.
+ * @brief Separable correlation kernel as a sequence of oriented 1D kernels.
  */
 template <typename T, Index I0, Index... Is>
 class SeparableKernel {
@@ -34,23 +34,31 @@ public:
   static constexpr Index Dimension = std::max({I0, Is...}) + 1;
 
   /**
-   * @brief Construct a sequence of identical `LineKernel`s with various orientations.
+   * @brief Construct a sequence of identical kernels with various orientations.
    */
-  explicit SeparableKernel(const LineKernel<T>& kernel) : m_kernels {{I0, kernel}, {Is, kernel}...} {}
+  explicit SeparableKernel(const std::vector<T>& values) : SeparableKernel(values, values.size() / 2) {}
 
   /**
-   * @brief Map-based constructor.
+   * @brief Construct a sequence of identical kernels with various orientations.
    */
-  template <typename... Ts>
-  explicit SeparableKernel(Ts&&... args) : m_kernels(std::forward<Ts>(args)...) {}
+  explicit SeparableKernel(const std::vector<T>& values, Index origin) :
+      m_kernels {OrientedKernel<T, I0> {values, origin}, OrientedKernel<T, Is> {values, origin}...} {}
+
+  /**
+   * @brief Tuple-based constructor.
+   */
+  // template <typename... Ts>
+  // explicit SeparableKernel(Ts&&... args) : m_kernels(std::forward<Ts>(args)...) {}
+  explicit SeparableKernel(std::tuple<OrientedKernel<T, I0>, OrientedKernel<T, Is>...> kernels) :
+      m_kernels(std::move(kernels)) {}
 
   /**
    * @brief Make a Prewitt correlation kernel along given axes.
    * @see `sobel()`
    */
   static SeparableKernel prewitt(T sign = 1) {
-    const auto derivation = LineKernel<T>({sign, 0, -sign}).template along<I0>();
-    const auto averaging = LineKernel<T>({1, 1, 1}).template along<Is...>();
+    const auto derivation = OrientedKernel<T, I0>({sign, 0, -sign});
+    const auto averaging = SeparableKernel<T, Is...>({1, 1, 1});
     return derivation * averaging;
   }
 
@@ -70,8 +78,8 @@ public:
    * \endcode
    */
   static SeparableKernel sobel(T sign = 1) {
-    const auto derivation = LineKernel<T>({sign, 0, -sign}).template along<I0>();
-    const auto averaging = LineKernel<T>({1, 2, 1}).template along<Is...>();
+    const auto derivation = OrientedKernel<T, I0>({sign, 0, -sign});
+    const auto averaging = SeparableKernel<T, Is...>({1, 2, 1});
     return derivation * averaging;
   }
 
@@ -80,8 +88,8 @@ public:
    * @see `sobel()`
    */
   static SeparableKernel<T, I0, Is...> scharr(T sign = 1) {
-    const auto derivation = LineKernel<T>({sign, 0, -sign}).template along<I0>();
-    const auto averaging = LineKernel<T>({3, 10, 3}).template along<Is...>();
+    const auto derivation = OrientedKernel<T, I0>({sign, 0, -sign});
+    const auto averaging = SeparableKernel<T, Is...>({3, 10, 3});
     return derivation * averaging;
   }
 
@@ -91,8 +99,8 @@ public:
    * The kernel is built as a sequence of 1D kernels `{1, -2, 1}` if `sign` is 1,
    * or `{-1, 2, -1}` if sign is -1.
    */
-  static SeparableKernel laplacian(T sign = 1) {
-    return SeparableKernel(LineKernel<T>({sign, sign * -2, sign}));
+  static SeparableKernel<T, I0, Is...> laplacian(T sign = 1) {
+    return SeparableKernel<T, I0, Is...>({sign, sign * -2, sign});
   }
 
   /// @group_properties
@@ -101,54 +109,24 @@ public:
    * @brief The logical window of the kernel.
    */
   Box<Dimension> window() const {
-    Box<Dimension> box(Position<Dimension>::zero(), Position<Dimension>::zero());
-    for (const auto& k : m_kernels) {
-      auto i = k.first;
-      const auto& w = k.second.window();
-      if (w.front() < box[i]) {
-        box[i] = w.front();
-      }
-      if (w.back() > box[i]) {
-        box[i] = w.back();
-      }
-    }
-    return box;
-  }
-
-  /**
-   * @brief Get the `LineKernel` along given axis.
-   */
-  const T& operator[](Index axis) const {
-    return m_kernels.at(axis);
-  }
-
-  /**
-   * @brief Beginning iterator over `{Index, LineKernel}` pairs.
-   */
-  const decltype(auto) begin() const {
-    return m_kernels.begin();
-  }
-
-  /**
-   * @brief End iterator over `{Index, LineKernel}` pairs.
-   */
-  const decltype(auto) end() const {
-    return m_kernels.end();
+    auto front = Position<Dimension>::zero();
+    auto back = Position<Dimension>::zero();
+    seqForeach(m_kernels, [&](const auto& k) {
+      front[k.Axis] = std::min(front[k.Axis], k.window().front());
+      back[k.Axis] = std::max(back[k.Axis], k.window().back());
+    });
+    return {front, back};
   }
 
   /**
    * @brief Convolve the separable components as a single ND kernel.
    */
   Kernel<Value, Dimension> compose() const {
-    auto shape = Position<Dimension>::one();
-    auto origin = Position<Dimension>::zero();
-    for (const auto& k : m_kernels) {
-      shape[k.first] = k.second.size();
-      origin[k.first] = k.second.origin();
-    }
-    auto raster = Raster<Value, Dimension>(shape).fill(T(0));
-    raster[origin] = T(1);
-    return kernelize(*this * raster, origin);
+    const auto w = window();
+    const auto o = -w.front();
+    auto raster = Raster<Value, Dimension>(w.shape());
+    raster[o] = T(1);
+    return kernelize(*this * raster, o);
   }
 
   /**
@@ -156,17 +134,26 @@ public:
    */
   template <Index... Js>
   SeparableKernel<T, I0, Is..., Js...> operator*(const SeparableKernel<T, Js...>& rhs) const {
-    SeparableKernel<T, I0, Is..., Js...> out(m_kernels);
-    out.m_kernels.insert(rhs.begin(), rhs.end());
-    return out;
+    return SeparableKernel<T, I0, Is..., Js...>(std::tuple_cat(m_kernels, rhs.m_kernels));
+  }
+
+  template <Index J>
+  SeparableKernel<T, I0, Is..., J> operator*(const OrientedKernel<T, J>& rhs) const {
+    return SeparableKernel<T, I0, Is..., J>(std::tuple_cat(m_kernels, rhs));
+  }
+
+  template <Index J>
+  friend SeparableKernel<T, J, I0, Is...>
+  operator*(const OrientedKernel<T, J>& lhs, const SeparableKernel<T, I0, Is...>& rhs) {
+    return SeparableKernel<T, J, I0, Is...>(std::tuple_cat(std::make_tuple(lhs), rhs.m_kernels));
   }
 
   /**
-   * @brief Apply the correlation kernels to an input raster.
+   * @brief Apply the correlation kernels to an input extrapolator.
    */
-  template <typename TIn, Index N, typename TContainer>
-  Raster<T, N> operator*(const Raster<TIn, N, TContainer>& in) const {
-    Raster<T, N> out(in.shape());
+  template <typename TRasterIn>
+  Raster<std::decay_t<typename TRasterIn::Value>, TRasterIn::Dimension> operator*(const TRasterIn& in) const {
+    Raster<std::decay_t<typename TRasterIn::Value>, TRasterIn::Dimension> out(in.shape());
     correlateTo(in, out);
     return out;
   }
@@ -176,82 +163,35 @@ public:
    */
   template <typename TRasterIn, typename TRasterOut>
   void correlateTo(const TRasterIn& in, TRasterOut& out) const {
-    correlateAlongSeqTo<TRasterIn, TRasterOut, I0, Is...>(in, out);
-  }
-
-  /**
-   * @brief Sparsely apply the correlation kernels to an input raster.
-   */
-  template <Index N, typename TRasterIn>
-  Raster<T, N> correlateSamples(const TRasterIn& in, const PositionSampling<N>& sampling) const {
-    Raster<T, N> out(sampling.shape());
-    correlateSamplesTo(in, sampling, out);
-  }
-
-  /**
-   * @copydoc correlateSamples()
-   */
-  template <typename TRasterIn, Index N, typename TRasterOut>
-  void correlateSamplesTo(const TRasterIn& in, const PositionSampling<N>& sampling, TRasterOut& out) const {
-    correlateSamplesAlongSeqTo<TRasterIn, N, TRasterOut, I0, Is...>(in, sampling, out);
+    correlateAxes<TRasterIn, TRasterOut, I0, Is...>(in, out);
   }
 
 private:
   template <typename TRasterIn, typename TRasterOut, Index J0, Index... Js>
-  void correlateAlongSeqTo(const TRasterIn& in, TRasterOut& out) const {
-    const auto tmp = correlateAlong<TRasterIn, TRasterOut, J0>(in);
-    correlateAlongSeqTo<TRasterOut, TRasterOut, Js...>(tmp, out);
+  void correlateAxes(const TRasterIn& in, TRasterOut& out) const {
+    const auto tmp = correlateKth<TRasterIn, TRasterOut, sizeof...(Is) - sizeof...(Js)>(in);
+    correlateAxes<TRasterOut, TRasterOut, Js...>(tmp, out);
     printf("%li: %i -> %i\n", J0, tmp[0], out[0]);
   }
 
   template <typename TRasterIn, typename TRasterOut>
-  void correlateAlongSeqTo(const TRasterIn& in, TRasterOut& out) const {
+  void correlateAxes(const TRasterIn& in, TRasterOut& out) const {
     out = in; // FIXME swap? move?
   }
 
-  template <typename TRasterIn, typename TRasterOut, Index J>
-  TRasterOut correlateAlong(const TRasterIn& in) const {
-    const auto shape = in.shape();
-    const auto length = shape[J];
-    const auto stride = shapeStride<J>(shape);
-    const auto domain = in.domain().project(J);
-    TRasterOut out(shape);
-    for (const auto& p : domain) {
-      DataSamples<const typename TRasterIn::Value> inSamples {&in[p], length, {}, stride};
-      DataSamples<typename TRasterOut::Value> outSamples {&out[p], length, {}, stride};
-      m_kernels.at(J).correlate(inSamples, outSamples);
-    }
-    return out;
-  }
-
-  template <typename TRasterIn, Index N, typename TRasterOut, Index J0, Index... Js>
-  void correlateSamplesAlongSeqTo(const TRasterIn& in, const PositionSampling<N>& sampling, TRasterOut& out) const {
-    auto box = correlationBox(sampling, in.shape()); // FIXME make unit and dilate
-    correlateAlongSeqTo<TRasterIn, N, TRasterOut, Js...>(in, box, out);
-    // FIXME m_kernels[J0]->correlateSamplesAlongTo<J0>(in, sampling, out)
-  }
-
-  template <Index N>
-  Box<N> correlationBox(const PositionSampling<N>& sampling, const Position<N>& shape) const {
-    auto box = sampling.region();
-    for (const auto& p : m_kernels) {
-      auto& front = box.front[p.first];
-      front -= p.second.origin();
-      if (front < 0) {
-        front = 0;
-      }
-      auto& back = box.back[p.first];
-      back += p.second.size() - p.second.origin() - 1;
-      if (back >= shape[p.first]) {
-        back = shape[p.first] - 1;
-      }
-    }
-    return box; //FIXME box.grow(amount).clamp(shape)
+  template <typename TRasterIn, typename TRasterOut, std::size_t K>
+  TRasterOut correlateKth(const TRasterIn& in) const {
+    return std::get<K>(m_kernels) * in;
   }
 
 private:
-  std::map<Index, LineKernel<T>> m_kernels;
+  std::tuple<OrientedKernel<T, I0>, OrientedKernel<T, Is>...> m_kernels;
 };
+
+template <typename U, Index J0, Index J1>
+SeparableKernel<U, J0, J1> operator*(OrientedKernel<U, J0> lhs, OrientedKernel<U, J1> rhs) {
+  return SeparableKernel<U, J0, J1>(std::make_tuple(lhs, rhs));
+}
 
 } // namespace Litl
 

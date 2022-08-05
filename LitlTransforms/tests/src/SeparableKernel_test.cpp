@@ -2,6 +2,7 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
+#include "LitlTransforms/Interpolation.h"
 #include "LitlTransforms/SeparableKernel.h"
 
 #include <boost/test/unit_test.hpp>
@@ -24,22 +25,21 @@ BOOST_AUTO_TEST_CASE(composition_test) {
 }
 
 BOOST_AUTO_TEST_CASE(associativity_commutativity_test) {
-  const auto a = LineKernel<int>({1, 0, -1}).along<0>();
-  const auto b = LineKernel<int>({1, 2, 3}).along<1>();
+  const auto a = OrientedKernel<int, 0>({1, 0, -1});
+  const auto b = OrientedKernel<int, 1>({1, 2, 3});
   const auto c = a * b;
-  const auto raster = Raster<int, 3>({3, 3, 3}).range();
-  const auto direct = c * raster;
-  const auto associated = a * b * raster;
-  const auto commutated = b * a * raster;
+  const auto raster = Raster<int>({3, 3}).range();
+  const auto direct = c * extrapolate(raster, 0);
+  const auto associated = a * b * extrapolate(raster, 0);
+  const auto commutated = b * a * extrapolate(raster, 0);
   BOOST_TEST(associated == direct);
   BOOST_TEST(commutated == direct);
 }
 
 BOOST_AUTO_TEST_CASE(sum_kernel_test) {
-  const LineKernel<int> one({1, 1, 1}, 1);
-  const auto separable = one.along<0, 1, 2>();
+  const SeparableKernel<int, 0, 1, 2> separable({1, 1, 1});
   const auto raster = Raster<int, 3>({3, 3, 3}).fill(1);
-  const auto sum = separable * raster;
+  const auto sum = separable * extrapolate(raster, 0);
   const std::vector<int> expected {
       8,  12, 8,  12, 18, 12, 8,  12, 8, // z = 0
       12, 18, 12, 18, 27, 18, 12, 18, 12, // z = 1
@@ -53,8 +53,8 @@ BOOST_AUTO_TEST_CASE(make_sobel_test) {
   const auto sobelX = SeparableKernel<int, 0, 1>::sobel();
   const auto sobelY = SeparableKernel<int, 1, 0>::sobel();
   const auto raster = Raster<int, 3>({3, 3, 3}).fill(1);
-  const auto edgesX = sobelX * raster;
-  const auto edgesY = sobelY * raster;
+  const auto edgesX = sobelX * extrapolate(raster, 0);
+  const auto edgesY = sobelY * extrapolate(raster, 0);
   const std::vector<int> expectedX {
       -3, 0, 3, -4, 0, 4, -3, 0, 3, // z = 0
       -3, 0, 3, -4, 0, 4, -3, 0, 3, // z = 1
