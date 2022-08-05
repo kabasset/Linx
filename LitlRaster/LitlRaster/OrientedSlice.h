@@ -47,8 +47,8 @@ public:
   /**
    * @brief Create a slice from a front position, size, and optional step.
    */
-  OrientedSlice<I, N> fromSize(Position<N> front, std::size_t size, Index step = 1) {
-    const auto back = front[I] + m_step * (size - 1);
+  static OrientedSlice<I, N> fromSize(Position<N> front, std::size_t size, Index step = 1) {
+    const auto back = front[I] + step * (size - 1);
     return OrientedSlice(std::move(front), back, step);
   }
 
