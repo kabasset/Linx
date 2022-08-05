@@ -34,7 +34,7 @@ public:
    * 
    * If the number of values is even, then the origin index is rounded down.
    */
-  OrientedKernel(std::vector<T> values) : OrientedKernel(values, values.size() / 2) {}
+  OrientedKernel(std::vector<T> values) : OrientedKernel(values, (values.size() - 1) / 2) {}
 
   /**
    * @brief Get the origin index.

@@ -140,7 +140,7 @@ Kernel<T, N> kernelize(const Raster<T, N, THolder>& values, Position<N> origin) 
  */
 template <typename T, Index N, typename THolder>
 Kernel<T, N> kernelize(const Raster<T, N, THolder>& values) {
-  return kernelize(values.data(), values.domain() - values.shape() / 2);
+  return kernelize(values.data(), values.domain() - (values.shape() - 1) / 2);
 }
 
 } // namespace Litl
