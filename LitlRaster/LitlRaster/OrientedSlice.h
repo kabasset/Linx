@@ -13,6 +13,7 @@
 namespace Litl {
 
 /**
+ * @ingroup regions
  * @brief An axis-aligned slice.
  */
 template <Index I, Index N = 2>

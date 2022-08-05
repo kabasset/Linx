@@ -11,6 +11,7 @@
 namespace Litl {
 
 /**
+ * @ingroup regions
  * @brief A masked ND bounding box.
  * 
  * This class is similar to `Box`, yet with a boolean value (the flag) associated to each position.

@@ -12,6 +12,7 @@
 namespace Litl {
 
 /**
+ * @ingroup regions
  * @brief An ND regular grid.
  */
 template <Index N = 2>

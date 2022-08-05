@@ -12,6 +12,7 @@
 namespace Litl {
 
 /**
+ * @ingroup regions
  * @brief An ND bounding box, defined by its front and back positions, both inclusive.
  * 
  * Like `Position`, this class stores no pixel values, but coordinates.

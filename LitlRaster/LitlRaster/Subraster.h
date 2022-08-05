@@ -18,6 +18,7 @@ namespace Litl {
 
 /**
  * @ingroup data_classes
+ * @ingroup regions
  * @brief A view of a raster region.
  * @tparam T The value type
  * @tparam TParent The parent raster or extrapolator type

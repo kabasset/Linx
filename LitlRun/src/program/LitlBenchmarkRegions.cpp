@@ -18,22 +18,32 @@ Elements::Logging logger = Elements::Logging::getLogger("LitlBenchmarkRegions");
 template <typename TDuration>
 TDuration filter(Litl::Raster<int, 3>& in, const Litl::Box<3>& box, char setup) {
   Litl::Chronometer<TDuration> chrono;
+  //! [Make sparse regions]
   Litl::Grid<3> grid(box, Litl::Position<3>::one());
   Litl::Mask<3> mask(box);
   Litl::Sequence<Litl::Position<3>> sequence(box);
+  //! [Make sparse regions]
   chrono.start();
   switch (setup) {
     case 'b':
+      //! [Iterate over box]
       in.subraster(box) += 1;
+      //! [Iterate over box]
       break;
     case 'g':
+      //! [Iterate over grid]
       in.subraster(grid) += 1;
+      //! [Iterate over grid]
       break;
     case 'm':
+      //! [Iterate over mask]
       in.subraster(mask) += 1;
+      //! [Iterate over mask]
       break;
     case 's':
+      //! [Iterate over sequence]
       in.subraster(sequence) += 1;
+      //! [Iterate over sequence]
       break;
     default:
       throw std::runtime_error("Case not implemented"); // FIXME CaseNotImplemented
@@ -65,9 +75,11 @@ public:
 
     logger.info("Generating random raster...");
     auto raster = Litl::Raster<int, 3>({side, side, side});
+    //! [Make box]
+    const auto box = Litl::Box<3>::fromCenter(radius, {side / 2, side / 2, side / 2});
+    //! [Make box]
 
     logger.info("Filtering it...");
-    const auto box = Litl::Box<3>::fromCenter(radius, {side / 2, side / 2, side / 2});
     const auto duration = filter<Duration>(raster, box, setup);
     const auto count = std::accumulate(raster.begin(), raster.end(), 0);
 

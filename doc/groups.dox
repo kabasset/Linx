@@ -21,6 +21,10 @@
 \brief Operations applied to each pixel independently.
 \example LitlDemoPixelwise_test.cpp
 
+\defgroup regions Regions, Neighborhoods and Subrasters
+\ingroup basics
+\brief Non-contiguous raster views.
+
 \defgroup random Random Generators
 \ingroup basics
 \brief Random values and random noise generation.
