@@ -49,6 +49,13 @@ public:
   }
 
   /**
+   * @brief Get the extrapolation method.
+   */
+  const TMethod& method() const {
+    return m_method;
+  }
+
+  /**
    * @brief Get a decorated subraster.
    */
   template <typename TRegion>
@@ -144,6 +151,13 @@ public:
    */
   auto raster() const -> decltype(auto) {
     return Litl::rasterize(m_raster);
+  }
+
+  /**
+   * @brief Get the interpolation method.
+   */
+  const TMethod& method() const {
+    return m_method;
   }
 
   /**

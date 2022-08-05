@@ -25,7 +25,7 @@ public:
     const auto side = args["side"].as<Litl::Index>();
     Litl::Raster<int, 4> in({side, side, side, side});
     const auto kernel = Litl::SeparableKernel<int, 0, 1>::sobel();
-    const auto out = kernel * in;
+    const auto out = kernel * extrapolate(in, 0);
     return ExitCode::OK;
   }
 };

@@ -6,6 +6,7 @@
 #define _LITLTRANSFORMS_SEPARABLEKERNEL_H
 
 #include "LitlRaster/Raster.h"
+#include "LitlTransforms/Interpolation.h"
 #include "LitlTransforms/Kernel.h"
 #include "LitlTransforms/OrientedKernel.h"
 #include "LitlTypes/SeqUtils.h"
@@ -36,7 +37,7 @@ public:
   /**
    * @brief Construct a sequence of identical kernels with various orientations.
    */
-  explicit SeparableKernel(const std::vector<T>& values) : SeparableKernel(values, values.size() / 2) {}
+  explicit SeparableKernel(const std::vector<T>& values) : SeparableKernel(values, (values.size() - 1) / 2) {}
 
   /**
    * @brief Construct a sequence of identical kernels with various orientations.
@@ -57,7 +58,7 @@ public:
    * @see `sobel()`
    */
   static SeparableKernel prewitt(T sign = 1) {
-    const auto derivation = OrientedKernel<T, I0>({sign, 0, -sign});
+    const auto derivation = OrientedKernel<T, I0>({-sign, 0, sign});
     const auto averaging = SeparableKernel<T, Is...>({1, 1, 1});
     return derivation * averaging;
   }
@@ -66,7 +67,7 @@ public:
    * @brief Make a Sobel correlation kernel along given axes.
    * @param sign The differentiation sign (-1 or 1)
    * 
-   * The kernel along the `Is` axes is `{1, 2, 1}` and that along `I0` is `{sign, 0, -sign}`.
+   * The kernel along the `Is` axes is `{1, 2, 1}` and that along `I0` is `{-sign, 0, sign}`.
    * Note the ordering of the differentiation _correlation_ kernel, which is opposite to Sobel's _convolution_ kernel.
    * For differenciation in the increasing-index direction, keep `sign = 1`;
    * for the opposite direction, set `sign = -1`.
@@ -78,7 +79,7 @@ public:
    * \endcode
    */
   static SeparableKernel sobel(T sign = 1) {
-    const auto derivation = OrientedKernel<T, I0>({sign, 0, -sign});
+    const auto derivation = OrientedKernel<T, I0>({-sign, 0, sign});
     const auto averaging = SeparableKernel<T, Is...>({1, 2, 1});
     return derivation * averaging;
   }
@@ -88,7 +89,7 @@ public:
    * @see `sobel()`
    */
   static SeparableKernel<T, I0, Is...> scharr(T sign = 1) {
-    const auto derivation = OrientedKernel<T, I0>({sign, 0, -sign});
+    const auto derivation = OrientedKernel<T, I0>({-sign, 0, sign});
     const auto averaging = SeparableKernel<T, Is...>({3, 10, 3});
     return derivation * averaging;
   }
@@ -125,8 +126,9 @@ public:
     const auto w = window();
     const auto o = -w.front();
     auto raster = Raster<Value, Dimension>(w.shape());
-    raster[o] = T(1);
-    return kernelize(*this * raster, o);
+    raster[o] = T(1); // FIXME or back-o?
+    auto impulse = *this * extrapolate(raster, 0);
+    return kernelize(impulse.reverse(), o);
   }
 
   /**
@@ -151,9 +153,9 @@ public:
   /**
    * @brief Apply the correlation kernels to an input extrapolator.
    */
-  template <typename TRasterIn>
-  Raster<std::decay_t<typename TRasterIn::Value>, TRasterIn::Dimension> operator*(const TRasterIn& in) const {
-    Raster<std::decay_t<typename TRasterIn::Value>, TRasterIn::Dimension> out(in.shape());
+  template <typename TIn>
+  Raster<std::decay_t<typename TIn::Value>, TIn::Dimension> operator*(const TIn& in) const {
+    Raster<std::decay_t<typename TIn::Value>, TIn::Dimension> out(in.shape());
     correlateTo(in, out);
     return out;
   }
@@ -161,26 +163,27 @@ public:
   /**
    * @copydoc correlate()
    */
-  template <typename TRasterIn, typename TRasterOut>
-  void correlateTo(const TRasterIn& in, TRasterOut& out) const {
-    correlateAxes<TRasterIn, TRasterOut, I0, Is...>(in, out);
+  template <typename TIn, typename TOut>
+  void correlateTo(const TIn& in, TOut& out) const {
+    correlateKernelSeq<TIn, TOut, I0, Is...>(in, out);
   }
 
 private:
-  template <typename TRasterIn, typename TRasterOut, Index J0, Index... Js>
-  void correlateAxes(const TRasterIn& in, TRasterOut& out) const {
-    const auto tmp = correlateKth<TRasterIn, TRasterOut, sizeof...(Is) - sizeof...(Js)>(in);
-    correlateAxes<TRasterOut, TRasterOut, Js...>(tmp, out);
-    printf("%li: %i -> %i\n", J0, tmp[0], out[0]);
+  template <typename TIn, typename TOut, Index J0, Index... Js>
+  void correlateKernelSeq(const TIn& in, TOut& out) const {
+    const auto tmp = correlateKthKernel<TIn, TOut, sizeof...(Is) - sizeof...(Js)>(in);
+    const auto& method = in.method();
+    const Extrapolator<TOut, decltype(method)> extrapolator(tmp, method);
+    correlateKernelSeq<decltype(extrapolator), TOut, Js...>(extrapolator, out);
   }
 
-  template <typename TRasterIn, typename TRasterOut>
-  void correlateAxes(const TRasterIn& in, TRasterOut& out) const {
-    out = in; // FIXME swap? move?
+  template <typename TIn, typename TOut>
+  void correlateKernelSeq(const TIn& in, TOut& out) const {
+    out = rasterize(in); // FIXME swap? move?
   }
 
-  template <typename TRasterIn, typename TRasterOut, std::size_t K>
-  TRasterOut correlateKth(const TRasterIn& in) const {
+  template <typename TIn, typename TOut, std::size_t K>
+  TOut correlateKthKernel(const TIn& in) const {
     return std::get<K>(m_kernels) * in;
   }
 
