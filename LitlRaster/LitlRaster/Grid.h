@@ -152,6 +152,13 @@ public:
   }
 
   /**
+   * @brief Clamp the front and back positions inside a given box.
+   */
+  Box<N>& clamp(const Box<N>& box) {
+    *this = clamp(*this, box);
+  }
+
+  /**
    * @brief Shift the box by a given vector.
    */
   Grid<N>& operator+=(const Position<N>& shift) {
@@ -242,6 +249,19 @@ template <Index N>
 Grid<N> project(const Grid<N>& in, Index axis = 0) {
   auto out = in;
   return out.project(axis);
+}
+
+/**
+ * @relates Grid
+ * @brief Clamp a grid inside a bounding box.
+ */
+template <Index N>
+inline Grid<N> clamp(const Grid<N>& region, const Box<N>& bounds) {
+  auto front = bounds.front();
+  for (Index i = 0; i < region.size(); ++i) {
+    front[i] += (region.back()[i] - front[i]) % region.step()[i];
+  }
+  return Grid<N>({front, bounds.back()}, region.step());
 }
 
 } // namespace Litl

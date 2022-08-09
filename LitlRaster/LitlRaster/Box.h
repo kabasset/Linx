@@ -360,7 +360,13 @@ Vector<T, N> clamp(const Vector<T, N>& position, const Position<N>& shape) {
 /**
  * @ingroup concepts
  * @requirements{Region}
- * @brief FIXME
+ * @brief A set of positions which can be shifted and clamped.
+ * 
+ * TODO
+ * - Region += Position
+ * - Region -= Position
+ * - box(Region) -> Box
+ * - clamp(Region, Box) -> Region
  */
 
 /**
@@ -390,6 +396,17 @@ inline Box<TIn::Dimension> box(const TIn& region) {
     }
   }
   return {front, back};
+}
+
+/**
+ * @relates Box
+ * @brief Clamp a box inside a bounding box.
+ */
+template <Index N>
+inline Box<N> clamp(const Box<N>& region, const Box<N>& bounds) {
+  auto out = region;
+  out.clamp();
+  return out;
 }
 
 } // namespace Litl
