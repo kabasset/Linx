@@ -2,6 +2,7 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
+#include "LitlTransforms/Extrapolation.h" // FIXME own test suite
 #include "LitlTransforms/Interpolation.h"
 
 #include <boost/test/unit_test.hpp>

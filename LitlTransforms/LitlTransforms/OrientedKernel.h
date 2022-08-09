@@ -6,6 +6,7 @@
 #define _LITLTRANSFORMS_ORIENTEDKERNEL_H
 
 #include "LitlRaster/Raster.h"
+#include "LitlTransforms/Extrapolation.h"
 #include "LitlTypes/Slice.h"
 
 #include <type_traits> // decay

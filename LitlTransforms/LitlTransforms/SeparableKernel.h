@@ -6,7 +6,7 @@
 #define _LITLTRANSFORMS_SEPARABLEKERNEL_H
 
 #include "LitlRaster/Raster.h"
-#include "LitlTransforms/Interpolation.h"
+#include "LitlTransforms/Extrapolation.h"
 #include "LitlTransforms/Kernel.h"
 #include "LitlTransforms/OrientedKernel.h"
 #include "LitlTypes/SeqUtils.h"
