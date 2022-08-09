@@ -5,7 +5,7 @@
 # Purpose
 
 This project is a work in progress to gather ND array related features
-of [EleFits](https://cnes.github.io/EleFits/)' Raster -- an extensible ND data storage class with pixel-wise operations --
+of [EleFits](https://cnes.github.io/EleFits/)' `Raster` -- an extensible ND data storage class with pixel-wise operations --
 and PhiFun's operations -- e.g. Fourier transforms, linear filtering, and interpolation.
 
 The target is a header-only library focused on ease of use
@@ -15,7 +15,7 @@ At some point, the ND array implementation of EleFits should be droped in favor 
 The image processing feature set is expected to grow steadily on demand.
 Currently supported operations are:
 
-* Pixel-wise operations (`+`, `*`, `exp()`, `apply()`...);
+* Pixel-wise operations (`+`, `*`, `exp()`, `apply()`...) on `Raster`s and on `Raster` regions;
 * Discrete Fourier transforms (FFTW wrapper) through the `DftPlan` class;
 * Linear filtering through the `Kernel` class;
 * Morphology and rank-order filtering through the `StructuringElement` class;
