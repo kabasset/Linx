@@ -172,6 +172,15 @@ public:
     return *this;
   }
 
+  /// @group_operations
+
+  /**
+   * @brief Create a cropped subraster.
+   */
+  Subraster<T, TParent, TRegion> subraster(Box<TParent::Dimension>& box) {
+    return Subraster<T, TParent, TRegion>(m_parent, clamp(m_region, box));
+  }
+
   /// @}
 
 private:
