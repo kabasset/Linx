@@ -44,6 +44,25 @@ public:
     m_box = Box<N>(m_box.front(), back);
   }
 
+  /**
+   * @brief Regular grid constructor.
+   */
+  Grid(Box<N> box, Index step) : Grid(std::move(box), Position<N>(m_box.dimension()).fill(step)) {}
+
+  /**
+   * @brief Create a grid from a front position, shape and step.
+   * @param front The front position
+   * @param shape The number of grid nodes along each axis
+   * @param step The steps along each axis
+   */
+  static Grid<N> fromShape(Position<N> front, Position<N> shape, Position<N> step) {
+    auto span = shape;
+    for (std::size_t i = 0; i < front.size(); ++i) {
+      span[i] *= step[i];
+    }
+    return Grid<N>(Box<N>::fromShape(front, span), step);
+  }
+
   /// @group_properties
 
   /**
@@ -82,6 +101,17 @@ public:
   }
 
   /**
+   * @brief Get the number of grid nodes along each axis
+   */
+  Position<Dimension> shape() const {
+    Position<Dimension> out(m_box.shape());
+    for (std::size_t i = 0; i < out.size(); ++i) {
+      out[i] /= m_step[i];
+    }
+    return out;
+  }
+
+  /**
    * @brief Get the number of grid nodes.
    */
   Index size() const {
@@ -93,7 +123,7 @@ public:
   }
 
   /**
-   * @brief Get the box length along given axis.
+   * @brief Get the number of nodes along given axis.
    */
   template <Index I>
   Index length() const {
@@ -101,7 +131,7 @@ public:
   }
 
   /**
-   * @brief Get the box length along given axis.
+   * @brief Get the number of nodes along given axis.
    */
   Index length(Index i) const {
     return m_box.length(i) / m_step[i];
@@ -137,6 +167,21 @@ public:
    */
   bool operator!=(const Grid<N>& other) const {
     return m_box != other.m_box || m_step != other.m_step;
+  }
+
+  /**
+   * @brief Check whether a position is a grid node.
+   */
+  bool operator[](const Position<N>& position) const {
+    for (Index i = 0; i < dimension(); ++i) {
+      if (position[i] < m_box.front()[i] || position[i] > m_box.back()[i]) {
+        return false;
+      }
+      if ((position[i] - m_box.front()[i]) % m_step[i] != 0) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /// @group_modifiers

@@ -11,6 +11,11 @@
 
 namespace Litl {
 
+/// @cond
+template <Index N>
+class BorderedBox; // for friendness // FIXME rm?
+/// @endcond
+
 /**
  * @ingroup regions
  * @brief An ND bounding box, defined by its front and back positions, both inclusive.
@@ -19,6 +24,7 @@ namespace Litl {
  */
 template <Index N = 2>
 class Box : boost::additive<Box<N>, Box<N>>, boost::additive<Box<N>, Position<N>>, boost::additive<Box<N>, Index> {
+  friend class BorderedBox<N>; // FIXME rm?
 
 public:
   /**
@@ -156,6 +162,18 @@ public:
    */
   bool operator!=(const Box<N>& other) const {
     return m_front != other.m_front || m_back != other.m_back;
+  }
+
+  /**
+   * @brief Check whether a position lies inside the box.
+   */
+  bool operator[](const Position<N>& position) const {
+    for (Index i = 0; i < dimension(); ++i) {
+      if (position[i] < m_front[i] || position[i] > m_back[i]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -405,7 +423,7 @@ inline Box<TIn::Dimension> box(const TIn& region) {
 template <Index N>
 inline Box<N> clamp(const Box<N>& region, const Box<N>& bounds) {
   auto out = region;
-  out.clamp();
+  out.clamp(bounds);
   return out;
 }
 
