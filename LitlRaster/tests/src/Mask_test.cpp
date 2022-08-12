@@ -17,11 +17,13 @@ BOOST_AUTO_TEST_SUITE(Mask_test)
 
 template <Index P>
 void checkBall(double radius = 2) {
-  const auto ball = Mask<3>::ball<P>(radius);
+  const auto center = Position<3>::one();
+  const auto ball = Mask<3>::ball<P>(radius, center);
   std::vector<Position<3>> out;
   std::vector<Position<3>> expected;
+  BOOST_TEST(ball.box() == Box<3>::fromCenter(radius, center));
   for (const auto& p : ball.box()) {
-    if (p.template norm<P>() <= std::pow(radius, P)) {
+    if (distance<P>(p, center) <= std::pow(radius, P)) {
       expected.push_back(p);
     }
   }

@@ -7,6 +7,7 @@
 
 #include "LitlContainer/Sequence.h"
 #include "LitlRaster/Box.h"
+#include "LitlRaster/Raster.h"
 
 namespace Litl {
 
@@ -32,18 +33,19 @@ public:
   /**
    * @brief Constructor.
    */
-  explicit Mask(Box<N> box, bool flag = true) : m_box(std::move(box)), m_flags(m_box.size(), flag) {}
+  explicit Mask(Box<N> box, bool flag = true) : m_box(std::move(box)), m_flags(m_box.shape()) {
+    m_flags.fill(flag);
+  }
 
   /**
    * @brief Constructor.
    */
-  explicit Mask(Position<N> front, Position<N> back, bool flag = true) :
-      m_box(std::move(front), std::move(back)), m_flags(m_box.size(), flag) {}
+  explicit Mask(Position<N> front, Position<N> back, bool flag = true) : Mask({front, back}, flag) {}
 
   /**
    * @brief Create a mask from a radius and center position.
    */
-  static Mask<N> fromCenter(Index radius = 1, const Position<N> center = Position<N>::zero(), bool flag = true) {
+  static Mask<N> fromCenter(Index radius = 1, const Position<N>& center = Position<N>::zero(), bool flag = true) {
     return Mask<N>(center - radius, center + radius, flag);
   }
 
@@ -52,12 +54,12 @@ public:
    * @tparam P The norm power
    */
   template <Index P>
-  static Mask<N> ball(double radius = 1) {
-    auto out = Mask<N>::fromCenter(radius, Position<N>::zero(), false);
+  static Mask<N> ball(double radius = 1, const Position<N>& center = Position<N>::zero()) {
+    auto out = Mask<N>::fromCenter(radius, center, false);
     const auto radiusPow = std::pow(radius, P);
     auto it = out.m_flags.begin();
-    for (const auto& p : out.box()) {
-      if (p.template norm<P>() <= radiusPow) { // TODO optimize for 0?
+    for (const auto& p : out.box() - center) {
+      if (norm<P>(p) <= radiusPow) {
         *it = true;
       }
       ++it;
@@ -77,15 +79,15 @@ public:
   /**
    * @brief Compute the box shape.
    */
-  Position<N> shape() const {
-    return m_box.shape();
+  const Position<N>& shape() const {
+    return m_flags.shape();
   }
 
   /**
    * @brief Get the number of dimensions.
    */
   Index dimension() const {
-    return m_box.dimension();
+    return m_flags.dimension();
   }
 
   /**
@@ -140,6 +142,20 @@ public:
    */
   bool operator!=(const Mask<N>& other) const {
     return m_box != other.m_box || m_flags != other.m_flags;
+  }
+
+  /**
+   * @brief Check whether a position is set in the mask.
+   */
+  bool operator[](const Position<N>& position) const {
+    return m_flags[position];
+  }
+
+  /**
+   * @brief Set or unset a position in the mask.
+   */
+  bool& operator[](const Position<N>& position) {
+    return m_flags[position];
   }
 
   /// @group_modifiers
@@ -218,7 +234,7 @@ private:
   /**
    * @brief The flag map.
    */
-  std::vector<bool> m_flags;
+  Raster<bool, N> m_flags;
 };
 
 /**
@@ -228,6 +244,20 @@ private:
 template <Index N>
 inline const Box<N>& box(const Mask<N>& region) {
   return region.box();
+}
+
+/**
+ * @relates Mask
+ * @brief Clamp a mask inside a bounding box.
+ */
+template <Index N>
+inline Mask<N> clamp(const Mask<N>& region, const Box<N>& bounds) {
+  const auto box = clamp(region.box(), bounds);
+  Mask<N> out(box, false);
+  for (const auto& p : box) { // FIXME optimize
+    out[p] = region[p];
+  }
+  return out;
 }
 
 } // namespace Litl

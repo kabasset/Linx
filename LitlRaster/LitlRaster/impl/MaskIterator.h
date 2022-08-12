@@ -16,7 +16,7 @@ private:
   /**
    * @brief Constructor.
    */
-  explicit Iterator(const Mask<N>& region, std::vector<bool>::const_iterator current) :
+  explicit Iterator(const Mask<N>& region, const bool* current) :
       m_flagIt(current), m_flagEnd(region.m_flags.end()),
       m_current(region.m_box, Box<N>::Iterator::beginPosition(region.m_box)) {
     while (m_flagIt != m_flagEnd && not *m_flagIt) {
@@ -92,11 +92,11 @@ private:
   /**
    * @brief The current flag iterator.
    */
-  std::vector<bool>::const_iterator m_flagIt;
+  const bool* m_flagIt;
   /**
    * @brief The flag iterator end.
    */
-  std::vector<bool>::const_iterator m_flagEnd;
+  const bool* m_flagEnd;
 
   /**
    * @brief The current box iterator.
