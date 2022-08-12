@@ -106,13 +106,6 @@ public:
   /**
    * @brief Get the region.
    */
-  const TRegion& region() const { // FIXME replace with domain()
-    return m_region;
-  }
-
-  /**
-   * @brief Get the region.
-   */
   const TRegion& domain() const {
     return m_region;
   }

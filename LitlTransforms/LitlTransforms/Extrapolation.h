@@ -146,12 +146,12 @@ const TRaster& dontExtrapolate(const Extrapolator<TRaster, TMethod>& in) {
 
 template <typename T, typename TParent, typename TRegion>
 auto dontExtrapolate(Subraster<T, TParent, TRegion>& in) -> decltype(auto) {
-  return dontExtrapolate(in.parent()).subraster(in.region()); // FIXME avoid region copy if TParent is no extrapolator
+  return dontExtrapolate(in.parent()).subraster(in.domain()); // FIXME avoid region copy if TParent is no extrapolator
 }
 
 template <typename T, typename TParent, typename TRegion>
 auto dontExtrapolate(const Subraster<T, TParent, TRegion>& in) -> decltype(auto) {
-  return dontExtrapolate(in.parent()).subraster(in.region()); // FIXME avoid region copy if TParent is no extrapolator
+  return dontExtrapolate(in.parent()).subraster(in.domain()); // FIXME avoid region copy if TParent is no extrapolator
 }
 
 } // namespace Litl
