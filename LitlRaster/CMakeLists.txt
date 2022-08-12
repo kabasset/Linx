@@ -11,6 +11,10 @@ elements_add_library(LitlRaster src/lib/*.cpp
                      LINK_LIBRARIES LitlContainer Boost
                      PUBLIC_HEADERS LitlRaster)
 
+elements_add_unit_test(BorderedBox tests/src/BorderedBox_test.cpp 
+                     EXECUTABLE LitlRaster_BorderedBox_test
+                     LINK_LIBRARIES LitlRaster
+                     TYPE Boost)
 elements_add_unit_test(Box tests/src/Box_test.cpp 
                      EXECUTABLE LitlRaster_Box_test
                      LINK_LIBRARIES LitlRaster

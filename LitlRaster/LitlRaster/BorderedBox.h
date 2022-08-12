@@ -31,26 +31,27 @@ public:
   /**
    * @brief Constructor.
    */
-  BorderedBox(Box<N> box, Box<N> margin) : m_inner(std::move(box)), m_fronts(), m_backs() {
+  BorderedBox(const Box<N>& box, const Box<N>& margin) : m_inner(box - margin), m_fronts(), m_backs() {
 
+    auto current = m_inner;
     const auto dim = m_inner.dimension();
-    m_fronts.reserve(dim);
+    m_backs.reserve(dim);
     for (Index i = 0; i < dim; ++i) {
 
       const auto f = margin.front()[i];
       if (f < 0) {
-        auto before = m_inner;
-        before.m_back[i] = m_inner.m_front[i] - 1;
-        before.m_front[i] = m_inner.m_front[i] += f;
-        m_fronts.push_back(before);
+        auto before = current;
+        before.m_back[i] = current.m_front[i] - 1;
+        before.m_front[i] = current.m_front[i] += f;
+        m_fronts.push_front(before);
       }
 
       const auto b = margin.back()[i];
       if (b > 0) {
-        auto after = m_inner;
-        after.m_front[i] = m_inner.m_back[i] + 1;
-        after.m_back[i] = m_inner.m_back[i] += b;
-        m_backs.push_front(after);
+        auto after = current;
+        after.m_front[i] = current.m_back[i] + 1;
+        after.m_back[i] = current.m_back[i] += b;
+        m_backs.push_back(after);
       }
     }
   }
@@ -75,8 +76,8 @@ public:
 
 private:
   Box<N> m_inner;
-  std::vector<Box<N>> m_fronts;
-  std::deque<Box<N>> m_backs;
+  std::deque<Box<N>> m_fronts;
+  std::vector<Box<N>> m_backs;
 };
 
 } // namespace Litl
