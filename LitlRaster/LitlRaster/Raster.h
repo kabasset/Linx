@@ -397,13 +397,13 @@ public:
    * @see section()
    */
   template <typename TRegion>
-  const Subraster<const T, const Raster<T, N, THolder>, TRegion> subraster(TRegion&& region) const;
+  const Subraster<const T, const Raster<T, N, THolder>, TRegion> subraster(TRegion region) const;
 
   /**
    * @copybrief subraster().
    */
   template <typename TRegion>
-  Subraster<T, Raster<T, N, THolder>, TRegion> subraster(TRegion&& region);
+  Subraster<T, Raster<T, N, THolder>, TRegion> subraster(TRegion region);
 
   /// @}
 

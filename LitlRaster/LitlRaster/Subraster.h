@@ -106,7 +106,14 @@ public:
   /**
    * @brief Get the region.
    */
-  const TRegion& region() const {
+  const TRegion& region() const { // FIXME replace with domain()
+    return m_region;
+  }
+
+  /**
+   * @brief Get the region.
+   */
+  const TRegion& domain() const {
     return m_region;
   }
 
@@ -177,7 +184,14 @@ public:
   /**
    * @brief Create a cropped subraster.
    */
-  Subraster<T, TParent, TRegion> subraster(Box<TParent::Dimension>& box) {
+  Subraster<const T, const TParent, TRegion> subraster(const Box<TParent::Dimension>& box) const {
+    return Subraster<const T, const TParent, TRegion>(m_parent, clamp(m_region, box));
+  }
+
+  /**
+   * @brief Create a cropped subraster.
+   */
+  Subraster<T, TParent, TRegion> subraster(const Box<TParent::Dimension>& box) {
     return Subraster<T, TParent, TRegion>(m_parent, clamp(m_region, box));
   }
 
@@ -199,6 +213,18 @@ private:
    */
   Indexing m_indexing;
 };
+
+/**
+ * @relates Subraster
+ * @brief Get the parent raster of a subraster.
+ * 
+ * As opposed to `Subraster::parent()`, if the parent is an extrapolator,
+ * then the underlying decorated raster is effectively returned.
+ */
+template <typename T, typename TParent, typename TRegion>
+const auto& rasterize(const Subraster<T, TParent, TRegion>& in) {
+  return rasterize(in.parent());
+}
 
 } // namespace Litl
 
