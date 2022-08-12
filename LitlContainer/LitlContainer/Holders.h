@@ -211,6 +211,18 @@ public:
     SizeError::mayThrow(m_container.size(), size);
   }
 
+  StdHolder(const StdHolder& other) : StdHolder(other.size(), other.data()) {}
+
+  StdHolder& operator=(StdHolder other) {
+    swap(*this, other);
+    return *this;
+  }
+
+  friend void swap(StdHolder& lhs, StdHolder& rhs) {
+    std::swap(lhs.m_size, rhs.m_size);
+    std::swap(lhs.m_container, rhs.m_container);
+  }
+
   std::size_t size() const {
     return m_size;
   }
