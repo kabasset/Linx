@@ -12,6 +12,8 @@
 #include "LitlTransforms/Extrapolation.h"
 #include "LitlTransforms/Interpolation.h"
 
+#include <iostream> // std::cout
+
 namespace Litl {
 
 /**
@@ -56,16 +58,20 @@ public:
    */
   template <typename TIn, typename TRaster>
   void correlateTo(const TIn& in, TRaster& out) const {
-    const auto& inner = dontExtrapolate(in); // A raster or subraster
+    const auto& notExtrapolated = dontExtrapolate(in); // A raster or subraster
     const auto box = BorderedBox<Dimension>(rasterize(in).domain(), static_cast<const TDerived&>(*this).window());
     box.applyInnerBorder(
         [&](const auto& ib) {
-          auto outsub = out.subraster(ib);
-          static_cast<const TDerived&>(*this).correlateMonolithTo(inner.subraster(ib), outsub);
+          std::cout << "Inner: " << ib.front() << " - " << ib.back() << std::endl;
+          const auto insub = notExtrapolated.subraster(ib);
+          auto outsub = out.subraster(insub.domain());
+          static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
         },
         [&](const auto& ib) {
-          auto outsub = out.subraster(ib);
-          static_cast<const TDerived&>(*this).correlateMonolithTo(in.subraster(ib), outsub);
+          std::cout << "Border: " << ib.front() << " - " << ib.back() << std::endl;
+          const auto insub = in.subraster(ib);
+          auto outsub = out.subraster(insub.domain());
+          static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
         });
   }
 
@@ -75,7 +81,7 @@ public:
    */
   template <typename TBoxExtrapolator>
   Raster<Value, Dimension> correlateCrop(const TBoxExtrapolator& in) const {
-    Raster<Value, Dimension> out(in.region().shape());
+    Raster<Value, Dimension> out(in.domain().shape());
     correlateCropTo(in, out);
     return out;
   }
@@ -88,7 +94,7 @@ public:
   template <typename TBoxExtrapolator, typename TRaster>
   void correlateCropTo(const TBoxExtrapolator& in, TRaster& out) const {
     const auto& inner = dontExtrapolate(in);
-    const auto& front = in.region().front();
+    const auto& front = in.domain().front();
     const auto box = BorderedBox<Dimension>(rasterize(in).domain(), static_cast<const TDerived&>(*this).window());
     box.applyInnerBorder(
         [&](const auto& ib) {
@@ -107,7 +113,7 @@ public:
    */
   template <typename TGridExtrapolator>
   Raster<Value, Dimension> correlateDecimate(const TGridExtrapolator& in) const {
-    Raster<Value, Dimension> out(in.region().shape());
+    Raster<Value, Dimension> out(in.domain().shape());
     correlateDecimateTo(in, out);
     return out;
   }
@@ -120,7 +126,7 @@ public:
   template <typename TGridExtrapolator, typename TRaster>
   void correlateDecimateTo(const TGridExtrapolator& in, TRaster& out) const {
     const auto& inner = dontExtrapolate(in);
-    const auto& grid = in.region();
+    const auto& grid = in.domain();
     const auto& front = grid.front();
     const auto& step = grid.step();
     const auto gridToBox = [&](const auto& g) {
@@ -134,12 +140,12 @@ public:
     box.applyInnerBorder(
         [&](const auto& ib) {
           const auto insub = inner.subraster(ib);
-          auto outsub = out.subraster(gridToBox(insub.region()));
+          auto outsub = out.subraster(gridToBox(insub.domain()));
           static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
         },
         [&](const auto& ib) {
           const auto insub = in.subraster(ib);
-          auto outsub = out.subraster(gridToBox(insub.region()));
+          auto outsub = out.subraster(gridToBox(insub.domain()));
           static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
         });
   }

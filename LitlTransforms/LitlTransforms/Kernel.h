@@ -47,21 +47,23 @@ public:
 
   /**
    * @brief Correlate an input raster or extrapolator over a given region.
-   * @param in An input raster or extrapolator
+   * @param in An input subraster
    * @param out An output raster or extrapolator
    * 
    * As opposed to other methods, no optimization is performed: the region is not sliced.
    */
-  template <typename TIn, typename TRaster>
-  void correlateMonolithTo(const TIn& in, TRaster& out) const {
+  template <typename TSubraster, typename TRaster>
+  void correlateMonolithTo(const TSubraster& in, TRaster& out) const {
     if (in.size() < 0) {
       return;
     }
-    auto patch = in.subraster(m_window);
+    auto patch = in.parent().subraster(m_window);
     auto outIt = out.begin();
     for (const auto& p : in.domain()) {
       patch.shift(p);
+      std::cout << patch.domain().front() << " - " << patch.domain().back() << std::endl;
       *outIt = std::inner_product(m_values.begin(), m_values.end(), patch.begin(), T {});
+      std::cout << *outIt << std::endl;
       ++outIt;
       // FIXME replace out[p] with an iterator
       patch.shiftBack(p);
