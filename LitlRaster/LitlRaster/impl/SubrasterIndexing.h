@@ -219,6 +219,14 @@ struct SubrasterTraits<Raster<T, N, THolder>, OrientedSlice<I, N>> {
   using Indexing = StrideBasedIndexing<UParent, URegion>;
 };
 
+/// @cond
+// FIXME temporary workaround for
+// 'Mask' was not declared in this scope
+// (include issue?)
+template <Index N>
+class Mask;
+/// @endcond
+
 /**
  * @brief `Mask` specialization.
  */
