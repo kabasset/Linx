@@ -146,30 +146,6 @@ public:
   }
 
   /**
-   * @brief Compute the Lp-norm raised to the power p.
-   * @tparam P The power
-   */
-  template <Index P>
-  T norm() const {
-    T out(0);
-    for (const auto& e : *this) {
-      out += abspow<P>(e);
-    }
-    return out;
-  }
-
-  /**
-   * @brief Compute the Lp-distance to another vector raised to the power p.
-   * @tparam P The power
-   */
-  template <Index P>
-  T distance(const Vector<T, N>& other) const {
-    return std::inner_product(this->begin(), this->end(), other.begin(), 0., std::plus<T> {}, [](T a, T b) {
-      return abspow<P>(b - a);
-    });
-  }
-
-  /**
    * @brief Create a vector of lower dimension.
    * @tparam M The new dimension; cannot be -1
    * 
@@ -249,6 +225,30 @@ Index shapeSize(const Position<N>& shape) {
     return 0;
   }
   return shapeStride(shape, size);
+}
+
+/**
+ * @brief Compute the Lp-norm of a vector raised to the power p.
+ * @tparam P The power
+ */
+template <Index P, typename T, Index N>
+T norm(const Vector<T, N>& in) {
+  T out(0);
+  for (const auto& e : in) {
+    out += abspow<P>(e);
+  }
+  return out;
+}
+
+/**
+ * @brief Compute the absolute Lp-distance between two vectors raised to the power p.
+ * @tparam P The power
+ */
+template <Index P, typename T, Index N>
+T distance(const Vector<T, N>& lhs, const Vector<T, N>& rhs) {
+  return std::inner_product(lhs.begin(), lhs.end(), rhs.begin(), 0., std::plus<T> {}, [](T a, T b) {
+    return abspow<P>(b - a);
+  });
 }
 
 } // namespace Litl

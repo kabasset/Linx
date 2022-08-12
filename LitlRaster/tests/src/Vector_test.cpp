@@ -89,32 +89,32 @@ BOOST_AUTO_TEST_CASE(norm_test) {
   Position<3> xy {-4, -4, 0};
   Position<3> xyz {-4, -4, -4};
 
-  BOOST_TEST(zero.template norm<0>() == 0);
-  BOOST_TEST(x.template norm<0>() == 1);
-  BOOST_TEST(y.template norm<0>() == 1);
-  BOOST_TEST(z.template norm<0>() == 1);
-  BOOST_TEST(xy.template norm<0>() == 2);
-  BOOST_TEST(xyz.template norm<0>() == 3);
-  BOOST_TEST(xyz.template distance<0>(x) == 2);
-  BOOST_TEST(xyz.template distance<0>(-x) == 3);
+  BOOST_TEST(norm<0>(zero) == 0);
+  BOOST_TEST(norm<0>(x) == 1);
+  BOOST_TEST(norm<0>(y) == 1);
+  BOOST_TEST(norm<0>(z) == 1);
+  BOOST_TEST(norm<0>(xy) == 2);
+  BOOST_TEST(norm<0>(xyz) == 3);
+  BOOST_TEST(distance<0>(xyz, x) == 2);
+  BOOST_TEST(distance<0>(xyz, -x) == 3);
 
-  BOOST_TEST(zero.template norm<1>() == 0);
-  BOOST_TEST(x.template norm<1>() == 4);
-  BOOST_TEST(y.template norm<1>() == 4);
-  BOOST_TEST(z.template norm<1>() == 4);
-  BOOST_TEST(xy.template norm<1>() == 8);
-  BOOST_TEST(xyz.template norm<1>() == 12);
-  BOOST_TEST(xyz.template distance<1>(x) == 8);
-  BOOST_TEST(xyz.template distance<1>(-x) == 16);
+  BOOST_TEST(norm<1>(zero) == 0);
+  BOOST_TEST(norm<1>(x) == 4);
+  BOOST_TEST(norm<1>(y) == 4);
+  BOOST_TEST(norm<1>(z) == 4);
+  BOOST_TEST(norm<1>(xy) == 8);
+  BOOST_TEST(norm<1>(xyz) == 12);
+  BOOST_TEST(distance<1>(xyz, x) == 8);
+  BOOST_TEST(distance<1>(xyz, -x) == 16);
 
-  BOOST_TEST(zero.template norm<2>() == 0);
-  BOOST_TEST(x.template norm<2>() == 16);
-  BOOST_TEST(y.template norm<2>() == 16);
-  BOOST_TEST(z.template norm<2>() == 16);
-  BOOST_TEST(xy.template norm<2>() == 32);
-  BOOST_TEST(xyz.template norm<2>() == 48);
-  BOOST_TEST(xyz.template distance<2>(x) == 32);
-  BOOST_TEST(xyz.template distance<2>(-x) == 96);
+  BOOST_TEST(norm<2>(zero) == 0);
+  BOOST_TEST(norm<2>(x) == 16);
+  BOOST_TEST(norm<2>(y) == 16);
+  BOOST_TEST(norm<2>(z) == 16);
+  BOOST_TEST(norm<2>(xy) == 32);
+  BOOST_TEST(norm<2>(xyz) == 48);
+  BOOST_TEST(distance<2>(xyz, x) == 32);
+  BOOST_TEST(distance<2>(xyz, -x) == 96);
 }
 
 //-----------------------------------------------------------------------------
