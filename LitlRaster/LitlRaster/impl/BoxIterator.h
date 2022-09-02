@@ -44,7 +44,7 @@ public:
    */
   static Position<N> endPosition(const Box<N>& box) {
     auto out = box.front();
-    --out[0];
+    out[0] -= (box.size() > 0); // out = front if size <= 0
     return out;
   }
 

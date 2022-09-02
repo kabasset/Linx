@@ -45,6 +45,15 @@ BOOST_AUTO_TEST_CASE(box_is_screened_in_order_test) {
   BOOST_TEST(count == region.size());
 }
 
+BOOST_AUTO_TEST_CASE(empty_box_iterator_passes_test) {
+  Box<2> region {Position<2>::one() * 2, Position<2>::zero()};
+  BOOST_CHECK(region.size() == 0);
+  for (const auto& p : region) {
+    std::cout << p << std::endl;
+    throw std::out_of_range("We should not be there!");
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE_END()

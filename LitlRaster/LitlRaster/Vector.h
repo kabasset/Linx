@@ -202,7 +202,9 @@ using Position = Vector<Index, N>;
  */
 template <Index N>
 Index shapeStride(const Position<N>& shape, Index axis) {
-  return std::accumulate(shape.begin(), shape.begin() + axis, 1L, std::multiplies<Index> {});
+  return std::accumulate(shape.begin(), shape.begin() + axis, 1L, [](auto s, auto l) {
+    return l > 0 ? s * l : 0; // FIXME here or for shapeSize only?
+  });
 }
 
 /**
