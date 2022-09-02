@@ -102,6 +102,13 @@ struct ContiguousContainerMixin {
     return begin() == end();
   }
 
+  /**
+   * @brief Maximum number of elements the container is able to hold (same as `size()`).
+   */
+  std::size_t max_size() const {
+    return static_cast<const TDerived&>(*this).size();
+  }
+
   /// @group_elements
 
   /**
