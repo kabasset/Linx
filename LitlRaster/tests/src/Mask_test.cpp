@@ -45,6 +45,17 @@ BOOST_AUTO_TEST_CASE(l2_ball_test) {
   checkBall<2>();
 }
 
+BOOST_AUTO_TEST_CASE(empty_mask_iterator_passes_test) {
+  Box<2> box {Position<2>::zero(), Position<2>::one()};
+  Mask<2> mask(box, false);
+  BOOST_CHECK(box.size() > 0);
+  BOOST_CHECK(mask.size() == 0);
+  for (const auto& p : mask) {
+    std::cout << p << std::endl;
+    throw std::out_of_range("We should not be there!");
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE_END()
