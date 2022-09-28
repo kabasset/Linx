@@ -3,10 +3,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "ElementsKernel/ProgramHeaders.h"
-#include "LitlBase/Sequence.h"
 #include "LitlCore/Grid.h"
 #include "LitlCore/Mask.h"
 #include "LitlCore/Raster.h"
+#include "LitlCore/Sequence.h"
 #include "LitlRun/Chronometer.h"
 #include "LitlRun/ProgramOptions.h"
 

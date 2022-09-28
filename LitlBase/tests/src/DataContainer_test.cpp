@@ -2,8 +2,7 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "LitlBase/Holders.h"
-#include "LitlBase/Sequence.h"
+#include "LitlBase/DataContainer.h"
 
 #include <boost/test/unit_test.hpp>
 #include <sstream>
@@ -16,14 +15,14 @@ BOOST_AUTO_TEST_SUITE(DataContainer_test)
 
 //-----------------------------------------------------------------------------
 
-void checkStreamInsertion(Sequence<int> container, const std::string& expected) {
+void checkStreamInsertion(MinimalDataContainer<int> container, const std::string& expected) {
   std::stringstream os;
   os << container;
   BOOST_TEST(os.str() == expected);
 }
 
 BOOST_AUTO_TEST_CASE(stream_insertion_test) {
-  checkStreamInsertion(Sequence<int>(), "[]");
+  checkStreamInsertion(MinimalDataContainer<int>(), "[]");
   checkStreamInsertion({0}, "[0]");
   checkStreamInsertion({0, 1}, "[0, 1]");
   checkStreamInsertion({0, 1, 2}, "[0, 1, 2]");

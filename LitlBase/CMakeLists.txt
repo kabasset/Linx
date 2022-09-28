@@ -43,7 +43,3 @@ elements_add_unit_test(Random tests/src/Random_test.cpp
                      EXECUTABLE LitlBase_Random_test
                      LINK_LIBRARIES LitlBase
                      TYPE Boost)
-elements_add_unit_test(Sequence tests/src/Sequence_test.cpp 
-                     EXECUTABLE LitlBase_Sequence_test
-                     LINK_LIBRARIES LitlBase
-                     TYPE Boost)

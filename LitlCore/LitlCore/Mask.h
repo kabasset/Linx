@@ -5,9 +5,9 @@
 #ifndef _LITLCORE_MASK_H
 #define _LITLCORE_MASK_H
 
-#include "LitlBase/Sequence.h"
 #include "LitlCore/Box.h"
 #include "LitlCore/Raster.h"
+#include "LitlCore/Sequence.h"
 
 namespace Litl {
 

@@ -2,15 +2,12 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "LitlBase/Sequence.h"
+#include "LitlBase/DataContainer.h"
 
 #include <boost/test/unit_test.hpp>
 #include <sstream>
 
 using namespace Litl;
-
-template <typename T, Index N>
-using TestContainer = Sequence<T, StdHolder<std::array<T, N>>>;
 
 //-----------------------------------------------------------------------------
 
@@ -20,7 +17,7 @@ BOOST_AUTO_TEST_SUITE(DataDistribution_test)
 
 template <Index Size>
 void checkQuantiles() {
-  TestContainer<double, Size> data;
+  MinimalDataContainer<double> data(Size);
   data.range();
   auto dist = data.distribution();
   BOOST_TEST(dist.min() == 0);
@@ -41,7 +38,7 @@ BOOST_AUTO_TEST_CASE(quantiles_test) {
 }
 
 BOOST_AUTO_TEST_CASE(robust_test) {
-  TestContainer<int, 7> data {2, 1, 9, 4, 1, 2, 6};
+  MinimalDataContainer<int> data {2, 1, 9, 4, 1, 2, 6};
   auto dist = data.distribution();
   BOOST_TEST(dist.min() == 1);
   BOOST_TEST(dist.max() == 9);
@@ -50,7 +47,7 @@ BOOST_AUTO_TEST_CASE(robust_test) {
 }
 
 BOOST_AUTO_TEST_CASE(histogram_test) {
-  TestContainer<int, 10> data;
+  MinimalDataContainer<int> data(10);
   data.range();
   const std::vector<double> bins {-10, -.5, 0, 1.5, 4, 9, 12};
   const auto hist = data.distribution().histogram(bins);

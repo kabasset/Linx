@@ -35,16 +35,20 @@ elements_add_unit_test(OrientedSliceIterator tests/src/OrientedSliceIterator_tes
                      EXECUTABLE LitlCore_OrientedSliceIterator_test
                      LINK_LIBRARIES LitlCore
                      TYPE Boost)
-elements_add_unit_test(Raster tests/src/Raster_test.cpp 
-                     EXECUTABLE LitlCore_Raster_test
-                     LINK_LIBRARIES LitlCore
-                     TYPE Boost)
 elements_add_unit_test(Patch tests/src/Patch_test.cpp 
                      EXECUTABLE LitlCore_Patch_test
                      LINK_LIBRARIES LitlCore
                      TYPE Boost)
 elements_add_unit_test(PatchIterator tests/src/PatchIterator_test.cpp 
                      EXECUTABLE LitlCore_PatchIterator_test
+                     LINK_LIBRARIES LitlCore
+                     TYPE Boost)
+elements_add_unit_test(Raster tests/src/Raster_test.cpp 
+                     EXECUTABLE LitlCore_Raster_test
+                     LINK_LIBRARIES LitlCore
+                     TYPE Boost)
+elements_add_unit_test(Sequence tests/src/Sequence_test.cpp 
+                     EXECUTABLE LitlCore_Sequence_test
                      LINK_LIBRARIES LitlCore
                      TYPE Boost)
 elements_add_unit_test(Vector tests/src/Vector_test.cpp 

@@ -2,8 +2,8 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LITLBASE_SEQUENCE_H
-#define _LITLBASE_SEQUENCE_H
+#ifndef _LITLCORE_SEQUENCE_H
+#define _LITLCORE_SEQUENCE_H
 
 #include "LitlBase/Arithmetic.h"
 #include "LitlBase/DataContainer.h"

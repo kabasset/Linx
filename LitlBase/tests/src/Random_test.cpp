@@ -2,8 +2,8 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
+#include "LitlBase/DataContainer.h"
 #include "LitlBase/Random.h"
-#include "LitlBase/Sequence.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_SUITE(Random_test)
 
 template <typename T>
 void checkUniform(T) {
-  Sequence<T> sequence(32);
+  MinimalDataContainer<T> sequence(32);
   sequence.generate(UniformNoise<T>(5, 10));
   for (const auto& e : sequence) {
     BOOST_TEST(e >= 5);
@@ -34,7 +34,7 @@ void checkUniform(bool) {}
 
 template <typename T>
 void checkUniform(std::complex<T>) {
-  Sequence<std::complex<T>> sequence(32);
+  MinimalDataContainer<std::complex<T>> sequence(32);
   sequence.generate(UniformNoise<std::complex<T>>({5, 1}, {10, 2}));
   for (const auto& e : sequence) {
     BOOST_TEST(e.real() >= 5);
@@ -57,7 +57,7 @@ LITL_TEST_CASE_TEMPLATE(uniform_test) {
 
 template <typename T>
 void checkGaussian(T) {
-  Sequence<T> sequence(32);
+  MinimalDataContainer<T> sequence(32);
   sequence.generate(GaussianNoise<T>(100, 15));
   sequence.apply(GaussianNoise<T>());
   // FIXME
@@ -74,7 +74,7 @@ LITL_TEST_CASE_TEMPLATE(gaussian_test) {
 
 template <typename T>
 void checkPoisson(T) {
-  Sequence<T> sequence(32);
+  MinimalDataContainer<T> sequence(32);
   sequence.generate(PoissonNoise<T>(20));
   sequence.apply(PoissonNoise<T>());
   // FIXME
@@ -90,7 +90,7 @@ LITL_TEST_CASE_TEMPLATE(poisson_test) {
 }
 
 BOOST_AUTO_TEST_CASE(reproducible_gaussian_test) {
-  Sequence<int> sequenceA {10, 100, 1000};
+  MinimalDataContainer<int> sequenceA {10, 100, 1000};
   auto sequenceB = sequenceA;
   sequenceB[1] += 1;
   GaussianNoise<int> noiseA(0, 1, 0);
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(reproducible_gaussian_test) {
 }
 
 BOOST_AUTO_TEST_CASE(reproducible_poisson_test) {
-  Sequence<int> sequenceA {10, 100, 1000};
+  MinimalDataContainer<int> sequenceA {10, 100, 1000};
   auto sequenceB = sequenceA;
   sequenceB[1] += 1;
   StablePoissonNoise<int> noiseA(0, 0);

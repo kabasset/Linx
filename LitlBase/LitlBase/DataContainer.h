@@ -125,6 +125,30 @@ public:
   /// @}
 };
 
+/**
+ * @brief A minimal `DataContainer` class, mostly for testing purpose.
+ * 
+ * `Sequence` and `Vector` are better-suited for general purpose usage.
+ */
+template <typename T>
+class MinimalDataContainer : public DataContainer<T, DefaultHolder<T>, void, MinimalDataContainer<T>> {
+public:
+  using Base = DataContainer<T, DefaultHolder<T>, void, MinimalDataContainer<T>>;
+
+  template <typename... TArgs>
+  explicit MinimalDataContainer(std::size_t size = 0, TArgs&&... args) : Base(size, std::forward<TArgs>(args)...) {}
+
+  template <typename U>
+  MinimalDataContainer(std::initializer_list<U> list) : Base(list) {}
+
+  template <typename U, typename... TArgs>
+  explicit MinimalDataContainer(std::initializer_list<U> list, TArgs&&... args) :
+      Base(list, std::forward<TArgs>(args)...) {}
+
+  template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr, typename... TArgs>
+  explicit MinimalDataContainer(TIterable& iterable, TArgs&&... args) : Base(iterable, std::forward<TArgs>(args)...) {}
+};
+
 } // namespace Litl
 
 #endif

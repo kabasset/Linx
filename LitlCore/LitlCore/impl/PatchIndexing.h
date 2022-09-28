@@ -5,12 +5,12 @@
 #ifndef _LITLCORE_IMPL_PATCHINDEXING_H
 #define _LITLCORE_IMPL_PATCHINDEXING_H
 
-#include "LitlBase/Sequence.h"
 #include "LitlCore/Box.h"
 #include "LitlCore/Grid.h"
 #include "LitlCore/Mask.h"
 #include "LitlCore/OrientedSlice.h"
 #include "LitlCore/Raster.h"
+#include "LitlCore/Sequence.h"
 
 namespace Litl {
 
