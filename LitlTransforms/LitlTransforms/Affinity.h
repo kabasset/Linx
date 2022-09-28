@@ -5,8 +5,8 @@
 #ifndef _LITLTRANSFORMS_AFFINITY_H
 #define _LITLTRANSFORMS_AFFINITY_H
 
-#include "LitlRaster/Matrix.h"
-#include "LitlRaster/Vector.h"
+#include "LitlCore/Matrix.h"
+#include "LitlCore/Vector.h"
 
 namespace Litl {
 

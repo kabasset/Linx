@@ -2,14 +2,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 elements_subdir(LitlTransforms)
 
-elements_depends_on_subdirs(LitlRaster)
+elements_depends_on_subdirs(LitlCore)
 
 find_package(Eigen3)
 find_package(FFTW)
 
 elements_add_library(LitlTransforms src/lib/*.cpp
-                     INCLUDE_DIRS LitlRaster Eigen3 FFTW
-                     LINK_LIBRARIES LitlRaster Eigen3 FFTW
+                     INCLUDE_DIRS LitlCore Eigen3 FFTW
+                     LINK_LIBRARIES LitlCore Eigen3 FFTW
                      PUBLIC_HEADERS LitlTransforms)
 
 elements_add_unit_test(Affinity tests/src/Affinity_test.cpp 

@@ -5,7 +5,7 @@
 #ifndef _LITLTRANSFORMS_SEPARABLEKERNEL_H
 #define _LITLTRANSFORMS_SEPARABLEKERNEL_H
 
-#include "LitlRaster/Raster.h"
+#include "LitlCore/Raster.h"
 #include "LitlTransforms/Extrapolation.h"
 #include "LitlTransforms/Kernel.h"
 #include "LitlTransforms/OrientedKernel.h"

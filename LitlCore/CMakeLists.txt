@@ -1,0 +1,53 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
+
+elements_subdir(LitlCore)
+
+elements_depends_on_subdirs(LitlBase)
+
+find_package(Boost)
+
+elements_add_library(LitlCore src/lib/*.cpp
+                     INCLUDE_DIRS LitlBase Boost
+                     LINK_LIBRARIES LitlBase Boost
+                     PUBLIC_HEADERS LitlCore)
+
+elements_add_unit_test(BorderedBox tests/src/BorderedBox_test.cpp 
+                     EXECUTABLE LitlCore_BorderedBox_test
+                     LINK_LIBRARIES LitlCore
+                     TYPE Boost)
+elements_add_unit_test(Box tests/src/Box_test.cpp 
+                     EXECUTABLE LitlCore_Box_test
+                     LINK_LIBRARIES LitlCore
+                     TYPE Boost)
+elements_add_unit_test(BoxIterator tests/src/BoxIterator_test.cpp 
+                     EXECUTABLE LitlCore_BoxIterator_test
+                     LINK_LIBRARIES LitlCore
+                     TYPE Boost)
+elements_add_unit_test(Grid tests/src/Grid_test.cpp 
+                     EXECUTABLE LitlCore_Grid_test
+                     LINK_LIBRARIES LitlCore
+                     TYPE Boost)
+elements_add_unit_test(Mask tests/src/Mask_test.cpp 
+                     EXECUTABLE LitlCore_Mask_test
+                     LINK_LIBRARIES LitlCore
+                     TYPE Boost)
+elements_add_unit_test(OrientedSliceIterator tests/src/OrientedSliceIterator_test.cpp 
+                     EXECUTABLE LitlCore_OrientedSliceIterator_test
+                     LINK_LIBRARIES LitlCore
+                     TYPE Boost)
+elements_add_unit_test(Raster tests/src/Raster_test.cpp 
+                     EXECUTABLE LitlCore_Raster_test
+                     LINK_LIBRARIES LitlCore
+                     TYPE Boost)
+elements_add_unit_test(Patch tests/src/Patch_test.cpp 
+                     EXECUTABLE LitlCore_Patch_test
+                     LINK_LIBRARIES LitlCore
+                     TYPE Boost)
+elements_add_unit_test(PatchIterator tests/src/PatchIterator_test.cpp 
+                     EXECUTABLE LitlCore_PatchIterator_test
+                     LINK_LIBRARIES LitlCore
+                     TYPE Boost)
+elements_add_unit_test(Vector tests/src/Vector_test.cpp 
+                     EXECUTABLE LitlCore_Vector_test
+                     LINK_LIBRARIES LitlCore
+                     TYPE Boost)

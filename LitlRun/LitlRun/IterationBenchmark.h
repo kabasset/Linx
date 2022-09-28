@@ -5,7 +5,7 @@
 #ifndef _LITLRUN_ITERATIONBENCHMARK_H
 #define _LITLRUN_ITERATIONBENCHMARK_H
 
-#include "LitlRaster/Raster.h"
+#include "LitlCore/Raster.h"
 #include "LitlRun/Chronometer.h"
 
 namespace Litl {

@@ -5,7 +5,7 @@
 #ifndef _LITLTRANSFORMS_INTERPOLATIONMETHODS_H
 #define _LITLTRANSFORMS_INTERPOLATIONMETHODS_H
 
-#include "LitlRaster/Raster.h"
+#include "LitlCore/Raster.h"
 
 namespace Litl {
 

@@ -5,7 +5,7 @@
 #ifndef _LITLTRANSFORMS_DFTPLAN_H
 #define _LITLTRANSFORMS_DFTPLAN_H
 
-#include "LitlRaster/Raster.h"
+#include "LitlCore/Raster.h"
 #include "LitlTransforms/DftMemory.h"
 
 namespace Litl {

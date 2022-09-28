@@ -5,7 +5,7 @@
 #ifndef _LITLTRANSFORMS_STRUCTURINGELEMENT_H
 #define _LITLTRANSFORMS_STRUCTURINGELEMENT_H
 
-#include "LitlRaster/Raster.h"
+#include "LitlCore/Raster.h"
 #include "LitlTransforms/Extrapolation.h"
 
 namespace Litl {

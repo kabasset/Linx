@@ -2,19 +2,19 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 elements_subdir(LitlDemo)
 
-elements_depends_on_subdirs(LitlRaster LitlTransforms LitlTransforms)
+elements_depends_on_subdirs(LitlCore LitlTransforms LitlTransforms)
 
 elements_add_unit_test(LitlDemoBasics tests/src/LitlDemoBasics_test.cpp 
                      EXECUTABLE LitlDemoBasics_test
-                     LINK_LIBRARIES LitlRaster
+                     LINK_LIBRARIES LitlCore
                      TYPE Boost)
 elements_add_unit_test(LitlDemoChannels tests/src/LitlDemoChannels_test.cpp 
                      EXECUTABLE LitlDemoChannels_test
-                     LINK_LIBRARIES LitlRaster
+                     LINK_LIBRARIES LitlCore
                      TYPE Boost)
 elements_add_unit_test(LitlDemoConstructors tests/src/LitlDemoConstructors_test.cpp 
                      EXECUTABLE LitlDemoConstructors_test
-                     LINK_LIBRARIES LitlRaster
+                     LINK_LIBRARIES LitlCore
                      TYPE Boost)
 elements_add_unit_test(LitlDemoDft tests/src/LitlDemoDft_test.cpp 
                      EXECUTABLE LitlDemoDft_test
@@ -26,9 +26,9 @@ elements_add_unit_test(LitlDemoInterpolation tests/src/LitlDemoInterpolation_tes
                      TYPE Boost)
 elements_add_unit_test(LitlDemoPixelwise tests/src/LitlDemoPixelwise_test.cpp 
                      EXECUTABLE LitlDemoPixelwise_test
-                     LINK_LIBRARIES LitlRaster
+                     LINK_LIBRARIES LitlCore
                      TYPE Boost)
 elements_add_unit_test(LitlDemoRandom tests/src/LitlDemoRandom_test.cpp 
                      EXECUTABLE LitlDemoRandom_test
-                     LINK_LIBRARIES LitlRaster
+                     LINK_LIBRARIES LitlCore
                      TYPE Boost)

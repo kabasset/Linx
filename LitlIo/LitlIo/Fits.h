@@ -5,7 +5,7 @@
 #ifndef _LITLIO_FITS_H
 #define _LITLIO_FITS_H
 
-#include "LitlRaster/Raster.h"
+#include "LitlCore/Raster.h"
 
 #include <fitsio.h>
 #include <string>

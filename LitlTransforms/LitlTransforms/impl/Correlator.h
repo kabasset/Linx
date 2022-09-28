@@ -5,10 +5,10 @@
 #ifndef _LITLTRANSFORMS_IMPL_CORRELATOR_H
 #define _LITLTRANSFORMS_IMPL_CORRELATOR_H
 
-#include "LitlRaster/BorderedBox.h"
-#include "LitlRaster/Box.h"
-#include "LitlRaster/Grid.h"
-#include "LitlRaster/Raster.h"
+#include "LitlCore/BorderedBox.h"
+#include "LitlCore/Box.h"
+#include "LitlCore/Grid.h"
+#include "LitlCore/Raster.h"
 #include "LitlTransforms/Extrapolation.h"
 #include "LitlTransforms/Interpolation.h"
 
