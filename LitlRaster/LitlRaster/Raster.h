@@ -30,9 +30,9 @@ namespace Litl {
 /// @cond
 // Issue with forward declarations: https://github.com/doxygen/doxygen/issues/8177
 
-// Forward declaration for Raster::subraster()
+// Forward declaration for Raster::patch()
 template <typename T, typename TRaster, typename TRegion>
-class Subraster;
+class Patch;
 
 // Forward declaration for specializations
 template <typename T, Index N, typename THolder>
@@ -152,7 +152,7 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
  */
 template <typename T, Index N = 2, typename THolder = DefaultHolder<T>>
 class Raster : public DataContainer<T, THolder, EuclidArithmetic, Raster<T, N, THolder>> {
-  friend class ImageRaster; // FIXME rm when Subraster is removed
+  friend class ImageRaster; // FIXME rm when Patch is removed
 
 public:
   /**
@@ -385,25 +385,25 @@ public:
   PtrRaster<T, N == -1 ? -1 : N - 1> section(Index index);
 
   /**
-   * @brief Create a subraster from given region.
+   * @brief Create a patch from given region.
    * 
-   * A subraster is a view of the raster data contained in a region.
-   * As opposed to a slice or a section, a subraster is not necessarily contiguous in memory.
+   * A patch is a view of the raster data contained in a region.
+   * As opposed to a slice or a section, a patch is not necessarily contiguous in memory.
    * 
-   * Subrasters are iterable.
+   * Patchs are iterable.
    * 
    * @see isContiguous()
    * @see slice()
    * @see section()
    */
   template <typename TRegion>
-  const Subraster<const T, const Raster<T, N, THolder>, TRegion> subraster(TRegion region) const;
+  const Patch<const T, const Raster<T, N, THolder>, TRegion> patch(TRegion region) const;
 
   /**
-   * @copybrief subraster().
+   * @copybrief patch().
    */
   template <typename TRegion>
-  Subraster<T, Raster<T, N, THolder>, TRegion> subraster(TRegion region);
+  Patch<T, Raster<T, N, THolder>, TRegion> patch(TRegion region);
 
   /// @}
 
@@ -524,7 +524,7 @@ Raster<T, N> random(const Position<N>& shape) {
 
 } // namespace Litl
 
-#include "LitlRaster/Subraster.h"
+#include "LitlRaster/Patch.h"
 #include "LitlRaster/impl/Raster.hpp"
 
 #endif

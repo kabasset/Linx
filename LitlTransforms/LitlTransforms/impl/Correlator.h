@@ -45,32 +45,32 @@ public:
   }
 
   /**
-   * @brief Correlate an input (raster or subraster) extrapolator into an output raster.
-   * @param in A extrapolator or subraster or subextrapolator
+   * @brief Correlate an input (raster or patch) extrapolator into an output raster.
+   * @param in A extrapolator or patch or subextrapolator
    * @param out A raster
    * 
    * If the correlation bounding box requires input values from outside the input domain,
    * then `in` must be an extrapolator or subextrapolator.
    * If the bounding box of `in` is small enough so than no extrapolated values are required,
-   * then `in` can be a subraster.
+   * then `in` can be a patch.
    * 
    * @see `correlateCropTo()`
    */
   template <typename TIn, typename TRaster>
   void correlateTo(const TIn& in, TRaster& out) const {
-    const auto& notExtrapolated = dontExtrapolate(in); // A raster or subraster
+    const auto& notExtrapolated = dontExtrapolate(in); // A raster or patch
     const auto box = BorderedBox<Dimension>(rasterize(in).domain(), static_cast<const TDerived&>(*this).window());
     box.applyInnerBorder(
         [&](const auto& ib) {
           std::cout << "Inner: " << ib.front() << " - " << ib.back() << std::endl;
-          const auto insub = notExtrapolated.subraster(ib);
-          auto outsub = out.subraster(insub.domain());
+          const auto insub = notExtrapolated.patch(ib);
+          auto outsub = out.patch(insub.domain());
           static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
         },
         [&](const auto& ib) {
           std::cout << "Border: " << ib.front() << " - " << ib.back() << std::endl;
-          const auto insub = in.subraster(ib);
-          auto outsub = out.subraster(insub.domain());
+          const auto insub = in.patch(ib);
+          auto outsub = out.patch(insub.domain());
           static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
         });
   }
@@ -98,12 +98,12 @@ public:
     const auto box = BorderedBox<Dimension>(rasterize(in).domain(), static_cast<const TDerived&>(*this).window());
     box.applyInnerBorder(
         [&](const auto& ib) {
-          auto outsub = out.subraster(ib - front);
-          static_cast<const TDerived&>(*this).correlateMonolithTo(notExtrapolated.subraster(ib), outsub);
+          auto outsub = out.patch(ib - front);
+          static_cast<const TDerived&>(*this).correlateMonolithTo(notExtrapolated.patch(ib), outsub);
         },
         [&](const auto& ib) {
-          auto outsub = out.subraster(ib - front);
-          static_cast<const TDerived&>(*this).correlateMonolithTo(in.subraster(ib), outsub);
+          auto outsub = out.patch(ib - front);
+          static_cast<const TDerived&>(*this).correlateMonolithTo(in.patch(ib), outsub);
         });
   }
 
@@ -139,13 +139,13 @@ public:
     const auto box = BorderedBox<Dimension>(rasterize(in).domain(), static_cast<const TDerived&>(*this).window());
     box.applyInnerBorder(
         [&](const auto& ib) {
-          const auto insub = notExtrapolated.subraster(ib);
-          auto outsub = out.subraster(gridToBox(insub.domain()));
+          const auto insub = notExtrapolated.patch(ib);
+          auto outsub = out.patch(gridToBox(insub.domain()));
           static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
         },
         [&](const auto& ib) {
-          const auto insub = in.subraster(ib);
-          auto outsub = out.subraster(gridToBox(insub.domain()));
+          const auto insub = in.patch(ib);
+          auto outsub = out.patch(gridToBox(insub.domain()));
           static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
         });
   }

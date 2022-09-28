@@ -2,14 +2,14 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LITLRASTER_SUBRASTER_H
-#define _LITLRASTER_SUBRASTER_H
+#ifndef _LITLRASTER_PATCH_H
+#define _LITLRASTER_PATCH_H
 
 #include "LitlContainer/Arithmetic.h"
 #include "LitlContainer/Math.h"
 #include "LitlRaster/Box.h"
 #include "LitlRaster/Raster.h"
-#include "LitlRaster/impl/SubrasterIndexing.h"
+#include "LitlRaster/impl/PatchIndexing.h"
 
 #include <algorithm> // accumulate
 #include <functional> // multiplies
@@ -24,25 +24,25 @@ namespace Litl {
  * @tparam TParent The parent raster or extrapolator type
  * @tparam TRegion The region type
  * 
- * As opposed to a raster, values of a subraster are generally not contiguous in memory:
+ * As opposed to a raster, values of a patch are generally not contiguous in memory:
  * they are piece-wise contiguous when the region is a `Box`, and sometimes not even piece-wise contiguous.
  * When a region is indeed contiguous, it is better to rely on a `PtrRaster` instead: see `Raster::section()`.
  * 
- * Whatever the region type, subrasters are iterable,
+ * Whatever the region type, patchs are iterable,
  * and the iterator type depends on the parent and region types in order to maximize performance.
- * Assuming the region itself is cheap to shift, subrasters are cheap to shift and iterate,
+ * Assuming the region itself is cheap to shift, patchs are cheap to shift and iterate,
  * which makes them ideal to represent sliding windows, even of arbitrary shapes (e.g. when the region is a `Mask`).
  * 
  * In-place pixel-wise operations of rasters (like arithmetic operators and math functions)
- * are applicable to subrasters of mutable parents.
+ * are applicable to patchs of mutable parents.
  * 
  * @see pixelwise
  */
 template <typename T, typename TParent, typename TRegion = Box<TParent::Dimension>>
-class Subraster :
-    public ArithmeticMixin<EuclidArithmetic, T, Subraster<T, TParent, TRegion>>,
-    public MathFunctionsMixin<T, Subraster<T, TParent, TRegion>>,
-    public RangeMixin<T, Subraster<T, TParent, TRegion>> {
+class Patch :
+    public ArithmeticMixin<EuclidArithmetic, T, Patch<T, TParent, TRegion>>,
+    public MathFunctionsMixin<T, Patch<T, TParent, TRegion>>,
+    public RangeMixin<T, Patch<T, TParent, TRegion>> {
 
 public:
   /**
@@ -69,7 +69,7 @@ public:
   /**
    * @brief The indexing strategy.
    */
-  using Indexing = typename SubrasterTraits<std::decay_t<Parent>, Region>::template Indexing<Parent, Region>;
+  using Indexing = typename PatchTraits<std::decay_t<Parent>, Region>::template Indexing<Parent, Region>;
 
   /**
    * @brief The iterator type.
@@ -83,21 +83,21 @@ public:
   /**
    * @brief Constructor.
    */
-  Subraster(Parent& parent, Region region) :
+  Patch(Parent& parent, Region region) :
       m_parent(parent), m_region(std::move(region)), m_indexing(m_parent, m_region) {}
   // std::move(region) not applicable to const Region& // TODO decay?
 
   /// @group_properties
 
   /**
-   * @brief Get the subraster bounding box.
+   * @brief Get the patch bounding box.
    */
   Position<Dimension> box() const {
     return box(m_region);
   }
 
   /**
-   * @brief Get the number of pixels in the subraster.
+   * @brief Get the number of pixels in the patch.
    */
   std::size_t size() const {
     return m_region.size();
@@ -157,17 +157,17 @@ public:
   /// @group_modifiers
 
   /**
-   * @brief Shift the subraster by a given vector.
+   * @brief Shift the patch by a given vector.
    */
-  Subraster& shift(const Position<Dimension>& vector) {
+  Patch& shift(const Position<Dimension>& vector) {
     m_region += vector;
     return *this;
   }
 
   /**
-   * @brief Shift the subraster by the opposite of a given vector.
+   * @brief Shift the patch by the opposite of a given vector.
    */
-  Subraster& shiftBack(const Position<Dimension>& vector) {
+  Patch& shiftBack(const Position<Dimension>& vector) {
     m_region -= vector;
     return *this;
   }
@@ -175,17 +175,17 @@ public:
   /// @group_operations
 
   /**
-   * @brief Create a cropped subraster.
+   * @brief Create a cropped patch.
    */
-  Subraster<const T, const TParent, TRegion> subraster(const Box<TParent::Dimension>& box) const {
-    return Subraster<const T, const TParent, TRegion>(m_parent, clamp(m_region, box));
+  Patch<const T, const TParent, TRegion> patch(const Box<TParent::Dimension>& box) const {
+    return Patch<const T, const TParent, TRegion>(m_parent, clamp(m_region, box));
   }
 
   /**
-   * @brief Create a cropped subraster.
+   * @brief Create a cropped patch.
    */
-  Subraster<T, TParent, TRegion> subraster(const Box<TParent::Dimension>& box) {
-    return Subraster<T, TParent, TRegion>(m_parent, clamp(m_region, box));
+  Patch<T, TParent, TRegion> patch(const Box<TParent::Dimension>& box) {
+    return Patch<T, TParent, TRegion>(m_parent, clamp(m_region, box));
   }
 
   /// @}
@@ -208,14 +208,14 @@ private:
 };
 
 /**
- * @relates Subraster
- * @brief Get the parent raster of a subraster.
+ * @relates Patch
+ * @brief Get the parent raster of a patch.
  * 
- * As opposed to `Subraster::parent()`, if the parent is an extrapolator,
+ * As opposed to `Patch::parent()`, if the parent is an extrapolator,
  * then the underlying decorated raster is effectively returned.
  */
 template <typename T, typename TParent, typename TRegion>
-const auto& rasterize(const Subraster<T, TParent, TRegion>& in) {
+const auto& rasterize(const Patch<T, TParent, TRegion>& in) {
   return rasterize(in.parent());
 }
 

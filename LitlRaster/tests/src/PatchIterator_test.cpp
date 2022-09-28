@@ -13,7 +13,7 @@ using namespace Litl;
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(SubrasterIterator_test)
+BOOST_AUTO_TEST_SUITE(PatchIterator_test)
 
 //-----------------------------------------------------------------------------
 
@@ -30,7 +30,7 @@ void checkIterator(const Position<N>& shape, const TRegion& region) {
 
   std::vector<float> out;
   out.reserve(expected.size());
-  for (const auto& v : raster.subraster(region)) {
+  for (const auto& v : raster.patch(region)) {
     out.push_back(v);
   }
 

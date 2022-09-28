@@ -194,7 +194,7 @@ public:
     if (region.size() < 0) {
       return;
     }
-    auto patch = in.subraster(m_window);
+    auto patch = in.patch(m_window);
     std::vector<std::decay_t<typename TIn::Value>> neighbors(m_window.size());
     for (const auto& p : region) {
       patch.shift(p);

@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(regionwise_test) {
 
   std::cout << "REGION\n";
   const auto region = Mask<3>::ball<2>(2, in.shape() / 2);
-  const auto regionOut = k * extrapolated.subraster(region);
+  const auto regionOut = k * extrapolated.patch(region);
   BOOST_TEST(regionOut.shape() == in.shape());
   for (const auto& p : regionOut.domain()) {
     if (region[p]) {
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(regionwise_test) {
 
   // std::cout << "CROP\n";
   // const Box<3> crop {Position<3>::one(), in.shape() - 2}; // No extrapolation needed
-  // const auto cropOut = k.correlateCrop(in.subraster(crop));
+  // const auto cropOut = k.correlateCrop(in.patch(crop));
   // BOOST_TEST(cropOut.shape() == crop.shape());
   // for (const auto& p : cropOut.domain()) {
   //   BOOST_TEST(cropOut[p] == expected[p + crop.front()]);
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(regionwise_test) {
 
   // std::cout << "DECIMATE\n";
   // const auto decimate = Grid<3>(crop, Position<3>::one() * 3);
-  // const auto decimateOut = k.correlateDecimate(in.subraster(decimate));
+  // const auto decimateOut = k.correlateDecimate(in.patch(decimate));
   // BOOST_TEST(decimateOut.shape() == decimate.shape());
   // for (const auto& p : decimateOut) {
   //   BOOST_TEST(decimateOut[p] == expected[decimate.front() + p * 3]);

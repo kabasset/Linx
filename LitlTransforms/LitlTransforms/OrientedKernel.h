@@ -69,11 +69,11 @@ public:
   void correlateTo(const TIn& in, TOut& out, const TRegion region) const {
     auto front = Position<TIn::Dimension>::zero();
     front[I] -= m_origin;
-    auto patch = in.subraster(OrientedSlice<I, TIn::Dimension>::fromSize(std::move(front), m_values.size()));
+    auto patch = in.patch(OrientedSlice<I, TIn::Dimension>::fromSize(std::move(front), m_values.size()));
     for (const auto& p : region) {
       patch.shift(p); // FIXME patch.moveBy(p)
       out[p] = std::inner_product(m_values.begin(), m_values.end(), patch.begin(), T {});
-      // FIXME use out.subraster(region) iterator?
+      // FIXME use out.patch(region) iterator?
       patch.shiftBack(p); // FIXME patch.moveAt(front);
     }
   }

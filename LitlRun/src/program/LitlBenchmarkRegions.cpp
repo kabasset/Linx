@@ -27,22 +27,22 @@ TDuration filter(Litl::Raster<int, 3>& in, const Litl::Box<3>& box, char setup) 
   switch (setup) {
     case 'b':
       //! [Iterate over box]
-      in.subraster(box) += 1;
+      in.patch(box) += 1;
       //! [Iterate over box]
       break;
     case 'g':
       //! [Iterate over grid]
-      in.subraster(grid) += 1;
+      in.patch(grid) += 1;
       //! [Iterate over grid]
       break;
     case 'm':
       //! [Iterate over mask]
-      in.subraster(mask) += 1;
+      in.patch(mask) += 1;
       //! [Iterate over mask]
       break;
     case 's':
       //! [Iterate over sequence]
-      in.subraster(sequence) += 1;
+      in.patch(sequence) += 1;
       //! [Iterate over sequence]
       break;
     default:

@@ -132,13 +132,13 @@ inline T& Raster<T, N, THolder>::at(const Position<N>& pos) {
 
 template <typename T, Index N, typename THolder>
 template <typename TRegion>
-const Subraster<const T, const Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::subraster(TRegion region) const {
+const Patch<const T, const Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::patch(TRegion region) const {
   return {*this, std::move(region)};
 }
 
 template <typename T, Index N, typename THolder>
 template <typename TRegion>
-Subraster<T, Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::subraster(TRegion region) {
+Patch<T, Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::patch(TRegion region) {
   return {*this, std::move(region)};
 }
 

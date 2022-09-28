@@ -6,27 +6,27 @@ namespace Litl {
 
 <table class="fieldtable">
 <tr><th>Operation<th>Applicable to<th>Documentation
-<tr><td>Pixel-wise operators<td>`Sequence`, `Raster`, `Subraster`
+<tr><td>Pixel-wise operators<td>`Sequence`, `Raster`, `Patch`
 <td><ul>
 <li>Module \ref pixelwise
 <li>Specifications `VectorArithmetic`
 <li>Specifications `EuclidArithmetic`
 <li>Class `ArithmeticMixin`
-<tr><td>Pixel-wise mathematical functions<td>`Sequence`, `Raster`, `Subraster`
+<tr><td>Pixel-wise mathematical functions<td>`Sequence`, `Raster`, `Patch`
 <td><ul>
 <li>Module \ref pixelwise
 <li>Class `MathFunctionsMixin`
 <li>Free functions in `Litl` namespace
-<tr><td>Pixel-wise custom functions<td>`Sequence`, `Raster`, `Subraster`
+<tr><td>Pixel-wise custom functions<td>`Sequence`, `Raster`, `Patch`
 <td><ul>
 <li>Module \ref pixelwise
 <li>Methods `DataContainer::generate()` and `DataContainer::apply()`
-<tr><td>Random noise<td>`Sequence`, `Raster`, `Subraster`
+<tr><td>Random noise<td>`Sequence`, `Raster`, `Patch`
 <td><ul>
 <li>Module \ref random
 <li>Specifications `RandomNoise`
 <li>Methods `DataContainer::generate()` and `DataContainer::apply()`
-<tr><td>Distribution estimators<td>`Sequence`, `Raster`, `Subraster`
+<tr><td>Distribution estimators<td>`Sequence`, `Raster`, `Patch`
 <td><ul>
 <li>Class `DataDistribution`
 <li>Method `DataContainer::distribution()`

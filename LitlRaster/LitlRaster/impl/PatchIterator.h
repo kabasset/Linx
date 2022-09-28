@@ -2,11 +2,11 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LITLRASTER_IMPL_SUBRASTERITERATOR_H
-#define _LITLRASTER_IMPL_SUBRASTERITERATOR_H
+#ifndef _LITLRASTER_IMPL_PATCHITERATOR_H
+#define _LITLRASTER_IMPL_PATCHITERATOR_H
 
-#include "LitlRaster/Subraster.h"
-#include "LitlRaster/impl/SubrasterIndexing.h"
+#include "LitlRaster/Patch.h"
+#include "LitlRaster/impl/PatchIndexing.h"
 
 namespace Litl {
 

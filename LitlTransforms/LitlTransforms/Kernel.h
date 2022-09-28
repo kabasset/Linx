@@ -47,8 +47,8 @@ public:
 
   /**
    * @brief Correlate an input raster or extrapolator over a given region.
-   * @param in An input subraster
-   * @param out An output raster or subraster
+   * @param in An input patch
+   * @param out An output raster or patch
    * 
    * The output domain must be compatible with the input domain.
    * Specifically, both domains will be iterated in parallel,
@@ -58,12 +58,12 @@ public:
    * As opposed to other methods, no optimization is performed:
    * the region is not sliced to isolate extrapolated values from non-extrapolated values.
    */
-  template <typename TSubraster, typename TRaster>
-  void correlateMonolithTo(const TSubraster& in, TRaster& out) const {
+  template <typename TPatch, typename TRaster>
+  void correlateMonolithTo(const TPatch& in, TRaster& out) const {
     if (in.size() < 0) {
       return;
     }
-    auto patch = in.parent().subraster(m_window);
+    auto patch = in.parent().patch(m_window);
     auto outIt = out.begin();
     for (const auto& p : in.domain()) {
       patch.shift(p);

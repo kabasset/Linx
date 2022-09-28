@@ -2,8 +2,8 @@
 // This file is part of Litl <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LITLRASTER_IMPL_SUBRASTERINDEXING_H
-#define _LITLRASTER_IMPL_SUBRASTERINDEXING_H
+#ifndef _LITLRASTER_IMPL_PATCHINDEXING_H
+#define _LITLRASTER_IMPL_PATCHINDEXING_H
 
 #include "LitlContainer/Sequence.h"
 #include "LitlRaster/Box.h"
@@ -21,7 +21,7 @@ template <typename TParent, typename TRegion>
 class PositionBasedIndexing {
 public:
   /**
-   * @brief The subraster iterator.
+   * @brief The patch iterator.
    */
   template <typename T>
   class Iterator;
@@ -55,7 +55,7 @@ template <typename TParent, typename TRegion>
 class StrideBasedIndexing {
 public:
   /**
-   * @brief The subraster iterator.
+   * @brief The patch iterator.
    */
   template <typename T>
   class Iterator;
@@ -134,7 +134,7 @@ template <typename TParent, typename TRegion>
 class OffsetBasedIndexing {
 public:
   /**
-   * @brief The subraster iterator.
+   * @brief The patch iterator.
    */
   template <typename T>
   class Iterator;
@@ -175,11 +175,11 @@ private:
 };
 
 template <typename TParent, typename TRegion>
-struct SubrasterTraits {
+struct PatchTraits {
   /**
-   * @brief The indexing strategy of a subraster, depending on the type of parent and region.
+   * @brief The indexing strategy of a patch, depending on the type of parent and region.
    * 
-   * As opposed to the subraster itself, the indexing is shift-invariant.
+   * As opposed to the patch itself, the indexing is shift-invariant.
    * Optimized regions for raster parents are:
    * - `Box`,
    * - `Grid`,
@@ -196,7 +196,7 @@ struct SubrasterTraits {
  * @brief `Box` specialization.
  */
 template <typename T, Index N, typename THolder>
-struct SubrasterTraits<Raster<T, N, THolder>, Box<N>> {
+struct PatchTraits<Raster<T, N, THolder>, Box<N>> {
   template <typename UParent, typename URegion>
   using Indexing = StrideBasedIndexing<UParent, URegion>;
 };
@@ -205,7 +205,7 @@ struct SubrasterTraits<Raster<T, N, THolder>, Box<N>> {
  * @brief `Grid` specialization.
  */
 template <typename T, Index N, typename THolder>
-struct SubrasterTraits<Raster<T, N, THolder>, Grid<N>> {
+struct PatchTraits<Raster<T, N, THolder>, Grid<N>> {
   template <typename UParent, typename URegion>
   using Indexing = StrideBasedIndexing<UParent, URegion>;
 };
@@ -214,7 +214,7 @@ struct SubrasterTraits<Raster<T, N, THolder>, Grid<N>> {
  * @brief `OrientedSlice` specialization.
  */
 template <typename T, Index N, typename THolder, Index I>
-struct SubrasterTraits<Raster<T, N, THolder>, OrientedSlice<I, N>> {
+struct PatchTraits<Raster<T, N, THolder>, OrientedSlice<I, N>> {
   template <typename UParent, typename URegion>
   using Indexing = StrideBasedIndexing<UParent, URegion>;
 };
@@ -231,13 +231,13 @@ class Mask;
  * @brief `Mask` specialization.
  */
 template <typename T, Index N, typename THolder>
-struct SubrasterTraits<Raster<T, N, THolder>, Mask<N>> {
+struct PatchTraits<Raster<T, N, THolder>, Mask<N>> {
   template <typename UParent, typename URegion>
   using Indexing = OffsetBasedIndexing<UParent, URegion>;
 };
 
 } // namespace Litl
 
-#include "LitlRaster/impl/SubrasterIterator.h"
+#include "LitlRaster/impl/PatchIterator.h"
 
 #endif

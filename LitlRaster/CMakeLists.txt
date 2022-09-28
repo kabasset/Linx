@@ -39,12 +39,12 @@ elements_add_unit_test(Raster tests/src/Raster_test.cpp
                      EXECUTABLE LitlRaster_Raster_test
                      LINK_LIBRARIES LitlRaster
                      TYPE Boost)
-elements_add_unit_test(Subraster tests/src/Subraster_test.cpp 
-                     EXECUTABLE LitlRaster_Subraster_test
+elements_add_unit_test(Patch tests/src/Patch_test.cpp 
+                     EXECUTABLE LitlRaster_Patch_test
                      LINK_LIBRARIES LitlRaster
                      TYPE Boost)
-elements_add_unit_test(SubrasterIterator tests/src/SubrasterIterator_test.cpp 
-                     EXECUTABLE LitlRaster_SubrasterIterator_test
+elements_add_unit_test(PatchIterator tests/src/PatchIterator_test.cpp 
+                     EXECUTABLE LitlRaster_PatchIterator_test
                      LINK_LIBRARIES LitlRaster
                      TYPE Boost)
 elements_add_unit_test(Vector tests/src/Vector_test.cpp 

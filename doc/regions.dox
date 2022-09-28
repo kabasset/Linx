@@ -4,20 +4,20 @@ namespace Litl {
 \addtogroup regions
 
 
-\section regions-intro Regions Yield Pixel Positions, Subrasters Yield Pixel Values
+\section regions-intro Regions Yield Pixel Positions, Patchs Yield Pixel Values
 
 
 Regions are objects which provide position iterators and can be translated.
 There are many kinds of regions, from simple boxes to arbitrary shapes.
 They are generally used to apply functions to a selected set of raster pixels,
-which is accomplished thanks to the `Subraster` class template.
-Rasters and extrapolators can be `subraster()`ed.
+which is accomplished thanks to the `Patch` class template.
+Rasters and extrapolators can be `patch()`ed.
 While regions allow to iterate on pixel positions,
-subrasters allow to iterate on (possibly extrapolated) pixel values.
+patchs allow to iterate on (possibly extrapolated) pixel values.
 
 Functions which act on regions -- like convolution or morphologial operations -- are generally optimized
-by selecting the most efficient method to iterate over the positions or pixels of the region or subraster.
-This is done through a careful design of the position iterators, and of the associated pixel iterators in subrasters.
+by selecting the most efficient method to iterate over the positions or pixels of the region or patch.
+This is done through a careful design of the position iterators, and of the associated pixel iterators in patchs.
 
 
 \section regions-box Box

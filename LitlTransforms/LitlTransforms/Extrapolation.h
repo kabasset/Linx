@@ -56,11 +56,11 @@ public:
   }
 
   /**
-   * @brief Get a decorated subraster.
+   * @brief Get a decorated patch.
    */
   template <typename TRegion>
-  const Subraster<const Value, const Extrapolator<TRaster, TMethod>, TRegion> subraster(TRegion&& region) const {
-    return Subraster<const Value, const Extrapolator<TRaster, TMethod>, TRegion>(*this, std::forward<TRegion>(region));
+  const Patch<const Value, const Extrapolator<TRaster, TMethod>, TRegion> patch(TRegion&& region) const {
+    return Patch<const Value, const Extrapolator<TRaster, TMethod>, TRegion>(*this, std::forward<TRegion>(region));
   }
 
   /**
@@ -127,7 +127,7 @@ auto extrapolate(const Raster<T, N, THolder>& raster, T constant) -> decltype(au
 
 /**
  * @relates Extrapolator
- * @brief Do not extrapolate if `in` is an extrapolator or subraster of an extrapolator.
+ * @brief Do not extrapolate if `in` is an extrapolator or patch of an extrapolator.
  */
 template <typename T, Index N, typename THolder>
 Raster<T, N, THolder>& dontExtrapolate(Raster<T, N, THolder>& in) {
@@ -145,13 +145,13 @@ const TRaster& dontExtrapolate(const Extrapolator<TRaster, TMethod>& in) {
 }
 
 template <typename T, typename TParent, typename TRegion>
-auto dontExtrapolate(Subraster<T, TParent, TRegion>& in) -> decltype(auto) {
-  return dontExtrapolate(in.parent()).subraster(in.domain()); // FIXME avoid region copy if TParent is no extrapolator
+auto dontExtrapolate(Patch<T, TParent, TRegion>& in) -> decltype(auto) {
+  return dontExtrapolate(in.parent()).patch(in.domain()); // FIXME avoid region copy if TParent is no extrapolator
 }
 
 template <typename T, typename TParent, typename TRegion>
-auto dontExtrapolate(const Subraster<T, TParent, TRegion>& in) -> decltype(auto) {
-  return dontExtrapolate(in.parent()).subraster(in.domain()); // FIXME avoid region copy if TParent is no extrapolator
+auto dontExtrapolate(const Patch<T, TParent, TRegion>& in) -> decltype(auto) {
+  return dontExtrapolate(in.parent()).patch(in.domain()); // FIXME avoid region copy if TParent is no extrapolator
 }
 
 } // namespace Litl

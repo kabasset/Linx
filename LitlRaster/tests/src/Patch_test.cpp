@@ -10,7 +10,7 @@ using namespace Litl;
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(Subraster_test)
+BOOST_AUTO_TEST_SUITE(Patch_test)
 
 //-----------------------------------------------------------------------------
 
@@ -20,16 +20,16 @@ BOOST_AUTO_TEST_CASE(mixins_test) {
   Raster<int, 1> raster({16});
   raster.range();
   Box<1> region {{1}, {14}};
-  auto subraster = raster.subraster(region);
+  auto patch = raster.patch(region);
 
   // Arithmetic
-  ++subraster;
+  ++patch;
 
   // MathFunctions
-  subraster.pow(2);
+  patch.pow(2);
 
   // Range
-  subraster.apply([](auto v) {
+  patch.apply([](auto v) {
     return -v;
   });
 

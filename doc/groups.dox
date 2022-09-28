@@ -21,7 +21,7 @@
 \brief Operations applied to each pixel independently.
 \example LitlDemoPixelwise_test.cpp
 
-\defgroup regions Regions, Neighborhoods and Subrasters
+\defgroup regions Regions, Neighborhoods and Patchs
 \ingroup basics
 \brief Non-contiguous raster views.
 
