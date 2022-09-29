@@ -28,13 +28,13 @@ namespace Litl {
  * they are piece-wise contiguous when the region is a `Box`, and sometimes not even piece-wise contiguous.
  * When a region is indeed contiguous, it is better to rely on a `PtrRaster` instead: see `Raster::section()`.
  * 
- * Whatever the region type, patchs are iterable,
+ * Whatever the region type, patches are iterable,
  * and the iterator type depends on the parent and region types in order to maximize performance.
- * Assuming the region itself is cheap to shift, patchs are cheap to shift and iterate,
+ * Assuming the region itself is cheap to shift, patches are cheap to shift and iterate,
  * which makes them ideal to represent sliding windows, even of arbitrary shapes (e.g. when the region is a `Mask`).
  * 
  * In-place pixel-wise operations of rasters (like arithmetic operators and math functions)
- * are applicable to patchs of mutable parents.
+ * are applicable to patches of mutable parents.
  * 
  * @see pixelwise
  */

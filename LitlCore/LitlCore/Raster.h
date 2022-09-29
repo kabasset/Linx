@@ -390,7 +390,7 @@ public:
    * A patch is a view of the raster data contained in a region.
    * As opposed to a slice or a section, a patch is not necessarily contiguous in memory.
    * 
-   * Patchs are iterable.
+   * Patches are iterable.
    * 
    * @see isContiguous()
    * @see slice()
