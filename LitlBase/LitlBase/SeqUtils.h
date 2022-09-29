@@ -2,10 +2,10 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LITLTYPES_SEQUTILS_H
-#define _LITLTYPES_SEQUTILS_H
+#ifndef _LITLBASE_SEQUTILS_H
+#define _LITLBASE_SEQUTILS_H
 
-#include "LitlTypes/TypeUtils.h"
+#include "LitlBase/TypeUtils.h"
 
 #include <algorithm> // transform
 #include <array>

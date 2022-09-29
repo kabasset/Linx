@@ -5,7 +5,7 @@
 #ifndef _LITLBASE_HOLDER_H
 #define _LITLBASE_HOLDER_H
 
-#include "LitlTypes/Exceptions.h"
+#include "LitlBase/Exceptions.h"
 
 #include <algorithm> // copy_n
 #include <array>

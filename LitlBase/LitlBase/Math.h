@@ -5,7 +5,7 @@
 #ifndef _LITLBASE_MATH_H
 #define _LITLBASE_MATH_H
 
-#include "LitlTypes/SeqUtils.h" // isIterable
+#include "LitlBase/SeqUtils.h" // isIterable
 
 #include <algorithm>
 #include <cmath>

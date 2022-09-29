@@ -882,7 +882,6 @@ INPUT                  = @PROJECT_SOURCE_DIR@/README.md \
                          @PROJECT_SOURCE_DIR@/LitlBase \
                          @PROJECT_SOURCE_DIR@/LitlCore \
                          @PROJECT_SOURCE_DIR@/LitlTransforms \
-                         @PROJECT_SOURCE_DIR@/LitlTypes \
                          @PROJECT_SOURCE_DIR@/LitlRun
 
 # This tag can be used to specify the character encoding of the source files

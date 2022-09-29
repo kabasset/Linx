@@ -2,13 +2,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 elements_subdir(LitlBase)
 
-elements_depends_on_subdirs(LitlTypes)
-
 find_package(Boost) # Operators
 
 elements_add_library(LitlBase src/lib/*.cpp
-                     INCLUDE_DIRS LitlTypes Boost
-                     LINK_LIBRARIES LitlTypes Boost
+                     INCLUDE_DIRS Boost
+                     LINK_LIBRARIES Boost
                      PUBLIC_HEADERS LitlBase)
 
 elements_add_unit_test(AlignedBuffer tests/src/AlignedBuffer_test.cpp 
@@ -31,6 +29,10 @@ elements_add_unit_test(DataDistribution tests/src/DataDistribution_test.cpp
                      EXECUTABLE LitlBase_DataDistribution_test
                      LINK_LIBRARIES LitlBase
                      TYPE Boost)
+elements_add_unit_test(Exceptions tests/src/Exceptions_test.cpp 
+                     EXECUTABLE LitlBase_Exceptions_test
+                     LINK_LIBRARIES LitlBase
+                     TYPE Boost)
 elements_add_unit_test(Holders tests/src/Holders_test.cpp 
                      EXECUTABLE LitlBase_Holders_test
                      LINK_LIBRARIES LitlBase
@@ -41,5 +43,17 @@ elements_add_unit_test(Math tests/src/Math_test.cpp
                      TYPE Boost)
 elements_add_unit_test(Random tests/src/Random_test.cpp 
                      EXECUTABLE LitlBase_Random_test
+                     LINK_LIBRARIES LitlBase
+                     TYPE Boost)
+elements_add_unit_test(SeqUtils tests/src/SeqUtils_test.cpp 
+                     EXECUTABLE LitlBase_SeqUtils_test
+                     LINK_LIBRARIES LitlBase
+                     TYPE Boost)
+elements_add_unit_test(Slice tests/src/Slice_test.cpp 
+                     EXECUTABLE LitlBase_Slice_test
+                     LINK_LIBRARIES LitlBase
+                     TYPE Boost)
+elements_add_unit_test(TypeUtils tests/src/TypeUtils_test.cpp 
+                     EXECUTABLE LitlBase_TypeUtils_test
                      LINK_LIBRARIES LitlBase
                      TYPE Boost)

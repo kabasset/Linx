@@ -6,8 +6,8 @@
 #define _LITLCORE_MATRIX_H
 
 #include "LitlBase/DataContainer.h"
+#include "LitlBase/Exceptions.h"
 #include "LitlCore/Vector.h"
-#include "LitlTypes/Exceptions.h"
 
 #include <eigen3/Eigen/Core>
 

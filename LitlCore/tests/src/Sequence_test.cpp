@@ -2,8 +2,8 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
+#include "LitlBase/TypeUtils.h"
 #include "LitlCore/Sequence.h"
-#include "LitlTypes/TypeUtils.h"
 
 #include <boost/test/unit_test.hpp>
 

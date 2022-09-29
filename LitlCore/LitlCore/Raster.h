@@ -7,9 +7,9 @@
 
 #include "LitlBase/AlignedBuffer.h"
 #include "LitlBase/DataContainer.h"
+#include "LitlBase/Exceptions.h"
 #include "LitlBase/Random.h"
 #include "LitlCore/Box.h"
-#include "LitlTypes/Exceptions.h"
 
 #include <complex>
 #include <cstdint>

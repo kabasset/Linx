@@ -5,11 +5,11 @@
 #ifndef _LITLTRANSFORMS_SEPARABLEKERNEL_H
 #define _LITLTRANSFORMS_SEPARABLEKERNEL_H
 
+#include "LitlBase/SeqUtils.h"
 #include "LitlCore/Raster.h"
 #include "LitlTransforms/Extrapolation.h"
 #include "LitlTransforms/Kernel.h"
 #include "LitlTransforms/OrientedKernel.h"
-#include "LitlTypes/SeqUtils.h"
 
 #include <type_traits> // decay
 

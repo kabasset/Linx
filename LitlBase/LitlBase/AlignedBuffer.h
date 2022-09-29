@@ -5,8 +5,8 @@
 #ifndef _LITLBASE_ALIGNEDBUFFER_H
 #define _LITLBASE_ALIGNEDBUFFER_H
 
-#include "LitlTypes/Exceptions.h"
-#include "LitlTypes/TypeUtils.h"
+#include "LitlBase/Exceptions.h"
+#include "LitlBase/TypeUtils.h"
 
 #include <algorithm> // copy_n
 #include <cstdint> // uintptr_t

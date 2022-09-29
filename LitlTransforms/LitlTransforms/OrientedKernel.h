@@ -5,9 +5,9 @@
 #ifndef _LITLTRANSFORMS_ORIENTEDKERNEL_H
 #define _LITLTRANSFORMS_ORIENTEDKERNEL_H
 
+#include "LitlBase/Slice.h"
 #include "LitlCore/Raster.h"
 #include "LitlTransforms/Extrapolation.h"
-#include "LitlTypes/Slice.h"
 
 #include <type_traits> // decay
 #include <vector>

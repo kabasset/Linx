@@ -7,7 +7,7 @@
 
 #include "LitlBase/DataContainer.h"
 #include "LitlBase/Math.h" // abspow
-#include "LitlTypes/TypeUtils.h"
+#include "LitlBase/TypeUtils.h"
 
 #include <numeric> // accumulate, multiplies
 #include <type_traits> // conditional

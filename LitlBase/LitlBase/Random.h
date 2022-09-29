@@ -5,7 +5,7 @@
 #ifndef _LITLBASE_RANDOM_H
 #define _LITLBASE_RANDOM_H
 
-#include "LitlTypes/TypeUtils.h"
+#include "LitlBase/TypeUtils.h"
 
 #include <algorithm>
 #include <chrono>

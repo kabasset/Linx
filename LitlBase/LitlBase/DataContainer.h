@@ -8,12 +8,12 @@
 #include "LitlBase/Arithmetic.h"
 #include "LitlBase/ContiguousContainer.h"
 #include "LitlBase/DataDistribution.h"
+#include "LitlBase/Exceptions.h"
 #include "LitlBase/Holders.h"
 #include "LitlBase/Math.h"
 #include "LitlBase/Range.h"
-#include "LitlTypes/Exceptions.h"
-#include "LitlTypes/SeqUtils.h" // isIterable
-#include "LitlTypes/TypeUtils.h" // Index, Limits
+#include "LitlBase/SeqUtils.h" // isIterable
+#include "LitlBase/TypeUtils.h" // Index, Limits
 
 #include <cstddef> // size_t
 #include <initializer_list>
