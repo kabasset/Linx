@@ -92,7 +92,7 @@ public:
   /**
    * @brief Get the patch bounding box.
    */
-  Position<Dimension> box() const {
+  Box<Dimension> box() const {
     return box(m_region);
   }
 
