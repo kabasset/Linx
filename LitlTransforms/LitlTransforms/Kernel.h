@@ -46,33 +46,27 @@ public:
   }
 
   /**
-   * @brief Correlate an input raster or extrapolator over a given region.
-   * @param in An input patch
+   * @brief Correlate an input raster or extrapolator over a given monolithic region.
+   * @param in An input patch of raster or extrapolator
    * @param out An output raster or patch
    * 
    * The output domain must be compatible with the input domain.
    * Specifically, both domains will be iterated in parallel,
    * such that the result of the `n`-th correlation, at `std::advance(in.begin(), n)`,
-   * will be written to `std::advance(out..begin(), n)`.
+   * will be written to `std::advance(out.begin(), n)`.
    * 
-   * As opposed to other methods, no optimization is performed:
+   * As opposed to other methods, no spatial optimization is performed:
    * the region is not sliced to isolate extrapolated values from non-extrapolated values.
    */
-  template <typename TPatch, typename TRaster>
-  void correlateMonolithTo(const TPatch& in, TRaster& out) const {
-    if (in.size() < 0) {
-      return;
-    }
-    auto patch = in.parent().patch(m_window);
+  template <typename TIn, typename TOut>
+  void correlateMonolithTo(const TIn& in, TOut& out) const {
+    auto window = in.parent().patch(m_window);
     auto outIt = out.begin();
     for (const auto& p : in.domain()) {
-      patch.translate(p);
-      // std::cout << patch.domain().front() << " - " << patch.domain().back() << std::endl;
-      *outIt = std::inner_product(m_values.begin(), m_values.end(), patch.begin(), T {});
-      // std::cout << *outIt << std::endl;
+      window.translate(p);
+      *outIt = std::inner_product(m_values.begin(), m_values.end(), window.begin(), T {});
       ++outIt;
-      // FIXME replace out[p] with an iterator
-      patch.translateBack(p);
+      window.translateBack(p);
     }
   }
 
