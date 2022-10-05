@@ -148,18 +148,18 @@ public:
   /// @group_modifiers
 
   /**
-   * @brief Shift the box by a given vector.
+   * @brief Translate the box by a given vector.
    */
-  OrientedSlice<I, N>& operator+=(const Position<N>& shift) {
-    m_front += shift;
+  OrientedSlice<I, N>& operator+=(const Position<N>& vector) {
+    m_front += vector;
     return *this;
   }
 
   /**
-   * @brief Shift the box by a given vector.
+   * @brief Translate the box by the opposite of a given vector.
    */
-  OrientedSlice<I, N>& operator-=(const Position<N>& shift) {
-    m_front -= shift;
+  OrientedSlice<I, N>& operator-=(const Position<N>& vector) {
+    m_front -= vector;
     return *this;
   }
 

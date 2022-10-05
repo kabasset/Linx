@@ -30,7 +30,7 @@ namespace Litl {
  * 
  * Whatever the region type, patches are iterable,
  * and the iterator type depends on the parent and region types in order to maximize performance.
- * Assuming the region itself is cheap to shift, patches are cheap to shift and iterate,
+ * Assuming the region itself is cheap to translate, patches are cheap to translate and iterate,
  * which makes them ideal to represent sliding windows, even of arbitrary shapes (e.g. when the region is a `Mask`).
  * 
  * In-place pixel-wise operations of rasters (like arithmetic operators and math functions)
@@ -157,17 +157,17 @@ public:
   /// @group_modifiers
 
   /**
-   * @brief Shift the patch by a given vector.
+   * @brief Translate the patch by a given vector.
    */
-  Patch& shift(const Position<Dimension>& vector) {
+  Patch& translate(const Position<Dimension>& vector) {
     m_region += vector;
     return *this;
   }
 
   /**
-   * @brief Shift the patch by the opposite of a given vector.
+   * @brief Translate the patch by the opposite of a given vector.
    */
-  Patch& shiftBack(const Position<Dimension>& vector) {
+  Patch& translateBack(const Position<Dimension>& vector) {
     m_region -= vector;
     return *this;
   }
@@ -202,7 +202,7 @@ private:
   Region m_region;
 
   /**
-   * @brief The shift-invariant indexing helper.
+   * @brief The translation-invariant indexing helper.
    */
   Indexing m_indexing;
 };

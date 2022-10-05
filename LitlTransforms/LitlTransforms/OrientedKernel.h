@@ -71,10 +71,10 @@ public:
     front[I] -= m_origin;
     auto patch = in.patch(OrientedSlice<I, TIn::Dimension>::fromSize(std::move(front), m_values.size()));
     for (const auto& p : region) {
-      patch.shift(p); // FIXME patch.moveBy(p)
+      patch.translate(p);
       out[p] = std::inner_product(m_values.begin(), m_values.end(), patch.begin(), T {});
       // FIXME use out.patch(region) iterator?
-      patch.shiftBack(p); // FIXME patch.moveAt(front);
+      patch.translateBack(p);
     }
   }
 

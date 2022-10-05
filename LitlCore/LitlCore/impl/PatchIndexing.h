@@ -179,7 +179,7 @@ struct PatchTraits {
   /**
    * @brief The indexing strategy of a patch, depending on the type of parent and region.
    * 
-   * As opposed to the patch itself, the indexing is shift-invariant.
+   * As opposed to the patch itself, the indexing is translation-invariant.
    * Optimized regions for raster parents are:
    * - `Box`,
    * - `Grid`,

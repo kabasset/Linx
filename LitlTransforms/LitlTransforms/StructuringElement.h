@@ -197,11 +197,11 @@ public:
     auto patch = in.patch(m_window);
     std::vector<std::decay_t<typename TIn::Value>> neighbors(m_window.size());
     for (const auto& p : region) {
-      patch.shift(p);
+      patch.translate(p);
       std::copy(patch.begin(), patch.end(), neighbors.begin());
       out[p] = std::forward<TFunc>(func)(neighbors);
       // FIXME replace out[p] with an iterator
-      patch.shiftBack(p);
+      patch.translateBack(p);
     }
   }
 

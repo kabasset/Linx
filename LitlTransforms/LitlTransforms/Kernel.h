@@ -66,13 +66,13 @@ public:
     auto patch = in.parent().patch(m_window);
     auto outIt = out.begin();
     for (const auto& p : in.domain()) {
-      patch.shift(p);
+      patch.translate(p);
       // std::cout << patch.domain().front() << " - " << patch.domain().back() << std::endl;
       *outIt = std::inner_product(m_values.begin(), m_values.end(), patch.begin(), T {});
       // std::cout << *outIt << std::endl;
       ++outIt;
       // FIXME replace out[p] with an iterator
-      patch.shiftBack(p);
+      patch.translateBack(p);
     }
   }
 

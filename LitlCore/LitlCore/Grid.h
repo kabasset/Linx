@@ -204,18 +204,18 @@ public:
   }
 
   /**
-   * @brief Shift the box by a given vector.
+   * @brief Translate the box by a given vector.
    */
-  Grid<N>& operator+=(const Position<N>& shift) {
-    m_box += shift;
+  Grid<N>& operator+=(const Position<N>& vector) {
+    m_box += vector;
     return *this;
   }
 
   /**
-   * @brief Shift the box by a given vector.
+   * @brief Translate the box by the opposite of a given vector.
    */
-  Grid<N>& operator-=(const Position<N>& shift) {
-    m_box -= shift;
+  Grid<N>& operator-=(const Position<N>& vector) {
+    m_box -= vector;
     return *this;
   }
 

@@ -262,20 +262,20 @@ public:
   }
 
   /**
-   * @brief Shift the box by a given vector.
+   * @brief Translate the box by a given vector.
    */
-  Box<N>& operator+=(const Position<N>& shift) {
-    m_front += shift;
-    m_back += shift;
+  Box<N>& operator+=(const Position<N>& vector) {
+    m_front += vector;
+    m_back += vector;
     return *this;
   }
 
   /**
-   * @brief Shift the box by a given vector.
+   * @brief Translate the box by the opposite of a given vector.
    */
-  Box<N>& operator-=(const Position<N>& shift) {
-    m_front -= shift;
-    m_back -= shift;
+  Box<N>& operator-=(const Position<N>& vector) {
+    m_front -= vector;
+    m_back -= vector;
     return *this;
   }
 
@@ -378,7 +378,7 @@ Vector<T, N> clamp(const Vector<T, N>& position, const Position<N>& shape) {
 /**
  * @ingroup concepts
  * @requirements{Region}
- * @brief A set of positions which can be shifted and clamped.
+ * @brief A set of positions which can be translated and clamped.
  * 
  * TODO
  * - Region += Position

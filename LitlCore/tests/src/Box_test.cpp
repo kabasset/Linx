@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE(ctors_test) {
   BOOST_TEST(fromShape.back() == back);
 }
 
-BOOST_AUTO_TEST_CASE(shift_test) {
+BOOST_AUTO_TEST_CASE(translation_test) {
   const Position<3> front {1, 2, 3};
   const Position<3> back {4, 5, 6};
   Box<3> region {front, back};

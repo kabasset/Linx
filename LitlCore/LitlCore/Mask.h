@@ -161,18 +161,18 @@ public:
   /// @group_modifiers
 
   /**
-   * @brief Shift the mask by a given vector.
+   * @brief Translate the mask by a given vector.
    */
-  Mask<N>& operator+=(const Position<N>& shift) {
-    m_box += shift;
+  Mask<N>& operator+=(const Position<N>& vector) {
+    m_box += vector;
     return *this;
   }
 
   /**
-   * @brief Shift the mask by a given vector.
+   * @brief Translate the mask by the opposite of a given vector.
    */
-  Mask<N>& operator-=(const Position<N>& shift) {
-    m_box -= shift;
+  Mask<N>& operator-=(const Position<N>& vector) {
+    m_box -= vector;
     return *this;
   }
 
