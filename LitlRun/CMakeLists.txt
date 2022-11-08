@@ -11,14 +11,17 @@ elements_add_library(LitlRun src/lib/*.cpp
                      PUBLIC_HEADERS LitlRun)
 
 elements_add_executable(LitlBenchmarkCorrelation src/program/LitlBenchmarkCorrelation.cpp
-                     INCLUDE_DIRS LitlTransforms LitlRun
-                     LINK_LIBRARIES LitlTransforms LitlRun)
+                     INCLUDE_DIRS LitlRun
+                     LINK_LIBRARIES LitlRun)
+elements_add_executable(LitlBenchmarkExp src/program/LitlBenchmarkExp.cpp
+                     INCLUDE_DIRS LitlRun
+                     LINK_LIBRARIES LitlRun)
 elements_add_executable(LitlBenchmarkIteration src/program/LitlBenchmarkIteration.cpp
-                     INCLUDE_DIRS ElementsKernel LitlRun
-                     LINK_LIBRARIES ElementsKernel LitlRun)
+                     INCLUDE_DIRS LitlRun
+                     LINK_LIBRARIES LitlRun)
 elements_add_executable(LitlBenchmarkRegions src/program/LitlBenchmarkRegions.cpp
-                     INCLUDE_DIRS ElementsKernel LitlRun
-                     LINK_LIBRARIES ElementsKernel LitlRun)
+                     INCLUDE_DIRS LitlRun
+                     LINK_LIBRARIES LitlRun)
 
 elements_add_unit_test(Chronometer tests/src/Chronometer_test.cpp 
                      EXECUTABLE LitlRun_Chronometer_test
