@@ -12,7 +12,12 @@
 
 Elements::Logging logger = Elements::Logging::getLogger("LitlBenchmarkExp");
 
-void taylorExp(Litl::Raster<double>& inout, Litl::Index order) { // FIXME test
+/**
+ * Compute the exponential as a Tailor series.
+ * @param inout The raster to be exponentialized in place
+ * @param order The series order (must be >= 1)
+ */
+void taylorExp(Litl::Raster<double>& inout, Litl::Index order) {
   auto exp = [=](double x) {
     double sum = 1 + x;
     double term = x;
@@ -48,10 +53,18 @@ public:
 
     logger.info("Computing exponential...");
     chrono.start();
-    if (order == -1) {
-      raster.exp();
-    } else {
-      taylorExp(raster, order);
+    switch (order) {
+      case -1:
+        raster.exp();
+        break;
+      case 0:
+        raster.fill(1);
+        break;
+      case 1:
+        raster += 1;
+        break;
+      default:
+        taylorExp(raster, order);
     }
     const auto duration = chrono.stop();
 
