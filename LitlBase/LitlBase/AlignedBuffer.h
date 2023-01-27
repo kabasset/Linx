@@ -118,8 +118,7 @@ public:
     if (m_data) {
       AlignmentError::mayThrow(m_data, m_as);
     } else {
-      m_container = std::aligned_alloc(m_as, sizeof(T) * m_size);
-      m_data = reinterpret_cast<T*>(m_container);
+      allocate();
     }
   }
 
@@ -150,8 +149,7 @@ public:
       m_size = other.m_size;
       m_as = other.m_as;
       if (other.owns()) {
-        m_container = std::aligned_alloc(m_as, sizeof(T) * m_size);
-        m_data = m_container;
+        allocate();
         std::copy_n(other.m_data, m_size, m_data);
       } else {
         m_container = other.m_container;
@@ -188,7 +186,7 @@ public:
   /**
    * @brief Get the data size.
    */
-  std::size_t size() const {
+  inline std::size_t size() const {
     return m_size;
   }
 
@@ -254,8 +252,14 @@ public:
   }
 
 private:
+  void allocate() {
+    const auto validSize = ((m_size + m_as - 1) / m_as) * m_as; // Smallest multiple of m_as >= m_size
+    m_container = std::aligned_alloc(m_as, sizeof(T) * validSize);
+    m_data = reinterpret_cast<T*>(m_container);
+  }
+
   static std::size_t alignAs(const void* data, std::size_t align) {
-    constexpr std::size_t simd = 64; // 64 for AVX512; TODO detect?
+    constexpr std::size_t simd = 32; // 64 for AVX512; TODO detect?
     switch (align) {
       case -1:
         return simd;
