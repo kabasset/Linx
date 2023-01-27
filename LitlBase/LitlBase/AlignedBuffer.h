@@ -38,7 +38,7 @@ std::size_t alignment(const T* ptr) {
   if (not ptr) {
     throw NullPtrError("Null pointer tested for alignment.");
   }
-  std::size_t as = 2;
+  std::size_t as = 2; // FIXME 1?
   while (std::uintptr_t(ptr) % as == 0) {
     as <<= 1;
   }
@@ -118,8 +118,8 @@ public:
     if (m_data) {
       AlignmentError::mayThrow(m_data, m_as);
     } else {
-      m_container = std::malloc(sizeof(T) * m_size + m_as - 1);
-      m_data = reinterpret_cast<T*>((std::uintptr_t(m_container) + (m_as - 1)) & ~(m_as - 1));
+      m_container = std::aligned_alloc(m_as, sizeof(T) * m_size);
+      m_data = reinterpret_cast<T*>(m_container);
     }
   }
 
@@ -150,8 +150,8 @@ public:
       m_size = other.m_size;
       m_as = other.m_as;
       if (other.owns()) {
-        m_container = std::malloc(sizeof(T) * m_size + m_as - 1);
-        m_data = reinterpret_cast<T*>((std::uintptr_t(m_container) + (m_as - 1)) & ~(m_as - 1));
+        m_container = std::aligned_alloc(m_as, sizeof(T) * m_size);
+        m_data = m_container;
         std::copy_n(other.m_data, m_size, m_data);
       } else {
         m_container = other.m_container;
@@ -228,8 +228,6 @@ public:
    * 
    * The buffer can still be used, but does not own the data anymore,
    * and thus memory will not be freed when it goes out of scope.
-   * The method returns the pointer to the unaligned memory,
-   * i.e. the one which must be freed with `std::free()`.
    * 
    * Aligned memory address is still accessible as `data()`.
    */
@@ -242,8 +240,8 @@ public:
   /**
    * @brief Reset the buffer.
    * 
-   * If the buffer is owner, memory is freed.
    * Size is set to 0, alignment requirement to 1, and pointers are nullified.
+   * If the buffer is owned, memory is freed.
    */
   void reset() {
     if (m_container) {
@@ -280,7 +278,7 @@ protected:
   std::size_t m_as;
 
   /**
-   * @brief The unaligned container.
+   * @brief The container if owned, or `nullptr` if shared.
    */
   void* m_container;
 
