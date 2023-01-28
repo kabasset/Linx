@@ -21,7 +21,7 @@ namespace Litl {
 
 /**
  * @ingroup concepts
- * @requirements{SizedData}
+ * @requirements{SizedData} // FIXME replace with ContiguousIterable, i.e. begin(), end()
  * @brief Requirements for the holder of a `DataContainer`.
  * 
  * A contiguous data holder is a class which stores or points to some data contiguous in memory,

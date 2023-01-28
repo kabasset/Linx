@@ -279,7 +279,7 @@ protected:
   /**
    * @brief The required alignment.
    */
-  std::size_t m_as;
+  std::size_t m_as; // FIXME rm
 
   /**
    * @brief The container if owned, or `nullptr` if shared.
