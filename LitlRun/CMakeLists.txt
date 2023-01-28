@@ -10,6 +10,9 @@ elements_add_library(LitlRun src/lib/*.cpp
                      LINK_LIBRARIES LitlTransforms ElementsKernel
                      PUBLIC_HEADERS LitlRun)
 
+elements_add_executable(LitlBenchmarkBuffers src/program/LitlBenchmarkBuffers.cpp
+                     INCLUDE_DIRS LitlRun
+                     LINK_LIBRARIES LitlRun)
 elements_add_executable(LitlBenchmarkCorrelation src/program/LitlBenchmarkCorrelation.cpp
                      INCLUDE_DIRS LitlRun
                      LINK_LIBRARIES LitlRun)
