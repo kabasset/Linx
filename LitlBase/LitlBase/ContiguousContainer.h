@@ -21,17 +21,17 @@ namespace Litl {
 
 /**
  * @ingroup concepts
- * @requirements{SizedData} // FIXME replace with ContiguousIterable, i.e. begin(), end()
+ * @requirements{ContiguousRange}
  * @brief Requirements for the holder of a `DataContainer`.
  * 
  * A contiguous data holder is a class which stores or points to some data contiguous in memory,
  * and implements the following methods:
  * - Constructor from a size and pointer;
- * - `std::size_t size() const`;
- * - `inline const T* data() const`.
+ * - `inline const T* begin() const`;
+ * - `inline const T* end() const`.
  * 
  * @par_example
- * Here is a minimal `SizedData`-compliant class:
+ * Here is a minimal `ContiguousRange`-compliant class:
  * \snippet LitlDemoBasics_test.cpp MallocRaster
  */
 
@@ -48,7 +48,7 @@ namespace Litl {
  * This is a CRTP implementation, which means it takes as template parameter
  * the derived class to be empowered.
  * 
- * The derived class must satisfy the `SizedData` requirements.
+ * The derived class must satisfy the `ContiguousRange` requirements.
  * 
  * @satisfies{ContiguousContainer}
  */
@@ -99,23 +99,44 @@ struct ContiguousContainerMixin {
    * Empty corresponds to `begin() == end()`.
    */
   bool empty() const {
-    return begin() == end();
+    return static_cast<const TDerived&>(*this).end() == static_cast<const TDerived&>(*this).begin();
+  }
+
+  /**
+   * @brief Number of elements.
+   */
+  std::size_t size() const {
+    return static_cast<const TDerived&>(*this).end() - static_cast<const TDerived&>(*this).begin();
   }
 
   /**
    * @brief Maximum number of elements the container is able to hold (same as `size()`).
    */
   std::size_t max_size() const {
-    return static_cast<const TDerived&>(*this).size();
+    return size();
   }
 
   /// @group_elements
 
   /**
+   * @brief Get a pointer to the underlying array.
+   */
+  inline const T* data() const {
+    return static_cast<const TDerived&>(*this).begin();
+  }
+
+  /**
+   * @copybrief data()const
+   */
+  inline T* data() {
+    return const_cast<T*>(const_cast<const ContiguousContainerMixin&>(*this).data());
+  }
+
+  /**
    * @brief Access the element with given index.
    */
   inline const T& operator[](size_type index) const {
-    return *(static_cast<const TDerived&>(*this).data() + index);
+    return *(static_cast<const TDerived&>(*this).begin() + index);
   }
 
   /**
@@ -129,11 +150,11 @@ struct ContiguousContainerMixin {
    * @brief Access the first element.
    */
   inline const T& front() const {
-    return *(static_cast<const TDerived&>(*this).data());
+    return *(static_cast<const TDerived&>(*this).begin());
   }
 
   /**
-   * @copybrief front()
+   * @copybrief front()const
    */
   inline T& front() {
     return const_cast<T&>(const_cast<const ContiguousContainerMixin&>(*this).front());
@@ -143,7 +164,7 @@ struct ContiguousContainerMixin {
    * @brief Access the last element.
    */
   inline const T& back() const {
-    return operator[](static_cast<const TDerived&>(*this).size() - 1);
+    return *(static_cast<const TDerived&>(*this).end() - 1);
   }
 
   /**
@@ -156,45 +177,31 @@ struct ContiguousContainerMixin {
   /// @group_iterators
 
   /**
-   * @brief Iterator to the first element.
-   */
-  const_iterator begin() const {
-    return static_cast<const TDerived&>(*this).data();
-  }
-
-  /**
    * @copybrief begin()const
    */
   iterator begin() {
-    return const_cast<iterator>(const_cast<const ContiguousContainerMixin&>(*this).begin());
+    return const_cast<iterator>(const_cast<const TDerived&>(static_cast<TDerived&>(*this)).begin()); // TODO cleaner?
   }
 
   /**
    * @copybrief begin()const
    */
   const_iterator cbegin() {
-    return const_cast<const ContiguousContainerMixin&>(*this).begin();
-  }
-
-  /**
-   * @brief Iterator to one past the last element.
-   */
-  const_iterator end() const {
-    return begin() + static_cast<const TDerived&>(*this).size();
+    return const_cast<const TDerived&>(static_cast<TDerived&>(*this)).begin(); // TODO cleaner?
   }
 
   /**
    * @copybrief end()const
    */
   iterator end() {
-    return const_cast<iterator>(const_cast<const ContiguousContainerMixin&>(*this).end());
+    return const_cast<iterator>(const_cast<const TDerived&>(static_cast<TDerived&>(*this)).end()); // TODO cleaner?
   }
 
   /**
    * @copybrief end()const
    */
   const_iterator cend() {
-    return const_cast<const ContiguousContainerMixin&>(*this).end();
+    return const_cast<const TDerived&>(static_cast<TDerived&>(*this)).end(); // TODO cleaner?
   }
 
   /// @group_operations
@@ -203,7 +210,8 @@ struct ContiguousContainerMixin {
    * @brief Check equality.
    */
   virtual bool operator==(const TDerived& rhs) const {
-    return (static_cast<const TDerived&>(*this).size() == rhs.size() && std::equal(begin(), end(), rhs.begin()));
+    const auto& lhs = static_cast<const TDerived&>(*this);
+    return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
   }
 
   /**

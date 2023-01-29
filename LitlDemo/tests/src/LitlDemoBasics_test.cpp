@@ -21,12 +21,12 @@ public:
     free(m_data);
   }
 
-  std::size_t size() const {
-    return m_size;
+  inline const T* begin() const {
+    return m_data;
   }
 
-  inline const T* data() const {
-    return m_data;
+  inline const T* end() const {
+    return m_data + m_size;
   }
 
 private:

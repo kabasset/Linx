@@ -14,6 +14,9 @@ BOOST_AUTO_TEST_SUITE(ContiguousContainer_test)
 
 struct TestContiguousContainer : ContiguousContainerMixin<int, TestContiguousContainer> {
 
+  using ContiguousContainerMixin<int, TestContiguousContainer>::begin;
+  using ContiguousContainerMixin<int, TestContiguousContainer>::end;
+
   TestContiguousContainer(std::size_t size = 0, const int* data = nullptr) : vector() {
     if (size > 0) {
       if (data) {
@@ -24,12 +27,12 @@ struct TestContiguousContainer : ContiguousContainerMixin<int, TestContiguousCon
     }
   }
 
-  const int* data() const {
-    return vector.data();
+  const int* begin() const {
+    return &*vector.begin();
   }
 
-  std::size_t size() const {
-    return vector.size();
+  const int* end() const {
+    return &*vector.end();
   }
 
   std::vector<int> vector;

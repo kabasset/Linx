@@ -49,9 +49,9 @@ The class diagram is as follows:
 \section data_classes-holder Data Holder
 
 
-The holder can be any class which satisfies `SizedData` requirements.
+The holder can be any class which satisfies `ContiguousRange` requirements.
 Whatever the container it wraps, it must expose the methods a `Raster` expects:
-see `SizedData`.
+see `ContiguousRange`.
 Users can implement their own holders if those provided (see next section) are not enough.
 Here is a simple example of a custom holder and associated `Raster` specialization
 (see example \ref LitlDemoBasics_test.cpp):

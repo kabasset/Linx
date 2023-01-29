@@ -21,10 +21,9 @@ Chrono::Unit benchmarkBuffer(Litl::Index size, Litl::Index alignment) {
   Litl::AlignedBuffer<long> buffer(size, nullptr, alignment);
   long sum = 0;
   logger.info("Iteration...");
-  const auto end = buffer.data() + buffer.size();
   chrono.start();
-  for (auto it = buffer.data(); it != end; ++it) {
-    sum += *it;
+  for (const auto& v : buffer) {
+    sum += v;
   }
   const auto duration = chrono.stop();
   logger.info(std::to_string(sum));

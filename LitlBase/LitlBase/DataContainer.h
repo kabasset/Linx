@@ -30,7 +30,7 @@ namespace Litl {
  * @tparam THolder The data container holder
  * @tparam TDerived The derived class
  * 
- * The class can be specialized for any container which implements the `SizedData` requirements.
+ * The class can be specialized for any container which implements the `ContiguousRange` requirements.
  * @satisfies{ContiguousContainer}
  */
 template <typename T, typename THolder, typename TArithmetic, typename TDerived>
@@ -46,6 +46,11 @@ public:
    * @brief The concrete data holder type.
    */
   using Holder = THolder;
+
+  using Holder::begin;
+  using Holder::end;
+  using ContiguousContainerMixin<T, TDerived>::begin;
+  using ContiguousContainerMixin<T, TDerived>::end;
 
   /// @{
   /// @group_construction
@@ -82,26 +87,7 @@ public:
   LITL_DEFAULT_COPYABLE(DataContainer)
   LITL_DEFAULT_MOVABLE(DataContainer)
 
-  /// @group_properties
-
-  /**
-   * @brief Inherit data holder's `size()`.
-   */
-  using Holder::size;
-
   /// @group_elements
-
-  /**
-   * @brief Inherit data holder's `data()`.
-   */
-  using Holder::data;
-
-  /**
-   * @brief Access the raw data.
-   */
-  inline T* data() {
-    return const_cast<T*>(const_cast<const DataContainer&>(*this).data());
-  }
 
   /**
    * @brief Access the element with given index.
@@ -110,7 +96,7 @@ public:
    * and bounds are checked.
    */
   const T& at(Index i) const {
-    const auto s = size();
+    const auto s = this->size();
     OutOfBoundsError::mayThrow("Index " + std::to_string(i), i, {-s, s - 1});
     return this->operator[](i >= 0 ? i : i + s);
   }

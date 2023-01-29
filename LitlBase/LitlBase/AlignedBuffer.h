@@ -114,11 +114,11 @@ public:
    * \snippet LitlDemoConstructors_test.cpp AlignedRaster shares
    */
   AlignedBuffer(std::size_t size, T* data = nullptr, std::size_t align = 0) :
-      m_size(size), m_as(alignAs(data, align)), m_container(nullptr), m_data(data) {
-    if (m_data) {
-      AlignmentError::mayThrow(m_data, m_as);
+      m_as(alignAs(data, align)), m_container(nullptr), m_begin(data), m_end(data + size) {
+    if (m_begin) {
+      AlignmentError::mayThrow(m_begin, m_as);
     } else {
-      allocate();
+      allocate(size);
     }
   }
 
@@ -126,9 +126,9 @@ public:
    * @brief Copy constructor.
    */
   AlignedBuffer(const AlignedBuffer& other) :
-      AlignedBuffer(other.m_size, other.owns() ? nullptr : other.m_data, other.m_as) {
+      AlignedBuffer(other.m_size, other.owns() ? nullptr : other.m_begin, other.m_as) {
     if (other.owns()) {
-      std::copy_n(other.m_data, m_size, const_cast<std::remove_cv_t<T>*>(m_data));
+      std::copy(other.m_begin, other.m_end, const_cast<std::remove_cv_t<T>*>(m_begin));
       // Safe because if T is const, other is not owning (or should we throw?)
     }
   }
@@ -136,7 +136,7 @@ public:
   /**
    * @brief Move constructor.
    */
-  AlignedBuffer(AlignedBuffer&& other) : m_size(other.m_size), m_as(other.m_as), m_container(), m_data(other.m_data) {
+  AlignedBuffer(AlignedBuffer&& other) : m_as(other.m_as), m_container(), m_begin(other.m_begin), m_end(other.m_end) {
     other.release();
     other.reset();
   }
@@ -146,14 +146,14 @@ public:
    */
   AlignedBuffer& operator=(const AlignedBuffer& other) {
     if (this != &other) {
-      m_size = other.m_size;
       m_as = other.m_as;
       if (other.owns()) {
-        allocate();
-        std::copy_n(other.m_data, m_size, m_data);
+        allocate(other.m_end - other.m_begin);
+        std::copy(other.m_begin, other.m_end, m_begin);
       } else {
         m_container = other.m_container;
-        m_data = other.m_data;
+        m_begin = other.m_begin;
+        m_end = other.m_end;
       }
     }
     return *this;
@@ -164,10 +164,10 @@ public:
    */
   AlignedBuffer& operator=(AlignedBuffer&& other) {
     if (this != &other) {
-      m_size = other.m_size;
       m_as = other.m_as;
       m_container = other.m_container;
-      m_data = other.m_data;
+      m_begin = other.m_begin;
+      m_end = other.m_end;
       other.release();
       other.reset();
     }
@@ -184,17 +184,17 @@ public:
   }
 
   /**
-   * @brief Get the data size.
+   * @brief Get an iterator to the beginning.
    */
-  inline std::size_t size() const {
-    return m_size;
+  inline const T* begin() const {
+    return m_begin;
   }
 
   /**
-   * @brief Get the data pointer.
+   * @brief Get an iterator to the end.
    */
-  inline const T* data() const {
-    return m_data;
+  inline const T* end() const {
+    return m_end;
   }
 
   /**
@@ -218,7 +218,7 @@ public:
    * @brief Get the actual data alignment, which may be better than required.
    */
   std::size_t alignment() const {
-    return Litl::alignment(m_data);
+    return Litl::alignment(m_begin);
   }
 
   /**
@@ -246,16 +246,17 @@ public:
       std::free(m_container);
       m_container = nullptr;
     }
-    m_size = 0;
     m_as = 1;
-    m_data = nullptr;
+    m_begin = nullptr;
+    m_end = nullptr;
   }
 
 private:
-  void allocate() {
-    const auto validSize = ((m_size + m_as - 1) / m_as) * m_as; // Smallest multiple of m_as >= m_size
+  void allocate(std::size_t size) {
+    const auto validSize = ((size + m_as - 1) / m_as) * m_as; // Smallest multiple of m_as >= size
     m_container = std::aligned_alloc(m_as, sizeof(T) * validSize);
-    m_data = reinterpret_cast<T*>(m_container);
+    m_begin = reinterpret_cast<T*>(m_container);
+    m_end = m_begin + size;
   }
 
   static std::size_t alignAs(const void* data, std::size_t align) {
@@ -272,11 +273,6 @@ private:
 
 protected:
   /**
-   * @brief The data size.
-   */
-  std::size_t m_size;
-
-  /**
    * @brief The required alignment.
    */
   std::size_t m_as; // FIXME rm
@@ -287,9 +283,14 @@ protected:
   void* m_container;
 
   /**
-   * @brief The aligned data.
+   * @brief The buffer beginning.
    */
-  T* m_data;
+  T* m_begin;
+
+  /**
+   * @brief The buffer end.
+   */
+  T* m_end;
 };
 
 } // namespace Litl

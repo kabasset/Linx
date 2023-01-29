@@ -54,11 +54,11 @@ inline const T* data(const T (&c)[N]) noexcept {
 
 /**
  * @ingroup data_classes
- * @brief A default holder of any contiguous container specified by a size and data pointer.
+ * @brief A default holder of any contiguous container specified by a range.
  * 
  * The class can be specialized for any continuous container,
- * in which case the specialization should satisfy the `SizedData` requirements.
- * @satisfies{SizedData}
+ * in which case the specialization should satisfy the `ContiguousRange` requirements.
+ * @satisfies{ContiguousRange}
  */
 template <typename TContainer>
 class StdHolder {
@@ -78,7 +78,7 @@ public:
   template <typename U = typename TContainer::value_type>
   explicit StdHolder(std::size_t size, U* data = nullptr) : m_container(size) {
     if (data) {
-      std::copy_n(data, size, const_cast<typename TContainer::value_type*>(this->data()));
+      std::copy_n(data, size, const_cast<typename TContainer::value_type*>(this->begin()));
     }
   }
 
@@ -89,29 +89,29 @@ public:
     SizeError::mayThrow(m_container.size(), size);
   }
 
-  /// @group_properties
-
-  /**
-   * @brief Get the number of elements.
-   */
-  std::size_t size() const {
-    return m_container.size();
-  }
-
   /// @group_elements
-
-  /**
-   * @brief Access the raw data.
-   */
-  inline const typename TContainer::value_type* data() const {
-    return Litl::data(m_container); // m_container.data() not available for valarray
-  }
 
   /**
    * @brief Access the underlying container in read-only mode.
    */
   const std::decay_t<Container>& container() const {
     return this->m_container;
+  }
+
+  /// @group_iterators
+
+  /**
+   * @brief Get an iterator to the beginning.
+   */
+  inline const typename TContainer::value_type* begin() const {
+    return &*m_container.begin();
+  }
+
+  /**
+   * @brief Get an iterator to the end.
+   */
+  inline const typename TContainer::value_type* end() const {
+    return &*m_container.end();
   }
 
   /// @group_modifiers
@@ -170,12 +170,12 @@ public:
     SizeError::mayThrow(m_container.size(), size);
   }
 
-  std::size_t size() const {
-    return N;
+  inline const T* begin() const {
+    return m_container.begin();
   }
 
-  inline const T* data() const {
-    return m_container.data();
+  inline const T* end() const {
+    return m_container.end();
   }
 
   const std::decay_t<Container>& container() const {
@@ -211,7 +211,7 @@ public:
     SizeError::mayThrow(m_container.size(), size);
   }
 
-  StdHolder(const StdHolder& other) : StdHolder(other.size(), other.data()) {}
+  StdHolder(const StdHolder& other) : StdHolder(other.end() - other.begin(), other.begin()) {}
 
   StdHolder& operator=(StdHolder other) {
     swap(*this, other);
@@ -223,12 +223,12 @@ public:
     std::swap(lhs.m_container, rhs.m_container);
   }
 
-  std::size_t size() const {
-    return m_size;
+  inline const T* begin() const {
+    return m_container.get();
   }
 
-  inline const T* data() const {
-    return m_container.get();
+  inline const T* end() const {
+    return begin() + m_size;
   }
 
   const std::decay_t<Container>& container() const {
@@ -256,26 +256,19 @@ template <typename T>
 class PtrHolder {
 
 public:
-  explicit PtrHolder(std::size_t size, T* data) : m_size(size), m_container(data) {}
+  explicit PtrHolder(std::size_t size, T* data) : m_begin(data), m_end(m_begin + size) {}
 
-  std::size_t size() const {
-    return m_size;
+  inline const T* begin() const {
+    return m_begin;
   }
 
-  inline const T* data() const {
-    return m_container;
+  inline const T* end() const {
+    return m_end;
   }
 
 private:
-  /**
-   * @brief The number of elements.
-   */
-  std::size_t m_size;
-
-  /**
-   * @brief The raw data pointer.
-   */
-  T* m_container;
+  T* m_begin;
+  T* m_end;
 };
 
 /**
