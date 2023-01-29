@@ -114,7 +114,7 @@ public:
    * \snippet LitlDemoConstructors_test.cpp AlignedRaster shares
    */
   AlignedBuffer(std::size_t size, T* data = nullptr, std::size_t align = 0) :
-      m_as(alignAs(data, align)), m_container(nullptr), m_begin(data), m_end(data + size) {
+      m_container(nullptr), m_begin(data), m_end(data + size), m_as(alignAs(data, align)) {
     if (m_begin) {
       AlignmentError::mayThrow(m_begin, m_as);
     } else {
@@ -126,7 +126,7 @@ public:
    * @brief Copy constructor.
    */
   AlignedBuffer(const AlignedBuffer& other) :
-      AlignedBuffer(other.m_size, other.owns() ? nullptr : other.m_begin, other.m_as) {
+      AlignedBuffer(other.m_end - other.m_begin, other.owns() ? nullptr : other.m_begin, other.m_as) {
     if (other.owns()) {
       std::copy(other.m_begin, other.m_end, const_cast<std::remove_cv_t<T>*>(m_begin));
       // Safe because if T is const, other is not owning (or should we throw?)
@@ -136,7 +136,7 @@ public:
   /**
    * @brief Move constructor.
    */
-  AlignedBuffer(AlignedBuffer&& other) : m_as(other.m_as), m_container(), m_begin(other.m_begin), m_end(other.m_end) {
+  AlignedBuffer(AlignedBuffer&& other) : m_container(), m_begin(other.m_begin), m_end(other.m_end), m_as(other.m_as) {
     other.release();
     other.reset();
   }
@@ -146,7 +146,7 @@ public:
    */
   AlignedBuffer& operator=(const AlignedBuffer& other) {
     if (this != &other) {
-      m_as = other.m_as;
+      m_as = other.m_as; // Must be set before allocate()
       if (other.owns()) {
         allocate(other.m_end - other.m_begin);
         std::copy(other.m_begin, other.m_end, m_begin);
@@ -164,10 +164,10 @@ public:
    */
   AlignedBuffer& operator=(AlignedBuffer&& other) {
     if (this != &other) {
-      m_as = other.m_as;
       m_container = other.m_container;
       m_begin = other.m_begin;
       m_end = other.m_end;
+      m_as = other.m_as;
       other.release();
       other.reset();
     }
@@ -210,7 +210,7 @@ public:
   /**
    * @brief Get the required data alignment.
    */
-  std::size_t alignmentReq() const {
+  std::size_t alignmentReq() const { // FIXME overalignment() as in std doc?
     return m_as;
   }
 
@@ -273,11 +273,6 @@ private:
 
 protected:
   /**
-   * @brief The required alignment.
-   */
-  std::size_t m_as; // FIXME rm
-
-  /**
    * @brief The container if owned, or `nullptr` if shared.
    */
   void* m_container;
@@ -291,6 +286,11 @@ protected:
    * @brief The buffer end.
    */
   T* m_end;
+
+  /**
+   * @brief The required alignment.
+   */
+  std::size_t m_as; // FIXME rm?
 };
 
 } // namespace Litl

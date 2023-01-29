@@ -18,31 +18,39 @@ using Chrono = Litl::Chronometer<std::chrono::milliseconds>;
 Chrono::Unit benchmarkBuffer(Litl::Index size, Litl::Index alignment) {
   Chrono chrono;
   logger.info("Assignment...");
+  chrono.start();
   Litl::AlignedBuffer<long> buffer(size, nullptr, alignment);
+  auto duration = chrono.stop();
+  logger.info(std::to_string(duration.count()) + "ms");
   long sum = 0;
   logger.info("Iteration...");
   chrono.start();
   for (const auto& v : buffer) {
-    sum += v;
+    sum += v + 1;
   }
-  const auto duration = chrono.stop();
+  duration = chrono.stop();
   logger.info(std::to_string(sum));
-  return duration;
+  logger.info(std::to_string(duration.count()) + "ms");
+  return chrono.elapsed();
 }
 
 Chrono::Unit benchmarkVector(Litl::Index size) {
   Chrono chrono;
   logger.info("Initialization...");
+  chrono.start();
   std::vector<long> buffer(size);
+  auto duration = chrono.stop();
+  logger.info(std::to_string(duration.count()) + "ms");
   long sum = 0;
   logger.info("Iteration...");
   chrono.start();
   for (const auto& v : buffer) {
-    sum += v;
+    sum += v + 1;
   }
-  const auto duration = chrono.stop();
+  duration = chrono.stop();
   logger.info(std::to_string(sum));
-  return duration;
+  logger.info(std::to_string(duration.count()) + "ms");
+  return chrono.elapsed();
 }
 
 class LitlBenchmarkIteration : public Elements::Program {
