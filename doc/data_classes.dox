@@ -24,12 +24,12 @@ This is the purpose of the current page, while the design is described in detail
 A `Raster` object can rely on some underlying 1D contiguous container of arbitrary type
 -- raw array, `std::vector`, `std::array`...
 The container is adapded by a so-called _data holder_, which provides the necessary interface for compatibility with `Raster`.
-This means in particular that it implements a `size()` and a `data()` method.
+This means in particular that it implements `begin()` and `end()`.
 This is the only responsibility of the data holder.
 
 The data holder is embedded in a `DataContainer`, which brings:
 - The standard container interface
-  -- `begin()`, `end()`, `operator[]()`, `operator==()` and co --
+  -- `size()`, `empty()`, `operator[]()`, `operator==()` and co --
   through the `ContiguousContainerMixin`.
 - Constructors and filling methods: see \ref raster_ctors.
 
@@ -60,7 +60,7 @@ Here is a simple example of a custom holder and associated `Raster` specializati
 
 Given that `Raster` inherits from the holder,
 methods can be implemented in the holder and then called from the raster.
-For example, the holder of `AlignedRaster` (see next section) implements method `alignment()`.
+For example, the holder of `AlignedRaster` (`AlignedBuffer`, see next section) implements the method `alignment()`.
 This method can be called from an `AlignedRaster` object.
 
 
@@ -93,6 +93,8 @@ Data can be owned (allocated at construction, freed at destruction):
 or shared like in the case of `PtrRaster`:
 
 \snippet LitlDemoConstructors_test.cpp AlignedRaster shares
+
+`AlignedBuffer` was specifically designed to interface smoothly with FFTW (see \ref dft).
 
 */
 }

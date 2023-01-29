@@ -2,9 +2,8 @@
 
 class Holder {
 + Holder(size, data)
-+ size()
-+ data()
-+ {method}...
++ begin()
++ end()
 }
 
 class DataContainer {
@@ -33,12 +32,12 @@ class Raster {
 }
 
 class ContiguousContainerMixin {
++ size()
 + empty()
++ data()
 + operator[](index)
-+ begin()
-+ end()
-+ operator==()
-+ operator!=()
++ operator==(rhs)
++ operator!=(rhs)
 }
 
 class ArithmeticMixin {

@@ -33,7 +33,7 @@ A variety of global operations are supported, too, for example:
 - Statistical estimators...
 
 As opposed to the containers of the standard library,
-indices they are _signed_ integers, as recommended in the C++ Core Guidelines.
+indices are _signed_ integers, as recommended in the C++ Core Guidelines.
 Among others, this enables backward indexing with negative values.
 
 
