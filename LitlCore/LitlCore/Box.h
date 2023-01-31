@@ -236,7 +236,7 @@ public:
    * @brief Clamp the front and back positions inside a given box.
    */
   Box<N>& clamp(const Box<N>& box) {
-    for (Index i = 0; i < size(); ++i) {
+    for (Index i = 0; i < dimension(); ++i) {
       m_front[i] = std::max(m_front[i], box.front()[i]);
       m_back[i] = std::min(m_back[i], box.back()[i]);
     }
@@ -355,8 +355,8 @@ Box<N> project(const Box<N>& in, Index axis = 0) {
  */
 template <typename T, Index N = 2>
 Vector<T, N> clamp(const Vector<T, N>& position, const Box<N>& box) {
-  Vector<T, N> out(box.size());
-  for (std::size_t i = 0; i < out.size(); ++i) {
+  Vector<T, N> out(box.dimension());
+  for (std::size_t i = 0; i < out.dimension(); ++i) {
     out[i] = clamp(position[i], box.front[i], box.back[i]); // TODO transform
   }
   return out;
