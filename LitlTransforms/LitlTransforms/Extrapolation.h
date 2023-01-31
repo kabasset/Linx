@@ -98,6 +98,25 @@ private:
   TMethod m_method;
 };
 
+/// @cond
+namespace Internal {
+template <typename T>
+struct IsExtrapolatorImpl : std::false_type {};
+
+template <typename T, typename TMethod>
+struct IsExtrapolatorImpl<Extrapolator<T, TMethod>> : std::true_type {};
+
+template <typename T, typename TParent, typename TRegion>
+struct IsExtrapolatorImpl<Patch<T, TParent, TRegion>> : IsExtrapolatorImpl<std::decay_t<TParent>> {};
+
+} // namespace Internal
+/// @endcond
+
+template <typename T>
+constexpr bool isExtrapolator() {
+  return Internal::IsExtrapolatorImpl<std::decay_t<T>>::value;
+}
+
 /**
  * @relates Extrapolator
  * @brief Get the raster decorated by an extrapolator.

@@ -40,8 +40,35 @@ public:
   template <typename TExtrapolator>
   Raster<Value, Dimension> operator*(const TExtrapolator& in) const {
     Raster<Value, Dimension> out(rasterize(in).shape());
+    out.fill(Value());
     correlateTo(in, out);
     return out;
+  }
+
+  /**
+   * @brief Correlate an input raster extrapolator or patch into an output raster.
+   * @param in A extrapolator or patch or subextrapolator
+   * @param out A raster or patch with compatible domain
+   * 
+   * If the correlation bounding box requires input values from outside the input domain,
+   * then `in` must be an extrapolator.
+   * If the bounding box of `in` is small enough so that no extrapolated values are required,
+   * then `in` can be a patch.
+   * 
+   * @see `correlateCropTo()`
+   */
+  template <typename TIn, typename TOut>
+  void correlateTo(const TIn& in, TOut& out) const {
+    if constexpr (isExtrapolator<TIn>()) {
+      if constexpr (isPatch<TIn>()) {
+        correlatePatchTo(in, out);
+      } else {
+        correlateRasterTo(in, out);
+      }
+    } else {
+      // FIXME check no extrapolation is required
+      static_cast<const TDerived&>(*this).correlateMonolithTo(in, out);
+    }
   }
 
   /**
@@ -56,19 +83,38 @@ public:
    * 
    * @see `correlateCropTo()`
    */
-  template <typename TIn, typename TRaster>
-  void correlateTo(const TIn& in, TRaster& out) const {
-    const auto& notExtrapolated = dontExtrapolate(in); // A raster or patch
-    const auto box = BorderedBox<Dimension>(rasterize(in).domain(), static_cast<const TDerived&>(*this).window());
+  template <typename TIn, typename Tout>
+  void correlateRasterTo(const TIn& in, Tout& out) const {
+    const auto& raster = dontExtrapolate(in);
+    const auto box = BorderedBox<Dimension>(in.domain(), static_cast<const TDerived&>(*this).window());
     box.applyInnerBorder(
         [&](const auto& ib) {
-          std::cout << "Inner: " << ib.front() << " - " << ib.back() << std::endl;
-          const auto insub = notExtrapolated.patch(ib);
+          std::cout << "Raster inner: " << ib.front() << " - " << ib.back() << std::endl;
+          const auto insub = raster.patch(ib);
           auto outsub = out.patch(insub.domain());
           static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
         },
         [&](const auto& ib) {
-          std::cout << "Border: " << ib.front() << " - " << ib.back() << std::endl;
+          std::cout << "Raster border: " << ib.front() << " - " << ib.back() << std::endl;
+          const auto insub = in.patch(ib);
+          auto outsub = out.patch(insub.domain());
+          static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
+        });
+  }
+
+  template <typename TIn, typename TRaster>
+  void correlatePatchTo(const TIn& in, TRaster& out) const {
+    const auto& patch = dontExtrapolate(in);
+    const auto box = BorderedBox<Dimension>(Litl::box(patch.domain()), static_cast<const TDerived&>(*this).window());
+    box.applyInnerBorder(
+        [&](const auto& ib) {
+          std::cout << "Patch inner: " << ib.front() << " - " << ib.back() << std::endl;
+          const auto insub = patch.patch(ib);
+          auto outsub = out.patch(insub.domain());
+          static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
+        },
+        [&](const auto& ib) {
+          std::cout << "Patch border: " << ib.front() << " - " << ib.back() << std::endl;
           const auto insub = in.patch(ib);
           auto outsub = out.patch(insub.domain());
           static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);

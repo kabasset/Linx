@@ -207,6 +207,22 @@ private:
   Indexing m_indexing;
 };
 
+/// @cond
+namespace Internal {
+template <typename T>
+struct IsPatchImpl : std::false_type {};
+
+template <typename T, typename TParent, typename TRegion>
+struct IsPatchImpl<Patch<T, TParent, TRegion>> : std::true_type {};
+
+} // namespace Internal
+/// @endcond
+
+template <typename T>
+constexpr bool isPatch() {
+  return Internal::IsPatchImpl<T>::value;
+}
+
 /**
  * @relates Patch
  * @brief Get the parent raster of a patch.

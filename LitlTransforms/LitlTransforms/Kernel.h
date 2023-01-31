@@ -60,13 +60,13 @@ public:
    */
   template <typename TIn, typename TOut>
   void correlateMonolithTo(const TIn& in, TOut& out) const {
-    auto window = in.parent().patch(m_window);
+    auto patch = in.parent().patch(m_window);
     auto outIt = out.begin();
     for (const auto& p : in.domain()) {
-      window.translate(p);
-      *outIt = std::inner_product(m_values.begin(), m_values.end(), window.begin(), T {});
+      patch.translate(p);
+      *outIt = std::inner_product(m_values.begin(), m_values.end(), patch.begin(), T {});
       ++outIt;
-      window.translateBack(p);
+      patch.translateBack(p);
     }
   }
 
