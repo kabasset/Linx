@@ -10,7 +10,6 @@
 #include <numeric> // accumulate
 #include <tuple>
 #include <typeindex>
-#include <utility> // enable_if
 
 namespace Litl {
 
@@ -52,7 +51,7 @@ struct TypeCardinality<std::tuple<Ts...>> {
  * @see `TypeCardinality`
  */
 template <typename S>
-constexpr int prerequisiteCardinality() {
+constexpr std::size_t prerequisiteCardinality() {
   return TypeCardinality<typename S::Prerequisite>::value;
 }
 
@@ -77,28 +76,15 @@ class StepperPipeline {
 
 public:
   /**
-   * @brief Evaluation of step `S` which has no prerequisite.
+   * @brief Evaluation of step `S`.
    */
   template <typename S>
-  std::enable_if_t<prerequisiteCardinality<S>() == 0, typename S::Return> get() {
-    return evaluateGet<S>();
-  }
-
-  /**
-   * @brief Lazy evaluation of step `S` which triggers a single prerequisite evaluation if needed.
-   */
-  template <typename S>
-  std::enable_if_t<prerequisiteCardinality<S>() == 1, typename S::Return> get() {
-    get<typename S::Prerequisite>();
-    return evaluateGet<S>();
-  }
-
-  /**
-   * @brief Lazy evaluation of step `S` which triggers multiple prerequisite evaluations if needed.
-   */
-  template <typename S>
-  std::enable_if_t<prerequisiteCardinality<S>() >= 2, typename S::Return> get() {
-    getMultiple<typename S::Prerequisite>(std::make_index_sequence<prerequisiteCardinality<S>()> {});
+  typename S::Return get() {
+    if constexpr (prerequisiteCardinality<S>() == 1) {
+      get<typename S::Prerequisite>();
+    } else if constexpr (prerequisiteCardinality<S>() > 1) {
+      getMultiple<typename S::Prerequisite>(std::make_index_sequence<prerequisiteCardinality<S>()> {});
+    }
     return evaluateGet<S>();
   }
 

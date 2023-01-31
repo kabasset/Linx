@@ -110,7 +110,7 @@ struct MathFunctionsMixin {
       return std::function(e, other); \
     }); \
     return *derived; \
-  }
+  } // TODO rm enable_if and merge with previous function thanks to if constexpr
 
   LITL_MATH_UNARY_INPLACE(abs)
   LITL_MATH_BINARY_INPLACE(max)
