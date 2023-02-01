@@ -123,32 +123,12 @@ public:
    * @brief Correlate and crop an input extrapolator.
    * @see `correlateCropTo()`
    */
-  template <typename TBoxExtrapolator>
-  Raster<Value, Dimension> correlateCrop(const TBoxExtrapolator& in) const {
+  template <typename TPatch>
+  Raster<Value, Dimension> correlateCrop(const TPatch& in) const {
+    // FIXME check region is a Box
     Raster<Value, Dimension> out(in.domain().shape());
-    correlateCropTo(in, out);
+    correlateTo(in, out);
     return out;
-  }
-
-  /**
-   * @brief Correlate and crop an input extrapolator into an output raster.
-   * @param in An extrapolated box patch
-   * @param out A raster
-   */
-  template <typename TBoxExtrapolator, typename TRaster>
-  void correlateCropTo(const TBoxExtrapolator& in, TRaster& out) const {
-    const auto& notExtrapolated = dontExtrapolate(in);
-    const auto& front = in.domain().front();
-    const auto box = BorderedBox<Dimension>(rasterize(in).domain(), static_cast<const TDerived&>(*this).window());
-    box.applyInnerBorder(
-        [&](const auto& ib) {
-          auto outsub = out.patch(ib - front);
-          static_cast<const TDerived&>(*this).correlateMonolithTo(notExtrapolated.patch(ib), outsub);
-        },
-        [&](const auto& ib) {
-          auto outsub = out.patch(ib - front);
-          static_cast<const TDerived&>(*this).correlateMonolithTo(in.patch(ib), outsub);
-        });
   }
 
   /**
