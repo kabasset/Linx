@@ -148,14 +148,15 @@ public:
    * @brief Check whether a position is set in the mask.
    */
   bool operator[](const Position<N>& position) const {
-    return m_flags[position];
+    return m_box[position] && m_flags[position - m_box.front()];
   }
 
   /**
    * @brief Set or unset a position in the mask.
    */
   bool& operator[](const Position<N>& position) {
-    return m_flags[position];
+    // FIXME check bounds
+    return m_flags[position - m_box.front()];
   }
 
   /// @group_modifiers
