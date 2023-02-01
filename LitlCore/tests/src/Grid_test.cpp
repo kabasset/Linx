@@ -33,19 +33,19 @@ BOOST_AUTO_TEST_CASE(grid_clamp_is_shrunk_test) {
   BOOST_TEST(in.back()[0] == 7);
   BOOST_TEST(in.step()[0] == 3);
 
-  const auto out2 = clamp(in, {{2}, {8}});
+  const auto out2 = in & Box<1>({2}, {8});
   //  --+--+-
   BOOST_TEST(out2.front()[0] == 4);
   BOOST_TEST(out2.back()[0] == 7);
   BOOST_TEST(out2.step()[0] == 3);
 
-  const auto out4 = clamp(in, {{4}, {8}});
+  const auto out4 = in & Box<1>({4}, {8});
   //    +--+-
   BOOST_TEST(out4.front()[0] == 4);
   BOOST_TEST(out4.back()[0] == 7);
   BOOST_TEST(out4.step()[0] == 3);
 
-  const auto out6 = clamp(in, {{6}, {8}});
+  const auto out6 = in & Box<1>({6}, {8});
   //      -+-
   BOOST_TEST(out6.front()[0] == 7);
   BOOST_TEST(out6.back()[0] == 7);

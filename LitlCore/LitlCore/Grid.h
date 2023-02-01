@@ -199,8 +199,9 @@ public:
   /**
    * @brief Clamp the front and back positions inside a given box.
    */
-  Box<N>& clamp(const Box<N>& box) {
-    *this = clamp(*this, box);
+  Grid<N>& operator&=(const Box<N>& box) {
+    *this = *this & box;
+    return *this;
   }
 
   /**
@@ -301,7 +302,7 @@ Grid<N> project(const Grid<N>& in, Index axis = 0) {
  * @brief Clamp a grid inside a bounding box.
  */
 template <Index N>
-inline Grid<N> clamp(const Grid<N>& region, const Box<N>& bounds) {
+inline Grid<N> operator&(const Grid<N>& region, const Box<N>& bounds) {
   auto front = bounds.front();
   for (Index i = 0; i < region.size(); ++i) {
     front[i] += (region.back()[i] - front[i]) % region.step()[i];

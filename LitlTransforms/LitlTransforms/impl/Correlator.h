@@ -89,13 +89,11 @@ public:
     const auto box = BorderedBox<Dimension>(in.domain(), static_cast<const TDerived&>(*this).window());
     box.applyInnerBorder(
         [&](const auto& ib) {
-          std::cout << "Raster inner: " << ib.front() << " - " << ib.back() << std::endl;
           const auto insub = raster.patch(ib);
           auto outsub = out.patch(insub.domain());
           static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
         },
         [&](const auto& ib) {
-          std::cout << "Raster border: " << ib.front() << " - " << ib.back() << std::endl;
           const auto insub = in.patch(ib);
           auto outsub = out.patch(insub.domain());
           static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);

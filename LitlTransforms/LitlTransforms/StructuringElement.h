@@ -178,13 +178,13 @@ public:
 
     // Non-extrapolated pixels
     auto inner = in.domain() - box(m_window);
-    // inner.clamp(region); // FIXME
+    // inner &= region; // FIXME
     applyRegionTo(std::forward<TFunc>(func), rasterize(in), inner, out);
 
     // Extrapolated pixels
     auto outers = inner.surround(box(m_window));
     for (auto& o : outers) {
-      // o.clamp(region); // FIXME
+      // o &= region; // FIXME
       applyRegionTo(std::forward<TFunc>(func), in, o, out);
     }
   }

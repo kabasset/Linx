@@ -251,8 +251,8 @@ inline const Box<N>& box(const Mask<N>& region) {
  * @brief Clamp a mask inside a bounding box.
  */
 template <Index N>
-inline Mask<N> clamp(const Mask<N>& region, const Box<N>& bounds) {
-  const auto box = clamp(region.box(), bounds);
+inline Mask<N> operator&(const Mask<N>& region, const Box<N>& bounds) {
+  const auto box = region.box() & bounds;
   Mask<N> out(box, false);
   for (const auto& p : box) { // FIXME optimize
     out[p] = region[p];

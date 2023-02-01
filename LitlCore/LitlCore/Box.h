@@ -233,12 +233,83 @@ public:
   }
 
   /**
-   * @brief Clamp the front and back positions inside a given box.
+   * @brief Check whether the box is contained within another box.
    */
-  Box<N>& clamp(const Box<N>& box) {
+  bool operator<=(const Box<N>& rhs) const {
     for (Index i = 0; i < dimension(); ++i) {
-      m_front[i] = std::max(m_front[i], box.front()[i]);
-      m_back[i] = std::min(m_back[i], box.back()[i]);
+      if (m_front[i] < rhs.front()[i]) {
+        return false;
+      }
+      if (m_back[i] > rhs.back()[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @brief Check whether the box is stricly contained within another box.
+   */
+  bool operator<(const Box<N>& rhs) const {
+    for (Index i = 0; i < dimension(); ++i) {
+      if (m_front[i] <= rhs.front()[i]) {
+        return false;
+      }
+      if (m_back[i] >= rhs.back()[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @brief Check whether the box contains another box.
+   */
+  bool operator>=(const Box<N>& rhs) const {
+    for (Index i = 0; i < dimension(); ++i) {
+      if (m_front[i] > rhs.front()[i]) {
+        return false;
+      }
+      if (m_back[i] < rhs.back()[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @brief Check whether the box stricly contains another box.
+   */
+  bool operator>(const Box<N>& rhs) const {
+    for (Index i = 0; i < dimension(); ++i) {
+      if (m_front[i] >= rhs.front()[i]) {
+        return false;
+      }
+      if (m_back[i] <= rhs.back()[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /**
+   * @brief Shrink the box inside another box (i.e. get the intersection of both).
+   */
+  Box<N>& operator&=(const Box<N>& rhs) {
+    for (Index i = 0; i < dimension(); ++i) {
+      m_front[i] = std::max(m_front[i], rhs.front()[i]);
+      m_back[i] = std::min(m_back[i], rhs.back()[i]);
+    }
+    return *this;
+  }
+
+  /**
+   * @brief Minimally grow the box to include another box (i.e. get the minimum box which contains both).
+   */
+  Box<N>& operator|=(const Box<N>& rhs) {
+    for (Index i = 0; i < dimension(); ++i) {
+      m_front[i] = std::min(m_front[i], rhs.front()[i]);
+      m_back[i] = std::max(m_back[i], rhs.back()[i]);
     }
     return *this;
   }
@@ -378,13 +449,13 @@ Vector<T, N> clamp(const Vector<T, N>& position, const Position<N>& shape) {
 /**
  * @ingroup concepts
  * @requirements{Region}
- * @brief A set of positions which can be translated and clamped.
+ * @brief A set of positions which can be translated and clamped (intersected by a box).
  * 
  * TODO
  * - Region += Position
  * - Region -= Position
+ * - Region &= Box
  * - box(Region) -> Box
- * - clamp(Region, Box) -> Region
  */
 
 /**
@@ -418,12 +489,12 @@ inline Box<TIn::Dimension> box(const TIn& region) {
 
 /**
  * @relates Box
- * @brief Clamp a box inside a bounding box.
+ * @brief Get the intersection of two boxes.
  */
 template <Index N>
-inline Box<N> clamp(const Box<N>& region, const Box<N>& bounds) {
+inline Box<N> operator&(const Box<N>& region, const Box<N>& bounds) {
   auto out = region;
-  out.clamp(bounds);
+  out &= bounds;
   return out;
 }
 

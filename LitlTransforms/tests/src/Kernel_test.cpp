@@ -45,22 +45,23 @@ BOOST_AUTO_TEST_CASE(inner_box_test) {
 
 BOOST_AUTO_TEST_CASE(regionwise_test) {
 
-  const auto in = Raster<int, 3>({4, 5, 6}).range();
+  const auto in = Raster<int, 3>({5, 6, 7}).range();
   const auto extrapolated = extrapolate(in, 0);
   const auto k = kernelize(Raster<int, 3>({3, 3, 3}).fill(1));
   const auto expected = k * extrapolated;
 
-  // std::cout << "MASK\n";
-  // const auto region = Mask<3>::ball<2>(2, in.shape() / 2);
-  // const auto regionOut = k * extrapolated.patch(region);
-  // BOOST_TEST(regionOut.shape() == in.shape());
-  // for (const auto& p : regionOut.domain()) {
-  //   if (region[p]) {
-  //     BOOST_TEST(regionOut[p] == expected[p]);
-  //   } else {
-  //     BOOST_TEST(regionOut[p] == 0);
-  //   }
-  // }
+  std::cout << "MASK\n";
+  const auto region = Mask<3>::ball<2>(2, in.shape() / 2);
+  BOOST_TEST(region.box() <= in.domain());
+  const auto regionOut = k * extrapolated.patch(region);
+  BOOST_TEST(regionOut.shape() == in.shape());
+  for (const auto& p : regionOut.domain()) {
+    if (region[p]) {
+      BOOST_TEST(regionOut[p] == expected[p]);
+    } else {
+      BOOST_TEST(regionOut[p] == 0);
+    }
+  }
 
   // std::cout << "CROP\n";
   // const Box<3> crop {Position<3>::one(), in.shape() - 2}; // No extrapolation needed

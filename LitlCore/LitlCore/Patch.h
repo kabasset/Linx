@@ -178,14 +178,14 @@ public:
    * @brief Create a cropped patch.
    */
   Patch<const T, const TParent, TRegion> patch(const Box<TParent::Dimension>& box) const {
-    return Patch<const T, const TParent, TRegion>(m_parent, clamp(m_region, box));
+    return Patch<const T, const TParent, TRegion>(m_parent, m_region & box);
   }
 
   /**
    * @brief Create a cropped patch.
    */
   Patch<T, TParent, TRegion> patch(const Box<TParent::Dimension>& box) {
-    return Patch<T, TParent, TRegion>(m_parent, clamp(m_region, box));
+    return Patch<T, TParent, TRegion>(m_parent, m_region & box);
   }
 
   /// @}
