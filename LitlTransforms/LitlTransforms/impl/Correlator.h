@@ -57,11 +57,7 @@ public:
   template <typename TIn, typename TOut>
   void correlateTo(const TIn& in, TOut& out) const {
     if constexpr (isExtrapolator<TIn>()) {
-      if constexpr (isPatch<TIn>()) {
-        correlatePatchTo(in, out);
-      } else {
-        correlateRasterTo(in, out);
-      }
+      correlateSplitTo(in, out);
     } else {
       // FIXME check no extrapolation is required
       static_cast<const TDerived&>(*this).correlateMonolithTo(in, out);
@@ -96,30 +92,13 @@ public:
    * 
    * @see `correlateCropTo()`
    */
-  template <typename TIn, typename Tout>
-  void correlateRasterTo(const TIn& in, Tout& out) const {
-    const auto& raster = dontExtrapolate(in);
-    const auto box = BorderedBox<Dimension>(in.domain(), static_cast<const TDerived&>(*this).window());
-    box.applyInnerBorder(
-        [&](const auto& ib) {
-          const auto insub = raster.patch(ib);
-          auto outsub = out.patch(insub.domain());
-          static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
-        },
-        [&](const auto& ib) {
-          const auto insub = in.patch(ib);
-          auto outsub = out.patch(insub.domain());
-          static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
-        });
-  }
-
   template <typename TIn, typename TRaster>
-  void correlatePatchTo(const TIn& in, TRaster& out) const {
-    const auto& patch = dontExtrapolate(in);
-    const auto box = BorderedBox<Dimension>(Litl::box(patch.domain()), static_cast<const TDerived&>(*this).window());
+  void correlateSplitTo(const TIn& in, TRaster& out) const {
+    const auto& raw = dontExtrapolate(in);
+    const auto box = BorderedBox<Dimension>(Litl::box(raw.domain()), static_cast<const TDerived&>(*this).window());
     box.applyInnerBorder(
         [&](const auto& ib) {
-          const auto insub = patch.patch(ib);
+          const auto insub = raw.patch(ib);
           auto outsub = out.patch(insub.domain());
           static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
         },
