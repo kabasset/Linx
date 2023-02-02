@@ -94,7 +94,7 @@ public:
       return *this;
     }
     m_current = m_front + *(++m_offsetIt);
-    // FIXME cannot dereference if m_offsetIt == m_offsetEnd => size + 1 to avoid branching?
+    // Cannot dereference if m_offsetIt == m_offsetEnd => size + 1 to avoid branching
     m_eol = m_current + m_width;
     return *this;
   }

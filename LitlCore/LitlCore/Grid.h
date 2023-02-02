@@ -106,7 +106,7 @@ public:
   Position<Dimension> shape() const {
     Position<Dimension> out(m_box.shape());
     for (std::size_t i = 0; i < out.size(); ++i) {
-      out[i] /= m_step[i];
+      out[i] = out[i] / m_step[i] + 1;
     }
     return out;
   }
@@ -127,14 +127,14 @@ public:
    */
   template <Index I>
   Index length() const {
-    return m_box.template length<I>() / m_step[I];
+    return (m_box.template length<I>() - 1) / m_step[I] + 1;
   }
 
   /**
    * @brief Get the number of nodes along given axis.
    */
   Index length(Index i) const {
-    return m_box.length(i) / m_step[i];
+    return (m_box.length(i) - 1) / m_step[i] + 1;
   }
 
   /// @group_elements

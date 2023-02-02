@@ -10,9 +10,6 @@
 #include "LitlCore/Grid.h"
 #include "LitlCore/Raster.h"
 #include "LitlTransforms/Extrapolation.h"
-#include "LitlTransforms/Interpolation.h"
-
-#include <iostream> // std::cout
 
 namespace Litl {
 
@@ -72,6 +69,22 @@ public:
   }
 
   /**
+   * @brief Correlate and crop an input extrapolator.
+   * 
+   * The input patch can be a box for a cropped correlation,
+   * or a grid for a decimated correlation.
+   * 
+   * @see `correlateCropTo()`
+   */
+  template <typename TPatch>
+  Raster<Value, Dimension> correlateCrop(const TPatch& in) const {
+    // FIXME check region is a Box or Grid
+    Raster<Value, Dimension> out(in.domain().shape());
+    correlateTo(in, out);
+    return out;
+  }
+
+  /**
    * @brief Correlate an input (raster or patch) extrapolator into an output raster.
    * @param in A extrapolator or patch or subextrapolator
    * @param out A raster
@@ -106,70 +119,13 @@ public:
     const auto box = BorderedBox<Dimension>(Litl::box(patch.domain()), static_cast<const TDerived&>(*this).window());
     box.applyInnerBorder(
         [&](const auto& ib) {
-          std::cout << "Patch inner: " << ib.front() << " - " << ib.back() << std::endl;
           const auto insub = patch.patch(ib);
           auto outsub = out.patch(insub.domain());
           static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
         },
         [&](const auto& ib) {
-          std::cout << "Patch border: " << ib.front() << " - " << ib.back() << std::endl;
           const auto insub = in.patch(ib);
           auto outsub = out.patch(insub.domain());
-          static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
-        });
-  }
-
-  /**
-   * @brief Correlate and crop an input extrapolator.
-   * @see `correlateCropTo()`
-   */
-  template <typename TPatch>
-  Raster<Value, Dimension> correlateCrop(const TPatch& in) const {
-    // FIXME check region is a Box
-    Raster<Value, Dimension> out(in.domain().shape());
-    correlateTo(in, out);
-    return out;
-  }
-
-  /**
-   * @brief Correlate and decimate an input extrapolator.
-   * @see `correlateDecimateTo()`
-   */
-  template <typename TGridExtrapolator>
-  Raster<Value, Dimension> correlateDecimate(const TGridExtrapolator& in) const {
-    Raster<Value, Dimension> out(in.domain().shape());
-    correlateDecimateTo(in, out);
-    return out;
-  }
-
-  /**
-   * @brief Correlate and decimate an input extrapolator into an output raster.
-   * @param in A subextrapolator with grid region
-   * @param out A raster
-   */
-  template <typename TGridExtrapolator, typename TRaster>
-  void correlateDecimateTo(const TGridExtrapolator& in, TRaster& out) const {
-    const auto& notExtrapolated = dontExtrapolate(in);
-    const auto& grid = in.domain();
-    const auto& front = grid.front();
-    const auto& step = grid.step();
-    const auto gridToBox = [&](const auto& g) {
-      auto f = g.front() - front;
-      for (std::size_t i = 0; i < f.size(); ++i) {
-        f /= step[i];
-      }
-      return Box<Dimension>::fromShape(f, g.shape());
-    };
-    const auto box = BorderedBox<Dimension>(rasterize(in).domain(), static_cast<const TDerived&>(*this).window());
-    box.applyInnerBorder(
-        [&](const auto& ib) {
-          const auto insub = notExtrapolated.patch(ib);
-          auto outsub = out.patch(gridToBox(insub.domain()));
-          static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
-        },
-        [&](const auto& ib) {
-          const auto insub = in.patch(ib);
-          auto outsub = out.patch(gridToBox(insub.domain()));
           static_cast<const TDerived&>(*this).correlateMonolithTo(insub, outsub);
         });
   }

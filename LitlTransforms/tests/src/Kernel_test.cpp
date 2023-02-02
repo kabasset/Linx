@@ -86,15 +86,13 @@ BOOST_AUTO_TEST_CASE(decimate_test) {
   const auto k = kernelize(Raster<int, 3>({3, 3, 3}).fill(1));
   const auto expected = k * extrapolated;
 
-  std::cout << "DECIMATE\n";
   const Box<3> crop {Position<3>::one(), in.shape() - 2};
   const auto decimate = Grid<3>(crop, Position<3>::one() * 3);
-  std::cout << decimate.front() << " - " << decimate.back() << " (" << decimate.step() << ")\n";
-  // const auto decimateOut = k.correlateDecimate(in.patch(decimate));
-  // BOOST_TEST(decimateOut.shape() == decimate.shape());
-  // for (const auto& p : decimateOut) {
-  //   BOOST_TEST(decimateOut[p] == expected[decimate.front() + p * 3]);
-  // }
+  const auto decimateOut = k.correlateCrop(in.patch(decimate));
+  BOOST_TEST(decimateOut.shape() == decimate.shape());
+  for (const auto& p : decimateOut.domain()) {
+    BOOST_TEST(decimateOut[p] == expected[decimate.front() + p * 3]);
+  }
 }
 
 //-----------------------------------------------------------------------------

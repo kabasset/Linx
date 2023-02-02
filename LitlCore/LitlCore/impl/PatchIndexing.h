@@ -80,7 +80,7 @@ public:
       m_step(region.step()[0]), m_width(box(region).template length<0>()),
       m_offsets(region.size() / m_width + 1) // +1 see above
   {
-    auto plane = (region - region.front()).project();
+    const auto plane = (region - region.front()).project();
     std::transform(plane.begin(), plane.end(), m_offsets.begin(), [&](const auto& p) {
       return parent.index(p);
     });
