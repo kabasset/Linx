@@ -5,7 +5,7 @@
 #ifndef _LITLTRANSFORMS_KERNEL_H
 #define _LITLTRANSFORMS_KERNEL_H
 
-#include "LitlTransforms/impl/Correlator.h"
+#include "LitlTransforms/impl/Filter.h"
 
 namespace Litl {
 
@@ -13,11 +13,18 @@ namespace Litl {
  * @brief A kernel which can be used for convolution or cross-correlation.
  */
 template <typename T, Index N = 2>
-class Kernel : public CorrelatorMixin<T, N, Kernel<T, N>> { // FIXME DataContainer
+class Kernel { // FIXME DataContainer?
 
 public:
-  using typename CorrelatorMixin<T, N, Kernel<T, N>>::Value;
-  using CorrelatorMixin<T, N, Kernel<T, N>>::Dimension;
+  /**
+   * @brief The value type.
+   */
+  using Value = T;
+
+  /**
+   * @brief The dimension parameter.
+   */
+  static constexpr Index Dimension = N;
 
   /**
    * @brief Constructor.
@@ -46,28 +53,29 @@ public:
   }
 
   /**
-   * @brief Correlate an input raster or extrapolator over a given monolithic region.
-   * @param in An input patch of raster or extrapolator
-   * @param out An output raster or patch
-   * 
-   * The output domain must be compatible with the input domain.
-   * Specifically, both domains will be iterated in parallel,
-   * such that the result of the `n`-th correlation, at `std::advance(in.begin(), n)`,
-   * will be written to `std::advance(out.begin(), n)`.
-   * 
-   * As opposed to other methods, no spatial optimization is performed:
-   * the region is not sliced to isolate extrapolated values from non-extrapolated values.
+   * @brief Convolve an input raster.
    */
-  template <typename TIn, typename TOut>
-  void correlateMonolithTo(const TIn& in, TOut& out) const {
-    auto patch = in.parent().patch(m_window);
-    auto outIt = out.begin();
-    for (const auto& p : in.domain()) {
-      patch.translate(p);
-      *outIt = std::inner_product(m_values.begin(), m_values.end(), patch.begin(), T {});
-      ++outIt;
-      patch.translateBack(p);
-    }
+  template <typename TIn>
+  auto operator*(const TIn& in) const {
+    return convolve().full(in);
+  }
+
+  /**
+   * @brief Make a convolution filter.
+   */
+  auto convolve() const {
+    return filterize(*this, [&](const auto& neighbors) -> T {
+      return std::inner_product(m_values.rbegin(), m_values.rend(), neighbors.begin(), T {});
+    });
+  }
+
+  /**
+   * @brief Make a correlation filter.
+   */
+  auto correlate() const {
+    return filterize(*this, [&](const auto& neighbors) -> T {
+      return std::inner_product(m_values.begin(), m_values.end(), neighbors.begin(), T {});
+    });
   }
 
 private:

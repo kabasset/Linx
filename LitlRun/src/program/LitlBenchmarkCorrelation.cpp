@@ -22,7 +22,7 @@ TDuration filter(Litl::Raster<int, 3>& in, const Litl::Kernel<int, 3>& kernel, c
       break;
     case 'm': {
       auto tmp = in;
-      kernel.correlateMonolithTo(extrapolate(in, 0).patch(in.domain()), tmp);
+      // kernel.correlateMonolithTo(extrapolate(in, 0).patch(in.domain()), tmp); // FIXME refactor
       in = tmp;
     } break;
     default:

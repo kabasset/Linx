@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(crop_test) {
   const auto expected = k * extrapolated;
 
   const Box<3> crop {Position<3>::one(), in.shape() - 2}; // No extrapolation needed
-  const auto cropOut = k.correlateCrop(in.patch(crop));
+  const auto cropOut = k.correlate().crop(in.patch(crop));
   BOOST_TEST(cropOut.shape() == crop.shape());
   for (const auto& p : cropOut.domain()) {
     BOOST_TEST(cropOut[p] == expected[p + crop.front()]);
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(decimate_test) {
 
   const Box<3> crop {Position<3>::one(), in.shape() - 2};
   const auto decimate = Grid<3>(crop, Position<3>::one() * 3);
-  const auto decimateOut = k.correlateCrop(in.patch(decimate));
+  const auto decimateOut = k.correlate().crop(in.patch(decimate));
   BOOST_TEST(decimateOut.shape() == decimate.shape());
   for (const auto& p : decimateOut.domain()) {
     BOOST_TEST(decimateOut[p] == expected[decimate.front() + p * 3]);
