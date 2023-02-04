@@ -11,6 +11,8 @@
 #include "LitlCore/Raster.h"
 #include "LitlTransforms/Extrapolation.h"
 
+#include <iostream> // std::cout
+
 namespace Litl {
 
 /**
@@ -33,43 +35,121 @@ public:
   /**
    * @brief Constructor.
    */
-  Filter(const Box<Dimension>& window, TFunc&& func) : m_window(window), m_func(std::forward<TFunc>(func)) {}
+  Filter(const TKernel& kernel, TFunc func) : m_kernel(kernel), m_func(std::forward<TFunc>(func)) {}
 
   /**
-   * @brief Filter an input extrapolator or patch.
-   * @see `to()`
+   * @brief Get the filtering window.
+   */
+  const Box<Dimension>& window() const {
+    return m_kernel.window();
+  }
+
+  /**
+   * @brief Apply the filter according to the input type.
+   * 
+   * Here is the mapping between the input type and associated operation:
+   * - If `in` is an extrapolated raster, then `full(in)` is returned;
+   * - If `in` is a raw raster, then `crop(in)` is returned;
+   * - If `in` is a box-based patch, then `box(in)` is returned;
+   * - If `in` is a grid-based batch, then `decimate(in)` is returned.
+   * 
+   * For any other case, the method won't compile (see `transform()`).
+   * 
    */
   template <typename TIn>
-  Raster<Value, Dimension> full(const TIn& in) const {
-    Raster<Value, Dimension> out(rasterize(in).shape());
-    out.fill(Value());
-    transform(in, out);
+  Raster<Value, Dimension> operator*(const TIn& in) const {
+    if constexpr (isPatch<TIn>()) {
+      if (in.domain().step().isOne()) { // Box
+        std::cout << "box\n";
+        return box(in);
+      } else { // Grid
+        std::cout << "decimate\n";
+        return decimate(in);
+      }
+    } else if constexpr (isExtrapolator<TIn>()) {
+      std::cout << "full\n";
+      return full(in);
+    } else {
+      std::cout << "crop\n";
+      return crop(in);
+    }
+  }
+
+  /**
+   * @brief Filter an extrapolated raster.
+   * 
+   * The output raster has the same shape as the input raster.
+   */
+  template <typename TExtrapolator>
+  Raster<Value, Dimension> full(const TExtrapolator& in) const {
+    Raster<Value, Dimension> out(in.raster().shape());
+    transformSplits(in, out);
     return out;
   }
 
   /**
-   * @brief Correlate and crop an input extrapolator.
-   * @see `correlateCropTo()`
+   * @brief Filter and crop an input raster.
+   * 
+   * Border regions which would require extrapolation are cropped-out,
+   * such that the output domain is `in.domain() - filter.window()`.
+   */
+  template <typename TRaster>
+  Raster<Value, Dimension> crop(const TRaster& in) const {
+    // FIXME check region is a Box
+    const auto region =
+        Litl::box(in.domain()) - m_kernel.window(); // box() needed to compile given that Grid is acceptable
+    Raster<Value, Dimension> out(region.shape());
+    transformMonolith(in.patch(region), out);
+    return out;
+  }
+
+  /**
+   * @brief Filter a box-based patch.
+   * 
+   * If input values from outside the raster domain are required,
+   * then `in` must be an extrapolator.
+   * On the contrary, if the box of `in` is small enough so that no extrapolated values are required,
+   * then `in` can be a raw patch.
+   * 
+   * The output raster has the same shape as the box.
    */
   template <typename TPatch>
-  Raster<Value, Dimension> crop(const TPatch& in) const {
-    // FIXME check region is a Box or Grid
+  Raster<Value, Dimension> box(const TPatch& in) const {
+    // FIXME check region is a Box
     Raster<Value, Dimension> out(in.domain().shape());
     transform(in, out);
     return out;
   }
 
   /**
-   * @brief Filter an input raster extrapolator or patch into an output raster.
-   * @param in A extrapolator or patch or subextrapolator
+   * @brief Filter and decimate a grid-based patch.
+   * 
+   * Decimation is especially useful for downsampling.
+   * 
+   * If input values from outside the raster domain are required,
+   * then `in` must be an extrapolator.
+   * On the contrary, if the box of `in` is small enough so that no extrapolated values are required,
+   * then `in` can be a raw patch.
+   * 
+   * The output raster has the same shape as the grid.
+   */
+  template <typename TPatch>
+  Raster<Value, Dimension> decimate(const TPatch& in) const { // FIXME adjust?
+    // FIXME check region is a Box or Grid
+    Raster<Value, Dimension> out(in.domain().shape());
+    transform(in, out); // FIXME map in and out BBoxes to call transformSplit
+    return out;
+  }
+
+  /**
+   * @brief Filter an input extrapolator or patch into an output raster or patch.
+   * @param in A extrapolator or patch (or both)
    * @param out A raster or patch with compatible domain
    * 
-   * If the correlation bounding box requires input values from outside the input domain,
+   * If the filtering bounding box requires input values from outside the input domain,
    * then `in` must be an extrapolator.
    * If the bounding box of `in` is small enough so that no extrapolated values are required,
-   * then `in` can be a patch.
-   * 
-   * @see `correlateCropTo()`
+   * then `in` can be a raw patch.
    */
   template <typename TIn, typename TOut>
   void transform(const TIn& in, TOut& out) const {
@@ -83,21 +163,13 @@ public:
 
 private:
   /**
-   * @brief Correlate an input (raster or patch) extrapolator into an output raster.
-   * @param in A extrapolator or patch or subextrapolator
-   * @param out A raster
-   * 
-   * If the correlation bounding box requires input values from outside the input domain,
-   * then `in` must be an extrapolator or subextrapolator.
-   * If the bounding box of `in` is small enough so than no extrapolated values are required,
-   * then `in` can be a patch.
-   * 
-   * @see `correlateCropTo()`
+   * @brief Filter by splitting inner and border regions.
    */
   template <typename TIn, typename TOut>
   void transformSplits(const TIn& in, TOut& out) const {
     const auto& raw = dontExtrapolate(in);
-    const auto box = BorderedBox<Dimension>(Litl::box(raw.domain()), m_window);
+    const auto box = BorderedBox<Dimension>(Litl::box(raw.domain()), m_kernel.window());
+    std::cout << "transformSplits\n";
     box.applyInnerBorder(
         [&](const auto& ib) {
           const auto insub = raw.patch(ib);
@@ -112,25 +184,18 @@ private:
   }
 
   /**
-   * @brief Correlate an input raster or extrapolator over a given monolithic region.
-   * @param in An input patch of raster or extrapolator
-   * @param out An output raster or patch
-   * 
-   * The output domain must be compatible with the input domain.
-   * Specifically, both domains will be iterated in parallel,
-   * such that the result of the `n`-th correlation, at `std::advance(in.begin(), n)`,
-   * will be written to `std::advance(out.begin(), n)`.
-   * 
-   * As opposed to other methods, no spatial optimization is performed:
-   * the region is not sliced to isolate extrapolated values from non-extrapolated values.
+   * @brief Filter a monolithic patch (no region splitting).
    */
   template <typename TIn, typename TOut>
   void transformMonolith(const TIn& in, TOut& out) const {
-    auto patch = in.parent().patch(m_window);
+    std::cout << "transformMonolith\n";
+    std::cout << m_kernel.window().front() << " - " << m_kernel.window().back() << "\n";
+    auto patch = in.parent().patch(m_kernel.window());
     auto outIt = out.begin();
+    std::cout << "loop\n";
     for (const auto& p : in.domain()) {
       patch.translate(p);
-      *outIt = m_func(patch); // FIXME forward?
+      *outIt = TFunc(m_func)(patch); // FIXME forward?
       ++outIt;
       patch.translateBack(p);
     }
@@ -138,9 +203,9 @@ private:
 
 private:
   /**
-   * @brief The filtering window.
+   * @brief The kernel.
    */
-  const Box<Dimension>& m_window; // FIXME allow StructuringElement "kernels"
+  const TKernel& m_kernel;
 
   /**
    * @brief The filtering function.
@@ -153,7 +218,7 @@ private:
  */
 template <typename TKernel, typename TFunc>
 Filter<TKernel, typename std::decay_t<TFunc>> filterize(const TKernel& kernel, TFunc&& func) {
-  return Filter<TKernel, typename std::decay_t<TFunc>>(kernel.window(), std::forward<TFunc>(func));
+  return Filter<TKernel, typename std::decay_t<TFunc>>(kernel, std::forward<TFunc>(func));
 }
 
 } // namespace Litl

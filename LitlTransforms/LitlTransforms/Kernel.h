@@ -57,7 +57,7 @@ public:
    */
   template <typename TIn>
   auto operator*(const TIn& in) const {
-    return convolve().full(in);
+    return convolve() * in;
   }
 
   /**
