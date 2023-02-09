@@ -113,7 +113,7 @@ public:
    * 
    * \snippet LitlDemoConstructors_test.cpp AlignedRaster shares
    */
-  AlignedBuffer(std::size_t size, T* data = nullptr, std::size_t align = 0) :
+  AlignedBuffer(std::size_t size, T* data = nullptr, Index align = 0) :
       m_container(nullptr), m_begin(data), m_end(data + size), m_as(alignAs(data, align)) {
     if (m_begin) {
       AlignmentError::mayThrow(m_begin, m_as);
@@ -210,7 +210,7 @@ public:
   /**
    * @brief Get the required data alignment.
    */
-  std::size_t alignmentReq() const { // FIXME overalignment() as in std doc?
+  Index alignmentReq() const { // FIXME overalignment() as in std doc?
     return m_as;
   }
 
@@ -259,7 +259,7 @@ private:
     m_end = m_begin + size;
   }
 
-  static std::size_t alignAs(const void* data, std::size_t align) {
+  static std::size_t alignAs(const void* data, Index align) {
     constexpr std::size_t simd = 32; // 64 for AVX512; TODO detect?
     switch (align) {
       case -1:
@@ -267,7 +267,7 @@ private:
       case 0:
         return data ? 1 : simd;
       default:
-        return align;
+        return static_cast<std::size_t>(align);
     }
   }
 
@@ -290,7 +290,7 @@ protected:
   /**
    * @brief The required alignment.
    */
-  std::size_t m_as; // FIXME rm?
+  Index m_as; // FIXME rm?
 };
 
 } // namespace Litl
