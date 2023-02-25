@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE(full_test) {
 
   // FIXME make fixture
   auto in = Raster<int>({4, 3}).fill(1);
-  auto k = kernelize(Raster<int>({3, 3}).fill(1));
+  auto k = convolution(Raster<int>({3, 3}).fill(1));
   auto out = k * extrapolate(in, 0);
   std::cout << out << "\n";
   std::vector<int> expected = {4, 6, 6, 4, 6, 9, 9, 6, 4, 6, 6, 4};
@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE(crop_test) {
 
   const auto in = Raster<int>({10, 8}).range();
   const auto extrapolated = extrapolate(in, 0);
-  const auto k = kernelize(Raster<int>({3, 3}).fill(1));
+  const auto k = convolution(Raster<int>({3, 3}).fill(1));
   const auto expected = k * extrapolated;
 
   const auto out = k * in;
@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(inner_box_test) {
 
   const auto in = Raster<int, 3>({5, 6, 7}).range();
   const auto extrapolated = extrapolate(in, 0);
-  const auto k = kernelize(Raster<int, 3>({3, 3, 3}).fill(1));
+  const auto k = convolution(Raster<int, 3>({3, 3, 3}).fill(1));
   const auto expected = k * extrapolated;
 
   const Box<3> region {Position<3>::one(), in.shape() - 2}; // No extrapolation needed
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(inner_decimate_test) {
 
   const auto in = Raster<int, 3>({5, 6, 7}).range();
   const auto extrapolated = extrapolate(in, 0);
-  const auto k = kernelize(Raster<int, 3>({3, 3, 3}).fill(1));
+  const auto k = convolution(Raster<int, 3>({3, 3, 3}).fill(1));
   const auto expected = k * extrapolated;
 
   const Box<3> crop {Position<3>::one(), in.shape() - 2};

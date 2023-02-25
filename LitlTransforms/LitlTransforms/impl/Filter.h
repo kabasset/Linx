@@ -18,30 +18,30 @@ namespace Litl {
 /**
  * @brief Spatial filtering mixin.
  */
-template <typename TKernel, typename TFunc>
-class Filter {
+template <typename T, typename TWindow, typename TDerived>
+class FilterMixin {
 
 public:
   /**
    * @brief The value type.
    */
-  using Value = typename TKernel::Value;
+  using Value = T;
 
   /**
    * @brief The dimension parameter.
    */
-  static constexpr Index Dimension = TKernel::Dimension;
+  static constexpr Index Dimension = TWindow::Dimension;
 
   /**
    * @brief Constructor.
    */
-  Filter(const TKernel& kernel, TFunc func) : m_kernel(kernel), m_func(std::forward<TFunc>(func)) {}
+  FilterMixin(TWindow window) : m_window(std::move(window)) {}
 
   /**
    * @brief Get the filtering window.
    */
-  const Box<Dimension>& window() const {
-    return m_kernel.window();
+  const TWindow& window() const {
+    return m_window;
   }
 
   /**
@@ -96,8 +96,7 @@ public:
   template <typename TRaster>
   Raster<Value, Dimension> crop(const TRaster& in) const {
     // FIXME check region is a Box
-    const auto region =
-        Litl::box(in.domain()) - m_kernel.window(); // box() needed to compile given that Grid is acceptable
+    const auto region = Litl::box(in.domain()) - m_window; // box() needed to compile given that Grid is acceptable
     Raster<Value, Dimension> out(region.shape());
     transformMonolith(in.patch(region), out);
     return out;
@@ -168,7 +167,7 @@ private:
   template <typename TIn, typename TOut>
   void transformSplits(const TIn& in, TOut& out) const {
     const auto& raw = dontExtrapolate(in);
-    const auto box = BorderedBox<Dimension>(Litl::box(raw.domain()), m_kernel.window());
+    const auto box = BorderedBox<Dimension>(Litl::box(raw.domain()), m_window);
     std::cout << "transformSplits\n";
     box.applyInnerBorder(
         [&](const auto& ib) {
@@ -189,37 +188,24 @@ private:
   template <typename TIn, typename TOut>
   void transformMonolith(const TIn& in, TOut& out) const {
     std::cout << "transformMonolith\n";
-    std::cout << m_kernel.window().front() << " - " << m_kernel.window().back() << "\n";
-    auto patch = in.parent().patch(m_kernel.window());
+    std::cout << m_window.front() << " - " << m_window.back() << "\n";
+    auto patch = in.parent().patch(m_window);
     auto outIt = out.begin();
     std::cout << "loop\n";
     for (const auto& p : in.domain()) {
       patch.translate(p);
-      *outIt = TFunc(m_func)(patch); // FIXME forward?
+      *outIt = reinterpret_cast<const TDerived&>(*this)(patch);
       ++outIt;
       patch.translateBack(p);
     }
   }
 
-private:
+protected:
   /**
-   * @brief The kernel.
+   * @brief The window with origin at position 0.
    */
-  const TKernel& m_kernel;
-
-  /**
-   * @brief The filtering function.
-   */
-  TFunc m_func;
+  TWindow m_window;
 };
-
-/**
- * @brief Make a filter.
- */
-template <typename TKernel, typename TFunc>
-Filter<TKernel, typename std::decay_t<TFunc>> filterize(const TKernel& kernel, TFunc&& func) {
-  return Filter<TKernel, typename std::decay_t<TFunc>>(kernel, std::forward<TFunc>(func));
-}
 
 } // namespace Litl
 

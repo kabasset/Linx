@@ -23,7 +23,7 @@ T sum(const std::vector<std::decay_t<T>>& neighbors) {
    */
 template <typename T>
 T mean(const std::vector<std::decay_t<T>>& neighbors) {
-  return sum(neighbors) / neighbors.size();
+  return sum(neighbors) / neighbors.size(); // FIXME size() can be costly if neighbors is a Patch
 }
 
 /**

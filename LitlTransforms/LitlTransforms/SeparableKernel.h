@@ -122,13 +122,13 @@ public:
   /**
    * @brief Convolve the separable components as a single ND kernel.
    */
-  Kernel<Value, Dimension> compose() const {
+  Kernel<KernelType::Convolution, Value, Dimension> compose() const { // FIXME inherit KernelType
     const auto w = window();
     const auto o = -w.front();
     auto raster = Raster<Value, Dimension>(w.shape());
     raster[o] = T(1); // FIXME or back-o?
     auto impulse = *this * extrapolate(raster, 0);
-    return kernelize(impulse.reverse(), o);
+    return convolution(impulse.reverse(), o); // FIXME use KernelType
   }
 
   /**

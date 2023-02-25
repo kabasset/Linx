@@ -13,7 +13,8 @@
 static Elements::Logging logger = Elements::Logging::getLogger("LitlBenchmarkCorrelation");
 
 template <typename TDuration>
-TDuration filter(Litl::Raster<int, 3>& in, const Litl::Kernel<int, 3>& kernel, char setup) {
+TDuration
+filter(Litl::Raster<int, 3>& in, const Litl::Kernel<Litl::KernelType::Convolution, int, 3>& kernel, char setup) {
   Litl::Chronometer<TDuration> chrono;
   chrono.start();
   switch (setup) {
@@ -49,7 +50,7 @@ public:
     const auto diameter = args["radius"].as<Litl::Index>() * 2 + 1;
     const auto seed = args["seed"].as<Litl::Index>();
     Litl::Raster<int, 3> in({side, side, side});
-    const auto kernel = Litl::kernelize(
+    const auto kernel = Litl::convolution(
         Litl::Raster<int, 3>({diameter, diameter, diameter}).generate(Litl::UniformNoise<int>(0, 1, seed)));
     const auto out = kernel * extrapolate(in, 0);
 

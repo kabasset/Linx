@@ -9,94 +9,70 @@
 
 namespace Litl {
 
+enum class KernelType { // FIXME KernelTag?
+  Convolution,
+  Correlation
+};
+
 /**
  * @brief A kernel which can be used for convolution or cross-correlation.
  */
-template <typename T, Index N = 2>
-class Kernel { // FIXME DataContainer?
+template <KernelType TKernel, typename T, Index N = 2>
+class Kernel : public FilterMixin<T, Box<N>, Kernel<TKernel, T, N>> {
 
 public:
-  /**
-   * @brief The value type.
-   */
-  using Value = T;
-
-  /**
-   * @brief The dimension parameter.
-   */
-  static constexpr Index Dimension = N;
+  using typename FilterMixin<T, Box<N>, Kernel<TKernel, T, N>>::Value;
+  using FilterMixin<T, Box<N>, Kernel<TKernel, T, N>>::Dimension;
 
   /**
    * @brief Constructor.
    */
-  Kernel(const T* values, Box<N> window) : m_values(values, values + window.size()), m_window(std::move(window)) {}
-
-  /**
-   * @brief Get the window.
-   */
-  const Box<Dimension>& window() const {
-    return m_window;
-  }
+  Kernel(const Value* values, Box<Dimension> window) :
+      FilterMixin<T, Box<N>, Kernel<TKernel, T, N>>(std::move(window)),
+      m_values(values, values + this->m_window.size()) {}
 
   /**
    * @brief View the kernel values as a `Raster`.
    */
+
   PtrRaster<const Value, Dimension> raster() const {
-    return PtrRaster<const Value, Dimension>(m_window.shape(), m_values.data());
+    return PtrRaster<const Value, Dimension>(this->window().shape(), m_values.data());
   }
 
   /**
    * @copybrief raster()
    */
   PtrRaster<Value, Dimension> raster() {
-    return PtrRaster<Value, Dimension>(m_window.shape(), m_values.data());
+    return PtrRaster<Value, Dimension>(this->window().shape(), m_values.data());
   }
 
   /**
-   * @brief Convolve an input raster.
+   * @brief Estimation operator.
    */
   template <typename TIn>
-  auto operator*(const TIn& in) const {
-    return convolve() * in;
-  }
-
-  /**
-   * @brief Make a convolution filter.
-   */
-  auto convolve() const {
-    return filterize(*this, [&](const auto& neighbors) -> T {
-      return std::inner_product(m_values.rbegin(), m_values.rend(), neighbors.begin(), T {});
-    });
-  }
-
-  /**
-   * @brief Make a correlation filter.
-   */
-  auto correlate() const {
-    return filterize(*this, [&](const auto& neighbors) -> T {
-      return std::inner_product(m_values.begin(), m_values.end(), neighbors.begin(), T {});
-    });
+  Value operator()(const TIn& neighbors) const {
+    if constexpr (TKernel == KernelType::Correlation) {
+      return std::inner_product(m_values.begin(), m_values.end(), neighbors.begin(), Value {});
+    }
+    if constexpr (TKernel == KernelType::Convolution) {
+      return std::inner_product(m_values.rbegin(), m_values.rend(), neighbors.begin(), Value {});
+    }
   }
 
 private:
   /**
    * @brief The correlation values.
    */
-  std::vector<T> m_values;
-
-  /**
-   * @brief The correlation window.
-   */
-  Box<N> m_window;
+  std::vector<Value> m_values;
 };
 
 /**
  * @relates Kernel
- * @brief Make a kernel from values and a window.
+ * @brief Make a convolution kernel from values and a window.
  */
 template <typename T, Index N = 2>
-Kernel<T, N> kernelize(const T* values, Box<N> window) {
-  return Kernel<T, N>(values, std::move(window));
+Kernel<KernelType::Convolution, T, N> convolution(const T* values, Box<N> window) {
+  return Kernel<KernelType::Convolution, T, N>(values, std::move(window));
 }
 
 /**
@@ -104,8 +80,8 @@ Kernel<T, N> kernelize(const T* values, Box<N> window) {
  * @brief Make a kernel from a raster and origin position.
  */
 template <typename T, Index N, typename THolder>
-Kernel<T, N> kernelize(const Raster<T, N, THolder>& values, Position<N> origin) {
-  return kernelize(values.data(), values.domain() - origin);
+Kernel<KernelType::Convolution, T, N> convolution(const Raster<T, N, THolder>& values, Position<N> origin) {
+  return convolution(values.data(), values.domain() - origin);
 }
 
 /**
@@ -115,8 +91,8 @@ Kernel<T, N> kernelize(const Raster<T, N, THolder>& values, Position<N> origin) 
  * In case of even lengths, origin position is rounded down.
  */
 template <typename T, Index N, typename THolder>
-Kernel<T, N> kernelize(const Raster<T, N, THolder>& values) {
-  return kernelize(values.data(), values.domain() - (values.shape() - 1) / 2);
+Kernel<KernelType::Convolution, T, N> convolution(const Raster<T, N, THolder>& values) {
+  return convolution(values.data(), values.domain() - (values.shape() - 1) / 2);
 }
 
 } // namespace Litl
