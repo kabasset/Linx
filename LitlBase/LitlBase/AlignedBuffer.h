@@ -19,7 +19,7 @@ namespace Litl {
  * @brief Check whether some pointer is aligned as required.
  */
 template <typename T>
-bool isAligned(const T* ptr, std::size_t as) {
+bool isAligned(const T* ptr, Index as) {
   if (not ptr) {
     throw NullPtrError("Null pointer tested for alignment.");
   }
@@ -34,11 +34,11 @@ bool isAligned(const T* ptr, std::size_t as) {
  * @brief Get the highest power of two some pointer is aligned as.
  */
 template <typename T>
-std::size_t alignment(const T* ptr) {
+Index alignment(const T* ptr) {
   if (not ptr) {
     throw NullPtrError("Null pointer tested for alignment.");
   }
-  std::size_t as = 2; // FIXME 1?
+  Index as = 2; // FIXME 1?
   while (std::uintptr_t(ptr) % as == 0) {
     as <<= 1;
   }
@@ -62,13 +62,13 @@ struct AlignmentError : Exception {
   /**
    * @brief Constructor.
    */
-  AlignmentError(const void* ptr, std::size_t alignment) :
+  AlignmentError(const void* ptr, Index alignment) :
       Exception("Alignment error", toString(ptr) + " is not " + std::to_string(alignment) + " byte-aligned.") {};
 
   /**
    * @brief Throw if the alignement requirement is not met.
    */
-  static void mayThrow(const void* ptr, std::size_t alignment) {
+  static void mayThrow(const void* ptr, Index alignment) {
     if (not isAligned(ptr, alignment)) {
       throw AlignmentError(ptr, alignment);
     }
@@ -113,7 +113,7 @@ public:
    * 
    * \snippet LitlDemoConstructors_test.cpp AlignedRaster shares
    */
-  AlignedBuffer(std::size_t size, T* data = nullptr, std::size_t align = 0) :
+  AlignedBuffer(std::size_t size, T* data = nullptr, Index align = 0) :
       m_container(nullptr), m_begin(data), m_end(data + size), m_as(alignAs(data, align)) {
     if (m_begin) {
       AlignmentError::mayThrow(m_begin, m_as);
@@ -259,7 +259,7 @@ private:
     m_end = m_begin + size;
   }
 
-  static std::size_t alignAs(const void* data, std::size_t align) {
+  static std::size_t alignAs(const void* data, Index align) {
     constexpr std::size_t simd = 32; // 64 for AVX512; TODO detect?
     switch (align) {
       case -1:
@@ -267,7 +267,7 @@ private:
       case 0:
         return data ? 1 : simd;
       default:
-        return align;
+        return static_cast<std::size_t>(align);
     }
   }
 
@@ -290,7 +290,7 @@ protected:
   /**
    * @brief The required alignment.
    */
-  std::size_t m_as; // FIXME rm?
+  Index m_as; // FIXME rm?
 };
 
 } // namespace Litl

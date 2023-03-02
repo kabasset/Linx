@@ -9,8 +9,8 @@
 
 #include <algorithm> // copy_n
 #include <array>
-#include <exception> // runtime_error // FIXME to Exceptions
 #include <memory> // unique_ptr
+#include <stdexcept> // runtime_error // FIXME to Exceptions
 #include <valarray>
 #include <vector>
 
