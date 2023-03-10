@@ -58,6 +58,7 @@ public:
    */
   template <typename TIn>
   Raster<Value, Dimension> operator*(const TIn& in) const {
+    std::cout << "---\n";
     if constexpr (isPatch<TIn>()) {
       if (in.domain().step().isOne()) { // Box
         std::cout << "box\n";
@@ -187,11 +188,9 @@ private:
    */
   template <typename TIn, typename TOut>
   void transformMonolith(const TIn& in, TOut& out) const {
-    std::cout << "transformMonolith\n";
-    std::cout << m_window.front() << " - " << m_window.back() << "\n";
     auto patch = in.parent().patch(m_window);
     auto outIt = out.begin();
-    std::cout << "loop\n";
+    std::cout << "transformMonolith\n";
     for (const auto& p : in.domain()) {
       patch.translate(p);
       *outIt = reinterpret_cast<const TDerived&>(*this)(patch);

@@ -76,6 +76,21 @@ BOOST_AUTO_TEST_CASE(inner_decimate_test) {
   }
 }
 
+BOOST_AUTO_TEST_CASE(extrapolated_decimate_test) {
+
+  const auto in = Raster<int, 3>({5, 6, 7}).range();
+  const auto extrapolated = extrapolate(in, 0);
+  const auto k = convolution(Raster<int, 3>({3, 3, 3}).fill(1));
+  const auto expected = k * extrapolated;
+
+  const auto region = Grid<3>(in.domain(), Position<3>::one() * 3);
+  const auto out = k * extrapolated.patch(region);
+  BOOST_TEST(out.shape() == region.shape());
+  for (const auto& p : out.domain()) {
+    BOOST_TEST(out[p] == expected[region.front() + p * 3]);
+  }
+}
+
 // FIXME extrapolated_decimate_test, inc. out-of-domain positions
 
 //-----------------------------------------------------------------------------
