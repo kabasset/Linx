@@ -135,9 +135,34 @@ public:
    */
   template <typename TPatch>
   Raster<Value, Dimension> decimate(const TPatch& in) const { // FIXME adjust?
-    // FIXME check region is a Box or Grid
+
+    const auto& raw = dontExtrapolate(in);
+    const auto& front = in.domain().front();
+    const auto& back = in.domain().back();
+    const auto& step = in.domain().step();
     Raster<Value, Dimension> out(in.domain().shape());
-    transform(in, out); // FIXME map in and out BBoxes to call transformSplit
+
+    const auto gridToBox = [&](const auto& g) {
+      auto f = g.front() - front;
+      for (std::size_t i = 0; i < f.size(); ++i) {
+        f /= step[i];
+      }
+      return Box<Dimension>::fromShape(f, g.shape());
+    };
+
+    const auto box = BorderedBox<Dimension>(rasterize(in).domain(), m_window);
+    box.applyInnerBorder(
+        [&](const auto& ib) {
+          const auto insub = raw.patch(ib);
+          auto outsub = out.patch(gridToBox(insub.domain()));
+          transformMonolith(insub, outsub);
+        },
+        [&](const auto& ib) {
+          const auto insub = in.patch(ib);
+          auto outsub = out.patch(gridToBox(insub.domain()));
+          transformMonolith(insub, outsub);
+        });
+
     return out;
   }
 
