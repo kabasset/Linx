@@ -1,4 +1,4 @@
-namespace Litl {
+namespace Linx {
 /**
 
 \addtogroup dft
@@ -15,19 +15,19 @@ then this is the only section you have to read!
 As an illustrative example, we will compute the derivative of the sine function in Fourier space.
 Given an input sine signal:
 
-\snippet LitlDemoDft_test.cpp Fill vector
+\snippet LinxDemoDft_test.cpp Fill vector
 
 We compute the Fourier transform:
 
-\snippet LitlDemoDft_test.cpp realDft
+\snippet LinxDemoDft_test.cpp realDft
 
 Multiply by `jk`:
 
-\snippet LitlDemoDft_test.cpp Concise derivation
+\snippet LinxDemoDft_test.cpp Concise derivation
 
 And transform back the data:
 
-\snippet LitlDemoDft_test.cpp inverseRealDft
+\snippet LinxDemoDft_test.cpp inverseRealDft
 
 And that's all!
 
@@ -38,7 +38,7 @@ And that's all!
 <a href="http://fftw.org/">FFTW</a> is a fast(est) C library
 to compute a variety of discrete Fourier and related transforms (hereafter denoted DFTs).
 It provides low-level functions to configure, prepare and execute DFTs with a primary focus on performance.
-Litl offers an as-light-as-possible modern C++ wrapper of FFTW with automatic memory management,
+Linx offers an as-light-as-possible modern C++ wrapper of FFTW with automatic memory management,
 more friendly interfaces, and (obviously) perfect integration with rasters.
 
 Still, the key concepts of FFTW hold:
@@ -66,7 +66,7 @@ Like in the first section, we will compute the derivative of the sine function.
 For this purpose, we need a direct 1D DFT of real values, and the associated inverse DFT.
 Let us instantiate a DFT plan of 360 values.
 
-\snippet LitlDemoDft_test.cpp Plan direct
+\snippet LinxDemoDft_test.cpp Plan direct
 
 In order to perform the inverse transform,
 it is natural (and efficient) to reuse the buffers of the direct transform.
@@ -74,7 +74,7 @@ This can be done manually by creating buffers with shared memory,
 or automatically with `DftPlan::inverse()`,
 which returns an object of appropriate type and with inverted buffers:
 
-\snippet LitlDemoDft_test.cpp Plan inverse
+\snippet LinxDemoDft_test.cpp Plan inverse
 
 
 \section dft-execution Execution
@@ -83,21 +83,21 @@ which returns an object of appropriate type and with inverted buffers:
 After planning, the buffers may contain garbage values.
 Let us fill the input buffer with a sine signal:
 
-\snippet LitlDemoDft_test.cpp Fill signal
+\snippet LinxDemoDft_test.cpp Fill signal
 
 Now, the DFT can be executed:
 
-\snippet LitlDemoDft_test.cpp Direct transform
+\snippet LinxDemoDft_test.cpp Direct transform
 
 The derivative is computed in Fourier space as `direct.out() * jk`:
 
-\snippet LitlDemoDft_test.cpp Derivation
+\snippet LinxDemoDft_test.cpp Derivation
 
 And the derived signal is recovered by executing the inverse transform.
 Like with FFTW, the inverse transform is scaled by the size of the logical raster shape.
 It can be normalized with `DftPlan::normalize()`, which acts directly on the output buffer.
 
-\snippet LitlDemoDft_test.cpp Inverse transform
+\snippet LinxDemoDft_test.cpp Inverse transform
 
 Now, `direct.in()` contains the derivative of the initial sine signal, i.e. a cosine signal.
 

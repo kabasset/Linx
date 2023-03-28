@@ -4,6 +4,7 @@
 
 ## Breaking changes
 
+* Namespace change (`Linx`)
 * `makeRaster()` renamed as `rasterize()`
 * `Region` replaced with `Box`
 * `Dim` renamed as `Dimension`
@@ -17,12 +18,12 @@
 * Extrapolation and interpolation with `Extrapolator` and `Interpolator`
 * Affine transformations as `Affinity`
 * `Raster` has Euclidean ring arithmetic (not only vector space arithmetic)
-* Containers supports mathematical functions (`abs()`, `min()`, `sin()`, `exp()`...)
+* Containers support mathematical functions (`abs()`, `min()`, `sin()`, `exp()`...)
 * Containers support filling methods (`fill()`, `range()`...),
   random values can be generated with `generate()`,
   and random noise can be added with `apply()`
 * New `Raster` specialization `AlignedRaster` supports owning and sharing memory-aligned data
-* Containers supports `std::valarray` as a data holder
+* Containers support `std::valarray` as a data holder
 * 1D container `Vector` generalizes `Position` with template value type
 * Alias `Index` for `long`, mostly for documentation purpose
 * Header-only library

@@ -32,7 +32,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = Litl # @PROJECT_NAME@ does not allow dot
+PROJECT_NAME           = Linx # @PROJECT_NAME@ does not allow dot
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -879,10 +879,10 @@ INPUT                  = @PROJECT_SOURCE_DIR@/README.md \
                          @PROJECT_SOURCE_DIR@/INSTALL.md \
                          @PROJECT_SOURCE_DIR@/CHANGES.md \
                          @PROJECT_SOURCE_DIR@/doc \
-                         @PROJECT_SOURCE_DIR@/LitlBase \
-                         @PROJECT_SOURCE_DIR@/LitlCore \
-                         @PROJECT_SOURCE_DIR@/LitlTransforms \
-                         @PROJECT_SOURCE_DIR@/LitlRun
+                         @PROJECT_SOURCE_DIR@/LinxBase \
+                         @PROJECT_SOURCE_DIR@/LinxCore \
+                         @PROJECT_SOURCE_DIR@/LinxTransforms \
+                         @PROJECT_SOURCE_DIR@/LinxRun
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -991,8 +991,8 @@ EXCLUDE_SYMBOLS        =
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           = @PROJECT_SOURCE_DIR@/LitlDemo \
-                         @PROJECT_SOURCE_DIR@/LitlRun
+EXAMPLE_PATH           = @PROJECT_SOURCE_DIR@/LinxDemo \
+                         @PROJECT_SOURCE_DIR@/LinxRun
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and

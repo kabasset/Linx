@@ -1,4 +1,4 @@
-namespace Litl {
+namespace Linx {
 /**
 
 \addtogroup channels
@@ -22,7 +22,7 @@ Depending on what has to be done with the data, different strategies should be c
 
 We can define a simple structure like so:
 
-\snippet LitlDemoChannels_test.cpp Rgb struct
+\snippet LinxDemoChannels_test.cpp Rgb struct
 
 If the three channels are always used together, this is the good approach because values will be stored contiguously in memory,
 i.e. `raster[1].r` will be stored immediately after `raster[0].b`.
@@ -36,17 +36,17 @@ For example, this is a very efficient and user-friendly approach for RGB to HSV 
 Let us see how the code could look like.
 Define some structure for HSV pixels, too:
 
-\snippet LitlDemoChannels_test.cpp Hsv struct
+\snippet LinxDemoChannels_test.cpp Hsv struct
 
 Instantiate an RGB image:
 
-\snippet LitlDemoChannels_test.cpp Input Rgb
+\snippet LinxDemoChannels_test.cpp Input Rgb
 
 And apply some function `rgbToHsv()` to each pixel with `Raster::generate()`:
 
-\snippet LitlDemoChannels_test.cpp Output Hsv
+\snippet LinxDemoChannels_test.cpp Output Hsv
 
-(The conversion function is not showed in this page but available in the demo program: \ref LitlDemoChannels_test.cpp.)
+(The conversion function is not showed in this page but available in the demo program: \ref LinxDemoChannels_test.cpp.)
 
 
 \section channels-along0 With Color Along the First Axis
@@ -58,15 +58,15 @@ Here is another possible memory layout, using the first axis for the color:
 
 With this strategy, the RGB and HSV images are 3D:
 
-\snippet LitlDemoChannels_test.cpp CxyImage
+\snippet LinxDemoChannels_test.cpp CxyImage
 
 And things get ugly already when filling the input image:
 
-\snippet LitlDemoChannels_test.cpp Input Cxy
+\snippet LinxDemoChannels_test.cpp Input Cxy
 
 Looping over the input RGB image and output HSV image at the same time is something like:
 
-\snippet LitlDemoChannels_test.cpp Output Cxy
+\snippet LinxDemoChannels_test.cpp Output Cxy
 
 where this time `rgbToHsv()` operates on `rgbIt[0]`, `rgbIt[1]`, `rgbIt[2]`, `hsvIt[0]`, `hsvIt[1]`, `hsvIt[2]`!
 
@@ -91,7 +91,7 @@ where we will multiply the red channel by 1.5, the green channel by 1.1 and the 
 
 The image type will be similar to the previous section:
 
-\snippet LitlDemoChannels_test.cpp XycImage
+\snippet LinxDemoChannels_test.cpp XycImage
 
 But the layout is very different:
 
@@ -100,11 +100,11 @@ But the layout is very different:
 The pixels are organized channel by channel to ensure data contiguity inside each channel.
 The channels can then be viewed as `PtrRaster`s with the `Raster::section()` method:
 
-\snippet LitlDemoChannels_test.cpp Input Xyc
+\snippet LinxDemoChannels_test.cpp Input Xyc
 
 Operations on each channel are very efficient (vectorized and with minimal cache missing):
 
-\snippet LitlDemoChannels_test.cpp Output Xyc
+\snippet LinxDemoChannels_test.cpp Output Xyc
 
 Obviously, this approach is not limitted to color channels;
 it is also very convenient to handle video fluxes, where the last axis is time,
@@ -126,15 +126,15 @@ With the filter wheel example, assume we want to support any number of filters,
 and compute the pixel-wise integrated incoming flux as the weighted sum of the pixel components.
 In this scenario, we have a 3D input and a 2D output:
 
-\snippet LitlDemoChannels_test.cpp Vector image
+\snippet LinxDemoChannels_test.cpp Vector image
 
 Let us set up some dummy input:
 
-\snippet LitlDemoChannels_test.cpp Input vector
+\snippet LinxDemoChannels_test.cpp Input vector
 
 And compute the weighted sum:
 
-\snippet LitlDemoChannels_test.cpp Output scalar
+\snippet LinxDemoChannels_test.cpp Output scalar
 
 This technique is both the most readable, and the most efficient for accumulators in general:
 when possible, it is best to accumulate along the first axis.
@@ -148,7 +148,7 @@ that is, it is possible to instantiate something like a `Raster<Raster<int>>`!
 
 TODO
 
-\snippet LitlDemoChannels_test.cpp Raster of raster
+\snippet LinxDemoChannels_test.cpp Raster of raster
 
 */
 }

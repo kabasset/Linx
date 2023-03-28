@@ -1,4 +1,4 @@
-namespace Litl {
+namespace Linx {
 /**
 
 \addtogroup primer
@@ -7,7 +7,7 @@ namespace Litl {
 \section primer-intro Introduction
 
 
-Above all, Litl is an extensible data containers library.
+Above all, Linx is an extensible data containers library.
 The main 1D container is `Sequence` while the main ND container is `Raster`.
 Both aim at adding signal processing methods to any object which points to some contiguous memory
 -- from a raw pointer to `std::vector` or any custom type --
@@ -16,7 +16,7 @@ Many more data containers are defined, like `Vector`, `Matrix` or even `Chronome
 which are all made up by picking some building blocks (base classes and mixins) to tailor their feature set.
 
 Let us first introduce `Sequence` and `Raster`,
-before briefly presenting the class hierarchy which results in all of the Litl containers.
+before briefly presenting the class hierarchy which results in all of the Linx containers.
 Many more details are available in dedicated pages, which are referenced at the end of each section.
 
 
@@ -51,7 +51,7 @@ ND geometrical transforms are implemented.
 Before going further, a short digression on the naming of the class.
 Why "raster" and not simply image or array?
 Mostly for disambiguation purpose: "image" refers to an extension type of the FITS format
--- which is at the heart of EleFits, from which Litl was initially out-sourced --
+-- which is at the heart of EleFits, from which Linx was initially out-sourced --
 while "array" has already several meanings in C/C++.
 `NdArray` would have been an option, but every related class should have been prefixed with `Nd` for homogeneity:
 `NdPosition`, `NdBox`, `VecNdArray`...
@@ -74,7 +74,7 @@ Element-wise methods are then implemented in mixins:
 `ArithmeticMixin` for operators and `MathFunctionsMixin` for mathematical functions.
 Finally, `DataContainer` implements constructors and assignment methods (`fill()`, `linspace()`, `apply()`...).
 
-For illustration, here is how some of the Litl containers are composed:
+For illustration, here is how some of the Linx containers are composed:
 
 <table class="fieldtable">
 <tr><th>Container<th>Holder<th>Operators<th>Math functions
@@ -173,7 +173,7 @@ Indices are 0-based signed integers of type `Index`.
 Class `Position` is a contiguous container of indices, which is generally brace-initialized.
 Using signed integers enables backward indexing, e.g. with method `Raster::at()`:
 
-\snippet LitlDemoBasics_test.cpp Element access
+\snippet LinxDemoBasics_test.cpp Element access
 
 As a standard contiguous container, `Raster` also provides element access through iterators,
 which are explicitely raw pointers (as opposed to `std::vector` but like `eastl::vector`)
@@ -182,7 +182,7 @@ Methods `Raster::begin()` and `Raster::end()` enable range for loops
 and should be used with standard functions like algorithms.
 The following blocks are all functionally equivalent:
 
-\snippet LitlDemoBasics_test.cpp Foreach element
+\snippet LinxDemoBasics_test.cpp Foreach element
 
 */
 }
