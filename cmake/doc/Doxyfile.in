@@ -51,7 +51,7 @@ PROJECT_BRIEF          = @PROJECT_DESCRIPTION@
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           = @PROJECT_SOURCE_DIR@/doc/diagrams/raster_logo_notext.svg
+PROJECT_LOGO           = @PROJECT_SOURCE_DIR@/doc/diagrams/logo_notext.svg
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
