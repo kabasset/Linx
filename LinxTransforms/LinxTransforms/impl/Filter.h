@@ -141,6 +141,8 @@ public:
     const auto& back = in.domain().back();
     const auto& step = in.domain().step();
     Raster<Value, Dimension> out(in.domain().shape());
+    printf("in grid: %d-%d: %d\n", front[0], back[0], step[0]);
+    printf("out box: %d-%d\n", out.domain().front()[0], out.domain().back()[0]);
 
     const auto gridToBox = [&](const auto& g) {
       auto f = g.front() - front;
@@ -153,13 +155,27 @@ public:
     const auto box = BorderedBox<Dimension>(rasterize(in).domain(), m_window);
     box.applyInnerBorder(
         [&](const auto& ib) {
+          printf("inner crop: %d-%d\n", ib.front()[0], ib.back()[0]);
           const auto insub = raw.patch(ib);
           auto outsub = out.patch(gridToBox(insub.domain()));
+          printf(
+              "inner grid: %d-%d: %d\n",
+              insub.domain().front()[0],
+              insub.domain().back()[0],
+              insub.domain().step()[0]);
+          printf("inner box: %d-%d\n", outsub.domain().front()[0], outsub.domain().back()[0]);
           transformMonolith(insub, outsub);
         },
         [&](const auto& ib) {
+          printf("border crop: %d-%d\n", ib.front()[0], ib.back()[0]);
           const auto insub = in.patch(ib);
           auto outsub = out.patch(gridToBox(insub.domain()));
+          printf(
+              "border grid: %d-%d: %d\n",
+              insub.domain().front()[0],
+              insub.domain().back()[0],
+              insub.domain().step()[0]);
+          printf("border box: %d-%d\n", outsub.domain().front()[0], outsub.domain().back()[0]);
           transformMonolith(insub, outsub);
         });
 
