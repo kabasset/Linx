@@ -12,6 +12,8 @@
 #include "LinxCore/Raster.h"
 #include "LinxCore/Sequence.h"
 
+#include <iostream> // std::cout
+
 namespace Linx {
 
 /**
@@ -81,6 +83,8 @@ public:
       m_offsets(region.size() / m_width + 1) // +1 see above
   {
     const auto plane = (region - region.front()).project();
+    std::cout << "Region: " << region.front() << "-" << region.back() << ": " << region.step() << "\n";
+    std::cout << "Plane: " << plane.front() << "-" << plane.back() << ": " << plane.step() << "\n";
     std::transform(plane.begin(), plane.end(), m_offsets.begin(), [&](const auto& p) {
       return parent.index(p);
     });
