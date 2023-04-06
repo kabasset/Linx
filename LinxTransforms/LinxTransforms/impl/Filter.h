@@ -11,8 +11,6 @@
 #include "LinxCore/Raster.h"
 #include "LinxTransforms/Extrapolation.h"
 
-#include <iostream> // std::cout
-
 namespace Linx {
 
 /**
@@ -58,20 +56,15 @@ public:
    */
   template <typename TIn>
   Raster<Value, Dimension> operator*(const TIn& in) const {
-    std::cout << "---\n";
     if constexpr (isPatch<TIn>()) {
       if (in.domain().step().isOne()) { // Box
-        std::cout << "box\n";
         return box(in);
       } else { // Grid
-        std::cout << "decimate\n";
         return decimate(in);
       }
     } else if constexpr (isExtrapolator<TIn>()) {
-      std::cout << "full\n";
       return full(in);
     } else {
-      std::cout << "crop\n";
       return crop(in);
     }
   }
@@ -138,16 +131,13 @@ public:
 
     const auto& raw = dontExtrapolate(in);
     const auto& front = in.domain().front();
-    const auto& back = in.domain().back();
     const auto& step = in.domain().step();
     Raster<Value, Dimension> out(in.domain().shape());
-    printf("in grid: %d-%d: %d\n", front[0], back[0], step[0]);
-    printf("out box: %d-%d\n", out.domain().front()[0], out.domain().back()[0]);
 
     const auto gridToBox = [&](const auto& g) {
       auto f = g.front() - front;
-      for (std::size_t i = 0; i < f.size(); ++i) {
-        f /= step[i];
+      for (std::size_t i = 0; i < f.size(); ++i) { // FIXME simplify with Linx
+        f[i] /= step[i];
       }
       return Box<Dimension>::fromShape(f, g.shape());
     };
@@ -155,27 +145,13 @@ public:
     const auto box = BorderedBox<Dimension>(rasterize(in).domain(), m_window);
     box.applyInnerBorder(
         [&](const auto& ib) {
-          printf("inner crop: %d-%d\n", ib.front()[0], ib.back()[0]);
           const auto insub = raw.patch(ib);
           auto outsub = out.patch(gridToBox(insub.domain()));
-          printf(
-              "inner grid: %d-%d: %d\n",
-              insub.domain().front()[0],
-              insub.domain().back()[0],
-              insub.domain().step()[0]);
-          printf("inner box: %d-%d\n", outsub.domain().front()[0], outsub.domain().back()[0]);
           transformMonolith(insub, outsub);
         },
         [&](const auto& ib) {
-          printf("border crop: %d-%d\n", ib.front()[0], ib.back()[0]);
           const auto insub = in.patch(ib);
           auto outsub = out.patch(gridToBox(insub.domain()));
-          printf(
-              "border grid: %d-%d: %d\n",
-              insub.domain().front()[0],
-              insub.domain().back()[0],
-              insub.domain().step()[0]);
-          printf("border box: %d-%d\n", outsub.domain().front()[0], outsub.domain().back()[0]);
           transformMonolith(insub, outsub);
         });
 
@@ -210,7 +186,6 @@ private:
   void transformSplits(const TIn& in, TOut& out) const {
     const auto& raw = dontExtrapolate(in);
     const auto box = BorderedBox<Dimension>(Linx::box(raw.domain()), m_window);
-    std::cout << "transformSplits\n";
     box.applyInnerBorder(
         [&](const auto& ib) {
           const auto insub = raw.patch(ib);
@@ -231,7 +206,6 @@ private:
   void transformMonolith(const TIn& in, TOut& out) const {
     auto patch = in.parent().patch(m_window);
     auto outIt = out.begin();
-    std::cout << "transformMonolith\n";
     for (const auto& p : in.domain()) {
       patch.translate(p);
       *outIt = reinterpret_cast<const TDerived&>(*this)(patch);
