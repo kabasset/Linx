@@ -304,7 +304,7 @@ Grid<N> project(const Grid<N>& in, Index axis = 0) {
 template <Index N>
 inline Grid<N> operator&(const Grid<N>& region, const Box<N>& bounds) {
   auto front = bounds.front();
-  for (Index i = 0; i < region.size(); ++i) {
+  for (Index i = 0; i < region.dimension(); ++i) {
     front[i] += (region.back()[i] - front[i]) % region.step()[i];
   }
   return Grid<N>({front, bounds.back()}, region.step());
