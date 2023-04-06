@@ -1,6 +1,6 @@
 # Project Overview
 
-<p>![Linx logo](doc/diagrams/logo_square.svg)</p>
+<br/>![Linx logo](doc/diagrams/logo_square.svg)
 
 # Purpose
 
