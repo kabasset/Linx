@@ -1,6 +1,6 @@
 # Project Overview
 
-![Litl logo](doc/diagrams/litl_logo.svg)
+![Linx logo](doc/diagrams/logo_square.svg)
 
 # Purpose
 
@@ -10,7 +10,7 @@ and PhiFun's operations -- e.g. Fourier transforms, linear filtering, and interp
 
 The target is a header-only library focused on ease of use
 and which interfaces seamlessly with the standard C++ library.
-At some point, the ND array implementation of EleFits should be droped in favor of Litl.
+At some point, the ND array implementation of EleFits should be droped in favor of Linx.
 
 The image processing feature set is expected to grow steadily on demand.
 Currently supported operations are:
@@ -28,11 +28,11 @@ Currently supported operations are:
 
 # Alternatives
 
-The following libraries offer features similar to Litl.
+The following libraries offer features similar to Linx.
 Most of the libraries which support ND arrays are focused on linear algebra,
 while most image processing libraries limit the number of axes.
 ITK (and SimpleITK) is the notable exception.
-Litl aims at being less verbose and more extensible,
+Linx aims at being less verbose and more extensible,
 although with a more limited feature set.
 
 * Armadillo

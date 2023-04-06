@@ -1,4 +1,4 @@
-namespace Litl {
+namespace Linx {
 /**
 
 \addtogroup regions
@@ -48,22 +48,22 @@ Regions can be more or less costly to iterate, depending on which regularity ass
 For example, boxes contain many contiguous pixels, while sequences of positions can be completely random.
 This generally makes iterating over boxes much faster than iterating over the sequence of positions inside the box.
 
-\snippet LitlBenchmarkRegions.cpp Make box
-\snippet LitlBenchmarkRegions.cpp Make sparse regions
+\snippet LinxBenchmarkRegions.cpp Make box
+\snippet LinxBenchmarkRegions.cpp Make sparse regions
 
-\snippet LitlBenchmarkRegions.cpp Iterate over box
-
-10ms
-
-\snippet LitlBenchmarkRegions.cpp Iterate over grid
+\snippet LinxBenchmarkRegions.cpp Iterate over box
 
 10ms
 
-\snippet LitlBenchmarkRegions.cpp Iterate over mask
+\snippet LinxBenchmarkRegions.cpp Iterate over grid
+
+10ms
+
+\snippet LinxBenchmarkRegions.cpp Iterate over mask
 
 120ms
 
-\snippet LitlBenchmarkRegions.cpp Iterate over sequence
+\snippet LinxBenchmarkRegions.cpp Iterate over sequence
 
 200ms
 

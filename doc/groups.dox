@@ -6,7 +6,7 @@
 \defgroup primer Primer
 \ingroup basics
 \brief Containers and core functionalities.
-\example LitlDemoBasics_test.cpp
+\example LinxDemoBasics_test.cpp
 
 \defgroup data_classes Class Hierarchy
 \ingroup basics
@@ -19,7 +19,7 @@
 \defgroup pixelwise Pixel-wise Operations
 \ingroup basics
 \brief Operations applied to each pixel independently.
-\example LitlDemoPixelwise_test.cpp
+\example LinxDemoPixelwise_test.cpp
 
 \defgroup regions Regions, Neighborhoods and Patches
 \ingroup basics
@@ -28,7 +28,7 @@
 \defgroup random Random Generators
 \ingroup basics
 \brief Random values and random noise generation.
-\example LitlDemoRandom_test.cpp
+\example LinxDemoRandom_test.cpp
 
 \defgroup filtering Filtering
 \brief Linear and non-linear filtering.
@@ -44,7 +44,7 @@
 \defgroup dft Discrete Fourier Transforms
 \ingroup filtering
 \brief FFTW wrapper with automatic memory management.
-\example LitlDemoDft_test.cpp
+\example LinxDemoDft_test.cpp
 
 \defgroup geometry Geometrical Transforms
 \brief Transforms which act on pixel locations.
@@ -67,7 +67,7 @@
 \defgroup channels Vector Pixels
 \ingroup guidelines
 \brief How to organize your data with non-scalar pixels?
-\example LitlDemoChannels_test.cpp
+\example LinxDemoChannels_test.cpp
 
 \defgroup looping_benchmark Looping Strategies
 \ingroup guidelines

@@ -14,6 +14,6 @@ set(USE_SPHINX OFF
       FORCE)
 
 elements_project(
-    Litl 1.0
-    USE Elements 6.2
-    DESCRIPTION "The light image template library")
+    Linx 1.0
+    USE Elements 6.3
+    DESCRIPTION "Extensible N-dimensional image library")

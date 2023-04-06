@@ -1,4 +1,4 @@
-namespace Litl {
+namespace Linx {
 /**
 
 \addtogroup interpolation
@@ -30,7 +30,7 @@ TODO
 
 TODO
 
-\snippet LitlDemoInterpolation_test.cpp Extra
+\snippet LinxDemoInterpolation_test.cpp Extra
 
 
 \section interpolation-interpolate Interpolate
@@ -39,9 +39,9 @@ TODO
 Interpolators are templated by the interpolation policy and extrapolator or raster type,
 depending on whether out-of-bounds values should be accessed or not.
 
-\snippet LitlDemoInterpolation_test.cpp Inter
+\snippet LinxDemoInterpolation_test.cpp Inter
 
-\snippet LitlDemoInterpolation_test.cpp Inter-extra
+\snippet LinxDemoInterpolation_test.cpp Inter-extra
 
 
 */

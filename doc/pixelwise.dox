@@ -1,4 +1,4 @@
-namespace Litl {
+namespace Linx {
 /**
 
 \addtogroup pixelwise
@@ -13,7 +13,7 @@ In-place (`+=`, `-=`, `*=`...) and new-instance (`+`, `-`, `*`...) versions are 
 The following examples for operator `+` holds for all operators;
 `a` and `b` denote `Raster`s while `k` is some scalar.
 
-\snippet LitlDemoPixelwise_test.cpp Operators
+\snippet LinxDemoPixelwise_test.cpp Operators
 
 The complete list of available operators can be found in `EuclidArithmetic`.
 
@@ -22,10 +22,10 @@ The complete list of available operators can be found in `EuclidArithmetic`.
 
 
 Pixel-wise mathematical functions are also provided
-with in-place (methods `a.sin()`, `a.exp()`...) and new-instance (free functions `Litl::sin(a)`, `Litl::exp(a)`...) versions.
+with in-place (methods `a.sin()`, `a.exp()`...) and new-instance (free functions `Linx::sin(a)`, `Linx::exp(a)`...) versions.
 Argument-dependent lookup (ADL) allows skipping the namespace in the latter case:
 
-\snippet LitlDemoPixelwise_test.cpp Functions
+\snippet LinxDemoPixelwise_test.cpp Functions
 
 The complete list of available functions can be found in `MathFunctionsMixin`'s documentation.
 
@@ -40,18 +40,18 @@ and an unbounded number of input rasters (can be 0).
 
 For example, to compute `a * k + b`, do:
 
-\snippet LitlDemoPixelwise_test.cpp Generate
+\snippet LinxDemoPixelwise_test.cpp Generate
 
 This is equivalent but much faster than doing simply:
 
-\snippet LitlDemoPixelwise_test.cpp Formula
+\snippet LinxDemoPixelwise_test.cpp Formula
 
 because intermediate variable `tmp = a * k` is not instanciated.
 This is all the more true for formulae with more operations.
 
 The in-place version, corresponding to `a = a * k + b`, is obtained with `apply()`:
 
-\snippet LitlDemoPixelwise_test.cpp Apply
+\snippet LinxDemoPixelwise_test.cpp Apply
 
 This can be seen as an equivalent to XTensor's or Eigen's lazy evaluations,
 yet with arbitrary functions.

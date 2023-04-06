@@ -1,4 +1,4 @@
-namespace Litl {
+namespace Linx {
 /**
 
 \page supported_ops List of Supported Operations
@@ -16,7 +16,7 @@ namespace Litl {
 <td><ul>
 <li>Module \ref pixelwise
 <li>Class `MathFunctionsMixin`
-<li>Free functions in `Litl` namespace
+<li>Free functions in `Linx` namespace
 <tr><td>Pixel-wise custom functions<td>`Sequence`, `Raster`, `Patch`
 <td><ul>
 <li>Module \ref pixelwise
