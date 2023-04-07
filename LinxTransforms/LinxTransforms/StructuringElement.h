@@ -7,78 +7,85 @@
 
 #include "LinxCore/Raster.h"
 #include "LinxTransforms/Extrapolation.h"
+#include "LinxTransforms/impl/Filter.h"
 
 namespace Linx {
 
 /**
-   * @brief Compute the sum of the neighbors.
-   */
-template <typename T>
-T sum(const std::vector<std::decay_t<T>>& neighbors) {
-  return std::accumulate(neighbors.begin(), neighbors.end(), T());
-}
+ * @brief Structuring element-based operations.
+ */
+namespace MorphologyOp {
 
 /**
-   * @brief Compute the mean of the neighbors.
-   */
+ * @brief Mean filtering.
+ */
 template <typename T>
-T mean(const std::vector<std::decay_t<T>>& neighbors) {
-  return sum(neighbors) / neighbors.size(); // FIXME size() can be costly if neighbors is a Patch
-}
-
-/**
-   * @brief Get the n-th neighbor value.
-   */
-template <typename T>
-T nth(std::vector<std::decay_t<T>>& neighbors, std::size_t n) {
-  auto b = neighbors.data();
-  auto e = b + neighbors.size();
-  auto out = b + n;
-  std::nth_element(b, out, e);
-  return *out;
-}
-
-/**
-   * @brief Compute the median of the neighbors.
-   */
-template <typename T>
-T median(std::vector<std::decay_t<T>>& neighbors) {
-  const auto size = neighbors.size();
-  auto b = neighbors.data();
-  auto e = b + size;
-  auto n = b + size / 2;
-  std::nth_element(b, n, e);
-  if (size % 2 == 1) {
-    return *n;
+struct MeanFilter {
+  using Value = T; // FIXME deduce from operator()
+  T operator()(const std::vector<T>& neighbors) const {
+    return std::accumulate(neighbors.begin(), neighbors.end(), T()) / neighbors.size();
   }
-  std::nth_element(b, n + 1, e);
-  return (*n + *(n + 1)) * .5;
-}
+};
 
 /**
-   * @brief Get the min neighbor value.
-   */
+ * @brief Median filtering.
+ */
 template <typename T>
-T min(const std::vector<std::decay_t<T>>& neighbors) {
-  return *std::min_element(neighbors.begin(), neighbors.end());
-}
+struct MedianFilter {
+  using Value = T;
+  T operator()(std::vector<T>& neighbors) const {
+    const auto size = neighbors.size();
+    auto b = neighbors.data();
+    auto e = b + size;
+    auto n = b + size / 2;
+    std::nth_element(b, n, e);
+    if (size % 2 == 1) {
+      return *n;
+    }
+    std::nth_element(b, n + 1, e);
+    return (*n + *(n + 1)) * .5;
+  }
+};
 
 /**
-   * @brief Get the max neighbor value.
-   */
+ * @brief Erosion (i.e. min filtering).
+ */
 template <typename T>
-T max(const std::vector<std::decay_t<T>>& neighbors) {
-  return *std::max_element(neighbors.begin(), neighbors.end());
-}
+struct Erosion {
+  using Value = T;
+  T operator()(const std::vector<T>& neighbors) const {
+    return *std::min_element(neighbors.begin(), neighbors.end());
+  }
+};
+
+/**
+ * @brief Dilation (i.e. max filtering).
+ */
+template <typename T>
+struct Dilation {
+  using Value = T;
+  T operator()(const std::vector<T>& neighbors) const {
+    return *std::max_element(neighbors.begin(), neighbors.end());
+  }
+};
+
+} // namespace MorphologyOp
 
 /**
  * @brief A structuring element for morphological operations.
+ * @tparam TOp The morphological operator
+ * @tparam T The value type
  * @tparam TWindow The type of window, e.g. `Box` or `Mask`
  */
-template <typename TWindow>
-class StructuringElement {
+template <typename TOp, typename TWindow>
+class StructuringElement : public FilterMixin<typename TOp::Value, TWindow, StructuringElement<TOp, TWindow>> {
 
 public:
+  /**
+   * @brief The value type.
+   */
+  using Value = typename TOp::Value;
+
   /**
    * @brief The dimension parameter.
    */
@@ -88,129 +95,58 @@ public:
    * @brief Explcit window constructor.
    * @param window The filter window
    */
-  explicit StructuringElement(TWindow window) : m_window(std::move(window)) {}
+  explicit StructuringElement(TOp&& op, TWindow window) :
+      FilterMixin<Value, TWindow, StructuringElement<TOp, TWindow>>(std::move(window)), m_op(std::forward<TOp>(op)) {}
 
   /**
    * @brief Hypercube window constructor.
    * @param radius The hypercube radius
    */
-  explicit StructuringElement(Index radius = 1) : StructuringElement(Box<Dimension>::fromCenter(radius)) {}
+  explicit StructuringElement(TOp&& op, Index radius = 1) :
+      StructuringElement(std::forward<TOp>(op), Box<Dimension>::fromCenter(radius)) {}
 
   /**
-   * @brief Apply a median filter.
-   * @see `apply()`
+   * @brief Estimation operator.
    */
   template <typename TIn>
-  Raster<std::decay_t<typename TIn::Value>, TIn::Dimension> median(const TIn& in) {
-    return apply(&Linx::median<typename TIn::Value>, in);
-  }
-
-  /**
-   * @brief Apply a median filter into a given output raster.
-   * @see `applyTo()`
-   */
-  template <typename TIn, typename TOut>
-  void medianTo(const TIn& in, TOut& out, const Box<Dimension>& region = Box<Dimension>::whole()) {
-    return applyTo(&Linx::median<typename TIn::Value>, in, out, region);
-  }
-
-  /**
-   * @brief Erode.
-   * @see `apply()`
-   */
-  template <typename TIn>
-  Raster<std::decay_t<typename TIn::Value>, TIn::Dimension> erode(const TIn& in) {
-    return apply(&Linx::min<typename TIn::Value>, in);
-  }
-
-  /**
-   * @brief Erode into a given output raster.
-   * @see `applyTo()`
-   */
-  template <typename TIn, typename TOut>
-  void erodeTo(const TIn& in, TOut& out, const Box<Dimension>& region = Box<Dimension>::whole()) {
-    return applyTo(&Linx::min<typename TIn::Value>, in, out, region);
-  }
-
-  /**
-   * @brief Dilate.
-   * @see `apply()`
-   */
-  template <typename TIn>
-  Raster<std::decay_t<typename TIn::Value>, TIn::Dimension> dilate(const TIn& in) {
-    return apply(&Linx::max<typename TIn::Value>, in);
-  }
-
-  /**
-   * @brief Dilate into a given output raster.
-   * @see `applyTo()`
-   */
-  template <typename TIn, typename TOut>
-  void dilateTo(const TIn& in, TOut& out, const Box<Dimension>& region = Box<Dimension>::whole()) {
-    return applyTo(&Linx::max<typename TIn::Value>, in, out, region);
-  }
-
-  /**
-   * @brief Apply a function.
-   * @see `applyTo()`
-   */
-  template <typename TFunc, typename TIn>
-  Raster<std::decay_t<typename TIn::Value>, TIn::Dimension> apply(TFunc&& func, const TIn& in) {
-    Raster<std::decay_t<typename TIn::Value>, TIn::Dimension> out(in.shape());
-    applyTo(std::forward<TFunc>(func), in, out, out.domain());
-    return out;
-  }
-
-  /**
-   * @brief Apply to each pixel of a region a function which transforms neighbors into a value.
-   * @param func The function to apply
-   * @param in The input raster or extrapolator
-   * @param out The output raster
-   * @param region The application region
-   * 
-   * For each pixel of `in` inside `region`, get the neighboring values, apply the function to them,
-   * and assign the output of the function to the corresponding pixel in `out`.
-   */
-  template <typename TFunc, typename TIn, typename TOut>
-  void applyTo(TFunc&& func, const TIn& in, TOut& out, const Box<Dimension>& region = Box<Dimension>::whole()) {
-
-    std::vector<std::decay_t<typename TOut::Value>> neighbors(m_window.size());
-
-    // Non-extrapolated pixels
-    auto inner = in.domain() - box(m_window);
-    // inner &= region; // FIXME
-    applyRegionTo(std::forward<TFunc>(func), rasterize(in), inner, out);
-
-    // Extrapolated pixels
-    auto outers = inner.surround(box(m_window));
-    for (auto& o : outers) {
-      // o &= region; // FIXME
-      applyRegionTo(std::forward<TFunc>(func), in, o, out);
-    }
-  }
-
-  template <typename TFunc, typename TIn, typename TOut>
-  void applyRegionTo(TFunc&& func, const TIn& in, const Box<TIn::Dimension>& region, TOut& out) {
-    if (region.size() < 0) {
-      return;
-    }
-    auto patch = in.patch(m_window);
-    std::vector<std::decay_t<typename TIn::Value>> neighbors(m_window.size());
-    for (const auto& p : region) {
-      patch.translate(p);
-      std::copy(patch.begin(), patch.end(), neighbors.begin());
-      out[p] = std::forward<TFunc>(func)(neighbors);
-      // FIXME replace out[p] with an iterator
-      patch.translateBack(p);
-    }
+  Value operator()(const TIn& neighbors) const {
+    m_neighbors.assign(neighbors.begin(), neighbors.end());
+    return m_op(m_neighbors);
   }
 
 private:
   /**
-   * @brief The window.
+   * @brief The operation.
    */
-  TWindow m_window;
+  TOp m_op;
+
+  /**
+   * @brief The neighbor buffer.
+   */
+  mutable std::vector<Value> m_neighbors;
 };
+
+template <typename T, typename TWindow>
+StructuringElement<MorphologyOp::MeanFilter<T>, TWindow> meanFilter(TWindow window) {
+  return StructuringElement<MorphologyOp::MeanFilter<T>, TWindow>(MorphologyOp::MeanFilter<T> {}, std::move(window));
+}
+
+template <typename T, typename TWindow>
+StructuringElement<MorphologyOp::MedianFilter<T>, TWindow> medianFilter(TWindow window) {
+  return StructuringElement<MorphologyOp::MedianFilter<T>, TWindow>(
+      MorphologyOp::MedianFilter<T> {},
+      std::move(window));
+}
+
+template <typename T, typename TWindow>
+StructuringElement<MorphologyOp::Erosion<T>, TWindow> erosion(TWindow window) {
+  return StructuringElement<MorphologyOp::Erosion<T>, TWindow>(MorphologyOp::Erosion<T> {}, std::move(window));
+}
+
+template <typename T, typename TWindow>
+StructuringElement<MorphologyOp::Dilation<T>, TWindow> dilation(TWindow window) {
+  return StructuringElement<MorphologyOp::Dilation<T>, TWindow>(MorphologyOp::Dilation<T> {}, std::move(window));
+}
 
 } // namespace Linx
 
