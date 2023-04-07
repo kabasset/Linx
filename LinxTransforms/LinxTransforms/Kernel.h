@@ -9,27 +9,29 @@
 
 namespace Linx {
 
-enum class KernelType { // FIXME KernelTag?
-  Convolution,
-  Correlation
+/**
+ * @brief Kernel-based operations.
+ */
+enum class KernelOp {
+  Convolution, ///< Convolution
+  Correlation ///< Cross-correlation
 };
 
 /**
  * @brief A kernel which can be used for convolution or cross-correlation.
  */
-template <KernelType TKernel, typename T, Index N = 2>
-class Kernel : public FilterMixin<T, Box<N>, Kernel<TKernel, T, N>> {
+template <KernelOp TOp, typename T, Index N = 2>
+class Kernel : public FilterMixin<T, Box<N>, Kernel<TOp, T, N>> {
 
 public:
-  using typename FilterMixin<T, Box<N>, Kernel<TKernel, T, N>>::Value;
-  using FilterMixin<T, Box<N>, Kernel<TKernel, T, N>>::Dimension;
+  using typename FilterMixin<T, Box<N>, Kernel<TOp, T, N>>::Value;
+  using FilterMixin<T, Box<N>, Kernel<TOp, T, N>>::Dimension;
 
   /**
    * @brief Constructor.
    */
   Kernel(const Value* values, Box<Dimension> window) :
-      FilterMixin<T, Box<N>, Kernel<TKernel, T, N>>(std::move(window)),
-      m_values(values, values + this->m_window.size()) {}
+      FilterMixin<T, Box<N>, Kernel<TOp, T, N>>(std::move(window)), m_values(values, values + this->m_window.size()) {}
 
   /**
    * @brief View the kernel values as a `Raster`.
@@ -51,10 +53,11 @@ public:
    */
   template <typename TIn>
   Value operator()(const TIn& neighbors) const {
-    if constexpr (TKernel == KernelType::Correlation) {
+    if constexpr (TOp == KernelOp::Correlation) {
       return std::inner_product(m_values.begin(), m_values.end(), neighbors.begin(), Value {});
+      // FIXME conjugate for complex values
     }
-    if constexpr (TKernel == KernelType::Convolution) {
+    if constexpr (TOp == KernelOp::Convolution) {
       return std::inner_product(m_values.rbegin(), m_values.rend(), neighbors.begin(), Value {});
     }
   }
@@ -71,8 +74,8 @@ private:
  * @brief Make a convolution kernel from values and a window.
  */
 template <typename T, Index N = 2>
-Kernel<KernelType::Convolution, T, N> convolution(const T* values, Box<N> window) {
-  return Kernel<KernelType::Convolution, T, N>(values, std::move(window));
+Kernel<KernelOp::Convolution, T, N> convolution(const T* values, Box<N> window) {
+  return Kernel<KernelOp::Convolution, T, N>(values, std::move(window));
 }
 
 /**
@@ -80,7 +83,7 @@ Kernel<KernelType::Convolution, T, N> convolution(const T* values, Box<N> window
  * @brief Make a kernel from a raster and origin position.
  */
 template <typename T, Index N, typename THolder>
-Kernel<KernelType::Convolution, T, N> convolution(const Raster<T, N, THolder>& values, Position<N> origin) {
+Kernel<KernelOp::Convolution, T, N> convolution(const Raster<T, N, THolder>& values, Position<N> origin) {
   return convolution(values.data(), values.domain() - origin);
 }
 
@@ -91,7 +94,7 @@ Kernel<KernelType::Convolution, T, N> convolution(const Raster<T, N, THolder>& v
  * In case of even lengths, origin position is rounded down.
  */
 template <typename T, Index N, typename THolder>
-Kernel<KernelType::Convolution, T, N> convolution(const Raster<T, N, THolder>& values) {
+Kernel<KernelOp::Convolution, T, N> convolution(const Raster<T, N, THolder>& values) {
   return convolution(values.data(), values.domain() - (values.shape() - 1) / 2);
 }
 

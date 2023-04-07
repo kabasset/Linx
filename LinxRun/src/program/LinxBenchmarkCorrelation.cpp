@@ -14,7 +14,7 @@ static Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkCor
 
 template <typename TDuration>
 TDuration
-filter(Linx::Raster<int, 3>& in, const Linx::Kernel<Linx::KernelType::Convolution, int, 3>& kernel, char setup) {
+filter(Linx::Raster<int, 3>& in, const Linx::Kernel<Linx::KernelOp::Convolution, int, 3>& kernel, char setup) {
   Linx::Chronometer<TDuration> chrono;
   chrono.start();
   switch (setup) {
