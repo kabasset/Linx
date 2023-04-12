@@ -136,8 +136,8 @@ public:
   /**
    * @brief Move constructor.
    */
-  AlignedBuffer(AlignedBuffer&& other) : m_container(), m_begin(other.m_begin), m_end(other.m_end), m_as(other.m_as) {
-    other.release();
+  AlignedBuffer(AlignedBuffer&& other) :
+      m_container(other.release()), m_begin(other.m_begin), m_end(other.m_end), m_as(other.m_as) {
     other.reset();
   }
 
@@ -164,11 +164,10 @@ public:
    */
   AlignedBuffer& operator=(AlignedBuffer&& other) {
     if (this != &other) {
-      m_container = other.m_container;
+      m_container = other.release();
       m_begin = other.m_begin;
       m_end = other.m_end;
       m_as = other.m_as;
-      other.release();
       other.reset();
     }
     return *this;
