@@ -12,7 +12,7 @@
 #include "LinxBase/Holders.h"
 #include "LinxBase/Math.h"
 #include "LinxBase/Range.h"
-#include "LinxBase/SeqUtils.h" // isIterable
+#include "LinxBase/SeqUtils.h" // IsIterable
 #include "LinxBase/TypeUtils.h" // Index, Limits
 
 #include <cstddef> // size_t
@@ -77,7 +77,7 @@ public:
    * 
    * Iterable values are copied to the container.
    */
-  template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr, typename... TArgs>
+  template <typename TIterable, typename std::enable_if_t<IsIterable<TIterable>::value>* = nullptr, typename... TArgs>
   explicit DataContainer(const TIterable& iterable, TArgs&&... args) :
       Holder(std::distance(iterable.begin(), iterable.end()), std::forward<TArgs>(args)...) {
     std::copy(iterable.begin(), iterable.end(), this->data());
@@ -131,7 +131,7 @@ public:
   explicit MinimalDataContainer(std::initializer_list<U> list, TArgs&&... args) :
       Base(list, std::forward<TArgs>(args)...) {}
 
-  template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr, typename... TArgs>
+  template <typename TIterable, typename std::enable_if_t<IsIterable<TIterable>::value>* = nullptr, typename... TArgs>
   explicit MinimalDataContainer(TIterable& iterable, TArgs&&... args) : Base(iterable, std::forward<TArgs>(args)...) {}
 };
 

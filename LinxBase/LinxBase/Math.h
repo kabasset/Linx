@@ -5,7 +5,7 @@
 #ifndef _LINXBASE_MATH_H
 #define _LINXBASE_MATH_H
 
-#include "LinxBase/SeqUtils.h" // isIterable
+#include "LinxBase/SeqUtils.h" // IsIterable
 
 #include <algorithm>
 #include <cmath>
@@ -13,7 +13,7 @@
 namespace Linx {
 
 /**
- * @brief π
+ * @brief &pi;
  */
 template <typename T>
 T pi() {
@@ -93,7 +93,7 @@ struct MathFunctionsMixin {
 #define LINX_MATH_BINARY_INPLACE(function) \
   /** @brief Apply std::##function##(). */ \
   template <typename U> \
-  const std::enable_if_t<isIterable<U>::value, TDerived>& function(const U& other) { \
+  const std::enable_if_t<IsIterable<U>::value, TDerived>& function(const U& other) { \
     auto* derived = static_cast<TDerived*>(this); \
     std::transform(derived->begin(), derived->end(), other.begin(), derived->begin(), [](auto e, auto f) { \
       return std::function(e, f); \
@@ -104,7 +104,7 @@ struct MathFunctionsMixin {
 #define LINX_MATH_BINARY_SCALAR_INPLACE(function) \
   /** @brief Apply std::##function##(). */ \
   template <typename U> \
-  std::enable_if_t<not isIterable<U>::value, TDerived>& function(U other) { \
+  std::enable_if_t<not IsIterable<U>::value, TDerived>& function(U other) { \
     auto* derived = static_cast<TDerived*>(this); \
     std::transform(derived->begin(), derived->end(), derived->begin(), [=](auto e) { \
       return std::function(e, other); \

@@ -207,7 +207,6 @@ const PtrRaster<const T, N == -1 ? -1 : N - 1> Raster<T, N, THolder>::section(In
 
 template <typename T, Index N, typename THolder>
 PtrRaster<T, N == -1 ? -1 : N - 1> Raster<T, N, THolder>::section(Index index) {
-  auto region = domain();
   const auto last = dimension() - 1;
   auto f = Position<N>::zero();
   auto b = shape() - 1;

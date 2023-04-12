@@ -51,6 +51,7 @@ BOOST_AUTO_TEST_CASE(empty_mask_iterator_passes_test) {
   BOOST_CHECK(box.size() > 0);
   BOOST_CHECK(mask.size() == 0);
   for (const auto& p : mask) {
+    std::cout << p << std::endl;
     throw std::out_of_range("We should not be there!");
   }
 }

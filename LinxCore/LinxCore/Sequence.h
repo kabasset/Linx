@@ -27,7 +27,7 @@ public:
   template <typename U, typename... TArgs>
   explicit Sequence(std::initializer_list<U> list, TArgs&&... args) : Container(list, std::forward<TArgs>(args)...) {}
 
-  template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr, typename... TArgs>
+  template <typename TIterable, typename std::enable_if_t<IsIterable<TIterable>::value>* = nullptr, typename... TArgs>
   explicit Sequence(TIterable& iterable, TArgs&&... args) : Container(iterable, std::forward<TArgs>(args)...) {}
 };
 

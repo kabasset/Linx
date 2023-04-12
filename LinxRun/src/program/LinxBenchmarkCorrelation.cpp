@@ -52,7 +52,6 @@ public:
     Linx::Raster<int, 3> in({side, side, side});
     const auto kernel = Linx::convolution(
         Linx::Raster<int, 3>({diameter, diameter, diameter}).generate(Linx::UniformNoise<int>(0, 1, seed)));
-    const auto out = kernel * extrapolate(in, 0);
 
     using Duration = std::chrono::milliseconds;
 

@@ -22,13 +22,13 @@ namespace Linx {
  * @brief Test whether a type is iterable, i.e. has `begin()` and `end()` methods.
  */
 template <typename T, typename = void>
-struct isIterable : std::false_type {};
+struct IsIterable : std::false_type {};
 
 /// @cond
 // https://en.cppreference.com/w/cpp/types/void_t
 template <typename T>
-struct isIterable<T, templateVoid<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>> : // FIXME std::begin(T), std::end(T)
-    std::true_type {};
+struct IsIterable<T, templateVoid<decltype(std::declval<T>().begin()), decltype(std::declval<T>().end())>> :
+    std::true_type {}; // FIXME std::begin(T), std::end(T)
 /// @endcond
 
 /// @cond

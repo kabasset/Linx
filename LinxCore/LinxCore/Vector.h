@@ -82,7 +82,7 @@ public:
   /**
    * @brief Create a vector from an iterable.
    */
-  template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr>
+  template <typename TIterable, typename std::enable_if_t<IsIterable<TIterable>::value>* = nullptr>
   explicit Vector(TIterable&& iterable) : Container(iterable) {}
 
   /**
@@ -188,7 +188,7 @@ public:
  * Classical positions are instantiated with named constructors, e.g.:
  * \code
  * auto bottomLeft = Position<2>::zero();
- * auto topRight = Position<2>::ùinusOne();
+ * auto topRight = Position<2>::inf();
  * \endcode
  * 
  * @see Box

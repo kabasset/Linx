@@ -21,7 +21,7 @@
  * @brief The light image template library
  * 
  * An ND image processing library developed and maintained by the French space agency,
- * Centre national d'études spatiales.
+ * Centre National d'Etudes Spatiales.
  * @see https://github.com/cnes
  * @see https://cnes.fr/en
  */
@@ -225,7 +225,7 @@ public:
    * std::copy(iterable.begin(), iterable.end(), holder.data());
    * \endcode
    */
-  template <typename TIterable, typename std::enable_if_t<isIterable<TIterable>::value>* = nullptr, typename... TArgs>
+  template <typename TIterable, typename std::enable_if_t<IsIterable<TIterable>::value>* = nullptr, typename... TArgs>
   explicit Raster(Position<N> shape, TIterable& iterable, TArgs&&... args) :
       Container(iterable, std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
     SizeError::mayThrow(std::distance(std::begin(iterable), std::end(iterable)), shapeSize(shape));
