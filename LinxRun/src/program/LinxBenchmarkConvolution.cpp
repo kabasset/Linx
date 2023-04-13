@@ -10,7 +10,7 @@
 #include <map>
 #include <string>
 
-static Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkCorrelation");
+static Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkConvolution");
 
 using Image = Linx::Raster<float, 3>;
 using Duration = std::chrono::milliseconds;

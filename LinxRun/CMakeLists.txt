@@ -13,7 +13,7 @@ elements_add_library(LinxRun src/lib/*.cpp
 elements_add_executable(LinxBenchmarkBuffers src/program/LinxBenchmarkBuffers.cpp
                      INCLUDE_DIRS LinxRun
                      LINK_LIBRARIES LinxRun)
-elements_add_executable(LinxBenchmarkCorrelation src/program/LinxBenchmarkCorrelation.cpp
+elements_add_executable(LinxBenchmarkConvolution src/program/LinxBenchmarkConvolution.cpp
                      INCLUDE_DIRS LinxRun
                      LINK_LIBRARIES LinxRun)
 elements_add_executable(LinxBenchmarkExp src/program/LinxBenchmarkExp.cpp
