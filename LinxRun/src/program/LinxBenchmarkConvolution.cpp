@@ -15,6 +15,20 @@ static Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkCon
 using Image = Linx::Raster<float, 3>;
 using Duration = std::chrono::milliseconds;
 
+void filterMonolith(Image& image, const Linx::Kernel<Linx::KernelOp::Convolution, float, 3>& kernel) {
+  const auto extrapolated = extrapolate(image, 0.0F);
+  auto patch = extrapolated.patch(kernel.window());
+  Image out(image.shape());
+  auto outIt = out.begin();
+  for (const auto& p : image.domain()) {
+    patch.translate(p);
+    *outIt = kernel(patch);
+    ++outIt;
+    patch.translateBack(p);
+  }
+  image = out;
+}
+
 template <typename TDuration>
 TDuration filter(Image& image, const Linx::Kernel<Linx::KernelOp::Convolution, float, 3>& kernel, char setup) {
   Linx::Chronometer<TDuration> chrono;
@@ -23,11 +37,9 @@ TDuration filter(Image& image, const Linx::Kernel<Linx::KernelOp::Convolution, f
     case 'd':
       image = kernel * extrapolate(image, 0.0F);
       break;
-    case 'm': {
-      auto tmp = image;
-      // kernel.correlateMonolithTo(extrapolate(image, 0).patch(image.domain()), tmp); // FIXME refactor
-      image = tmp;
-    } break;
+    case 'm':
+      filterMonolith(image, kernel);
+      break;
     default:
       throw std::runtime_error("Case not implemented"); // FIXME CaseNotImplemented
   }
