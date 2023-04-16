@@ -42,3 +42,7 @@ elements_add_unit_test(StepperPipeline tests/src/StepperPipeline_test.cpp
                      EXECUTABLE LinxRun_StepperPipeline_test
                      LINK_LIBRARIES LinxRun
                      TYPE Boost)
+
+elements_install_python_modules()
+
+elements_add_python_program(LinxBenchmarkPythonConvolution LinxRun.LinxBenchmarkPythonConvolution)
