@@ -52,7 +52,7 @@ public:
    * @brief Estimation operator.
    */
   template <typename TIn>
-  Value operator()(const TIn& neighbors) const {
+  inline Value operator()(const TIn& neighbors) const { // FIXME use StructuringElement design
     if constexpr (TOp == KernelOp::Correlation) {
       return std::inner_product(m_values.begin(), m_values.end(), neighbors.begin(), Value {});
       // FIXME conjugate for complex values
