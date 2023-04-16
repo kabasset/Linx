@@ -24,7 +24,15 @@ void filterMonolith(Image& image, const Linx::Kernel<Linx::KernelOp::Convolution
     *it = extrapolation[p];
     ++it;
   }
-  image = kernel.crop(extrapolated);
+  // image = kernel.crop(extrapolated);
+  auto patch = extrapolated.patch(kernel.window() - kernel.window().front());
+  auto outIt = image.begin();
+  for (const auto& p : image.domain()) {
+    patch.translate(p);
+    *outIt = kernel(patch);
+    ++outIt;
+    patch.translateBack(p);
+  }
 }
 
 template <typename TDuration>
