@@ -257,7 +257,7 @@ public:
    * @brief Check whether a given (possibly non-integral) position lies inside the raster domain.
    */
   template <typename U>
-  bool contains(const Vector<U, N>& position) const {
+  inline bool contains(const Vector<U, N>& position) const {
     for (std::size_t i = 0; i < position.size(); ++i) { // TODO iterators
       if (position[i] < 0 || position[i] >= m_shape[i]) {
         return false;
