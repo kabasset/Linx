@@ -16,17 +16,15 @@ using Image = Linx::Raster<float>;
 using Duration = std::chrono::milliseconds;
 
 void filterMonolith(Image& image, const Linx::Kernel<Linx::KernelOp::Convolution, float>& kernel) {
-  const auto extrapolated = extrapolate(image, 0.0F);
-  auto patch = extrapolated.patch(kernel.window());
-  Image out(image.shape());
-  auto outIt = out.begin();
-  for (const auto& p : image.domain()) {
-    patch.translate(p);
-    *outIt = kernel(patch);
-    ++outIt;
-    patch.translateBack(p);
+  const auto extrapolation = extrapolate(image, 0.0F);
+  const auto domain = image.domain() + kernel.window();
+  Image extrapolated(domain.shape());
+  auto it = extrapolated.begin();
+  for (const auto& p : domain) {
+    *it = extrapolation[p];
+    ++it;
   }
-  image = out;
+  image = kernel.crop(extrapolated);
 }
 
 template <typename TDuration>
