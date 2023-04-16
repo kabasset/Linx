@@ -12,10 +12,10 @@
 
 static Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkConvolution");
 
-using Image = Linx::Raster<float, 3>;
+using Image = Linx::Raster<float>;
 using Duration = std::chrono::milliseconds;
 
-void filterMonolith(Image& image, const Linx::Kernel<Linx::KernelOp::Convolution, float, 3>& kernel) {
+void filterMonolith(Image& image, const Linx::Kernel<Linx::KernelOp::Convolution, float>& kernel) {
   const auto extrapolated = extrapolate(image, 0.0F);
   auto patch = extrapolated.patch(kernel.window());
   Image out(image.shape());
@@ -30,7 +30,7 @@ void filterMonolith(Image& image, const Linx::Kernel<Linx::KernelOp::Convolution
 }
 
 template <typename TDuration>
-TDuration filter(Image& image, const Linx::Kernel<Linx::KernelOp::Convolution, float, 3>& kernel, char setup) {
+TDuration filter(Image& image, const Linx::Kernel<Linx::KernelOp::Convolution, float>& kernel, char setup) {
   Linx::Chronometer<TDuration> chrono;
   chrono.start();
   switch (setup) {
@@ -52,8 +52,8 @@ public:
   std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
     Linx::ProgramOptions options;
     options.named("case", "Test case: d (default), m (monolith)", 'd');
-    options.named("image", "Raster length along each axis", 400L);
-    options.named("kernel", "Kernel length along each axis", 3L);
+    options.named("image", "Raster length along each axis", 2048L);
+    options.named("kernel", "Kernel length along each axis", 5L);
     return options.asPair();
   }
 
@@ -62,19 +62,19 @@ public:
     const auto image_diameter = args["image"].as<Linx::Index>();
     const auto kernel_diameter = args["kernel"].as<Linx::Index>();
 
-    Linx::Position<3> image_shape {image_diameter, image_diameter, image_diameter};
-    Linx::Position<3> kernel_shape {kernel_diameter, kernel_diameter, kernel_diameter};
+    Linx::Position<2> image_shape {image_diameter, image_diameter};
+    Linx::Position<2> kernel_shape {kernel_diameter, kernel_diameter};
 
     logger.info("Generating raster and kernel...");
     auto image = Image(image_shape).range();
     const auto kernel = Linx::convolution(Image(kernel_shape).range());
     logger.info() << "  input: " << image;
 
-    logger.info("Filtering it...");
+    logger.info("Filtering...");
     const auto duration = filter<Duration>(image, kernel, setup);
     logger.info() << "  output: " << image;
 
-    logger.info() << "Performed convolution in " << duration.count() << "ms";
+    logger.info() << "  Done in " << duration.count() << "ms";
 
     return ExitCode::OK;
   }
