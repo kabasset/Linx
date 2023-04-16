@@ -195,7 +195,7 @@ private:
         [&](const auto& ib) {
           const auto insub = in.patch(ib);
           auto outsub = out.patch(insub.domain());
-          transformMonolith(insub, outsub);
+          transformMonolithExtrapolator(insub, outsub);
         });
   }
 
@@ -212,6 +212,20 @@ private:
       ++outIt;
       patch.translateBack(p);
     }
+  }
+
+  template <typename TIn, typename TOut>
+  void transformMonolithExtrapolator(const TIn& in, TOut& out) const {
+    const auto domain = Linx::box(in.domain()) + m_window;
+    Raster<typename TOut::Value, TOut::Dimension> extrapolated(domain.shape());
+    auto it = extrapolated.begin();
+    const auto& parent = in.parent();
+    for (const auto& p : domain) {
+      *it = parent[p];
+      ++it;
+    }
+    const auto box = extrapolated.domain() - m_window; // FIXME region - m_window.front()?
+    transformMonolith(extrapolated.patch(box), out);
   }
 
 protected:
