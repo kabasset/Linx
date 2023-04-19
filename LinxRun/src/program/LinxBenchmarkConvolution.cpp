@@ -13,17 +13,12 @@
 static Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkConvolution");
 
 using Image = Linx::Raster<float>;
+using Kernel = const Linx::Kernel<Linx::KernelOp::Convolution, float>;
 using Duration = std::chrono::milliseconds;
 
-void filterMonolith(Image& image, const Linx::Kernel<Linx::KernelOp::Convolution, float>& kernel) {
-  const auto extrapolation = extrapolate(image, 0.0F);
-  const auto domain = image.domain() + kernel.window();
-  Image extrapolated(domain.shape());
-  auto it = extrapolated.begin();
-  for (const auto& p : domain) {
-    *it = extrapolation[p];
-    ++it;
-  }
+void filterMonolith(Image& image, Kernel& kernel) {
+  const auto extrapolation = Linx::extrapolate<Linx::NearestNeighbor>(image);
+  const auto extrapolated = extrapolation.copy(image.domain() + kernel.window());
   // image = kernel.crop(extrapolated);
   auto patch = extrapolated.patch(kernel.window() - kernel.window().front());
   auto outIt = image.begin();
@@ -35,16 +30,42 @@ void filterMonolith(Image& image, const Linx::Kernel<Linx::KernelOp::Convolution
   }
 }
 
+void filterHardcoded(Image& image, Kernel& kernel) {
+  const auto extrapolation = Linx::extrapolate<Linx::NearestNeighbor>(image);
+  const auto extrapolated = extrapolation.copy(image.domain() + kernel.window());
+  const auto kernelData = kernel.raster();
+  auto kIt = kernelData.end();
+  Image out(image.shape());
+  auto outIt = out.begin();
+  const auto inner = image.domain() - kernel.window().front();
+  auto patch = extrapolated.patch(inner);
+  for (const auto& q : kernel.window()) {
+    --kIt;
+    patch.translate(q);
+    const auto k = *kIt;
+    for (const auto& v : patch) {
+      *outIt += k * v;
+      ++outIt;
+    }
+    patch.translateBack(q);
+    outIt = out.begin();
+  }
+  image = out;
+}
+
 template <typename TDuration>
-TDuration filter(Image& image, const Linx::Kernel<Linx::KernelOp::Convolution, float>& kernel, char setup) {
+TDuration filter(Image& image, Kernel& kernel, char setup) {
   Linx::Chronometer<TDuration> chrono;
   chrono.start();
   switch (setup) {
     case 'd':
-      image = kernel * extrapolate(image, 0.0F);
+      image = kernel * Linx::extrapolate<Linx::NearestNeighbor>(image);
       break;
     case 'm':
       filterMonolith(image, kernel);
+      break;
+    case 'h':
+      filterHardcoded(image, kernel);
       break;
     default:
       throw std::runtime_error("Case not implemented"); // FIXME CaseNotImplemented
