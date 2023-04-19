@@ -56,14 +56,6 @@ public:
   }
 
   /**
-   * @brief Get a decorated patch.
-   */
-  template <typename TRegion>
-  const Patch<const Value, const Extrapolator<TRaster, TMethod>, TRegion> patch(TRegion&& region) const {
-    return Patch<const Value, const Extrapolator<TRaster, TMethod>, TRegion>(*this, std::forward<TRegion>(region));
-  }
-
-  /**
    * @brief Get the raster shape.
    */
   const Position<Dimension>& shape() const {
@@ -84,6 +76,23 @@ public:
    */
   inline const Value& operator[](const Position<Dimension>& position) const {
     return m_method.at(m_raster, position);
+  }
+
+  /**
+   * @brief Get a decorated patch.
+   */
+  template <typename TRegion>
+  const Patch<const Value, const Extrapolator<TRaster, TMethod>, TRegion> patch(TRegion&& region) const {
+    return Patch<const Value, const Extrapolator<TRaster, TMethod>, TRegion>(*this, std::forward<TRegion>(region));
+  }
+
+  /**
+   * @brief Get a copy of the data in a given region.
+   */
+  template <typename TRegion>
+  Raster<std::decay_t<Value>, Dimension> copy(TRegion&& region) const {
+    // FIXME optimize
+    return Raster<std::decay_t<Value>, Dimension>(patch(std::forward<TRegion>(region)));
   }
 
 private:

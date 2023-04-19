@@ -152,7 +152,6 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
  */
 template <typename T, Index N = 2, typename THolder = DefaultHolder<T>>
 class Raster : public DataContainer<T, THolder, EuclidArithmetic, Raster<T, N, THolder>> {
-  friend class ImageRaster; // FIXME rm when Patch is removed
 
 public:
   /**
@@ -230,6 +229,13 @@ public:
       Container(iterable, std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
     SizeError::mayThrow(std::distance(std::begin(iterable), std::end(iterable)), shapeSize(shape));
   }
+
+  /**
+   * @brief Patch-copy constructor.
+   * @param patch The box- or grid-based patch to be copied (can be an extrapolator).
+   */
+  template <typename U, typename TRaster, typename TRegion>
+  explicit Raster(const Patch<U, TRaster, TRegion>& patch) : Container(patch), m_shape(patch.domain().shape()) {}
 
   /// @group_properties
 
