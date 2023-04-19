@@ -58,6 +58,9 @@ TDuration filter(Image& image, Kernel& kernel, char setup) {
   Linx::Chronometer<TDuration> chrono;
   chrono.start();
   switch (setup) {
+    case '0':
+      image = kernel * Linx::extrapolate(image, 0.0F);
+      break;
     case 'd':
       image = kernel * Linx::extrapolate<Linx::NearestNeighbor>(image);
       break;
