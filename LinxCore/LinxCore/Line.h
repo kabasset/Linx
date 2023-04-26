@@ -39,6 +39,13 @@ public:
   /// @group_construction
 
   /**
+   * @brief Default constructor.
+   * 
+   * Create a line which corresponds to single position 0.
+   */
+  Line() : Line(Position<N>::zero(), 0) {}
+
+  /**
    * @brief Constructor.
    */
   Line(Position<N> front, Index back, Index step = 1) :

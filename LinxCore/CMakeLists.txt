@@ -51,7 +51,11 @@ elements_add_unit_test(Sequence tests/src/Sequence_test.cpp
                      EXECUTABLE LinxCore_Sequence_test
                      LINK_LIBRARIES LinxCore
                      TYPE Boost)
+elements_add_unit_test(Tiling tests/src/Tiling_test.cpp 
+                    EXECUTABLE LinxCore_Tiling_test
+                    LINK_LIBRARIES LinxCore
+                    TYPE Boost)
 elements_add_unit_test(Vector tests/src/Vector_test.cpp 
-                     EXECUTABLE LinxCore_Vector_test
-                     LINK_LIBRARIES LinxCore
-                     TYPE Boost)
+                    EXECUTABLE LinxCore_Vector_test
+                    LINK_LIBRARIES LinxCore
+                    TYPE Boost)
