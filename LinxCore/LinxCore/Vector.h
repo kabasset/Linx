@@ -72,7 +72,8 @@ public:
   /**
    * @brief Create a vector of given dimension.
    */
-  explicit Vector(T dim) : Container(dim) {}
+  template <typename TInt, typename std::enable_if_t<std::is_integral<TInt>::value>* = nullptr>
+  explicit Vector(TInt dim) : Container(std::size_t(dim)) {}
 
   /**
    * @brief Create a vector from a brace-enclosed list of indices.
