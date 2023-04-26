@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(inner_cube_iterator_test) {
 
 template <Index I, Index N>
 void checkSliceIterator(const Position<N>& shape) {
-  OrientedSlice<I, 3> slice(Position<N>::one(), shape[I] - 1, 2);
+  Line<I, 3> slice(Position<N>::one(), shape[I] - 1, 2);
   checkIterator(shape, slice);
 }
 

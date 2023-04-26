@@ -31,8 +31,8 @@ elements_add_unit_test(Mask tests/src/Mask_test.cpp
                      EXECUTABLE LinxCore_Mask_test
                      LINK_LIBRARIES LinxCore
                      TYPE Boost)
-elements_add_unit_test(OrientedSliceIterator tests/src/OrientedSliceIterator_test.cpp 
-                     EXECUTABLE LinxCore_OrientedSliceIterator_test
+elements_add_unit_test(LineIterator tests/src/LineIterator_test.cpp 
+                     EXECUTABLE LinxCore_LineIterator_test
                      LINK_LIBRARIES LinxCore
                      TYPE Boost)
 elements_add_unit_test(Patch tests/src/Patch_test.cpp 

@@ -7,8 +7,8 @@
 
 #include "LinxCore/Box.h"
 #include "LinxCore/Grid.h"
+#include "LinxCore/Line.h"
 #include "LinxCore/Mask.h"
-#include "LinxCore/OrientedSlice.h"
 #include "LinxCore/Raster.h"
 #include "LinxCore/Sequence.h"
 
@@ -90,7 +90,7 @@ public:
    * @brief Constructor for slices.
    */
   template <Index I>
-  StrideBasedIndexing(const TParent& parent, const OrientedSlice<I, TParent::Dimension>& region) :
+  StrideBasedIndexing(const TParent& parent, const Line<I, TParent::Dimension>& region) :
       m_step(shapeStride<I>(parent.shape()) * region.step()), m_width(m_step * (region.size() - 1) + 1),
       m_offsets(2, 0) {} // 1+1 see above
 
@@ -183,7 +183,7 @@ struct PatchTraits {
    * Optimized regions for raster parents are:
    * - `Box`,
    * - `Grid`,
-   * - `OrientedSlice`
+   * - `Line`
    * - `Mask`.
    * 
    * For extrapolators, no optimization is performed.
@@ -211,10 +211,10 @@ struct PatchTraits<Raster<T, N, THolder>, Grid<N>> {
 };
 
 /**
- * @brief `OrientedSlice` specialization.
+ * @brief `Line` specialization.
  */
 template <typename T, Index N, typename THolder, Index I>
-struct PatchTraits<Raster<T, N, THolder>, OrientedSlice<I, N>> {
+struct PatchTraits<Raster<T, N, THolder>, Line<I, N>> {
   template <typename UParent, typename URegion>
   using Indexing = StrideBasedIndexing<UParent, URegion>;
 };

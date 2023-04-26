@@ -2,27 +2,26 @@
 // This file is part of Linx <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LINXCORE_IMPL_ORIENTEDSLICEITERATOR_H
-#define _LINXCORE_IMPL_ORIENTEDSLICEITERATOR_H
+#ifndef _LINXCORE_IMPL_LINEITERATOR_H
+#define _LINXCORE_IMPL_LINEITERATOR_H
 
-#include "LinxCore/OrientedSlice.h"
+#include "LinxCore/Line.h"
 
 namespace Linx {
 
 template <Index I, Index N>
-class OrientedSlice<I, N>::Iterator : public std::iterator<std::input_iterator_tag, Position<N>> {
+class Line<I, N>::Iterator : public std::iterator<std::input_iterator_tag, Position<N>> {
 
 public:
-  explicit Iterator(const OrientedSlice<I, N>& region, Index current) :
-      m_step(region.step()), m_current(region.front()) {
+  explicit Iterator(const Line<I, N>& region, Index current) : m_step(region.step()), m_current(region.front()) {
     m_current[I] = current;
   }
 
-  static Iterator begin(const OrientedSlice<I, N>& region) {
+  static Iterator begin(const Line<I, N>& region) {
     return Iterator(region, region.frontIndex());
   }
 
-  static Iterator end(const OrientedSlice<I, N>& region) {
+  static Iterator end(const Line<I, N>& region) {
     return Iterator(region, region.backIndex() + region.step());
   }
 

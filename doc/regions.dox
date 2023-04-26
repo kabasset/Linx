@@ -33,7 +33,7 @@ They are simply defined as a pair of front and back positions, both inclusive.
 The following ad-hoc region classes are implemented with efficient iterators:
 
 - `Grid`,
-- `OrientedSlice`,
+- `Line`,
 - `Mask`.
 
 In addition to those specialized classes, additive position containers also meet `Region` requirements,

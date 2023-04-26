@@ -2,7 +2,7 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "LinxCore/OrientedSlice.h"
+#include "LinxCore/Line.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -10,13 +10,13 @@ using namespace Linx;
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(OrientedSliceIterator_test)
+BOOST_AUTO_TEST_SUITE(LineIterator_test)
 
 //-----------------------------------------------------------------------------
 
 template <Index I, Index N>
 void checkIterator(const Position<N>& front = Position<N>::one(), Index back = 12, Index step = 3) {
-  const OrientedSlice<I, N> slice(front, back, step);
+  const Line<I, N> slice(front, back, step);
   std::vector<Position<N>> expected(slice.size(), slice.front());
   for (std::size_t i = 0; i < expected.size(); ++i) {
     expected[i][I] += slice.step() * i;

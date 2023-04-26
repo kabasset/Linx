@@ -2,8 +2,8 @@
 // This file is part of Linx <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LINXCORE_ORIENTEDSLICE_H
-#define _LINXCORE_ORIENTEDSLICE_H
+#ifndef _LINXCORE_LINE_H
+#define _LINXCORE_LINE_H
 
 #include "LinxCore/Box.h"
 #include "LinxCore/Vector.h"
@@ -17,7 +17,7 @@ namespace Linx {
  * @brief An axis-aligned slice.
  */
 template <Index I, Index N = 2>
-class OrientedSlice : boost::additive<OrientedSlice<I, N>, Position<N>>, boost::additive<OrientedSlice<I, N>, Index> {
+class Line : boost::additive<Line<I, N>, Position<N>>, boost::additive<Line<I, N>, Index> {
 
 public:
   /**
@@ -32,7 +32,6 @@ public:
 
   /**
    * @brief A position iterator.
-   * @see `Box::Iterator`
    */
   class Iterator;
 
@@ -42,15 +41,15 @@ public:
   /**
    * @brief Constructor.
    */
-  OrientedSlice(Position<N> front, Index back, Index step = 1) :
+  Line(Position<N> front, Index back, Index step = 1) :
       m_front(std::move(front)), m_step(step), m_size((back - m_front[I]) / m_step + 1) {}
 
   /**
    * @brief Create a slice from a front position, size, and optional step.
    */
-  static OrientedSlice<I, N> fromSize(Position<N> front, std::size_t size, Index step = 1) {
+  static Line<I, N> fromSize(Position<N> front, std::size_t size, Index step = 1) {
     const auto back = front[I] + step * (size - 1);
-    return OrientedSlice(std::move(front), back, step);
+    return Line(std::move(front), back, step);
   }
 
   /// @group_properties
@@ -134,14 +133,14 @@ public:
   /**
    * @brief Check whether two slices are equal.
    */
-  bool operator==(const OrientedSlice<I, N>& other) const {
+  bool operator==(const Line<I, N>& other) const {
     return m_front == other.m_front && m_step == other.m_step && m_size == other.m_size;
   }
 
   /**
    * @brief Check whether two slices are different.
    */
-  bool operator!=(const OrientedSlice<I, N>& other) const {
+  bool operator!=(const Line<I, N>& other) const {
     return m_front != other.m_front || m_step != other.m_step || m_size != other.m_size;
   }
 
@@ -150,7 +149,7 @@ public:
   /**
    * @brief Translate the box by a given vector.
    */
-  OrientedSlice<I, N>& operator+=(const Position<N>& vector) {
+  Line<I, N>& operator+=(const Position<N>& vector) {
     m_front += vector;
     return *this;
   }
@@ -158,7 +157,7 @@ public:
   /**
    * @brief Translate the box by the opposite of a given vector.
    */
-  OrientedSlice<I, N>& operator-=(const Position<N>& vector) {
+  Line<I, N>& operator-=(const Position<N>& vector) {
     m_front -= vector;
     return *this;
   }
@@ -166,7 +165,7 @@ public:
   /**
     * @brief Add a scalar to each coordinate.
     */
-  OrientedSlice<I, N>& operator+=(Index scalar) {
+  Line<I, N>& operator+=(Index scalar) {
     m_front += scalar;
     return *this;
   }
@@ -174,7 +173,7 @@ public:
   /**
    * @brief Subtract a scalar to each coordinate.
    */
-  OrientedSlice<I, N>& operator-=(Index scalar) {
+  Line<I, N>& operator-=(Index scalar) {
     m_front -= scalar;
     return *this;
   }
@@ -182,29 +181,29 @@ public:
   /**
    * @brief Add 1 to each coordinate.
    */
-  OrientedSlice<I, N>& operator++() {
+  Line<I, N>& operator++() {
     return *this += 1;
   }
 
   /**
    * @brief Subtract 1 to each coordinate.
    */
-  OrientedSlice<I, N>& operator--() {
+  Line<I, N>& operator--() {
     return *this -= 1;
   }
 
   /**
    * @brief Copy.
    */
-  OrientedSlice<I, N> operator+() {
+  Line<I, N> operator+() {
     return *this;
   }
 
   /**
    * @brief Invert the sign of each coordinate.
    */
-  OrientedSlice<I, N> operator-() {
-    return OrientedSlice<I, N>::fromSize(-m_front, m_size, -m_step);
+  Line<I, N> operator-() {
+    return Line<I, N>::fromSize(-m_front, m_size, -m_step);
   }
 
   /// @}
@@ -227,16 +226,16 @@ private:
 };
 
 /**
- * @relates OrientedSlice
+ * @relates Line
  * @brief Get the bounding box of a slice.
  */
 template <Index I, Index N>
-inline const Box<N>& box(const OrientedSlice<I, N>& region) {
+inline const Box<N>& box(const Line<I, N>& region) {
   return region.box();
 }
 
 } // namespace Linx
 
-#include "LinxCore/impl/OrientedSliceIterator.h"
+#include "LinxCore/impl/LineIterator.h"
 
 #endif

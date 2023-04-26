@@ -69,7 +69,7 @@ public:
   void correlateTo(const TIn& in, TOut& out, const TRegion region) const {
     auto front = Position<TIn::Dimension>::zero();
     front[I] -= m_origin;
-    auto patch = in.patch(OrientedSlice<I, TIn::Dimension>::fromSize(std::move(front), m_values.size()));
+    auto patch = in.patch(Line<I, TIn::Dimension>::fromSize(std::move(front), m_values.size()));
     for (const auto& p : region) {
       patch.translate(p);
       out[p] = std::inner_product(m_values.begin(), m_values.end(), patch.begin(), T {});
