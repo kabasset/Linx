@@ -41,6 +41,17 @@ BOOST_AUTO_TEST_CASE(box_region_tiling_ordering_test) {
   }
 }
 
+BOOST_AUTO_TEST_CASE(grid_region_tiling_test) {
+  Grid<2> region({{3, 4}, {9, 8}}, {3, 3});
+  const auto tiles = tileRegionAlong<1>(region);
+  BOOST_TEST(tiles.shape() == Position<2>({3, 1}));
+  for (const auto& p : tiles.domain()) {
+    const auto line = tiles[p];
+    BOOST_TEST(line.front() == p * 3 + region.front());
+    BOOST_TEST(line.size() == 2);
+  }
+}
+
 BOOST_AUTO_TEST_CASE(raster_tiling_ordering_test) {
   const auto raster = Raster<Index, 3>({3, 4, 5}).range();
   const auto tiles = tileRasterAlong<0>(raster);
@@ -55,6 +66,22 @@ BOOST_AUTO_TEST_CASE(raster_tiling_ordering_test) {
     }
   }
 }
+
+// BOOST_AUTO_TEST_CASE(grid_patch_tiling_ordering_test) {
+//   const auto raster = Raster<Index, 2>({6, 4}).range();
+//   const auto region = Grid<2>({{1, 1}, {5, 3}}, {2, 2});
+//   const auto patch = raster.patch(region);
+//   const auto tiles = tileRasterAlong<0>(patch);
+//   BOOST_TEST(tiles.shape() == (Position<2> {3, 2}));
+//   Index i = 1;
+//   for (const auto& p : tiles.domain()) {
+//     const auto line = tiles[p];
+//     for (const auto& j : line) {
+//       BOOST_TEST(j == i);
+//       i += 2;
+//     }
+//   }
+// }
 
 //-----------------------------------------------------------------------------
 
