@@ -13,7 +13,7 @@ template <Index I, typename TRegion>
 Raster<Line<I, TRegion::Dimension>, TRegion::Dimension> tileRegionAlong(const TRegion& in) {
   const auto size = in.template length<I>();
   const auto step = in.step();
-  const auto plane = project(box(in), I);
+  const auto plane = project(in, I);
   Raster<Line<I, TRegion::Dimension>, TRegion::Dimension> out(plane.shape());
   auto frontIt = plane.begin();
   for (auto& e : out) {
@@ -24,13 +24,17 @@ Raster<Line<I, TRegion::Dimension>, TRegion::Dimension> tileRegionAlong(const TR
 }
 
 template <Index I, typename TRaster>
-Raster<Patch<TRaster, Line<I, TRaster::Dimension>>, TRaster::Dimension> tileRasterAlong(const TRaster& in) {
-  const auto size = in.template length<I>();
-  const auto step = in.step();
-  Raster<Patch<TRaster, Line<I, TRaster::Dimension>>, TRaster::Dimension> out(project(in.domain(), I).shape());
-  auto frontIt = out.domain().begin();
-  for (auto& e : out.domain()) {
-    e = in.patch(Line<I, TRaster::Dimension>::fromSize(*frontIt, size, step));
+auto tileRasterAlong(const TRaster& in) {
+  using T = typename TRaster::Value;
+  static constexpr Index N = TRaster::Dimension;
+  const auto domain = in.domain();
+  const auto size = domain.template length<I>();
+  const auto step = domain.step();
+  const auto plane = project(domain, I);
+  Raster<Patch<const T, const TRaster, Line<I, N>>, N> out(plane.shape());
+  auto frontIt = plane.begin();
+  for (auto& e : out) {
+    e = in.patch(Line<I, N>::fromSize(*frontIt, size, step[I]));
     ++frontIt;
   }
   return out;
