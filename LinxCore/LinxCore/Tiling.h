@@ -13,8 +13,9 @@ template <Index I, typename TRegion>
 Raster<Line<I, TRegion::Dimension>, TRegion::Dimension> tileRegionAlong(const TRegion& in) {
   const auto size = in.template length<I>();
   const auto step = in.step();
-  Raster<Line<I, TRegion::Dimension>, TRegion::Dimension> out(project(box(in), I).shape());
-  auto frontIt = out.domain().begin();
+  const auto plane = project(box(in), I);
+  Raster<Line<I, TRegion::Dimension>, TRegion::Dimension> out(plane.shape());
+  auto frontIt = plane.begin();
   for (auto& e : out) {
     e = Line<I, TRegion::Dimension>::fromSize(*frontIt, size, step[I]);
     ++frontIt;
