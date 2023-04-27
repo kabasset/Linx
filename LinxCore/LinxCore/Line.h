@@ -41,9 +41,9 @@ public:
   /**
    * @brief Default constructor.
    * 
-   * Create a line which corresponds to single position 0.
+   * Create an empty line.
    */
-  Line() : Line(Position<N>::zero(), 0) {}
+  Line() : Line(Position<N>::zero(), -1) {}
 
   /**
    * @brief Constructor.
