@@ -81,10 +81,17 @@ public:
   /// @group_construction
 
   /**
+   * @brief Default constructor.
+   * 
+   * This is a dummy constructor defined for compatibility with `std::vector`.
+   */
+  Patch() : m_parent(nullptr), m_region(), m_indexing() {}
+
+  /**
    * @brief Constructor.
    */
   Patch(Parent& parent, Region region) :
-      m_parent(parent), m_region(std::move(region)), m_indexing(m_parent, m_region) {}
+      m_parent(&parent), m_region(std::move(region)), m_indexing(*m_parent, m_region) {}
   // std::move(region) not applicable to const Region& // TODO decay?
 
   /// @group_properties
@@ -114,14 +121,14 @@ public:
    * @brief Access the parent raster or extrapolator.
    */
   const Parent& parent() const {
-    return m_parent;
+    return *m_parent;
   }
 
   /**
    * @brief Access the parent raster or extrapolator.
    */
   Parent& parent() {
-    return m_parent;
+    return *m_parent;
   }
 
   /// @group_elements
@@ -130,28 +137,28 @@ public:
    * @brief Constant iterator to the front pixel.
    */
   Iterator<const Value> begin() const {
-    return m_indexing.template begin<const Value>(m_parent, m_region);
+    return m_indexing.template begin<const Value>(*m_parent, m_region);
   }
 
   /**
    * @brief Iterator to the front pixel.
    */
   Iterator<Value> begin() {
-    return m_indexing.template begin<Value>(m_parent, m_region);
+    return m_indexing.template begin<Value>(*m_parent, m_region);
   }
 
   /**
    * @brief Constant end iterator.
    */
   Iterator<const Value> end() const {
-    return m_indexing.template end<const Value>(m_parent, m_region);
+    return m_indexing.template end<const Value>(*m_parent, m_region);
   }
 
   /**
    * @brief End iterator.
    */
   Iterator<Value> end() {
-    return m_indexing.template end<Value>(m_parent, m_region);
+    return m_indexing.template end<Value>(*m_parent, m_region);
   }
 
   /// @group_modifiers
@@ -175,17 +182,24 @@ public:
   /// @group_operations
 
   /**
+   * @brief Check whether two masks are equal.
+   */
+  bool operator==(const Patch<T, TParent, TRegion>& other) const {
+    return m_parent == other.m_parent && m_region == other.m_region;
+  }
+
+  /**
    * @brief Create a cropped patch.
    */
   Patch<const T, const TParent, TRegion> patch(const Box<TParent::Dimension>& box) const {
-    return Patch<const T, const TParent, TRegion>(m_parent, m_region & box);
+    return Patch<const T, const TParent, TRegion>(*m_parent, m_region & box);
   }
 
   /**
    * @brief Create a cropped patch.
    */
   Patch<T, TParent, TRegion> patch(const Box<TParent::Dimension>& box) {
-    return Patch<T, TParent, TRegion>(m_parent, m_region & box);
+    return Patch<T, TParent, TRegion>(*m_parent, m_region & box);
   }
 
   /// @}
@@ -194,7 +208,7 @@ private:
   /**
    * @brief The parent raster.
    */
-  Parent& m_parent;
+  Parent* m_parent;
 
   /**
    * @brief The region.

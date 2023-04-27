@@ -27,6 +27,11 @@ public:
   class Iterator;
 
   /**
+   * @brief Default constructor.
+   */
+  PositionBasedIndexing() {}
+
+  /**
    * @brief Constructor.
    */
   PositionBasedIndexing(const TParent&, const TRegion&) {}
@@ -59,6 +64,11 @@ public:
    */
   template <typename T>
   class Iterator;
+
+  /**
+   * @brief Default constructor.
+   */
+  StrideBasedIndexing() : m_step(1), m_width(0), m_offsets(1) {}
 
   /**
    * @brief Constructor for boxes.
@@ -138,6 +148,11 @@ public:
    */
   template <typename T>
   class Iterator;
+
+  /**
+   * @brief Default constructor.
+   */
+  OffsetBasedIndexing() : m_offsets(1) {}
 
   /**
    * @brief Constructor.
