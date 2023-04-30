@@ -45,6 +45,8 @@ public:
   /// @{
   /// @group_construction
 
+  Box() : Box(Position<N>::one(), Position<N>::zero()) {}
+
   /**
    * @brief Constructor.
    */

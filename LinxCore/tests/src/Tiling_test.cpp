@@ -52,36 +52,47 @@ BOOST_AUTO_TEST_CASE(grid_region_tiling_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(raster_tiling_ordering_test) {
+BOOST_AUTO_TEST_CASE(raster_profiles_ordering_test) {
   const auto raster = Raster<Index, 3>({3, 4, 5}).range();
-  const auto tiles = tileRasterAlong<0>(raster);
-  const auto plane = tiles.domain();
+  const auto parts = profiles<0>(raster);
+  const auto plane = parts.domain();
   BOOST_TEST(plane == Box<3>({0, 0, 0}, {0, 3, 4}));
   Index i = 0;
-  for (const auto& p : tiles.domain()) {
-    const auto line = tiles[p];
-    for (const auto& j : line) {
+  for (const auto& p : parts) {
+    for (const auto& j : p) {
       BOOST_TEST(j == i);
       ++i;
     }
   }
 }
 
-// BOOST_AUTO_TEST_CASE(grid_patch_tiling_ordering_test) {
-//   const auto raster = Raster<Index, 2>({6, 4}).range();
-//   const auto region = Grid<2>({{1, 1}, {5, 3}}, {2, 2});
-//   const auto patch = raster.patch(region);
-//   const auto tiles = tileRasterAlong<0>(patch);
-//   BOOST_TEST(tiles.shape() == (Position<2> {3, 2}));
-//   Index i = 1;
-//   for (const auto& p : tiles.domain()) {
-//     const auto line = tiles[p];
-//     for (const auto& j : line) {
-//       BOOST_TEST(j == i);
-//       i += 2;
-//     }
-//   }
-// }
+BOOST_AUTO_TEST_CASE(raster_profiles_setting_test) {
+  auto raster = Raster<Index, 2>({3, 4}).fill(-1);
+  auto parts = profiles<1>(raster);
+  Index i = 0;
+  for (auto& p : parts) {
+    for (auto& j : p) {
+      j = i;
+      ++i;
+    }
+  }
+  for (const auto& p : raster.domain()) {
+    BOOST_TEST(raster[p] == p[1] + raster.length(1) * p[0]);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(raster_tiles_ordering_test) {
+  const auto raster = Raster<Index, 3>({3, 4, 5}).range();
+  const auto parts = tiles(raster, Position<3>({1, 1, 1}));
+  Index i = 0;
+  for (const auto& p : parts) {
+    BOOST_TEST(p.size() == 1);
+    for (const auto& j : p) {
+      BOOST_TEST(j == i);
+      ++i;
+    }
+  }
+}
 
 //-----------------------------------------------------------------------------
 
