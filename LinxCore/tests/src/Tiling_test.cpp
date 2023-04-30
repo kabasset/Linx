@@ -52,6 +52,21 @@ BOOST_AUTO_TEST_CASE(grid_region_tiling_test) {
   }
 }
 
+BOOST_AUTO_TEST_CASE(raster_sections_thickness_test) {
+  auto raster = Raster<Index, 3>({8, 3, 4}).fill(-1);
+  Index i = 0;
+  for (auto& part : sections(raster, 3)) {
+    for (auto& e : part) {
+      e = i;
+    }
+    ++i;
+  }
+  for (const auto& p : raster.domain()) {
+    const auto expected = p[2] < 3 ? 0 : 1;
+    BOOST_TEST(raster[p] == expected);
+  }
+}
+
 BOOST_AUTO_TEST_CASE(raster_profiles_ordering_test) {
   const auto raster = Raster<Index, 3>({3, 4, 5}).range();
   const auto parts = profiles<0>(raster);
