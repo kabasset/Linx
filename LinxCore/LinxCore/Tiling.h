@@ -81,9 +81,9 @@ template <typename TRaster>
 auto sections(TRaster& in, Index thickness = 1) {
   using TSection = std::decay_t<decltype(in.section(0, thickness - 1))>;
   std::vector<TSection> out;
-  const auto bound = in.length(-1);
-  for (Index i = 0; i < bound; i += thickness) {
-    out.push_back(in.section(i, std::min(i + thickness, bound) - 1));
+  const auto back = in.length(in.dimension() - 1); // FIXME implement length(-1)
+  for (Index i = 0; i <= back; i += thickness) {
+    out.push_back(in.section(i, std::min(i + thickness, back) - 1));
   }
   return out;
 }
