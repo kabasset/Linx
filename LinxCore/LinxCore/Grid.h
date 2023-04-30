@@ -106,7 +106,7 @@ public:
   Position<Dimension> shape() const {
     Position<Dimension> out(m_box.shape());
     for (std::size_t i = 0; i < out.size(); ++i) {
-      out[i] = out[i] / m_step[i] + 1;
+      out[i] = (out[i] + m_step[i] - 1) / m_step[i];
     }
     return out;
   }
