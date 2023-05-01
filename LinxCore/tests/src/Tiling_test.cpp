@@ -14,44 +14,6 @@ BOOST_AUTO_TEST_SUITE(Tiling_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(box_region_tiling_test) {
-  Box<3> region({3, 4, 5}, {9, 8, 7});
-  const auto tiles = tileRegionAlong<1>(region);
-  const auto plane = tiles.domain() + region.front();
-  BOOST_TEST(plane == Box<3>({3, 4, 5}, {9, 4, 7}));
-  for (const auto& p : tiles.domain()) {
-    const auto line = tiles[p];
-    BOOST_TEST(line.front() == p + region.front());
-    BOOST_TEST(line.size() == 5);
-  }
-}
-
-BOOST_AUTO_TEST_CASE(box_region_tiling_ordering_test) {
-  Box<3> region({3, 4, 5}, {9, 8, 7});
-  const auto tiles = tileRegionAlong<0>(region);
-  const auto plane = tiles.domain() + region.front();
-  BOOST_TEST(plane == Box<3>({3, 4, 5}, {3, 8, 7}));
-  auto it = region.begin();
-  for (const auto& p : tiles.domain()) {
-    const auto line = tiles[p];
-    for (const auto& q : line) {
-      BOOST_TEST(q == *it);
-      ++it;
-    }
-  }
-}
-
-BOOST_AUTO_TEST_CASE(grid_region_tiling_test) {
-  Grid<2> region({{3, 4}, {9, 8}}, {3, 3});
-  const auto tiles = tileRegionAlong<1>(region);
-  BOOST_TEST(tiles.shape() == Position<2>({3, 1}));
-  for (const auto& p : tiles.domain()) {
-    const auto line = tiles[p];
-    BOOST_TEST(line.front() == p * 3 + region.front());
-    BOOST_TEST(line.size() == 2);
-  }
-}
-
 BOOST_AUTO_TEST_CASE(raster_sections_thickness_test) {
   auto raster = Raster<Index, 3>({8, 3, 4}).fill(-1);
   Index i = 0;
@@ -112,9 +74,10 @@ BOOST_AUTO_TEST_CASE(raster_profiles_setting_test) {
 
 BOOST_AUTO_TEST_CASE(raster_tiles_ordering_test) {
   const auto raster = Raster<Index, 3>({3, 4, 5}).range();
-  const auto parts = tiles(raster, Position<3>({1, 1, 1}));
+  auto parts = tiles(raster, Position<3>({1, 1, 1}));
   Index i = 0;
   for (const auto& p : parts) {
+    std::cout << i << std::endl;
     BOOST_TEST(p.size() == 1);
     for (const auto& j : p) {
       BOOST_TEST(j == i);

@@ -10,22 +10,63 @@
 
 namespace Linx {
 
-template <Index I, typename TRegion>
-Raster<Line<I, TRegion::Dimension>, TRegion::Dimension> tileRegionAlong(const TRegion& in) {
-  const auto size = in.template length<I>();
-  const auto step = in.step();
-  const auto plane = project(in, I);
-  Raster<Line<I, TRegion::Dimension>, TRegion::Dimension> out(plane.shape());
-  auto frontIt = plane.begin();
-  for (auto& e : out) {
-    e = Line<I, TRegion::Dimension>::fromSize(*frontIt, size, step[I]);
-    ++frontIt;
+/**
+ * @ingroup regions
+ * @brief Iterator over the tiles of a raster.
+ * @see tiles()
+ */
+template <typename TRaster, Index M>
+class TileGenerator;
+
+/**
+ * @relates TileGenerator
+ * @brief Get a box-patch partitioning of a raster.
+ * 
+ * The input raster domain is partitioned into boxes of given shape,
+ * except at its upper limits where the boxes may be clamped inside the input domain.
+ * An iterable over the corresponding patches is returned.
+ */
+template <typename TRaster, Index M>
+auto tiles(TRaster& in, Position<M> shape) {
+  return TileGenerator<TRaster, M>(in, std::move(shape));
+}
+
+/**
+ * @ingroup region
+ * @brief Iterator over the sections of a raster.
+ * @see sections()
+ */
+template <typename TRaster>
+class SectionGenerator;
+
+/**
+ * @ingroup regions
+ * @brief Get a slicing of a raster as an iterable of cross-sections of given thickness.
+ * 
+ * The input raster domain is sliced along its last axis into sections of given thickness,
+ * except for the last section which may be thinner.
+ * An iterable over the sections is returned.
+ */
+template <typename TRaster>
+auto sections(TRaster& in, Index thickness = 1) {
+  using TSection = std::decay_t<decltype(in.section(0, thickness - 1))>;
+  std::vector<TSection> out;
+  const auto back = in.length(in.dimension() - 1); // FIXME implement length(-1)
+  for (Index i = 0; i <= back; i += thickness) {
+    out.push_back(in.section(i, std::min(i + thickness, back) - 1));
   }
   return out;
 }
 
 /**
  * @ingroup regions
+ * @brief Iterator over the `I`-th axis-aligned profiles of a raster.
+ */
+template <Index I, typename TRaster>
+class ProfileGenerator;
+
+/**
+ * @relates ProfileGenerator
  * @brief Get a line-patch partitioning of a raster.
  * 
  * The input raster domain is partitioned into maximal lines oriented along the `I`-th axis.
@@ -48,6 +89,13 @@ auto profiles(TRaster& in) {
 }
 
 /**
+ * @brief Iterator over the rows of a raster.
+ */
+template <typename TRaster>
+class RowGenerator;
+
+/**
+ * @relates RowGenerator
  * @brief Get a line-section partitioning of a raster.
  * 
  * This function is similar to `profiles<0>()` but parts are `PtrRaster`s instead of `Patch`es
@@ -72,47 +120,8 @@ auto rows(TRaster& in) {
   return out;
 }
 
-/**
- * @ingroup regions
- * @brief Get a box-patch partitioning of a raster.
- * 
- * The input raster domain is partitioned into boxes of given shape,
- * except at its upper limits where the boxes may be clamped inside the input domain.
- * An iterable over the corresponding patches is returned.
- */
-template <typename TRaster, Index M>
-auto tiles(TRaster& in, const Position<M>& shape) {
-  using TPatch = std::decay_t<decltype(in.patch(Box<M>()))>;
-  const auto domain = in.domain();
-  const Grid<M> fronts(domain, shape);
-  Raster<TPatch, TRaster::Dimension> out(fronts.shape());
-  auto frontIt = fronts.begin();
-  for (auto& e : out) {
-    e = in.patch(Box<M>::fromShape(*frontIt, shape) & domain);
-    ++frontIt;
-  }
-  return out;
-}
-
-/**
- * @ingroup regions
- * @brief Get a slicing of a raster as an iterable of cross-sections of given thickness.
- * 
- * The input raster domain is sliced along its last axis into sections of given thickness,
- * except for the last section which may be thinner.
- * An iterable over the sections is returned.
- */
-template <typename TRaster>
-auto sections(TRaster& in, Index thickness = 1) {
-  using TSection = std::decay_t<decltype(in.section(0, thickness - 1))>;
-  std::vector<TSection> out;
-  const auto back = in.length(in.dimension() - 1); // FIXME implement length(-1)
-  for (Index i = 0; i <= back; i += thickness) {
-    out.push_back(in.section(i, std::min(i + thickness, back) - 1));
-  }
-  return out;
-}
-
 } // namespace Linx
+
+#include "LinxCore/impl/TilingGenerator.h"
 
 #endif

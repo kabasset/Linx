@@ -34,6 +34,11 @@ public:
   /// @group_construction
 
   /**
+   * @brief Default constructor.
+   */
+  Grid() : m_box(), m_step(Position<N>::one()) {}
+
+  /**
    * @brief Constructor.
    */
   Grid(Box<N> box, Position<N> step) : m_box(std::move(box)), m_step(std::move(step)) {
