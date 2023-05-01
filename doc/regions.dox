@@ -41,6 +41,17 @@ but no assumptions can be made on the regularity and therefore iterators cannot 
 Yet, for very sparse and irregular regions, `Sequence<Position<N>>` migth be better suited than `Mask<N>`.
 
 
+\section regions-tiling Tiling
+
+
+TODO
+
+- `sections()`,
+- `tiles()`,
+- `profiles()`,
+- `rows()`.
+
+
 \section regions-performance Performance and Optimization
 
 

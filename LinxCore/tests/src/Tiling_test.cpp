@@ -81,6 +81,20 @@ BOOST_AUTO_TEST_CASE(raster_profiles_ordering_test) {
   }
 }
 
+BOOST_AUTO_TEST_CASE(raster_rowss_ordering_test) {
+  const auto raster = Raster<Index, 3>({3, 4, 5}).range();
+  const auto parts = rows(raster);
+  const auto plane = parts.domain();
+  BOOST_TEST(plane == Box<3>({0, 0, 0}, {0, 3, 4}));
+  Index i = 0;
+  for (const auto& p : parts) {
+    for (const auto& j : p) {
+      BOOST_TEST(j == i);
+      ++i;
+    }
+  }
+}
+
 BOOST_AUTO_TEST_CASE(raster_profiles_setting_test) {
   auto raster = Raster<Index, 2>({3, 4}).fill(-1);
   auto parts = profiles<1>(raster);

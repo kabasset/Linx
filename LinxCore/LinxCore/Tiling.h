@@ -48,6 +48,31 @@ auto profiles(TRaster& in) {
 }
 
 /**
+ * @brief Get a line-section partitioning of a raste.
+ * 
+ * This function is similar to `profiles<0>()` but parts are `PtrRaster`s instead of `Patch`es
+ * since data is necessarily contiguous along axis 0.
+ * 
+ * @see profiles()
+ */
+template <typename TRaster>
+auto rows(TRaster& in) {
+  using T = std::conditional_t<std::is_const<TRaster>::value, const typename TRaster::Value, typename TRaster::Value>;
+  using TRow = PtrRaster<T, 1>;
+  const auto domain = in.domain();
+  const auto size = domain.template length<0>();
+  const auto plane = project(domain);
+  auto patch = in.patch(plane);
+  Raster<TRow, TRaster::Dimension> out(plane.shape());
+  auto it = patch.begin();
+  for (auto& e : out) {
+    e = PtrRaster<T, 1>({size}, &*it);
+    ++it;
+  }
+  return out;
+}
+
+/**
  * @ingroup regions
  * @brief Get a box-patch partitioning of a raster.
  * 
