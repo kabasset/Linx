@@ -11,7 +11,7 @@ namespace Linx {
 
 /**
  * @ingroup mixins
- * @brief Base class to provide range operations to iterables.
+ * @brief Base class to provide range operations.
  * @tparam T The value type
  * @tparam TDerived The child class which implements required methods
  */

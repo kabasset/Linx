@@ -22,13 +22,14 @@ public:
   explicit Sequence(std::size_t size = 0, TArgs&&... args) : Container(size, std::forward<TArgs>(args)...) {}
 
   template <typename U>
-  Sequence(std::initializer_list<U> list) : Container(list) {}
+  Sequence(std::initializer_list<U> list) : Container(std::move(list)) {}
 
   template <typename U, typename... TArgs>
-  explicit Sequence(std::initializer_list<U> list, TArgs&&... args) : Container(list, std::forward<TArgs>(args)...) {}
+  explicit Sequence(std::initializer_list<U> list, TArgs&&... args) :
+      Container(std::move(list), std::forward<TArgs>(args)...) {}
 
-  template <typename TIterable, typename std::enable_if_t<IsIterable<TIterable>::value>* = nullptr, typename... TArgs>
-  explicit Sequence(TIterable& iterable, TArgs&&... args) : Container(iterable, std::forward<TArgs>(args)...) {}
+  template <typename TRange, typename std::enable_if_t<IsRange<TRange>::value>* = nullptr, typename... TArgs>
+  explicit Sequence(const TRange& range, TArgs&&... args) : Container(range, std::forward<TArgs>(args)...) {}
 };
 
 /**

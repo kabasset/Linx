@@ -74,8 +74,8 @@ public:
   /**
    * @brief Create a diagonal matrix.
    */
-  template <typename TIterable>
-  static Matrix diagonal(const TIterable& values) {
+  template <typename TRange>
+  static Matrix diagonal(const TRange& values) {
     Matrix out;
     auto d = out.data();
     for (auto it = values.begin(); it != values.end(); ++it, d += Columns + 1) {

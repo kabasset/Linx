@@ -24,7 +24,7 @@ class TileGenerator;
  * 
  * The input raster domain is partitioned into boxes of given shape,
  * except at its upper limits where the boxes may be clamped inside the input domain.
- * An iterable over the corresponding patches is returned.
+ * A range over the corresponding patches is returned.
  */
 template <typename TRaster, Index M>
 auto tiles(TRaster& in, Position<M> shape) {
@@ -41,11 +41,11 @@ class SectionGenerator;
 
 /**
  * @ingroup regions
- * @brief Get a slicing of a raster as an iterable of cross-sections of given thickness.
+ * @brief Get a slicing of a raster as a range of cross-sections of given thickness.
  * 
  * The input raster domain is sliced along its last axis into sections of given thickness,
  * except for the last section which may be thinner.
- * An iterable over the sections is returned.
+ * A range over the sections is returned.
  */
 template <typename TRaster>
 auto sections(TRaster& in, Index thickness = 1) {
@@ -70,7 +70,7 @@ class ProfileGenerator;
  * @brief Get a line-patch partitioning of a raster.
  * 
  * The input raster domain is partitioned into maximal lines oriented along the `I`-th axis.
- * An iterable over the corresponding patches is returned.
+ * A range over the corresponding patches is returned.
  */
 template <Index I, typename TRaster>
 auto profiles(TRaster& in) {

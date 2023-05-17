@@ -208,26 +208,26 @@ public:
    */
   template <typename U, typename... TArgs>
   explicit Raster(Position<N> shape, std::initializer_list<U> list, TArgs&&... args) :
-      Container(list, std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
-    SizeError::mayThrow(list.size(), shapeSize(shape));
+      Container(std::move(list), std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
+    SizeError::mayThrow(this->size(), shapeSize(shape));
   }
 
   /**
-   * @brief Iterable-copy constructor.
+   * @brief Range-copy constructor.
    * @param shape The raster shape
-   * @param iterable The values to be copied into the holder
+   * @param range The values to be copied into the holder
    * @param args The arguments to be forwarded to the data holder
    * 
    * The holder is instantiated as:
    * \code
    * Holder holder(shapeSize(shape), std::forward<TArgs>(args)...);
-   * std::copy(iterable.begin(), iterable.end(), holder.data());
+   * std::copy(range.begin(), range.end(), holder.data());
    * \endcode
    */
-  template <typename TIterable, typename std::enable_if_t<IsIterable<TIterable>::value>* = nullptr, typename... TArgs>
-  explicit Raster(Position<N> shape, TIterable& iterable, TArgs&&... args) :
-      Container(iterable, std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
-    SizeError::mayThrow(std::distance(std::begin(iterable), std::end(iterable)), shapeSize(shape));
+  template <typename TRange, typename std::enable_if_t<IsRange<TRange>::value>* = nullptr, typename... TArgs>
+  explicit Raster(Position<N> shape, TRange& range, TArgs&&... args) :
+      Container(range, std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
+    SizeError::mayThrow(std::distance(std::begin(range), std::end(range)), shapeSize(shape));
   }
 
   /**

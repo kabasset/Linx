@@ -54,10 +54,10 @@ public:
   }
 
   /**
-   * @brief Iterable-copy constructor.
+   * @brief Range-copy constructor.
    */
-  template <typename TIterable>
-  explicit DataDistribution(const TIterable& values) : DataDistribution(std::vector<T>(values.begin(), values.end())) {}
+  template <typename TRange>
+  explicit DataDistribution(const TRange& values) : DataDistribution(std::vector<T>(values.begin(), values.end())) {}
 
   /// @group_properties
 
@@ -159,8 +159,8 @@ public:
    * 
    * The output size is the size of `bins` minus one.
    */
-  template <typename TIterable>
-  std::vector<std::size_t> histogram(const TIterable& bins) { // FIXME bounds options
+  template <typename TRange>
+  std::vector<std::size_t> histogram(const TRange& bins) { // FIXME bounds options
     sort();
     std::vector<std::size_t> out(std::distance(bins.begin(), bins.end()) - 1);
     auto it = m_values.begin();

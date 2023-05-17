@@ -12,7 +12,7 @@
 #include "LinxBase/Holders.h"
 #include "LinxBase/Math.h"
 #include "LinxBase/Range.h"
-#include "LinxBase/SeqUtils.h" // IsIterable
+#include "LinxBase/SeqUtils.h" // IsRange
 #include "LinxBase/TypeUtils.h" // Index, Limits
 
 #include <cstddef> // size_t
@@ -62,26 +62,33 @@ public:
   explicit DataContainer(std::size_t s = 0, TArgs&&... args) : Holder(s, std::forward<TArgs>(args)...) {}
 
   /**
+   * @brief Iterator-based constructor.
+   * 
+   * Iterated values are copied to the container.
+   */
+  template <typename TIt, typename... TArgs>
+  explicit DataContainer(TIt begin, TIt end, TArgs&&... args) :
+      DataContainer(std::distance(begin, end), std::forward<TArgs>(args)...) {
+    std::copy(std::move(begin), std::move(end), this->data());
+  }
+
+  /**
    * @brief List-based constructor.
    * 
    * List values are copied to the container.
    */
   template <typename U, typename... TArgs>
   explicit DataContainer(std::initializer_list<U> list, TArgs&&... args) :
-      Holder(list.size(), std::forward<TArgs>(args)...) {
-    std::copy(list.begin(), list.end(), this->data());
-  }
+      DataContainer(list.begin(), list.end(), std::forward<TArgs>(args)...) {}
 
   /**
-   * @brief Iterator-based constructor.
+   * @brief Range-based constructor.
    * 
-   * Iterable values are copied to the container.
+   * Range values are copied to the container.
    */
-  template <typename TIterable, typename std::enable_if_t<IsIterable<TIterable>::value>* = nullptr, typename... TArgs>
-  explicit DataContainer(const TIterable& iterable, TArgs&&... args) :
-      Holder(std::distance(iterable.begin(), iterable.end()), std::forward<TArgs>(args)...) {
-    std::copy(iterable.begin(), iterable.end(), this->data());
-  }
+  template <typename TRange, typename std::enable_if_t<IsRange<TRange>::value>* = nullptr, typename... TArgs>
+  explicit DataContainer(const TRange& range, TArgs&&... args) :
+      DataContainer(range.begin(), range.end(), std::forward<TArgs>(args)...) {}
 
   LINX_VIRTUAL_DTOR(DataContainer)
   LINX_DEFAULT_COPYABLE(DataContainer)
@@ -131,8 +138,8 @@ public:
   explicit MinimalDataContainer(std::initializer_list<U> list, TArgs&&... args) :
       Base(list, std::forward<TArgs>(args)...) {}
 
-  template <typename TIterable, typename std::enable_if_t<IsIterable<TIterable>::value>* = nullptr, typename... TArgs>
-  explicit MinimalDataContainer(TIterable& iterable, TArgs&&... args) : Base(iterable, std::forward<TArgs>(args)...) {}
+  template <typename TRange, typename std::enable_if_t<IsRange<TRange>::value>* = nullptr, typename... TArgs>
+  explicit MinimalDataContainer(TRange& range, TArgs&&... args) : Base(range, std::forward<TArgs>(args)...) {}
 };
 
 } // namespace Linx

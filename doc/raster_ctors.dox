@@ -13,7 +13,7 @@ Yet, each and every specialization of `Raster` provides at least the following c
 - From a shape;
 - From a shape and a brace-enclosed list of values to be assigned;
 - From a shape and a data pointer to be referenced or copied into the raster (see the data holder documentation);
-- From a shape and an iterable object to be copied into the raster;
+- From a shape and a range object to be copied into the raster;
 - From a shape and a container to be moved into the raster;
 
 Here is an illustration for `VecRaster`:

@@ -9,7 +9,7 @@ class Holder {
 class DataContainer {
 + DataContainer(size, args...)
 + DataContainer(values, args...)
-+ DataContainer(iterable, args...)
++ DataContainer(range, args...)
 + fill(value)
 + range(min, step)
 + linspace(min, max)
@@ -20,7 +20,7 @@ class DataContainer {
 class Raster {
 + Raster(shape, args...)
 + Raster(shape, values, args...)
-+ Raster(shape, iterable, args...)
++ Raster(shape, range, args...)
 + shape()
 + domain()
 + dimension()

@@ -81,10 +81,10 @@ public:
   Vector(std::initializer_list<T> indices) : Container(indices) {}
 
   /**
-   * @brief Create a vector from an iterable.
+   * @brief Create a vector from a range.
    */
-  template <typename TIterable, typename std::enable_if_t<IsIterable<TIterable>::value>* = nullptr>
-  explicit Vector(TIterable&& iterable) : Container(iterable) {}
+  template <typename TRange, typename std::enable_if_t<IsRange<TRange>::value>* = nullptr>
+  explicit Vector(TRange&& range) : Container(range) {}
 
   /**
    * @brief Create a vector full of `Limits::zero()'s.

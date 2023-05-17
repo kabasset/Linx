@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE(any_raster_ctors_test) {
   Linx::VecRaster<int> defaultInitialized({3, 2});
   Linx::VecRaster<int> listInitialized({3, 2}, {1, 2, 3, 4, 5, 6});
   Linx::VecRaster<int> copiedFromPointer({3, 2}, data);
-  Linx::VecRaster<int> copiedFromIterable({3, 2}, vec);
+  Linx::VecRaster<int> copiedFromRange({3, 2}, vec);
   Linx::VecRaster<int> movedFromContainer({3, 2}, std::move(vec));
   //! [Any raster]
 
@@ -29,10 +29,10 @@ BOOST_AUTO_TEST_CASE(any_raster_ctors_test) {
     BOOST_TEST(defaultInitialized[i] == 0);
     BOOST_TEST(listInitialized[i] == i + 1);
     BOOST_TEST(copiedFromPointer[i] == i + 1);
-    BOOST_TEST(copiedFromIterable[i] == i + 1);
+    BOOST_TEST(copiedFromRange[i] == i + 1);
     BOOST_TEST(movedFromContainer[i] == i + 1);
   }
-  BOOST_TEST(copiedFromIterable.data() != data);
+  BOOST_TEST(copiedFromRange.data() != data);
   BOOST_TEST(movedFromContainer.data() == data);
 
   const int* listData = listInitialized.data();
