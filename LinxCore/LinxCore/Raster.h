@@ -206,8 +206,8 @@ public:
    * std::copy(list.begin(), list.end(), holder.data());
    * \endcode
    */
-  template <typename U, typename... TArgs>
-  explicit Raster(Position<N> shape, std::initializer_list<U> list, TArgs&&... args) :
+  template <typename... TArgs>
+  explicit Raster(Position<N> shape, std::initializer_list<T> list, TArgs&&... args) :
       Container(std::move(list), std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
     SizeError::mayThrow(this->size(), shapeSize(shape));
   }

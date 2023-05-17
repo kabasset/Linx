@@ -77,8 +77,8 @@ public:
    * 
    * List values are copied to the container.
    */
-  template <typename U, typename... TArgs>
-  explicit DataContainer(std::initializer_list<U> list, TArgs&&... args) :
+  template <typename... TArgs>
+  explicit DataContainer(std::initializer_list<T> list, TArgs&&... args) :
       DataContainer(list.begin(), list.end(), std::forward<TArgs>(args)...) {}
 
   /**
