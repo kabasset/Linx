@@ -30,6 +30,11 @@
 \brief Random values and random noise generation.
 \example LinxDemoRandom_test.cpp
 
+\defgroup numpy Comparison to NumPy Interface
+\ingroup basics
+\brief Snippets compared, adapted from NumPy's tutorial.
+\example LinxDemoBasics_test.cpp
+
 \defgroup filtering Filtering
 \brief Linear and non-linear filtering.
 

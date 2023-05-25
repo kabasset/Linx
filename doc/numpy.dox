@@ -1,0 +1,190 @@
+namespace Linx {
+/**
+
+\addtogroup numpy
+
+
+\section numpy-basics Basics
+
+
+Linx is a lower-level library than NumPy.
+The main difference in the design of Linx is the fact that there is no abstraction of the memory layout, and no implicit allocation.
+Rasters are always row-major ordered and contiguous in memory.
+Going further, it is not possible to resize a raster, while ndarrays are reallocable.
+When a non memory-contiguous view on a raster is needed, another class has to be used (`Patch`),
+which is not the case with ndarrays.
+
+Another major difference is the ordering of the axes.
+Where NumPy uses linear algebra conventions (index by row, then column), Linx uses image conventions instead (x, then y),
+and pixels are contiguous along the first axis (the image width).
+
+NumPy:
+
+\code{.py}
+a = np.range(15, dtype=int).reshape((3, 5))
+shape = a.shape  # [3, 5]
+ndim = a.ndim  # 2
+size = a.size  # 15
+width = a.size[-1]  # 5
+\endcode
+
+Linx:
+
+\code{.cpp}
+auto a = Linx::Raster<int>({5, 3}).range();
+auto shape = a.shape(); // [5, 3]
+auto ndim = a.dimension(); // 2
+auto size = a.size(); // 15
+auto width = a.length(0); // 5
+\endcode
+
+
+\section numpy-creation Creation
+
+
+By contrast with NumPy's creation based on size or nested iterables, the shape is always given to `Raster`'s constructor.
+
+NumPy:
+
+\code{.py}
+a = np.ones((2, 3, 4), dtype=np.int16)
+x = np.linspace(0, 2 * np.pi, 100)
+f = np.sin(x)
+b = np.random.default_rng().random((2, 3))
+c = np.array([[[  0,  1,  2],
+               [ 10, 12, 13]],
+              [[100, 101, 102],
+               [110, 112, 113]]])
+\endcode
+
+Linx:
+
+\code{.cpp}
+auto a = Linx::Raster<std::int16_t, 3>({4, 3, 2}).fill(1);
+auto x = Linx::Sequence<double>(100).linspace(0, 2 * Linx::pi<double>());
+auto f = sin(x);
+auto b = Linx::random({3, 2});
+auto c = Linx::Raster<double, 3>(
+    {3, 2, 2},
+    {0,  1,  2, 10, 12, 13, 100, 101, 102, 110, 112, 113});
+\endcode
+
+
+\section numpy-ops Operations
+
+
+NumPy:
+
+\code{.py}
+a = np.array([20, 30, 40, 50])
+b = np.arange(4)
+
+# New instance
+
+c = a - b
+d = b ** 2
+e = 10 * np.sin(a)
+min = np.min(a)
+
+# In place
+
+a *= 3
+b += a
+np.exp(b, out=b)
+\endcode
+
+Linx:
+
+\code{.cpp}
+auto a = Linx::Sequence<double>({20, 30, 40, 50});
+auto b = Linx::Sequence<double>(4).range();
+
+// New instance
+
+auto c = a - b;
+auto d = pow(b, 2);
+auto e = sin(a) * 10
+auto min = std::min_element(a.begin(), a.end());
+
+// In place
+
+a *= 3;
+b += a;
+b.exp();
+\endcode
+
+
+\section numpy-indexing Indexing
+
+
+NumPy:
+
+\code{.py}
+# Creation
+
+def f(y, x):
+    return 10 * y + x
+
+b = np.fromfunction(f, (5, 4), dtype=int)
+
+# Access
+
+some_pixel = b[2, 3]
+last_pixel = b[-1, -1]
+last_row = b[-1]
+
+# Iteration
+
+for pixel in b.flat:
+    print(pixel)
+
+for row in b:
+    print(row)
+\endcode
+
+Linx:
+
+\code{.cpp}
+// Creation
+
+int f(int x, int y) {
+  return 10 * x + y;
+}
+
+auto b = Linx::Raster<int>({4, 5}).map(f); // FIXME implement
+
+// Access
+
+auto somePixel = b[{3, 2}];
+auto lastPixel = b[-1]; // or b[{-1, -1}]
+auto lastRow = b.row(-1);
+
+// Iteration
+
+for (const auto& pixel : b) {
+  std::cout << pixel << std::endl;
+}
+
+for (const auto& row : rows(b)) {
+  std::cout << row << std::endl;
+}
+\endcode
+
+NumPy:
+
+\code{.py}
+a = np.arange(12).reshape(3, 4)
+indices = a > 4  # Sequence of indices
+a[indices] = 0
+\endcode
+
+Linx:
+
+\code{.cpp}
+auto a = Linx::Raster<double>({4, 3}).range();
+auto mask = a.where([](auto e) { return e > 4; }); // Patch // FIXME implement
+mask.fill(0);
+\endcode
+
+*/
+}
