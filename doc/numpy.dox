@@ -104,7 +104,7 @@ auto b = Linx::Sequence<double>(4).range();
 auto c = a - b;
 auto d = pow(b, 2);
 auto e = sin(a) * 10
-auto min = std::min_element(a.begin(), a.end());
+auto min = a.min();
 
 // In place
 
