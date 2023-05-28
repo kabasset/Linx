@@ -43,6 +43,7 @@ auto width = a.length(0); // 5
 
 
 By contrast with NumPy's creation based on size or nested iterables, the shape is always given to `Raster`'s constructor.
+For convenience, `Sequence` is a 1D analogous of `Raster` which provides a few shortcuts.
 
 NumPy:
 
@@ -63,7 +64,7 @@ Linx:
 auto a = Linx::Raster<std::int16_t, 3>({4, 3, 2}).fill(1);
 auto x = Linx::Sequence<double>(100).linspace(0, 2 * Linx::pi<double>());
 auto f = sin(x);
-auto b = Linx::random({3, 2});
+auto b = Linx::random<double>({3, 2});
 auto c = Linx::Raster<double, 3>(
     {3, 2, 2},
     {0,  1,  2, 10, 12, 13, 100, 101, 102, 110, 112, 113});
@@ -72,6 +73,10 @@ auto c = Linx::Raster<double, 3>(
 
 \section numpy-ops Operations
 
+
+Like ndarrays, rasters and sequences support the classical pixelwise operations and mathematical functions.
+As a rule of thumb, member methods (e.g. `raster.exp()`) modify the pixels in place,
+while free functions (e.g. `exp(raster)`) create a new raster.
 
 NumPy:
 
@@ -117,6 +122,11 @@ b.exp();
 \section numpy-indexing Indexing
 
 
+As previously mentioned, the order of the axes is different in NumPy and Linx.
+There are other divergences related to indexing.
+For example, an ndarray is a collection of rows, while a raster is a collection of pixels.
+Ndarrays can be viewed as a collection of pixels with `array.flat` while rasters can be viewed as a collection of rows with `rows(raster)`.
+
 NumPy:
 
 \code{.py}
@@ -125,20 +135,20 @@ NumPy:
 def f(y, x):
     return 10 * y + x
 
-b = np.fromfunction(f, (5, 4), dtype=int)
+a = np.fromfunction(f, (5, 4), dtype=int)
 
 # Access
 
-some_pixel = b[2, 3]
-last_pixel = b[-1, -1]
-last_row = b[-1]
+some_pixel = a[2, 3]
+last_pixel = a[-1, -1]
+last_row = a[-1]
 
 # Iteration
 
-for pixel in b.flat:
+for pixel in a.flat:
     print(pixel)
 
-for row in b:
+for row in a:
     print(row)
 \endcode
 
@@ -151,39 +161,89 @@ int f(int x, int y) {
   return 10 * x + y;
 }
 
-auto b = Linx::Raster<int>({4, 5}).map(f); // FIXME implement
+auto a = Linx::Raster<int>({4, 5}).posGenerate(f);
 
 // Access
 
-auto somePixel = b[{3, 2}];
-auto lastPixel = b[-1]; // or b[{-1, -1}]
-auto lastRow = b.row(-1);
+auto somePixel = a[{3, 2}];
+auto lastPixel = a[-1]; // or a[{-1, -1}]
+auto lastRow = a.row(-1);
 
 // Iteration
 
-for (const auto& pixel : b) {
+for (const auto& pixel : a) {
   std::cout << pixel << std::endl;
 }
 
-for (const auto& row : rows(b)) {
+for (const auto& row : rows(a)) {
   std::cout << row << std::endl;
 }
 \endcode
 
+NumPy supports the classical Python's slicing syntax, which does not exist in C++.
+Linx relies instead on dedicated region classes, like `Box` or `Grid`.
+A view on a raster is called a patch.
+Like NumPy's views, patches perform no copy and altering a patch means altering the parent raster.
+
 NumPy:
 
 \code{.py}
-a = np.arange(12).reshape(3, 4)
-indices = a > 4  # Sequence of indices
-a[indices] = 0
+a = np.arange(100, dtype=int).reshape(10, 10)
+b = a[1:5, 3, 6]
+c = a[1:5:2, 3:6]
+b += 1
 \endcode
 
 Linx:
 
 \code{.cpp}
-auto a = Linx::Raster<double>({4, 3}).range();
-auto mask = a.where([](auto e) { return e > 4; }); // Patch // FIXME implement
-mask.fill(0);
+auto a = Linx::Raster<int>({10, 10}).range();
+auto box = Linx::Box<2>({3, 1}, {6, 5});
+auto b = a.patch(box); // Box-based patch
+auto grid = Linx::Grid<2>(box, {1, 2});
+auto b = a.patch(grid); // Grid-based patch
+++b;
+\endcode
+
+As usual, syntax is more complex in C++.
+Yet, the library is extensible and the variety of supported region types is virtually infinite.
+
+NumPy:
+
+\code{.py}
+# Column
+
+b = a[:2]
+
+# Selector
+
+indices = a > 4  # Sequence of indices
+a[indices] = 0
+
+# L1-norm ball
+
+y, x = np.ogrid(*a.shape)
+l1_distance = np.abs(y - 4) + np.abs(x - 5)
+ball = l1_distance <= 3  # Sequence of indices
+c = a[ball]
+\endcode
+
+Linx:
+
+\code{.cpp}
+// Column
+
+auto b = a.template profile<1>(2); // Line-based patch
+
+// Selector
+
+auto patch = a.where([](auto e) { return e > 4; }); // Mask-based patch
+patch.fill(0);
+
+// L1-norm ball
+
+auto ball = Mask<2>::ball<1>({5, 4}, 3);
+auto c = a.patch(ball); // Mask-based patch
 \endcode
 
 */

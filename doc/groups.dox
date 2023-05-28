@@ -8,10 +8,6 @@
 \brief Containers and core functionalities.
 \example LinxDemoBasics_test.cpp
 
-\defgroup data_classes Class Hierarchy
-\ingroup basics
-\brief The classes which build up `Raster`
-
 \defgroup raster_ctors Rasters Assignment
 \ingroup basics
 \brief On how to instantiate and fill rasters
@@ -85,6 +81,10 @@
 
 \defgroup design Library Design
 \brief Design documentation for developers and advanced users.
+
+\defgroup data_classes Class Hierarchy
+\ingroup design
+\brief The classes which build up `Raster`
 
 \defgroup mixins Mixins
 \ingroup design
