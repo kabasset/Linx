@@ -18,7 +18,7 @@
 #include <vector>
 
 /**
- * @brief The light image template library
+ * @brief Extensible ND image laboratory.
  * 
  * An ND image processing library developed and maintained by the French space agency,
  * Centre National d'Etudes Spatiales.
@@ -33,6 +33,14 @@ namespace Linx {
 // Forward declaration for Raster::patch()
 template <typename T, typename TRaster, typename TRegion>
 class Patch;
+
+// Forward declaration for Raster::where()
+template <Index N>
+class Mask;
+
+// Forward declaration for Raster::profile()
+template <Index I, Index N>
+class Line;
 
 // Forward declaration for specializations
 template <typename T, Index N, typename THolder>
@@ -76,7 +84,7 @@ using ValRaster = Raster<T, N, StdHolder<std::valarray<T>>>;
 
 /**
  * @ingroup data_classes
- * @brief `Raster` which owns a `std::valarray`.
+ * @brief `Raster` which owns a `std::array`.
  * @tparam T The pixel type
  * @tparam Capacity The maximum number of pixels
  * @tparam N The raster dimension
@@ -137,6 +145,7 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
  * 
  * The raster data can be viewed region-wise as a `PtrRaster`,
  * provided that the region is contiguous in memory.
+ * Non contiguous view are implemented as `Patch`es, which can have arbitrarily shaped regions.
  * 
  * @tspecialization{PtrRaster}
  * @tspecialization{VecRaster}
@@ -381,7 +390,7 @@ public:
   PtrRaster<T, N> section(Index front, Index back);
 
   /**
-   * @brief Create a section at given.
+   * @brief Create a section at given index.
    */
   const PtrRaster<const T, N == -1 ? -1 : N - 1> section(Index index) const;
 
@@ -389,6 +398,29 @@ public:
    * @copybrief section(Index)const
    */
   PtrRaster<T, N == -1 ? -1 : N - 1> section(Index index);
+
+  /**
+   * @brief Create a row-section at given position.
+   */
+  const PtrRaster<const T, 1> row(const Position<N == -1 ? -1 : N - 1>& position) const;
+
+  /**
+   * @copybrief row()const
+   */
+  PtrRaster<T, 1> row(const Position<N == -1 ? -1 : N - 1>& position);
+
+  /**
+   * @brief Create a line-patch at given position.
+   */
+  template <Index I>
+  const Patch<const T, const Raster<T, N, THolder>, Line<I, N>>
+  profile(const Position<N == -1 ? -1 : N - 1>& position) const;
+
+  /**
+   * @brief Create a line-patch at given position.
+   */
+  template <Index I>
+  Patch<T, Raster<T, N, THolder>, Line<I, N>> profile(const Position<N == -1 ? -1 : N - 1>& position);
 
   /**
    * @brief Create a patch from given region.
@@ -406,10 +438,22 @@ public:
   const Patch<const T, const Raster<T, N, THolder>, TRegion> patch(TRegion region) const;
 
   /**
-   * @copybrief patch().
+   * @copybrief patch(TRegion)const
    */
   template <typename TRegion>
   Patch<T, Raster<T, N, THolder>, TRegion> patch(TRegion region);
+
+  /**
+   * @brief Create a mask patch according to some pixel-wise condition.
+   */
+  template <typename TFunc>
+  const Patch<const T, const Raster<T, N, THolder>, Mask<N>> where(TFunc&& condition) const;
+
+  /**
+   * @copybrief where(TFunc)const
+   */
+  template <typename TFunc>
+  Patch<T, Raster<T, N, THolder>, Mask<N>> where(TFunc&& condition);
 
   /// @}
 

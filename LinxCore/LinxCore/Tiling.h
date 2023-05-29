@@ -40,7 +40,7 @@ template <typename TRaster>
 class SectionGenerator;
 
 /**
- * @ingroup regions
+ * @relates SectionGenerator
  * @brief Get a slicing of a raster as a range of cross-sections of given thickness.
  * 
  * The input raster domain is sliced along its last axis into sections of given thickness,

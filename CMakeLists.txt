@@ -16,4 +16,4 @@ set(USE_SPHINX OFF
 elements_project(
     Linx 1.0
     USE Elements 6.3
-    DESCRIPTION "Extensible N-dimensional image library")
+    DESCRIPTION "Extensible N-dimensional image laboratory")
