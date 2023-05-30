@@ -145,6 +145,13 @@ public:
   /// @group_elements
 
   /**
+   * @brief Get the absolute position given a position in the grid referential.
+   */
+  inline Position<N> operator[](const Position<N>& p) const {
+    return p * m_step + m_box.front();
+  }
+
+  /**
    * @brief Get an iterator to the beginning.
    */
   Iterator begin() const {
@@ -177,7 +184,7 @@ public:
   /**
    * @brief Check whether a position is a grid node.
    */
-  bool operator[](const Position<N>& position) const {
+  bool contains(const Position<N>& position) const {
     for (Index i = 0; i < dimension(); ++i) {
       if (position[i] < m_box.front()[i] || position[i] > m_box.back()[i]) {
         return false;

@@ -134,6 +134,29 @@ public:
   /// @group_elements
 
   /**
+   * @brief Access the element at given position in the region referential.
+   * 
+   * Only patches based on regions with suitable `operator[]()` are supported.
+   * For example, box-based patches support `Position` as an argument,
+   * while line-based patches support `Index` as an argument.
+   * 
+   * This method is provided for convenience but is slower than iterators.
+   * Generally, it should be avoided in hot paths.
+   */
+  template <typename TPos>
+  const Value& operator[](const TPos& pos) const {
+    return (*m_parent)[m_region[pos]];
+  }
+
+  /**
+   * @copybrief operator[]()const
+   */
+  template <typename TPos>
+  Value& operator[](const TPos& pos) {
+    return (*m_parent)[m_region[pos]];
+  }
+
+  /**
    * @brief Constant iterator to the front pixel.
    */
   Iterator<const Value> begin() const {

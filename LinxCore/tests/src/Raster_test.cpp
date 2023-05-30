@@ -220,7 +220,39 @@ BOOST_AUTO_TEST_CASE(sectionning_test) {
   BOOST_TEST((*section0D.data() == raster3D[{2, 6, 3}]));
 }
 
-BOOST_AUTO_TEST_CASE(raster_generate_test) {
+BOOST_AUTO_TEST_CASE(raster_row_test) {
+  const auto raster = Raster<int>({6, 5}).range();
+  const auto row0 = raster.row({0});
+  const auto row1 = raster.row({1});
+  const auto row4 = raster.row({-1});
+  const auto width = raster.length<0>();
+  BOOST_TEST(row0.size() == width);
+  BOOST_TEST(row1.size() == width);
+  BOOST_TEST(row4.size() == width);
+  for (Index i = 0; i < width; ++i) {
+    BOOST_TEST(row0[i] == (raster[{i, 0}]));
+    BOOST_TEST(row1[i] == (raster[{i, 1}]));
+    BOOST_TEST(row4[i] == (raster[{i, 4}]));
+  }
+}
+
+BOOST_AUTO_TEST_CASE(raster_profile_test) {
+  const auto raster = Raster<int, 3>({6, 5, 4}).range();
+  const auto profile00 = raster.profile<1>({0, 0});
+  const auto profile13 = raster.profile<1>({1, -1});
+  const auto profile53 = raster.profile<1>({-1, -1});
+  const auto height = raster.length<1>();
+  BOOST_TEST(profile00.size() == height);
+  BOOST_TEST(profile13.size() == height);
+  BOOST_TEST(profile53.size() == height);
+  for (Index i = 0; i < height; ++i) {
+    BOOST_TEST(profile00[i] == (raster[{0, i, 0}]));
+    BOOST_TEST(profile13[i] == (raster[{1, i, 3}]));
+    BOOST_TEST(profile53[i] == (raster[{5, i, 3}]));
+  }
+}
+
+BOOST_AUTO_TEST_CASE(raster_apply_generate_test) {
   Position<3> shape {3, 14, 15};
   auto a = random<std::int16_t>(shape);
   auto b = random<std::int32_t>(shape);

@@ -5,6 +5,7 @@
 #ifndef _LINXCORE_IMPL_RASTER_HPP
 #define _LINXCORE_IMPL_RASTER_HPP
 
+#include "LinxCore/Line.h"
 #include "LinxCore/Raster.h"
 
 #include <functional> // multiplies
@@ -131,18 +132,6 @@ inline T& Raster<T, N, THolder>::at(const Position<N>& pos) {
 }
 
 template <typename T, Index N, typename THolder>
-template <typename TRegion>
-const Patch<const T, const Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::patch(TRegion region) const {
-  return {*this, std::move(region)};
-}
-
-template <typename T, Index N, typename THolder>
-template <typename TRegion>
-Patch<T, Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::patch(TRegion region) {
-  return {*this, std::move(region)};
-}
-
-template <typename T, Index N, typename THolder>
 template <Index M>
 const PtrRaster<const T, M> Raster<T, N, THolder>::slice(const Box<N>& region) const {
   // FIXME resolve
@@ -214,6 +203,72 @@ PtrRaster<T, N == -1 ? -1 : N - 1> Raster<T, N, THolder>::section(Index index) {
   b[last] = index;
   return slice < N == -1 ? -1 : N - 1 > (Box<N>(f, b));
   // FIXME duplication
+}
+
+template <typename T, Index N, typename THolder>
+const PtrRaster<const T, 1> Raster<T, N, THolder>::row(const Position<N == -1 ? -1 : N - 1>& position) const {
+  Position<N> f(dimension());
+  for (Index i = 1; i < dimension(); ++i) {
+    const auto p = position[i - 1];
+    f[i] = p >= 0 ? p : length(i) + p;
+  }
+  const Position<1> shape({length<0>()});
+  return PtrRaster<const T, 1> {shape, &operator[](f)};
+}
+
+template <typename T, Index N, typename THolder>
+PtrRaster<T, 1> Raster<T, N, THolder>::row(const Position<N == -1 ? -1 : N - 1>& position) {
+  Position<N> f(dimension());
+  for (Index i = 1; i < dimension(); ++i) {
+    const auto p = position[i - 1];
+    f[i] = p >= 0 ? p : length(i) + p;
+  }
+  const Position<1> shape({length<0>()});
+  return PtrRaster<T, 1> {shape, &operator[](f)};
+}
+
+template <typename T, Index N, typename THolder>
+template <Index I>
+const Patch<const T, const Raster<T, N, THolder>, Line<I, N>>
+Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position) const {
+  Position<N> f(dimension());
+  for (Index i = 0; i < I; ++i) {
+    const auto p = position[i];
+    f[i] = p >= 0 ? p : length(i) + p;
+  }
+  f[I] = 0;
+  for (Index i = I + 1; i < dimension(); ++i) {
+    const auto p = position[i - 1];
+    f[i] = p >= 0 ? p : length(i) + p;
+  }
+  return {*this, Line<I, N>(f, length<I>() - 1)};
+}
+
+template <typename T, Index N, typename THolder>
+template <Index I>
+Patch<T, Raster<T, N, THolder>, Line<I, N>>
+Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position) {
+  Position<N> f(dimension());
+  for (Index i = 0; i < I; ++i) {
+    f[i] = position[i];
+  }
+  f[I] = 0;
+  for (Index i = I + 1; i < dimension(); ++i) {
+    f[i] = position[i - 1];
+  }
+  return {*this, Line<I, N>(f, length<I>() - 1)};
+}
+
+template <typename T, Index N, typename THolder>
+template <typename TRegion>
+const Patch<const T, const Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::patch(TRegion region) const {
+  return {*this, std::move(region)};
+}
+
+template <typename T, Index N, typename THolder>
+template <typename TRegion>
+Patch<T, Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::patch(TRegion region) {
+  return {*this, std::move(region)};
 }
 
 template <typename T, Index N, typename THolder>

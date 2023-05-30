@@ -233,7 +233,7 @@ Linx:
 \code{.cpp}
 // Column
 
-auto b = a.template profile<1>(2); // Line-based patch
+auto b = a.profile<1>(2); // Line-based patch
 
 // Selector
 

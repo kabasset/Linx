@@ -62,6 +62,15 @@ public:
   /// @group_properties
 
   /**
+   * @brief Get the absolute position given an index in the line referential.
+   */
+  inline Position<N> operator[](Index i) const {
+    auto out = m_front;
+    out[I] += i * m_step;
+    return out;
+  }
+
+  /**
    * @brief Compute the bounding box.
    */
   Box<N> box() const {
