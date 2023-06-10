@@ -9,7 +9,7 @@
 #include "Linx/Data/Box.h"
 #include "Linx/Data/Grid.h"
 #include "Linx/Data/Raster.h"
-#include "LinxTransforms/Extrapolation.h"
+#include "Linx/Transforms/Extrapolation.h"
 
 namespace Linx {
 

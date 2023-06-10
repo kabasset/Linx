@@ -2,8 +2,8 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "LinxTransforms/Extrapolation.h"
-#include "LinxTransforms/Interpolation.h"
+#include "Linx/Transforms/Extrapolation.h"
+#include "Linx/Transforms/Interpolation.h"
 
 #include <boost/test/unit_test.hpp>
 

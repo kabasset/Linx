@@ -2,7 +2,7 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "LinxTransforms/DftPlan.h"
+#include "Linx/Transforms/DftPlan.h"
 
 #include <boost/test/unit_test.hpp>
 

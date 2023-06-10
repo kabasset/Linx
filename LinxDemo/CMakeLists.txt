@@ -2,7 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 elements_subdir(LinxDemo)
 
-elements_depends_on_subdirs(Linx LinxTransforms LinxTransforms)
+elements_depends_on_subdirs(Linx Linx Linx)
 
 elements_add_unit_test(LinxDemoBasics tests/src/LinxDemoBasics_test.cpp 
                      EXECUTABLE LinxDemoBasics_test
@@ -18,11 +18,11 @@ elements_add_unit_test(LinxDemoConstructors tests/src/LinxDemoConstructors_test.
                      TYPE Boost)
 elements_add_unit_test(LinxDemoDft tests/src/LinxDemoDft_test.cpp 
                      EXECUTABLE LinxDemoDft_test
-                     LINK_LIBRARIES LinxTransforms
+                     LINK_LIBRARIES Linx
                      TYPE Boost)
 elements_add_unit_test(LinxDemoInterpolation tests/src/LinxDemoInterpolation_test.cpp 
                      EXECUTABLE LinxDemoInterpolation_test
-                     LINK_LIBRARIES LinxTransforms
+                     LINK_LIBRARIES Linx
                      TYPE Boost)
 elements_add_unit_test(LinxDemoPixelwise tests/src/LinxDemoPixelwise_test.cpp 
                      EXECUTABLE LinxDemoPixelwise_test

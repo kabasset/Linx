@@ -7,7 +7,7 @@
 
 #include "Linx/Base/Slice.h"
 #include "Linx/Data/Raster.h"
-#include "LinxTransforms/Extrapolation.h"
+#include "Linx/Transforms/Extrapolation.h"
 
 #include <type_traits> // decay
 #include <vector>

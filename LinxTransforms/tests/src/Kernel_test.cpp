@@ -2,7 +2,7 @@
 // This file is part of Linx <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "LinxTransforms/Kernel.h"
+#include "Linx/Transforms/Kernel.h"
 
 #include <boost/test/unit_test.hpp>
 

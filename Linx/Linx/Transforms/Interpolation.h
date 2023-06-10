@@ -6,7 +6,7 @@
 #define _LINXTRANSFORMS_INTERPOLATION_H
 
 #include "Linx/Data/Raster.h"
-#include "LinxTransforms/impl/InterpolationMethods.h"
+#include "Linx/Transforms/impl/InterpolationMethods.h"
 
 namespace Linx {
 

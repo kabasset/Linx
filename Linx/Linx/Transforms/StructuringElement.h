@@ -6,8 +6,8 @@
 #define _LINXTRANSFORMS_STRUCTURINGELEMENT_H
 
 #include "Linx/Data/Raster.h"
-#include "LinxTransforms/Extrapolation.h"
-#include "LinxTransforms/impl/Filter.h"
+#include "Linx/Transforms/Extrapolation.h"
+#include "Linx/Transforms/impl/Filter.h"
 
 namespace Linx {
 

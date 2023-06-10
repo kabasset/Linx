@@ -5,7 +5,7 @@
 #ifndef _LINXTRANSFORMS_KERNEL_H
 #define _LINXTRANSFORMS_KERNEL_H
 
-#include "LinxTransforms/impl/Filter.h"
+#include "Linx/Transforms/impl/Filter.h"
 
 namespace Linx {
 

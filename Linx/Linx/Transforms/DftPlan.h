@@ -6,7 +6,7 @@
 #define _LINXTRANSFORMS_DFTPLAN_H
 
 #include "Linx/Data/Raster.h"
-#include "LinxTransforms/DftMemory.h"
+#include "Linx/Transforms/DftMemory.h"
 
 namespace Linx {
 

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "Linx/Data/Raster.h"
-#include "LinxTransforms/StructuringElement.h"
+#include "Linx/Transforms/StructuringElement.h"
 
 #include <boost/test/unit_test.hpp>
 

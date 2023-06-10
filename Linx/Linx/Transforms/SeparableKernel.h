@@ -7,9 +7,9 @@
 
 #include "Linx/Base/SeqUtils.h"
 #include "Linx/Data/Raster.h"
-#include "LinxTransforms/Extrapolation.h"
-#include "LinxTransforms/Kernel.h"
-#include "LinxTransforms/OrientedKernel.h"
+#include "Linx/Transforms/Extrapolation.h"
+#include "Linx/Transforms/Kernel.h"
+#include "Linx/Transforms/OrientedKernel.h"
 
 #include <type_traits> // decay
 

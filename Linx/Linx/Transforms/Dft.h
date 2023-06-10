@@ -5,7 +5,7 @@
 #ifndef _LINXTRANSFORMS_DFT_H
 #define _LINXTRANSFORMS_DFT_H
 
-#include "LinxTransforms/DftPlan.h"
+#include "Linx/Transforms/DftPlan.h"
 
 #include <complex>
 
