@@ -6,7 +6,7 @@
 #define _LINXTRANSFORMS_SEPARABLEKERNEL_H
 
 #include "Linx/Base/SeqUtils.h"
-#include "LinxCore/Raster.h"
+#include "Linx/Data/Raster.h"
 #include "LinxTransforms/Extrapolation.h"
 #include "LinxTransforms/Kernel.h"
 #include "LinxTransforms/OrientedKernel.h"

@@ -3,10 +3,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "ElementsKernel/ProgramHeaders.h"
-#include "LinxCore/Grid.h"
-#include "LinxCore/Mask.h"
-#include "LinxCore/Raster.h"
-#include "LinxCore/Sequence.h"
+#include "Linx/Data/Grid.h"
+#include "Linx/Data/Mask.h"
+#include "Linx/Data/Raster.h"
+#include "Linx/Data/Sequence.h"
 #include "LinxRun/Chronometer.h"
 #include "LinxRun/ProgramOptions.h"
 

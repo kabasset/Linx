@@ -5,7 +5,7 @@
 #ifndef _LINXIO_FITS_H
 #define _LINXIO_FITS_H
 
-#include "LinxCore/Raster.h"
+#include "Linx/Data/Raster.h"
 
 #include <fitsio.h>
 #include <string>

@@ -2,14 +2,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 elements_subdir(LinxTransforms)
 
-elements_depends_on_subdirs(LinxCore)
+elements_depends_on_subdirs(Linx)
 
 find_package(Eigen3)
 find_package(FFTW)
 
 elements_add_library(LinxTransforms src/lib/*.cpp
-                     INCLUDE_DIRS LinxCore Eigen3 FFTW
-                     LINK_LIBRARIES LinxCore Eigen3 FFTW
+                     INCLUDE_DIRS Linx Eigen3 FFTW
+                     LINK_LIBRARIES Linx Eigen3 FFTW
                      PUBLIC_HEADERS LinxTransforms)
 
 elements_add_unit_test(Affinity tests/src/Affinity_test.cpp 

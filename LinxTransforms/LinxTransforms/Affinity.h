@@ -5,8 +5,8 @@
 #ifndef _LINXTRANSFORMS_AFFINITY_H
 #define _LINXTRANSFORMS_AFFINITY_H
 
-#include "LinxCore/Matrix.h"
-#include "LinxCore/Vector.h"
+#include "Linx/Data/Matrix.h"
+#include "Linx/Data/Vector.h"
 
 namespace Linx {
 

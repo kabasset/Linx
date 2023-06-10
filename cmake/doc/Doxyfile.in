@@ -880,7 +880,6 @@ INPUT                  = @PROJECT_SOURCE_DIR@/README.md \
                          @PROJECT_SOURCE_DIR@/CHANGES.md \
                          @PROJECT_SOURCE_DIR@/doc \
                          @PROJECT_SOURCE_DIR@/Linx \
-                         @PROJECT_SOURCE_DIR@/LinxCore \
                          @PROJECT_SOURCE_DIR@/LinxTransforms \
                          @PROJECT_SOURCE_DIR@/LinxRun
 

@@ -5,10 +5,10 @@
 #ifndef _LINXTRANSFORMS_IMPL_FILTER_H
 #define _LINXTRANSFORMS_IMPL_FILTER_H
 
-#include "LinxCore/BorderedBox.h"
-#include "LinxCore/Box.h"
-#include "LinxCore/Grid.h"
-#include "LinxCore/Raster.h"
+#include "Linx/Data/BorderedBox.h"
+#include "Linx/Data/Box.h"
+#include "Linx/Data/Grid.h"
+#include "Linx/Data/Raster.h"
 #include "LinxTransforms/Extrapolation.h"
 
 namespace Linx {

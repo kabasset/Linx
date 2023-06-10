@@ -5,7 +5,7 @@
 #ifndef _LINXTRANSFORMS_STRUCTURINGELEMENT_H
 #define _LINXTRANSFORMS_STRUCTURINGELEMENT_H
 
-#include "LinxCore/Raster.h"
+#include "Linx/Data/Raster.h"
 #include "LinxTransforms/Extrapolation.h"
 #include "LinxTransforms/impl/Filter.h"
 

@@ -6,7 +6,7 @@
 #define _LINXTRANSFORMS_ORIENTEDKERNEL_H
 
 #include "Linx/Base/Slice.h"
-#include "LinxCore/Raster.h"
+#include "Linx/Data/Raster.h"
 #include "LinxTransforms/Extrapolation.h"
 
 #include <type_traits> // decay

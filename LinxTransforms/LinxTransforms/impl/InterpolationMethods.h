@@ -5,7 +5,7 @@
 #ifndef _LINXTRANSFORMS_INTERPOLATIONMETHODS_H
 #define _LINXTRANSFORMS_INTERPOLATIONMETHODS_H
 
-#include "LinxCore/Raster.h"
+#include "Linx/Data/Raster.h"
 
 namespace Linx {
 
