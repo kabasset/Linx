@@ -26,6 +26,15 @@ Currently supported operations are:
 
 [LGPL-3.0-or-later](LICENSE.md)
 
+# Installation
+
+The simplest way to use Linx, which is a header-only library, is to copy the deepest `Linx` folder into your include directory:
+
+```sh
+git clone https://github.com/kabasset/Linx.git
+cp -r Linx/Linx/Linx /usr/include/
+```
+
 # Alternatives
 
 The following libraries offer features similar to Linx.
