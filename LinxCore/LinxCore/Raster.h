@@ -5,10 +5,10 @@
 #ifndef _LINXCORE_RASTER_H
 #define _LINXCORE_RASTER_H
 
-#include "LinxBase/AlignedBuffer.h"
-#include "LinxBase/DataContainer.h"
-#include "LinxBase/Exceptions.h"
-#include "LinxBase/Random.h"
+#include "Linx/Base/AlignedBuffer.h"
+#include "Linx/Base/DataContainer.h"
+#include "Linx/Base/Exceptions.h"
+#include "Linx/Base/Random.h"
 #include "LinxCore/Box.h"
 
 #include <complex>

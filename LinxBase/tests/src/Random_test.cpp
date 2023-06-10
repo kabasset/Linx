@@ -2,8 +2,8 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "LinxBase/DataContainer.h"
-#include "LinxBase/Random.h"
+#include "Linx/Base/DataContainer.h"
+#include "Linx/Base/Random.h"
 
 #include <boost/test/unit_test.hpp>
 

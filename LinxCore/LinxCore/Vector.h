@@ -5,9 +5,9 @@
 #ifndef _LINXCORE_VECTOR_H
 #define _LINXCORE_VECTOR_H
 
-#include "LinxBase/DataContainer.h"
-#include "LinxBase/Math.h" // abspow
-#include "LinxBase/TypeUtils.h"
+#include "Linx/Base/DataContainer.h"
+#include "Linx/Base/Math.h" // abspow
+#include "Linx/Base/TypeUtils.h"
 
 #include <numeric> // accumulate, multiplies
 #include <type_traits> // conditional

@@ -5,8 +5,8 @@
 #ifndef _LINXBASE_ALIGNEDBUFFER_H
 #define _LINXBASE_ALIGNEDBUFFER_H
 
-#include "LinxBase/Exceptions.h"
-#include "LinxBase/TypeUtils.h"
+#include "Linx/Base/Exceptions.h"
+#include "Linx/Base/TypeUtils.h"
 
 #include <algorithm> // copy_n
 #include <cstdint> // uintptr_t

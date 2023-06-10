@@ -5,7 +5,7 @@
 #ifndef _LINXBASE_HOLDER_H
 #define _LINXBASE_HOLDER_H
 
-#include "LinxBase/Exceptions.h"
+#include "Linx/Base/Exceptions.h"
 
 #include <algorithm> // copy_n
 #include <array>

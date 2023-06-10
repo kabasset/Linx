@@ -5,8 +5,8 @@
 #ifndef _LINXCORE_PATCH_H
 #define _LINXCORE_PATCH_H
 
-#include "LinxBase/Arithmetic.h"
-#include "LinxBase/Math.h"
+#include "Linx/Base/Arithmetic.h"
+#include "Linx/Base/Math.h"
 #include "LinxCore/Box.h"
 #include "LinxCore/Raster.h"
 #include "LinxCore/impl/PatchIndexing.h"

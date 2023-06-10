@@ -5,7 +5,7 @@
 #ifndef _LINXTRANSFORMS_SEPARABLEKERNEL_H
 #define _LINXTRANSFORMS_SEPARABLEKERNEL_H
 
-#include "LinxBase/SeqUtils.h"
+#include "Linx/Base/SeqUtils.h"
 #include "LinxCore/Raster.h"
 #include "LinxTransforms/Extrapolation.h"
 #include "LinxTransforms/Kernel.h"

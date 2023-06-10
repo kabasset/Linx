@@ -5,7 +5,7 @@
 #ifndef _LINXBASE_SLICE_H
 #define _LINXBASE_SLICE_H
 
-#include "LinxBase/TypeUtils.h"
+#include "Linx/Base/TypeUtils.h"
 
 namespace Linx {
 

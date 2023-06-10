@@ -5,7 +5,7 @@
 #ifndef _LINXTRANSFORMS_ORIENTEDKERNEL_H
 #define _LINXTRANSFORMS_ORIENTEDKERNEL_H
 
-#include "LinxBase/Slice.h"
+#include "Linx/Base/Slice.h"
 #include "LinxCore/Raster.h"
 #include "LinxTransforms/Extrapolation.h"
 

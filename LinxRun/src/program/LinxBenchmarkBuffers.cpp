@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "ElementsKernel/ProgramHeaders.h"
-#include "LinxBase/AlignedBuffer.h"
+#include "Linx/Base/AlignedBuffer.h"
 #include "LinxRun/Chronometer.h"
 #include "LinxRun/ProgramOptions.h"
 

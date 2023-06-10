@@ -5,7 +5,7 @@
 #ifndef _LINXBASE_RANDOM_H
 #define _LINXBASE_RANDOM_H
 
-#include "LinxBase/TypeUtils.h"
+#include "Linx/Base/TypeUtils.h"
 
 #include <algorithm>
 #include <chrono>

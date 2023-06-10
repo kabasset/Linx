@@ -5,15 +5,15 @@
 #ifndef _LINXBASE_DATACONTAINER_H
 #define _LINXBASE_DATACONTAINER_H
 
-#include "LinxBase/Arithmetic.h"
-#include "LinxBase/ContiguousContainer.h"
-#include "LinxBase/DataDistribution.h"
-#include "LinxBase/Exceptions.h"
-#include "LinxBase/Holders.h"
-#include "LinxBase/Math.h"
-#include "LinxBase/Range.h"
-#include "LinxBase/SeqUtils.h" // IsRange
-#include "LinxBase/TypeUtils.h" // Index, Limits
+#include "Linx/Base/Arithmetic.h"
+#include "Linx/Base/ContiguousContainer.h"
+#include "Linx/Base/DataDistribution.h"
+#include "Linx/Base/Exceptions.h"
+#include "Linx/Base/Holders.h"
+#include "Linx/Base/Math.h"
+#include "Linx/Base/Range.h"
+#include "Linx/Base/SeqUtils.h" // IsRange
+#include "Linx/Base/TypeUtils.h" // Index, Limits
 
 #include <cstddef> // size_t
 #include <initializer_list>

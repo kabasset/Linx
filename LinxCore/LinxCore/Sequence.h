@@ -5,11 +5,11 @@
 #ifndef _LINXCORE_SEQUENCE_H
 #define _LINXCORE_SEQUENCE_H
 
-#include "LinxBase/Arithmetic.h"
-#include "LinxBase/DataContainer.h"
-#include "LinxBase/Holders.h"
-#include "LinxBase/Math.h"
-#include "LinxBase/Random.h"
+#include "Linx/Base/Arithmetic.h"
+#include "Linx/Base/DataContainer.h"
+#include "Linx/Base/Holders.h"
+#include "Linx/Base/Math.h"
+#include "Linx/Base/Random.h"
 
 namespace Linx {
 

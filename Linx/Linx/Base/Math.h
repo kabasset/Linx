@@ -5,7 +5,7 @@
 #ifndef _LINXBASE_MATH_H
 #define _LINXBASE_MATH_H
 
-#include "LinxBase/SeqUtils.h" // IsRange
+#include "Linx/Base/SeqUtils.h" // IsRange
 
 #include <algorithm>
 #include <cmath>

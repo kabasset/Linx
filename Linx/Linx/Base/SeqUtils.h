@@ -5,7 +5,7 @@
 #ifndef _LINXBASE_SEQUTILS_H
 #define _LINXBASE_SEQUTILS_H
 
-#include "LinxBase/TypeUtils.h"
+#include "Linx/Base/TypeUtils.h"
 
 #include <algorithm> // transform
 #include <array>
