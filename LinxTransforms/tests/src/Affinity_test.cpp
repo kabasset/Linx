@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(rotation_origin_90z_test) {
   const Vector<double, 3> in {3, 4, 5};
   const auto out = rotation[in];
   const Vector<double, 3> expected {-4, 3, 5};
-  BOOST_TEST(out == expected);
+  BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
 }
 
 //-----------------------------------------------------------------------------
