@@ -5,7 +5,9 @@
 #ifndef _LINXTRANSFORMS_AFFINITY_H
 #define _LINXTRANSFORMS_AFFINITY_H
 
+#include "Linx/Data/Raster.h"
 #include "Linx/Data/Vector.h"
+#include "Linx/Transforms/Interpolation.h"
 
 #include <eigen3/Eigen/Core>
 
@@ -123,9 +125,7 @@ public:
    * @brief Scale isotropically by a given factor.
    */
   Affinity& operator*=(double value) {
-    m_translation -= m_center;
     m_map *= EigenVector::Fill(value).asDiagonal(value);
-    m_translation += m_center;
     return *this;
   }
 
@@ -134,9 +134,7 @@ public:
    */
   Affinity& operator*=(const Vector<double, N>& vector) {
     if (not vector.isOne()) {
-      m_translation -= m_center;
       m_map *= toEigenVector(vector).asDiagonal();
-      m_translation += m_center;
     }
     return *this;
   }
@@ -153,9 +151,7 @@ public:
    */
   Affinity& operator/=(const Vector<double, N>& vector) {
     if (not vector.isOne()) {
-      m_translation -= m_center;
       m_map *= toEigenVector(vector).cwiseInverse().asDiagonal();
-      m_translation += m_center;
     }
     return *this;
   }
@@ -165,7 +161,6 @@ public:
    */
   Affinity& rotateRadians(double angle, Index from = 0, Index to = 1) {
     if (angle != 0) {
-      m_translation -= m_center;
       EigenMatrix rotation = EigenMatrix::Identity();
       const auto sin = std::sin(angle);
       const auto cos = std::cos(angle);
@@ -174,7 +169,6 @@ public:
       rotation(to, from) = sin;
       rotation(to, to) = cos;
       m_map *= rotation;
-      m_translation += m_center;
     }
     return *this;
   }
@@ -200,7 +194,7 @@ public:
    */
   template <typename T>
   Vector<double, N> operator[](const Vector<T, N>& in) const {
-    return Vector<double, N>(m_translation + m_map * toEigenVector(in));
+    return Vector<double, N>(m_translation + m_center + m_map * (toEigenVector(in) - m_center));
     // TODO faster without cast?
     // Vector<double, N> out(m_translation);
     // auto it = out.begin();
@@ -220,14 +214,15 @@ public:
   TRaster& transform(const TInterpolator& in, TRaster& out) const {
     auto it = out.begin();
     for (const auto& p : out.domain()) {
-      *it = in[operator()(p)];
+      *it = in(operator[](p));
       ++it;
     }
     return out;
   }
 
 private:
-  static EigenVector toEigenVector(const Vector<double, N>& in) {
+  template <typename T>
+  static EigenVector toEigenVector(const Vector<T, N>& in) {
     EigenVector out(in.size());
     std::copy(in.begin(), in.end(), out.begin());
     return out;

@@ -67,6 +67,35 @@ BOOST_AUTO_TEST_CASE(rotation_origin_270z_test) {
   BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
 }
 
+BOOST_AUTO_TEST_CASE(rotation_int_90z_test) {
+  const Vector<double, 3> center = {0, 1, 2};
+  const auto rotation = Affinity<3>::rotationDegrees(90, 0, 1, center);
+  const Vector<double, 3> in {3, 4, 5};
+  const auto out = rotation[in];
+  const Vector<double, 3> expected {-3, 4, 5};
+  BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
+}
+
+BOOST_AUTO_TEST_CASE(rotation_float_90z_test) {
+  const Vector<double, 3> center = {1.5, 1.5, 0};
+  const auto rotation = Affinity<3>::rotationDegrees(90, 0, 1, center);
+  const Vector<double, 3> in {3, 4, 5};
+  const auto out = rotation[in];
+  const Vector<double, 3> expected {-1, 3, 5};
+  BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
+}
+
+BOOST_AUTO_TEST_CASE(raster_rotation_center_90z_test) {
+  const auto in = Raster<Index>({4, 4}).range();
+  const auto interpolator = interpolate<Linx::NearestNeighbor>(in);
+  auto out = Raster<Index>(in.shape());
+  const auto rotation = Affinity<2>::rotationDegrees(90, 0, 1, {1.5, 1.5});
+  rotation.transform(interpolator, out);
+  for (const auto& p : out.domain()) {
+    BOOST_TEST(out[p] == (interpolator(rotation[p])));
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE_END()
