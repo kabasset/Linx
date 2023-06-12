@@ -35,11 +35,35 @@ BOOST_AUTO_TEST_CASE(scaling_origin_test) {
   BOOST_TEST(out == expected);
 }
 
+BOOST_AUTO_TEST_CASE(rotation_origin_90x_test) {
+  const auto rotation = Affinity<3>::rotationDegrees(90, 1, 2);
+  const Vector<double, 3> in {3, 4, 5};
+  const auto out = rotation[in];
+  const Vector<double, 3> expected {3, -5, 4};
+  BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
+}
+
+BOOST_AUTO_TEST_CASE(rotation_origin_90y_test) {
+  const auto rotation = Affinity<3>::rotationDegrees(90, 2, 0);
+  const Vector<double, 3> in {3, 4, 5};
+  const auto out = rotation[in];
+  const Vector<double, 3> expected {5, 4, -3};
+  BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
+}
+
 BOOST_AUTO_TEST_CASE(rotation_origin_90z_test) {
   const auto rotation = Affinity<3>::rotationDegrees(90, 0, 1);
   const Vector<double, 3> in {3, 4, 5};
   const auto out = rotation[in];
   const Vector<double, 3> expected {-4, 3, 5};
+  BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
+}
+
+BOOST_AUTO_TEST_CASE(rotation_origin_270z_test) {
+  const auto rotation = Affinity<3>::rotationDegrees(90, 1, 0);
+  const Vector<double, 3> in {3, 4, 5};
+  const auto out = rotation[in];
+  const Vector<double, 3> expected {4, -3, 5};
   BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
 }
 
