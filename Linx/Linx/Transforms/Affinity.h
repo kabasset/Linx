@@ -201,7 +201,7 @@ public:
   /**
    * @brief Apply the transform to an input interpolator.
    * 
-   * The output raster has the same shape as the input.
+   * The output raster has the same shape as the input (which can be a patch).
    */
   template <typename TIn>
   Raster<typename TIn::Value, TIn::Dimension> operator*(const TIn& in) const {
@@ -239,6 +239,44 @@ private:
   EigenVector m_translation;
   EigenVector m_center;
 };
+
+/**
+ * @brief Translate an input interpolator.
+ */
+template <typename TIn>
+Raster<typename TIn::Value, TIn::Dimension> translate(const TIn& in, const Vector<double, TIn::Dimension>& vector) {
+  return Affinity<TIn::Dimension>::translate(vector) * in; // FIXME optimize
+}
+
+/**
+ * @brief Scale an input interpolator from its center.
+ */
+template <typename TIn>
+Raster<typename TIn::Value, TIn::Dimension> scale(const TIn& in, double factor) {
+  const auto& domain = in.domain();
+  Vector<double, TIn::Dimension> sum(domain.front() + domain.back());
+  return Affinity<TIn::Dimension>::scaling(factor, sum / 2) * in; // FIXME optimize
+}
+
+/**
+ * @brief Rotate an input interpolator around its center.
+ */
+template <typename TIn>
+Raster<typename TIn::Value, TIn::Dimension> rotateRadians(const TIn& in, double angle, Index from = 0, Index to = 1) {
+  const auto& domain = in.domain();
+  Vector<double, TIn::Dimension> sum(domain.front() + domain.back());
+  return Affinity<TIn::Dimension>::rotationRadians(angle, from, to, sum / 2) * in;
+}
+
+/**
+ * @brief Rotate an input interpolator around its center.
+ */
+template <typename TIn>
+Raster<typename TIn::Value, TIn::Dimension> rotateDegrees(const TIn& in, double angle, Index from = 0, Index to = 1) {
+  const auto& domain = in.domain();
+  Vector<double, TIn::Dimension> sum(domain.front() + domain.back());
+  return Affinity<TIn::Dimension>::rotationDegrees(angle, from, to, sum / 2) * in;
+}
 
 } // namespace Linx
 
