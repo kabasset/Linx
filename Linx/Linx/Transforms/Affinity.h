@@ -193,28 +193,35 @@ public:
    * @brief Apply the transform to an input vector.
    */
   template <typename T>
-  Vector<double, N> operator[](const Vector<T, N>& in) const {
+  Vector<double, N> operator()(const Vector<T, N>& in) const {
     return Vector<double, N>(m_translation + m_center + m_map * (toEigenVector(in) - m_center));
-    // TODO faster without cast?
-    // Vector<double, N> out(m_translation);
-    // auto it = out.begin();
-    // for (auto row : m_map.rowwise()) {
-    //   *it += std::inner_product(row.begin(), row.end(), in.begin(), T()); // FIXME init = m_translation(i)?
-    //   ++it;
-    // }
+    // TODO faster without cast, i.e. without Eigen?
   }
 
   /**
    * @brief Apply the transform to an input interpolator.
    * 
-   * The domain of the output parameter is used to decide which positions to take into account.
+   * The output raster has the same shape as the input.
+   */
+  template <typename TIn>
+  Raster<typename TIn::Value, TIn::Dimension> operator*(const TIn& in) const {
+    Raster<typename TIn::Value, TIn::Dimension> out(in.shape());
+    transform(in, out);
+    return out;
+  }
+
+  /**
+   * @brief Apply the transform to an input interpolator.
+   * 
+   * The domain of the output parameter (which can be a raster or a patch)
+   * is used to decide which positions to take into account.
    * If positions outside the input domain are required, then `in` must be an extrapolator, too.
    */
-  template <typename TInterpolator, typename TRaster>
-  TRaster& transform(const TInterpolator& in, TRaster& out) const {
+  template <typename TIn, typename TOut>
+  TOut& transform(const TIn& in, TOut& out) const {
     auto it = out.begin();
     for (const auto& p : out.domain()) {
-      *it = in(operator[](p));
+      *it = in(operator()(p));
       ++it;
     }
     return out;
