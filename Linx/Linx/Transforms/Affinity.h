@@ -125,7 +125,7 @@ public:
    * @brief Scale isotropically by a given factor.
    */
   Affinity& operator*=(double value) {
-    m_map *= EigenVector::Fill(value).asDiagonal(value);
+    m_map *= EigenVector::Constant(m_translation.size(), value).asDiagonal();
     return *this;
   }
 
