@@ -10,6 +10,7 @@
 #include "Linx/Transforms/Interpolation.h"
 
 #include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/LU> // inverse
 
 namespace Linx {
 
@@ -219,9 +220,11 @@ public:
    */
   template <typename TIn, typename TOut>
   TOut& transform(const TIn& in, TOut& out) const {
+    Affinity inv = *this;
+    inv.inverse();
     auto it = out.begin();
     for (const auto& p : out.domain()) {
-      *it = in(operator()(p));
+      *it = in(inv(p));
       ++it;
     }
     return out;
