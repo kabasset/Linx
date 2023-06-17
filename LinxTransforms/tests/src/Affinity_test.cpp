@@ -91,9 +91,14 @@ BOOST_AUTO_TEST_CASE(raster_scaling_center_2_test) {
   const auto scaling = Affinity<4>::scaling(2, {1, 1, 1, 1});
   const auto out = scaling * interpolator;
   const auto out2 = scale(interpolator, 2);
-  for (const auto& p : out.domain()) {
-    BOOST_TEST(out[p] == (interpolator(scaling(p))));
-    BOOST_TEST(out2[p] == (interpolator(scaling(p))));
+  const auto outNn = interpolate<NearestNeighbor>(out);
+  const auto out2Nn = interpolate<NearestNeighbor>(out2);
+  for (const auto& p : in.domain()) {
+    const auto q = scaling(p);
+    if (in.contains(q)) {
+      BOOST_TEST(outNn(q) == in[p]);
+      BOOST_TEST(out2Nn(q) == in[p]);
+    }
   }
 }
 
@@ -103,9 +108,14 @@ BOOST_AUTO_TEST_CASE(raster_rotation_center_90z_test) {
   const auto rotation = Affinity<2>::rotationDegrees(90, 0, 1, {1.5, 1.5});
   const auto out = rotation * interpolator;
   const auto out2 = rotateDegrees(interpolator, 90);
-  for (const auto& p : out.domain()) {
-    BOOST_TEST(out[p] == (interpolator(rotation(p))));
-    BOOST_TEST(out2[p] == (interpolator(rotation(p))));
+  const auto outNn = interpolate<NearestNeighbor>(out);
+  const auto out2Nn = interpolate<NearestNeighbor>(out2);
+  for (const auto& p : in.domain()) {
+    const auto q = rotation(p);
+    if (in.contains(q)) {
+      BOOST_TEST(outNn(q) == in[p]);
+      BOOST_TEST(out2Nn(q) == in[p]);
+    }
   }
 }
 
@@ -113,12 +123,13 @@ BOOST_AUTO_TEST_CASE(patch_rotation_center_30z_test) {
   const auto in = Raster<Index>({5, 5}).range();
   const auto interpolator = interpolate<Linear>(in);
   const auto rotation = Affinity<2>::rotationDegrees(30, 0, 1, {2, 2});
+  const auto inv = inverse(rotation);
   Raster<double> out(in.shape());
   auto patch = out.patch(Box<2>({1, 1}, {3, 3}));
   rotation.transform(interpolator, patch);
   for (const auto& p : out.domain()) {
     if (patch.domain().contains(p)) {
-      BOOST_TEST(out[p] == (interpolator(rotation(p))));
+      BOOST_TEST(out[p] == (interpolator(inv(p))));
     } else {
       BOOST_TEST(out[p] == 0);
     }

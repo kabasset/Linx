@@ -14,10 +14,22 @@
 
 namespace Linx {
 
+/// @cond
+
+// Forward declare for inverse
+template <Index N = 2>
+class Affinity;
+
+// Forward declare for Affinity::transform()
+template <Index N>
+Affinity<N> inverse(const Affinity<N>& in);
+
+/// @endcond
+
 /**
  * @brief Geometrical affinity transform (translation, scaling, rotation).
  */
-template <Index N = 2>
+template <Index N>
 class Affinity {
 private:
   using EigenMatrix = Eigen::Matrix<double, N, N, Eigen::RowMajor>;
@@ -220,8 +232,7 @@ public:
    */
   template <typename TIn, typename TOut>
   TOut& transform(const TIn& in, TOut& out) const {
-    Affinity inv = *this;
-    inv.inverse();
+    const Affinity inv = Linx::inverse(*this);
     auto it = out.begin();
     for (const auto& p : out.domain()) {
       *it = in(inv(p));
@@ -242,6 +253,16 @@ private:
   EigenVector m_translation;
   EigenVector m_center;
 };
+
+/**
+ * @brief Create the inverse transform of a given affinity.
+ */
+template <Index N>
+Affinity<N> inverse(const Affinity<N>& in) {
+  auto out = in;
+  out.inverse();
+  return out;
+}
 
 /**
  * @brief Translate an input interpolator.
