@@ -27,7 +27,66 @@ Affinity<N> inverse(const Affinity<N>& in);
 /// @endcond
 
 /**
- * @brief Geometrical affinity transform (translation, scaling, rotation).
+ * @ingroup affinity
+ * @brief Geometrical affine transform (translation, scaling, rotation).
+ * 
+ * Affinities transform an input vector `x` into an output vector `y` by applying a linear map `a` (square matrix) and a translation vector `b` as:
+ * \code
+ * y = a * x + b
+ * \endcode
+ * 
+ * The map typically represents scaling and/or rotation transforms.
+ * In geometry, it is common for such transforms to be defined relative to some center `c`,
+ * which is not explicit in the matrix representation, but can be integrated as:
+ * \code
+ * y = a * (x - c) + b + c
+ * \endcode
+ * 
+ * This class makes the center explicit in the constructor.
+ * The affinity is then built up by composition.
+ * Here is an example to create a 30 degrees-rotation centered in (100, 50) and oriented from axis 1 to axis 0:
+ * 
+ * \code
+ * Affinity<2> affinity({100, 50});
+ * affinity.rotateDegrees(30, 1, 0);
+ * auto y = affinity(x);
+ * \code
+ * 
+ * The affinity can be applied to a raster, or patch, too, e.g. with `operator*()`.
+ * For example, let us scale an input raster by a factor 3 around its center:
+ * 
+ * \code
+ * Vector<double> center = in.domain();
+ * center /= 2;
+ * Affinity<2> affinity(center);
+ * affinity *= 3;
+ * out = affinity * in;
+ * \endcode
+ * 
+ * This use case is very classical and a shortcut is therefore provided:
+ * 
+ * \code
+ * auto out = scale(in, 3);
+ * \endcode
+ * 
+ * Note that `in` must at least be an interpolator.
+ * If values outside its domain are required, then it must also be an extrapolator.
+ * 
+ * Let us also stress out that the output is of the same shape as the input.
+ * It is possible to resample the output with:
+ * 
+ * \code
+ * Raster<int> out(in.shape() * 3);
+ * Affinity<2> upscale;
+ * upscale *= 3;
+ * upscale.transform(in, out);
+ * \endcode
+ * 
+ * Which is equivalent to:
+ * 
+ * \code
+ * out = upsample(in, 3);
+ * \endcode
  */
 template <Index N>
 class Affinity {
@@ -242,6 +301,9 @@ public:
   }
 
 private:
+  /**
+   * @brief Copy a vector into an `EigenVector`.
+   */
   template <typename T>
   static EigenVector toEigenVector(const Vector<T, N>& in) {
     EigenVector out(in.size());
@@ -249,12 +311,24 @@ private:
     return out;
   }
 
+  /**
+   * @brief The linear map.
+   */
   EigenMatrix m_map;
+
+  /**
+   * @brief The translation vector.
+   */
   EigenVector m_translation;
+
+  /**
+   * @brief The linear map center.
+   */
   EigenVector m_center;
 };
 
 /**
+ * @relates Affinity
  * @brief Create the inverse transform of a given affinity.
  */
 template <Index N>
@@ -265,6 +339,7 @@ Affinity<N> inverse(const Affinity<N>& in) {
 }
 
 /**
+ * @relates Affinity
  * @brief Translate an input interpolator.
  */
 template <typename TIn>
@@ -273,6 +348,7 @@ Raster<typename TIn::Value, TIn::Dimension> translate(const TIn& in, const Vecto
 }
 
 /**
+ * @relates Affinity
  * @brief Scale an input interpolator from its center.
  */
 template <typename TIn>
@@ -283,6 +359,28 @@ Raster<typename TIn::Value, TIn::Dimension> scale(const TIn& in, double factor) 
 }
 
 /**
+ * @relates Affinity
+ * @brief Upsample an input interpolator.
+ */
+template <typename TIn>
+Raster<typename TIn::Value, TIn::Dimension> upsample(const TIn& in, double factor) {
+  Raster<typename TIn::Value, TIn::Dimension> out(in.shape() * factor);
+  const auto scaling = Affinity<TIn::Dimension>::scaling(factor);
+  scaling.transform(in, out);
+  return out;
+}
+
+/**
+ * @relates Affinity
+ * @brief Downsample an input interpolator.
+ */
+template <typename TIn>
+Raster<typename TIn::Value, TIn::Dimension> downsample(const TIn& in, double factor) {
+  return upsample(in, 1. / factor);
+}
+
+/**
+ * @relates Affinity
  * @brief Rotate an input interpolator around its center.
  */
 template <typename TIn>
@@ -293,6 +391,7 @@ Raster<typename TIn::Value, TIn::Dimension> rotateRadians(const TIn& in, double 
 }
 
 /**
+ * @relates Affinity
  * @brief Rotate an input interpolator around its center.
  */
 template <typename TIn>

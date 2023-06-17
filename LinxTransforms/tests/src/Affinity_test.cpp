@@ -136,6 +136,48 @@ BOOST_AUTO_TEST_CASE(patch_rotation_center_30z_test) {
   }
 }
 
+BOOST_AUTO_TEST_CASE(raster_upsampling_sesquiple_test) {
+  const auto in = Raster<float>({3, 2}).range();
+  const auto interpolator = interpolate<NearestNeighbor>(in);
+  const auto out = upsample(interpolator, 1.5);
+  BOOST_TEST(out.shape() == in.shape() * 1.5);
+  for (const auto& p : out.domain()) {
+    Vector<double> q(p);
+    q += 0.75;
+    q /= 1.5;
+    Position<> r(q);
+    BOOST_TEST(out[p] == in[r]);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(raster_upsampling_double_test) {
+  const auto in = Raster<float>({3, 2}).range();
+  const auto interpolator = interpolate<NearestNeighbor>(in);
+  const auto out = upsample(interpolator, 2);
+  BOOST_TEST(out.shape() == in.shape() * 2);
+  for (const auto& p : out.domain()) {
+    Vector<double> q(p);
+    q += 1;
+    q /= 2;
+    Position<> r(q);
+    BOOST_TEST(out[p] == in[r]);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(raster_upsampling_triple_test) {
+  const auto in = Raster<float>({3, 2}).range();
+  const auto interpolator = interpolate<NearestNeighbor>(in);
+  const auto out = upsample(interpolator, 3);
+  BOOST_TEST(out.shape() == in.shape() * 3);
+  for (const auto& p : out.domain()) {
+    Vector<double> q(p);
+    q += 1.5;
+    q /= 3;
+    Position<> r(q);
+    BOOST_TEST(out[p] == in[r]);
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE_END()

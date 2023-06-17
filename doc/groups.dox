@@ -38,7 +38,7 @@
 \ingroup geometry
 \brief Handling of values between pixels or outside the raster domain.
 
-\defgroup transforms Affine Transforms
+\defgroup affinity Affine Transforms
 \ingroup geometry
 \brief Translation, rotation, scaling
 
