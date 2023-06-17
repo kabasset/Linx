@@ -37,9 +37,10 @@ public:
     const float angle = args["rotate"].as<float>();
 
     Linx::Raster<float> input({side, side});
+    input.fill(1);
     Linx::Box<2> square({quarter, quarter}, {3 * quarter, 3 * quarter});
-    input.patch(square).fill(1);
-    auto extrapolator = Linx::extrapolate<Linx::NearestNeighbor>(input);
+    input.patch(square).fill(2);
+    auto extrapolator = Linx::extrapolate(input, 0.F);
     auto interpolator = Linx::interpolate<Linx::Linear>(extrapolator);
 
     Linx::Raster<float> output(input.shape());

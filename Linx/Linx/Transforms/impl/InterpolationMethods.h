@@ -101,7 +101,7 @@ struct Linear {
     const auto d = position.front() - f;
     const T p = raster[{f, indices...}];
     const T n = raster[{f + 1, indices...}];
-    return d * (p - n) + n;
+    return d * (n - p) + p;
   }
 
   template <typename T, Index N, typename TRaster, typename... TIndices>
@@ -112,7 +112,7 @@ struct Linear {
     const auto pos = position.template slice<N - 1>();
     const auto p = at<T>(raster, pos, f, indices...);
     const auto n = at<T>(raster, pos, f + 1, indices...);
-    return d * (p - n) + n;
+    return d * (n - p) + p;
   }
 };
 
