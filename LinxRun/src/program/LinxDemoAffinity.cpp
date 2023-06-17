@@ -23,6 +23,7 @@ public:
     Linx::ProgramOptions options;
     options.positional<std::string>("output", "Output file name");
     options.named<Linx::Index>("side", "Image side", 128);
+    options.named<float>("translate", "Translation along first axis", 0);
     options.named<float>("scale", "Scaling factor", 1);
     options.named<float>("rotate", "Rotation angle (deg)", 0);
     return options.asPair();
@@ -33,6 +34,7 @@ public:
     const auto filename = args["output"].as<std::string>();
     const auto side = args["side"].as<Linx::Index>();
     const Linx::Index quarter = side / 4;
+    const float vector = args["translate"].as<float>();
     const float factor = args["scale"].as<float>();
     const float angle = args["rotate"].as<float>();
 
@@ -45,6 +47,7 @@ public:
 
     Linx::Raster<float> output(input.shape());
     Linx::Affinity<2> affinity({2 * quarter, 2 * quarter});
+    affinity += {vector, 0};
     affinity *= factor;
     affinity.rotateDegrees(angle);
 
