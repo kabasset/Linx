@@ -5,6 +5,8 @@
 #ifndef _LINXRUN_CHRONOMETER_H
 #define _LINXRUN_CHRONOMETER_H
 
+#include "Linx/Base/DataDistribution.h"
+
 #include <algorithm> // accumulate, min_element, max_element
 #include <chrono>
 #include <cmath> // sqrt
@@ -28,7 +30,7 @@ namespace Linx {
  * and the elapsed time is set to 0 or the offset.
  */
 template <typename TUnit>
-class Chronometer { // FIXME make a DataContainer and get StatsMixin
+class Chronometer {
 public:
   /**
    * @brief The time unit.
@@ -96,7 +98,7 @@ public:
   /**
    * @brief The number of increments.
    */
-  std::size_t count() const {
+  std::size_t size() const {
     return m_container.size();
   }
 
@@ -108,33 +110,35 @@ public:
   }
 
   /**
-   * @brief The mean of the increments.
-   */
-  double mean() const {
-    return std::accumulate(m_container.begin(), m_container.end(), 0.) / count();
-  }
-
-  /**
-   * @brief The standard deviation of the increments.
-   */
-  double stdev() const {
-    const auto m = mean();
-    const auto s2 = std::inner_product(m_container.begin(), m_container.end(), m_container.begin(), 0.);
-    return std::sqrt(s2 / count() - m * m);
-  }
-
-  /**
-   * @brief The minimum increment.
+   * @brief Get the minimum increment.
+   * @see `distribution()`
    */
   double min() const {
     return *std::min_element(m_container.begin(), m_container.end());
   }
 
   /**
-   * @brief The maximum increment.
+   * @brief Get the maximum increment.
+   * @see `distribution()`
    */
   double max() const {
     return *std::max_element(m_container.begin(), m_container.end());
+  }
+
+  /**
+   * @brief Get the pair of min and max increments.
+   * @see `distribution()`
+   */
+  std::pair<TUnit, TUnit> minmax() const {
+    const auto its = std::minmax_element(m_container.begin(), m_container.end());
+    return {*its.first, *its.second};
+  }
+
+  /**
+   * @brief Get the increments distribution.
+   */
+  DataDistribution<double> distribution() const {
+    return DataDistribution<double>(m_container);
   }
 
 private:

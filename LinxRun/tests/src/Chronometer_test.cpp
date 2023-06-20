@@ -30,7 +30,7 @@ BOOST_FIXTURE_TEST_SUITE(Chronometer_test, ChronoFixture)
 BOOST_AUTO_TEST_CASE(init_test) {
   BOOST_TEST(elapsed().count() == offset.count());
   BOOST_TEST(not isRunning());
-  BOOST_TEST(count() == 0);
+  BOOST_TEST(size() == 0);
 }
 
 BOOST_AUTO_TEST_CASE(one_inc_test) {
@@ -40,12 +40,12 @@ BOOST_AUTO_TEST_CASE(one_inc_test) {
   stop();
   BOOST_TEST(not isRunning());
   BOOST_TEST(elapsed().count() >= offset.count());
-  BOOST_TEST(count() == 1);
+  BOOST_TEST(size() == 1);
   const auto inc = last().count();
   BOOST_TEST(inc >= defaultWait);
   BOOST_TEST(elapsed().count() == offset.count() + inc);
-  BOOST_TEST(mean() == inc);
-  BOOST_TEST(stdev() == 0.); // Exactly 0.
+  BOOST_TEST(distribution().mean() == inc);
+  BOOST_TEST(distribution().stdev(false) == 0.); // Exactly 0.
   BOOST_TEST(min() == inc);
   BOOST_TEST(max() == inc);
 }
@@ -60,14 +60,14 @@ BOOST_AUTO_TEST_CASE(two_incs_test) {
   stop();
   BOOST_TEST(not isRunning());
   BOOST_TEST(elapsed().count() > offset.count());
-  BOOST_TEST(count() == 2);
+  BOOST_TEST(size() == 2);
   const auto fast = increments()[0];
   const auto slow = increments()[1];
   BOOST_TEST(fast < slow); // FIXME Not that sure!
   BOOST_TEST(elapsed().count() == offset.count() + fast + slow);
-  BOOST_TEST(mean() >= fast);
-  BOOST_TEST(mean() <= slow);
-  BOOST_TEST(stdev() > 0.);
+  BOOST_TEST(distribution().mean() >= fast);
+  BOOST_TEST(distribution().mean() <= slow);
+  BOOST_TEST(distribution().stdev() > 0.);
   BOOST_TEST(min() == fast);
   BOOST_TEST(max() == slow);
 }
