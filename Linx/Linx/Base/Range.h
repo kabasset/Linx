@@ -5,6 +5,8 @@
 #ifndef _LINXBASE_RANGE_H
 #define _LINXBASE_RANGE_H
 
+#include "Linx/Base/DataDistribution.h"
+
 #include <algorithm>
 
 namespace Linx {
