@@ -7,10 +7,8 @@
 
 #include "Linx/Base/DataDistribution.h"
 
-#include <algorithm> // accumulate, min_element, max_element
+#include <algorithm> // min_element, max_element
 #include <chrono>
-#include <cmath> // sqrt
-#include <numeric> // inner_product
 #include <vector>
 
 namespace Linx {

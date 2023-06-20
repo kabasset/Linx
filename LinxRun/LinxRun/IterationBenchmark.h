@@ -6,7 +6,7 @@
 #define _LINXRUN_ITERATIONBENCHMARK_H
 
 #include "Linx/Data/Raster.h"
-#include "LinxRun/Chronometer.h"
+#include "Linx/Run/Chronometer.h"
 
 namespace Linx {
 

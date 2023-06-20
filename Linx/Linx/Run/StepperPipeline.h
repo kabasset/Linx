@@ -13,6 +13,9 @@
 
 namespace Linx {
 
+/// @cond
+namespace Internal {
+
 /**
  * @relates StepperPipeline
  * @brief Traits class which gives the cardinality (number of elements) of a type.
@@ -55,19 +58,29 @@ constexpr std::size_t prerequisiteCardinality() {
   return TypeCardinality<typename S::Prerequisite>::value;
 }
 
+} // namespace Internal
+/// @endcond
+
 /**
  * @brief A pipeline or directed acyclic graph (DAG) which can be run step-by-step using lazy evaluation.
  * 
- * The only public method, `get<S>()`, returns the value of step `S`.
- * If not already done, the prerequisites of `S` are first triggered.
+ * The main method, `get<S>()`, returns the value of step `S`.
+ * If not already done, the prerequisites of `S` are first triggered, recursively.
+ * Run times of the steps are stored; They are accessed with `milliseconds()`.
  * 
- * This class relies on the CRTP.
- * Child classes should provide a specialization of the following methods for each step `S`:
+ * This class relies on the CRTP, i.e. child classes should inherit this class with their name as template parameter, e.g.
+ * \code
+ * class MyPipeline : public StepperPipeline<MyPipeline> {
+ *   ...
+ * };
+ * \endcode
+ * 
+ * Child classes must provide a specialization of the following methods for each step `S`:
  * - `void doEvaluate<S>()`, which evaluates `S` assuming upstream tasks were already computed;
  * - `S::Return doGet<S>()`, which returns the computed value of `S`.
  * 
  * A step `S` is a class which contains the following type definitions:
- * - `Return` is the return value type of `get<S>`;
+ * - `Return` is the return value type of `get<S>()`;
  * - `Prerequisite` is (are) the step(s) which must be run prior to `S`, or `void` if there is no prerequisite;
  *   Multiple prerequisites are describled with tuples.
  */
@@ -80,10 +93,10 @@ public:
    */
   template <typename S>
   typename S::Return get() {
-    if constexpr (prerequisiteCardinality<S>() == 1) {
+    if constexpr (Internal::prerequisiteCardinality<S>() == 1) {
       get<typename S::Prerequisite>();
-    } else if constexpr (prerequisiteCardinality<S>() > 1) {
-      getMultiple<typename S::Prerequisite>(std::make_index_sequence<prerequisiteCardinality<S>()> {});
+    } else if constexpr (Internal::prerequisiteCardinality<S>() > 1) {
+      getMultiple<typename S::Prerequisite>(std::make_index_sequence<Internal::prerequisiteCardinality<S>()> {});
     }
     return evaluateGet<S>();
   }
@@ -197,7 +210,7 @@ private:
 };
 
 /**
- * @brief Helper class to declare a pipeline steps.
+ * @brief Helper class to declare a pipeline step.
  * 
  * Usage:
  * \code

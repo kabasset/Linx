@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "ElementsKernel/ProgramHeaders.h"
+#include "Linx/Run/ProgramOptions.h"
 #include "LinxRun/IterationBenchmark.h"
-#include "LinxRun/ProgramOptions.h"
 
 #include <map>
 #include <string>

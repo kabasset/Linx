@@ -7,8 +7,8 @@
 #include "Linx/Data/Mask.h"
 #include "Linx/Data/Raster.h"
 #include "Linx/Data/Sequence.h"
-#include "LinxRun/Chronometer.h"
-#include "LinxRun/ProgramOptions.h"
+#include "Linx/Run/Chronometer.h"
+#include "Linx/Run/ProgramOptions.h"
 
 #include <map>
 #include <string>

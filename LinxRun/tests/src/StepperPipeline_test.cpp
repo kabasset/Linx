@@ -2,7 +2,7 @@
 // This file is part of Linx <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "LinxRun/StepperPipeline.h"
+#include "Linx/Run/StepperPipeline.h"
 
 #include <boost/test/unit_test.hpp>
 

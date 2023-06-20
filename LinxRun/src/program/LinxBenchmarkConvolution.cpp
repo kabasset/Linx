@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "ElementsKernel/ProgramHeaders.h"
-#include "LinxRun/Chronometer.h"
-#include "LinxRun/ProgramOptions.h"
+#include "Linx/Run/Chronometer.h"
+#include "Linx/Run/ProgramOptions.h"
 #include "Linx/Transforms/Kernel.h"
 
 #include <map>

@@ -4,8 +4,8 @@
 
 #include "ElementsKernel/ProgramHeaders.h"
 #include "Linx/Base/AlignedBuffer.h"
-#include "LinxRun/Chronometer.h"
-#include "LinxRun/ProgramOptions.h"
+#include "Linx/Run/Chronometer.h"
+#include "Linx/Run/ProgramOptions.h"
 
 #include <map>
 #include <string>
