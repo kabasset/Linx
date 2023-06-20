@@ -119,9 +119,20 @@ public:
 
   /**
    * @brief Compute the variance.
+   * 
+   * The difference between biased and unbiased variance is that the denomitator is
+   * the number of samples `size()` in the first case
+   * and `size() - 1` in the latter case.
    */
   Floating variance(bool unbiased = true) {
-    return Floating(m_sum2 - m_sum * m_sum() / size()) / (size() - unbiased);
+    return Floating(m_sum2 - m_sum * m_sum / size()) / (size() - unbiased);
+  }
+
+  /**
+   * @brief Compute the standard deviation.
+   */
+  Floating stdev(bool unbiased = true) {
+    return std::sqrt(variance(unbiased));
   }
 
   /**
@@ -158,6 +169,7 @@ public:
    * @brief Compute the histogram with given bins.
    * 
    * The output size is the size of `bins` minus one.
+   * Bins are open-closed intervals (the lower bound is includer, the upper bound is excluded).
    */
   template <typename TRange>
   std::vector<std::size_t> histogram(const TRange& bins) { // FIXME bounds options
@@ -203,7 +215,7 @@ private:
   /**
    * @brief Check if values are totally sorted.
    */
-  bool m_sorted;
+  bool m_sorted; // FIXME count the number of elements sorted instead
 
   /**
    * @brief The cached sum.
