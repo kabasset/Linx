@@ -12,6 +12,9 @@
 
 namespace Linx {
 
+/// @cond
+namespace Internal {
+
 /**
  * @ingroup regions
  * @brief A box made of an inner box and bordering boxes.
@@ -79,6 +82,9 @@ private:
   std::deque<Box<N>> m_fronts;
   std::vector<Box<N>> m_backs;
 };
+
+} // namespace Internal
+/// @endcond
 
 } // namespace Linx
 

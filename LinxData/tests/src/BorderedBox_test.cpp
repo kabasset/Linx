@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE(position_set_test) {
   const auto inner = Box<2>::fromShape({1, 1}, {4, 3});
   const Box<2> margin {{-3, -2}, {2, 1}};
   const auto box = inner + margin;
-  const BorderedBox<2> bordered(box, margin);
+  const Internal::BorderedBox<2> bordered(box, margin);
 
   std::set<Indices<2>> innerSet;
   for (const auto& p : inner) {
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(box_ordering_test) {
 
   const auto inner = Box<2>::fromShape({1, 1}, {4, 3});
   const Box<2> margin {{-3, -2}, {2, 1}};
-  const BorderedBox<2> bordered(inner + margin, margin);
+  const Internal::BorderedBox<2> bordered(inner + margin, margin);
 
   std::vector<Box<2>> expected {
       {{-2, -1}, {6, 0}}, // top

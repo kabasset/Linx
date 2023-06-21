@@ -142,7 +142,7 @@ public:
       return Box<Dimension>::fromShape(f, g.shape());
     };
 
-    const auto box = BorderedBox<Dimension>(rasterize(in).domain(), m_window);
+    const auto box = Internal::BorderedBox<Dimension>(rasterize(in).domain(), m_window);
     box.applyInnerBorder(
         [&](const auto& ib) {
           const auto insub = raw.patch(ib);
@@ -185,7 +185,7 @@ private:
   template <typename TIn, typename TOut>
   void transformSplits(const TIn& in, TOut& out) const {
     const auto& raw = dontExtrapolate(in);
-    const auto box = BorderedBox<Dimension>(Linx::box(raw.domain()), m_window);
+    const auto box = Internal::BorderedBox<Dimension>(Linx::box(raw.domain()), m_window);
     box.applyInnerBorder(
         [&](const auto& ib) {
           const auto insub = raw.patch(ib);

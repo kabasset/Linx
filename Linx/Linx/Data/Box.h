@@ -12,8 +12,10 @@
 namespace Linx {
 
 /// @cond
+namespace Internal {
 template <Index N>
 class BorderedBox; // for friendness // FIXME rm?
+}
 /// @endcond
 
 /**
@@ -24,7 +26,7 @@ class BorderedBox; // for friendness // FIXME rm?
  */
 template <Index N = 2>
 class Box : boost::additive<Box<N>, Box<N>>, boost::additive<Box<N>, Position<N>>, boost::additive<Box<N>, Index> {
-  friend class BorderedBox<N>; // FIXME rm?
+  friend class Internal::BorderedBox<N>; // FIXME rm? make private class, friend of FilterMixin?
 
 public:
   /**
