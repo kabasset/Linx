@@ -76,6 +76,8 @@ class EuclidArithmetic;
 template <typename TSpecs, typename T, typename TDerived>
 struct ArithmeticMixin {}; // Empy base class for void
 
+/// @cond
+
 /**
  * @ingroup pixelwise
  * @ingroup mixins
@@ -244,6 +246,8 @@ struct ArithmeticMixin<EuclidArithmetic, T, TDerived> :
 
   /// @}
 };
+
+/// @endcond
 
 #undef LINX_VECTOR_OPERATOR_INPLACE
 #undef LINX_SCALAR_OPERATOR_INPLACE
