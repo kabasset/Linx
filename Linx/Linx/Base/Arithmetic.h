@@ -70,8 +70,8 @@ class EuclidArithmetic;
  * @tparam T The contained element value type
  * @tparam TDerived The container which inherits this class
  * 
- * In addition to vector space arithmetic operators, this mixin provides
- * `generate()` and `apply()` to apply a function to each element.
+ * @tspecialization{VectorArithmetic}
+ * @tspecialization{EuclidArithmetic}
  */
 template <typename TSpecs, typename T, typename TDerived>
 struct ArithmeticMixin {}; // Empy base class for void
