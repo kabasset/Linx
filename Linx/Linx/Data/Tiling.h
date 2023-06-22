@@ -10,6 +10,9 @@
 
 namespace Linx {
 
+/// @cond
+namespace Internal {
+
 /**
  * @ingroup regions
  * @brief Iterator over the tiles of a raster.
@@ -17,6 +20,31 @@ namespace Linx {
  */
 template <typename TRaster, Index M>
 class TileGenerator;
+
+/**
+ * @ingroup regions
+ * @brief Iterator over the sections of a raster.
+ * @see sections()
+ */
+template <typename TRaster>
+class SectionGenerator;
+
+/**
+ * @ingroup regions
+ * @brief Iterator over the `I`-th axis-aligned profiles of a raster.
+ */
+template <Index I, typename TRaster>
+class ProfileGenerator;
+
+/**
+ * @ingroup regions
+ * @brief Iterator over the rows of a raster.
+ */
+template <typename TRaster>
+class RowGenerator;
+
+} // namespace Internal
+/// @endcond
 
 /**
  * @ingroup regions
@@ -28,16 +56,26 @@ class TileGenerator;
  */
 template <typename TRaster, Index M>
 auto tiles(TRaster& in, Position<M> shape) {
-  return TileGenerator<TRaster, M>(in, std::move(shape));
+  return Internal::TileGenerator<TRaster, M>(in, std::move(shape));
 }
 
 /**
  * @ingroup regions
- * @brief Iterator over the sections of a raster.
- * @see sections()
+ * @brief Make a raster of tiles.
  */
-template <typename TRaster>
-class SectionGenerator;
+template <typename TParent, Index N>
+auto rasterize(const Internal::TileGenerator<TParent, N>& generator) {
+  return generator.raster();
+}
+
+/**
+ * @ingroup regions
+ * @brief Make a raster of tiles.
+ */
+template <typename TParent, Index N>
+auto rasterize(Internal::TileGenerator<TParent, N>& generator) {
+  return generator.raster();
+}
 
 /**
  * @ingroup regions
@@ -57,13 +95,6 @@ auto sections(TRaster& in, Index thickness = 1) {
   }
   return out;
 }
-
-/**
- * @ingroup regions
- * @brief Iterator over the `I`-th axis-aligned profiles of a raster.
- */
-template <Index I, typename TRaster>
-class ProfileGenerator;
 
 /**
  * @ingroup regions
@@ -88,13 +119,6 @@ auto profiles(TRaster& in) {
   }
   return out;
 }
-
-/**
- * @ingroup regions
- * @brief Iterator over the rows of a raster.
- */
-template <typename TRaster>
-class RowGenerator;
 
 /**
  * @ingroup regions

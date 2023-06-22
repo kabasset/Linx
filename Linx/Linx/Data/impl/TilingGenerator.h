@@ -9,6 +9,9 @@
 
 namespace Linx {
 
+/// @cond
+namespace Internal {
+
 template <typename TParent, Index M>
 class TileGenerator : public std::iterator<std::forward_iterator_tag, decltype(TParent().patch(Box<M>()))> {
 
@@ -72,15 +75,8 @@ private:
   typename Grid<TParent::Dimension>::Iterator m_current;
 };
 
-template <typename TParent, Index N>
-auto rasterize(const TileGenerator<TParent, N>& generator) {
-  return generator.raster();
-}
-
-template <typename TParent, Index N>
-auto rasterize(TileGenerator<TParent, N>& generator) {
-  return generator.raster();
-}
+} // namespace Internal
+/// @endcond
 
 } // namespace Linx
 
