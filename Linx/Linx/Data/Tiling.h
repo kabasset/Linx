@@ -19,7 +19,7 @@ template <typename TRaster, Index M>
 class TileGenerator;
 
 /**
- * @relates TileGenerator
+ * @ingroup regions
  * @brief Get a box-patch partitioning of a raster.
  * 
  * The input raster domain is partitioned into boxes of given shape,
@@ -32,7 +32,7 @@ auto tiles(TRaster& in, Position<M> shape) {
 }
 
 /**
- * @ingroup region
+ * @ingroup regions
  * @brief Iterator over the sections of a raster.
  * @see sections()
  */
@@ -40,7 +40,7 @@ template <typename TRaster>
 class SectionGenerator;
 
 /**
- * @relates SectionGenerator
+ * @ingroup regions
  * @brief Get a slicing of a raster as a range of cross-sections of given thickness.
  * 
  * The input raster domain is sliced along its last axis into sections of given thickness,
@@ -66,7 +66,7 @@ template <Index I, typename TRaster>
 class ProfileGenerator;
 
 /**
- * @relates ProfileGenerator
+ * @ingroup regions
  * @brief Get a line-patch partitioning of a raster.
  * 
  * The input raster domain is partitioned into maximal lines oriented along the `I`-th axis.
@@ -89,13 +89,14 @@ auto profiles(TRaster& in) {
 }
 
 /**
+ * @ingroup regions
  * @brief Iterator over the rows of a raster.
  */
 template <typename TRaster>
 class RowGenerator;
 
 /**
- * @relates RowGenerator
+ * @ingroup regions
  * @brief Get a line-section partitioning of a raster.
  * 
  * This function is similar to `profiles<0>()` but parts are `PtrRaster`s instead of `Patch`es

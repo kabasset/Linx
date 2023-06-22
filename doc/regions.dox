@@ -4,7 +4,7 @@ namespace Linx {
 \addtogroup regions
 
 
-\section regions-intro Regions Yield Pixel Positions, Patches Yield Pixel Values
+\section regions-intro Regions vs. Patches
 
 
 Regions are objects which provide position iterators and can be translated.
@@ -15,7 +15,8 @@ Rasters and extrapolators can be `patch()`ed.
 While regions allow to iterate on pixel positions,
 patches allow to iterate on (possibly extrapolated) pixel values.
 
-Functions which act on regions -- like convolution or morphologial operations -- are generally optimized
+Most regions are cheap to translate, so that they can efficiently represent sliding windows or more complex neighborhoods.
+Functions which act on neighborhoods -- like convolution or morphologial operations -- are generally optimized
 by selecting the most efficient method to iterate over the positions or pixels of the region or patch.
 This is done through a careful design of the position iterators, and of the associated pixel iterators in patches.
 
@@ -23,8 +24,8 @@ This is done through a careful design of the position iterators, and of the asso
 \section regions-box Box
 
 
-Bounding boxes (`Box`es) are the most commonly used kinds of regions.
-They are simply defined as a pair of front and back positions, both inclusive.
+Axis-aligned bounding box (`Box`) is the most commonly used kind of regions.
+It is simply defined as a pair of front and back positions, both inclusive.
 
 
 \section regions-sparse Sparse Regions
@@ -32,9 +33,9 @@ They are simply defined as a pair of front and back positions, both inclusive.
 
 The following ad-hoc region classes are implemented with efficient iterators:
 
-- `Grid`,
-- `Line`,
-- `Mask`.
+- `Grid` is a regular, possibly non-isotropic, axis-aligned rectilinear grid (i.e. a box with non-unit step);
+- `Line` is an axis-aligned dotted or plain line segment;
+- `Mask` is an arbitrary region represented as a binary mask.
 
 In addition to those specialized classes, additive position containers also meet `Region` requirements,
 but no assumptions can be made on the regularity and therefore iterators cannot be optimized generically.
@@ -44,12 +45,35 @@ Yet, for very sparse and irregular regions, `Sequence<Position<N>>` migth be bet
 \section regions-tiling Tiling
 
 
-TODO
+Sometimes, regions are used to partition some raster domain into so-called tiles.
+The following functions return patch generators, so that a raster can be iterated region-wise instead of pixel-wise:
 
-- `sections()`,
-- `tiles()`,
-- `profiles()`,
-- `rows()`.
+- `sections()` splits the raster into sections of dimension N-1 (typically planes of a data cube);
+- `tiles()` split the raster into ND boxes;
+- `profiles()` split the raster into axis-alined lines;
+- `rows()` split the raster into lines aligned with the first axis (which is generally faster than `profiles<0>()`).
+
+Here is a toy example usage:
+
+\code
+Index i = 0;
+for (auto& row : rows(raster)) {
+    row += i;
+    ++i;
+}
+\endcode
+
+Note that these functions return generators, and not containers, such that only one patch is available at a given time.
+Yet, containers can be created from the generators, for example to enable parallel processing:
+
+\code
+auto rows = rasterize(rows(raster));
+
+#pragma omp parallel for
+for (Index i = 0; i < rows.size(); ++i) {
+    rows[i] += i;
+}
+\endcode
 
 
 \section regions-performance Performance and Optimization
@@ -59,8 +83,15 @@ Regions can be more or less costly to iterate, depending on which regularity ass
 For example, boxes contain many contiguous pixels, while sequences of positions can be completely random.
 This generally makes iterating over boxes much faster than iterating over the sequence of positions inside the box.
 
+Let us first instantiate a mere 3D box.
+
 \snippet LinxBenchmarkRegions.cpp Make box
+
+It can also be represented with any other kind of region:
+
 \snippet LinxBenchmarkRegions.cpp Make sparse regions
+
+Then, we iterate over the pixels of the various regions to increment some underlying raster value, and measure the run time.
 
 \snippet LinxBenchmarkRegions.cpp Iterate over box
 
@@ -77,6 +108,10 @@ This generally makes iterating over boxes much faster than iterating over the se
 \snippet LinxBenchmarkRegions.cpp Iterate over sequence
 
 200ms
+
+As expected, the more flexible the region type, the slower the iteration.
+Obviously, many more things can be done with a mask than with a box,
+and the take-home message is to select the simplest region type which fulfills your needs.
 
 */
 }
