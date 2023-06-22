@@ -168,7 +168,7 @@ struct ContiguousContainerMixin {
   }
 
   /**
-   * @copybrief back()
+   * @copybrief back()const
    */
   inline T& back() {
     return const_cast<T&>(const_cast<const ContiguousContainerMixin&>(*this).back());
@@ -177,21 +177,21 @@ struct ContiguousContainerMixin {
   /// @group_iterators
 
   /**
-   * @copybrief begin()const
+   * @brief Get an iterator to the beginning.
    */
   iterator begin() {
     return const_cast<iterator>(const_cast<const TDerived&>(static_cast<TDerived&>(*this)).begin()); // TODO cleaner?
   }
 
   /**
-   * @copybrief begin()const
+   * @copybrief begin()
    */
   const_iterator cbegin() {
     return const_cast<const TDerived&>(static_cast<TDerived&>(*this)).begin(); // TODO cleaner?
   }
 
   /**
-   * @copybrief end()const
+   * @brief Get an iterator to the end.
    */
   iterator end() {
     return const_cast<iterator>(const_cast<const TDerived&>(static_cast<TDerived&>(*this)).end()); // TODO cleaner?

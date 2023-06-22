@@ -123,7 +123,7 @@ public:
     return m_eigen.determinant();
   }
 
-  /// @group_modifier
+  /// @group_modifiers
 
   Matrix& inverse() {
     m_eigen.inverse();

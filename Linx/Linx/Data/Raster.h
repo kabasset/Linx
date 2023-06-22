@@ -450,7 +450,7 @@ public:
   const Patch<const T, const Raster<T, N, THolder>, Mask<N>> where(TFunc&& condition) const;
 
   /**
-   * @copybrief where(TFunc)const
+   * @copybrief where()const
    */
   template <typename TFunc>
   Patch<T, Raster<T, N, THolder>, Mask<N>> where(TFunc&& condition);

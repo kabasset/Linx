@@ -95,6 +95,9 @@ struct Periodic {
  */
 struct Linear {
 
+  /**
+   * @brief Return the interpolated value at given index.
+   */
   template <typename T, typename TRaster, typename... TIndices>
   inline T at(const TRaster& raster, const Vector<double, 1>& position, TIndices... indices) const {
     const auto f = floor<Index>(position.front());
@@ -104,6 +107,9 @@ struct Linear {
     return d * (n - p) + p;
   }
 
+  /**
+   * @brief Return the interpolated value at given position.
+   */
   template <typename T, Index N, typename TRaster, typename... TIndices>
   inline std::enable_if_t<N != 1, T>
   at(const TRaster& raster, const Vector<double, N>& position, TIndices... indices) const {
@@ -122,6 +128,9 @@ struct Linear {
  */
 struct Cubic {
 
+  /**
+   * @brief Return the interpolated value at given index.
+   */
   template <typename T, typename TRaster, typename... TIndices>
   inline T at(const TRaster& raster, const Vector<double, 1>& position, TIndices... indices) const {
     const auto f = floor<Index>(position.front());
@@ -133,6 +142,9 @@ struct Cubic {
     return p + 0.5 * (d * (-pp + n) + d * d * (2 * pp - 5 * p + 4 * n - nn) + d * d * d * (-pp + 3 * p - 3 * n + nn));
   }
 
+  /**
+   * @brief Return the interpolated value at given position.
+   */
   template <typename T, Index N, typename TRaster, typename... TIndices>
   inline std::enable_if_t<N != 1, T>
   at(const TRaster& raster, const Vector<double, N>& position, TIndices... indices) const {

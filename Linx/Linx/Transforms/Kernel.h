@@ -42,7 +42,7 @@ public:
   }
 
   /**
-   * @copybrief raster()
+   * @copybrief raster()const
    */
   PtrRaster<Value, Dimension> raster() {
     return PtrRaster<Value, Dimension>(this->window().shape(), m_values.data());

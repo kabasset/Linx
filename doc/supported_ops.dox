@@ -67,7 +67,7 @@ namespace Linx {
 <li>Class `DftPlan`
 <tr><td>Geometrical transforms<td>`Raster`
 <td><ul>
-<li>Module \ref transforms
+<li>Module \ref geometry
 <li>Class `Affinity`
 <li>Module \ref interpolation
 <li>Class `Extrapolator`
