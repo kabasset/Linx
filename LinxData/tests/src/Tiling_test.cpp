@@ -5,6 +5,7 @@
 #include "Linx/Data/Tiling.h"
 
 #include <boost/test/unit_test.hpp>
+#include <omp.h>
 
 using namespace Linx;
 
@@ -43,7 +44,7 @@ BOOST_AUTO_TEST_CASE(raster_profiles_ordering_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(raster_rowss_ordering_test) {
+BOOST_AUTO_TEST_CASE(raster_rows_ordering_test) {
   const auto raster = Raster<Index, 3>({3, 4, 5}).range();
   const auto parts = rows(raster);
   const auto plane = parts.domain();
@@ -75,15 +76,33 @@ BOOST_AUTO_TEST_CASE(raster_profiles_setting_test) {
 BOOST_AUTO_TEST_CASE(raster_tiles_ordering_test) {
   const auto raster = Raster<Index, 3>({3, 4, 5}).range();
   auto parts = tiles(raster, Position<3>({1, 1, 1}));
+  const auto partsRaster = rasterize(parts);
   Index i = 0;
   for (const auto& p : parts) {
-    std::cout << i << std::endl;
     BOOST_TEST(p.size() == 1);
+    BOOST_TEST(partsRaster[i] == p);
     for (const auto& j : p) {
       BOOST_TEST(j == i);
       ++i;
     }
   }
+}
+
+BOOST_AUTO_TEST_CASE(raster_tiles_parallelization_test) {
+
+  auto raster = Raster<Index, 2>({4, 3});
+  auto generator = tiles(raster, Position<2>({1, 1}));
+  auto parts = rasterize(generator);
+  std::vector<Index> threads(raster.size());
+
+#pragma omp parallel for
+  for (std::size_t i = 0; i < parts.size(); ++i) {
+    const auto n = omp_get_thread_num();
+    threads[i] += n;
+    parts[i] += n;
+  }
+
+  BOOST_TEST(raster.container() == threads);
 }
 
 //-----------------------------------------------------------------------------

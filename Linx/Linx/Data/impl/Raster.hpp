@@ -133,7 +133,7 @@ inline T& Raster<T, N, THolder>::at(const Position<N>& pos) {
 
 template <typename T, Index N, typename THolder>
 template <Index M>
-const PtrRaster<const T, M> Raster<T, N, THolder>::slice(const Box<N>& region) const {
+PtrRaster<const T, M> Raster<T, N, THolder>::slice(const Box<N>& region) const {
   // FIXME resolve
   if (not isContiguous<M>(region)) {
     throw Exception("Cannot slice: Box is not contiguous."); // FIXME clarify
@@ -164,7 +164,7 @@ PtrRaster<T, M> Raster<T, N, THolder>::slice(const Box<N>& region) {
 }
 
 template <typename T, Index N, typename THolder>
-const PtrRaster<const T, N> Raster<T, N, THolder>::section(Index front, Index back) const {
+PtrRaster<const T, N> Raster<T, N, THolder>::section(Index front, Index back) const {
   const auto last = dimension() - 1;
   auto f = Position<N>::zero();
   auto b = shape() - 1;
@@ -184,7 +184,7 @@ PtrRaster<T, N> Raster<T, N, THolder>::section(Index front, Index back) {
 }
 
 template <typename T, Index N, typename THolder>
-const PtrRaster<const T, N == -1 ? -1 : N - 1> Raster<T, N, THolder>::section(Index index) const {
+PtrRaster<const T, N == -1 ? -1 : N - 1> Raster<T, N, THolder>::section(Index index) const {
   const auto last = dimension() - 1;
   auto f = Position<N>::zero();
   auto b = shape() - 1;
@@ -206,7 +206,7 @@ PtrRaster<T, N == -1 ? -1 : N - 1> Raster<T, N, THolder>::section(Index index) {
 }
 
 template <typename T, Index N, typename THolder>
-const PtrRaster<const T, 1> Raster<T, N, THolder>::row(const Position<N == -1 ? -1 : N - 1>& position) const {
+PtrRaster<const T, 1> Raster<T, N, THolder>::row(const Position<N == -1 ? -1 : N - 1>& position) const {
   Position<N> f(dimension());
   for (Index i = 1; i < dimension(); ++i) {
     const auto p = position[i - 1];
@@ -229,7 +229,7 @@ PtrRaster<T, 1> Raster<T, N, THolder>::row(const Position<N == -1 ? -1 : N - 1>&
 
 template <typename T, Index N, typename THolder>
 template <Index I>
-const Patch<const T, const Raster<T, N, THolder>, Line<I, N>>
+Patch<const T, const Raster<T, N, THolder>, Line<I, N>>
 Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position) const {
   Position<N> f(dimension());
   for (Index i = 0; i < I; ++i) {
@@ -261,7 +261,7 @@ Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position) {
 
 template <typename T, Index N, typename THolder>
 template <typename TRegion>
-const Patch<const T, const Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::patch(TRegion region) const {
+Patch<const T, const Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::patch(TRegion region) const {
   return {*this, std::move(region)};
 }
 

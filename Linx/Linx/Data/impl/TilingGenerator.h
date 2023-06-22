@@ -14,9 +14,14 @@ class TileGenerator : public std::iterator<std::forward_iterator_tag, decltype(T
 
 public:
   using Value = decltype(TParent().patch(Box<M>()));
+  static constexpr Index Dimension = M;
 
   TileGenerator(TParent& in, Position<M> shape) :
       m_parent(&in), m_domain(m_parent->domain()), m_fronts(m_domain, std::move(shape)), m_current(m_fronts.begin()) {}
+
+  TileGenerator begin() const {
+    return *this;
+  }
 
   TileGenerator& begin() {
     return *this;
@@ -53,6 +58,10 @@ public:
     return m_current != rhs.m_current;
   }
 
+  Raster<std::decay_t<Value>, Dimension> raster() {
+    return Raster<Value, Dimension>(m_fronts.shape(), *this);
+  }
+
 private:
   TileGenerator(typename Grid<TParent::Dimension>::Iterator current) :
       m_parent(nullptr), m_domain(), m_fronts(), m_current(current) {} // FIXME no copy
@@ -62,6 +71,16 @@ private:
   Grid<TParent::Dimension> m_fronts;
   typename Grid<TParent::Dimension>::Iterator m_current;
 };
+
+template <typename TParent, Index N>
+auto rasterize(const TileGenerator<TParent, N>& generator) {
+  return generator.raster();
+}
+
+template <typename TParent, Index N>
+auto rasterize(TileGenerator<TParent, N>& generator) {
+  return generator.raster();
+}
 
 } // namespace Linx
 

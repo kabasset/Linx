@@ -68,7 +68,7 @@ public:
    */
   template <typename TIt, typename... TArgs>
   explicit DataContainer(TIt begin, TIt end, TArgs&&... args) :
-      DataContainer(std::distance(begin, end), std::forward<TArgs>(args)...) {
+      DataContainer(std::distance(begin, end), std::forward<TArgs>(args)...) { // FIXME distance might be expensive
     std::copy(std::move(begin), std::move(end), this->data());
   }
 

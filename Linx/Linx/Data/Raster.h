@@ -236,7 +236,7 @@ public:
   template <typename TRange, typename std::enable_if_t<IsRange<TRange>::value>* = nullptr, typename... TArgs>
   explicit Raster(Position<N> shape, TRange& range, TArgs&&... args) :
       Container(range, std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
-    SizeError::mayThrow(std::distance(std::begin(range), std::end(range)), shapeSize(shape));
+    SizeError::mayThrow(this->size(), shapeSize(shape));
   }
 
   /**
@@ -356,7 +356,7 @@ public:
    * @see section()
    */
   template <Index M = 2>
-  const PtrRaster<const T, M> slice(const Box<N>& region) const;
+  PtrRaster<const T, M> slice(const Box<N>& region) const;
 
   /**
    * @copybrief slice()
@@ -382,7 +382,7 @@ public:
    * 
    * @see slice()
    */
-  const PtrRaster<const T, N> section(Index front, Index back) const;
+  PtrRaster<const T, N> section(Index front, Index back) const;
 
   /**
    * @copybrief section(Index,Index)const
@@ -392,7 +392,7 @@ public:
   /**
    * @brief Create a section at given index.
    */
-  const PtrRaster<const T, N == -1 ? -1 : N - 1> section(Index index) const;
+  PtrRaster<const T, N == -1 ? -1 : N - 1> section(Index index) const;
 
   /**
    * @copybrief section(Index)const
@@ -402,7 +402,7 @@ public:
   /**
    * @brief Create a row-section at given position.
    */
-  const PtrRaster<const T, 1> row(const Position<N == -1 ? -1 : N - 1>& position) const;
+  PtrRaster<const T, 1> row(const Position<N == -1 ? -1 : N - 1>& position) const;
 
   /**
    * @copybrief row()const
@@ -413,8 +413,7 @@ public:
    * @brief Create a line-patch at given position.
    */
   template <Index I>
-  const Patch<const T, const Raster<T, N, THolder>, Line<I, N>>
-  profile(const Position<N == -1 ? -1 : N - 1>& position) const;
+  Patch<const T, const Raster<T, N, THolder>, Line<I, N>> profile(const Position<N == -1 ? -1 : N - 1>& position) const;
 
   /**
    * @brief Create a line-patch at given position.
@@ -435,7 +434,7 @@ public:
    * @see section()
    */
   template <typename TRegion>
-  const Patch<const T, const Raster<T, N, THolder>, TRegion> patch(TRegion region) const;
+  Patch<const T, const Raster<T, N, THolder>, TRegion> patch(TRegion region) const;
 
   /**
    * @copybrief patch(TRegion)const
@@ -447,7 +446,7 @@ public:
    * @brief Create a mask patch according to some pixel-wise condition.
    */
   template <typename TFunc>
-  const Patch<const T, const Raster<T, N, THolder>, Mask<N>> where(TFunc&& condition) const;
+  Patch<const T, const Raster<T, N, THolder>, Mask<N>> where(TFunc&& condition) const;
 
   /**
    * @copybrief where()const
