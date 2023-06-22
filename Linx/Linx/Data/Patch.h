@@ -261,7 +261,7 @@ constexpr bool isPatch() {
 }
 
 /**
- * @relates Patch
+ * @relatesalso Patch
  * @brief Get the parent raster of a patch.
  * 
  * As opposed to `Patch::parent()`, if the parent is an extrapolator,

@@ -225,7 +225,7 @@ struct ContiguousContainerMixin {
 };
 
 /**
- * @relates ContiguousContainerMixin
+ * @relatesalso ContiguousContainerMixin
  * @brief Insert a `ContiguousContainerMixin` into an output stream.
  */
 template <typename T, typename TDerived>

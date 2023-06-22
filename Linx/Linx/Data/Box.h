@@ -422,7 +422,7 @@ private:
 };
 
 /**
- * @relates Box
+ * @relatesalso Box
  * @brief Flatten the box along a given axis.
  */
 template <Index N>
@@ -432,7 +432,7 @@ Box<N> project(const Box<N>& in, Index axis = 0) {
 }
 
 /**
- * @relates Box
+ * @relatesalso Box
  * @brief Clamp a position inside a box.
  */
 template <typename T, Index N = 2>
@@ -445,7 +445,7 @@ Vector<T, N> clamp(const Vector<T, N>& position, const Box<N>& box) {
 }
 
 /**
- * @relates Box
+ * @relatesalso Box
  * @brief Clamp a position inside a shape.
  */
 template <typename T, Index N = 2>
@@ -470,7 +470,7 @@ Vector<T, N> clamp(const Vector<T, N>& position, const Position<N>& shape) {
  */
 
 /**
- * @relates Box
+ * @relatesalso Box
  * @brief Identity, for compatibility with `Region`.
  */
 template <Index N>
@@ -479,7 +479,7 @@ inline const Box<N>& box(const Box<N>& region) {
 }
 
 /**
- * @relates Box
+ * @relatesalso Box
  * @brief Get the bounding box of a region.
  * 
  * This generic implementation is unoptimized:
@@ -499,7 +499,7 @@ inline Box<TIn::Dimension> box(const TIn& region) {
 }
 
 /**
- * @relates Box
+ * @relatesalso Box
  * @brief Get the intersection of two boxes.
  */
 template <Index N>

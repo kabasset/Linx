@@ -242,7 +242,7 @@ private:
 };
 
 /**
- * @relates Line
+ * @relatesalso Line
  * @brief Get the bounding box of a slice.
  */
 template <Index I, Index N>

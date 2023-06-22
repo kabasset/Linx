@@ -70,7 +70,7 @@ private:
 };
 
 /**
- * @relates Kernel
+ * @relatesalso Kernel
  * @brief Make a convolution kernel from values and a window.
  */
 template <typename T, Index N = 2>
@@ -79,7 +79,7 @@ Kernel<KernelOp::Convolution, T, N> convolution(const T* values, Box<N> window) 
 }
 
 /**
- * @relates Kernel
+ * @relatesalso Kernel
  * @brief Make a kernel from a raster and origin position.
  */
 template <typename T, Index N, typename THolder>
@@ -88,7 +88,7 @@ Kernel<KernelOp::Convolution, T, N> convolution(const Raster<T, N, THolder>& val
 }
 
 /**
- * @relates Kernel
+ * @relatesalso Kernel
  * @brief Make a kernel from a raster, with centered origin.
  * 
  * In case of even lengths, origin position is rounded down.

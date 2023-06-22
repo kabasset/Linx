@@ -15,7 +15,7 @@
 namespace Linx {
 
 /**
- * @relates AlignedBuffer
+ * @relatesalso AlignedBuffer
  * @brief Check whether some pointer is aligned as required.
  */
 template <typename T>
@@ -30,7 +30,7 @@ bool isAligned(const T* ptr, Index as) {
 }
 
 /**
- * @relates AlignedBuffer
+ * @relatesalso AlignedBuffer
  * @brief Get the highest power of two some pointer is aligned as.
  */
 template <typename T>

@@ -68,6 +68,7 @@ class ProfileGenerator;
 /**
  * @ingroup regions
  * @brief Get a line-patch partitioning of a raster.
+ * @tparam I The index of the axis
  * 
  * The input raster domain is partitioned into maximal lines oriented along the `I`-th axis.
  * A range over the corresponding patches is returned.

@@ -17,7 +17,7 @@ namespace Linx {
 namespace Internal {
 
 /**
- * @relates StepperPipeline
+ * @relatesalso StepperPipeline
  * @brief Traits class which gives the cardinality (number of elements) of a type.
  * 
  * Cardinality of:
@@ -31,7 +31,7 @@ struct TypeCardinality {
 };
 
 /**
- * @relates StepperPipeline
+ * @relatesalso StepperPipeline
  * @brief `void` specialization
  */
 template <>
@@ -40,7 +40,7 @@ struct TypeCardinality<void> {
 };
 
 /**
- * @relates StepperPipeline
+ * @relatesalso StepperPipeline
  * @brief Tuple specialization
  */
 template <typename... Ts>
@@ -49,7 +49,7 @@ struct TypeCardinality<std::tuple<Ts...>> {
 };
 
 /**
- * @relates StepperPipeline
+ * @relatesalso StepperPipeline
  * @brief Cardinality of a step's prerequisite.
  * @see `TypeCardinality`
  */

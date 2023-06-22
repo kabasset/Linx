@@ -465,7 +465,7 @@ private:
 };
 
 /**
- * @relates Raster
+ * @relatesalso Raster
  * @brief Equality operator.
  */
 template <typename T, Index N, typename THolder, typename U, Index M, typename UHolder>
@@ -476,7 +476,7 @@ bool operator==(const Raster<T, N, THolder>& lhs, const Raster<U, M, UHolder>& r
   return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 }
 /**
- * @relates Raster
+ * @relatesalso Raster
  * @brief Inequality operator.
  */
 template <typename T, Index N, typename THolder, typename U, Index M, typename UHolder>
@@ -485,7 +485,7 @@ bool operator!=(const Raster<T, N, THolder>& lhs, const Raster<U, M, UHolder>& r
 }
 
 /**
- * @relates Raster
+ * @relatesalso Raster
  * @brief Shortcut to create a raster from a shape and data without specifying the template parameters.
  * @tparam T The pixel type, should not be specified (automatically deduced)
  * @tparam Longs The axes lengths, should not be specified (automatically deduced)
@@ -514,7 +514,7 @@ rasterize(TContainer&& data, Longs... shape) {
 }
 
 /**
- * @relates Raster
+ * @relatesalso Raster
  * @copybrief rasterize()
  */
 template <typename T, typename... Longs>
@@ -523,7 +523,7 @@ PtrRaster<T, sizeof...(Longs)> rasterize(T* data, Longs... shape) {
 }
 
 /**
- * @relates Raster
+ * @relatesalso Raster
  * @brief Identity.
  * 
  * This function is provided for compatibility with `Extrapolator`
@@ -560,7 +560,7 @@ LINX_MATH_COMPLEX_TO_REAL(norm) ///< Apply `std::norm()` @ingroup pixelwise
 #undef LINX_MATH_COMPLEX_TO_REAL
 
 /**
- * @relates Raster
+ * @relatesalso Raster
  * @brief Generate a random raster.
  * 
  * Pixel values are uniformly distributed between the type's half min and half max.

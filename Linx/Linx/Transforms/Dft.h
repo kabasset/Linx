@@ -217,7 +217,7 @@ template <Index N = 2>
 using ComplexDft = DftPlan<Internal::ComplexDftTransform, N>;
 
 /**
- * @relates DftPlan
+ * @relatesalso DftPlan
  * @brief Compute the complex DFT.
  */
 template <typename TRaster>
@@ -229,7 +229,7 @@ ComplexDftBuffer<TRaster::Dimension> complexDft(const TRaster& in) {
 }
 
 /**
- * @relates DftPlan
+ * @relatesalso DftPlan
  * @brief Compute the inverse complex DFT.
  */
 template <typename TRaster>
@@ -241,7 +241,7 @@ ComplexDftBuffer<TRaster::Dimension> inverseComplexDft(const TRaster& in) {
 }
 
 /**
- * @relates DftPlan
+ * @relatesalso DftPlan
  * @brief Compute the real DFT.
  */
 template <typename TRaster>
@@ -253,7 +253,7 @@ ComplexDftBuffer<TRaster::Dimension> realDft(const TRaster& in) {
 }
 
 /**
- * @relates DftPlan
+ * @relatesalso DftPlan
  * @brief Compute the inverse real DFT.
  */
 template <typename TRaster>

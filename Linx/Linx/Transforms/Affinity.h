@@ -328,7 +328,7 @@ private:
 };
 
 /**
- * @relates Affinity
+ * @relatesalso Affinity
  * @brief Create the inverse transform of a given affinity.
  */
 template <Index N>
@@ -339,7 +339,7 @@ Affinity<N> inverse(const Affinity<N>& in) {
 }
 
 /**
- * @relates Affinity
+ * @relatesalso Affinity
  * @brief Translate an input interpolator.
  */
 template <typename TIn>
@@ -348,7 +348,7 @@ Raster<typename TIn::Value, TIn::Dimension> translate(const TIn& in, const Vecto
 }
 
 /**
- * @relates Affinity
+ * @relatesalso Affinity
  * @brief Scale an input interpolator from its center.
  */
 template <typename TIn>
@@ -359,7 +359,7 @@ Raster<typename TIn::Value, TIn::Dimension> scale(const TIn& in, double factor) 
 }
 
 /**
- * @relates Affinity
+ * @relatesalso Affinity
  * @brief Upsample an input interpolator.
  */
 template <typename TIn>
@@ -371,7 +371,7 @@ Raster<typename TIn::Value, TIn::Dimension> upsample(const TIn& in, double facto
 }
 
 /**
- * @relates Affinity
+ * @relatesalso Affinity
  * @brief Downsample an input interpolator.
  */
 template <typename TIn>
@@ -380,7 +380,7 @@ Raster<typename TIn::Value, TIn::Dimension> downsample(const TIn& in, double fac
 }
 
 /**
- * @relates Affinity
+ * @relatesalso Affinity
  * @brief Rotate an input interpolator around its center.
  */
 template <typename TIn>
@@ -391,7 +391,7 @@ Raster<typename TIn::Value, TIn::Dimension> rotateRadians(const TIn& in, double 
 }
 
 /**
- * @relates Affinity
+ * @relatesalso Affinity
  * @brief Rotate an input interpolator around its center.
  */
 template <typename TIn>

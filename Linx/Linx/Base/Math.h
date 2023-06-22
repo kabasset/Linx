@@ -167,7 +167,7 @@ struct MathFunctionsMixin {
 };
 
 #define LINX_MATH_UNARY_NEWINSTANCE(function) \
-  /** @relates MathFunctionsMixin @brief Apply std::##function##() (new instance). */ \
+  /** @relatesalso MathFunctionsMixin @brief Apply std::##function##() (new instance). */ \
   template <typename T, typename TDerived> \
   TDerived function(const MathFunctionsMixin<T, TDerived>& in) { \
     TDerived out(static_cast<const TDerived&>(in)); \
@@ -176,7 +176,7 @@ struct MathFunctionsMixin {
   }
 
 #define LINX_MATH_BINARY_NEWINSTANCE(function) \
-  /** @relates MathFunctionsMixin @brief Apply std::##function##() (new instance). */ \
+  /** @relatesalso MathFunctionsMixin @brief Apply std::##function##() (new instance). */ \
   template <typename T, typename TDerived, typename TOther> \
   TDerived function(const MathFunctionsMixin<T, TDerived>& in, const TOther& other) { \
     TDerived out(static_cast<const TDerived&>(in)); \

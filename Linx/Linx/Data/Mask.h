@@ -239,7 +239,7 @@ private:
 };
 
 /**
- * @relates Mask
+ * @relatesalso Mask
  * @brief Get the bounding box of a mask.
  */
 template <Index N>
@@ -248,7 +248,7 @@ inline const Box<N>& box(const Mask<N>& region) {
 }
 
 /**
- * @relates Mask
+ * @relatesalso Mask
  * @brief Clamp a mask inside a bounding box.
  */
 template <Index N>

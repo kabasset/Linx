@@ -291,7 +291,7 @@ private:
 };
 
 /**
- * @relates Grid
+ * @relatesalso Grid
  * @brief Get the bounding box of a grid.
  */
 template <Index N>
@@ -300,7 +300,7 @@ inline const Box<N>& box(const Grid<N>& region) {
 }
 
 /**
- * @relates Grid
+ * @relatesalso Grid
  * @brief Flatten the grid along a given axis.
  */
 template <Index N>
@@ -310,7 +310,7 @@ Grid<N> project(const Grid<N>& in, Index axis = 0) {
 }
 
 /**
- * @relates Grid
+ * @relatesalso Grid
  * @brief Clamp a grid inside a bounding box.
  */
 template <Index N>

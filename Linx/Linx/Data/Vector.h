@@ -21,7 +21,7 @@ template <typename T, Index N = 2>
 using Coordinates = typename std::conditional<(N == -1), std::vector<T>, std::array<T, (std::size_t)N>>::type;
 
 /**
- * @relates Position
+ * @relatesalso Position
  * @brief The index container type.
  */
 template <Index N = 2>
@@ -198,7 +198,7 @@ template <Index N = 2>
 using Position = Vector<Index, N>;
 
 /**
- * @relates Position
+ * @relatesalso Position
  * @brief Get the stride along a given axis.
  */
 template <Index N>
@@ -209,7 +209,7 @@ Index shapeStride(const Position<N>& shape, Index axis) {
 }
 
 /**
- * @relates Position
+ * @relatesalso Position
  * @brief Get the stride along a given axis.
  */
 template <Index Axis, Index N>
@@ -218,7 +218,7 @@ Index shapeStride(const Position<N>& shape) {
 }
 
 /**
- * @relates Position
+ * @relatesalso Position
  * @brief Compute the number of pixels in a given shape.
  */
 template <Index N = 2>

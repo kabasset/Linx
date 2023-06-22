@@ -112,7 +112,7 @@ private:
 };
 
 /**
- * @relates Interpolator
+ * @relatesalso Interpolator
  * @brief Make an interpolator with given interpolation method.
  */
 template <typename TMethod = NearestNeighbor, typename TParent, typename... TArgs>

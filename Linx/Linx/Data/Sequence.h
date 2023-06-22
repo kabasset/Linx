@@ -32,7 +32,7 @@ public:
 };
 
 /**
- * @relates Sequence
+ * @relatesalso Sequence
  * @brief Generate a random raster.
  * 
  * Pixel values are uniformly distributed between the type's half min and half max.

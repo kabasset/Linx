@@ -26,7 +26,7 @@ public:
     return TileGenerator(m_fronts.end());
   }
 
-  Value operator*() const { // FIXME store patch and return Value&
+  Value operator*() const {
     return m_parent->patch(Box<M>::fromShape(*m_current, m_fronts.step()) & m_domain);
   }
 
