@@ -174,20 +174,46 @@ public:
   }
 };
 
+/**
+ * @relatesalso Vector
+ * @brief Erase an element from a given vector.
+ * 
+ * The size of the resulting vector is that of the input vector minus one.
+ */
 template <Index I, typename T, Index N>
 Vector<T, N == -1 ? -1 : N - 1> erase(const Vector<T, N>& in) {
+  static_assert(I >= 0);
   constexpr auto M = N == -1 ? -1 : N - 1;
   Vector<T, M> out(in.size() - 1);
-  for (Index i = 0; i < I; ++i) {
+  for (std::size_t i = 0; i < I; ++i) {
     out[i] = in[i];
   }
-  for (Index i = I + 1; i < in.size(); ++i) {
-    out[i - 1] = in[i];
+  for (std::size_t i = I; i < out.size(); ++i) {
+    out[i] = in[i + 1];
   }
   return out;
 }
 
-// FIXME insert
+/**
+ * @relatesalso Vector
+ * @brief Insert an element into a given vector.
+ * 
+ * The size of the resulting vector is that of the input vector plus one.
+ */
+template <Index I, typename T, Index N>
+Vector<T, N == -1 ? -1 : N + 1> insert(const Vector<T, N>& in, T&& value) {
+  static_assert(I >= 0);
+  constexpr auto M = N == -1 ? -1 : N + 1;
+  Vector<T, M> out(in.size() + 1);
+  for (std::size_t i = 0; i < I; ++i) {
+    out[i] = in[i];
+  }
+  out[I] = std::forward<T>(value);
+  for (std::size_t i = I + 1; i < out.size(); ++i) {
+    out[i] = in[i - 1];
+  }
+  return out;
+}
 
 /**
  * @ingroup data_classes
