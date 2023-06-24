@@ -57,8 +57,9 @@ Here is a toy example usage:
 
 \code
 Index i = 0;
-for (auto& row : rows(raster)) {
-    row += i;
+auto rows = rows(raster);
+for (auto& r : rows) {
+    r += i;
     ++i;
 }
 \endcode
@@ -67,7 +68,8 @@ Note that these functions return generators, and not containers, such that only 
 Yet, containers can be created from the generators, for example to enable parallel processing:
 
 \code
-auto rows = rasterize(rows(raster));
+auto generator = rows(raster);
+auto rows = rasterize(generator);
 
 #pragma omp parallel for
 for (Index i = 0; i < rows.size(); ++i) {
