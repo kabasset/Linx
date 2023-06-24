@@ -131,23 +131,30 @@ auto profiles(TRaster& in) {
  */
 template <typename TRaster>
 auto rows(TRaster& in) {
-  using T = std::conditional_t<std::is_const<TRaster>::value, const typename TRaster::Value, typename TRaster::Value>;
-  using TRow = PtrRaster<T, 1>;
-  const auto domain = in.domain();
-  const auto size = domain.template length<0>();
-  const auto plane = project(domain);
-  auto patch = in.patch(plane);
-  Raster<TRow, TRaster::Dimension> out(plane.shape());
-  auto it = patch.begin();
-  for (auto& e : out) {
-    e = PtrRaster<T, 1>({size}, &*it);
-    ++it;
-  }
-  return out;
+  return Internal::RowGenerator<TRaster>(in);
+}
+
+/**
+ * @ingroup regions
+ * @brief Make a raster of rows.
+ */
+template <typename TParent>
+auto rasterize(const Internal::RowGenerator<TParent>& generator) {
+  return generator.raster();
+}
+
+/**
+ * @ingroup regions
+ * @brief Make a raster of rows.
+ */
+template <typename TParent>
+auto rasterize(Internal::RowGenerator<TParent>& generator) {
+  return generator.raster();
 }
 
 } // namespace Linx
 
-#include "Linx/Data/impl/TilingGenerator.h"
+#include "Linx/Data/impl/RowGenerator.h"
+#include "Linx/Data/impl/TileGenerator.h"
 
 #endif

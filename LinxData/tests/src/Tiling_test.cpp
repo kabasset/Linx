@@ -46,13 +46,15 @@ BOOST_AUTO_TEST_CASE(raster_profiles_ordering_test) {
 
 BOOST_AUTO_TEST_CASE(raster_rows_ordering_test) {
   const auto raster = Raster<Index, 3>({3, 4, 5}).range();
-  const auto parts = rows(raster);
-  const auto plane = parts.domain();
-  BOOST_TEST(plane == Box<3>({0, 0, 0}, {0, 3, 4}));
+  auto parts = rows(raster);
+  const auto partsRaster = rasterize(parts);
+  const auto plane = partsRaster.domain();
+  BOOST_TEST(plane == Box<2>({0, 0}, {3, 4}));
   Index i = 0;
   for (const auto& p : parts) {
     for (const auto& j : p) {
       BOOST_TEST(j == i);
+      // FIXME test partsRaster
       ++i;
     }
   }

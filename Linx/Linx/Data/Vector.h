@@ -153,7 +153,7 @@ public:
    * The values up to dimension `M` are copied.
    */
   template <Index M>
-  Vector<T, M> slice() const {
+  Vector<T, M> slice() const { // FIXME free function
     Vector<T, M> res(M);
     std::copy_n(this->data(), M, res.data());
     return res;
@@ -167,12 +167,27 @@ public:
    * Those between dimensions `N` and `M` are taken from the given padding vector.
    */
   template <Index M>
-  Vector<T, M> extend(const Vector<T, M>& padding = Vector<T, M>::zero()) const {
+  Vector<T, M> extend(const Vector<T, M>& padding = Vector<T, M>::zero()) const { // FIXME free function
     auto res = padding;
     std::copy_n(this->data(), this->size(), res.data());
     return res;
   }
 };
+
+template <Index I, typename T, Index N>
+Vector<T, N == -1 ? -1 : N - 1> erase(const Vector<T, N>& in) {
+  constexpr auto M = N == -1 ? -1 : N - 1;
+  Vector<T, M> out(in.size() - 1);
+  for (Index i = 0; i < I; ++i) {
+    out[i] = in[i];
+  }
+  for (Index i = I + 1; i < in.size(); ++i) {
+    out[i - 1] = in[i];
+  }
+  return out;
+}
+
+// FIXME insert
 
 /**
  * @ingroup data_classes

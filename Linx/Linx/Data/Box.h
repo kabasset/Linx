@@ -433,6 +433,28 @@ Box<N> project(const Box<N>& in, Index axis = 0) {
 
 /**
  * @relatesalso Box
+ * @brief Erase an axis.
+ * @tparam The index of the axis
+ */
+template <Index I, Index N>
+Box<N == -1 ? -1 : N - 1> erase(const Box<N>& in) {
+  return {erase<I>(in.front()), erase<I>(in.back())};
+}
+
+/**
+ * @relatesalso Box
+ * @brief Insert an axis.
+ * @tparam I The index of the new axis
+ * @param front The front bound along axis `I`
+ * @param back The back bound along axis `I`
+ */
+template <Index I, Index N>
+Box<N == -1 ? -1 : N + 1> insert(const Box<N>& in, Index front, Index back) {
+  return {insert<I>(in.front(), front), insert<I>(in.back(), back)};
+}
+
+/**
+ * @relatesalso Box
  * @brief Clamp a position inside a box.
  */
 template <typename T, Index N = 2>

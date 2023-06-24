@@ -2,8 +2,8 @@
 // This file is part of Linx <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LINXDATA_IMPL_TILINGITERATOR_H
-#define _LINXDATA_IMPL_TILINGITERATOR_H
+#ifndef _LINXDATA_IMPL_TILEGENERATOR_H
+#define _LINXDATA_IMPL_TILEGENERATOR_H
 
 #include "Linx/Data/Tiling.h"
 
@@ -62,7 +62,7 @@ public:
   }
 
   Raster<std::decay_t<Value>, Dimension> raster() {
-    return Raster<Value, Dimension>(m_fronts.shape(), *this);
+    return Raster<std::decay_t<Value>, Dimension>(m_fronts.shape(), *this);
   }
 
 private:
