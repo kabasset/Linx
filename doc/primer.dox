@@ -12,8 +12,8 @@ The main 1D container is `Sequence` while the main ND container is `Raster`.
 Both aim at adding signal processing methods to any object which points to some contiguous memory
 -- from a raw pointer to `std::vector` or any custom type --
 without any runtime cost.
-Many more data containers are defined, like `Vector`, `Matrix` or even `Chronometer`,
-which are all made up by picking some building blocks (base classes and mixins) to tailor their feature set.
+Many more data containers are dfined to serve different purposes,
+and they are all made up by picking some building blocks (base classes and mixins) to tailor their feature set.
 
 Let us first introduce `Sequence` and `Raster`,
 before briefly presenting the class hierarchy which results in all of the Linx containers.
@@ -27,9 +27,9 @@ Many more details are available in dedicated pages, which are referenced at the 
 with Euclidean ring operators and element-wise mathematical functions.
 A variety of global operations are supported, too, for example:
 - Noise generation;
+- Interpolation and extrapolation;
 - Fourier transforms;
-- Linear and median filters;
-- Interpolators and extrapolators;
+- Linear and morphological filters;
 - Statistical estimators...
 
 As opposed to the containers of the standard library,
@@ -40,7 +40,7 @@ Among others, this enables backward indexing with negative values.
 \section primer-raster Rasters
 
 
-A raster is an N-dimensional array of pixels
+A raster is a multidimensional array of pixels
 internally stored in a one-dimensional container similar to `Sequence`.
 The number of axes is set either at compile time or at runtime.
 The raster shape, i.e. the lengths along axes, is set at runtime.
@@ -48,15 +48,15 @@ Pixels are located at N-dimensional positions, which convert to 1D indices in th
 In addition to the aforementioned operations applicable to `Sequence`,
 ND geometrical transforms are implemented.
 
-Before going further, a short digression on the naming of the class.
+Before going further, let us make a short digression on the naming of the class.
 Why "raster" and not simply image or array?
 Mostly for disambiguation purpose: "image" refers to an extension type of the FITS format
 -- which is at the heart of EleFits, from which Linx was initially out-sourced --
 while "array" has already several meanings in C/C++.
 `NdArray` would have been an option, but every related class should have been prefixed with `Nd` for homogeneity:
-`NdPosition`, `NdBox`, `VecNdArray`...
+`NdPosition`, `NdBox`, `NdAffinity`...
 "Tensor" is often used as a multidimensional extension of matrices,
-but is more associated to linear algebra than image processing.
+but is more often associated to linear algebra than image processing.
 From the cathodic television era, "raster" also historically carries the concept of contiguous pixels which scan the image.
 It is very common in the field of Earth observation, and also belongs to the Java library.
 The term raster was also chosen to convey some information on the memory contiguity and layout (see next section),
@@ -71,17 +71,12 @@ All the containers of the library are built from a limited set of classes.
 The parent class is a data holder, which wraps an array or contiguous container like `std::vector`.
 Element-wise methods are then implemented in mixins:
 `ContiguousContainerMixin` to provide standard methods like `begin()` and `empty()`,
-`ArithmeticMixin` for operators and `MathFunctionsMixin` for mathematical functions.
-Finally, `DataContainer` implements constructors and assignment methods (`fill()`, `linspace()`, `apply()`...).
+`ArithmeticMixin` for operators and `MathFunctionsMixin` for mathematical functions,
+`RangeMixin` for assignment methods (e.g. `fill()`, `linspace()`, `apply()`).
+Finally, `DataContainer` aggregates all of the mixins and implements the constructors.
+`Sequence` is a simple `DataContainer` while `Raster` decorates it with a multidimensional indexing scheme,
+and accepts a variety of ND transforms.
 
-For illustration, here is how some of the Linx containers are composed:
-
-<table class="fieldtable">
-<tr><th>Container<th>Holder<th>Operators<th>Math functions
-<tr><td>`Vector<T, N>`<td>`std::vector<T>` if `N` = -1 and `std::array<T, N>` otherwise<td>Vector space arithmetic<td>No
-<tr><td>`Raster<T, N, THolder>`<td>`THolder`<td>Euclidean ring arithmetic<td>Yes
-<tr><td>`Chronometer<TUnit>`<td>`std::vector<TUnit>` where `TUnit` is a time unit<td>None<td>No
-</table>
 
 \section primer-memory Memory Layout
 
@@ -96,7 +91,6 @@ In particular, no assumption is made on the orientation of the axes.
 Graphically, positions are represented from left to right, from bottom to top and from front to back,
 but that is only for the purpose of documentation.
 The following figure shows the index of each pixel of a 3D raster of shape (4, 3, 2).
-It will be used in the remaining of the documentation in code snippets.
 
 \image html doc/diagrams/raster_ordering.svg
 
@@ -107,11 +101,11 @@ It will be used in the remaining of the documentation in code snippets.
 `Raster` is a class template.
 Its first template paramer is the pixel type, `T`, which may be const-qualified for read-only rasters.
 All fundamental types (Boolean, integers and floating point types) as well as `std::complex` types are supported,
-i.e. have been unit tested.
+i.e. have been systematically unit tested.
 Other types, including user-defined types, can be used (see for example \ref channels),
 provided that they offer the minimal interface required by the `Raster` methods _which are effectively called_.
-For example, `operator+()` must be defined in order to use `Raster::operator+()`,
-but is not necessary if no method which would rely on it is called.
+For example, `T::operator+()` must be defined in order to use `Raster::operator+()`,
+but is not necessary if no method which would rely on the latter is called.
 Indeed, the library relies a lot on template metaprogramming,
 which can be seen as a compile time equivalent of Python's duck typing.
 
@@ -119,14 +113,14 @@ The second template parameter, `N`, is the raster dimension.
 It can be set at compile time, as a positive or null integer,
 or at runtime, using -1 as a special value.
 This basically gives more freedom at the cost of less safety.
-As a rule of thumb, compile time dimensions should be preferred.
+As a rule of thumb, compile time dimension should be preferred.
 
 Other multidimensional classes, like `Position` or `Box`,
 are also templated by the dimension and follow the same convention.
 Roughly speaking, `Position<N>` is similar to `std::array<Index, N>` when `N` is positive or null,
 while `Position<-1>` is similar to `std::vector<Index>`.
 
-Now, to introduce a few property names, we can state about the example raster that:
+Now, to introduce a few property names, we can state about the previously introduced example raster that:
 
 - its _dimension_ is 3;
 - its _shape_ is (4, 3, 2);
@@ -147,7 +141,7 @@ e.g. use "fill", "generate" or "linspace" to denote concepts analogous to `std::
 
 Different flavors of rasters ship with the library.
 They are specializations of the template class `Raster`.
-Indeed, `Raster` takes a third template parameter, `THolder`,
+In fact, `Raster` takes a third template parameter, `THolder`,
 which is used to decorate any 1D container with `Raster`'s interface.
 Let us introduce here some of the specializations:
 
