@@ -1,0 +1,41 @@
+/// @copyright 2022, Antoine Basset (CNES)
+// This file is part of Linx <github.com/kabasset/Raster>
+// SPDX-License-Identifier: LGPL-3.0-or-later
+
+#ifndef _LINX_IO_H
+#define _LINX_IO_H
+
+#include "Linx/Io/Fits.h"
+
+#include <filesystem>
+#include <string>
+
+namespace Linx {
+
+/**
+ * @brief Read a file.
+ */
+template <typename T, Index N = 2>
+Raster<T, N> read(const std::filesystem::path& path) {
+  try {
+    return Fits(path).read<Raster<T, N>>();
+  } catch (FileFormatError&) {
+    throw FileFormatError("No suitable reader", path);
+  }
+}
+
+/**
+ * @brief Write a raster to a file.
+ */
+template <typename TRaster>
+void write(const TRaster& in, const std::filesystem::path& path) {
+  try {
+    return Fits(path).write(in);
+  } catch (FileFormatError&) {
+    throw FileFormatError("No suitable writer ", path);
+  }
+}
+
+} // namespace Linx
+
+#endif

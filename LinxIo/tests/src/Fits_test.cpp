@@ -3,9 +3,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "Linx/Base/TypeUtils.h"
-#include "Linx/Io/Fits.h"
+#include "Linx/Io.h"
 
 #include <boost/test/unit_test.hpp>
+#include <fstream>
 
 using namespace Linx;
 
@@ -30,7 +31,7 @@ using SupportedFitsTypes = std::tuple<
     float,
     double>;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(write_read_test, T, SupportedFitsTypes) { // FIXME for several Ns
+BOOST_AUTO_TEST_CASE_TEMPLATE(fits_write_read_test, T, SupportedFitsTypes) { // FIXME for several Ns
   Raster<T> in({16, 16});
   in.range();
   std::string name("BITPIX");
@@ -41,9 +42,37 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(write_read_test, T, SupportedFitsTypes) { // FIXME
   Fits io(name);
   io.write(in);
   BOOST_TEST(std::filesystem::exists(io.path()));
-  auto out = io.read<Raster<T>>();
+  const auto out = io.read<Raster<T>>();
   BOOST_TEST(out == in);
   std::remove(name.c_str());
+}
+
+BOOST_AUTO_TEST_CASE_TEMPLATE(auto_write_read_test, T, SupportedFitsTypes) {
+  Raster<T> in({16, 16});
+  in.range();
+  std::string name("BITPIX");
+  name += std::to_string(Fits::bitpix<T>());
+  name += std::is_signed_v<T> ? 's' : 'u';
+  name += typeid(T).name();
+  name += ".fits";
+  write(in, name);
+  const auto out = read<T>(name);
+  BOOST_TEST(out == in);
+  std::remove(name.c_str());
+}
+
+BOOST_AUTO_TEST_CASE(auto_wrong_format_test) {
+  std::string name = "dummy.txt";
+  BOOST_ASSERT(not std::filesystem::exists(name));
+  std::ofstream f(name);
+  f << "DUMMY";
+  f.close();
+  BOOST_CHECK_THROW(read<int>(name), FileFormatError);
+  std::remove(name.c_str());
+}
+
+BOOST_AUTO_TEST_CASE(auto_missing_file_test) {
+  BOOST_CHECK_THROW(read<int>("no_such_file.fits"), FileNotFoundError);
 }
 
 //-----------------------------------------------------------------------------

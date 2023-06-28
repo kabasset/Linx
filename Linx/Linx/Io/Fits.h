@@ -6,6 +6,7 @@
 #define _LINXIO_FITS_H
 
 #include "Linx/Data/Raster.h"
+#include "Linx/Io/Exceptions.h"
 
 #include <filesystem>
 #include <fitsio.h>
@@ -20,33 +21,24 @@ namespace Linx {
 class Fits {
 
 public:
-  class Error : public std::exception {
+  class Error : public FileFormatError {
   public:
-    Error(const std::string& context, int status) : m_message(context) {
-
-      m_message += '\n';
+    Error(const std::string& context, const std::filesystem::path& path, int status) : FileFormatError(context, path) {
 
       float version = 0;
       fits_get_version(&version);
-      m_message += "CFITSIO v" + std::to_string(version) + ' ';
+      append("CFITSIO v" + std::to_string(version));
 
       char text[FLEN_ERRMSG];
       text[0] = '\0';
       fits_get_errstatus(status, text);
-      m_message += "Error " + std::to_string(status) + ": " + text + '\n';
+      append("Error " + std::to_string(status) + ": " + text);
 
       char message[80];
       while (fits_read_errmsg(message) != 0) {
-        m_message += message;
+        append(message);
       };
     }
-
-    const char* what() const noexcept override {
-      return m_message.c_str();
-    }
-
-  private:
-    std::string m_message;
   };
 
   /**
@@ -66,6 +58,7 @@ public:
    */
   template <typename TRaster>
   TRaster read(Index hdu = 0) {
+    FileNotFoundError::mayThrow(m_path);
     int naxis = 0;
     fits_open_file(&m_fptr, m_path.c_str(), READONLY, &m_status);
     fits_movabs_hdu(m_fptr, hdu + 1, nullptr, &m_status);
@@ -76,7 +69,7 @@ public:
     fits_read_img(m_fptr, typecode<typename TRaster::Value>(), 1, out.size(), nullptr, out.data(), nullptr, &m_status);
     fits_close_file(m_fptr, &m_status);
     if (m_status != 0) {
-      throw Error("Cannot read file " + m_path.string(), m_status);
+      throw Error("Cannot read file", m_path, m_status);
     }
     m_fptr = nullptr;
     return out;
@@ -93,7 +86,7 @@ public:
     fits_write_img(m_fptr, typecode<typename TRaster::Value>(), 1, raster.size(), raster.data(), &m_status);
     fits_close_file(m_fptr, &m_status);
     if (m_status != 0) {
-      throw Error("Cannot write file " + m_path.string(), m_status);
+      throw Error("Cannot write file", m_path, m_status);
     }
     m_fptr = nullptr;
   }
