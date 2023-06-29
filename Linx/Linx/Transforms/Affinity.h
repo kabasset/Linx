@@ -256,7 +256,7 @@ public:
    * @brief Inverse the transform.
    */
   Affinity& inverse() {
-    m_map = m_map.inverse();
+    m_map = m_map.inverse().eval();
     m_translation = -m_map * m_translation;
     return *this;
   }
