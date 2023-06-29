@@ -17,13 +17,23 @@ namespace Linx {
 
 /**
  * @brief FITS file reader/writer.
+ * 
+ * This is a simple handler able to read or write an image HDU.
+ * For example, streaming and keyword records are not handled.
+ * For anything more complex, see EleFits: https://cnes.github.io/EleFits/
  */
 class Fits {
 
 public:
-  class Error : public FileFormatError {
+  /**
+   * @brief FITS-specific `FileFormatError`.
+   */
+  class Error : public Exception {
   public:
-    Error(const std::string& context, const std::filesystem::path& path, int status) : FileFormatError(context, path) {
+    /**
+     * @brief Constructor.
+     */
+    Error(const std::string& context, const std::filesystem::path& path, int status) : Exception(context, path) {
 
       float version = 0;
       fits_get_version(&version);
@@ -44,7 +54,7 @@ public:
   /**
    * @brief Constructor.
    */
-  Fits(const std::filesystem::path& path) : m_path(path), m_fptr(nullptr), m_status(0) {}
+  Fits(const std::filesystem::path& path) : m_path(path) {}
 
   /**
    * @brief Get the file path.
@@ -59,36 +69,66 @@ public:
   template <typename TRaster>
   TRaster read(Index hdu = 0) {
     FileNotFoundError::mayThrow(m_path);
+    int status = 0;
+    fitsfile* fptr;
     int naxis = 0;
-    fits_open_file(&m_fptr, m_path.c_str(), READONLY, &m_status);
-    fits_movabs_hdu(m_fptr, hdu + 1, nullptr, &m_status);
-    fits_get_img_dim(m_fptr, &naxis, &m_status);
-    Position<TRaster::Dimension> shape(naxis);
-    fits_get_img_size(m_fptr, naxis, shape.data(), &m_status);
-    TRaster out(shape);
-    fits_read_img(m_fptr, typecode<typename TRaster::Value>(), 1, out.size(), nullptr, out.data(), nullptr, &m_status);
-    fits_close_file(m_fptr, &m_status);
-    if (m_status != 0) {
-      throw Error("Cannot read file", m_path, m_status);
+    fits_open_file(&fptr, m_path.c_str(), READONLY, &status);
+    if (status != 0) {
+      throw FileFormatError("Cannot read file", m_path);
     }
-    m_fptr = nullptr;
+    fits_movabs_hdu(fptr, hdu + 1, nullptr, &status);
+    fits_get_img_dim(fptr, &naxis, &status);
+    Position<TRaster::Dimension> shape(naxis);
+    fits_get_img_size(fptr, naxis, shape.data(), &status);
+    TRaster out(shape);
+    fits_read_img(fptr, typecode<typename TRaster::Value>(), 1, out.size(), nullptr, out.data(), nullptr, &status);
+    fits_close_file(fptr, &status);
+    if (status != 0) {
+      throw Error("Cannot read file", m_path, status);
+    }
+    fptr = nullptr;
     return out;
   }
 
   /**
    * @brief Write an image as a new FITS file.
+   * @param raster The raster to be written
+   * @param mode `x` to create a new file, `w` to create or overwrite, `a` to append an HDU
    */
   template <typename TRaster>
-  void write(TRaster raster) { // FIXME const
-    fits_create_file(&m_fptr, m_path.c_str(), &m_status);
-    auto shape = raster.shape();
-    fits_create_img(m_fptr, imageTypecode<typename TRaster::Value>(), raster.dimension(), shape.data(), &m_status);
-    fits_write_img(m_fptr, typecode<typename TRaster::Value>(), 1, raster.size(), raster.data(), &m_status);
-    fits_close_file(m_fptr, &m_status);
-    if (m_status != 0) {
-      throw Error("Cannot write file", m_path, m_status);
+  void write(TRaster raster, char mode = 'x') {
+    int status = 0;
+    fitsfile* fptr;
+    std::string path = "!"; // For overwriting
+    switch (mode) {
+      case 'x':
+        PathExistsError::mayThrow(m_path);
+        fits_create_file(&fptr, m_path.c_str(), &status);
+        break;
+      case 'w':
+        path += m_path;
+        fits_create_file(&fptr, path.c_str(), &status);
+        break;
+      case 'a':
+        FileNotFoundError::mayThrow(m_path);
+        fits_open_file(&fptr, m_path.c_str(), READWRITE, &status);
+        break;
+      default:
+        throw Exception("Unknown write mode", std::string(1, mode));
     }
-    m_fptr = nullptr;
+    if (status != 0) {
+      throw FileFormatError("Cannot write file", m_path);
+    }
+    auto shape = raster.shape();
+    fits_create_img(fptr, imageTypecode<typename TRaster::Value>(), raster.dimension(), shape.data(), &status);
+    if (raster.size() > 0) {
+      fits_write_img(fptr, typecode<typename TRaster::Value>(), 1, raster.size(), raster.data(), &status);
+    }
+    fits_close_file(fptr, &status);
+    if (status != 0) {
+      throw Error("Cannot write file", m_path, status);
+    }
+    fptr = nullptr;
   }
 
   /**
@@ -174,8 +214,6 @@ private:
 
 private:
   std::filesystem::path m_path;
-  fitsfile* m_fptr;
-  int m_status;
 };
 
 } // namespace Linx
