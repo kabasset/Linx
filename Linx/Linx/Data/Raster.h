@@ -217,7 +217,7 @@ public:
    */
   template <typename... TArgs>
   explicit Raster(Position<N> shape, std::initializer_list<T> list, TArgs&&... args) :
-      Container(std::move(list), std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
+      Container(list.begin(), list.end(), std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
     SizeError::mayThrow(this->size(), shapeSize(shape));
   }
 
@@ -235,7 +235,7 @@ public:
    */
   template <typename TRange, typename std::enable_if_t<IsRange<TRange>::value>* = nullptr, typename... TArgs>
   explicit Raster(Position<N> shape, TRange& range, TArgs&&... args) :
-      Container(range, std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
+      Container(range.begin(), range.end(), std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
     SizeError::mayThrow(this->size(), shapeSize(shape));
   }
 
@@ -244,7 +244,7 @@ public:
    * @param patch The box- or grid-based patch to be copied (can be an extrapolator).
    */
   template <typename U, typename TRaster, typename TRegion>
-  explicit Raster(const Patch<U, TRaster, TRegion>& patch) : Container(patch), m_shape(patch.domain().shape()) {}
+  explicit Raster(const Patch<U, TRaster, TRegion>& patch) : Raster(patch.domain().shape(), patch) {}
 
   /// @group_properties
 

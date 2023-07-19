@@ -78,13 +78,13 @@ public:
   /**
    * @brief Create a vector from a brace-enclosed list of indices.
    */
-  Vector(std::initializer_list<T> indices) : Container(indices) {}
+  Vector(std::initializer_list<T> indices) : Container(indices.begin(), indices.end()) {}
 
   /**
    * @brief Create a vector from a range.
    */
   template <typename TRange, typename std::enable_if_t<IsRange<TRange>::value>* = nullptr>
-  explicit Vector(TRange&& range) : Container(range) {}
+  explicit Vector(TRange&& range) : Container(range.begin(), range.end()) {}
 
   /**
    * @brief Create a vector full of `Limits::zero()'s.

@@ -25,10 +25,11 @@ public:
 
   template <typename... TArgs>
   explicit Sequence(std::initializer_list<T> list, TArgs&&... args) :
-      Container(std::move(list), std::forward<TArgs>(args)...) {}
+      Container(list.begin(), list.end(), std::forward<TArgs>(args)...) {}
 
   template <typename TRange, typename std::enable_if_t<IsRange<TRange>::value>* = nullptr, typename... TArgs>
-  explicit Sequence(const TRange& range, TArgs&&... args) : Container(range, std::forward<TArgs>(args)...) {}
+  explicit Sequence(TRange& range, TArgs&&... args) :
+      Container(range.begin(), range.end(), std::forward<TArgs>(args)...) {}
 };
 
 /**

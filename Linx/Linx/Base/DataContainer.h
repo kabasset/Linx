@@ -55,6 +55,10 @@ public:
   /// @{
   /// @group_construction
 
+  LINX_VIRTUAL_DTOR(DataContainer)
+  LINX_DEFAULT_COPYABLE(DataContainer)
+  LINX_DEFAULT_MOVABLE(DataContainer)
+
   /**
    * @brief Size-based constructor.
    */
@@ -71,28 +75,6 @@ public:
       DataContainer(std::distance(begin, end), std::forward<TArgs>(args)...) { // FIXME distance might be expensive
     std::copy(std::move(begin), std::move(end), this->data());
   }
-
-  /**
-   * @brief List-based constructor.
-   * 
-   * List values are copied to the container.
-   */
-  template <typename... TArgs>
-  explicit DataContainer(std::initializer_list<T> list, TArgs&&... args) :
-      DataContainer(list.begin(), list.end(), std::forward<TArgs>(args)...) {}
-
-  /**
-   * @brief Range-based constructor.
-   * 
-   * Range values are copied to the container.
-   */
-  template <typename TRange, typename std::enable_if_t<IsRange<TRange>::value>* = nullptr, typename... TArgs>
-  explicit DataContainer(const TRange& range, TArgs&&... args) :
-      DataContainer(range.begin(), range.end(), std::forward<TArgs>(args)...) {}
-
-  LINX_VIRTUAL_DTOR(DataContainer)
-  LINX_DEFAULT_COPYABLE(DataContainer)
-  LINX_DEFAULT_MOVABLE(DataContainer)
 
   /// @group_elements
 
@@ -132,14 +114,15 @@ public:
   explicit MinimalDataContainer(std::size_t size = 0, TArgs&&... args) : Base(size, std::forward<TArgs>(args)...) {}
 
   template <typename U>
-  MinimalDataContainer(std::initializer_list<U> list) : Base(list) {}
+  MinimalDataContainer(std::initializer_list<U> list) : Base(list.begin(), list.end()) {}
 
   template <typename U, typename... TArgs>
   explicit MinimalDataContainer(std::initializer_list<U> list, TArgs&&... args) :
-      Base(list, std::forward<TArgs>(args)...) {}
+      Base(list.begin(), list.end(), std::forward<TArgs>(args)...) {}
 
   template <typename TRange, typename std::enable_if_t<IsRange<TRange>::value>* = nullptr, typename... TArgs>
-  explicit MinimalDataContainer(TRange& range, TArgs&&... args) : Base(range, std::forward<TArgs>(args)...) {}
+  explicit MinimalDataContainer(TRange& range, TArgs&&... args) :
+      Base(range.begin(), range.end(), std::forward<TArgs>(args)...) {}
 };
 
 } // namespace Linx
