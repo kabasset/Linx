@@ -107,7 +107,7 @@ public:
    */
   static Vector<T, N> inf() {
     Vector<T, N> res(std::abs(N));
-    return res.fill(-Limits<T>::inf());
+    return res.fill(Limits<T>::inf());
   }
 
   /**
