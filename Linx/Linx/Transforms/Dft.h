@@ -32,7 +32,7 @@ namespace Internal {
  * @brief Convert a raster shape into an FFTW shape.
  */
 template <typename TRaster>
-std::vector<int> fftwShape(const TRaster& raster) {
+std::vector<int> fftw_shape(const TRaster& raster) {
   std::vector<int> out(raster.shape().begin(), raster.shape().end());
   std::reverse(out.begin(), out.end());
   return out;
@@ -80,7 +80,7 @@ struct DftTransformMixin {
    * @param shape The logical shape
    */
   template <Index N>
-  static Position<N> inShape(const Position<N>& shape) {
+  static Position<N> in_shape(const Position<N>& shape) {
     return shape;
   }
 
@@ -89,7 +89,7 @@ struct DftTransformMixin {
    * @param shape The logical shape
    */
   template <Index N>
-  static Position<N> outShape(const Position<N>& shape) {
+  static Position<N> out_shape(const Position<N>& shape) {
     return shape;
   }
 
@@ -97,7 +97,7 @@ struct DftTransformMixin {
    * @brief Allocate an FFTW plan.
    */
   template <Index N>
-  static FftwPlanPtr allocateFftwPlan(AlignedRaster<TIn, N>& in, AlignedRaster<TOut, N>& out);
+  static FftwPlanPtr allocate_fftw_plan(AlignedRaster<TIn, N>& in, AlignedRaster<TOut, N>& out);
 };
 
 /**
@@ -113,17 +113,17 @@ struct DftTransformMixin<TIn, TOut, Inverse<TTransform>> {
   using InverseTransform = TTransform;
 
   template <Index N>
-  static Position<N> inShape(const Position<N>& shape) {
-    return DftTransformMixin<TIn, TOut, TTransform>::outShape(shape);
+  static Position<N> in_shape(const Position<N>& shape) {
+    return DftTransformMixin<TIn, TOut, TTransform>::out_shape(shape);
   }
 
   template <Index N>
-  static Position<N> outShape(const Position<N>& shape) {
-    return DftTransformMixin<TIn, TOut, TTransform>::inShape(shape);
+  static Position<N> out_shape(const Position<N>& shape) {
+    return DftTransformMixin<TIn, TOut, TTransform>::in_shape(shape);
   }
 
   template <Index N>
-  static FftwPlanPtr allocateFftwPlan(AlignedRaster<TOut, N>& in, AlignedRaster<TIn, N>& out);
+  static FftwPlanPtr allocate_fftw_plan(AlignedRaster<TOut, N>& in, AlignedRaster<TIn, N>& out);
 };
 
 template <typename TTransform>
@@ -137,7 +137,7 @@ struct RealDftTransform : DftTransformMixin<double, std::complex<double>, RealDf
 
 template <>
 template <Index N>
-Position<N> RealDftTransform::Base::outShape(const Position<N>& shape) {
+Position<N> RealDftTransform::Base::out_shape(const Position<N>& shape) {
   auto out = shape;
   out[0] = out[0] / 2 + 1;
   return out;
@@ -145,8 +145,8 @@ Position<N> RealDftTransform::Base::outShape(const Position<N>& shape) {
 
 template <>
 template <Index N>
-FftwPlanPtr RealDftTransform::Base::allocateFftwPlan(RealDftBuffer<N>& in, ComplexDftBuffer<N>& out) {
-  auto shape = fftwShape(in);
+FftwPlanPtr RealDftTransform::Base::allocate_fftw_plan(RealDftBuffer<N>& in, ComplexDftBuffer<N>& out) {
+  auto shape = fftw_shape(in);
   return std::make_unique<fftw_plan>(fftw_plan_dft_r2c(
       shape.size(),
       shape.data(),
@@ -157,8 +157,8 @@ FftwPlanPtr RealDftTransform::Base::allocateFftwPlan(RealDftBuffer<N>& in, Compl
 
 template <>
 template <Index N>
-FftwPlanPtr Inverse<RealDftTransform>::Base::allocateFftwPlan(ComplexDftBuffer<N>& in, RealDftBuffer<N>& out) {
-  auto shape = fftwShape(out);
+FftwPlanPtr Inverse<RealDftTransform>::Base::allocate_fftw_plan(ComplexDftBuffer<N>& in, RealDftBuffer<N>& out) {
+  auto shape = fftw_shape(out);
   return std::make_unique<fftw_plan>(fftw_plan_dft_c2r(
       shape.size(),
       shape.data(),
@@ -175,8 +175,8 @@ struct ComplexDftTransform : DftTransformMixin<std::complex<double>, std::comple
 
 template <>
 template <Index N>
-FftwPlanPtr ComplexDftTransform::Base::allocateFftwPlan(ComplexDftBuffer<N>& in, ComplexDftBuffer<N>& out) {
-  auto shape = fftwShape(in);
+FftwPlanPtr ComplexDftTransform::Base::allocate_fftw_plan(ComplexDftBuffer<N>& in, ComplexDftBuffer<N>& out) {
+  auto shape = fftw_shape(in);
   return std::make_unique<fftw_plan>(fftw_plan_dft(
       shape.size(),
       shape.data(),
@@ -188,8 +188,8 @@ FftwPlanPtr ComplexDftTransform::Base::allocateFftwPlan(ComplexDftBuffer<N>& in,
 
 template <>
 template <Index N>
-FftwPlanPtr Inverse<ComplexDftTransform>::Base::allocateFftwPlan(ComplexDftBuffer<N>& in, ComplexDftBuffer<N>& out) {
-  auto shape = fftwShape(out);
+FftwPlanPtr Inverse<ComplexDftTransform>::Base::allocate_fftw_plan(ComplexDftBuffer<N>& in, ComplexDftBuffer<N>& out) {
+  auto shape = fftw_shape(out);
   return std::make_unique<fftw_plan>(fftw_plan_dft(
       shape.size(),
       shape.data(),
@@ -221,7 +221,7 @@ using ComplexDft = DftPlan<Internal::ComplexDftTransform, N>;
  * @brief Compute the complex DFT.
  */
 template <typename TRaster>
-ComplexDftBuffer<TRaster::Dimension> complexDft(const TRaster& in) {
+ComplexDftBuffer<TRaster::Dimension> complex_dft(const TRaster& in) {
   ComplexDft<TRaster::Dimension> plan(in.shape());
   std::copy(in.begin(), in.end(), plan.in().begin());
   plan.transform();
@@ -233,7 +233,7 @@ ComplexDftBuffer<TRaster::Dimension> complexDft(const TRaster& in) {
  * @brief Compute the inverse complex DFT.
  */
 template <typename TRaster>
-ComplexDftBuffer<TRaster::Dimension> inverseComplexDft(const TRaster& in) {
+ComplexDftBuffer<TRaster::Dimension> inverse_complex_dft(const TRaster& in) {
   typename ComplexDft<TRaster::Dimension>::Inverse plan(in.shape());
   std::copy(in.begin(), in.end(), plan.in().begin());
   plan.transform().normalize();
@@ -245,7 +245,7 @@ ComplexDftBuffer<TRaster::Dimension> inverseComplexDft(const TRaster& in) {
  * @brief Compute the real DFT.
  */
 template <typename TRaster>
-ComplexDftBuffer<TRaster::Dimension> realDft(const TRaster& in) {
+ComplexDftBuffer<TRaster::Dimension> real_dft(const TRaster& in) {
   RealDft<TRaster::Dimension> plan(in.shape());
   std::copy(in.begin(), in.end(), plan.in().begin());
   plan.transform();
@@ -257,7 +257,7 @@ ComplexDftBuffer<TRaster::Dimension> realDft(const TRaster& in) {
  * @brief Compute the inverse real DFT.
  */
 template <typename TRaster>
-RealDftBuffer<TRaster::Dimension> inverseRealDft(const TRaster& in, const Position<TRaster::Dimension>& shape) {
+RealDftBuffer<TRaster::Dimension> inverse_real_dft(const TRaster& in, const Position<TRaster::Dimension>& shape) {
   typename RealDft<TRaster::Dimension>::Inverse plan(shape);
   std::copy(in.begin(), in.end(), plan.in().begin());
   plan.transform().normalize();

@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_SUITE(DataDistribution_test)
 //-----------------------------------------------------------------------------
 
 template <Index Size>
-void checkQuantiles() {
+void check_quantiles() {
   MinimalDataContainer<double> data(Size);
   data.range();
   auto dist = data.distribution();
@@ -33,8 +33,8 @@ void checkQuantiles() {
 }
 
 BOOST_AUTO_TEST_CASE(quantiles_test) {
-  checkQuantiles<10>();
-  checkQuantiles<13>();
+  check_quantiles<10>();
+  check_quantiles<13>();
 }
 
 BOOST_AUTO_TEST_CASE(robust_test) {

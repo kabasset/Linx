@@ -103,7 +103,7 @@ public:
    * @param radius The hypercube radius
    */
   explicit StructuringElement(TOp&& op, Index radius = 1) :
-      StructuringElement(std::forward<TOp>(op), Box<Dimension>::fromCenter(radius)) {}
+      StructuringElement(std::forward<TOp>(op), Box<Dimension>::from_center(radius)) {}
 
   /**
    * @brief Estimation operator.
@@ -127,12 +127,12 @@ private:
 };
 
 template <typename T, typename TWindow>
-StructuringElement<MorphologyOp::MeanFilter<T>, TWindow> meanFilter(TWindow window) {
+StructuringElement<MorphologyOp::MeanFilter<T>, TWindow> mean_filter(TWindow window) {
   return StructuringElement<MorphologyOp::MeanFilter<T>, TWindow>(MorphologyOp::MeanFilter<T> {}, std::move(window));
 }
 
 template <typename T, typename TWindow>
-StructuringElement<MorphologyOp::MedianFilter<T>, TWindow> medianFilter(TWindow window) {
+StructuringElement<MorphologyOp::MedianFilter<T>, TWindow> median_filter(TWindow window) {
   return StructuringElement<MorphologyOp::MedianFilter<T>, TWindow>(
       MorphologyOp::MedianFilter<T> {},
       std::move(window));

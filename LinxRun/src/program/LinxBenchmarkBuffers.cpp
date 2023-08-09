@@ -15,7 +15,7 @@ Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkBuffers");
 
 using Chrono = Linx::Chronometer<std::chrono::milliseconds>;
 
-Chrono::Unit benchmarkBuffer(Linx::Index size, Linx::Index alignment) {
+Chrono::Unit benchmark_buffer(Linx::Index size, Linx::Index alignment) {
   Chrono chrono;
   logger.info("Assignment...");
   chrono.start();
@@ -34,7 +34,7 @@ Chrono::Unit benchmarkBuffer(Linx::Index size, Linx::Index alignment) {
   return chrono.elapsed();
 }
 
-Chrono::Unit benchmarkVector(Linx::Index size) {
+Chrono::Unit benchmark_vector(Linx::Index size) {
   Chrono chrono;
   logger.info("Initialization...");
   chrono.start();
@@ -60,7 +60,7 @@ public:
     Linx::ProgramOptions options;
     options.named<long>("align", "Alignment for an AlignedBuffer or 0 for a std::vector");
     options.named<long>("size", "Number of elements", 1000000);
-    return options.asPair();
+    return options.as_pair();
   }
 
   ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
@@ -69,10 +69,10 @@ public:
     const auto size = args["size"].as<long>();
 
     if (alignment > 0) {
-      const auto duration = benchmarkBuffer(size, alignment);
+      const auto duration = benchmark_buffer(size, alignment);
       logger.info() << "Done in " << duration.count() << "ms";
     } else {
-      const auto duration = benchmarkVector(size);
+      const auto duration = benchmark_vector(size);
       logger.info() << "Done in " << duration.count() << "ms";
       logger.info() << "Done in " << duration.count() << "ms";
     }

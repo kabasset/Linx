@@ -122,7 +122,7 @@ struct IsExtrapolatorImpl<Patch<T, TParent, TRegion>> : IsExtrapolatorImpl<std::
 /// @endcond
 
 template <typename T>
-constexpr bool isExtrapolator() {
+constexpr bool is_extrapolator() {
   return Internal::IsExtrapolatorImpl<std::decay_t<T>>::value;
 }
 
@@ -158,28 +158,28 @@ auto extrapolate(const Raster<T, N, THolder>& raster, T constant) -> decltype(au
  * @brief Do not extrapolate if `in` is an extrapolator or patch of an extrapolator.
  */
 template <typename T, Index N, typename THolder>
-Raster<T, N, THolder>& dontExtrapolate(Raster<T, N, THolder>& in) {
+Raster<T, N, THolder>& dont_extrapolate(Raster<T, N, THolder>& in) {
   return in;
 }
 
 template <typename T, Index N, typename THolder>
-const Raster<T, N, THolder>& dontExtrapolate(const Raster<T, N, THolder>& in) {
+const Raster<T, N, THolder>& dont_extrapolate(const Raster<T, N, THolder>& in) {
   return in;
 }
 
 template <typename TRaster, typename TMethod>
-const TRaster& dontExtrapolate(const Extrapolator<TRaster, TMethod>& in) {
+const TRaster& dont_extrapolate(const Extrapolator<TRaster, TMethod>& in) {
   return in.raster();
 }
 
 template <typename T, typename TParent, typename TRegion>
-auto dontExtrapolate(Patch<T, TParent, TRegion>& in) -> decltype(auto) {
-  return dontExtrapolate(in.parent()).patch(in.domain()); // FIXME avoid region copy if TParent is no extrapolator
+auto dont_extrapolate(Patch<T, TParent, TRegion>& in) -> decltype(auto) {
+  return dont_extrapolate(in.parent()).patch(in.domain()); // FIXME avoid region copy if TParent is no extrapolator
 }
 
 template <typename T, typename TParent, typename TRegion>
-auto dontExtrapolate(const Patch<T, TParent, TRegion>& in) -> decltype(auto) {
-  return dontExtrapolate(in.parent()).patch(in.domain()); // FIXME avoid region copy if TParent is no extrapolator
+auto dont_extrapolate(const Patch<T, TParent, TRegion>& in) -> decltype(auto) {
+  return dont_extrapolate(in.parent()).patch(in.domain()); // FIXME avoid region copy if TParent is no extrapolator
 }
 
 } // namespace Linx

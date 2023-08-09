@@ -21,7 +21,7 @@ struct SizeError : Exception {
   SizeError(std::size_t in, std::size_t ref) :
       Exception("Size error", std::string("Expected ") + std::to_string(ref) + ", got " + std::to_string(in)) {}
 
-  static void mayThrow(std::size_t in, std::size_t ref) {
+  static void may_throw(std::size_t in, std::size_t ref) {
     if (in != ref) {
       throw SizeError(in, ref);
     }
@@ -86,7 +86,7 @@ public:
    * @brief Container-move constructor.
    */
   explicit StdHolder(std::size_t size, Container&& container) : m_container(std::move(container)) {
-    SizeError::mayThrow(m_container.size(), size);
+    SizeError::may_throw(m_container.size(), size);
   }
 
   /// @group_elements
@@ -124,14 +124,14 @@ public:
    * \code
    * VecRaster<float> raster(...);
    * std::vector<float> data;
-   * raster.moveTo(data);
+   * raster.move_to(data);
    * // Values have been moved to data without copy.
    * // raster.vector() is in an unspecified state now.
    * \endcode
    * @warning
    * The container is not usable anymore after this call.
    */
-  Container& moveTo(Container& destination) {
+  Container& move_to(Container& destination) {
     destination = std::move(this->m_container);
     return destination;
   }
@@ -167,7 +167,7 @@ public:
   }
 
   explicit StdHolder(std::size_t size, Container&& container) : m_container(std::move(container)) {
-    SizeError::mayThrow(m_container.size(), size);
+    SizeError::may_throw(m_container.size(), size);
   }
 
   inline const T* begin() const {
@@ -182,7 +182,7 @@ public:
     return this->m_container;
   }
 
-  Container& moveTo(Container& destination) {
+  Container& move_to(Container& destination) {
     destination = std::move(this->m_container);
     return destination;
   }
@@ -208,7 +208,7 @@ public:
   }
 
   explicit StdHolder(std::size_t size, Container&& container) : m_size(size), m_container(std::move(container)) {
-    SizeError::mayThrow(m_container.size(), size);
+    SizeError::may_throw(m_container.size(), size);
   }
 
   StdHolder(const StdHolder& other) : StdHolder(other.end() - other.begin(), other.begin()) {}
@@ -235,7 +235,7 @@ public:
     return this->m_container;
   }
 
-  Container& moveTo(Container& destination) {
+  Container& move_to(Container& destination) {
     destination = std::move(this->m_container);
     return destination;
   }

@@ -113,7 +113,7 @@ public:
   /**
    * @brief Check whether the vector is zero.
    */
-  bool isZero() const {
+  bool is_zero() const {
     for (auto i : *this) {
       if (i != Limits<T>::zero()) {
         return false;
@@ -125,7 +125,7 @@ public:
   /**
    * @brief Check whether the vector is one.
    */
-  bool isOne() const {
+  bool is_one() const {
     for (auto i : *this) {
       if (i != Limits<T>::one()) {
         return false;
@@ -137,7 +137,7 @@ public:
   /**
    * @brief Check whether the vector is minus one.
    */
-  bool isInf() const {
+  bool is_inf() const {
     for (auto i : *this) {
       if (i != Limits<T>::inf()) {
         return false;
@@ -229,8 +229,8 @@ Vector<T, N == -1 ? -1 : N + 1> insert(const Vector<T, N>& in, T&& value) {
  * 
  * Classical positions are instantiated with named constructors, e.g.:
  * \code
- * auto bottomLeft = Position<2>::zero();
- * auto topRight = Position<2>::inf();
+ * auto bottom_left = Position<2>::zero();
+ * auto top_right = Position<2>::inf();
  * \endcode
  * 
  * @see Box
@@ -243,9 +243,9 @@ using Position = Vector<Index, N>;
  * @brief Get the stride along a given axis.
  */
 template <Index N>
-Index shapeStride(const Position<N>& shape, Index axis) {
+Index shape_stride(const Position<N>& shape, Index axis) {
   return std::accumulate(shape.begin(), shape.begin() + axis, 1L, [](auto s, auto l) {
-    return l > 0 ? s * l : 0; // FIXME here or for shapeSize only?
+    return l > 0 ? s * l : 0; // FIXME here or for shape_size only?
   });
 }
 
@@ -254,8 +254,8 @@ Index shapeStride(const Position<N>& shape, Index axis) {
  * @brief Get the stride along a given axis.
  */
 template <Index Axis, Index N>
-Index shapeStride(const Position<N>& shape) {
-  return shapeStride(shape, Axis);
+Index shape_stride(const Position<N>& shape) {
+  return shape_stride(shape, Axis);
 }
 
 /**
@@ -263,12 +263,12 @@ Index shapeStride(const Position<N>& shape) {
  * @brief Compute the number of pixels in a given shape.
  */
 template <Index N = 2>
-Index shapeSize(const Position<N>& shape) {
+Index shape_size(const Position<N>& shape) {
   const auto size = shape.size();
   if (size == 0) {
     return 0;
   }
-  return shapeStride(shape, size);
+  return shape_stride(shape, size);
 }
 
 /**

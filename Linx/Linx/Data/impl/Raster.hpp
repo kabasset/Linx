@@ -62,7 +62,7 @@ struct IndexRecursionImpl<-1, I> {
    */
   static Index index(const Position<-1>& shape, const Position<-1>& pos) {
     const auto n = shape.size();
-    SizeError::mayThrow(pos.size(), n);
+    SizeError::may_throw(pos.size(), n);
     Index res = 0;
     for (std::size_t j = 0; j < shape.size(); ++j) {
       res = pos[n - 1 - j] + shape[n - 1 - j] * res;
@@ -83,7 +83,7 @@ const Position<N>& Raster<T, N, THolder>::shape() const {
 
 template <typename T, Index N, typename THolder>
 Box<N> Raster<T, N, THolder>::domain() const {
-  return Box<N>::fromShape(Position<N>::zero(), m_shape);
+  return Box<N>::from_shape(Position<N>::zero(), m_shape);
 }
 
 template <typename T, Index N, typename THolder>
@@ -114,16 +114,16 @@ inline T& Raster<T, N, THolder>::operator[](const Position<N>& pos) {
 
 template <typename T, Index N, typename THolder>
 inline const T& Raster<T, N, THolder>::at(const Position<N>& pos) const {
-  auto boundedPos = pos;
+  auto bounded_pos = pos;
   for (Index i = 0; i < dimension(); ++i) {
-    auto& b = boundedPos[i];
+    auto& b = bounded_pos[i];
     const auto& s = m_shape[i];
-    OutOfBoundsError::mayThrow("pos[" + std::to_string(i) + "]", b, {-s, s - 1});
+    OutOfBoundsError::may_throw("pos[" + std::to_string(i) + "]", b, {-s, s - 1});
     if (b < 0) {
       b += s;
     }
   }
-  return operator[](boundedPos);
+  return operator[](bounded_pos);
 }
 
 template <typename T, Index N, typename THolder>
@@ -135,7 +135,7 @@ template <typename T, Index N, typename THolder>
 template <Index M>
 PtrRaster<const T, M> Raster<T, N, THolder>::slice(const Box<N>& region) const {
   // FIXME resolve
-  if (not isContiguous<M>(region)) {
+  if (not is_contiguous<M>(region)) {
     throw Exception("Cannot slice: Box is not contiguous."); // FIXME clarify
   }
   const auto& f = region.front();
@@ -150,7 +150,7 @@ PtrRaster<const T, M> Raster<T, N, THolder>::slice(const Box<N>& region) const {
 template <typename T, Index N, typename THolder>
 template <Index M>
 PtrRaster<T, M> Raster<T, N, THolder>::slice(const Box<N>& region) {
-  if (not isContiguous<M>(region)) {
+  if (not is_contiguous<M>(region)) {
     throw Exception("Cannot slice: Box is not contiguous."); // FIXME clarify
   }
   const auto& f = region.front();
@@ -273,7 +273,7 @@ Patch<T, Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::patch(TRegion re
 
 template <typename T, Index N, typename THolder>
 template <Index M>
-bool Raster<T, N, THolder>::isContiguous(const Box<N>& region) const {
+bool Raster<T, N, THolder>::is_contiguous(const Box<N>& region) const {
   const auto& f = region.front();
   const auto& b = region.back();
   for (Index i = 0; i < M - 1; ++i) {

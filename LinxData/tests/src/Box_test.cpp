@@ -19,10 +19,10 @@ BOOST_AUTO_TEST_CASE(ctors_test) {
   Position<7> front;
   ++front;
   Position<7> back {2, 8, 6, 1, 9, 8, 9};
-  Box<7> fromTo {front, back};
-  BOOST_TEST(fromTo.shape() == back);
-  Box<7> fromShape {front, fromTo.shape()};
-  BOOST_TEST(fromShape.back() == back);
+  Box<7> from_to {front, back};
+  BOOST_TEST(from_to.shape() == back);
+  Box<7> from_shape {front, from_to.shape()};
+  BOOST_TEST(from_shape.back() == back);
 }
 
 BOOST_AUTO_TEST_CASE(translation_test) {
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(translation_test) {
 }
 
 BOOST_AUTO_TEST_CASE(surrounding_test) {
-  const auto central = Box<2>::fromShape({1, 1}, {4, 3});
+  const auto central = Box<2>::from_shape({1, 1}, {4, 3});
   const Box<2> margin {{-3, -2}, {2, 1}};
   const auto chunks = central.surround(margin);
   const auto box = central + margin;

@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_SUITE(LineIterator_test)
 //-----------------------------------------------------------------------------
 
 template <Index I, Index N>
-void checkIterator(const Position<N>& front = Position<N>::one(), Index back = 12, Index step = 3) {
+void check_iterator(const Position<N>& front = Position<N>::one(), Index back = 12, Index step = 3) {
   const Line<I, N> slice(front, back, step);
   std::vector<Position<N>> expected(slice.size(), slice.front());
   for (std::size_t i = 0; i < expected.size(); ++i) {
@@ -29,11 +29,11 @@ void checkIterator(const Position<N>& front = Position<N>::one(), Index back = 1
 }
 
 BOOST_AUTO_TEST_CASE(iterator_test) {
-  checkIterator<0, 1>();
-  checkIterator<0, 4>();
-  checkIterator<1, 4>();
-  checkIterator<2, 4>();
-  checkIterator<3, 4>();
+  check_iterator<0, 1>();
+  check_iterator<0, 4>();
+  check_iterator<1, 4>();
+  check_iterator<2, 4>();
+  check_iterator<3, 4>();
 }
 
 //-----------------------------------------------------------------------------

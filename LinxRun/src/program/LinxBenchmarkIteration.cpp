@@ -14,21 +14,21 @@ Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkIteration"
 Linx::IterationBenchmark::Duration iterate(Linx::IterationBenchmark& benchmark, char setup) {
   switch (setup) {
     case 'x':
-      return benchmark.loopOverXyz();
+      return benchmark.loop_over_xyz();
     case 'z':
-      return benchmark.loopOverZyx();
+      return benchmark.loop_over_zyx();
     case 'p':
-      return benchmark.iterateOverPositions();
+      return benchmark.iterate_over_positions();
     case 'q':
-      return benchmark.iterateOverPositionsOptimized();
+      return benchmark.iterate_over_positions_optimized();
     case 'i':
-      return benchmark.loopOverIndices();
+      return benchmark.loop_over_indices();
     case 'v':
-      return benchmark.iterateOverValues();
+      return benchmark.iterate_over_values();
     case 'o':
-      return benchmark.callOperator();
+      return benchmark.call_operator();
     case 'g':
-      return benchmark.callGenerate();
+      return benchmark.call_generate();
     default:
       throw std::runtime_error("Case not implemented"); // FIXME CaseNotImplemented
   }
@@ -44,7 +44,7 @@ public:
         "Initial of the test case to be benchmarked: "
         "x (x-y-z), z (z-y-x), p (position), i (index), v (value), o (operator), g (generate)");
     options.named<long>("side", "Image width, height and depth (same value)", 400);
-    return options.asPair();
+    return options.as_pair();
   }
 
   ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {

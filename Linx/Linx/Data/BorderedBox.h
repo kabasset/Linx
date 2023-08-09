@@ -65,13 +65,13 @@ public:
    * @brief Apply two different functions to the inner and bordering boxes.
    */
   template <typename TInnerFunc, typename TBorderFunc>
-  void applyInnerBorder(TInnerFunc&& innerFunc, TBorderFunc&& borderFunc) const {
+  void apply_inner_border(TInnerFunc&& inner_func, TBorderFunc&& border_func) const {
     for (const auto& box : m_fronts) {
-      std::forward<TBorderFunc>(borderFunc)(box);
+      std::forward<TBorderFunc>(border_func)(box);
     }
-    std::forward<TInnerFunc>(innerFunc)(m_inner);
+    std::forward<TInnerFunc>(inner_func)(m_inner);
     for (const auto& box : m_backs) {
-      std::forward<TBorderFunc>(borderFunc)(box);
+      std::forward<TBorderFunc>(border_func)(box);
     }
   }
 

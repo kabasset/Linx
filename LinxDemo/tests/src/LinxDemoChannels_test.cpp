@@ -40,7 +40,7 @@ struct Hsv {
 /**
  * @brief Convert an RGB pixel into a HSV pixel.
  */
-Hsv rgbToHsv(const Rgb& rgb) {
+Hsv rgb_to_hsv(const Rgb& rgb) {
 
   const double normalization = 1. / 255.;
   const double r = normalization * rgb.r;
@@ -86,18 +86,18 @@ Hsv rgbToHsv(const Rgb& rgb) {
   return hsv;
 }
 
-void rgbDataToHsvData(unsigned char* rgb, double* hsv) {
-  const auto out = rgbToHsv(Rgb {rgb[0], rgb[1], rgb[2]});
+void rgb_data_to_hsv_data(unsigned char* rgb, double* hsv) {
+  const auto out = rgb_to_hsv(Rgb {rgb[0], rgb[1], rgb[2]});
   hsv[0] = out.h;
   hsv[1] = out.s;
   hsv[2] = out.v;
 }
 
-std::string toString(const Rgb& rgb) {
+std::string to_string(const Rgb& rgb) {
   return std::to_string(rgb.r) + "R " + std::to_string(rgb.g) + "G " + std::to_string(rgb.b) + "B";
 }
 
-std::string toString(const Hsv& hsv) {
+std::string to_string(const Hsv& hsv) {
   return std::to_string(hsv.h) + "H " + std::to_string(hsv.s) + "S " + std::to_string(hsv.v) + "V";
 }
 
@@ -117,10 +117,10 @@ BOOST_AUTO_TEST_CASE(color_struct_test) {
 
   //! [Output Hsv]
   Hsv::Image hsv(rgb.shape());
-  hsv.generate(rgbToHsv, rgb);
+  hsv.generate(rgb_to_hsv, rgb);
   //! [Output Hsv]
 
-  std::cout << toString(rgb[{0, 0}]) << " = " << toString(hsv[{0, 0}]) << std::endl;
+  std::cout << to_string(rgb[{0, 0}]) << " = " << to_string(hsv[{0, 0}]) << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(color_along_0_test) {
@@ -141,16 +141,16 @@ BOOST_AUTO_TEST_CASE(color_along_0_test) {
 
   //! [Output Cxy]
   HsvXyImage hsv(rgb.shape());
-  auto hsvIt = hsv.begin();
+  auto hsv_it = hsv.begin();
   // Loop by steps of 3 pixels
-  for (auto rgbIt = rgb.begin(); rgbIt != rgb.end(); rgbIt += 3, hsvIt += 3) {
-    rgbDataToHsvData(rgbIt, hsvIt);
+  for (auto rgb_it = rgb.begin(); rgb_it != rgb.end(); rgb_it += 3, hsv_it += 3) {
+    rgb_data_to_hsv_data(rgb_it, hsv_it);
   }
   //! [Output Cxy]
 
   const Rgb rgb0 {rgb[0], rgb[1], rgb[2]};
   const Hsv hsv0 {hsv[0], hsv[1], hsv[2]};
-  std::cout << toString(rgb0) << " = " << toString(hsv0) << std::endl;
+  std::cout << to_string(rgb0) << " = " << to_string(hsv0) << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(color_along_2_test) {
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE(color_along_2_test) {
   //! [Output Xyc]
   const Rgb out0 {rgb[{0, 0, 0}], rgb[{0, 0, 1}], rgb[{0, 0, 2}]};
 
-  std::cout << toString(in0) << " -> " << toString(out0) << std::endl;
+  std::cout << to_string(in0) << " -> " << to_string(out0) << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(vector_along_2_test) {
@@ -196,9 +196,9 @@ BOOST_AUTO_TEST_CASE(vector_along_2_test) {
 
   //! [Output scalar]
   IntegratedImage image({cube.length(1), cube.length(2)});
-  auto cubeIt = cube.begin();
-  for (auto imageIt = image.begin(); imageIt != image.end(); ++imageIt, cubeIt += n) {
-    *imageIt = std::inner_product(weights.begin(), weights.end(), cubeIt, 0.);
+  auto cube_it = cube.begin();
+  for (auto image_it = image.begin(); image_it != image.end(); ++image_it, cube_it += n) {
+    *image_it = std::inner_product(weights.begin(), weights.end(), cube_it, 0.);
   }
   //! [Output scalar]
 
@@ -216,7 +216,7 @@ BOOST_AUTO_TEST_CASE(raster_of_raster_test) {
     auto& raster = nested[p];
     raster = Linx::Raster<int>(shape).range();
     std::cout << "Raster at " << p << " = " << raster << std::endl;
-    BOOST_TEST(raster.at(-1) == shapeSize(shape) - 1);
+    BOOST_TEST(raster.at(-1) == shape_size(shape) - 1);
   }
   //! [Raster of raster]
 }

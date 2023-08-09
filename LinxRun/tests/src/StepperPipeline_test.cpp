@@ -44,10 +44,10 @@ public:
 
 protected:
   template <typename S>
-  void doEvaluate();
+  void evaluate_impl();
 
   template <typename S>
-  typename S::Return doGet();
+  typename S::Return get_impl();
 
 private:
   char m_value = 0;
@@ -58,46 +58,46 @@ private:
 };
 
 template <>
-void Dag::doEvaluate<Step0>() {
+void Dag::evaluate_impl<Step0>() {
   ++m_value;
   m_0.value = m_value;
 }
 
 template <>
-void Dag::doEvaluate<Step1a>() {
+void Dag::evaluate_impl<Step1a>() {
   ++m_value;
   m_1a.value = m_value;
 }
 
 template <>
-void Dag::doEvaluate<Step1b>() {
+void Dag::evaluate_impl<Step1b>() {
   ++m_value;
   m_1b.value = m_value;
 }
 
 template <>
-void Dag::doEvaluate<Step2>() {
+void Dag::evaluate_impl<Step2>() {
   ++m_value;
   m_2.value = m_value;
 }
 
 template <>
-Step0::Return Dag::doGet<Step0>() {
+Step0::Return Dag::get_impl<Step0>() {
   return m_0.value;
 }
 
 template <>
-Step1a::Return Dag::doGet<Step1a>() {
+Step1a::Return Dag::get_impl<Step1a>() {
   return m_1a.value;
 }
 
 template <>
-Step1b::Return Dag::doGet<Step1b>() {
+Step1b::Return Dag::get_impl<Step1b>() {
   return m_1b.value;
 }
 
 template <>
-Step2::Return Dag::doGet<Step2>() {
+Step2::Return Dag::get_impl<Step2>() {
   return m_2.value;
 }
 

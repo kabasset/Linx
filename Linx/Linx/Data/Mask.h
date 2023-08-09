@@ -45,7 +45,7 @@ public:
   /**
    * @brief Create a mask from a radius and center position.
    */
-  static Mask<N> fromCenter(Index radius = 1, const Position<N>& center = Position<N>::zero(), bool flag = true) {
+  static Mask<N> from_center(Index radius = 1, const Position<N>& center = Position<N>::zero(), bool flag = true) {
     return Mask<N>(center - radius, center + radius, flag);
   }
 
@@ -55,11 +55,11 @@ public:
    */
   template <Index P>
   static Mask<N> ball(double radius = 1, const Position<N>& center = Position<N>::zero()) {
-    auto out = Mask<N>::fromCenter(radius, center, false);
-    const auto radiusPow = std::pow(radius, P);
+    auto out = Mask<N>::from_center(radius, center, false);
+    const auto radius_pow = std::pow(radius, P);
     auto it = out.m_flags.begin();
     for (const auto& p : out.box() - center) {
-      if (norm<P>(p) <= radiusPow) {
+      if (norm<P>(p) <= radius_pow) {
         *it = true;
       }
       ++it;

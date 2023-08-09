@@ -161,13 +161,13 @@ int f(int x, int y) {
   return 10 * x + y;
 }
 
-auto a = Linx::Raster<int>({4, 5}).posGenerate(f);
+auto a = Linx::Raster<int>({4, 5}).pos_generate(f);
 
 // Access
 
-auto somePixel = a[{3, 2}];
-auto lastPixel = a[-1]; // or a[{-1, -1}]
-auto lastRow = a.row(-1);
+auto some_pixel = a[{3, 2}];
+auto last_pixel = a[-1]; // or a[{-1, -1}]
+auto last_row = a.row(-1);
 
 // Iteration
 

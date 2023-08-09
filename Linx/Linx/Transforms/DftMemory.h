@@ -72,15 +72,15 @@ public:
    * `in` and `out` are filled with garbage.
    */
   template <typename TTransform, typename TIn, typename TOut>
-  static Internal::FftwPlanPtr createPlan(TIn& in, TOut& out) {
+  static Internal::FftwPlanPtr create_plan(TIn& in, TOut& out) {
     instantiate();
-    return TTransform::allocateFftwPlan(in, out);
+    return TTransform::allocate_fftw_plan(in, out);
   }
 
   /**
    * @brief Destroy a plan.
    */
-  static void destroyPlan(Internal::FftwPlanPtr& plan) {
+  static void destroy_plan(Internal::FftwPlanPtr& plan) {
     if (plan) {
       fftw_destroy_plan(*plan);
     }

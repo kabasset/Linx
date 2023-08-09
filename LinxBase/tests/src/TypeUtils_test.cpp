@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_SUITE(TypeUtils_test)
 //-----------------------------------------------------------------------------
 
 template <typename T>
-void checkTypeTraits(T) {
+void check_type_traits(T) {
   using Floating = typename TypeTraits<T>::Floating;
   using Scalar = typename TypeTraits<T>::Scalar;
   BOOST_TEST(std::is_floating_point<Floating>::value);
@@ -25,14 +25,14 @@ void checkTypeTraits(T) {
 }
 
 template <typename T>
-void checkTypeTraits(std::complex<T>) {
+void check_type_traits(std::complex<T>) {
   using Scalar = typename TypeTraits<T>::Scalar;
   BOOST_TEST((std::is_same<Scalar, T>::value));
-  checkTypeTraits(T());
+  check_type_traits(T());
 }
 
 LINX_TEST_CASE_TEMPLATE(type_traits_test) {
-  checkTypeTraits(T());
+  check_type_traits(T());
 }
 
 //-----------------------------------------------------------------------------

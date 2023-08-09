@@ -54,7 +54,7 @@ public:
   /**
    * @brief Create a slice from a front position, size, and optional step.
    */
-  static Line<I, N> fromSize(Position<N> front, std::size_t size, Index step = 1) {
+  static Line<I, N> from_size(Position<N> front, std::size_t size, Index step = 1) {
     const auto back = front[I] + step * (size - 1);
     return Line(std::move(front), back, step);
   }
@@ -96,14 +96,14 @@ public:
   /**
    * @brief Get the front index along the axis.
    */
-  Index frontIndex() const {
+  Index front_index() const {
     return m_front[I];
   }
 
   /**
    * @brief Compute the back index along the axis.
    */
-  Index backIndex() const {
+  Index back_index() const {
     return m_front[I] + m_step * (m_size - 1);
   }
 
@@ -219,7 +219,7 @@ public:
    * @brief Invert the sign of each coordinate.
    */
   Line<I, N> operator-() {
-    return Line<I, N>::fromSize(-m_front, m_size, -m_step);
+    return Line<I, N>::from_size(-m_front, m_size, -m_step);
   }
 
   /// @}

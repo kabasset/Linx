@@ -101,7 +101,7 @@ public:
    */
   template <Index I>
   StrideBasedIndexing(const TParent& parent, const Line<I, TParent::Dimension>& region) :
-      m_step(shapeStride<I>(parent.shape()) * region.step()), m_width(m_step * (region.size() - 1) + 1),
+      m_step(shape_stride<I>(parent.shape()) * region.step()), m_width(m_step * (region.size() - 1) + 1),
       m_offsets(2, 0) {} // 1+1 see above
 
   /**

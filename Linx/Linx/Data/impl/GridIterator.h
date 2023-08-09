@@ -20,7 +20,7 @@ public:
   }
 
   static Iterator end(const Grid<N>& region) {
-    return Iterator(region, Box<N>::Iterator::endPosition(region.box()));
+    return Iterator(region, Box<N>::Iterator::end_position(region.box()));
   }
 
   const Position<N>& operator*() const {
@@ -33,7 +33,7 @@ public:
 
   Iterator& operator++() {
     if (m_current == m_region.back()) {
-      m_current = Box<N>::Iterator::endPosition(m_region.box());
+      m_current = Box<N>::Iterator::end_position(m_region.box());
       return *this;
     }
     m_current[0] += m_region.step()[0];

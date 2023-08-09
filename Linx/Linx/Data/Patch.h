@@ -197,7 +197,7 @@ public:
   /**
    * @brief Translate the patch by the opposite of a given vector.
    */
-  Patch& translateBack(const Position<Dimension>& vector) {
+  Patch& translate_back(const Position<Dimension>& vector) {
     m_region -= vector;
     return *this;
   }
@@ -256,7 +256,7 @@ struct IsPatchImpl<Patch<T, TParent, TRegion>> : std::true_type {};
 /// @endcond
 
 template <typename T>
-constexpr bool isPatch() {
+constexpr bool is_patch() {
   return Internal::IsPatchImpl<T>::value;
 }
 

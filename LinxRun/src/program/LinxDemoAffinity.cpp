@@ -26,7 +26,7 @@ public:
     options.named<float>("translate", "Translation along first axis", 0);
     options.named<float>("scale", "Scaling factor", 1);
     options.named<float>("rotate", "Rotation angle (deg)", 0);
-    return options.asPair();
+    return options.as_pair();
   }
 
   ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
@@ -49,7 +49,7 @@ public:
     Linx::Affinity<2> affinity({2 * quarter, 2 * quarter});
     affinity += {vector, 0};
     affinity *= factor;
-    affinity.rotateDegrees(angle);
+    affinity.rotate_degrees(angle);
 
     affinity.transform(interpolator, output);
 

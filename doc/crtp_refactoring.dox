@@ -78,12 +78,12 @@ public:
   }
 
   char* data() { // Non-virtual interface idiom
-    return dataImpl();
+    return data_impl();
   }
 
 private:
 
-  virtual char* dataImpl() = 0; // Pure virtual
+  virtual char* data_impl() = 0; // Pure virtual
 
 };
 
@@ -93,7 +93,7 @@ private:
 
   std::vector<char> m_vec;
 
-  char* dataImpl() override { // Virtual function
+  char* data_impl() override { // Virtual function
     return m_vec.data();
   }
 
@@ -105,7 +105,7 @@ Without compiler optimizations, one call to `VecRaster::operator[]()` is:
   - 15-30 cycles;
   - Question: Is it and can it be inlined?
   - What can we do? Add inlining hint (keyword `inline` is just a hint to be taken into account -- or not -- by the compiler);
-- One call to virtual function `dataImpl()`
+- One call to virtual function `data_impl()`
   - 30-60 cycles;
   - Question: Is it and can it be devirtualized?
   - What can we do? Make the method `final` to help devirtualizing.
@@ -122,12 +122,12 @@ public:
   }
 
   inline char* data() { // Inline
-    return dataImpl();
+    return data_impl();
   }
 
 private:
 
-  virtual char* dataImpl() = 0;
+  virtual char* data_impl() = 0;
 
 };
 
@@ -137,7 +137,7 @@ private:
 
   std::vector<char> m_vec;
 
-  char* dataImpl() final { // Final
+  char* data_impl() final { // Final
     return m_vec.data();
   }
 
@@ -158,7 +158,7 @@ Here are the outputs, with a spoiler!
 \image html doc/diagrams/looping_benchmark_summary.svg
 
 A finer analysis showed that:
-- Making `dataImpl()` `final` sped up just a bit,
+- Making `data_impl()` `final` sped up just a bit,
   i.e. the compiler must have been doing a pretty good job at devirtualizing already;
 - Suggesting inlining sped up spectacularly!
   The compiler probably decided not to inline those functions by itself,

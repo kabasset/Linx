@@ -54,7 +54,7 @@ struct TypeCardinality<std::tuple<Ts...>> {
  * @see `TypeCardinality`
  */
 template <typename S>
-constexpr std::size_t prerequisiteCardinality() {
+constexpr std::size_t prerequisite_cardinality() {
   return TypeCardinality<typename S::Prerequisite>::value;
 }
 
@@ -76,8 +76,8 @@ constexpr std::size_t prerequisiteCardinality() {
  * \endcode
  * 
  * Child classes must provide a specialization of the following methods for each step `S`:
- * - `void doEvaluate<S>()`, which evaluates `S` assuming upstream tasks were already computed;
- * - `S::Return doGet<S>()`, which returns the computed value of `S`.
+ * - `void evaluate_impl<S>()`, which evaluates `S` assuming upstream tasks were already computed;
+ * - `S::Return get_impl<S>()`, which returns the computed value of `S`.
  * 
  * A step `S` is a class which contains the following type definitions:
  * - `Return` is the return value type of `get<S>()`;
@@ -93,12 +93,12 @@ public:
    */
   template <typename S>
   typename S::Return get() {
-    if constexpr (Internal::prerequisiteCardinality<S>() == 1) {
+    if constexpr (Internal::prerequisite_cardinality<S>() == 1) {
       get<typename S::Prerequisite>();
-    } else if constexpr (Internal::prerequisiteCardinality<S>() > 1) {
-      getMultiple<typename S::Prerequisite>(std::make_index_sequence<Internal::prerequisiteCardinality<S>()> {});
+    } else if constexpr (Internal::prerequisite_cardinality<S>() > 1) {
+      get_multiple<typename S::Prerequisite>(std::make_index_sequence<Internal::prerequisite_cardinality<S>()> {});
     }
-    return evaluateGet<S>();
+    return evaluate_get<S>();
   }
 
   /**
@@ -144,9 +144,9 @@ private:
    * @brief Call `get()` on each element of a tuple.
    */
   template <typename STuple, std::size_t... Is>
-  void getMultiple(std::index_sequence<Is...>) {
-    using mockUnpack = int[];
-    (void)mockUnpack {0, (get<std::tuple_element_t<Is, STuple>>(), void(), 0)...};
+  void get_multiple(std::index_sequence<Is...>) {
+    using mock_unpack = int[];
+    (void)mock_unpack {0, (get<std::tuple_element_t<Is, STuple>>(), void(), 0)...};
     // TODO could be done in threads!
   }
 
@@ -157,18 +157,18 @@ private:
   struct Accessor : TDerived {
 
     /**
-     * @brief Call `algo.doEvaluate<S>()`.
+     * @brief Call `algo.evaluate_impl<S>()`.
      */
     static void evaluate(TDerived& algo) {
-      auto f = &Accessor::template doEvaluate<S>;
+      auto f = &Accessor::template evaluate_impl<S>;
       (algo.*f)();
     }
 
     /**
-     * @brief Call `algo.doGet<S>()`.
+     * @brief Call `algo.get_impl<S>()`.
      */
     static typename S::Return get(TDerived& algo) {
-      auto f = &Accessor::template doGet<S>;
+      auto f = &Accessor::template get_impl<S>;
       return (algo.*f)();
     }
   };
@@ -177,7 +177,7 @@ private:
    * @brief Run step `S` if not done and return its output.
    */
   template <typename S>
-  typename S::Return evaluateGet() {
+  typename S::Return evaluate_get() {
     if (not evaluated<S>()) { // FIXME not thread-safe
       const auto start = std::chrono::high_resolution_clock::now();
       Accessor<S>::evaluate(derived());

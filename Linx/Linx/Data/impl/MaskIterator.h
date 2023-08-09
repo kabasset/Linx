@@ -17,10 +17,10 @@ private:
    * @brief Constructor.
    */
   explicit Iterator(const Mask<N>& region, const bool* current) :
-      m_flagIt(current), m_flagEnd(region.m_flags.end()),
-      m_current(region.m_box, Box<N>::Iterator::beginPosition(region.m_box)) {
-    while (m_flagIt != m_flagEnd && not *m_flagIt) {
-      ++m_flagIt;
+      m_flag_it(current), m_flag_end(region.m_flags.end()),
+      m_current(region.m_box, Box<N>::Iterator::begin_position(region.m_box)) {
+    while (m_flag_it != m_flag_end && not *m_flag_it) {
+      ++m_flag_it;
       ++m_current;
     }
   }
@@ -59,9 +59,9 @@ public:
    */
   Iterator& operator++() {
     do {
-      ++m_flagIt;
+      ++m_flag_it;
       ++m_current;
-    } while (m_flagIt != m_flagEnd && not *m_flagIt);
+    } while (m_flag_it != m_flag_end && not *m_flag_it);
     return *this;
   }
 
@@ -78,25 +78,25 @@ public:
    * @brief Equality operator.
    */
   bool operator==(const Iterator& rhs) const {
-    return m_flagIt == rhs.m_flagIt;
+    return m_flag_it == rhs.m_flag_it;
   }
 
   /**
    * @brief Non-equality operator.
    */
   bool operator!=(const Iterator& rhs) const {
-    return m_flagIt != rhs.m_flagIt;
+    return m_flag_it != rhs.m_flag_it;
   }
 
 private:
   /**
    * @brief The current flag iterator.
    */
-  const bool* m_flagIt;
+  const bool* m_flag_it;
   /**
    * @brief The flag iterator end.
    */
-  const bool* m_flagEnd;
+  const bool* m_flag_end;
 
   /**
    * @brief The current box iterator.

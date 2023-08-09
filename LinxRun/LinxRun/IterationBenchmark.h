@@ -39,42 +39,42 @@ public:
   /**
    * @brief Loop over positions built by looping over x, then y, and then z.
    */
-  Duration loopOverXyz();
+  Duration loop_over_xyz();
 
   /**
    * @brief Loop over positions built by looping over z, then y, and then x.
    */
-  Duration loopOverZyx();
+  Duration loop_over_zyx();
 
   /**
    * @brief Loop over positions via a position iterator.
    */
-  Duration iterateOverPositions();
+  Duration iterate_over_positions();
 
   /**
    * @brief Loop over positions via a position iterator and factorized index computation.
    */
-  Duration iterateOverPositionsOptimized();
+  Duration iterate_over_positions_optimized();
 
   /**
    * @brief Loop over indices.
    */
-  Duration loopOverIndices();
+  Duration loop_over_indices();
 
   /**
    * @brief Loop over values via a pixel iterator.
    */
-  Duration iterateOverValues();
+  Duration iterate_over_values();
 
   /**
    * @brief Call buitin operator.
    */
-  Duration callOperator();
+  Duration call_operator();
 
   /**
    * @brief Call `Raster::generate()`.
    */
-  Duration callGenerate();
+  Duration call_generate();
 
 protected:
   Index m_width;

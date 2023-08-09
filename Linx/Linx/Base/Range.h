@@ -90,7 +90,7 @@ struct RangeMixin {
     auto its = std::make_tuple(args.begin()...);
     auto& t = static_cast<TDerived&>(*this);
     for (auto& v : t) {
-      v = iteratorTupleApply(its, func);
+      v = iterator_tuple_apply(its, func);
     }
     return t;
   }

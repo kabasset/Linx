@@ -19,7 +19,7 @@ namespace Linx {
  * @brief Check whether some pointer is aligned as required.
  */
 template <typename T>
-bool isAligned(const T* ptr, Index as) {
+bool is_aligned(const T* ptr, Index as) {
   if (not ptr) {
     throw NullPtrError("Null pointer tested for alignment.");
   }
@@ -48,7 +48,7 @@ Index alignment(const T* ptr) {
 /**
  * @brief Convert a pointer address to string.
  */
-inline std::string toString(const void* ptr) {
+inline std::string to_string(const void* ptr) {
   std::stringstream ss;
   ss << ptr;
   return ss.str();
@@ -63,13 +63,13 @@ struct AlignmentError : Exception {
    * @brief Constructor.
    */
   AlignmentError(const void* ptr, Index alignment) :
-      Exception("Alignment error", toString(ptr) + " is not " + std::to_string(alignment) + " byte-aligned.") {};
+      Exception("Alignment error", to_string(ptr) + " is not " + std::to_string(alignment) + " byte-aligned.") {};
 
   /**
    * @brief Throw if the alignement requirement is not met.
    */
-  static void mayThrow(const void* ptr, Index alignment) {
-    if (not isAligned(ptr, alignment)) {
+  static void may_throw(const void* ptr, Index alignment) {
+    if (not is_aligned(ptr, alignment)) {
       throw AlignmentError(ptr, alignment);
     }
   }
@@ -114,9 +114,9 @@ public:
    * \snippet LinxDemoConstructors_test.cpp AlignedRaster shares
    */
   AlignedBuffer(std::size_t size, T* data = nullptr, Index align = 0) :
-      m_container(nullptr), m_begin(data), m_end(data + size), m_as(alignAs(data, align)) {
+      m_container(nullptr), m_begin(data), m_end(data + size), m_as(align_as(data, align)) {
     if (m_begin) {
-      AlignmentError::mayThrow(m_begin, m_as);
+      AlignmentError::may_throw(m_begin, m_as);
     } else {
       allocate(size);
     }
@@ -209,7 +209,7 @@ public:
   /**
    * @brief Get the required data alignment.
    */
-  Index alignmentReq() const { // FIXME overalignment() as in std doc?
+  Index alignment_req() const { // FIXME overalignment() as in std doc?
     return m_as;
   }
 
@@ -252,13 +252,13 @@ public:
 
 private:
   void allocate(std::size_t size) {
-    const auto validSize = ((size + m_as - 1) / m_as) * m_as; // Smallest multiple of m_as >= size
-    m_container = std::aligned_alloc(m_as, sizeof(T) * validSize);
+    const auto valid_size = ((size + m_as - 1) / m_as) * m_as; // Smallest multiple of m_as >= size
+    m_container = std::aligned_alloc(m_as, sizeof(T) * valid_size);
     m_begin = reinterpret_cast<T*>(m_container);
     m_end = m_begin + size;
   }
 
-  static std::size_t alignAs(const void* data, Index align) {
+  static std::size_t align_as(const void* data, Index align) {
     constexpr std::size_t simd = 32; // 64 for AVX512; TODO detect?
     switch (align) {
       case -1:

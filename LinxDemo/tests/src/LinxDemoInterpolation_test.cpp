@@ -35,9 +35,9 @@ BOOST_AUTO_TEST_CASE(extrapolate_interpolate_test) {
   //! [Inter]
 
   //! [Inter-extra]
-  const auto linearDirichlet = Linx::interpolate<Linx::Linear>(dirichlet);
-  BOOST_TEST(linearDirichlet[outside] == 0);
-  BOOST_TEST(linearDirichlet(inbetween) == 2.5);
+  const auto linear_dirichlet = Linx::interpolate<Linx::Linear>(dirichlet);
+  BOOST_TEST(linear_dirichlet[outside] == 0);
+  BOOST_TEST(linear_dirichlet(inbetween) == 2.5);
   //! [Inter-extra]
 }
 

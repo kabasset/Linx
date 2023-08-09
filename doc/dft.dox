@@ -19,7 +19,7 @@ Given an input sine signal:
 
 We compute the Fourier transform:
 
-\snippet LinxDemoDft_test.cpp realDft
+\snippet LinxDemoDft_test.cpp real_dft
 
 Multiply by `jk`:
 
@@ -27,7 +27,7 @@ Multiply by `jk`:
 
 And transform back the data:
 
-\snippet LinxDemoDft_test.cpp inverseRealDft
+\snippet LinxDemoDft_test.cpp inverse_real_dft
 
 And that's all!
 

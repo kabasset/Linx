@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_SUITE(Random_test)
 //-----------------------------------------------------------------------------
 
 template <typename T>
-void checkUniform(T) {
+void check_uniform(T) {
   MinimalDataContainer<T> sequence(32);
   sequence.generate(UniformNoise<T>(5, 10));
   for (const auto& e : sequence) {
@@ -30,10 +30,10 @@ void checkUniform(T) {
   }
 }
 
-void checkUniform(bool) {}
+void check_uniform(bool) {}
 
 template <typename T>
-void checkUniform(std::complex<T>) {
+void check_uniform(std::complex<T>) {
   MinimalDataContainer<std::complex<T>> sequence(32);
   sequence.generate(UniformNoise<std::complex<T>>({5, 1}, {10, 2}));
   for (const auto& e : sequence) {
@@ -52,65 +52,65 @@ void checkUniform(std::complex<T>) {
 }
 
 LINX_TEST_CASE_TEMPLATE(uniform_test) {
-  checkUniform(T {});
+  check_uniform(T {});
 }
 
 template <typename T>
-void checkGaussian(T) {
+void check_gaussian(T) {
   MinimalDataContainer<T> sequence(32);
   sequence.generate(GaussianNoise<T>(100, 15));
   sequence.apply(GaussianNoise<T>());
   // FIXME
 }
 
-void checkGaussian(bool) {}
+void check_gaussian(bool) {}
 
 template <typename T>
-void checkGaussian(std::complex<T>) {}
+void check_gaussian(std::complex<T>) {}
 
 LINX_TEST_CASE_TEMPLATE(gaussian_test) {
-  checkGaussian(T {});
+  check_gaussian(T {});
 }
 
 template <typename T>
-void checkPoisson(T) {
+void check_poisson(T) {
   MinimalDataContainer<T> sequence(32);
   sequence.generate(PoissonNoise<T>(20));
   sequence.apply(PoissonNoise<T>());
   // FIXME
 }
 
-void checkPoisson(bool) {}
+void check_poisson(bool) {}
 
 template <typename T>
-void checkPoisson(std::complex<T>) {}
+void check_poisson(std::complex<T>) {}
 
 LINX_TEST_CASE_TEMPLATE(poisson_test) {
-  checkPoisson(T {});
+  check_poisson(T {});
 }
 
 BOOST_AUTO_TEST_CASE(reproducible_gaussian_test) {
-  MinimalDataContainer<int> sequenceA {10, 100, 1000};
-  auto sequenceB = sequenceA;
-  sequenceB[1] += 1;
-  GaussianNoise<int> noiseA(0, 1, 0);
-  GaussianNoise<int> noiseB(0, 1, 0);
-  sequenceA.apply(noiseA);
-  sequenceB.apply(noiseB);
-  BOOST_TEST(sequenceA[0] == sequenceB[0]);
-  BOOST_TEST(sequenceA[2] == sequenceB[2]);
+  MinimalDataContainer<int> sequence_a {10, 100, 1000};
+  auto sequence_b = sequence_a;
+  sequence_b[1] += 1;
+  GaussianNoise<int> noise_a(0, 1, 0);
+  GaussianNoise<int> noise_b(0, 1, 0);
+  sequence_a.apply(noise_a);
+  sequence_b.apply(noise_b);
+  BOOST_TEST(sequence_a[0] == sequence_b[0]);
+  BOOST_TEST(sequence_a[2] == sequence_b[2]);
 }
 
 BOOST_AUTO_TEST_CASE(reproducible_poisson_test) {
-  MinimalDataContainer<int> sequenceA {10, 100, 1000};
-  auto sequenceB = sequenceA;
-  sequenceB[1] += 1;
-  StablePoissonNoise<int> noiseA(0, 0);
-  StablePoissonNoise<int> noiseB(0, 0);
-  sequenceA.apply(noiseA);
-  sequenceB.apply(noiseB);
-  BOOST_TEST(sequenceA[0] == sequenceB[0]);
-  BOOST_TEST(sequenceA[2] == sequenceB[2]);
+  MinimalDataContainer<int> sequence_a {10, 100, 1000};
+  auto sequence_b = sequence_a;
+  sequence_b[1] += 1;
+  StablePoissonNoise<int> noise_a(0, 0);
+  StablePoissonNoise<int> noise_b(0, 0);
+  sequence_a.apply(noise_a);
+  sequence_b.apply(noise_b);
+  BOOST_TEST(sequence_a[0] == sequence_b[0]);
+  BOOST_TEST(sequence_a[2] == sequence_b[2]);
 }
 
 //-----------------------------------------------------------------------------

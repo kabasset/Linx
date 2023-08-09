@@ -56,13 +56,13 @@ public:
    */
   template <typename TIn>
   Raster<Value, Dimension> operator*(const TIn& in) const {
-    if constexpr (isPatch<TIn>()) {
-      if (in.domain().step().isOne()) { // Box
+    if constexpr (is_patch<TIn>()) {
+      if (in.domain().step().is_one()) { // Box
         return box(in);
       } else { // Grid
         return decimate(in);
       }
-    } else if constexpr (isExtrapolator<TIn>()) {
+    } else if constexpr (is_extrapolator<TIn>()) {
       return full(in);
     } else {
       return crop(in);
@@ -77,7 +77,7 @@ public:
   template <typename TExtrapolator>
   Raster<Value, Dimension> full(const TExtrapolator& in) const {
     Raster<Value, Dimension> out(in.raster().shape());
-    transformSplits(in, out);
+    transform_splits(in, out);
     return out;
   }
 
@@ -92,7 +92,7 @@ public:
     // FIXME check region is a Box
     const auto region = Linx::box(in.domain()) - m_window; // box() needed to compile given that Grid is acceptable
     Raster<Value, Dimension> out(region.shape());
-    transformMonolith(in.patch(region), out);
+    transform_monolith(in.patch(region), out);
     return out;
   }
 
@@ -129,30 +129,30 @@ public:
   template <typename TPatch>
   Raster<Value, Dimension> decimate(const TPatch& in) const { // FIXME adjust?
 
-    const auto& raw = dontExtrapolate(in);
+    const auto& raw = dont_extrapolate(in);
     const auto& front = in.domain().front();
     const auto& step = in.domain().step();
     Raster<Value, Dimension> out(in.domain().shape());
 
-    const auto gridToBox = [&](const auto& g) {
+    const auto grid_to_box = [&](const auto& g) {
       auto f = g.front() - front;
       for (std::size_t i = 0; i < f.size(); ++i) { // FIXME simplify with Linx
         f[i] /= step[i];
       }
-      return Box<Dimension>::fromShape(f, g.shape());
+      return Box<Dimension>::from_shape(f, g.shape());
     };
 
     const auto box = Internal::BorderedBox<Dimension>(rasterize(in).domain(), m_window);
-    box.applyInnerBorder(
+    box.apply_inner_border(
         [&](const auto& ib) {
           const auto insub = raw.patch(ib);
-          auto outsub = out.patch(gridToBox(insub.domain()));
-          transformMonolith(insub, outsub);
+          auto outsub = out.patch(grid_to_box(insub.domain()));
+          transform_monolith(insub, outsub);
         },
         [&](const auto& ib) {
           const auto insub = in.patch(ib);
-          auto outsub = out.patch(gridToBox(insub.domain()));
-          transformMonolith(insub, outsub);
+          auto outsub = out.patch(grid_to_box(insub.domain()));
+          transform_monolith(insub, outsub);
         });
 
     return out;
@@ -170,11 +170,11 @@ public:
    */
   template <typename TIn, typename TOut>
   void transform(const TIn& in, TOut& out) const {
-    if constexpr (isExtrapolator<TIn>()) {
-      transformSplits(in, out);
+    if constexpr (is_extrapolator<TIn>()) {
+      transform_splits(in, out);
     } else {
       // FIXME check no extrapolation is required
-      transformMonolith(in, out);
+      transform_monolith(in, out);
     }
   }
 
@@ -183,19 +183,19 @@ private:
    * @brief Filter by splitting inner and border regions.
    */
   template <typename TIn, typename TOut>
-  void transformSplits(const TIn& in, TOut& out) const {
-    const auto& raw = dontExtrapolate(in);
+  void transform_splits(const TIn& in, TOut& out) const {
+    const auto& raw = dont_extrapolate(in);
     const auto box = Internal::BorderedBox<Dimension>(Linx::box(raw.domain()), m_window);
-    box.applyInnerBorder(
+    box.apply_inner_border(
         [&](const auto& ib) {
           const auto insub = raw.patch(ib);
           auto outsub = out.patch(insub.domain());
-          transformMonolith(insub, outsub);
+          transform_monolith(insub, outsub);
         },
         [&](const auto& ib) {
           const auto insub = in.patch(ib);
           auto outsub = out.patch(insub.domain());
-          transformMonolithExtrapolator(insub, outsub);
+          transform_monolith_extrapolator(insub, outsub);
         });
   }
 
@@ -203,22 +203,22 @@ private:
    * @brief Filter a monolithic patch (no region splitting).
    */
   template <typename TIn, typename TOut>
-  void transformMonolith(const TIn& in, TOut& out) const {
+  void transform_monolith(const TIn& in, TOut& out) const {
     auto patch = in.parent().patch(m_window);
-    auto outIt = out.begin();
+    auto out_it = out.begin();
     for (const auto& p : in.domain()) {
       patch.translate(p);
-      *outIt = reinterpret_cast<const TDerived&>(*this)(patch);
-      ++outIt;
-      patch.translateBack(p);
+      *out_it = reinterpret_cast<const TDerived&>(*this)(patch);
+      ++out_it;
+      patch.translate_back(p);
     }
   }
 
   template <typename TIn, typename TOut>
-  void transformMonolithExtrapolator(const TIn& in, TOut& out) const {
+  void transform_monolith_extrapolator(const TIn& in, TOut& out) const {
     const auto extrapolated = in.parent().copy(Linx::box(in.domain()) + m_window);
     const auto box = extrapolated.domain() - m_window; // FIXME region - m_window.front()?
-    transformMonolith(extrapolated.patch(box), out);
+    transform_monolith(extrapolated.patch(box), out);
   }
 
 protected:

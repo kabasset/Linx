@@ -69,9 +69,9 @@ BOOST_AUTO_TEST_CASE(concise_derivative_test) {
   }
   //! [Fill vector]
 
-  //! [realDft]
-  auto out = Linx::realDft(in);
-  //! [realDft]
+  //! [real_dft]
+  auto out = Linx::real_dft(in);
+  //! [real_dft]
 
   //! [Concise derivation]
   Linx::Index k = 0;
@@ -81,9 +81,9 @@ BOOST_AUTO_TEST_CASE(concise_derivative_test) {
   };
   //! [Concise derivation]
 
-  //! [inverseRealDft]
-  auto inv = Linx::inverseRealDft(out, {size});
-  //! [inverseRealDft]
+  //! [inverse_real_dft]
+  auto inv = Linx::inverse_real_dft(out, {size});
+  //! [inverse_real_dft]
 
   for (Linx::Index i = 0; i < size; ++i) {
     BOOST_TEST(std::abs(inv[i] - std::cos(dx * i)) < .001);

@@ -30,23 +30,23 @@ BOOST_AUTO_TEST_CASE(arithmetic_test) {
   const auto lhs = random<int>(314);
   const auto rhs = random<int>(314);
   int scalar = 2;
-  const auto plusVector = lhs + rhs;
-  const auto plusScalar = lhs + scalar;
-  const auto minusVector = lhs - rhs;
-  const auto minusScalar = lhs - scalar;
-  const auto timesVector = lhs * rhs;
-  const auto timesScalar = lhs * scalar;
-  const auto dividedByVector = lhs / rhs;
-  const auto dividedByScalar = lhs / scalar;
+  const auto plus_vector = lhs + rhs;
+  const auto plus_scalar = lhs + scalar;
+  const auto minus_vector = lhs - rhs;
+  const auto minus_scalar = lhs - scalar;
+  const auto times_vector = lhs * rhs;
+  const auto times_scalar = lhs * scalar;
+  const auto divided_by_vector = lhs / rhs;
+  const auto divided_by_scalar = lhs / scalar;
   for (std::size_t i = 0; i < lhs.size(); ++i) {
-    BOOST_TEST(plusVector[i] == lhs[i] + rhs[i]);
-    BOOST_TEST(plusScalar[i] == lhs[i] + scalar);
-    BOOST_TEST(minusVector[i] == lhs[i] - rhs[i]);
-    BOOST_TEST(minusScalar[i] == lhs[i] - scalar);
-    BOOST_TEST(timesVector[i] == lhs[i] * rhs[i]);
-    BOOST_TEST(timesScalar[i] == lhs[i] * scalar);
-    BOOST_TEST(dividedByVector[i] == lhs[i] / rhs[i]);
-    BOOST_TEST(dividedByScalar[i] == lhs[i] / scalar);
+    BOOST_TEST(plus_vector[i] == lhs[i] + rhs[i]);
+    BOOST_TEST(plus_scalar[i] == lhs[i] + scalar);
+    BOOST_TEST(minus_vector[i] == lhs[i] - rhs[i]);
+    BOOST_TEST(minus_scalar[i] == lhs[i] - scalar);
+    BOOST_TEST(times_vector[i] == lhs[i] * rhs[i]);
+    BOOST_TEST(times_scalar[i] == lhs[i] * scalar);
+    BOOST_TEST(divided_by_vector[i] == lhs[i] / rhs[i]);
+    BOOST_TEST(divided_by_scalar[i] == lhs[i] / scalar);
   }
 }
 

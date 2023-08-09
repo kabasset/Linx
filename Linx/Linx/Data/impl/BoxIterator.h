@@ -22,27 +22,27 @@ public:
    * @brief The beginning iterator.
    */
   static Iterator begin(const Box<N>& box) {
-    return Iterator(box, Iterator::beginPosition(box));
+    return Iterator(box, Iterator::begin_position(box));
   }
 
   /**
    * @brief The end iterator.
    */
   static Iterator end(const Box<N>& box) {
-    return Iterator(box, Iterator::endPosition(box));
+    return Iterator(box, Iterator::end_position(box));
   }
 
   /**
    * @brief The beginning position.
    */
-  static Position<N> beginPosition(const Box<N>& box) {
+  static Position<N> begin_position(const Box<N>& box) {
     return box.front();
   }
 
   /**
    * @brief The end position.
    */
-  static Position<N> endPosition(const Box<N>& box) {
+  static Position<N> end_position(const Box<N>& box) {
     auto out = box.front();
     out[0] -= (box.size() > 0); // out = front if size <= 0
     return out;
@@ -70,7 +70,7 @@ public:
    */
   Iterator& operator++() {
     if (m_current == m_region.back()) { // TODO simpler?
-      m_current = endPosition(m_region);
+      m_current = end_position(m_region);
       return *this;
     }
     ++m_current[0];

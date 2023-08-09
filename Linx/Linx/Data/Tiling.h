@@ -112,10 +112,10 @@ auto profiles(TRaster& in) {
   const auto step = domain.step();
   const auto plane = project(domain, I);
   Raster<TPatch, TRaster::Dimension> out(plane.shape());
-  auto frontIt = plane.begin();
+  auto front_it = plane.begin();
   for (auto& e : out) {
-    e = in.patch(Line<I, TRaster::Dimension>::fromSize(*frontIt, size, step[I]));
-    ++frontIt;
+    e = in.patch(Line<I, TRaster::Dimension>::from_size(*front_it, size, step[I]));
+    ++front_it;
   }
   return out;
 }

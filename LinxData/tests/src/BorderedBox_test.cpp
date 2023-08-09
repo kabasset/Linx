@@ -17,14 +17,14 @@ BOOST_AUTO_TEST_SUITE(BorderedBox_test)
 
 BOOST_AUTO_TEST_CASE(position_set_test) {
 
-  const auto inner = Box<2>::fromShape({1, 1}, {4, 3});
+  const auto inner = Box<2>::from_shape({1, 1}, {4, 3});
   const Box<2> margin {{-3, -2}, {2, 1}};
   const auto box = inner + margin;
   const Internal::BorderedBox<2> bordered(box, margin);
 
-  std::set<Indices<2>> innerSet;
+  std::set<Indices<2>> inner_set;
   for (const auto& p : inner) {
-    innerSet.insert(p.container());
+    inner_set.insert(p.container());
   }
   std::set<Indices<2>> all;
   for (const auto& p : box) {
@@ -33,28 +33,28 @@ BOOST_AUTO_TEST_CASE(position_set_test) {
 
   BOOST_TEST(all.size() == box.size());
 
-  std::set<Indices<2>> outInner;
-  std::set<Indices<2>> outAll;
-  bordered.applyInnerBorder(
+  std::set<Indices<2>> out_inner;
+  std::set<Indices<2>> out_all;
+  bordered.apply_inner_border(
       [&](const auto& b) {
         for (const auto& p : b) {
-          outInner.insert(p.container());
-          outAll.insert(p.container());
+          out_inner.insert(p.container());
+          out_all.insert(p.container());
         }
       },
       [&](const auto& b) {
         for (const auto& p : b) {
-          outAll.insert(p.container());
+          out_all.insert(p.container());
         }
       });
 
-  BOOST_TEST(outInner == innerSet);
-  BOOST_TEST(outAll == all);
+  BOOST_TEST(out_inner == inner_set);
+  BOOST_TEST(out_all == all);
 }
 
 BOOST_AUTO_TEST_CASE(box_ordering_test) {
 
-  const auto inner = Box<2>::fromShape({1, 1}, {4, 3});
+  const auto inner = Box<2>::from_shape({1, 1}, {4, 3});
   const Box<2> margin {{-3, -2}, {2, 1}};
   const Internal::BorderedBox<2> bordered(inner + margin, margin);
 
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(box_ordering_test) {
       {{-2, 4}, {6, 4}} // bottom
   };
   std::vector<Box<2>> out;
-  bordered.applyInnerBorder(
+  bordered.apply_inner_border(
       [&](const auto& b) {
         out.push_back(b);
       },

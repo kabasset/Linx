@@ -68,8 +68,8 @@ public:
    * @param offset An iterator to the beginning of line offsets
    */
   Iterator(Value* front, Index step, Index width, const Index* offset) :
-      m_step(step), m_width(width), m_front(front), m_eol(m_front + m_width), m_offsetIt(offset),
-      m_current(m_front + *m_offsetIt) {}
+      m_step(step), m_width(width), m_front(front), m_eol(m_front + m_width), m_offset_it(offset),
+      m_current(m_front + *m_offset_it) {}
 
   /**
    * @brief Dereference operator.
@@ -93,8 +93,8 @@ public:
     if (m_current < m_eol) {
       return *this;
     }
-    m_current = m_front + *(++m_offsetIt);
-    // Cannot dereference if m_offsetIt == m_offsetEnd => size + 1 to avoid branching
+    m_current = m_front + *(++m_offset_it);
+    // Cannot dereference if m_offset_it == m_offset_end => size + 1 to avoid branching
     m_eol = m_current + m_width;
     return *this;
   }
@@ -112,14 +112,14 @@ public:
    * @brief Equality operator.
    */
   bool operator==(const Iterator& rhs) const {
-    return m_offsetIt == rhs.m_offsetIt;
+    return m_offset_it == rhs.m_offset_it;
   }
 
   /**
    * @brief Non equality operator.
    */
   bool operator!=(const Iterator& rhs) const {
-    return m_offsetIt != rhs.m_offsetIt;
+    return m_offset_it != rhs.m_offset_it;
   }
 
 private:
@@ -146,7 +146,7 @@ private:
   /**
    * @brief A beginning of line offset iterator.
    */
-  const Index* m_offsetIt;
+  const Index* m_offset_it;
 
   /**
    * @brief The current pointer.

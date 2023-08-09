@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_SUITE(Slice_test)
 
 //-----------------------------------------------------------------------------
 
-void checkSlice(const Slice& in, Index front, Index back, Index step, std::size_t size) {
+void check_slice(const Slice& in, Index front, Index back, Index step, std::size_t size) {
   BOOST_TEST(in.front() == front);
   BOOST_TEST(in.back() == back);
   BOOST_TEST(in.step() == step);
@@ -23,23 +23,23 @@ void checkSlice(const Slice& in, Index front, Index back, Index step, std::size_
 
 BOOST_AUTO_TEST_CASE(segment_test) {
   // 2, 3, 4, ... , 10
-  checkSlice({2, 10}, 2, 10, 1, 9);
+  check_slice({2, 10}, 2, 10, 1, 9);
 }
 
 BOOST_AUTO_TEST_CASE(segment_from_size_test) {
-  checkSlice(Slice::fromSize(2, 9), 2, 10, 1, 9);
+  check_slice(Slice::from_size(2, 9), 2, 10, 1, 9);
 }
 
 BOOST_AUTO_TEST_CASE(slice_test) {
   // 2, 6, 10
-  checkSlice({2, 10, 4}, 2, 10, 4, 3);
-  checkSlice({2, 11, 4}, 2, 10, 4, 3);
-  checkSlice({2, 12, 4}, 2, 10, 4, 3);
-  checkSlice({2, 13, 4}, 2, 10, 4, 3);
+  check_slice({2, 10, 4}, 2, 10, 4, 3);
+  check_slice({2, 11, 4}, 2, 10, 4, 3);
+  check_slice({2, 12, 4}, 2, 10, 4, 3);
+  check_slice({2, 13, 4}, 2, 10, 4, 3);
 }
 
 BOOST_AUTO_TEST_CASE(slice_from_shape_test) {
-  checkSlice(Slice::fromSize(2, 3, 4), 2, 10, 4, 3);
+  check_slice(Slice::from_size(2, 3, 4), 2, 10, 4, 3);
 }
 
 //-----------------------------------------------------------------------------

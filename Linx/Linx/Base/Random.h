@@ -152,7 +152,7 @@ public:
   /**
    * @brief Constructor.
    */
-  explicit UniformNoise(T min = Limits<T>::halfMin(), T max = Limits<T>::halfMax(), std::size_t seed = -1) :
+  explicit UniformNoise(T min = Limits<T>::half_min(), T max = Limits<T>::half_max(), std::size_t seed = -1) :
       RandomGenerator(seed), m_distribution(min, max) {}
 
   /**
@@ -325,7 +325,7 @@ private:
  * If the sum of probabilities _s_ is greater than 1,
  * then the input probabilities are normalized by _s_.
  * 
- * For salt-and-pepper noise, see maker `saltAndPepper()`.
+ * For salt-and-pepper noise, see maker `salt_and_pepper()`.
  * 
  * @satisfies{RandomNoise}
  */
@@ -342,19 +342,20 @@ public:
   /**
    * @brief Multiple values constructor.
    */
-  explicit ImpulseNoise(const std::map<T, double>& valueProbabilities, std::size_t seed = -1) :
-      RandomGenerator(seed), m_values(values(valueProbabilities)), m_distribution(distribution(valueProbabilities)) {}
+  explicit ImpulseNoise(const std::map<T, double>& values_probabilities, std::size_t seed = -1) :
+      RandomGenerator(seed), m_values(values(values_probabilities)),
+      m_distribution(distribution(values_probabilities)) {}
 
   /**
    * @brief Make a salt and pepper noise generator.
    */
-  static ImpulseNoise saltAndPepper(
-      double pSalt,
-      double pPepper,
-      T salt = Limits<T>::max(),
-      T pepper = Limits<T>::min(),
+  static ImpulseNoise salt_and_pepper(
+      double salt_probability,
+      double pepper_probability,
+      T salt_value = Limits<T>::max(),
+      T pepper_value = Limits<T>::min(),
       std::size_t seed = -1) {
-    return ImpulseNoise({{salt, pSalt}, {pepper, pPepper}}, seed);
+    return ImpulseNoise({{salt_value, salt_probability}, {pepper_value, pepper_probability}}, seed);
   }
 
   /**
@@ -372,9 +373,9 @@ private:
   /**
    * @brief Extract the values from the value-probability map.
    */
-  static std::vector<T> values(const std::map<T, double>& valueProbabilities) {
-    std::vector<T> out(valueProbabilities.size());
-    std::transform(valueProbabilities.begin(), valueProbabilities.end(), out.begin(), [](auto vp) {
+  static std::vector<T> values(const std::map<T, double>& values_probabilities) {
+    std::vector<T> out(values_probabilities.size());
+    std::transform(values_probabilities.begin(), values_probabilities.end(), out.begin(), [](auto vp) {
       return vp.first;
     });
     return out;
@@ -383,16 +384,16 @@ private:
   /**
    * @brief Extract the weights from the value-probability map.
    */
-  static std::vector<double> weights(const std::map<T, double>& valueProbabilities) {
-    const auto count = valueProbabilities.size();
+  static std::vector<double> weights(const std::map<T, double>& values_probabilities) {
+    const auto count = values_probabilities.size();
     std::vector<double> out(count + 1);
-    auto& nullProbability = out[count];
-    nullProbability = 1;
-    std::transform(valueProbabilities.begin(), valueProbabilities.end(), out.begin(), [&](auto vp) {
-      nullProbability -= vp.second;
+    auto& null_probability = out[count];
+    null_probability = 1;
+    std::transform(values_probabilities.begin(), values_probabilities.end(), out.begin(), [&](auto vp) {
+      null_probability -= vp.second;
       return vp.second;
     });
-    if (nullProbability <= std::numeric_limits<double>::epsilon() * count) {
+    if (null_probability <= std::numeric_limits<double>::epsilon() * count) {
       out.resize(count); // Discard null hypothesis
     }
     return out;
@@ -401,8 +402,8 @@ private:
   /**
    * @brief Construct the distribution from the value-probability map.
    */
-  static std::discrete_distribution<std::size_t> distribution(const std::map<T, double>& valueProbabilities) {
-    const auto w = weights(valueProbabilities);
+  static std::discrete_distribution<std::size_t> distribution(const std::map<T, double>& values_probabilities) {
+    const auto w = weights(values_probabilities);
     return std::discrete_distribution<std::size_t>(w.begin(), w.end());
   }
 

@@ -68,7 +68,7 @@ public:
    */
   template <typename TRaster>
   TRaster read(Index hdu = 0) {
-    FileNotFoundError::mayThrow(m_path);
+    FileNotFoundError::may_throw(m_path);
     int status = 0;
     fitsfile* fptr;
     int naxis = 0;
@@ -102,7 +102,7 @@ public:
     std::string path = "!"; // For overwriting
     switch (mode) {
       case 'x':
-        PathExistsError::mayThrow(m_path);
+        PathExistsError::may_throw(m_path);
         fits_create_file(&fptr, m_path.c_str(), &status);
         break;
       case 'w':
@@ -110,7 +110,7 @@ public:
         fits_create_file(&fptr, path.c_str(), &status);
         break;
       case 'a':
-        FileNotFoundError::mayThrow(m_path);
+        FileNotFoundError::may_throw(m_path);
         fits_open_file(&fptr, m_path.c_str(), READWRITE, &status);
         break;
       default:
@@ -120,7 +120,7 @@ public:
       throw FileFormatError("Cannot write file", m_path);
     }
     auto shape = raster.shape();
-    fits_create_img(fptr, imageTypecode<typename TRaster::Value>(), raster.dimension(), shape.data(), &status);
+    fits_create_img(fptr, image_typecode<typename TRaster::Value>(), raster.dimension(), shape.data(), &status);
     if (raster.size() > 0) {
       fits_write_img(fptr, typecode<typename TRaster::Value>(), 1, raster.size(), raster.data(), &status);
     }
@@ -185,7 +185,7 @@ private:
    * @brief Get CFITSIO's image typecode.
    */
   template <typename T>
-  static constexpr int imageTypecode() {
+  static constexpr int image_typecode() {
     if constexpr (std::is_integral_v<T>) {
       constexpr bool sign = std::is_signed_v<T>;
       if constexpr (sizeof(T) == 1) {

@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(simple_random_test) {
   std::cout << "Noisy raster:  " << raster << std::endl;
 
   //! [Apply salt and pepper noise]
-  raster.apply(Linx::ImpulseNoise<int>::saltAndPepper(0.1, 0.2, 0, 1000));
+  raster.apply(Linx::ImpulseNoise<int>::salt_and_pepper(0.1, 0.2, 0, 1000));
   //! [Apply salt and pepper noise]
 
   std::cout << "S&P noised: " << raster << std::endl;

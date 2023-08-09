@@ -17,24 +17,24 @@ BOOST_AUTO_TEST_SUITE(Raster_test)
 BOOST_AUTO_TEST_CASE(index_test) {
 
   /* Fixed dimension */
-  Position<4> fixedShape;
-  for (auto& length : fixedShape) {
+  Position<4> fixed_shape;
+  for (auto& length : fixed_shape) {
     length = std::rand();
   }
-  Position<4> fixedPos;
-  for (auto& coord : fixedPos) {
+  Position<4> fixed_pos;
+  for (auto& coord : fixed_pos) {
     coord = std::rand();
   }
-  auto fixedIndex = Internal::IndexRecursionImpl<4>::index(fixedShape, fixedPos);
-  BOOST_TEST(
-      fixedIndex ==
-      fixedPos[0] + fixedShape[0] * (fixedPos[1] + fixedShape[1] * (fixedPos[2] + fixedShape[2] * (fixedPos[3]))));
+  auto fixed_index = Internal::IndexRecursionImpl<4>::index(fixed_shape, fixed_pos);
+  auto expected_index = fixed_pos[0] +
+      fixed_shape[0] * (fixed_pos[1] + fixed_shape[1] * (fixed_pos[2] + fixed_shape[2] * (fixed_pos[3])));
+  BOOST_TEST(fixed_index == expected_index);
 
   /* Variable dimension */
-  Position<-1> variableShape(fixedShape);
-  Position<-1> variablePos(fixedPos);
-  auto variableIndex = Internal::IndexRecursionImpl<-1>::index(variableShape, variablePos);
-  BOOST_TEST(variableIndex == fixedIndex);
+  Position<-1> variable_shape(fixed_shape);
+  Position<-1> variable_pos(fixed_pos);
+  auto variable_index = Internal::IndexRecursionImpl<-1>::index(variable_shape, variable_pos);
+  BOOST_TEST(variable_index == fixed_index);
 }
 
 BOOST_AUTO_TEST_CASE(ptrraster_data_test) {
@@ -45,22 +45,22 @@ BOOST_AUTO_TEST_CASE(ptrraster_data_test) {
 }
 
 BOOST_AUTO_TEST_CASE(const_ptrraster_data_test) {
-  const int cData[] = {3, 4, 5};
-  PtrRaster<const int, 1> cRaster({3}, cData);
-  BOOST_TEST(cRaster.data() != nullptr);
-  BOOST_TEST(cRaster[{0}] == 3);
+  const int c_data[] = {3, 4, 5};
+  PtrRaster<const int, 1> c_raster({3}, c_data);
+  BOOST_TEST(c_raster.data() != nullptr);
+  BOOST_TEST(c_raster[{0}] == 3);
 }
 
 BOOST_AUTO_TEST_CASE(vecraster_data_test) {
-  VecRaster<int, 1> vecRaster({3});
-  BOOST_TEST(vecRaster.data() != nullptr);
-  BOOST_TEST(vecRaster[{0}] == 0);
+  VecRaster<int, 1> vec_raster({3});
+  BOOST_TEST(vec_raster.data() != nullptr);
+  BOOST_TEST(vec_raster[{0}] == 0);
 }
 
 BOOST_AUTO_TEST_CASE(const_vecraster_data_test) {
-  const VecRaster<int, 1> cVecRaster({3});
-  BOOST_TEST(cVecRaster.data() != nullptr);
-  BOOST_TEST(cVecRaster[{0}] == 0);
+  const VecRaster<int, 1> c_vec_raster({3});
+  BOOST_TEST(c_vec_raster.data() != nullptr);
+  BOOST_TEST(c_vec_raster[{0}] == 0);
 }
 
 BOOST_AUTO_TEST_CASE(alignedraster_owned_and_shared_test) {
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(vecraster_move_test) {
   const auto copied = raster.container();
   const auto data = raster.data();
   std::vector<int> moved;
-  raster.moveTo(moved);
+  raster.move_to(moved);
   BOOST_TEST(moved == copied);
   BOOST_TEST(moved.data() == data);
 }
@@ -138,17 +138,17 @@ BOOST_AUTO_TEST_CASE(make_raster_test) {
   constexpr Index height = 9;
   constexpr Index depth = 3;
   short data2[width * height] = {0};
-  const short constData2[width * height] = {0};
+  const short c_data2[width * height] = {0};
   float data3[width * height * depth] = {0};
-  const float constData3[width * height * depth] = {0};
+  const float c_data3[width * height * depth] = {0};
   const auto raster2 = rasterize(data2, width, height);
-  const auto constRaster2 = rasterize(constData2, width, height);
+  const auto c_raster2 = rasterize(c_data2, width, height);
   const auto raster3 = rasterize(data3, width, height, depth);
-  const auto constRaster3 = rasterize(constData3, width, height, depth);
+  const auto c_raster3 = rasterize(c_data3, width, height, depth);
   BOOST_TEST(raster2.dimension() == 2);
-  BOOST_TEST(constRaster2.dimension() == 2);
+  BOOST_TEST(c_raster2.dimension() == 2);
   BOOST_TEST(raster3.dimension() == 3);
-  BOOST_TEST(constRaster3.dimension() == 3);
+  BOOST_TEST(c_raster3.dimension() == 3);
 }
 
 BOOST_AUTO_TEST_CASE(slicing_test) {
@@ -157,67 +157,67 @@ BOOST_AUTO_TEST_CASE(slicing_test) {
 
   // Several x-y planes
   Box<3> cube {{0, 0, 1}, {4, 2, 2}};
-  BOOST_TEST(raster.isContiguous<3>(cube));
+  BOOST_TEST(raster.is_contiguous<3>(cube));
   const auto cubed = raster.slice<3>(cube);
   BOOST_TEST((cubed.shape() == Position<3>({5, 3, 2})));
   BOOST_TEST((cubed[{0, 0, 0}] == raster[cube.front()]));
 
   // One full x-y plane
   Box<3> plane {{0, 0, 1}, {4, 2, 1}};
-  BOOST_TEST(raster.isContiguous<2>(plane));
+  BOOST_TEST(raster.is_contiguous<2>(plane));
   const auto planed = raster.slice<2>(plane);
   BOOST_TEST((planed.shape() == Position<2>({5, 3})));
   BOOST_TEST((planed[{0, 0}] == raster[plane.front()]));
 
   // One partial x-y plane
   Box<3> rectangle {{0, 1, 1}, {4, 2, 1}};
-  BOOST_TEST(raster.isContiguous<2>(rectangle));
+  BOOST_TEST(raster.is_contiguous<2>(rectangle));
   const auto rectangled = raster.slice<2>(rectangle);
   BOOST_TEST((rectangled.shape() == Position<2>({5, 2})));
   BOOST_TEST((rectangled[{0, 0}] == raster[rectangle.front()]));
 
   // One partial x line
   Box<3> segment {{1, 1, 1}, {3, 1, 1}};
-  BOOST_TEST(raster.isContiguous<1>(segment));
+  BOOST_TEST(raster.is_contiguous<1>(segment));
   const auto segmented = raster.slice<1>(segment);
   BOOST_TEST((segmented.shape() == Position<1>({3})));
   BOOST_TEST((segmented[{0}] == raster[segment.front()]));
 
   // Non-contiguous region
   Box<3> bad {{1, 1, 1}, {2, 2, 2}};
-  BOOST_TEST(not raster.isContiguous<3>(bad));
+  BOOST_TEST(not raster.is_contiguous<3>(bad));
   BOOST_CHECK_THROW(raster.slice<3>(bad), Exception);
 }
 
 BOOST_AUTO_TEST_CASE(sectionning_test) {
 
-  const auto raster3D = random<short, 3>({8, 9, 12});
+  const auto raster3d = random<short, 3>({8, 9, 12});
 
   // 3D
-  const auto section3D = raster3D.section(3, 5);
-  BOOST_TEST((section3D.shape() == Position<3>({8, 9, 3})));
-  for (const auto& p : section3D.domain()) {
-    BOOST_TEST((section3D[p] == raster3D[p + Position<3> {0, 0, 3}]));
+  const auto section3d = raster3d.section(3, 5);
+  BOOST_TEST((section3d.shape() == Position<3>({8, 9, 3})));
+  for (const auto& p : section3d.domain()) {
+    BOOST_TEST((section3d[p] == raster3d[p + Position<3> {0, 0, 3}]));
   }
 
   // 2D
-  const auto section2D = raster3D.section(3);
-  BOOST_TEST(section2D.shape() == Position<2>({8, 9}));
-  for (const auto& p : section2D.domain()) {
-    BOOST_TEST((section2D[p] == raster3D[p.extend<3>({0, 0, 3})]));
+  const auto section2d = raster3d.section(3);
+  BOOST_TEST(section2d.shape() == Position<2>({8, 9}));
+  for (const auto& p : section2d.domain()) {
+    BOOST_TEST((section2d[p] == raster3d[p.extend<3>({0, 0, 3})]));
   }
 
   // 1D
-  const auto section1D = section2D.section(6);
-  BOOST_TEST(section1D.shape() == Position<1> {8});
-  for (const auto& p : section1D.domain()) {
-    BOOST_TEST((section1D[p] == raster3D[p.extend<3>({0, 6, 3})]));
+  const auto section1d = section2d.section(6);
+  BOOST_TEST(section1d.shape() == Position<1> {8});
+  for (const auto& p : section1d.domain()) {
+    BOOST_TEST((section1d[p] == raster3d[p.extend<3>({0, 6, 3})]));
   }
 
   // 0D
-  const auto section0D = section1D.section(2);
-  BOOST_TEST(section0D.dimension() == 0);
-  BOOST_TEST((*section0D.data() == raster3D[{2, 6, 3}]));
+  const auto section0d = section1d.section(2);
+  BOOST_TEST(section0d.dimension() == 0);
+  BOOST_TEST((*section0d.data() == raster3d[{2, 6, 3}]));
 }
 
 BOOST_AUTO_TEST_CASE(raster_row_test) {

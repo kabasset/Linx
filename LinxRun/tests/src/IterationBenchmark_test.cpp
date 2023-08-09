@@ -14,7 +14,7 @@ struct BenchmarkFixture : IterationBenchmark {
 
   void validate() {
     const Position<3> shape {m_width, m_height, m_depth};
-    const auto size = shapeSize(shape);
+    const auto size = shape_size(shape);
     BOOST_TEST(size > 0);
     BOOST_TEST(m_a.shape() == shape);
     BOOST_TEST(m_b.shape() == shape);
@@ -32,42 +32,42 @@ BOOST_FIXTURE_TEST_SUITE(IterationBenchmark_test, BenchmarkFixture)
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(xyz_test) {
-  loopOverXyz();
+  loop_over_xyz();
   validate();
 }
 
 BOOST_AUTO_TEST_CASE(zyx_test) {
-  loopOverZyx();
+  loop_over_zyx();
   validate();
 }
 
 BOOST_AUTO_TEST_CASE(position_test) {
-  iterateOverPositions();
+  iterate_over_positions();
   validate();
 }
 
 BOOST_AUTO_TEST_CASE(position_optimized_test) {
-  iterateOverPositionsOptimized();
+  iterate_over_positions_optimized();
   validate();
 }
 
 BOOST_AUTO_TEST_CASE(index_test) {
-  loopOverIndices();
+  loop_over_indices();
   validate();
 }
 
 BOOST_AUTO_TEST_CASE(value_test) {
-  iterateOverValues();
+  iterate_over_values();
   validate();
 }
 
 BOOST_AUTO_TEST_CASE(operator_test) {
-  callOperator();
+  call_operator();
   validate();
 }
 
 BOOST_AUTO_TEST_CASE(generate_test) {
-  callGenerate();
+  call_generate();
   validate();
 }
 

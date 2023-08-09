@@ -57,14 +57,14 @@ public:
   /**
    * @brief Create a box from a front position and shape.
    */
-  static Box<N> fromShape(Position<N> front, Position<N> shape) {
+  static Box<N> from_shape(Position<N> front, Position<N> shape) {
     return {front, front + shape - 1};
   }
 
   /**
    * @brief Create a box from a radius and center position.
    */
-  static Box<N> fromCenter(Index radius = 1, const Position<N> center = Position<N>::zero()) {
+  static Box<N> from_center(Index radius = 1, const Position<N> center = Position<N>::zero()) {
     return {center - radius, center + radius};
   }
 
@@ -118,7 +118,7 @@ public:
    * @brief Compute the box size, i.e. number of positions.
    */
   Index size() const {
-    return shapeSize(shape());
+    return shape_size(shape());
   }
 
   /**

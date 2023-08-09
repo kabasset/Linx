@@ -10,16 +10,16 @@
 using namespace Linx;
 
 struct ChronoFixture : public Chronometer<std::chrono::milliseconds> {
-  ChronoFixture(std::chrono::milliseconds chronoOffset = std::chrono::milliseconds {std::rand()}) :
-      Chronometer<std::chrono::milliseconds>(chronoOffset), offset(chronoOffset) {}
-  void wait(std::int64_t ms = defaultWait) {
+  ChronoFixture(std::chrono::milliseconds chrono_offset = std::chrono::milliseconds {std::rand()}) :
+      Chronometer<std::chrono::milliseconds>(chrono_offset), offset(chrono_offset) {}
+  void wait(std::int64_t ms = default_wait) {
     std::this_thread::sleep_for(Unit(ms));
   }
   Unit offset;
-  static constexpr std::int64_t defaultWait = 10;
+  static constexpr std::int64_t default_wait = 10;
 };
 
-constexpr std::int64_t ChronoFixture::defaultWait;
+constexpr std::int64_t ChronoFixture::default_wait;
 
 //-----------------------------------------------------------------------------
 
@@ -29,20 +29,20 @@ BOOST_FIXTURE_TEST_SUITE(Chronometer_test, ChronoFixture)
 
 BOOST_AUTO_TEST_CASE(init_test) {
   BOOST_TEST(elapsed().count() == offset.count());
-  BOOST_TEST(not isRunning());
+  BOOST_TEST(not is_running());
   BOOST_TEST(size() == 0);
 }
 
 BOOST_AUTO_TEST_CASE(one_inc_test) {
   start();
-  BOOST_TEST(isRunning());
+  BOOST_TEST(is_running());
   wait();
   stop();
-  BOOST_TEST(not isRunning());
+  BOOST_TEST(not is_running());
   BOOST_TEST(elapsed().count() >= offset.count());
   BOOST_TEST(size() == 1);
   const auto inc = last().count();
-  BOOST_TEST(inc >= defaultWait);
+  BOOST_TEST(inc >= default_wait);
   BOOST_TEST(elapsed().count() == offset.count() + inc);
   BOOST_TEST(distribution().mean() == inc);
   BOOST_TEST(distribution().stdev(false) == 0.); // Exactly 0.
@@ -55,10 +55,10 @@ BOOST_AUTO_TEST_CASE(two_incs_test) {
   wait(); // Wait
   stop();
   start();
-  BOOST_TEST(isRunning());
-  wait(defaultWait * 10); // Wait more
+  BOOST_TEST(is_running());
+  wait(default_wait * 10); // Wait more
   stop();
-  BOOST_TEST(not isRunning());
+  BOOST_TEST(not is_running());
   BOOST_TEST(elapsed().count() > offset.count());
   BOOST_TEST(size() == 2);
   const auto fast = increments()[0];

@@ -196,12 +196,12 @@ public:
    * 
    * The holder is instantiated as:
    * \code
-   * Holder holder(shapeSize(shape), std::forward<TArgs>(args)...);
+   * Holder holder(shape_size(shape), std::forward<TArgs>(args)...);
    * \endcode
    */
   template <typename... TArgs>
   explicit Raster(Position<N> shape = Position<N>::zero(), TArgs&&... args) :
-      Container(shapeSize(shape), std::forward<TArgs>(args)...), m_shape(std::move(shape)) {}
+      Container(shape_size(shape), std::forward<TArgs>(args)...), m_shape(std::move(shape)) {}
 
   /**
    * @brief List-copy constructor.
@@ -211,14 +211,14 @@ public:
    * 
    * The holder is instantiated as:
    * \code
-   * Holder holder(shapeSize(shape), std::forward<TArgs>(args)...);
+   * Holder holder(shape_size(shape), std::forward<TArgs>(args)...);
    * std::copy(list.begin(), list.end(), holder.data());
    * \endcode
    */
   template <typename... TArgs>
   explicit Raster(Position<N> shape, std::initializer_list<T> list, TArgs&&... args) :
       Container(list.begin(), list.end(), std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
-    SizeError::mayThrow(this->size(), shapeSize(shape));
+    SizeError::may_throw(this->size(), shape_size(shape));
   }
 
   /**
@@ -229,14 +229,14 @@ public:
    * 
    * The holder is instantiated as:
    * \code
-   * Holder holder(shapeSize(shape), std::forward<TArgs>(args)...);
+   * Holder holder(shape_size(shape), std::forward<TArgs>(args)...);
    * std::copy(range.begin(), range.end(), holder.data());
    * \endcode
    */
   template <typename TRange, typename std::enable_if_t<IsRange<TRange>::value>* = nullptr, typename... TArgs>
   explicit Raster(Position<N> shape, TRange& range, TArgs&&... args) :
       Container(range.begin(), range.end(), std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
-    SizeError::mayThrow(this->size(), shapeSize(shape));
+    SizeError::may_throw(this->size(), shape_size(shape));
   }
 
   /**
@@ -262,7 +262,7 @@ public:
    * It can be used to loop over all pixels, e.g.:
    * \code
    * for (auto pos : raster.domain()) {
-   *   processPixel(pos, raster[pos]);
+   *   process_pixel(pos, raster[pos]);
    * }
    * \endcode
    */
@@ -347,12 +347,12 @@ public:
    * - For `i` > `M`, `front[i]` = `back[i]`.
    */
   template <Index M = 2>
-  bool isContiguous(const Box<N>& region) const;
+  bool is_contiguous(const Box<N>& region) const;
 
   /**
    * @brief Create a slice from a given region.
    * @tparam M The dimension of the slice (cannot be -1)
-   * @see isContiguous()
+   * @see is_contiguous()
    * @see section()
    */
   template <Index M = 2>
@@ -429,7 +429,7 @@ public:
    * 
    * Patches are iterable.
    * 
-   * @see isContiguous()
+   * @see is_contiguous()
    * @see slice()
    * @see section()
    */
@@ -498,10 +498,10 @@ bool operator!=(const Raster<T, N, THolder>& lhs, const Raster<U, M, UHolder>& r
  * - float* ptr: The pixel values as a pointer;
  * - std::vector<float> vec: The pixel values as a vector;
  * 
- * auto ptrRaster2D = rasterize(ptr, width, height);
- * auto ptrRaster3D = rasterize(ptr, width, height, depth);
- * auto vecRaster2D = rasterize(vec, width, height); // The vector is copied
- * auto vecRaster3D = rasterize(std::move(vec), width, height, depth); // The vector is moved
+ * auto ptrraster2d = rasterize(ptr, width, height);
+ * auto ptrraster3d = rasterize(ptr, width, height, depth);
+ * auto vecraster2d = rasterize(vec, width, height); // The vector is copied
+ * auto vecraster3d = rasterize(std::move(vec), width, height, depth); // The vector is moved
  * \endcode
  */
 template <typename TContainer, typename... Longs>

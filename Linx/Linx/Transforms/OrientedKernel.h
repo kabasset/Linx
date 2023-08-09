@@ -48,7 +48,7 @@ public:
    * @brief Get the kernel window.
    */
   Slice window() const {
-    return Slice::fromSize(-m_origin, m_values.size());
+    return Slice::from_size(-m_origin, m_values.size());
   }
 
   /**
@@ -58,7 +58,7 @@ public:
   Raster<std::decay_t<typename TExtrapolator::Value>, TExtrapolator::Dimension>
   operator*(const TExtrapolator& in) const {
     Raster<std::decay_t<typename TExtrapolator::Value>, TExtrapolator::Dimension> out(in.shape());
-    correlateTo(in, out, out.domain());
+    correlate_to(in, out, out.domain());
     return out;
   }
 
@@ -66,15 +66,15 @@ public:
    * @brief Correlate an input raster or extrapolator over a specified region.
    */
   template <typename TIn, typename TOut, typename TRegion>
-  void correlateTo(const TIn& in, TOut& out, const TRegion region) const {
+  void correlate_to(const TIn& in, TOut& out, const TRegion region) const {
     auto front = Position<TIn::Dimension>::zero();
     front[I] -= m_origin;
-    auto patch = in.patch(Line<I, TIn::Dimension>::fromSize(std::move(front), m_values.size()));
+    auto patch = in.patch(Line<I, TIn::Dimension>::from_size(std::move(front), m_values.size()));
     for (const auto& p : region) {
       patch.translate(p);
       out[p] = std::inner_product(m_values.begin(), m_values.end(), patch.begin(), T {});
       // FIXME use out.patch(region) iterator?
-      patch.translateBack(p);
+      patch.translate_back(p);
     }
   }
 

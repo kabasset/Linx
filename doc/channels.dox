@@ -42,7 +42,7 @@ Instantiate an RGB image:
 
 \snippet LinxDemoChannels_test.cpp Input Rgb
 
-And apply some function `rgbToHsv()` to each pixel with `Raster::generate()`:
+And apply some function `rgb_to_hsv()` to each pixel with `Raster::generate()`:
 
 \snippet LinxDemoChannels_test.cpp Output Hsv
 
@@ -68,7 +68,7 @@ Looping over the input RGB image and output HSV image at the same time is someth
 
 \snippet LinxDemoChannels_test.cpp Output Cxy
 
-where this time `rgbToHsv()` operates on `rgbIt[0]`, `rgbIt[1]`, `rgbIt[2]`, `hsvIt[0]`, `hsvIt[1]`, `hsvIt[2]`!
+where this time `rgb_to_hsv()` operates on `rgb_it[0]`, `rgb_it[1]`, `rgb_it[2]`, `hsv_it[0]`, `hsv_it[1]`, `hsv_it[2]`!
 
 Note that the memory layout in the underlying 1D container is *exactly* the same as with the dedicated structure strategy.
 This is just more cumbersome!

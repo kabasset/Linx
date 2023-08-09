@@ -19,11 +19,11 @@ namespace Linx {
  * Here's an example program to handle it:
  * \code
  * std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
- *   auto options = ProgramOptions::fromAuxdir("help.txt");
+ *   auto options = ProgramOptions::from_auxdir("help.txt");
  *   options.positional("positional", value<std::string>(), "Positional option");
  *   options.named("named1", value<int>(), "Named option 1");
  *   options.named("named2", value<int>(), "Named option 2");
- *   return options.asPair();
+ *   return options.as_pair();
  * }
  * \endcode
  */
@@ -63,8 +63,8 @@ public:
    * @brief Declare a positional option with default value.
    */
   template <typename T>
-  void positional(const char* name, const char* description, T defaultValue) {
-    positional(name, boost::program_options::value<T>()->default_value(defaultValue), description);
+  void positional(const char* name, const char* description, T default_value) {
+    positional(name, boost::program_options::value<T>()->default_value(default_value), description);
   }
 
   /**
@@ -72,8 +72,8 @@ public:
    */
   void positional(const char* name, const ValueSemantics* value, const char* description) {
     m_add(name, value, description);
-    const int maxArgs = value->max_tokens();
-    m_positional.add(name, maxArgs);
+    const int max_args = value->max_tokens();
+    m_positional.add(name, max_args);
   }
 
   /**
@@ -92,8 +92,8 @@ public:
    * A short form (1-character) of the option can be provided, separated by a comma.
    */
   template <typename T>
-  void named(const char* name, const char* description, T defaultValue) {
-    named(name, boost::program_options::value<T>()->default_value(defaultValue), description);
+  void named(const char* name, const char* description, T default_value) {
+    named(name, boost::program_options::value<T>()->default_value(default_value), description);
   }
 
   /**
@@ -115,7 +115,7 @@ public:
   /**
    * @brief Get the named (flags included) and positional options as a pair.
    */
-  std::pair<OptionsDescription, PositionalOptionsDescription> asPair() const {
+  std::pair<OptionsDescription, PositionalOptionsDescription> as_pair() const {
     return std::make_pair(m_named, m_positional);
   }
 
@@ -174,11 +174,11 @@ public:
 
 private:
   static std::string describe(const std::string& description) {
-    const std::string optionsGroup = "Options:";
+    const std::string options_group = "Options:";
     if (description.length() > 0) {
-      return description + "\n\n" + optionsGroup;
+      return description + "\n\n" + options_group;
     }
-    return optionsGroup;
+    return options_group;
   }
 
   OptionsDescription m_named;

@@ -16,39 +16,39 @@ using Image = Linx::Raster<float>;
 using Kernel = const Linx::Kernel<Linx::KernelOp::Convolution, float>;
 using Duration = std::chrono::milliseconds;
 
-void filterMonolith(Image& image, Kernel& kernel) {
+void filter_monolith(Image& image, Kernel& kernel) {
   const auto extrapolation = Linx::extrapolate<Linx::NearestNeighbor>(image);
   const auto extrapolated = extrapolation.copy(image.domain() + kernel.window());
   // image = kernel.crop(extrapolated);
   auto patch = extrapolated.patch(kernel.window() - kernel.window().front());
-  auto outIt = image.begin();
+  auto out_it = image.begin();
   for (const auto& p : image.domain()) {
     patch.translate(p);
-    *outIt = kernel(patch);
-    ++outIt;
-    patch.translateBack(p);
+    *out_it = kernel(patch);
+    ++out_it;
+    patch.translate_back(p);
   }
 }
 
-void filterHardcoded(Image& image, Kernel& kernel) {
+void filter_hardcoded(Image& image, Kernel& kernel) {
   const auto extrapolation = Linx::extrapolate<Linx::NearestNeighbor>(image);
   const auto extrapolated = extrapolation.copy(image.domain() + kernel.window());
-  const auto kernelData = kernel.raster();
-  auto kIt = kernelData.end();
+  const auto kernel_data = kernel.raster();
+  auto it = kernel_data.end();
   Image out(image.shape());
-  auto outIt = out.begin();
+  auto out_it = out.begin();
   const auto inner = image.domain() - kernel.window().front();
   auto patch = extrapolated.patch(inner);
   for (const auto& q : kernel.window()) {
-    --kIt;
+    --it;
     patch.translate(q);
-    const auto k = *kIt;
+    const auto k = *it;
     for (const auto& v : patch) {
-      *outIt += k * v;
-      ++outIt;
+      *out_it += k * v;
+      ++out_it;
     }
-    patch.translateBack(q);
-    outIt = out.begin();
+    patch.translate_back(q);
+    out_it = out.begin();
   }
   image = out;
 }
@@ -65,10 +65,10 @@ TDuration filter(Image& image, Kernel& kernel, char setup) {
       image = kernel * Linx::extrapolate<Linx::NearestNeighbor>(image);
       break;
     case 'm':
-      filterMonolith(image, kernel);
+      filter_monolith(image, kernel);
       break;
     case 'h':
-      filterHardcoded(image, kernel);
+      filter_hardcoded(image, kernel);
       break;
     default:
       throw std::runtime_error("Case not implemented"); // FIXME CaseNotImplemented
@@ -84,7 +84,7 @@ public:
     options.named("case", "Test case: d (default), m (monolith)", 'd');
     options.named("image", "Raster length along each axis", 2048L);
     options.named("kernel", "Kernel length along each axis", 5L);
-    return options.asPair();
+    return options.as_pair();
   }
 
   ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {

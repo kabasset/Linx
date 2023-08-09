@@ -30,7 +30,7 @@ public:
   /**
    * @brief Make a slice from a front position, number of indices, and optional step.
    */
-  static Slice fromSize(Index front, std::size_t size, Index step = 1) {
+  static Slice from_size(Index front, std::size_t size, Index step = 1) {
     return Slice(front, front + step * (size - 1), step);
   }
 

@@ -100,12 +100,12 @@ public:
   /**
    * @brief Constructor.
    * @param shape The logical shape
-   * @param inData The pre-existing input buffer, or `nullptr` to allocate a new one
-   * @param outData The pre-existing output buffer, or `nullptr` to allocate a new one
+   * @param in_data The pre-existing input buffer, or `nullptr` to allocate a new one
+   * @param out_data The pre-existing output buffer, or `nullptr` to allocate a new one
    */
-  DftPlan(Position<N> shape, InValue* inData = nullptr, OutValue* outData = nullptr) :
-      m_shape {shape}, m_in {Transform::inShape(m_shape), inData}, m_out {Transform::outShape(m_shape), outData},
-      m_plan {FftwAllocator::createPlan<Transform>(m_in, m_out)} {}
+  DftPlan(Position<N> shape, InValue* in_data = nullptr, OutValue* out_data = nullptr) :
+      m_shape {shape}, m_in {Transform::in_shape(m_shape), in_data}, m_out {Transform::out_shape(m_shape), out_data},
+      m_plan {FftwAllocator::create_plan<Transform>(m_in, m_out)} {}
 
   LINX_DEFAULT_COPYABLE(DftPlan)
   LINX_DEFAULT_MOVABLE(DftPlan)
@@ -117,7 +117,7 @@ public:
    * If data has to outlive the `DftPlan` object, buffers should be copied beforehand.
    */
   ~DftPlan() {
-    FftwAllocator::destroyPlan(m_plan);
+    FftwAllocator::destroy_plan(m_plan);
   }
 
   /**
@@ -140,13 +140,13 @@ public:
    * @brief Create a `DftPlan` which shares its input buffer with this `DftPlan`'s output buffer.
    * 
    * \code
-   * auto planB = planA.template compose<ComplexDft>();
-   * planA.transform(); // Fills planA.out() = planB.in()
-   * planB.transform(); // Fills planB.out()
+   * auto plan_b = plan_a.template compose<ComplexDft>();
+   * plan_a.transform(); // Fills plan_a.out() = plan_b.in()
+   * plan_b.transform(); // Fills plan_b.out()
    * \endcode
    * @warning
-   * This plan (`planA` from the snippet) is the owner of its output buffer, which will be freed by its destructor,
-   * which means that the input buffer of the composed plan (`planB`) has the same life cycle.
+   * This plan (`plan_a` from the snippet) is the owner of its output buffer, which will be freed by its destructor,
+   * which means that the input buffer of the composed plan (`plan_b`) has the same life cycle.
    */
   template <typename TPlan>
   TPlan compose(const Position<N>& shape) {
@@ -156,14 +156,14 @@ public:
   /**
    * @brief Get the logical plane shape.
    */
-  const Position<N>& logicalShape() const {
+  const Position<N>& logical_shape() const {
     return m_shape;
   }
 
   /**
    * @brief Get the input buffer shape.
    */
-  const Position<N>& inShape() const {
+  const Position<N>& in_shape() const {
     return m_in.shape();
   }
 
@@ -186,7 +186,7 @@ public:
   /**
    * @brief Get the output buffer shape.
    */
-  const Position<N>& outShape() const {
+  const Position<N>& out_shape() const {
     return m_out.shape();
   }
 
@@ -207,8 +207,8 @@ public:
   /**
    * @brief Get the normalization factor.
    */
-  double normalizationFactor() const {
-    return shapeSize(m_shape);
+  double normalization_factor() const {
+    return shape_size(m_shape);
   }
 
   /**
@@ -223,7 +223,7 @@ public:
    * @brief Divide by the output buffer by the normalization factor.
    */
   DftPlan& normalize() {
-    const auto factor = 1. / normalizationFactor();
+    const auto factor = 1. / normalization_factor();
     m_out *= factor;
     return *this;
   }

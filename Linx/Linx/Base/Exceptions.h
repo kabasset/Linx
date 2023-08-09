@@ -78,7 +78,7 @@ public:
   /**
    * @brief Throw if a given pointer is null.
    */
-  void mayThrow(const void* ptr, const std::string& message) {
+  void may_throw(const void* ptr, const std::string& message) {
     if (not ptr) {
       throw NullPtrError(message);
     }
@@ -109,7 +109,7 @@ public:
    * @brief Throw if a value lies out of given bounds, included.
    */
   template <typename T>
-  static void mayThrow(const std::string& name, T value, std::pair<T, T> bounds) {
+  static void may_throw(const std::string& name, T value, std::pair<T, T> bounds) {
     if (value < bounds.first || value > bounds.second) {
       throw OutOfBoundsError(name, value, bounds);
     }

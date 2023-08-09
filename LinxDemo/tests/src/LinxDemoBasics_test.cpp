@@ -38,7 +38,7 @@ template <typename T, Linx::Index N>
 using MallocRaster = Linx::Raster<T, N, MallocHolder<T>>;
 //! [MallocRaster]
 
-Linx::VecRaster<int, 3> rasterIota() {
+Linx::VecRaster<int, 3> raster_iota() {
   //! [Raster iota]
   Linx::Raster<int, 3> raster({4, 3, 2});
   raster.range(); // Assigns {0, 1, 2...}
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_SUITE(LinxDemoBasics_test)
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(raster_iota_test) {
-  rasterIota();
+  raster_iota();
 }
 
 BOOST_AUTO_TEST_CASE(vec_raster_iota_test) {
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(malloc_raster_iota_test) {
 
 BOOST_AUTO_TEST_CASE(element_access_test) {
 
-  const auto raster = rasterIota();
+  const auto raster = raster_iota();
 
   //! [Element access]
   std::cout << "Access by ND position: " << raster[{2, 2, 0}] << std::endl; // 10
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(element_access_test) {
 
 BOOST_AUTO_TEST_CASE(foreach_element_test) {
 
-  auto raster = rasterIota();
+  auto raster = raster_iota();
 
   //! [Foreach element]
   // Position

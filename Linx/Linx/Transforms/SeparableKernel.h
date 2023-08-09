@@ -112,7 +112,7 @@ public:
   Box<Dimension> window() const {
     auto front = Position<Dimension>::zero();
     auto back = Position<Dimension>::zero();
-    seqForeach(m_kernels, [&](const auto& k) {
+    seq_foreach(m_kernels, [&](const auto& k) {
       front[k.Axis] = std::min(front[k.Axis], k.window().front());
       back[k.Axis] = std::max(back[k.Axis], k.window().back());
     });
@@ -156,7 +156,7 @@ public:
   template <typename TIn>
   Raster<std::decay_t<typename TIn::Value>, TIn::Dimension> operator*(const TIn& in) const {
     Raster<std::decay_t<typename TIn::Value>, TIn::Dimension> out(in.shape());
-    correlateTo(in, out);
+    correlate_to(in, out);
     return out;
   }
 
@@ -164,26 +164,26 @@ public:
    * @copydoc correlate()
    */
   template <typename TIn, typename TOut>
-  void correlateTo(const TIn& in, TOut& out) const {
-    correlateKernelSeq<TIn, TOut, I0, Is...>(in, out);
+  void correlate_to(const TIn& in, TOut& out) const {
+    correlate_kernel_seq<TIn, TOut, I0, Is...>(in, out);
   }
 
 private:
   template <typename TIn, typename TOut, Index J0, Index... Js>
-  void correlateKernelSeq(const TIn& in, TOut& out) const {
-    const auto tmp = correlateKthKernel<TIn, TOut, sizeof...(Is) - sizeof...(Js)>(in);
+  void correlate_kernel_seq(const TIn& in, TOut& out) const {
+    const auto tmp = correlate_kth_kernel<TIn, TOut, sizeof...(Is) - sizeof...(Js)>(in);
     const auto& method = in.method();
     const Extrapolator<TOut, decltype(method)> extrapolator(tmp, method);
-    correlateKernelSeq<decltype(extrapolator), TOut, Js...>(extrapolator, out);
+    correlate_kernel_seq<decltype(extrapolator), TOut, Js...>(extrapolator, out);
   }
 
   template <typename TIn, typename TOut>
-  void correlateKernelSeq(const TIn& in, TOut& out) const {
+  void correlate_kernel_seq(const TIn& in, TOut& out) const {
     out = rasterize(in); // FIXME swap? move?
   }
 
   template <typename TIn, typename TOut, std::size_t K>
-  TOut correlateKthKernel(const TIn& in) const {
+  TOut correlate_kth_kernel(const TIn& in) const {
     return std::get<K>(m_kernels) * in;
   }
 

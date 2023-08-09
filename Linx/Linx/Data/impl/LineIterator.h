@@ -18,11 +18,11 @@ public:
   }
 
   static Iterator begin(const Line<I, N>& region) {
-    return Iterator(region, region.frontIndex());
+    return Iterator(region, region.front_index());
   }
 
   static Iterator end(const Line<I, N>& region) {
-    return Iterator(region, region.backIndex() + region.step());
+    return Iterator(region, region.back_index() + region.step());
   }
 
   const Position<N>& operator*() const {

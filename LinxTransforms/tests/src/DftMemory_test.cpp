@@ -35,23 +35,22 @@ BOOST_AUTO_TEST_CASE(fftw_malloc_int_test) {
 
 BOOST_AUTO_TEST_CASE(allocate_plan_test) {
   const Position<3> shape {6, 8, 2};
-  const Position<3> halfShape {3, 8, 2};
   RealDftBuffer<3> rin(shape);
   RealDftBuffer<3> rout(shape);
   ComplexDftBuffer<3> cin(shape);
   ComplexDftBuffer<3> cout(shape);
-  auto rc = FftwAllocator::createPlan<Internal::RealDftTransform>(rin, cout);
+  auto rc = FftwAllocator::create_plan<Internal::RealDftTransform>(rin, cout);
   BOOST_TEST(rc.get() != nullptr);
-  FftwAllocator::destroyPlan(rc);
-  auto irc = FftwAllocator::createPlan<Internal::Inverse<Internal::RealDftTransform>>(cout, rin);
+  FftwAllocator::destroy_plan(rc);
+  auto irc = FftwAllocator::create_plan<Internal::Inverse<Internal::RealDftTransform>>(cout, rin);
   BOOST_TEST(irc.get() != nullptr);
-  FftwAllocator::destroyPlan(irc);
-  auto cc = FftwAllocator::createPlan<Internal::ComplexDftTransform>(cin, cout);
+  FftwAllocator::destroy_plan(irc);
+  auto cc = FftwAllocator::create_plan<Internal::ComplexDftTransform>(cin, cout);
   BOOST_TEST(cc.get() != nullptr);
-  FftwAllocator::destroyPlan(cc);
-  auto icc = FftwAllocator::createPlan<Internal::Inverse<Internal::ComplexDftTransform>>(cout, cin);
+  FftwAllocator::destroy_plan(cc);
+  auto icc = FftwAllocator::create_plan<Internal::Inverse<Internal::ComplexDftTransform>>(cout, cin);
   BOOST_TEST(icc.get() != nullptr);
-  FftwAllocator::destroyPlan(icc);
+  FftwAllocator::destroy_plan(icc);
 }
 
 //-----------------------------------------------------------------------------

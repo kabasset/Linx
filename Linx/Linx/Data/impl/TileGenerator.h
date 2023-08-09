@@ -35,7 +35,7 @@ public:
   }
 
   Value operator*() const {
-    return m_parent->patch(Box<M>::fromShape(*m_current, m_fronts.step()) & m_domain);
+    return m_parent->patch(Box<M>::from_shape(*m_current, m_fronts.step()) & m_domain);
   }
 
   Value* operator->() const {

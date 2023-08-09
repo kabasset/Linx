@@ -86,7 +86,7 @@ public:
    */
   const T& at(Index i) const {
     const auto s = this->size();
-    OutOfBoundsError::mayThrow("Index " + std::to_string(i), i, {-s, s - 1});
+    OutOfBoundsError::may_throw("Index " + std::to_string(i), i, {-s, s - 1});
     return this->operator[](i >= 0 ? i : i + s);
   }
 

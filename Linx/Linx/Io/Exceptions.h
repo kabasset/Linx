@@ -27,7 +27,7 @@ public:
   /**
    * @brief Throw if a given path is not a file.
    */
-  static void mayThrow(const std::filesystem::path& path) {
+  static void may_throw(const std::filesystem::path& path) {
     if (not std::filesystem::is_regular_file(path)) {
       throw FileNotFoundError(path);
     }
@@ -49,7 +49,7 @@ public:
   /**
    * @brief Throw if a given path is not a file.
    */
-  static void mayThrow(const std::filesystem::path& path) {
+  static void may_throw(const std::filesystem::path& path) {
     if (std::filesystem::exists(path)) {
       throw PathExistsError(path);
     }

@@ -48,7 +48,7 @@ Affinity<N> inverse(const Affinity<N>& in);
  * 
  * \code
  * Affinity<2> affinity({100, 50});
- * affinity.rotateDegrees(30, 1, 0);
+ * affinity.rotate_degrees(30, 1, 0);
  * auto y = affinity(x);
  * \code
  * 
@@ -101,7 +101,7 @@ public:
    */
   explicit Affinity(const Vector<double, N>& center = Vector<double, N>::zero()) :
       m_map(EigenMatrix::Identity(center.size(), center.size())), m_translation(EigenVector::Zero(center.size())),
-      m_center(toEigenVector(center)) {}
+      m_center(to_eigen_vector(center)) {}
 
   /**
    * @brief Create a translation.
@@ -134,26 +134,26 @@ public:
   /**
    * @brief Create a rotation by an angle given in radians.
    */
-  static Affinity rotationRadians(
+  static Affinity rotation_radians(
       double angle,
       Index from = 0,
       Index to = 1,
       const Vector<double, N>& center = Vector<double, N>::zero()) {
     Affinity out(center);
-    out.rotateRadians(angle, from, to);
+    out.rotate_radians(angle, from, to);
     return out;
   }
 
   /**
    * @brief Create a rotation by an angle given in degrees.
    */
-  static Affinity rotationDegrees(
+  static Affinity rotation_degrees(
       double angle,
       Index from = 0,
       Index to = 1,
       const Vector<double, N>& center = Vector<double, N>::zero()) {
     Affinity out(center);
-    out.rotateDegrees(angle, from, to);
+    out.rotate_degrees(angle, from, to);
     return out;
   }
 
@@ -169,8 +169,8 @@ public:
    * @brief Translate by a given vector.
    */
   Affinity& operator+=(const Vector<double, N>& vector) {
-    if (not vector.isZero()) {
-      m_translation += toEigenVector(vector);
+    if (not vector.is_zero()) {
+      m_translation += to_eigen_vector(vector);
     }
     return *this;
   }
@@ -187,8 +187,8 @@ public:
    * @brief Translate by a the opposite of a given vector.
    */
   Affinity& operator-=(const Vector<double, N>& vector) {
-    if (not vector.isZero()) {
-      m_translation -= toEigenVector(vector);
+    if (not vector.is_zero()) {
+      m_translation -= to_eigen_vector(vector);
     }
     return *this;
   }
@@ -205,8 +205,8 @@ public:
    * @brief Scale by a given vector of factors.
    */
   Affinity& operator*=(const Vector<double, N>& vector) {
-    if (not vector.isOne()) {
-      m_map *= toEigenVector(vector).asDiagonal();
+    if (not vector.is_one()) {
+      m_map *= to_eigen_vector(vector).asDiagonal();
     }
     return *this;
   }
@@ -222,8 +222,8 @@ public:
    * @brief Scale by the inverse of a given vector of factors.
    */
   Affinity& operator/=(const Vector<double, N>& vector) {
-    if (not vector.isOne()) {
-      m_map *= toEigenVector(vector).cwiseInverse().asDiagonal();
+    if (not vector.is_one()) {
+      m_map *= to_eigen_vector(vector).cwiseInverse().asDiagonal();
     }
     return *this;
   }
@@ -231,7 +231,7 @@ public:
   /**
    * @brief Rotate by an angle given in radians from a given axis to a given axis.
    */
-  Affinity& rotateRadians(double angle, Index from = 0, Index to = 1) {
+  Affinity& rotate_radians(double angle, Index from = 0, Index to = 1) {
     if (angle != 0) {
       EigenMatrix rotation = EigenMatrix::Identity();
       const auto sin = std::sin(angle);
@@ -248,8 +248,8 @@ public:
   /**
    * @brief Rotate by an angle given in degrees from a given axis to a given axis.
    */
-  Affinity& rotateDegrees(double angle, Index from = 0, Index to = 1) {
-    return rotateRadians(Linx::pi<double>() / 180. * angle, from, to);
+  Affinity& rotate_degrees(double angle, Index from = 0, Index to = 1) {
+    return rotate_radians(Linx::pi<double>() / 180. * angle, from, to);
   }
 
   /**
@@ -266,7 +266,7 @@ public:
    */
   template <typename T>
   Vector<double, N> operator()(const Vector<T, N>& in) const {
-    return Vector<double, N>(m_translation + m_center + m_map * (toEigenVector(in) - m_center));
+    return Vector<double, N>(m_translation + m_center + m_map * (to_eigen_vector(in) - m_center));
     // TODO faster without cast, i.e. without Eigen?
   }
 
@@ -305,7 +305,7 @@ private:
    * @brief Copy a vector into an `EigenVector`.
    */
   template <typename T>
-  static EigenVector toEigenVector(const Vector<T, N>& in) {
+  static EigenVector to_eigen_vector(const Vector<T, N>& in) {
     EigenVector out(in.size());
     std::copy(in.begin(), in.end(), out.begin());
     return out;
@@ -384,10 +384,10 @@ Raster<typename TIn::Value, TIn::Dimension> downsample(const TIn& in, double fac
  * @brief Rotate an input interpolator around its center.
  */
 template <typename TIn>
-Raster<typename TIn::Value, TIn::Dimension> rotateRadians(const TIn& in, double angle, Index from = 0, Index to = 1) {
+Raster<typename TIn::Value, TIn::Dimension> rotate_radians(const TIn& in, double angle, Index from = 0, Index to = 1) {
   const auto& domain = in.domain();
   Vector<double, TIn::Dimension> sum(domain.front() + domain.back());
-  return Affinity<TIn::Dimension>::rotationRadians(angle, from, to, sum / 2) * in;
+  return Affinity<TIn::Dimension>::rotation_radians(angle, from, to, sum / 2) * in;
 }
 
 /**
@@ -395,10 +395,10 @@ Raster<typename TIn::Value, TIn::Dimension> rotateRadians(const TIn& in, double 
  * @brief Rotate an input interpolator around its center.
  */
 template <typename TIn>
-Raster<typename TIn::Value, TIn::Dimension> rotateDegrees(const TIn& in, double angle, Index from = 0, Index to = 1) {
+Raster<typename TIn::Value, TIn::Dimension> rotate_degrees(const TIn& in, double angle, Index from = 0, Index to = 1) {
   const auto& domain = in.domain();
   Vector<double, TIn::Dimension> sum(domain.front() + domain.back());
-  return Affinity<TIn::Dimension>::rotationDegrees(angle, from, to, sum / 2) * in;
+  return Affinity<TIn::Dimension>::rotation_degrees(angle, from, to, sum / 2) * in;
 }
 
 } // namespace Linx

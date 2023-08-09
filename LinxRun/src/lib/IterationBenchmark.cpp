@@ -15,7 +15,7 @@ IterationBenchmark::IterationBenchmark(Index side) :
   //! [Randomize]
 }
 
-IterationBenchmark::Duration IterationBenchmark::loopOverXyz() {
+IterationBenchmark::Duration IterationBenchmark::loop_over_xyz() {
   m_chrono.start();
   //! [x-y-z]
   for (Index x = 0; x < m_width; ++x) {
@@ -29,7 +29,7 @@ IterationBenchmark::Duration IterationBenchmark::loopOverXyz() {
   return m_chrono.stop();
 }
 
-IterationBenchmark::Duration IterationBenchmark::loopOverZyx() {
+IterationBenchmark::Duration IterationBenchmark::loop_over_zyx() {
   m_chrono.start();
   //! [z-y-x]
   for (Index z = 0; z < m_depth; ++z) {
@@ -43,7 +43,7 @@ IterationBenchmark::Duration IterationBenchmark::loopOverZyx() {
   return m_chrono.stop();
 }
 
-IterationBenchmark::Duration IterationBenchmark::iterateOverPositions() {
+IterationBenchmark::Duration IterationBenchmark::iterate_over_positions() {
   m_chrono.start();
   //! [position]
   for (const auto& p : m_c.domain()) {
@@ -53,7 +53,7 @@ IterationBenchmark::Duration IterationBenchmark::iterateOverPositions() {
   return m_chrono.stop();
 }
 
-IterationBenchmark::Duration IterationBenchmark::iterateOverPositionsOptimized() {
+IterationBenchmark::Duration IterationBenchmark::iterate_over_positions_optimized() {
   m_chrono.start();
   //! [position-index]
   for (const auto& p : m_c.domain()) {
@@ -64,7 +64,7 @@ IterationBenchmark::Duration IterationBenchmark::iterateOverPositionsOptimized()
   return m_chrono.stop();
 }
 
-IterationBenchmark::Duration IterationBenchmark::loopOverIndices() {
+IterationBenchmark::Duration IterationBenchmark::loop_over_indices() {
   m_chrono.start();
   //! [index]
   const auto size = m_c.size();
@@ -75,7 +75,7 @@ IterationBenchmark::Duration IterationBenchmark::loopOverIndices() {
   return m_chrono.stop();
 }
 
-IterationBenchmark::Duration IterationBenchmark::iterateOverValues() {
+IterationBenchmark::Duration IterationBenchmark::iterate_over_values() {
   m_chrono.start();
   //! [value]
   auto ait = m_a.begin();
@@ -89,7 +89,7 @@ IterationBenchmark::Duration IterationBenchmark::iterateOverValues() {
   return m_chrono.stop();
 }
 
-IterationBenchmark::Duration IterationBenchmark::callOperator() {
+IterationBenchmark::Duration IterationBenchmark::call_operator() {
   m_chrono.start();
   //! [operator]
   m_c = m_a + m_b;
@@ -97,7 +97,7 @@ IterationBenchmark::Duration IterationBenchmark::callOperator() {
   return m_chrono.stop();
 }
 
-IterationBenchmark::Duration IterationBenchmark::callGenerate() {
+IterationBenchmark::Duration IterationBenchmark::call_generate() {
   m_chrono.start();
   //! [generate]
   m_c.generate(

@@ -176,20 +176,20 @@ public:
     sort();
     std::vector<std::size_t> out(std::distance(bins.begin(), bins.end()) - 1);
     auto it = m_values.begin();
-    auto supIt = bins.begin();
-    auto countIt = out.begin();
-    while (it != m_values.end() && *it < *supIt) {
+    auto sup_it = bins.begin();
+    auto count_it = out.begin();
+    while (it != m_values.end() && *it < *sup_it) {
       ++it;
     }
-    for (++supIt; supIt != bins.end() && countIt != out.end(); ++supIt) {
-      while (it != m_values.end() && *it < *supIt) {
-        ++(*countIt);
+    for (++sup_it; sup_it != bins.end() && count_it != out.end(); ++sup_it) {
+      while (it != m_values.end() && *it < *sup_it) {
+        ++(*count_it);
         ++it;
       }
-      ++countIt;
+      ++count_it;
     }
     if (it != m_values.end() && *it == bins.back()) {
-      ++(*countIt);
+      ++(*count_it);
     }
     return out;
   }

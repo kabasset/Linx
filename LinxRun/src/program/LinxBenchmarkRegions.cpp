@@ -62,7 +62,7 @@ public:
         "b (box), g (grid), m (mask), s (sequence)");
     options.named<long>("side", "Image width, height and depth (same value)", 400);
     options.named<long>("radius", "Region radius", 10);
-    return options.asPair();
+    return options.as_pair();
   }
 
   ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
@@ -76,7 +76,7 @@ public:
     logger.info("Generating random raster...");
     auto raster = Linx::Raster<int, 3>({side, side, side});
     //! [Make box]
-    const auto box = Linx::Box<3>::fromCenter(radius, {side / 2, side / 2, side / 2});
+    const auto box = Linx::Box<3>::from_center(radius, {side / 2, side / 2, side / 2});
     //! [Make box]
 
     logger.info("Filtering it...");

@@ -75,7 +75,7 @@ public:
   /**
    * @brief Test whether the chronometer is running.
    */
-  bool isRunning() const {
+  bool is_running() const {
     return m_running; // TODO m_running could be removed by comparing m_toc to m_tic, but is it relevant?
   }
 

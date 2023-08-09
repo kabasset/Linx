@@ -60,12 +60,12 @@ public:
    * @param shape The number of grid nodes along each axis
    * @param step The steps along each axis
    */
-  static Grid<N> fromShape(Position<N> front, Position<N> shape, Position<N> step) {
+  static Grid<N> from_shape(Position<N> front, Position<N> shape, Position<N> step) {
     auto span = shape;
     for (std::size_t i = 0; i < front.size(); ++i) {
       span[i] *= step[i];
     }
-    return Grid<N>(Box<N>::fromShape(front, span), step);
+    return Grid<N>(Box<N>::from_shape(front, span), step);
   }
 
   /// @group_properties

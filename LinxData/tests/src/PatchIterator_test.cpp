@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_SUITE(PatchIterator_test)
 //-----------------------------------------------------------------------------
 
 template <Index N, typename TRegion>
-void checkIterator(const Position<N>& shape, const TRegion& region) {
+void check_iterator(const Position<N>& shape, const TRegion& region) {
 
   const auto raster = Raster<float, N>(shape).range();
 
@@ -40,23 +40,23 @@ void checkIterator(const Position<N>& shape, const TRegion& region) {
 BOOST_AUTO_TEST_CASE(inner_cube_iterator_test) {
   const Position<3> shape {4, 5, 6};
   const Box<3> box {{1, 1, 1}, {2, 3, 4}};
-  checkIterator(shape, box);
-  checkIterator(shape, Grid<3>(box, Position<3>::one()));
-  checkIterator(shape, Mask<3>(box, true));
-  checkIterator(shape, Sequence<Position<3>>(box));
+  check_iterator(shape, box);
+  check_iterator(shape, Grid<3>(box, Position<3>::one()));
+  check_iterator(shape, Mask<3>(box, true));
+  check_iterator(shape, Sequence<Position<3>>(box));
 }
 
 template <Index I, Index N>
-void checkSliceIterator(const Position<N>& shape) {
+void check_slice_iterator(const Position<N>& shape) {
   Line<I, 3> slice(Position<N>::one(), shape[I] - 1, 2);
-  checkIterator(shape, slice);
+  check_iterator(shape, slice);
 }
 
 BOOST_AUTO_TEST_CASE(slice_iterator_test) {
   const Position<3> shape {4, 5, 6};
-  checkSliceIterator<0>(shape);
-  checkSliceIterator<1>(shape);
-  checkSliceIterator<2>(shape);
+  check_slice_iterator<0>(shape);
+  check_slice_iterator<1>(shape);
+  check_slice_iterator<2>(shape);
 }
 
 //-----------------------------------------------------------------------------
