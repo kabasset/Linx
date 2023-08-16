@@ -26,10 +26,10 @@ void flag_cosmics_to(const TIn& in, double factor, TOut& out, typename TOut::val
   Raster<typename TIn::Value, 3> kernel(
       {3, 3, 4},
       {
-          -1, -1, -1, 2,  2, 2,  -1, -1, -1, // 0 deg
-          -1, -1, 2,  -1, 2, -1, 2,  -1, -1, // 45 deg
-          -1, 2,  -1, -1, 2, -1, -1, 2,  -1, // 90 deg
-          2,  -1, -1, -1, 2, -1, -1, -1, 2 // 135 deg
+          -1.0, -2.0, -1.0, +2.0, +4.0, +2.0, -1.0, -2.0, -1.0, // 0 deg
+          -1.0, +2.0, -1.0, -2.0, +4.0, -2.0, -1.0, +2.0, -1.0, // 90 deg
+          -1.0, -1.5, +2.0, -1.5, +4.0, -1.5, +2.0, -1.5, -1.0, // 45 deg
+          +2.0, -1.5, -1.0, -1.5, +4.0, -1.5, -1.0, -1.5, 2.0 // 135 deg
       });
 
   // auto convolved = convolution(kernel) * extrapolate<NearestNeighbor>(in);
