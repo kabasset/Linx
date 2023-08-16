@@ -22,6 +22,11 @@ class Mask : boost::additive<Mask<N>, Position<N>>, boost::additive<Mask<N>, Ind
 
 public:
   /**
+   * @brief The mask dimension.
+   */
+  static constexpr Index Dimension = N;
+
+  /**
    * @brief A position iterator.
    * @see `Box::Iterator`
    */
