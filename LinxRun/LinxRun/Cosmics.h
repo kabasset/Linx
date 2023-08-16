@@ -6,7 +6,8 @@
 #define _LINXRUN_COSMICS_H
 
 #include "Linx/Data/Raster.h"
-#include "Linx/Transforms/Kernel.h"
+#include "Linx/Transforms/Kernel.h" // FIXME Filtering
+#include "Linx/Transforms/StructuringElement.h" // FIXME Morphology
 
 namespace Linx {
 
@@ -43,10 +44,11 @@ void flag_cosmics_to(const TIn& in, double factor, TOut& out, typename TOut::val
     convolution(k).transform(extrapolation, c);
   }
 
-  auto stats = distribution(convolved);
-  auto mu = stats.median();
-  auto sigma = stats.mad();
+  auto stats = distribution(convolved); // TODO use grid patch for acceleration?
+  const auto mu = 0; // FIXME stats.median(); ?
+  const auto sigma = stats.stdev(); // FIXME 1.25 * stats.mad(); ?
   const auto tau = factor * sigma + mu;
+  printf("%f = %f * %f + %f\n", tau, factor, sigma, mu);
 
   out.apply(
       [=](auto f, int c0, int c1, int c2, int c3) {
@@ -69,6 +71,17 @@ Raster<T> flag_cosmics(const TIn& in, double factor) {
   Raster<T> out(in.shape());
   flag_cosmics_to(in, factor, out);
   return out;
+}
+
+/**
+ * @brief Perform morphological closing in place.
+ */
+template <typename TIn>
+void close_flag(TIn& in, long radius = 1) {
+  // auto strel = Mask<2>::ball<2>(radius); // FIXME accept masks in StructuringElement
+  auto strel = Box<2>::from_center(radius);
+  auto dilated = dilation<typename TIn::Value>(strel) * extrapolate<NearestNeighbor>(in);
+  erosion<typename TIn::Value>(strel).transform(extrapolate<NearestNeighbor>(dilated), in);
 }
 
 } // namespace Linx
