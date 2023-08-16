@@ -46,17 +46,9 @@ public:
     logger.info() << "Detecting cosmics...";
     logger.info() << "  \\Phi^{-1}(" << pfa << ") = " << factor;
     chrono.start();
-    auto mask = Linx::flag_cosmics<unsigned char>(data, factor);
+    auto mask = dilate(Linx::flag_cosmics<unsigned char>(data, factor), radius);
     chrono.stop();
     logger.info() << "  Done in: " << chrono.last().count() << " ms";
-
-    if (radius > 0) {
-      logger.info() << "Closing detection...";
-      chrono.start();
-      Linx::close_flag(mask, radius);
-      chrono.stop();
-      logger.info() << "  Done in: " << chrono.last().count() << " ms";
-    }
 
     logger.info() << "Writing output: " << output.path();
     output.write(data, 'w');

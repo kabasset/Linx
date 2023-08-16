@@ -21,42 +21,23 @@ namespace Linx {
  * @see Umbaugh, Scott E. (2011). Digital image processing and analysis (2nd ed.).
  */
 template <typename TIn, typename TOut>
-void flag_cosmics_to(const TIn& in, double factor, TOut& out, typename TOut::value_type flag = true) {
+void flag_cosmics_to(const TIn& in, double factor, TOut& out, typename TOut::Value flag = true) {
 
-  Raster<typename TIn::Value, 3> kernel(
-      {3, 3, 4},
-      {
-          -1.0, -2.0, -1.0, +2.0, +4.0, +2.0, -1.0, -2.0, -1.0, // 0 deg
-          -1.0, +2.0, -1.0, -2.0, +4.0, -2.0, -1.0, +2.0, -1.0, // 90 deg
-          -1.0, -1.5, +2.0, -1.5, +4.0, -1.5, +2.0, -1.5, -1.0, // 45 deg
-          +2.0, -1.5, -1.0, -1.5, +4.0, -1.5, -1.0, -1.5, 2.0 // 135 deg
-      });
+  using T = typename TIn::Value;
 
-  // auto convolved = convolution(kernel) * extrapolate<NearestNeighbor>(in);
-  // FIXME from xvalue?
-  // FIXME broadcasting
-
-  auto extrapolation = extrapolate<NearestNeighbor>(in);
-  Raster<typename TIn::Value, 3> convolved({in.shape()[0], in.shape()[1], 4});
-  for (long i = 0; i < 4; ++i) {
-    auto k = kernel.section(i);
-    auto c = convolved.section(i);
-    convolution(k).transform(extrapolation, c);
-  }
+  const auto laplacian = convolution(Raster<T>({3, 3}, {-.25, -.5, -.25, -.5, 3, -.5, -.25, -.5, -.25})) *
+      extrapolate<NearestNeighbor>(in);
 
   const auto mean = 0.0;
   const auto var =
-      std::inner_product(convolved.begin(), convolved.end(), convolved.begin(), 0.0) / (convolved.size() - 1);
+      std::inner_product(laplacian.begin(), laplacian.end(), laplacian.begin(), 0.0) / (laplacian.size() - 1);
   const auto threshold = factor * std::sqrt(var) + mean;
 
   out.apply(
-      [=](auto f, int c0, int c1, int c2, int c3) {
-        return c0 > threshold || c1 > threshold || c2 > threshold || c3 > threshold ? flag : f;
+      [=](auto f, auto c) {
+        return c > threshold ? flag : f;
       },
-      convolved.section(0),
-      convolved.section(1),
-      convolved.section(2),
-      convolved.section(3));
+      laplacian);
 }
 
 /**
@@ -77,10 +58,20 @@ Raster<T> flag_cosmics(const TIn& in, double factor) {
  */
 template <typename TIn>
 void close_flag(TIn& in, long radius = 1) {
+  using T = typename TIn::Value;
   // auto strel = Mask<2>::ball<2>(radius); // FIXME accept masks in StructuringElement
   auto strel = Box<2>::from_center(radius);
-  auto dilated = dilation<typename TIn::Value>(strel) * extrapolate<NearestNeighbor>(in);
-  erosion<typename TIn::Value>(strel).transform(extrapolate<NearestNeighbor>(dilated), in);
+  auto dilated = dilation<T>(strel) * extrapolate<NearestNeighbor>(in);
+  erosion<T>(strel).transform(extrapolate<NearestNeighbor>(dilated), in);
+}
+
+template <typename TIn>
+auto dilate(const TIn& in, long radius = 1) {
+  if (radius == 0) {
+    return in;
+  }
+  using T = typename TIn::Value;
+  return dilation<T>(Box<2>::from_center(radius)) * extrapolate<NearestNeighbor>(in);
 }
 
 } // namespace Linx
