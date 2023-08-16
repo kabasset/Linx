@@ -155,12 +155,21 @@ struct RangeMixin {
   /**
    * @brief Create a `DataDistribution` from the container.
    */
-  DataDistribution<T> distribution() const {
+  [[deprecated("Use free function")]] DataDistribution<T> distribution() const {
     return DataDistribution<T>(static_cast<const TDerived&>(*this));
   }
 
   /// @}
 };
+
+/**
+ * @relates RangeMixin
+ * @brief Create a `DataDistribution` from the container.
+ */
+template <typename TRange>
+DataDistribution<typename TRange::value_type> distribution(const TRange& in) {
+  return DataDistribution<typename TRange::value_type>(in);
+}
 
 } // namespace Linx
 

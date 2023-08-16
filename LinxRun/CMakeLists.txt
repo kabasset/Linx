@@ -28,6 +28,9 @@ elements_add_executable(LinxBenchmarkRegions src/program/LinxBenchmarkRegions.cp
 elements_add_executable(LinxDemoAffinity src/program/LinxDemoAffinity.cpp
                     INCLUDE_DIRS LinxRun
                     LINK_LIBRARIES LinxRun)
+elements_add_executable(LinxMaskCosmics src/program/LinxMaskCosmics.cpp
+                    INCLUDE_DIRS LinxRun
+                    LINK_LIBRARIES LinxRun)
 
 elements_add_unit_test(Chronometer tests/src/Chronometer_test.cpp 
                      EXECUTABLE LinxRun_Chronometer_test
