@@ -44,15 +44,14 @@ void flag_cosmics_to(const TIn& in, double factor, TOut& out, typename TOut::val
     convolution(k).transform(extrapolation, c);
   }
 
-  auto stats = distribution(convolved); // TODO use grid patch for acceleration?
-  const auto mu = 0; // FIXME stats.median(); ?
-  const auto sigma = stats.stdev(); // FIXME 1.25 * stats.mad(); ?
-  const auto tau = factor * sigma + mu;
-  printf("%f = %f * %f + %f\n", tau, factor, sigma, mu);
+  const auto mean = 0.0;
+  const auto var =
+      std::inner_product(convolved.begin(), convolved.end(), convolved.begin(), 0.0) / (convolved.size() - 1);
+  const auto threshold = factor * std::sqrt(var) + mean;
 
   out.apply(
       [=](auto f, int c0, int c1, int c2, int c3) {
-        return c0 > tau || c1 > tau || c2 > tau || c3 > tau ? flag : f;
+        return c0 > threshold || c1 > threshold || c2 > threshold || c3 > threshold ? flag : f;
       },
       convolved.section(0),
       convolved.section(1),
