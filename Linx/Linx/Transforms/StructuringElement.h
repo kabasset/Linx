@@ -22,7 +22,8 @@ namespace MorphologyOp {
 template <typename T>
 struct MeanFilter {
   using Value = T; // FIXME deduce from operator()
-  T operator()(const std::vector<T>& neighbors) const {
+  T operator()(const std::vector<T>& neighbors) const
+  {
     return std::accumulate(neighbors.begin(), neighbors.end(), T()) / neighbors.size();
   }
 };
@@ -33,7 +34,8 @@ struct MeanFilter {
 template <typename T>
 struct MedianFilter {
   using Value = T;
-  T operator()(std::vector<T>& neighbors) const {
+  T operator()(std::vector<T>& neighbors) const
+  {
     const auto size = neighbors.size();
     auto b = neighbors.data();
     auto e = b + size;
@@ -53,7 +55,8 @@ struct MedianFilter {
 template <typename T>
 struct Erosion {
   using Value = T;
-  T operator()(const std::vector<T>& neighbors) const {
+  T operator()(const std::vector<T>& neighbors) const
+  {
     return *std::min_element(neighbors.begin(), neighbors.end());
   }
 };
@@ -64,7 +67,8 @@ struct Erosion {
 template <typename T>
 struct Dilation {
   using Value = T;
-  T operator()(const std::vector<T>& neighbors) const {
+  T operator()(const std::vector<T>& neighbors) const
+  {
     return *std::max_element(neighbors.begin(), neighbors.end());
   }
 };
@@ -79,8 +83,8 @@ struct Dilation {
  */
 template <typename TOp, typename TWindow>
 class StructuringElement : public FilterMixin<typename TOp::Value, TWindow, StructuringElement<TOp, TWindow>> {
-
 public:
+
   /**
    * @brief The value type.
    */
@@ -96,25 +100,29 @@ public:
    * @param window The filter window
    */
   explicit StructuringElement(TOp&& op, TWindow window) :
-      FilterMixin<Value, TWindow, StructuringElement<TOp, TWindow>>(std::move(window)), m_op(std::forward<TOp>(op)) {}
+      FilterMixin<Value, TWindow, StructuringElement<TOp, TWindow>>(std::move(window)), m_op(std::forward<TOp>(op))
+  {}
 
   /**
    * @brief Hypercube window constructor.
    * @param radius The hypercube radius
    */
   explicit StructuringElement(TOp&& op, Index radius = 1) :
-      StructuringElement(std::forward<TOp>(op), Box<Dimension>::from_center(radius)) {}
+      StructuringElement(std::forward<TOp>(op), Box<Dimension>::from_center(radius))
+  {}
 
   /**
    * @brief Estimation operator.
    */
   template <typename TIn>
-  Value operator()(const TIn& neighbors) const {
+  Value operator()(const TIn& neighbors) const
+  {
     m_neighbors.assign(neighbors.begin(), neighbors.end());
     return m_op(m_neighbors);
   }
 
 private:
+
   /**
    * @brief The operation.
    */
@@ -127,24 +135,28 @@ private:
 };
 
 template <typename T, typename TWindow>
-StructuringElement<MorphologyOp::MeanFilter<T>, TWindow> mean_filter(TWindow window) {
+StructuringElement<MorphologyOp::MeanFilter<T>, TWindow> mean_filter(TWindow window)
+{
   return StructuringElement<MorphologyOp::MeanFilter<T>, TWindow>(MorphologyOp::MeanFilter<T> {}, std::move(window));
 }
 
 template <typename T, typename TWindow>
-StructuringElement<MorphologyOp::MedianFilter<T>, TWindow> median_filter(TWindow window) {
+StructuringElement<MorphologyOp::MedianFilter<T>, TWindow> median_filter(TWindow window)
+{
   return StructuringElement<MorphologyOp::MedianFilter<T>, TWindow>(
       MorphologyOp::MedianFilter<T> {},
       std::move(window));
 }
 
 template <typename T, typename TWindow>
-StructuringElement<MorphologyOp::Erosion<T>, TWindow> erosion(TWindow window) {
+StructuringElement<MorphologyOp::Erosion<T>, TWindow> erosion(TWindow window)
+{
   return StructuringElement<MorphologyOp::Erosion<T>, TWindow>(MorphologyOp::Erosion<T> {}, std::move(window));
 }
 
 template <typename T, typename TWindow>
-StructuringElement<MorphologyOp::Dilation<T>, TWindow> dilation(TWindow window) {
+StructuringElement<MorphologyOp::Dilation<T>, TWindow> dilation(TWindow window)
+{
   return StructuringElement<MorphologyOp::Dilation<T>, TWindow>(MorphologyOp::Dilation<T> {}, std::move(window));
 }
 

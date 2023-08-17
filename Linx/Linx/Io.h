@@ -17,7 +17,8 @@ namespace Linx {
  * @brief Read raster from a file.
  */
 template <typename T, Index N = 2>
-Raster<T, N> read(const std::filesystem::path& path, Index index = 0) {
+Raster<T, N> read(const std::filesystem::path& path, Index index = 0)
+{
   try {
     return Fits(path).read<Raster<T, N>>(index);
   } catch (FileFormatError&) {
@@ -29,7 +30,8 @@ Raster<T, N> read(const std::filesystem::path& path, Index index = 0) {
  * @brief Write a raster to a file.
  */
 template <typename TRaster>
-void write(const TRaster& in, const std::filesystem::path& path, char mode = 'x') {
+void write(const TRaster& in, const std::filesystem::path& path, char mode = 'x')
+{
   try {
     return Fits(path).write(in, mode);
   } catch (FileFormatError&) {

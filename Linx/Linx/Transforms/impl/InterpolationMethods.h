@@ -15,7 +15,6 @@ namespace Linx {
  */
 template <typename T>
 struct OutOfBoundsConstant {
-
   /**
    * @brief Constructor.
    */
@@ -25,7 +24,8 @@ struct OutOfBoundsConstant {
    * @brief Return `value` if out of bounds.
    */
   template <typename TRaster>
-  inline const T& at(TRaster& raster, const Position<TRaster::Dimension>& position) const {
+  inline const T& at(TRaster& raster, const Position<TRaster::Dimension>& position) const
+  {
     if (raster.contains(position)) {
       return raster[position];
     }
@@ -43,12 +43,12 @@ struct OutOfBoundsConstant {
  * @brief Nearest-neighbor interpolation or extrapolation, a.k.a. zero-flux Neumann boundary conditions.
  */
 struct NearestNeighbor {
-
   /**
    * @brief Return the value at the nearest in-bounds position.
    */
   template <typename TRaster>
-  inline const typename TRaster::value_type& at(TRaster& raster, const Position<TRaster::Dimension>& position) const {
+  inline const typename TRaster::value_type& at(TRaster& raster, const Position<TRaster::Dimension>& position) const
+  {
     auto in = clamp(position, raster.shape());
     return raster[in];
   }
@@ -57,7 +57,8 @@ struct NearestNeighbor {
    * @brief Return the value at the nearest integer position.
    */
   template <typename T, typename TRaster>
-  inline T at(TRaster& raster, const Vector<double, TRaster::Dimension>& position) const {
+  inline T at(TRaster& raster, const Vector<double, TRaster::Dimension>& position) const
+  {
     Position<TRaster::Dimension> integral(position.size());
     std::transform(position.begin(), position.end(), integral.begin(), [](auto e) {
       return e + .5;
@@ -71,12 +72,12 @@ struct NearestNeighbor {
  * @brief Periodic, a.k.a. symmetric or wrap-around, boundary conditions.
  */
 struct Periodic {
-
   /**
    * @brief Return the value at the modulo position.
    */
   template <typename TRaster>
-  inline const typename TRaster::value_type& at(TRaster& raster, const Position<TRaster::Dimension>& position) const {
+  inline const typename TRaster::value_type& at(TRaster& raster, const Position<TRaster::Dimension>& position) const
+  {
     Position<TRaster::Dimension> inbounds(position.size());
     inbounds.generate(
         [](auto p, auto s) {
@@ -94,12 +95,12 @@ struct Periodic {
  * @brief Linear interpolation.
  */
 struct Linear {
-
   /**
    * @brief Return the interpolated value at given index.
    */
   template <typename T, typename TRaster, typename... TIndices>
-  inline T at(const TRaster& raster, const Vector<double, 1>& position, TIndices... indices) const {
+  inline T at(const TRaster& raster, const Vector<double, 1>& position, TIndices... indices) const
+  {
     const auto f = floor<Index>(position.front());
     const auto d = position.front() - f;
     const T p = raster[{f, indices...}];
@@ -112,7 +113,8 @@ struct Linear {
    */
   template <typename T, Index N, typename TRaster, typename... TIndices>
   inline std::enable_if_t<N != 1, T>
-  at(const TRaster& raster, const Vector<double, N>& position, TIndices... indices) const {
+  at(const TRaster& raster, const Vector<double, N>& position, TIndices... indices) const
+  {
     const auto f = floor<Index>(position.back());
     const auto d = position.back() - f;
     const auto pos = position.template slice<N - 1>();
@@ -127,12 +129,12 @@ struct Linear {
  * @brief Cubic interpolation.
  */
 struct Cubic {
-
   /**
    * @brief Return the interpolated value at given index.
    */
   template <typename T, typename TRaster, typename... TIndices>
-  inline T at(const TRaster& raster, const Vector<double, 1>& position, TIndices... indices) const {
+  inline T at(const TRaster& raster, const Vector<double, 1>& position, TIndices... indices) const
+  {
     const auto f = floor<Index>(position.front());
     const auto d = position.front() - f;
     const T pp = raster[{f - 1, indices...}];
@@ -147,7 +149,8 @@ struct Cubic {
    */
   template <typename T, Index N, typename TRaster, typename... TIndices>
   inline std::enable_if_t<N != 1, T>
-  at(const TRaster& raster, const Vector<double, N>& position, TIndices... indices) const {
+  at(const TRaster& raster, const Vector<double, N>& position, TIndices... indices) const
+  {
     const auto f = floor<Index>(position.back());
     const auto d = position.back() - f;
     const auto pos = position.template slice<N - 1>();

@@ -11,7 +11,8 @@
 
 Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkIteration");
 
-Linx::IterationBenchmark::Duration iterate(Linx::IterationBenchmark& benchmark, char setup) {
+Linx::IterationBenchmark::Duration iterate(Linx::IterationBenchmark& benchmark, char setup)
+{
   switch (setup) {
     case 'x':
       return benchmark.loop_over_xyz();
@@ -35,9 +36,10 @@ Linx::IterationBenchmark::Duration iterate(Linx::IterationBenchmark& benchmark, 
 }
 
 class LinxBenchmarkIteration : public Elements::Program {
-
 public:
-  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
+
+  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
+  {
     Linx::ProgramOptions options;
     options.named<char>(
         "case",
@@ -47,8 +49,8 @@ public:
     return options.as_pair();
   }
 
-  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
-
+  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override
+  {
     logger.info("Generating random rasters...");
     Linx::IterationBenchmark benchmark(args["side"].as<long>());
 

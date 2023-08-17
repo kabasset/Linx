@@ -18,8 +18,8 @@ namespace Linx {
  */
 template <typename T, typename TWindow, typename TDerived>
 class FilterMixin {
-
 public:
+
   /**
    * @brief The value type.
    */
@@ -38,7 +38,8 @@ public:
   /**
    * @brief Get the filtering window.
    */
-  const TWindow& window() const {
+  const TWindow& window() const
+  {
     return m_window;
   }
 
@@ -55,7 +56,8 @@ public:
    * 
    */
   template <typename TIn>
-  Raster<Value, Dimension> operator*(const TIn& in) const {
+  Raster<Value, Dimension> operator*(const TIn& in) const
+  {
     if constexpr (is_patch<TIn>()) {
       if (in.domain().step().is_one()) { // Box
         return box(in);
@@ -75,7 +77,8 @@ public:
    * The output raster has the same shape as the input raster.
    */
   template <typename TExtrapolator>
-  Raster<Value, Dimension> full(const TExtrapolator& in) const {
+  Raster<Value, Dimension> full(const TExtrapolator& in) const
+  {
     Raster<Value, Dimension> out(in.raster().shape());
     transform_splits(in, out);
     return out;
@@ -88,7 +91,8 @@ public:
    * such that the output domain is `in.domain() - filter.window()`.
    */
   template <typename TRaster>
-  Raster<Value, Dimension> crop(const TRaster& in) const {
+  Raster<Value, Dimension> crop(const TRaster& in) const
+  {
     // FIXME check region is a Box
     const auto region = Linx::box(in.domain()) - m_window; // box() needed to compile given that Grid is acceptable
     Raster<Value, Dimension> out(region.shape());
@@ -107,7 +111,8 @@ public:
    * The output raster has the same shape as the box.
    */
   template <typename TPatch>
-  Raster<Value, Dimension> box(const TPatch& in) const {
+  Raster<Value, Dimension> box(const TPatch& in) const
+  {
     // FIXME check region is a Box
     Raster<Value, Dimension> out(in.domain().shape());
     transform(in, out);
@@ -127,7 +132,8 @@ public:
    * The output raster has the same shape as the grid.
    */
   template <typename TPatch>
-  Raster<Value, Dimension> decimate(const TPatch& in) const { // FIXME adjust?
+  Raster<Value, Dimension> decimate(const TPatch& in) const
+  { // FIXME adjust?
 
     const auto& raw = dont_extrapolate(in);
     const auto& front = in.domain().front();
@@ -169,7 +175,8 @@ public:
    * then `in` can be a raw patch.
    */
   template <typename TIn, typename TOut>
-  void transform(const TIn& in, TOut& out) const {
+  void transform(const TIn& in, TOut& out) const
+  {
     if constexpr (is_extrapolator<TIn>()) {
       transform_splits(in, out);
     } else {
@@ -179,11 +186,13 @@ public:
   }
 
 private:
+
   /**
    * @brief Filter by splitting inner and border regions.
    */
   template <typename TIn, typename TOut>
-  void transform_splits(const TIn& in, TOut& out) const {
+  void transform_splits(const TIn& in, TOut& out) const
+  {
     const auto& raw = dont_extrapolate(in);
     const auto box = Internal::BorderedBox<Dimension>(Linx::box(raw.domain()), m_window);
     box.apply_inner_border(
@@ -203,7 +212,8 @@ private:
    * @brief Filter a monolithic patch (no region splitting).
    */
   template <typename TIn, typename TOut>
-  void transform_monolith(const TIn& in, TOut& out) const {
+  void transform_monolith(const TIn& in, TOut& out) const
+  {
     auto patch = in.parent().patch(m_window);
     auto out_it = out.begin();
     for (const auto& p : in.domain()) {
@@ -215,13 +225,15 @@ private:
   }
 
   template <typename TIn, typename TOut>
-  void transform_monolith_extrapolator(const TIn& in, TOut& out) const {
+  void transform_monolith_extrapolator(const TIn& in, TOut& out) const
+  {
     const auto extrapolated = in.parent().copy(Linx::box(in.domain()) + m_window);
     const auto box = extrapolated.domain() - m_window; // FIXME region - m_window.front()?
     transform_monolith(extrapolated.patch(box), out);
   }
 
 protected:
+
   /**
    * @brief The window with origin at position 0.
    */

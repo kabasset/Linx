@@ -14,7 +14,8 @@ BOOST_AUTO_TEST_SUITE(Affinity_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(translation_test) {
+BOOST_AUTO_TEST_CASE(translation_test)
+{
   const Vector<double, 3> vector {0, 1, 2};
   const auto translation = Affinity<3>::translation(vector);
   const Vector<double, 3> in {3, 4, 5};
@@ -23,7 +24,8 @@ BOOST_AUTO_TEST_CASE(translation_test) {
   BOOST_TEST(out == expected);
 }
 
-BOOST_AUTO_TEST_CASE(scaling_origin_test) {
+BOOST_AUTO_TEST_CASE(scaling_origin_test)
+{
   const Vector<double, 3> vector {0, 1, 2};
   const auto scaling = Affinity<3>::scaling(vector);
   const Vector<double, 3> in {3, 4, 5};
@@ -35,7 +37,8 @@ BOOST_AUTO_TEST_CASE(scaling_origin_test) {
   BOOST_TEST(out == expected);
 }
 
-BOOST_AUTO_TEST_CASE(rotation_origin_90x_test) {
+BOOST_AUTO_TEST_CASE(rotation_origin_90x_test)
+{
   const auto rotation = Affinity<3>::rotation_degrees(90, 1, 2);
   const Vector<double, 3> in {3, 4, 5};
   const auto out = rotation(in);
@@ -43,7 +46,8 @@ BOOST_AUTO_TEST_CASE(rotation_origin_90x_test) {
   BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
 }
 
-BOOST_AUTO_TEST_CASE(rotation_origin_90y_test) {
+BOOST_AUTO_TEST_CASE(rotation_origin_90y_test)
+{
   const auto rotation = Affinity<3>::rotation_degrees(90, 2, 0);
   const Vector<double, 3> in {3, 4, 5};
   const auto out = rotation(in);
@@ -51,7 +55,8 @@ BOOST_AUTO_TEST_CASE(rotation_origin_90y_test) {
   BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
 }
 
-BOOST_AUTO_TEST_CASE(rotation_origin_90z_test) {
+BOOST_AUTO_TEST_CASE(rotation_origin_90z_test)
+{
   const auto rotation = Affinity<3>::rotation_degrees(90, 0, 1);
   const Vector<double, 3> in {3, 4, 5};
   const auto out = rotation(in);
@@ -59,7 +64,8 @@ BOOST_AUTO_TEST_CASE(rotation_origin_90z_test) {
   BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
 }
 
-BOOST_AUTO_TEST_CASE(rotation_origin_270z_test) {
+BOOST_AUTO_TEST_CASE(rotation_origin_270z_test)
+{
   const auto rotation = Affinity<3>::rotation_degrees(90, 1, 0);
   const Vector<double, 3> in {3, 4, 5};
   const auto out = rotation(in);
@@ -67,7 +73,8 @@ BOOST_AUTO_TEST_CASE(rotation_origin_270z_test) {
   BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
 }
 
-BOOST_AUTO_TEST_CASE(rotation_int_90z_test) {
+BOOST_AUTO_TEST_CASE(rotation_int_90z_test)
+{
   const Vector<double, 3> center = {0, 1, 2};
   const auto rotation = Affinity<3>::rotation_degrees(90, 0, 1, center);
   const Vector<double, 3> in {3, 4, 5};
@@ -76,7 +83,8 @@ BOOST_AUTO_TEST_CASE(rotation_int_90z_test) {
   BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
 }
 
-BOOST_AUTO_TEST_CASE(rotation_float_90z_test) {
+BOOST_AUTO_TEST_CASE(rotation_float_90z_test)
+{
   const Vector<double, 3> center = {1.5, 1.5, 0};
   const auto rotation = Affinity<3>::rotation_degrees(90, 0, 1, center);
   const Vector<double, 3> in {3, 4, 5};
@@ -85,7 +93,8 @@ BOOST_AUTO_TEST_CASE(rotation_float_90z_test) {
   BOOST_TEST(out == expected, boost::test_tools::tolerance(1.e-6) << boost::test_tools::per_element());
 }
 
-BOOST_AUTO_TEST_CASE(raster_scaling_center_2_test) {
+BOOST_AUTO_TEST_CASE(raster_scaling_center_2_test)
+{
   const auto in = Raster<Index, 4>({3, 3, 3, 3}).range();
   const auto interpolator = interpolate<Cubic>(in);
   const auto scaling = Affinity<4>::scaling(2, {1, 1, 1, 1});
@@ -102,7 +111,8 @@ BOOST_AUTO_TEST_CASE(raster_scaling_center_2_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(raster_rotation_center_90z_test) {
+BOOST_AUTO_TEST_CASE(raster_rotation_center_90z_test)
+{
   const auto in = Raster<Index>({4, 4}).range();
   const auto interpolator = interpolate<NearestNeighbor>(in);
   const auto rotation = Affinity<2>::rotation_degrees(90, 0, 1, {1.5, 1.5});
@@ -119,7 +129,8 @@ BOOST_AUTO_TEST_CASE(raster_rotation_center_90z_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(patch_rotation_center_30z_test) {
+BOOST_AUTO_TEST_CASE(patch_rotation_center_30z_test)
+{
   const auto in = Raster<Index>({5, 5}).range();
   const auto interpolator = interpolate<Linear>(in);
   const auto rotation = Affinity<2>::rotation_degrees(30, 0, 1, {2, 2});
@@ -136,7 +147,8 @@ BOOST_AUTO_TEST_CASE(patch_rotation_center_30z_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(raster_upsampling_sesquiple_test) {
+BOOST_AUTO_TEST_CASE(raster_upsampling_sesquiple_test)
+{
   const auto in = Raster<float>({3, 2}).range();
   const auto interpolator = interpolate<NearestNeighbor>(in);
   const auto out = upsample(interpolator, 1.5);
@@ -150,7 +162,8 @@ BOOST_AUTO_TEST_CASE(raster_upsampling_sesquiple_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(raster_upsampling_double_test) {
+BOOST_AUTO_TEST_CASE(raster_upsampling_double_test)
+{
   const auto in = Raster<float>({3, 2}).range();
   const auto interpolator = interpolate<NearestNeighbor>(in);
   const auto out = upsample(interpolator, 2);
@@ -164,7 +177,8 @@ BOOST_AUTO_TEST_CASE(raster_upsampling_double_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(raster_upsampling_triple_test) {
+BOOST_AUTO_TEST_CASE(raster_upsampling_triple_test)
+{
   const auto in = Raster<float>({3, 2}).range();
   const auto interpolator = interpolate<NearestNeighbor>(in);
   const auto out = upsample(interpolator, 3);

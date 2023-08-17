@@ -38,7 +38,8 @@ namespace Internal {
  * @brief Make an index sequence for a tuple.
  */
 template <typename TTuple>
-constexpr decltype(auto) tuple_index_sequence() {
+constexpr decltype(auto) tuple_index_sequence()
+{
   return std::make_index_sequence<std::tuple_size<std::remove_reference_t<TTuple>>::value>();
 }
 
@@ -46,7 +47,8 @@ constexpr decltype(auto) tuple_index_sequence() {
  * @brief Convert a tuple to a user-defined struct.
  */
 template <typename TReturn, typename TTuple, std::size_t... Is>
-TReturn tuple_as_impl(TTuple&& tuple, std::index_sequence<Is...>) {
+TReturn tuple_as_impl(TTuple&& tuple, std::index_sequence<Is...>)
+{
   return {std::get<Is>(tuple)...};
 }
 
@@ -54,7 +56,8 @@ TReturn tuple_as_impl(TTuple&& tuple, std::index_sequence<Is...>) {
  * @brief Apply a variadic function to a tuple.
  */
 template <typename TTuple, typename TFunc, std::size_t... Is>
-constexpr decltype(auto) apply_impl(TTuple&& tuple, TFunc&& func, std::index_sequence<Is...>) {
+constexpr decltype(auto) apply_impl(TTuple&& tuple, TFunc&& func, std::index_sequence<Is...>)
+{
   return func(std::get<Is>(tuple)...);
 }
 
@@ -63,7 +66,8 @@ constexpr decltype(auto) apply_impl(TTuple&& tuple, TFunc&& func, std::index_seq
  * and increment the iterators.
  */
 template <typename TIteratorTuple, typename TFunc, std::size_t... Is>
-constexpr decltype(auto) iterator_tuple_apply_impl(TIteratorTuple&& tuple, TFunc&& func, std::index_sequence<Is...>) {
+constexpr decltype(auto) iterator_tuple_apply_impl(TIteratorTuple&& tuple, TFunc&& func, std::index_sequence<Is...>)
+{
   return func(*std::get<Is>(tuple)++...);
 }
 
@@ -71,7 +75,8 @@ constexpr decltype(auto) iterator_tuple_apply_impl(TIteratorTuple&& tuple, TFunc
  * @brief Apply a function which returns void to each element of a tuple.
  */
 template <typename TTuple, typename TFunc, std::size_t... Is>
-void tuple_foreach_impl(TTuple&& tuple, TFunc&& func, std::index_sequence<Is...>) {
+void tuple_foreach_impl(TTuple&& tuple, TFunc&& func, std::index_sequence<Is...>)
+{
   using mock_unpack = int[];
   (void)mock_unpack {
       0, // Ensure there is at least one element
@@ -84,7 +89,8 @@ void tuple_foreach_impl(TTuple&& tuple, TFunc&& func, std::index_sequence<Is...>
  * @brief Apply a function to each element of a tuple, and make a user-defined struct from the results.
  */
 template <typename TReturn, typename TTuple, typename TFunc, std::size_t... Is>
-TReturn tuple_transform_impl(TTuple&& tuple, TFunc&& func, std::index_sequence<Is...>) {
+TReturn tuple_transform_impl(TTuple&& tuple, TFunc&& func, std::index_sequence<Is...>)
+{
   return {func(std::get<Is>(tuple))...};
 }
 
@@ -115,7 +121,8 @@ struct IsTupleImpl<std::array<T, N>> : std::true_type {};
  * @brief Test whether a sequence is a tuple.
  */
 template <typename TSeq>
-constexpr bool is_tuple() {
+constexpr bool is_tuple()
+{
   return Internal::IsTupleImpl<std::decay_t<TSeq>>::value;
 }
 
@@ -123,7 +130,8 @@ constexpr bool is_tuple() {
  * @brief Convert a tuple to a custom structure.
  */
 template <typename TReturn, typename TTuple>
-TReturn tuple_as(TTuple&& tuple) {
+TReturn tuple_as(TTuple&& tuple)
+{
   return Internal::tuple_as_impl<TReturn>(std::forward<TTuple>(tuple), Internal::tuple_index_sequence<TTuple>());
 }
 
@@ -131,7 +139,8 @@ TReturn tuple_as(TTuple&& tuple) {
  * @brief Apply a function to the elements of a tuple.
  */
 template <typename TTuple, typename TFunc>
-constexpr decltype(auto) tuple_apply(TTuple&& tuple, TFunc&& func) {
+constexpr decltype(auto) tuple_apply(TTuple&& tuple, TFunc&& func)
+{
   return Internal::apply_impl(
       std::forward<TTuple>(tuple),
       std::forward<TFunc>(func),
@@ -143,7 +152,8 @@ constexpr decltype(auto) tuple_apply(TTuple&& tuple, TFunc&& func) {
  * and then increment the iterators.
  */
 template <typename TIteratorTuple, typename TFunc>
-constexpr decltype(auto) iterator_tuple_apply(TIteratorTuple&& tuple, TFunc&& func) {
+constexpr decltype(auto) iterator_tuple_apply(TIteratorTuple&& tuple, TFunc&& func)
+{
   return Internal::iterator_tuple_apply_impl(
       std::forward<TIteratorTuple>(tuple),
       std::forward<TFunc>(func),
@@ -154,7 +164,8 @@ constexpr decltype(auto) iterator_tuple_apply(TIteratorTuple&& tuple, TFunc&& fu
  * @brief Apply a void-returning function to each element of a sequence.
  */
 template <typename TSeq, typename TFunc>
-std::enable_if_t<is_tuple<TSeq>()> seq_foreach(TSeq&& seq, TFunc&& func) {
+std::enable_if_t<is_tuple<TSeq>()> seq_foreach(TSeq&& seq, TFunc&& func)
+{
   Internal::tuple_foreach_impl(
       std::forward<TSeq>(seq),
       std::forward<TFunc>(func),
@@ -165,7 +176,8 @@ std::enable_if_t<is_tuple<TSeq>()> seq_foreach(TSeq&& seq, TFunc&& func) {
  * @copydoc seq_foreach()
  */
 template <typename TSeq, typename TFunc>
-std::enable_if_t<not is_tuple<TSeq>()> seq_foreach(const TSeq& seq, TFunc&& func) {
+std::enable_if_t<not is_tuple<TSeq>()> seq_foreach(const TSeq& seq, TFunc&& func)
+{
   for (const auto& element : seq) {
     func(element);
   }
@@ -175,7 +187,8 @@ std::enable_if_t<not is_tuple<TSeq>()> seq_foreach(const TSeq& seq, TFunc&& func
  * @copydoc seq_foreach()
  */
 template <typename TSeq, typename TFunc>
-std::enable_if_t<not is_tuple<TSeq>()> seq_foreach(TSeq& seq, TFunc&& func) {
+std::enable_if_t<not is_tuple<TSeq>()> seq_foreach(TSeq& seq, TFunc&& func)
+{
   for (auto& element : seq) {
     func(element);
   }
@@ -185,7 +198,8 @@ std::enable_if_t<not is_tuple<TSeq>()> seq_foreach(TSeq& seq, TFunc&& func) {
  * @brief Apply a transform to each element of a sequence and create a user-defined struct from the results.
  */
 template <typename TReturn, typename TSeq, typename TFunc>
-std::enable_if_t<is_tuple<TSeq>(), TReturn> seq_transform(TSeq&& seq, TFunc&& func) {
+std::enable_if_t<is_tuple<TSeq>(), TReturn> seq_transform(TSeq&& seq, TFunc&& func)
+{
   return Internal::tuple_transform_impl<TReturn>(
       std::forward<TSeq>(seq),
       std::forward<TFunc>(func),
@@ -196,7 +210,8 @@ std::enable_if_t<is_tuple<TSeq>(), TReturn> seq_transform(TSeq&& seq, TFunc&& fu
  * @copydoc seq_transform()
  */
 template <typename TReturn, typename TSeq, typename TFunc>
-std::enable_if_t<not is_tuple<TSeq>(), TReturn> seq_transform(const TSeq& seq, TFunc&& func) {
+std::enable_if_t<not is_tuple<TSeq>(), TReturn> seq_transform(const TSeq& seq, TFunc&& func)
+{
   TReturn res(seq.size());
   std::transform(seq.begin(), seq.end(), res.begin(), std::forward<TFunc>(func));
   return res;
@@ -213,7 +228,8 @@ std::enable_if_t<not is_tuple<TSeq>(), TReturn> seq_transform(const TSeq& seq, T
  * Prints: `1, 3.14, str`
  */
 template <typename TLogger, typename T0, typename... Ts>
-void serialize(TLogger&& logger, T0&& arg0, Ts&&... args) {
+void serialize(TLogger&& logger, T0&& arg0, Ts&&... args)
+{
   logger << std::forward<T0>(arg0);
   using mock_unpack = int[];
   (void)mock_unpack {0, (void(std::forward<TLogger>(logger) << ", " << std::forward<Ts>(args)), 0)...};

@@ -9,27 +9,32 @@
 //! [MallocRaster]
 template <typename T>
 struct MallocHolder {
-
 public:
-  MallocHolder(std::size_t s, T* d = nullptr) : m_size(s), m_data((T*)malloc(m_size * sizeof(T))) {
+
+  MallocHolder(std::size_t s, T* d = nullptr) : m_size(s), m_data((T*)malloc(m_size * sizeof(T)))
+  {
     if (d) {
       std::copy_n(d, m_size, m_data);
     }
   }
 
-  ~MallocHolder() {
+  ~MallocHolder()
+  {
     free(m_data);
   }
 
-  inline const T* begin() const {
+  inline const T* begin() const
+  {
     return m_data;
   }
 
-  inline const T* end() const {
+  inline const T* end() const
+  {
     return m_data + m_size;
   }
 
 private:
+
   std::size_t m_size;
   T* m_data;
 };
@@ -38,7 +43,8 @@ template <typename T, Linx::Index N>
 using MallocRaster = Linx::Raster<T, N, MallocHolder<T>>;
 //! [MallocRaster]
 
-Linx::VecRaster<int, 3> raster_iota() {
+Linx::VecRaster<int, 3> raster_iota()
+{
   //! [Raster iota]
   Linx::Raster<int, 3> raster({4, 3, 2});
   raster.range(); // Assigns {0, 1, 2...}
@@ -54,11 +60,13 @@ BOOST_AUTO_TEST_SUITE(LinxDemoBasics_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(raster_iota_test) {
+BOOST_AUTO_TEST_CASE(raster_iota_test)
+{
   raster_iota();
 }
 
-BOOST_AUTO_TEST_CASE(vec_raster_iota_test) {
+BOOST_AUTO_TEST_CASE(vec_raster_iota_test)
+{
   //! [VecRaster iota]
   Linx::VecRaster<int, 3> raster({4, 3, 2});
   raster.range(); // Assigns {0, 1, 2...}
@@ -67,7 +75,8 @@ BOOST_AUTO_TEST_CASE(vec_raster_iota_test) {
   //! [VecRaster iota]
 }
 
-BOOST_AUTO_TEST_CASE(ptr_raster_iota_test) {
+BOOST_AUTO_TEST_CASE(ptr_raster_iota_test)
+{
   //! [PtrRaster iota]
   std::array<int, 4 * 3 * 2> array;
   std::iota(array.begin(), array.end(), 0); // Same as raster.range()
@@ -78,7 +87,8 @@ BOOST_AUTO_TEST_CASE(ptr_raster_iota_test) {
   //! [PtrRaster iota]
 }
 
-BOOST_AUTO_TEST_CASE(malloc_raster_iota_test) {
+BOOST_AUTO_TEST_CASE(malloc_raster_iota_test)
+{
   //! [MallocRaster iota]
   MallocRaster<int, 3> raster({4, 3, 2});
   raster.range();
@@ -87,8 +97,8 @@ BOOST_AUTO_TEST_CASE(malloc_raster_iota_test) {
   //! [MallocRaster iota]
 }
 
-BOOST_AUTO_TEST_CASE(element_access_test) {
-
+BOOST_AUTO_TEST_CASE(element_access_test)
+{
   const auto raster = raster_iota();
 
   //! [Element access]
@@ -98,8 +108,8 @@ BOOST_AUTO_TEST_CASE(element_access_test) {
   //! [Element access]
 }
 
-BOOST_AUTO_TEST_CASE(foreach_element_test) {
-
+BOOST_AUTO_TEST_CASE(foreach_element_test)
+{
   auto raster = raster_iota();
 
   //! [Foreach element]

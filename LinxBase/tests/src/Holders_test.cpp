@@ -12,8 +12,8 @@ BOOST_AUTO_TEST_SUITE(Holders_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(example_test) {
-
+BOOST_AUTO_TEST_CASE(example_test)
+{
   BOOST_FAIL("!!!! Please implement your tests !!!!");
 }
 

@@ -13,11 +13,11 @@ using namespace Linx;
 BOOST_AUTO_TEST_SUITE(ContiguousContainer_test)
 
 struct TestContiguousContainer : ContiguousContainerMixin<int, TestContiguousContainer> {
-
   using ContiguousContainerMixin<int, TestContiguousContainer>::begin;
   using ContiguousContainerMixin<int, TestContiguousContainer>::end;
 
-  TestContiguousContainer(std::size_t size = 0, const int* data = nullptr) : vector() {
+  TestContiguousContainer(std::size_t size = 0, const int* data = nullptr) : vector()
+  {
     if (size > 0) {
       if (data) {
         vector.assign(data, data + size);
@@ -27,11 +27,13 @@ struct TestContiguousContainer : ContiguousContainerMixin<int, TestContiguousCon
     }
   }
 
-  const int* begin() const {
+  const int* begin() const
+  {
     return &*vector.begin();
   }
 
-  const int* end() const {
+  const int* end() const
+  {
     return &*vector.end();
   }
 
@@ -40,8 +42,8 @@ struct TestContiguousContainer : ContiguousContainerMixin<int, TestContiguousCon
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(mixin_test) {
-
+BOOST_AUTO_TEST_CASE(mixin_test)
+{
   constexpr std::size_t size = 10;
   TestContiguousContainer tcc(size);
   TestContiguousContainer empty;

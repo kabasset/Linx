@@ -55,7 +55,8 @@ class RowGenerator;
  * A range over the corresponding patches is returned.
  */
 template <typename TRaster, Index M>
-auto tiles(TRaster& in, Position<M> shape) {
+auto tiles(TRaster& in, Position<M> shape)
+{
   return Internal::TileGenerator<TRaster, M>(in, std::move(shape));
 }
 
@@ -64,7 +65,8 @@ auto tiles(TRaster& in, Position<M> shape) {
  * @brief Make a raster of tiles.
  */
 template <typename TParent, Index N>
-auto rasterize(const Internal::TileGenerator<TParent, N>& generator) {
+auto rasterize(const Internal::TileGenerator<TParent, N>& generator)
+{
   return generator.raster();
 }
 
@@ -73,7 +75,8 @@ auto rasterize(const Internal::TileGenerator<TParent, N>& generator) {
  * @brief Make a raster of tiles.
  */
 template <typename TParent, Index N>
-auto rasterize(Internal::TileGenerator<TParent, N>& generator) {
+auto rasterize(Internal::TileGenerator<TParent, N>& generator)
+{
   return generator.raster();
 }
 
@@ -86,7 +89,8 @@ auto rasterize(Internal::TileGenerator<TParent, N>& generator) {
  * A range over the sections is returned.
  */
 template <typename TRaster>
-auto sections(TRaster& in, Index thickness = 1) {
+auto sections(TRaster& in, Index thickness = 1)
+{
   using TSection = std::decay_t<decltype(in.section(0, thickness - 1))>;
   std::vector<TSection> out;
   const auto back = in.length(in.dimension() - 1); // FIXME implement length(-1)
@@ -105,7 +109,8 @@ auto sections(TRaster& in, Index thickness = 1) {
  * A range over the corresponding patches is returned.
  */
 template <Index I, typename TRaster>
-auto profiles(TRaster& in) {
+auto profiles(TRaster& in)
+{
   using TPatch = std::decay_t<decltype(in.patch(Line<I, TRaster::Dimension>()))>;
   const auto domain = in.domain();
   const auto size = domain.template length<I>();
@@ -130,7 +135,8 @@ auto profiles(TRaster& in) {
  * @see profiles()
  */
 template <typename TRaster>
-auto rows(TRaster& in) {
+auto rows(TRaster& in)
+{
   return Internal::RowGenerator<TRaster>(in);
 }
 
@@ -139,7 +145,8 @@ auto rows(TRaster& in) {
  * @brief Make a raster of rows.
  */
 template <typename TParent>
-auto rasterize(const Internal::RowGenerator<TParent>& generator) {
+auto rasterize(const Internal::RowGenerator<TParent>& generator)
+{
   return generator.raster();
 }
 
@@ -148,7 +155,8 @@ auto rasterize(const Internal::RowGenerator<TParent>& generator) {
  * @brief Make a raster of rows.
  */
 template <typename TParent>
-auto rasterize(Internal::RowGenerator<TParent>& generator) {
+auto rasterize(Internal::RowGenerator<TParent>& generator)
+{
   return generator.raster();
 }
 

@@ -17,9 +17,10 @@
 Elements::Logging logger = Elements::Logging::getLogger("LinxDemoAffinity");
 
 class LinxDemoAffinity : public Elements::Program {
-
 public:
-  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
+
+  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
+  {
     Linx::ProgramOptions options;
     options.positional<std::string>("output", "Output file name");
     options.named<Linx::Index>("side", "Image side", 128);
@@ -29,8 +30,8 @@ public:
     return options.as_pair();
   }
 
-  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
-
+  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override
+  {
     const auto filename = args["output"].as<std::string>();
     const auto side = args["side"].as<Linx::Index>();
     const Linx::Index quarter = side / 4;

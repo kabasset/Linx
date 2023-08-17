@@ -11,8 +11,8 @@
 namespace Linx {
 
 class Png {
-
 public:
+
   Png(const std::string& filename);
 
   bool accept();

@@ -12,8 +12,8 @@ BOOST_AUTO_TEST_SUITE(LinxDemoDft_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(verbose_derivative_test) {
-
+BOOST_AUTO_TEST_CASE(verbose_derivative_test)
+{
   //! [Plan direct]
   Linx::RealDft<1> direct({360});
   //! [Plan direct]
@@ -56,8 +56,8 @@ BOOST_AUTO_TEST_CASE(verbose_derivative_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(concise_derivative_test) {
-
+BOOST_AUTO_TEST_CASE(concise_derivative_test)
+{
   //! [Fill vector]
   Linx::Index size = 360;
   Linx::Raster<double, 1> in({size});
@@ -90,7 +90,8 @@ BOOST_AUTO_TEST_CASE(concise_derivative_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(multithread_test) {
+BOOST_AUTO_TEST_CASE(multithread_test)
+{
   // FIXME
 }
 

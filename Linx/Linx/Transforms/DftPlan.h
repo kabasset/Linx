@@ -62,11 +62,11 @@ namespace Linx {
  */
 template <typename TTransform, Index N = 2>
 class DftPlan {
-
   template <typename UTransform, Index M>
   friend class DftPlan;
 
 public:
+
   /**
    * @brief The plan dimension.
    */
@@ -105,7 +105,8 @@ public:
    */
   DftPlan(Position<N> shape, InValue* in_data = nullptr, OutValue* out_data = nullptr) :
       m_shape {shape}, m_in {Transform::in_shape(m_shape), in_data}, m_out {Transform::out_shape(m_shape), out_data},
-      m_plan {FftwAllocator::create_plan<Transform>(m_in, m_out)} {}
+      m_plan {FftwAllocator::create_plan<Transform>(m_in, m_out)}
+  {}
 
   LINX_DEFAULT_COPYABLE(DftPlan)
   LINX_DEFAULT_MOVABLE(DftPlan)
@@ -116,7 +117,8 @@ public:
    * Buffers are freed if they were allocated by the plan constructor.
    * If data has to outlive the `DftPlan` object, buffers should be copied beforehand.
    */
-  ~DftPlan() {
+  ~DftPlan()
+  {
     FftwAllocator::destroy_plan(m_plan);
   }
 
@@ -132,7 +134,8 @@ public:
    * This plan (`dft` from the snippet) is the owner of the buffers, which will be freed by its destructor,
    * which means that the buffers of the inverse plan (`idft`) has the same life cycle.
    */
-  Inverse inverse() {
+  Inverse inverse()
+  {
     return Inverse {m_shape, m_out.data(), m_in.data()};
   }
 
@@ -149,21 +152,24 @@ public:
    * which means that the input buffer of the composed plan (`plan_b`) has the same life cycle.
    */
   template <typename TPlan>
-  TPlan compose(const Position<N>& shape) {
+  TPlan compose(const Position<N>& shape)
+  {
     return {shape, m_out.data(), nullptr};
   }
 
   /**
    * @brief Get the logical plane shape.
    */
-  const Position<N>& logical_shape() const {
+  const Position<N>& logical_shape() const
+  {
     return m_shape;
   }
 
   /**
    * @brief Get the input buffer shape.
    */
-  const Position<N>& in_shape() const {
+  const Position<N>& in_shape() const
+  {
     return m_in.shape();
   }
 
@@ -172,49 +178,56 @@ public:
    * @warning
    * Contains garbage after `transform()` has been called.
    */
-  const AlignedRaster<InValue, N>& in() const {
+  const AlignedRaster<InValue, N>& in() const
+  {
     return m_in;
   }
 
   /**
    * @copydoc in()const
    */
-  AlignedRaster<InValue, N>& in() {
+  AlignedRaster<InValue, N>& in()
+  {
     return m_in;
   }
 
   /**
    * @brief Get the output buffer shape.
    */
-  const Position<N>& out_shape() const {
+  const Position<N>& out_shape() const
+  {
     return m_out.shape();
   }
 
   /**
    * @brief Access the output buffer.
    */
-  const AlignedRaster<OutValue, N>& out() const {
+  const AlignedRaster<OutValue, N>& out() const
+  {
     return m_out;
   }
 
   /**
    * @copydoc out()const
    */
-  AlignedRaster<OutValue, N>& out() {
+  AlignedRaster<OutValue, N>& out()
+  {
     return m_out;
   }
 
   /**
    * @brief Get the normalization factor.
    */
-  double normalization_factor() const {
+  double normalization_factor() const
+  {
     return shape_size(m_shape);
   }
 
   /**
    * @brief Compute the transform.
    */
-  DftPlan& transform() {
+  DftPlan& transform()
+  {
     fftw_execute(*m_plan);
     return *this;
   }
@@ -222,13 +235,15 @@ public:
   /**
    * @brief Divide by the output buffer by the normalization factor.
    */
-  DftPlan& normalize() {
+  DftPlan& normalize()
+  {
     const auto factor = 1. / normalization_factor();
     m_out *= factor;
     return *this;
   }
 
 private:
+
   /**
    * @brief The logical shape.
    */

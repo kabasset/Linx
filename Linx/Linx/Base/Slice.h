@@ -17,8 +17,8 @@ namespace Linx {
  * The slice size is the number of indices it contains.
  */
 class Slice {
-
 public:
+
   /**
    * @brief Constructor.
    * @param front The included front index
@@ -30,53 +30,61 @@ public:
   /**
    * @brief Make a slice from a front position, number of indices, and optional step.
    */
-  static Slice from_size(Index front, std::size_t size, Index step = 1) {
+  static Slice from_size(Index front, std::size_t size, Index step = 1)
+  {
     return Slice(front, front + step * (size - 1), step);
   }
 
   /**
    * @brief Get the included front index.
    */
-  Index front() const {
+  Index front() const
+  {
     return m_front;
   }
 
   /**
    * @brief Get the included back index.
    */
-  Index back() const {
+  Index back() const
+  {
     return m_front + m_step * (m_size - 1);
   }
 
   /**
    * @brief Get the step.
    */
-  Index step() const {
+  Index step() const
+  {
     return m_step;
   }
 
   /**
    * @brief Get the number of indices.
    */
-  std::size_t size() const {
+  std::size_t size() const
+  {
     return m_size;
   }
 
   /**
    * @brief Equality operator.
    */
-  bool operator==(const Slice& rhs) const {
+  bool operator==(const Slice& rhs) const
+  {
     return m_front == rhs.m_front && m_size == rhs.m_size && m_step == rhs.m_step;
   }
 
   /**
    * @brief Non-equality operator.
    */
-  bool operator!=(const Slice& rhs) const {
+  bool operator!=(const Slice& rhs) const
+  {
     return not(*this == rhs);
   }
 
 private:
+
   Index m_front;
   Index m_step;
   std::size_t m_size;

@@ -16,8 +16,8 @@ namespace Linx {
  * @brief Base of all exceptions thrown directly by the library.
  */
 class Exception : public std::exception {
-
 public:
+
   /**
    * @brief Destructor.
    */
@@ -35,12 +35,14 @@ public:
    * @param message Error message
    */
   explicit Exception(const std::string& prefix, const std::string& message) :
-      std::exception(), m_prefix(prefix), m_message(m_prefix + ": " + message) {}
+      std::exception(), m_prefix(prefix), m_message(m_prefix + ": " + message)
+  {}
 
   /**
    * @brief Output message.
    */
-  const char* what() const noexcept override {
+  const char* what() const noexcept override
+  {
     return m_message.c_str();
   }
 
@@ -49,7 +51,8 @@ public:
    * @param line The line to be appended
    * @param indent Some indentation level
    */
-  Exception& append(const std::string& line, std::size_t indent = 0) {
+  Exception& append(const std::string& line, std::size_t indent = 0)
+  {
     m_message += "\n";
     for (std::size_t i = 0; i < indent; ++i) {
       m_message += "  ";
@@ -59,6 +62,7 @@ public:
   }
 
 private:
+
   const std::string m_prefix;
   std::string m_message;
 };
@@ -68,8 +72,8 @@ private:
  * @brief Exception thrown when trying to read a null pointer.
  */
 class NullPtrError : public Exception {
-
 public:
+
   /**
    * @brief Constructor.
    */
@@ -78,7 +82,8 @@ public:
   /**
    * @brief Throw if a given pointer is null.
    */
-  void may_throw(const void* ptr, const std::string& message) {
+  void may_throw(const void* ptr, const std::string& message)
+  {
     if (not ptr) {
       throw NullPtrError(message);
     }
@@ -91,8 +96,8 @@ public:
  * @brief Exception thrown if a value lies out of given bounds.
  */
 class OutOfBoundsError : public Exception {
-
 public:
+
   /**
    * @brief Constructor.
    * 
@@ -103,13 +108,15 @@ public:
       Exception(
           "Out of bounds error",
           name + std::to_string(value) + " not in [" + std::to_string(bounds.first) + ", " +
-              std::to_string(bounds.second) + "]") {}
+              std::to_string(bounds.second) + "]")
+  {}
 
   /**
    * @brief Throw if a value lies out of given bounds, included.
    */
   template <typename T>
-  static void may_throw(const std::string& name, T value, std::pair<T, T> bounds) {
+  static void may_throw(const std::string& name, T value, std::pair<T, T> bounds)
+  {
     if (value < bounds.first || value > bounds.second) {
       throw OutOfBoundsError(name, value, bounds);
     }

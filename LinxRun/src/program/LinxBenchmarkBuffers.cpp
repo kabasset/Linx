@@ -15,7 +15,8 @@ Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkBuffers");
 
 using Chrono = Linx::Chronometer<std::chrono::milliseconds>;
 
-Chrono::Unit benchmark_buffer(Linx::Index size, Linx::Index alignment) {
+Chrono::Unit benchmark_buffer(Linx::Index size, Linx::Index alignment)
+{
   Chrono chrono;
   logger.info("Assignment...");
   chrono.start();
@@ -34,7 +35,8 @@ Chrono::Unit benchmark_buffer(Linx::Index size, Linx::Index alignment) {
   return chrono.elapsed();
 }
 
-Chrono::Unit benchmark_vector(Linx::Index size) {
+Chrono::Unit benchmark_vector(Linx::Index size)
+{
   Chrono chrono;
   logger.info("Initialization...");
   chrono.start();
@@ -54,17 +56,18 @@ Chrono::Unit benchmark_vector(Linx::Index size) {
 }
 
 class LinxBenchmarkIteration : public Elements::Program {
-
 public:
-  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
+
+  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
+  {
     Linx::ProgramOptions options;
     options.named<long>("align", "Alignment for an AlignedBuffer or 0 for a std::vector");
     options.named<long>("size", "Number of elements", 1000000);
     return options.as_pair();
   }
 
-  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
-
+  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override
+  {
     const auto alignment = args["align"].as<long>();
     const auto size = args["size"].as<long>();
 

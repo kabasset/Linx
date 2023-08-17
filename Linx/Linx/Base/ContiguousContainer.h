@@ -54,7 +54,6 @@ namespace Linx {
  */
 template <typename T, typename TDerived>
 struct ContiguousContainerMixin {
-
   /**
    * @brief The value type.
    */
@@ -98,21 +97,24 @@ struct ContiguousContainerMixin {
    * 
    * Empty corresponds to `begin() == end()`.
    */
-  bool empty() const {
+  bool empty() const
+  {
     return static_cast<const TDerived&>(*this).end() == static_cast<const TDerived&>(*this).begin();
   }
 
   /**
    * @brief Number of elements.
    */
-  std::size_t size() const {
+  std::size_t size() const
+  {
     return static_cast<const TDerived&>(*this).end() - static_cast<const TDerived&>(*this).begin();
   }
 
   /**
    * @brief Maximum number of elements the container is able to hold (same as `size()`).
    */
-  std::size_t max_size() const {
+  std::size_t max_size() const
+  {
     return size();
   }
 
@@ -121,56 +123,64 @@ struct ContiguousContainerMixin {
   /**
    * @brief Get a pointer to the underlying array.
    */
-  inline const T* data() const {
+  inline const T* data() const
+  {
     return static_cast<const TDerived&>(*this).begin();
   }
 
   /**
    * @copybrief data()const
    */
-  inline T* data() {
+  inline T* data()
+  {
     return const_cast<T*>(const_cast<const ContiguousContainerMixin&>(*this).data());
   }
 
   /**
    * @brief Access the element with given index.
    */
-  inline const T& operator[](size_type index) const {
+  inline const T& operator[](size_type index) const
+  {
     return *(static_cast<const TDerived&>(*this).begin() + index);
   }
 
   /**
    * @copybrief operator[]()
    */
-  inline T& operator[](size_type index) {
+  inline T& operator[](size_type index)
+  {
     return const_cast<T&>(const_cast<const ContiguousContainerMixin&>(*this)[index]);
   }
 
   /**
    * @brief Access the first element.
    */
-  inline const T& front() const {
+  inline const T& front() const
+  {
     return *(static_cast<const TDerived&>(*this).begin());
   }
 
   /**
    * @copybrief front()const
    */
-  inline T& front() {
+  inline T& front()
+  {
     return const_cast<T&>(const_cast<const ContiguousContainerMixin&>(*this).front());
   }
 
   /**
    * @brief Access the last element.
    */
-  inline const T& back() const {
+  inline const T& back() const
+  {
     return *(static_cast<const TDerived&>(*this).end() - 1);
   }
 
   /**
    * @copybrief back()const
    */
-  inline T& back() {
+  inline T& back()
+  {
     return const_cast<T&>(const_cast<const ContiguousContainerMixin&>(*this).back());
   }
 
@@ -179,28 +189,32 @@ struct ContiguousContainerMixin {
   /**
    * @brief Get an iterator to the beginning.
    */
-  iterator begin() {
+  iterator begin()
+  {
     return const_cast<iterator>(const_cast<const TDerived&>(static_cast<TDerived&>(*this)).begin()); // TODO cleaner?
   }
 
   /**
    * @copybrief begin()
    */
-  const_iterator cbegin() {
+  const_iterator cbegin()
+  {
     return const_cast<const TDerived&>(static_cast<TDerived&>(*this)).begin(); // TODO cleaner?
   }
 
   /**
    * @brief Get an iterator to the end.
    */
-  iterator end() {
+  iterator end()
+  {
     return const_cast<iterator>(const_cast<const TDerived&>(static_cast<TDerived&>(*this)).end()); // TODO cleaner?
   }
 
   /**
    * @copybrief end()const
    */
-  const_iterator cend() {
+  const_iterator cend()
+  {
     return const_cast<const TDerived&>(static_cast<TDerived&>(*this)).end(); // TODO cleaner?
   }
 
@@ -209,7 +223,8 @@ struct ContiguousContainerMixin {
   /**
    * @brief Check equality.
    */
-  virtual bool operator==(const TDerived& rhs) const {
+  virtual bool operator==(const TDerived& rhs) const
+  {
     const auto& lhs = static_cast<const TDerived&>(*this);
     return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
   }
@@ -217,7 +232,8 @@ struct ContiguousContainerMixin {
   /**
    * @brief Check inequality.
    */
-  bool operator!=(const TDerived& rhs) const {
+  bool operator!=(const TDerived& rhs) const
+  {
     return not(*this == rhs);
   }
 
@@ -229,7 +245,8 @@ struct ContiguousContainerMixin {
  * @brief Insert a `ContiguousContainerMixin` into an output stream.
  */
 template <typename T, typename TDerived>
-std::ostream& operator<<(std::ostream& os, const ContiguousContainerMixin<T, TDerived>& container) {
+std::ostream& operator<<(std::ostream& os, const ContiguousContainerMixin<T, TDerived>& container)
+{
   os << "[";
   if (not container.empty()) {
     const auto size = static_cast<const TDerived&>(container).size();

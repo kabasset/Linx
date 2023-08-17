@@ -15,7 +15,8 @@ BOOST_AUTO_TEST_SUITE(Sequence_test)
 
 //-----------------------------------------------------------------------------
 
-LINX_TEST_CASE_TEMPLATE(element_access_test) {
+LINX_TEST_CASE_TEMPLATE(element_access_test)
+{
   T data[] = {T(0), T(1), T(0), T(1), T(2), T(3)};
   Sequence<T> seq(6, data);
   BOOST_TEST(seq.size() == 6);
@@ -26,7 +27,8 @@ LINX_TEST_CASE_TEMPLATE(element_access_test) {
   BOOST_TEST(seq[0] == T(1));
 }
 
-BOOST_AUTO_TEST_CASE(arithmetic_test) {
+BOOST_AUTO_TEST_CASE(arithmetic_test)
+{
   const auto lhs = random<int>(314);
   const auto rhs = random<int>(314);
   int scalar = 2;

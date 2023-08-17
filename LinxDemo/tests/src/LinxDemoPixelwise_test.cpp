@@ -7,8 +7,8 @@
 #include <boost/test/unit_test.hpp>
 
 struct Fixture {
-
-  Fixture() : a({3, 2}), b({3, 2}), c({3, 2}), k(2.) {
+  Fixture() : a({3, 2}), b({3, 2}), c({3, 2}), k(2.)
+  {
     a.range(1);
     b.fill(-1);
   }
@@ -25,8 +25,8 @@ BOOST_FIXTURE_TEST_SUITE(LinxDemoChannels_test, Fixture)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(operators_test) {
-
+BOOST_AUTO_TEST_CASE(operators_test)
+{
   //! [Operators]
   a += b; // Is equivalent to:
   std::transform(a.begin(), a.end(), b.begin(), a.begin(), [](auto e, auto f) {
@@ -48,8 +48,8 @@ BOOST_AUTO_TEST_CASE(operators_test) {
   //! [Operators]
 }
 
-BOOST_AUTO_TEST_CASE(functions_test) {
-
+BOOST_AUTO_TEST_CASE(functions_test)
+{
   //! [Functions]
   // Unary function
   auto res1 = cos(a); // Calls Linx::cos(a) according to ADL
@@ -73,8 +73,8 @@ BOOST_AUTO_TEST_CASE(functions_test) {
   std::cout << "norm(c) = " << res4[0] << std::endl;
 }
 
-BOOST_AUTO_TEST_CASE(apply_test) {
-
+BOOST_AUTO_TEST_CASE(apply_test)
+{
   //! [Formula]
   auto res = a * k + b;
   //! [Formula]

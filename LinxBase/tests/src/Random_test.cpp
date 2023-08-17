@@ -16,7 +16,8 @@ BOOST_AUTO_TEST_SUITE(Random_test)
 //-----------------------------------------------------------------------------
 
 template <typename T>
-void check_uniform(T) {
+void check_uniform(T)
+{
   MinimalDataContainer<T> sequence(32);
   sequence.generate(UniformNoise<T>(5, 10));
   for (const auto& e : sequence) {
@@ -33,7 +34,8 @@ void check_uniform(T) {
 void check_uniform(bool) {}
 
 template <typename T>
-void check_uniform(std::complex<T>) {
+void check_uniform(std::complex<T>)
+{
   MinimalDataContainer<std::complex<T>> sequence(32);
   sequence.generate(UniformNoise<std::complex<T>>({5, 1}, {10, 2}));
   for (const auto& e : sequence) {
@@ -51,12 +53,14 @@ void check_uniform(std::complex<T>) {
   }
 }
 
-LINX_TEST_CASE_TEMPLATE(uniform_test) {
+LINX_TEST_CASE_TEMPLATE(uniform_test)
+{
   check_uniform(T {});
 }
 
 template <typename T>
-void check_gaussian(T) {
+void check_gaussian(T)
+{
   MinimalDataContainer<T> sequence(32);
   sequence.generate(GaussianNoise<T>(100, 15));
   sequence.apply(GaussianNoise<T>());
@@ -66,14 +70,17 @@ void check_gaussian(T) {
 void check_gaussian(bool) {}
 
 template <typename T>
-void check_gaussian(std::complex<T>) {}
+void check_gaussian(std::complex<T>)
+{}
 
-LINX_TEST_CASE_TEMPLATE(gaussian_test) {
+LINX_TEST_CASE_TEMPLATE(gaussian_test)
+{
   check_gaussian(T {});
 }
 
 template <typename T>
-void check_poisson(T) {
+void check_poisson(T)
+{
   MinimalDataContainer<T> sequence(32);
   sequence.generate(PoissonNoise<T>(20));
   sequence.apply(PoissonNoise<T>());
@@ -83,13 +90,16 @@ void check_poisson(T) {
 void check_poisson(bool) {}
 
 template <typename T>
-void check_poisson(std::complex<T>) {}
+void check_poisson(std::complex<T>)
+{}
 
-LINX_TEST_CASE_TEMPLATE(poisson_test) {
+LINX_TEST_CASE_TEMPLATE(poisson_test)
+{
   check_poisson(T {});
 }
 
-BOOST_AUTO_TEST_CASE(reproducible_gaussian_test) {
+BOOST_AUTO_TEST_CASE(reproducible_gaussian_test)
+{
   MinimalDataContainer<int> sequence_a {10, 100, 1000};
   auto sequence_b = sequence_a;
   sequence_b[1] += 1;
@@ -101,7 +111,8 @@ BOOST_AUTO_TEST_CASE(reproducible_gaussian_test) {
   BOOST_TEST(sequence_a[2] == sequence_b[2]);
 }
 
-BOOST_AUTO_TEST_CASE(reproducible_poisson_test) {
+BOOST_AUTO_TEST_CASE(reproducible_poisson_test)
+{
   MinimalDataContainer<int> sequence_a {10, 100, 1000};
   auto sequence_b = sequence_a;
   sequence_b[1] += 1;

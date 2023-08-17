@@ -31,8 +31,8 @@ namespace Linx {
  */
 template <typename T>
 class DataDistribution {
-
 public:
+
   /**
    * @copybrief TypeTraits::Floating
    */
@@ -46,7 +46,8 @@ public:
    */
   explicit DataDistribution(std::vector<T>&& values) :
       m_values(std::move(values)), m_sorted(std::is_sorted(m_values.begin(), m_values.end())), m_sum(Limits<T>::zero()),
-      m_sum2(m_sum) {
+      m_sum2(m_sum)
+  {
     for (const auto& v : m_values) {
       m_sum += v;
       m_sum2 += v * v;
@@ -57,42 +58,48 @@ public:
    * @brief Range-copy constructor.
    */
   template <typename TRange>
-  explicit DataDistribution(const TRange& values) : DataDistribution(std::vector<T>(values.begin(), values.end())) {}
+  explicit DataDistribution(const TRange& values) : DataDistribution(std::vector<T>(values.begin(), values.end()))
+  {}
 
   /// @group_properties
 
   /**
    * @brief Get the number of values.
    */
-  std::size_t size() {
+  std::size_t size()
+  {
     return m_values.size();
   }
 
   /**
    * @brief Get a reference to the min element.
    */
-  const T& min() {
+  const T& min()
+  {
     return nth(0);
   }
 
   /**
    * @brief Get a reference to the max element.
    */
-  const T& max() {
+  const T& max()
+  {
     return nth(size() - 1);
   }
 
   /**
    * @brief Get the sum of all values.
    */
-  const T& sum() {
+  const T& sum()
+  {
     return m_sum;
   }
 
   /**
    * @brief Get a reference to the n-th smallest element.
    */
-  const T& nth(std::size_t n) {
+  const T& nth(std::size_t n)
+  {
     if (m_sorted) {
       return m_values[n];
     }
@@ -106,14 +113,16 @@ public:
   /**
    * @brief Compute the mean.
    */
-  Floating mean() {
+  Floating mean()
+  {
     return sum() / size();
   }
 
   /**
    * @brief Compute the median.
    */
-  Floating median() {
+  Floating median()
+  {
     return quantile(0.5);
   }
 
@@ -124,21 +133,24 @@ public:
    * the number of samples `size()` in the first case
    * and `size() - 1` in the latter case.
    */
-  Floating variance(bool unbiased = true) {
+  Floating variance(bool unbiased = true)
+  {
     return Floating(m_sum2 - m_sum * m_sum / size()) / (size() - unbiased);
   }
 
   /**
    * @brief Compute the standard deviation.
    */
-  Floating stdev(bool unbiased = true) {
+  Floating stdev(bool unbiased = true)
+  {
     return std::sqrt(variance(unbiased));
   }
 
   /**
    * @brief Compute the median absolute deviation.
    */
-  Floating mad() {
+  Floating mad()
+  {
     std::vector<T> absdev(size());
     const auto m = median();
     std::transform(m_values.begin(), m_values.end(), absdev.begin(), [=](auto e) {
@@ -155,7 +167,8 @@ public:
    * - 1: `max()`;
    * - 0.5: `median()`.
    */
-  Floating quantile(double q) {
+  Floating quantile(double q)
+  {
     const auto n = q * (size() - 1);
     const std::size_t f = n;
     if (n == f) {
@@ -172,7 +185,8 @@ public:
    * Bins are open-closed intervals (the lower bound is includer, the upper bound is excluded).
    */
   template <typename TRange>
-  std::vector<std::size_t> histogram(const TRange& bins) { // FIXME bounds options
+  std::vector<std::size_t> histogram(const TRange& bins)
+  { // FIXME bounds options
     sort();
     std::vector<std::size_t> out(std::distance(bins.begin(), bins.end()) - 1);
     auto it = m_values.begin();
@@ -197,7 +211,8 @@ public:
   /**
    * @brief Sort the values once for all.
    */
-  void sort() {
+  void sort()
+  {
     if (not m_sorted) {
       std::sort(m_values.begin(), m_values.end());
       m_sorted = true;
@@ -207,6 +222,7 @@ public:
   /// @}
 
 private:
+
   /**
    * @brief The partially sorted values.
    */

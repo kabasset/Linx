@@ -15,7 +15,8 @@ BOOST_AUTO_TEST_SUITE(BoxIterator_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(domain_is_screened_in_order_test) {
+BOOST_AUTO_TEST_CASE(domain_is_screened_in_order_test)
+{
   Position<5> shape {2, 3, 4, 5, 6};
   Raster<Index, 5> raster(shape);
   for (std::size_t i = 0; i < raster.size(); ++i) {
@@ -28,7 +29,8 @@ BOOST_AUTO_TEST_CASE(domain_is_screened_in_order_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(box_is_screened_in_order_test) {
+BOOST_AUTO_TEST_CASE(box_is_screened_in_order_test)
+{
   Position<4> shape {3, 4, 5, 6};
   Raster<Index, 4> raster(shape);
   Box<4> region {Position<4>::zero() + 1, shape - 2};
@@ -45,7 +47,8 @@ BOOST_AUTO_TEST_CASE(box_is_screened_in_order_test) {
   BOOST_TEST(count == region.size());
 }
 
-BOOST_AUTO_TEST_CASE(empty_box_iterator_passes_test) {
+BOOST_AUTO_TEST_CASE(empty_box_iterator_passes_test)
+{
   Box<2> region {Position<2>::one() * 2, Position<2>::zero()};
   BOOST_CHECK(region.size() == 0);
   for (const auto& p : region) {

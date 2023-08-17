@@ -15,7 +15,8 @@ BOOST_AUTO_TEST_SUITE(OrientedKernel_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(sum3_neumann_test) {
+BOOST_AUTO_TEST_CASE(sum3_neumann_test)
+{
   const auto raster = Raster<int>({3, 3}).range();
   const auto in = extrapolate(raster, 0);
   const auto kernel0 = OrientedKernel<int, 0>({1, 1, 1});
@@ -33,7 +34,8 @@ BOOST_AUTO_TEST_CASE(sum3_neumann_test) {
   BOOST_TEST(out1.container() == expected1);
 }
 
-BOOST_AUTO_TEST_CASE(sum3_dirichlet_test) {
+BOOST_AUTO_TEST_CASE(sum3_dirichlet_test)
+{
   const auto raster = Raster<int>({3, 3}).range();
   const auto in = extrapolate<NearestNeighbor>(raster);
   const auto kernel0 = OrientedKernel<int, 0>({1, 1, 1});
@@ -51,7 +53,8 @@ BOOST_AUTO_TEST_CASE(sum3_dirichlet_test) {
   BOOST_TEST(out1.container() == expected1);
 }
 
-BOOST_AUTO_TEST_CASE(grad2_neumann_test) {
+BOOST_AUTO_TEST_CASE(grad2_neumann_test)
+{
   const auto raster = Raster<int>({3, 3}).range();
   const auto in = extrapolate(raster, 0);
   const auto kernel0 = OrientedKernel<int, 0>({-1, 1});

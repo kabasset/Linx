@@ -14,60 +14,73 @@ namespace Internal {
 
 template <typename TParent, Index M>
 class TileGenerator : public std::iterator<std::forward_iterator_tag, decltype(TParent().patch(Box<M>()))> {
-
 public:
+
   using Value = decltype(TParent().patch(Box<M>()));
   static constexpr Index Dimension = M;
 
   TileGenerator(TParent& in, Position<M> shape) :
-      m_parent(&in), m_domain(m_parent->domain()), m_fronts(m_domain, std::move(shape)), m_current(m_fronts.begin()) {}
+      m_parent(&in), m_domain(m_parent->domain()), m_fronts(m_domain, std::move(shape)), m_current(m_fronts.begin())
+  {}
 
-  TileGenerator begin() const {
+  TileGenerator begin() const
+  {
     return *this;
   }
 
-  TileGenerator& begin() {
+  TileGenerator& begin()
+  {
     return *this;
   }
 
-  TileGenerator end() const {
+  TileGenerator end() const
+  {
     return TileGenerator(m_fronts.end());
   }
 
-  Value operator*() const {
+  Value operator*() const
+  {
     return m_parent->patch(Box<M>::from_shape(*m_current, m_fronts.step()) & m_domain);
   }
 
-  Value* operator->() const {
+  Value* operator->() const
+  {
     return &*(*this);
   }
 
-  TileGenerator& operator++() {
+  TileGenerator& operator++()
+  {
     ++m_current;
     return *this;
   }
 
-  TileGenerator operator++(int) {
+  TileGenerator operator++(int)
+  {
     auto out = *this;
     ++(*this);
     return out;
   }
 
-  bool operator==(const TileGenerator& rhs) const {
+  bool operator==(const TileGenerator& rhs) const
+  {
     return m_current == rhs.m_current;
   }
 
-  bool operator!=(const TileGenerator& rhs) const {
+  bool operator!=(const TileGenerator& rhs) const
+  {
     return m_current != rhs.m_current;
   }
 
-  Raster<std::decay_t<Value>, Dimension> raster() {
+  Raster<std::decay_t<Value>, Dimension> raster()
+  {
     return Raster<std::decay_t<Value>, Dimension>(m_fronts.shape(), *this);
   }
 
 private:
+
   TileGenerator(typename Grid<TParent::Dimension>::Iterator current) :
-      m_parent(nullptr), m_domain(), m_fronts(), m_current(current) {} // FIXME no copy
+      m_parent(nullptr), m_domain(), m_fronts(), m_current(current)
+  {} // FIXME no copy
 
   TParent* m_parent;
   Box<TParent::Dimension> m_domain; // FIXME only back is needed for clamping

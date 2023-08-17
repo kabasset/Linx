@@ -11,27 +11,32 @@ namespace Linx {
 
 template <Index N>
 class Grid<N>::Iterator : public std::iterator<std::input_iterator_tag, Position<N>> {
-
 public:
+
   explicit Iterator(const Grid<N>& region, Position<N> current) : m_region(region), m_current(current) {}
 
-  static Iterator begin(const Grid<N>& region) {
+  static Iterator begin(const Grid<N>& region)
+  {
     return Iterator(region, region.front());
   }
 
-  static Iterator end(const Grid<N>& region) {
+  static Iterator end(const Grid<N>& region)
+  {
     return Iterator(region, Box<N>::Iterator::end_position(region.box()));
   }
 
-  const Position<N>& operator*() const {
+  const Position<N>& operator*() const
+  {
     return m_current;
   }
 
-  const Position<N>* operator->() const {
+  const Position<N>* operator->() const
+  {
     return &m_current;
   }
 
-  Iterator& operator++() {
+  Iterator& operator++()
+  {
     if (m_current == m_region.back()) {
       m_current = Box<N>::Iterator::end_position(m_region.box());
       return *this;
@@ -46,21 +51,25 @@ public:
     return *this;
   }
 
-  Iterator operator++(int) {
+  Iterator operator++(int)
+  {
     auto out = *this;
     ++this;
     return out;
   }
 
-  bool operator==(const Iterator& rhs) const {
+  bool operator==(const Iterator& rhs) const
+  {
     return m_current == rhs.m_current;
   }
 
-  bool operator!=(const Iterator& rhs) const {
+  bool operator!=(const Iterator& rhs) const
+  {
     return m_current != rhs.m_current;
   }
 
 private:
+
   /**
    * @brief The screened region.
    */

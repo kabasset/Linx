@@ -12,8 +12,8 @@ BOOST_AUTO_TEST_SUITE(LinxDemoRandom_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(simple_random_test) {
-
+BOOST_AUTO_TEST_CASE(simple_random_test)
+{
   //! [Generate Gaussian noise]
   Linx::Raster<double> raster({3, 2});
   raster.generate(Linx::GaussianNoise<double>(100, 15));
@@ -37,24 +37,26 @@ BOOST_AUTO_TEST_CASE(simple_random_test) {
 //! [System noise]
 template <typename T>
 class SystemNoise {
-
 public:
+
   explicit SystemNoise(std::size_t seed = 0) : m_poisson(0, seed), m_gaussian(0, 1, seed) {}
 
-  T operator()(T flux, T dark) {
+  T operator()(T flux, T dark)
+  {
     auto out = m_poisson(flux);
     out += dark + std::sqrt(dark) * m_gaussian();
     return out;
   }
 
 private:
+
   Linx::PoissonNoise<T> m_poisson;
   Linx::GaussianNoise<T> m_gaussian;
 };
 //! [System noise]
 
-BOOST_AUTO_TEST_CASE(compound_random_test) {
-
+BOOST_AUTO_TEST_CASE(compound_random_test)
+{
   Linx::Raster<double> flux({3, 2});
   Linx::Raster<double> dark({3, 2});
   flux.generate(Linx::PoissonNoise<int>(100));

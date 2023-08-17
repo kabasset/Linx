@@ -11,48 +11,58 @@ namespace Linx {
 
 template <Index I, Index N>
 class Line<I, N>::Iterator : public std::iterator<std::input_iterator_tag, Position<N>> {
-
 public:
-  explicit Iterator(const Line<I, N>& region, Index current) : m_step(region.step()), m_current(region.front()) {
+
+  explicit Iterator(const Line<I, N>& region, Index current) : m_step(region.step()), m_current(region.front())
+  {
     m_current[I] = current;
   }
 
-  static Iterator begin(const Line<I, N>& region) {
+  static Iterator begin(const Line<I, N>& region)
+  {
     return Iterator(region, region.front_index());
   }
 
-  static Iterator end(const Line<I, N>& region) {
+  static Iterator end(const Line<I, N>& region)
+  {
     return Iterator(region, region.back_index() + region.step());
   }
 
-  const Position<N>& operator*() const {
+  const Position<N>& operator*() const
+  {
     return m_current;
   }
 
-  const Position<N>* operator->() const {
+  const Position<N>* operator->() const
+  {
     return &m_current;
   }
 
-  Iterator& operator++() {
+  Iterator& operator++()
+  {
     m_current[I] += m_step;
     return *this;
   }
 
-  Iterator operator++(int) {
+  Iterator operator++(int)
+  {
     auto out = *this;
     ++this;
     return out;
   }
 
-  bool operator==(const Iterator& rhs) const {
+  bool operator==(const Iterator& rhs) const
+  {
     return m_current == rhs.m_current;
   }
 
-  bool operator!=(const Iterator& rhs) const {
+  bool operator!=(const Iterator& rhs) const
+  {
     return m_current != rhs.m_current;
   }
 
 private:
+
   /**
    * @brief The step.
    */

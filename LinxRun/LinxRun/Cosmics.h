@@ -10,6 +10,7 @@
 #include "Linx/Transforms/StructuringElement.h" // FIXME Morphology
 
 namespace Linx {
+namespace Cosmics {
 
 /**
  * @brief Detect cosmic rays and flag affected pixels.
@@ -18,11 +19,15 @@ namespace Linx {
  * @param out The output flag map
  * @param flag The flag value
  * 
- * @see Umbaugh, Scott E. (2011). Digital image processing and analysis (2nd ed.).
+ * This is a simple adaptive Laplacian thresholding.
+ * The input raster is convolved with some Laplacian kernel.
+ * The Gaussian noise parameters of the result are estimated to deduce the detection threshold.
+ * 
+ * @see Another, non isotropic approach: Umbaugh, Scott E. (2011). Digital image processing and analysis (2nd ed.).
  */
 template <typename TIn, typename TOut>
-void flag_cosmics_to(const TIn& in, double factor, TOut& out, typename TOut::Value flag = true) {
-
+void flag_to(const TIn& in, double factor, TOut& out, typename TOut::Value flag = true)
+{
   using T = typename TIn::Value;
 
   const auto laplacian = convolution(Raster<T>({3, 3}, {-.25, -.5, -.25, -.5, 3, -.5, -.25, -.5, -.25})) *
@@ -47,9 +52,10 @@ void flag_cosmics_to(const TIn& in, double factor, TOut& out, typename TOut::Val
  * @param factor The detection threshold factor relative to the noise standard deviation
  */
 template <typename T, typename TIn>
-Raster<T> flag_cosmics(const TIn& in, double factor) {
+Raster<T> flag(const TIn& in, double factor)
+{
   Raster<T> out(in.shape());
-  flag_cosmics_to(in, factor, out);
+  flag_to(in, factor, out);
   return out;
 }
 
@@ -57,7 +63,8 @@ Raster<T> flag_cosmics(const TIn& in, double factor) {
  * @brief Perform morphological closing in place.
  */
 template <typename TIn>
-void close_flag(TIn& in, long radius = 1) {
+void close_flagmap(TIn& in, long radius = 1)
+{
   using T = typename TIn::Value;
   // auto strel = Mask<2>::ball<2>(radius); // FIXME accept masks in StructuringElement
   auto strel = Box<2>::from_center(radius);
@@ -65,8 +72,12 @@ void close_flag(TIn& in, long radius = 1) {
   erosion<T>(strel).transform(extrapolate<NearestNeighbor>(dilated), in);
 }
 
+/**
+ * @brief Dilate the flag map.
+ */
 template <typename TIn>
-auto dilate(const TIn& in, long radius = 1) {
+auto dilate_flagmap(const TIn& in, long radius = 1)
+{
   if (radius == 0) {
     return in;
   }
@@ -74,6 +85,7 @@ auto dilate(const TIn& in, long radius = 1) {
   return dilation<T>(Box<2>::from_center(radius)) * extrapolate<NearestNeighbor>(in);
 }
 
+} // namespace Cosmics
 } // namespace Linx
 
 #endif

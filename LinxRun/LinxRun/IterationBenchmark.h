@@ -14,8 +14,8 @@ namespace Linx {
  * @brief Benchmark to measure the different pixel looping strategies.
  */
 class IterationBenchmark {
-
 public:
+
   /**
    * @brief The raster dimension.
    */
@@ -77,6 +77,7 @@ public:
   Duration call_generate();
 
 protected:
+
   Index m_width;
   Index m_height;
   Index m_depth;

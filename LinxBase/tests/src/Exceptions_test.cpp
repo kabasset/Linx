@@ -14,7 +14,8 @@ BOOST_AUTO_TEST_SUITE(Exceptions_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(message_test) {
+BOOST_AUTO_TEST_CASE(message_test)
+{
   const std::string prefix = "Linx";
   const std::string message = "MESSAGE!";
   Exception error(message);

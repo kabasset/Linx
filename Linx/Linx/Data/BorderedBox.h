@@ -21,8 +21,8 @@ namespace Internal {
  */
 template <Index N = 2>
 class BorderedBox {
-
 public:
+
   /**
    * @brief The dimension parameter.
    */
@@ -34,13 +34,12 @@ public:
   /**
    * @brief Constructor.
    */
-  BorderedBox(const Box<N>& box, const Box<N>& margin) : m_inner(box - margin), m_fronts(), m_backs() {
-
+  BorderedBox(const Box<N>& box, const Box<N>& margin) : m_inner(box - margin), m_fronts(), m_backs()
+  {
     auto current = m_inner;
     const auto dim = m_inner.dimension();
     m_backs.reserve(dim);
     for (Index i = 0; i < dim; ++i) {
-
       const auto f = margin.front()[i];
       if (f < 0) {
         auto before = current;
@@ -65,7 +64,8 @@ public:
    * @brief Apply two different functions to the inner and bordering boxes.
    */
   template <typename TInnerFunc, typename TBorderFunc>
-  void apply_inner_border(TInnerFunc&& inner_func, TBorderFunc&& border_func) const {
+  void apply_inner_border(TInnerFunc&& inner_func, TBorderFunc&& border_func) const
+  {
     for (const auto& box : m_fronts) {
       std::forward<TBorderFunc>(border_func)(box);
     }
@@ -78,6 +78,7 @@ public:
   /// @}
 
 private:
+
   Box<N> m_inner;
   std::deque<Box<N>> m_fronts;
   std::vector<Box<N>> m_backs;

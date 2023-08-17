@@ -14,8 +14,8 @@ BOOST_AUTO_TEST_SUITE(Kernel_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(full_test) {
-
+BOOST_AUTO_TEST_CASE(full_test)
+{
   // FIXME make fixture
   auto in = Raster<int>({4, 3}).fill(1);
   auto k = convolution(Raster<int>({3, 3}).fill(1));
@@ -27,8 +27,8 @@ BOOST_AUTO_TEST_CASE(full_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(crop_test) {
-
+BOOST_AUTO_TEST_CASE(crop_test)
+{
   const auto in = Raster<int>({10, 8}).range();
   const auto extrapolated = extrapolate(in, 0);
   const auto k = convolution(Raster<int>({3, 3}).fill(1));
@@ -42,8 +42,8 @@ BOOST_AUTO_TEST_CASE(crop_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(inner_box_test) {
-
+BOOST_AUTO_TEST_CASE(inner_box_test)
+{
   const auto in = Raster<int, 3>({5, 6, 7}).range();
   const auto extrapolated = extrapolate(in, 0);
   const auto k = convolution(Raster<int, 3>({3, 3, 3}).fill(1));
@@ -60,8 +60,8 @@ BOOST_AUTO_TEST_CASE(inner_box_test) {
 
 // FIXME extrapolated_box_test, inc. out-of-domain positions
 
-BOOST_AUTO_TEST_CASE(inner_decimate_test) {
-
+BOOST_AUTO_TEST_CASE(inner_decimate_test)
+{
   const auto in = Raster<int, 3>({5, 6, 7}).range();
   const auto extrapolated = extrapolate(in, 0);
   const auto k = convolution(Raster<int, 3>({3, 3, 3}).fill(1));
@@ -76,8 +76,8 @@ BOOST_AUTO_TEST_CASE(inner_decimate_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(extrapolated_decimate_1d_test) {
-
+BOOST_AUTO_TEST_CASE(extrapolated_decimate_1d_test)
+{
   const auto in = Raster<int, 1>({13}).range();
   const auto extrapolated = extrapolate(in, 0);
   const auto k = convolution(Raster<int, 1>({7}).fill(1));
@@ -91,8 +91,8 @@ BOOST_AUTO_TEST_CASE(extrapolated_decimate_1d_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(extrapolated_decimate_2d_test) {
-
+BOOST_AUTO_TEST_CASE(extrapolated_decimate_2d_test)
+{
   const auto in = Raster<int, 2>({13, 13}).range();
   const auto extrapolated = extrapolate(in, 0);
   const auto k = convolution(Raster<int, 2>({7, 7}).fill(1));
@@ -106,8 +106,8 @@ BOOST_AUTO_TEST_CASE(extrapolated_decimate_2d_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(extrapolated_decimate_3d_test) {
-
+BOOST_AUTO_TEST_CASE(extrapolated_decimate_3d_test)
+{
   const auto in = Raster<int, 3>({5, 6, 7}).range();
   const auto extrapolated = extrapolate(in, 0);
   const auto k = convolution(Raster<int, 3>({3, 3, 3}).fill(1));

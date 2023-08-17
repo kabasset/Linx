@@ -161,8 +161,8 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
  */
 template <typename T, Index N = 2, typename THolder = DefaultHolder<T>>
 class Raster : public DataContainer<T, THolder, EuclidArithmetic, Raster<T, N, THolder>> {
-
 public:
+
   /**
    * @brief The pixel value type.
    */
@@ -201,7 +201,8 @@ public:
    */
   template <typename... TArgs>
   explicit Raster(Position<N> shape = Position<N>::zero(), TArgs&&... args) :
-      Container(shape_size(shape), std::forward<TArgs>(args)...), m_shape(std::move(shape)) {}
+      Container(shape_size(shape), std::forward<TArgs>(args)...), m_shape(std::move(shape))
+  {}
 
   /**
    * @brief List-copy constructor.
@@ -217,7 +218,8 @@ public:
    */
   template <typename... TArgs>
   explicit Raster(Position<N> shape, std::initializer_list<T> list, TArgs&&... args) :
-      Container(list.begin(), list.end(), std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
+      Container(list.begin(), list.end(), std::forward<TArgs>(args)...), m_shape(std::move(shape))
+  {
     SizeError::may_throw(this->size(), shape_size(shape));
   }
 
@@ -235,7 +237,8 @@ public:
    */
   template <typename TRange, typename std::enable_if_t<IsRange<TRange>::value>* = nullptr, typename... TArgs>
   explicit Raster(Position<N> shape, TRange& range, TArgs&&... args) :
-      Container(range.begin(), range.end(), std::forward<TArgs>(args)...), m_shape(std::move(shape)) {
+      Container(range.begin(), range.end(), std::forward<TArgs>(args)...), m_shape(std::move(shape))
+  {
     SizeError::may_throw(this->size(), shape_size(shape));
   }
 
@@ -244,7 +247,8 @@ public:
    * @param patch The box- or grid-based patch to be copied (can be an extrapolator).
    */
   template <typename U, typename TRaster, typename TRegion>
-  explicit Raster(const Patch<U, TRaster, TRegion>& patch) : Raster(patch.domain().shape(), patch) {}
+  explicit Raster(const Patch<U, TRaster, TRegion>& patch) : Raster(patch.domain().shape(), patch)
+  {}
 
   /// @group_properties
 
@@ -272,7 +276,8 @@ public:
    * @brief Check whether a given (possibly non-integral) position lies inside the raster domain.
    */
   template <typename U>
-  inline bool contains(const Vector<U, N>& position) const {
+  inline bool contains(const Vector<U, N>& position) const
+  {
     for (std::size_t i = 0; i < position.size(); ++i) { // TODO iterators
       if (position[i] < 0 || position[i] >= m_shape[i]) {
         return false;
@@ -298,7 +303,8 @@ public:
   /**
    * @copydoc length()
    */
-  Index length(Index i) const {
+  Index length(Index i) const
+  {
     return m_shape[i];
   }
 
@@ -457,6 +463,7 @@ public:
   /// @}
 
 private:
+
   /**
    * @brief Raster shape, i.e. length along each axis.
    */
@@ -468,7 +475,8 @@ private:
  * @brief Equality operator.
  */
 template <typename T, Index N, typename THolder, typename U, Index M, typename UHolder>
-bool operator==(const Raster<T, N, THolder>& lhs, const Raster<U, M, UHolder>& rhs) {
+bool operator==(const Raster<T, N, THolder>& lhs, const Raster<U, M, UHolder>& rhs)
+{
   if (lhs.shape() != rhs.shape()) {
     return false;
   }
@@ -479,7 +487,8 @@ bool operator==(const Raster<T, N, THolder>& lhs, const Raster<U, M, UHolder>& r
  * @brief Inequality operator.
  */
 template <typename T, Index N, typename THolder, typename U, Index M, typename UHolder>
-bool operator!=(const Raster<T, N, THolder>& lhs, const Raster<U, M, UHolder>& rhs) {
+bool operator!=(const Raster<T, N, THolder>& lhs, const Raster<U, M, UHolder>& rhs)
+{
   return not(lhs == rhs);
 }
 
@@ -506,7 +515,8 @@ bool operator!=(const Raster<T, N, THolder>& lhs, const Raster<U, M, UHolder>& r
  */
 template <typename TContainer, typename... Longs>
 Raster<typename TContainer::value_type, sizeof...(Longs), StdHolder<TContainer>>
-rasterize(TContainer&& data, Longs... shape) {
+rasterize(TContainer&& data, Longs... shape)
+{
   return Raster<typename TContainer::value_type, sizeof...(Longs), StdHolder<TContainer>> {
       {shape...},
       std::forward<TContainer>(data)};
@@ -517,7 +527,8 @@ rasterize(TContainer&& data, Longs... shape) {
  * @copybrief rasterize()
  */
 template <typename T, typename... Longs>
-PtrRaster<T, sizeof...(Longs)> rasterize(T* data, Longs... shape) {
+PtrRaster<T, sizeof...(Longs)> rasterize(T* data, Longs... shape)
+{
   return PtrRaster<T, sizeof...(Longs)> {{shape...}, data};
 }
 
@@ -529,13 +540,15 @@ PtrRaster<T, sizeof...(Longs)> rasterize(T* data, Longs... shape) {
  * in cases where functions accept either a `Raster` or an `Extrapolator`.
  */
 template <typename T, Index N, typename THolder>
-const Raster<T, N, THolder>& rasterize(const Raster<T, N, THolder>& in) {
+const Raster<T, N, THolder>& rasterize(const Raster<T, N, THolder>& in)
+{
   return in;
 }
 
 #define LINX_MATH_COMPLEX_TO_REAL(function) \
   template <typename T, Index N, typename THolder> \
-  Raster<T, N> function(const Raster<std::complex<T>, N, THolder>& in) { \
+  Raster<T, N> function(const Raster<std::complex<T>, N, THolder>& in) \
+  { \
     Raster<T, N> out(in.shape()); \
     std::transform(in.begin(), in.end(), out.begin(), [](const auto& e) { \
       return std::function(e); \
@@ -565,7 +578,8 @@ LINX_MATH_COMPLEX_TO_REAL(norm) ///< Apply `std::norm()` @ingroup pixelwise
  * Pixel values are uniformly distributed between the type's half min and half max.
  */
 template <typename T, Index N = 2>
-Raster<T, N> random(const Position<N>& shape) {
+Raster<T, N> random(const Position<N>& shape)
+{
   Raster<T, N> out(shape);
   out.generate(UniformNoise<T>());
   return out;

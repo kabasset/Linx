@@ -9,7 +9,6 @@
 //! [Rgb struct]
 // An RGB (red, green, blue) color where each channel takes values between 0 and 255.
 struct Rgb {
-
   // The associated image type
   using Image = Linx::Raster<Rgb, 2>;
 
@@ -17,7 +16,8 @@ struct Rgb {
   unsigned char r, g, b;
 
   // operator==() is mandatory to work with rasters
-  bool operator==(const Rgb& other) const {
+  bool operator==(const Rgb& other) const
+  {
     return r == other.r && g == other.g && b == other.b;
   }
 };
@@ -26,12 +26,12 @@ struct Rgb {
 //! [Hsv struct]
 // A HSV (hue, saturation, value) color with H in [0, 360), and S and V in [0, 1].
 struct Hsv {
-
   using Image = Linx::Raster<Hsv, 2>;
 
   double h, s, v;
 
-  bool operator==(const Hsv& other) const {
+  bool operator==(const Hsv& other) const
+  {
     return h == other.h && s == other.s && v == other.v;
   }
 };
@@ -40,8 +40,8 @@ struct Hsv {
 /**
  * @brief Convert an RGB pixel into a HSV pixel.
  */
-Hsv rgb_to_hsv(const Rgb& rgb) {
-
+Hsv rgb_to_hsv(const Rgb& rgb)
+{
   const double normalization = 1. / 255.;
   const double r = normalization * rgb.r;
   const double g = normalization * rgb.g;
@@ -86,18 +86,21 @@ Hsv rgb_to_hsv(const Rgb& rgb) {
   return hsv;
 }
 
-void rgb_data_to_hsv_data(unsigned char* rgb, double* hsv) {
+void rgb_data_to_hsv_data(unsigned char* rgb, double* hsv)
+{
   const auto out = rgb_to_hsv(Rgb {rgb[0], rgb[1], rgb[2]});
   hsv[0] = out.h;
   hsv[1] = out.s;
   hsv[2] = out.v;
 }
 
-std::string to_string(const Rgb& rgb) {
+std::string to_string(const Rgb& rgb)
+{
   return std::to_string(rgb.r) + "R " + std::to_string(rgb.g) + "G " + std::to_string(rgb.b) + "B";
 }
 
-std::string to_string(const Hsv& hsv) {
+std::string to_string(const Hsv& hsv)
+{
   return std::to_string(hsv.h) + "H " + std::to_string(hsv.s) + "S " + std::to_string(hsv.v) + "V";
 }
 
@@ -107,8 +110,8 @@ BOOST_AUTO_TEST_SUITE(LinxDemoChannels_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(color_struct_test) {
-
+BOOST_AUTO_TEST_CASE(color_struct_test)
+{
   //! [Input Rgb]
   static constexpr Rgb turquoise {64, 224, 208};
   Rgb::Image rgb({640, 480});
@@ -123,8 +126,8 @@ BOOST_AUTO_TEST_CASE(color_struct_test) {
   std::cout << to_string(rgb[{0, 0}]) << " = " << to_string(hsv[{0, 0}]) << std::endl;
 }
 
-BOOST_AUTO_TEST_CASE(color_along_0_test) {
-
+BOOST_AUTO_TEST_CASE(color_along_0_test)
+{
   //! [CxyImage]
   using RgbXyImage = Linx::Raster<unsigned char, 3>;
   using HsvXyImage = Linx::Raster<double, 3>;
@@ -153,8 +156,8 @@ BOOST_AUTO_TEST_CASE(color_along_0_test) {
   std::cout << to_string(rgb0) << " = " << to_string(hsv0) << std::endl;
 }
 
-BOOST_AUTO_TEST_CASE(color_along_2_test) {
-
+BOOST_AUTO_TEST_CASE(color_along_2_test)
+{
   //! [XycImage]
   using XyRgbImage = Linx::Raster<unsigned char, 3>;
   //! [XycImage]
@@ -180,8 +183,8 @@ BOOST_AUTO_TEST_CASE(color_along_2_test) {
   std::cout << to_string(in0) << " -> " << to_string(out0) << std::endl;
 }
 
-BOOST_AUTO_TEST_CASE(vector_along_2_test) {
-
+BOOST_AUTO_TEST_CASE(vector_along_2_test)
+{
   //! [Vector image]
   using HyperspectralCube = Linx::Raster<double, 3>;
   using IntegratedImage = Linx::Raster<double, 2>;
@@ -205,8 +208,8 @@ BOOST_AUTO_TEST_CASE(vector_along_2_test) {
   std::cout << "Integrated flux = " << image[0] << std::endl;
 }
 
-BOOST_AUTO_TEST_CASE(raster_of_raster_test) {
-
+BOOST_AUTO_TEST_CASE(raster_of_raster_test)
+{
   //! [Raster of raster]
   using NestedRaster = Linx::Raster<Linx::Raster<int>>;
   NestedRaster nested({4, 3});

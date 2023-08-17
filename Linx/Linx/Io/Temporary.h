@@ -15,6 +15,7 @@ namespace Linx {
  */
 class TemporaryPath {
 public:
+
   /**
    * @brief Constructor.
    * 
@@ -27,22 +28,26 @@ public:
    * 
    * Removes the path.
    */
-  virtual ~TemporaryPath() {
+  virtual ~TemporaryPath()
+  {
     std::filesystem::remove_all(m_path);
   }
 
   /**
    * @brief Get the path.
    */
-  operator std::filesystem::path() const {
+  operator std::filesystem::path() const
+  {
     return m_path;
   }
 
-  std::string string() const {
+  std::string string() const
+  {
     return m_path.string();
   }
 
 private:
+
   std::filesystem::path m_path;
 };
 

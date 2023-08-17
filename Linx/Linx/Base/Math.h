@@ -16,7 +16,8 @@ namespace Linx {
  * @brief &pi;
  */
 template <typename T>
-T pi() {
+T pi()
+{
   static const T out = std::acos(T(-1));
   return out;
 }
@@ -27,7 +28,8 @@ namespace Internal {
 template <Index P>
 struct AbspowImpl {
   template <typename T>
-  static T pow(T x) {
+  static T pow(T x)
+  {
     return x * x * AbspowImpl<P - 2>::pow(x);
   }
 };
@@ -35,7 +37,8 @@ struct AbspowImpl {
 template <>
 struct AbspowImpl<0> {
   template <typename T>
-  static T pow(T x) {
+  static T pow(T x)
+  {
     return bool(x);
   }
 };
@@ -43,7 +46,8 @@ struct AbspowImpl<0> {
 template <>
 struct AbspowImpl<1> {
   template <typename T>
-  static T pow(T x) {
+  static T pow(T x)
+  {
     return std::abs(x);
   }
 };
@@ -51,7 +55,8 @@ struct AbspowImpl<1> {
 template <>
 struct AbspowImpl<2> {
   template <typename T>
-  static T pow(T x) {
+  static T pow(T x)
+  {
     return x * x;
   }
 };
@@ -63,7 +68,8 @@ struct AbspowImpl<2> {
  * @brief Compute the absolute value of an integral power.
  */
 template <Index P, typename T>
-T abspow(T x) {
+T abspow(T x)
+{
   return Internal::AbspowImpl<P>::pow(x);
 }
 
@@ -79,10 +85,10 @@ T abspow(T x) {
  */
 template <typename T, typename TDerived>
 struct MathFunctionsMixin {
-
 #define LINX_MATH_UNARY_INPLACE(function) \
   /** @brief Apply std::##function##(). */ \
-  TDerived& function() { \
+  TDerived& function() \
+  { \
     auto* derived = static_cast<TDerived*>(this); \
     std::transform(derived->begin(), derived->end(), derived->begin(), [](auto e) { \
       return std::function(e); \
@@ -93,7 +99,8 @@ struct MathFunctionsMixin {
 #define LINX_MATH_BINARY_INPLACE(function) \
   /** @brief Apply std::##function##(). */ \
   template <typename U> \
-  const std::enable_if_t<IsRange<U>::value, TDerived>& function(const U& other) { \
+  const std::enable_if_t<IsRange<U>::value, TDerived>& function(const U& other) \
+  { \
     auto* derived = static_cast<TDerived*>(this); \
     std::transform(derived->begin(), derived->end(), other.begin(), derived->begin(), [](auto e, auto f) { \
       return std::function(e, f); \
@@ -104,7 +111,8 @@ struct MathFunctionsMixin {
 #define LINX_MATH_BINARY_SCALAR_INPLACE(function) \
   /** @brief Apply std::##function##(). */ \
   template <typename U> \
-  std::enable_if_t<not IsRange<U>::value, TDerived>& function(U other) { \
+  std::enable_if_t<not IsRange<U>::value, TDerived>& function(U other) \
+  { \
     auto* derived = static_cast<TDerived*>(this); \
     std::transform(derived->begin(), derived->end(), derived->begin(), [=](auto e) { \
       return std::function(e, other); \
@@ -169,7 +177,8 @@ struct MathFunctionsMixin {
 #define LINX_MATH_UNARY_NEWINSTANCE(function) \
   /** @relatesalso MathFunctionsMixin @brief Apply std::##function##() (new instance). */ \
   template <typename T, typename TDerived> \
-  TDerived function(const MathFunctionsMixin<T, TDerived>& in) { \
+  TDerived function(const MathFunctionsMixin<T, TDerived>& in) \
+  { \
     TDerived out(static_cast<const TDerived&>(in)); \
     out.function(); \
     return out; \
@@ -178,7 +187,8 @@ struct MathFunctionsMixin {
 #define LINX_MATH_BINARY_NEWINSTANCE(function) \
   /** @relatesalso MathFunctionsMixin @brief Apply std::##function##() (new instance). */ \
   template <typename T, typename TDerived, typename TOther> \
-  TDerived function(const MathFunctionsMixin<T, TDerived>& in, const TOther& other) { \
+  TDerived function(const MathFunctionsMixin<T, TDerived>& in, const TOther& other) \
+  { \
     TDerived out(static_cast<const TDerived&>(in)); \
     out.function(other); \
     return out; \

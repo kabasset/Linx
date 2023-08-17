@@ -9,10 +9,10 @@
 using namespace Linx;
 
 struct BenchmarkFixture : IterationBenchmark {
-
   BenchmarkFixture() : IterationBenchmark(4) {}
 
-  void validate() {
+  void validate()
+  {
     const Position<3> shape {m_width, m_height, m_depth};
     const auto size = shape_size(shape);
     BOOST_TEST(size > 0);
@@ -31,42 +31,50 @@ BOOST_FIXTURE_TEST_SUITE(IterationBenchmark_test, BenchmarkFixture)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(xyz_test) {
+BOOST_AUTO_TEST_CASE(xyz_test)
+{
   loop_over_xyz();
   validate();
 }
 
-BOOST_AUTO_TEST_CASE(zyx_test) {
+BOOST_AUTO_TEST_CASE(zyx_test)
+{
   loop_over_zyx();
   validate();
 }
 
-BOOST_AUTO_TEST_CASE(position_test) {
+BOOST_AUTO_TEST_CASE(position_test)
+{
   iterate_over_positions();
   validate();
 }
 
-BOOST_AUTO_TEST_CASE(position_optimized_test) {
+BOOST_AUTO_TEST_CASE(position_optimized_test)
+{
   iterate_over_positions_optimized();
   validate();
 }
 
-BOOST_AUTO_TEST_CASE(index_test) {
+BOOST_AUTO_TEST_CASE(index_test)
+{
   loop_over_indices();
   validate();
 }
 
-BOOST_AUTO_TEST_CASE(value_test) {
+BOOST_AUTO_TEST_CASE(value_test)
+{
   iterate_over_values();
   validate();
 }
 
-BOOST_AUTO_TEST_CASE(operator_test) {
+BOOST_AUTO_TEST_CASE(operator_test)
+{
   call_operator();
   validate();
 }
 
-BOOST_AUTO_TEST_CASE(generate_test) {
+BOOST_AUTO_TEST_CASE(generate_test)
+{
   call_generate();
   validate();
 }

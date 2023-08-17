@@ -20,6 +20,7 @@ namespace Linx {
 template <typename TParent, typename TRegion>
 class PositionBasedIndexing {
 public:
+
   /**
    * @brief The patch iterator.
    */
@@ -40,7 +41,8 @@ public:
    * @brief Get an iterator to the beginning.
    */
   template <typename T>
-  Iterator<T> begin(TParent& parent, const TRegion& region) const {
+  Iterator<T> begin(TParent& parent, const TRegion& region) const
+  {
     return Iterator<T>(parent, region.begin());
   }
 
@@ -48,7 +50,8 @@ public:
    * @brief Get an iterator to the end.
    */
   template <typename T>
-  Iterator<T> end(TParent& parent, const TRegion& region) const {
+  Iterator<T> end(TParent& parent, const TRegion& region) const
+  {
     return Iterator<T>(parent, region.end());
   }
 };
@@ -59,6 +62,7 @@ public:
 template <typename TParent, typename TRegion>
 class StrideBasedIndexing {
 public:
+
   /**
    * @brief The patch iterator.
    */
@@ -102,13 +106,15 @@ public:
   template <Index I>
   StrideBasedIndexing(const TParent& parent, const Line<I, TParent::Dimension>& region) :
       m_step(shape_stride<I>(parent.shape()) * region.step()), m_width(m_step * (region.size() - 1) + 1),
-      m_offsets(2, 0) {} // 1+1 see above
+      m_offsets(2, 0)
+  {} // 1+1 see above
 
   /**
    * @brief Get an iterator to the beginning.
    */
   template <typename T>
-  Iterator<T> begin(TParent& raster, const TRegion& region) const {
+  Iterator<T> begin(TParent& raster, const TRegion& region) const
+  {
     return Iterator<T>(&raster[region.front()], m_step, m_width, m_offsets.data());
   }
 
@@ -116,11 +122,13 @@ public:
    * @brief Get an iterator to the end.
    */
   template <typename T>
-  Iterator<T> end(TParent& raster, const TRegion& region) const {
+  Iterator<T> end(TParent& raster, const TRegion& region) const
+  {
     return Iterator<T>(&raster[region.front()], m_step, m_width, m_offsets.data() + m_offsets.size() - 1);
   }
 
 private:
+
   /**
    * @brief The stride along axis 0.
    */
@@ -143,6 +151,7 @@ private:
 template <typename TParent, typename TRegion>
 class OffsetBasedIndexing {
 public:
+
   /**
    * @brief The patch iterator.
    */
@@ -170,7 +179,8 @@ public:
    * @brief Get an iterator to the beginning.
    */
   template <typename T>
-  Iterator<T> begin(TParent& raster, const TRegion& region) const {
+  Iterator<T> begin(TParent& raster, const TRegion& region) const
+  {
     return Iterator<T>(&raster[box(region).front()], m_offsets.data());
   }
 
@@ -178,11 +188,13 @@ public:
    * @brief Get an iterator to the end.
    */
   template <typename T>
-  Iterator<T> end(TParent& raster, const TRegion& region) const {
+  Iterator<T> end(TParent& raster, const TRegion& region) const
+  {
     return Iterator<T>(&raster[box(region).front()], m_offsets.data() + m_offsets.size() - 1);
   }
 
 private:
+
   /**
    * @brief The offsets relative to the front index.
    */

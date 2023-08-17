@@ -14,8 +14,8 @@ BOOST_AUTO_TEST_SUITE(Dft_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(dft_r2c_c2c_ic2c_ir2c_test) {
-
+BOOST_AUTO_TEST_CASE(dft_r2c_c2c_ic2c_ir2c_test)
+{
   constexpr Index width = 5;
   constexpr Index half_width = (width + 1) / 2;
   constexpr Index height = 6;

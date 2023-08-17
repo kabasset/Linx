@@ -23,18 +23,19 @@ namespace Linx {
  * For anything more complex, see EleFits: https://cnes.github.io/EleFits/
  */
 class Fits {
-
 public:
+
   /**
    * @brief FITS-specific `FileFormatError`.
    */
   class Error : public Exception {
   public:
+
     /**
      * @brief Constructor.
      */
-    Error(const std::string& context, const std::filesystem::path& path, int status) : Exception(context, path) {
-
+    Error(const std::string& context, const std::filesystem::path& path, int status) : Exception(context, path)
+    {
       float version = 0;
       fits_get_version(&version);
       append("CFITSIO v" + std::to_string(version));
@@ -59,7 +60,8 @@ public:
   /**
    * @brief Get the file path.
    */
-  const std::filesystem::path& path() const {
+  const std::filesystem::path& path() const
+  {
     return m_path;
   }
 
@@ -67,7 +69,8 @@ public:
    * @brief Read an image at given (0-based) HDU index.
    */
   template <typename TRaster>
-  TRaster read(Index hdu = 0) {
+  TRaster read(Index hdu = 0)
+  {
     FileNotFoundError::may_throw(m_path);
     int status = 0;
     fitsfile* fptr;
@@ -96,7 +99,8 @@ public:
    * @param mode `x` to create a new file, `w` to create or overwrite, `a` to append an HDU
    */
   template <typename TRaster>
-  void write(TRaster raster, char mode = 'x') {
+  void write(TRaster raster, char mode = 'x')
+  {
     int status = 0;
     fitsfile* fptr;
     std::string path = "!"; // For overwriting
@@ -135,7 +139,8 @@ public:
    * @brief Get the BITPIX of a given type.
    */
   template <typename T>
-  static constexpr int bitpix() {
+  static constexpr int bitpix()
+  {
     if constexpr (std::is_integral_v<T>) {
       return 8 * static_cast<int>(sizeof(T));
     }
@@ -146,11 +151,13 @@ public:
   }
 
 private:
+
   /**
    * @brief Get CFITSIO's typecode.
    */
   template <typename T>
-  static constexpr int typecode() {
+  static constexpr int typecode()
+  {
     if constexpr (std::is_integral_v<T>) {
       constexpr bool sign = std::is_signed_v<T>;
       using Signed = std::make_signed_t<T>;
@@ -185,7 +192,8 @@ private:
    * @brief Get CFITSIO's image typecode.
    */
   template <typename T>
-  static constexpr int image_typecode() {
+  static constexpr int image_typecode()
+  {
     if constexpr (std::is_integral_v<T>) {
       constexpr bool sign = std::is_signed_v<T>;
       if constexpr (sizeof(T) == 1) {
@@ -213,6 +221,7 @@ private:
   }
 
 private:
+
   std::filesystem::path m_path;
 };
 

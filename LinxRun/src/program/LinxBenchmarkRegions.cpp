@@ -16,7 +16,8 @@
 Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkRegions");
 
 template <typename TDuration>
-TDuration filter(Linx::Raster<int, 3>& in, const Linx::Box<3>& box, char setup) {
+TDuration filter(Linx::Raster<int, 3>& in, const Linx::Box<3>& box, char setup)
+{
   Linx::Chronometer<TDuration> chrono;
   //! [Make sparse regions]
   Linx::Grid<3> grid(box, Linx::Position<3>::one());
@@ -52,9 +53,10 @@ TDuration filter(Linx::Raster<int, 3>& in, const Linx::Box<3>& box, char setup) 
 }
 
 class LinxBenchmarkRegions : public Elements::Program {
-
 public:
-  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
+
+  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
+  {
     Linx::ProgramOptions options;
     options.named<char>(
         "case",
@@ -65,8 +67,8 @@ public:
     return options.as_pair();
   }
 
-  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
-
+  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override
+  {
     using Duration = std::chrono::milliseconds;
 
     const auto setup = args["case"].as<char>();

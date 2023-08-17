@@ -14,7 +14,8 @@ BOOST_AUTO_TEST_SUITE(Arithmetic_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(arithmetic_test) {
+BOOST_AUTO_TEST_CASE(arithmetic_test)
+{
   // FIXME moved to Sequence_test; use Fixture here?
 }
 

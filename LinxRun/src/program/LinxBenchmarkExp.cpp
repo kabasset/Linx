@@ -17,7 +17,8 @@ Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkExp");
  * @param inout The raster to be exponentialized in place
  * @param order The series order (must be >= 1)
  */
-void taylor_exp(Linx::Raster<double>& inout, Linx::Index order) {
+void taylor_exp(Linx::Raster<double>& inout, Linx::Index order)
+{
   auto exp = [=](double x) {
     double sum = 1 + x;
     double term = x;
@@ -31,17 +32,18 @@ void taylor_exp(Linx::Raster<double>& inout, Linx::Index order) {
 }
 
 class LinxBenchmarkExp : public Elements::Program {
-
 public:
-  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
+
+  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
+  {
     Linx::ProgramOptions options;
     options.named<long>("order", "Taylor series order (or -1 for std::exp)", -1);
     options.named<long>("side", "Image width and height (same value)", 4096);
     return options.as_pair();
   }
 
-  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
-
+  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override
+  {
     const auto order = args["order"].as<long>();
     const auto side = args["side"].as<long>();
 

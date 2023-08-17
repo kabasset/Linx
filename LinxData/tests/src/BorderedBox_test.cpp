@@ -15,8 +15,8 @@ BOOST_AUTO_TEST_SUITE(BorderedBox_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(position_set_test) {
-
+BOOST_AUTO_TEST_CASE(position_set_test)
+{
   const auto inner = Box<2>::from_shape({1, 1}, {4, 3});
   const Box<2> margin {{-3, -2}, {2, 1}};
   const auto box = inner + margin;
@@ -52,8 +52,8 @@ BOOST_AUTO_TEST_CASE(position_set_test) {
   BOOST_TEST(out_all == all);
 }
 
-BOOST_AUTO_TEST_CASE(box_ordering_test) {
-
+BOOST_AUTO_TEST_CASE(box_ordering_test)
+{
   const auto inner = Box<2>::from_shape({1, 1}, {4, 3});
   const Box<2> margin {{-3, -2}, {2, 1}};
   const Internal::BorderedBox<2> bordered(inner + margin, margin);

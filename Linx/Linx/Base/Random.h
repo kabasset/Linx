@@ -33,8 +33,8 @@ namespace Linx {
  */
 template <typename T, typename TDistribution>
 class ComplexDistribution {
-
 public:
+
   /**
    * @brief Forwarding constructor.
    * 
@@ -47,7 +47,8 @@ public:
    * and one imaginary distribution of mean 100 and standard deviation 15.
    */
   template <typename... TArgs>
-  ComplexDistribution(TArgs&&... args) : m_distribution(std::forward<TArgs>(args)...) {}
+  ComplexDistribution(TArgs&&... args) : m_distribution(std::forward<TArgs>(args)...)
+  {}
 
   /**
    * @brief Generate some value.
@@ -56,18 +57,21 @@ public:
    * one from the real distribution and the other from the imaginary distribution.
    */
   template <typename TEngine>
-  T operator()(TEngine& engine) {
+  T operator()(TEngine& engine)
+  {
     return m_distribution(engine);
   }
 
   /**
    * @brief Reset the distribution state.
    */
-  void reset() {
+  void reset()
+  {
     m_distribution.reset();
   }
 
 private:
+
   /**
    * @brief The distribution.
    */
@@ -78,23 +82,27 @@ private:
 
 template <typename T, typename TDistribution>
 class ComplexDistribution<std::complex<T>, TDistribution> {
-
 public:
+
   template <typename... TArgs>
   ComplexDistribution(TArgs&&... args) :
-      m_real(std::forward<TArgs>(args).real()...), m_imag(std::forward<TArgs>(args).imag()...) {}
+      m_real(std::forward<TArgs>(args).real()...), m_imag(std::forward<TArgs>(args).imag()...)
+  {}
 
   template <typename TEngine>
-  std::complex<T> operator()(TEngine& engine) {
+  std::complex<T> operator()(TEngine& engine)
+  {
     return {m_real(engine), m_imag(engine)};
   }
 
-  void reset() {
+  void reset()
+  {
     m_real.reset();
     m_imag.reset();
   }
 
 private:
+
   TDistribution m_real, m_imag;
 };
 
@@ -110,19 +118,23 @@ private:
  */
 class RandomGenerator {
 public:
+
   /**
    * @brief Constructor.
    * @param seed The random engine seed or -1 for using current time.
    */
   explicit RandomGenerator(std::size_t seed = -1) :
-      m_engine(seed != std::size_t(-1) ? seed : std::chrono::system_clock::now().time_since_epoch().count()) {}
+      m_engine(seed != std::size_t(-1) ? seed : std::chrono::system_clock::now().time_since_epoch().count())
+  {}
 
 protected:
+
   /**
    * @brief Generate some random value.
    */
   template <typename T, typename TDistribution>
-  T generate(TDistribution& distribution) {
+  T generate(TDistribution& distribution)
+  {
     return distribution(m_engine);
   }
 
@@ -130,7 +142,8 @@ protected:
    * @brief Add some random value to a given input.
    */
   template <typename T, typename TDistribution>
-  T add(T in, TDistribution& distribution) {
+  T add(T in, TDistribution& distribution)
+  {
     return in + generate<T>(distribution);
   }
 
@@ -147,29 +160,33 @@ protected:
  */
 template <typename T>
 class UniformNoise : RandomGenerator {
-
 public:
+
   /**
    * @brief Constructor.
    */
   explicit UniformNoise(T min = Limits<T>::half_min(), T max = Limits<T>::half_max(), std::size_t seed = -1) :
-      RandomGenerator(seed), m_distribution(min, max) {}
+      RandomGenerator(seed), m_distribution(min, max)
+  {}
 
   /**
    * @brief Generate value.
    */
-  T operator()() {
+  T operator()()
+  {
     return generate<T>(m_distribution);
   }
 
   /**
    * @brief Apply additive noise.
    */
-  T operator()(T in) {
+  T operator()(T in)
+  {
     return add<T>(in, m_distribution);
   }
 
 private:
+
   ComplexDistribution<
       T,
       std::conditional_t<
@@ -186,29 +203,33 @@ private:
  */
 template <typename T>
 class GaussianNoise : RandomGenerator {
-
 public:
+
   /**
    * @brief Constructor.
    */
   explicit GaussianNoise(T mean = Limits<T>::zero(), T stdev = Limits<T>::one(), std::size_t seed = -1) :
-      RandomGenerator(seed), m_distribution(mean, stdev) {}
+      RandomGenerator(seed), m_distribution(mean, stdev)
+  {}
 
   /**
    * @brief Generate value.
    */
-  T operator()() {
+  T operator()()
+  {
     return generate<T>(m_distribution);
   }
 
   /**
    * @brief Apply additive noise.
    */
-  T operator()(T in) {
+  T operator()(T in)
+  {
     return add<T>(in, m_distribution);
   }
 
 private:
+
   using Scalar = std::conditional_t<std::is_integral<T>::value, double, typename TypeTraits<T>::Scalar>;
   ComplexDistribution<T, std::normal_distribution<Scalar>> m_distribution;
 };
@@ -229,30 +250,33 @@ private:
  */
 template <typename T>
 class PoissonNoise : RandomGenerator {
-
 public:
+
   /**
    * @brief Constructor.
    */
-  explicit PoissonNoise(T mean = Limits<T>::zero(), std::size_t seed = -1) :
-      RandomGenerator(seed), m_distribution(mean) {}
+  explicit PoissonNoise(T mean = Limits<T>::zero(), std::size_t seed = -1) : RandomGenerator(seed), m_distribution(mean)
+  {}
 
   /**
    * @brief Generate value.
    */
-  T operator()() {
+  T operator()()
+  {
     return generate<T>(m_distribution);
   }
 
   /**
    * @brief Apply shot noise.
    */
-  T operator()(T in) {
+  T operator()(T in)
+  {
     decltype(m_distribution) distribution(in);
     return generate<T>(distribution);
   }
 
 private:
+
   using Scalar = std::conditional_t<std::is_integral<T>::value, T, long>;
   ComplexDistribution<T, std::poisson_distribution<Scalar>> m_distribution;
 };
@@ -281,8 +305,8 @@ private:
  */
 template <typename T>
 class StablePoissonNoise : RandomGenerator {
-
 public:
+
   /**
    * @brief Fixed-seed constructor.
    * 
@@ -291,25 +315,29 @@ public:
    * because this noise generator is intended for reproducible results.
    */
   explicit StablePoissonNoise(T mean = Limits<T>::zero(), std::size_t seed = 0) :
-      RandomGenerator(seed), m_distribution(mean), m_seeder(seed) {}
+      RandomGenerator(seed), m_distribution(mean), m_seeder(seed)
+  {}
 
   /**
    * @brief Generate value.
    */
-  T operator()() {
+  T operator()()
+  {
     return generate<T>(m_distribution);
   }
 
   /**
    * @brief Apply shot noise.
    */
-  T operator()(T in) {
+  T operator()(T in)
+  {
     auto seed = m_seeder();
     PoissonNoise<T> noise(in, seed); // TODO can we just reseed m_engine?
     return noise();
   }
 
 private:
+
   using Scalar = std::conditional_t<std::is_integral<T>::value, T, long>;
   ComplexDistribution<T, std::poisson_distribution<Scalar>> m_distribution;
   std::minstd_rand m_seeder;
@@ -331,20 +359,20 @@ private:
  */
 template <typename T>
 class ImpulseNoise : RandomGenerator {
-
 public:
+
   /**
    * @brief Single value constructor.
    */
-  explicit ImpulseNoise(T value, double probability, std::size_t seed = -1) :
-      ImpulseNoise({{value, probability}}, seed) {}
+  explicit ImpulseNoise(T value, double probability, std::size_t seed = -1) : ImpulseNoise({{value, probability}}, seed)
+  {}
 
   /**
    * @brief Multiple values constructor.
    */
   explicit ImpulseNoise(const std::map<T, double>& values_probabilities, std::size_t seed = -1) :
-      RandomGenerator(seed), m_values(values(values_probabilities)),
-      m_distribution(distribution(values_probabilities)) {}
+      RandomGenerator(seed), m_values(values(values_probabilities)), m_distribution(distribution(values_probabilities))
+  {}
 
   /**
    * @brief Make a salt and pepper noise generator.
@@ -354,7 +382,8 @@ public:
       double pepper_probability,
       T salt_value = Limits<T>::max(),
       T pepper_value = Limits<T>::min(),
-      std::size_t seed = -1) {
+      std::size_t seed = -1)
+  {
     return ImpulseNoise({{salt_value, salt_probability}, {pepper_value, pepper_probability}}, seed);
   }
 
@@ -364,16 +393,19 @@ public:
    * Generate discete values with constructor-provided probabilities,
    * and return the input value the rest of the time (if _s_ < 1).
    */
-  T operator()(T in = Limits<T>::zero()) {
+  T operator()(T in = Limits<T>::zero())
+  {
     auto index = generate<std::size_t>(m_distribution);
     return index < m_values.size() ? m_values[index] : in;
   }
 
 private:
+
   /**
    * @brief Extract the values from the value-probability map.
    */
-  static std::vector<T> values(const std::map<T, double>& values_probabilities) {
+  static std::vector<T> values(const std::map<T, double>& values_probabilities)
+  {
     std::vector<T> out(values_probabilities.size());
     std::transform(values_probabilities.begin(), values_probabilities.end(), out.begin(), [](auto vp) {
       return vp.first;
@@ -384,7 +416,8 @@ private:
   /**
    * @brief Extract the weights from the value-probability map.
    */
-  static std::vector<double> weights(const std::map<T, double>& values_probabilities) {
+  static std::vector<double> weights(const std::map<T, double>& values_probabilities)
+  {
     const auto count = values_probabilities.size();
     std::vector<double> out(count + 1);
     auto& null_probability = out[count];
@@ -402,7 +435,8 @@ private:
   /**
    * @brief Construct the distribution from the value-probability map.
    */
-  static std::discrete_distribution<std::size_t> distribution(const std::map<T, double>& values_probabilities) {
+  static std::discrete_distribution<std::size_t> distribution(const std::map<T, double>& values_probabilities)
+  {
     const auto w = weights(values_probabilities);
     return std::discrete_distribution<std::size_t>(w.begin(), w.end());
   }

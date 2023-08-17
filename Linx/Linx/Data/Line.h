@@ -18,8 +18,8 @@ namespace Linx {
  */
 template <Index I, Index N = 2>
 class Line : boost::additive<Line<I, N>, Position<N>>, boost::additive<Line<I, N>, Index> {
-
 public:
+
   /**
    * @brief The index of the axis the slice is aligned to.
    */
@@ -49,12 +49,14 @@ public:
    * @brief Constructor.
    */
   Line(Position<N> front, Index back, Index step = 1) :
-      m_front(std::move(front)), m_step(step), m_size((back - m_front[I]) / m_step + 1) {}
+      m_front(std::move(front)), m_step(step), m_size((back - m_front[I]) / m_step + 1)
+  {}
 
   /**
    * @brief Create a slice from a front position, size, and optional step.
    */
-  static Line<I, N> from_size(Position<N> front, std::size_t size, Index step = 1) {
+  static Line<I, N> from_size(Position<N> front, std::size_t size, Index step = 1)
+  {
     const auto back = front[I] + step * (size - 1);
     return Line(std::move(front), back, step);
   }
@@ -64,7 +66,8 @@ public:
   /**
    * @brief Get the absolute position given an index in the line referential.
    */
-  inline Position<N> operator[](Index i) const {
+  inline Position<N> operator[](Index i) const
+  {
     auto out = m_front;
     out[I] += i * m_step;
     return out;
@@ -73,21 +76,24 @@ public:
   /**
    * @brief Compute the bounding box.
    */
-  Box<N> box() const {
+  Box<N> box() const
+  {
     return {m_front, back()};
   }
 
   /**
    * @brief Get the front position.
    */
-  const Position<N>& front() const {
+  const Position<N>& front() const
+  {
     return m_front;
   }
 
   /**
    * @brief Compute the back position.
    */
-  Position<N> back() const {
+  Position<N> back() const
+  {
     auto out = m_front;
     out[I] += m_step * (m_size - 1);
     return out;
@@ -96,35 +102,40 @@ public:
   /**
    * @brief Get the front index along the axis.
    */
-  Index front_index() const {
+  Index front_index() const
+  {
     return m_front[I];
   }
 
   /**
    * @brief Compute the back index along the axis.
    */
-  Index back_index() const {
+  Index back_index() const
+  {
     return m_front[I] + m_step * (m_size - 1);
   }
 
   /**
    * @brief Get the step.
    */
-  Index step() const {
+  Index step() const
+  {
     return m_step;
   }
 
   /**
    * @brief Get the number of dimensions.
    */
-  Index dimension() const {
+  Index dimension() const
+  {
     return m_front.dimension();
   }
 
   /**
    * @brief Get the number of positions.
    */
-  Index size() const {
+  Index size() const
+  {
     return m_size;
   }
 
@@ -133,14 +144,16 @@ public:
   /**
    * @brief Get an iterator to the beginning.
    */
-  Iterator begin() const {
+  Iterator begin() const
+  {
     return Iterator::begin(*this);
   }
 
   /**
    * @brief Get an iterator to the end.
    */
-  Iterator end() const {
+  Iterator end() const
+  {
     return Iterator::end(*this);
   }
 
@@ -149,14 +162,16 @@ public:
   /**
    * @brief Check whether two slices are equal.
    */
-  bool operator==(const Line<I, N>& other) const {
+  bool operator==(const Line<I, N>& other) const
+  {
     return m_front == other.m_front && m_step == other.m_step && m_size == other.m_size;
   }
 
   /**
    * @brief Check whether two slices are different.
    */
-  bool operator!=(const Line<I, N>& other) const {
+  bool operator!=(const Line<I, N>& other) const
+  {
     return m_front != other.m_front || m_step != other.m_step || m_size != other.m_size;
   }
 
@@ -165,7 +180,8 @@ public:
   /**
    * @brief Translate the box by a given vector.
    */
-  Line<I, N>& operator+=(const Position<N>& vector) {
+  Line<I, N>& operator+=(const Position<N>& vector)
+  {
     m_front += vector;
     return *this;
   }
@@ -173,7 +189,8 @@ public:
   /**
    * @brief Translate the box by the opposite of a given vector.
    */
-  Line<I, N>& operator-=(const Position<N>& vector) {
+  Line<I, N>& operator-=(const Position<N>& vector)
+  {
     m_front -= vector;
     return *this;
   }
@@ -181,7 +198,8 @@ public:
   /**
     * @brief Add a scalar to each coordinate.
     */
-  Line<I, N>& operator+=(Index scalar) {
+  Line<I, N>& operator+=(Index scalar)
+  {
     m_front += scalar;
     return *this;
   }
@@ -189,7 +207,8 @@ public:
   /**
    * @brief Subtract a scalar to each coordinate.
    */
-  Line<I, N>& operator-=(Index scalar) {
+  Line<I, N>& operator-=(Index scalar)
+  {
     m_front -= scalar;
     return *this;
   }
@@ -197,34 +216,39 @@ public:
   /**
    * @brief Add 1 to each coordinate.
    */
-  Line<I, N>& operator++() {
+  Line<I, N>& operator++()
+  {
     return *this += 1;
   }
 
   /**
    * @brief Subtract 1 to each coordinate.
    */
-  Line<I, N>& operator--() {
+  Line<I, N>& operator--()
+  {
     return *this -= 1;
   }
 
   /**
    * @brief Copy.
    */
-  Line<I, N> operator+() {
+  Line<I, N> operator+()
+  {
     return *this;
   }
 
   /**
    * @brief Invert the sign of each coordinate.
    */
-  Line<I, N> operator-() {
+  Line<I, N> operator-()
+  {
     return Line<I, N>::from_size(-m_front, m_size, -m_step);
   }
 
   /// @}
 
 private:
+
   /**
    * @brief The front position.
    */
@@ -246,7 +270,8 @@ private:
  * @brief Get the bounding box of a slice.
  */
 template <Index I, Index N>
-inline const Box<N>& box(const Line<I, N>& region) {
+inline const Box<N>& box(const Line<I, N>& region)
+{
   return region.box();
 }
 

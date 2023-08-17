@@ -11,14 +11,15 @@ namespace Linx {
 
 template <Index N>
 class Mask<N>::Iterator : public std::iterator<std::input_iterator_tag, Position<N>> {
-
 private:
+
   /**
    * @brief Constructor.
    */
   explicit Iterator(const Mask<N>& region, const bool* current) :
       m_flag_it(current), m_flag_end(region.m_flags.end()),
-      m_current(region.m_box, Box<N>::Iterator::begin_position(region.m_box)) {
+      m_current(region.m_box, Box<N>::Iterator::begin_position(region.m_box))
+  {
     while (m_flag_it != m_flag_end && not *m_flag_it) {
       ++m_flag_it;
       ++m_current;
@@ -26,38 +27,44 @@ private:
   }
 
 public:
+
   /**
    * @brief Make an iterator to the beginning of a mask.
    */
-  static Iterator begin(const Mask<N>& region) {
+  static Iterator begin(const Mask<N>& region)
+  {
     return Iterator(region, region.m_flags.begin());
   }
 
   /**
    * @brief Make an iterator to the end of a mask.
    */
-  static Iterator end(const Mask<N>& region) {
+  static Iterator end(const Mask<N>& region)
+  {
     return Iterator(region, region.m_flags.end());
   }
 
   /**
    * @brief Dereference operator.
    */
-  const Position<N>& operator*() const {
+  const Position<N>& operator*() const
+  {
     return *m_current;
   }
 
   /**
    * @brief Arrow operator.
    */
-  const Position<N>* operator->() const {
+  const Position<N>* operator->() const
+  {
     return &*m_current;
   }
 
   /**
    * @brief Increment operator.
    */
-  Iterator& operator++() {
+  Iterator& operator++()
+  {
     do {
       ++m_flag_it;
       ++m_current;
@@ -68,7 +75,8 @@ public:
   /**
    * @brief Increment operator.
    */
-  Iterator operator++(int) {
+  Iterator operator++(int)
+  {
     auto out = *this;
     ++(*this);
     return out;
@@ -77,18 +85,21 @@ public:
   /**
    * @brief Equality operator.
    */
-  bool operator==(const Iterator& rhs) const {
+  bool operator==(const Iterator& rhs) const
+  {
     return m_flag_it == rhs.m_flag_it;
   }
 
   /**
    * @brief Non-equality operator.
    */
-  bool operator!=(const Iterator& rhs) const {
+  bool operator!=(const Iterator& rhs) const
+  {
     return m_flag_it != rhs.m_flag_it;
   }
 
 private:
+
   /**
    * @brief The current flag iterator.
    */

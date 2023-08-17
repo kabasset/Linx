@@ -17,11 +17,12 @@
 namespace Linx {
 
 struct SizeError : Exception {
-
   SizeError(std::size_t in, std::size_t ref) :
-      Exception("Size error", std::string("Expected ") + std::to_string(ref) + ", got " + std::to_string(in)) {}
+      Exception("Size error", std::string("Expected ") + std::to_string(ref) + ", got " + std::to_string(in))
+  {}
 
-  static void may_throw(std::size_t in, std::size_t ref) {
+  static void may_throw(std::size_t in, std::size_t ref)
+  {
     if (in != ref) {
       throw SizeError(in, ref);
     }
@@ -32,7 +33,8 @@ struct SizeError : Exception {
  * @brief Get the pointer to a container's data.
  */
 template <typename T>
-inline const typename T::value_type* data(const T& c) {
+inline const typename T::value_type* data(const T& c)
+{
   return c.data();
 }
 
@@ -40,7 +42,8 @@ inline const typename T::value_type* data(const T& c) {
  * @brief `valarray`'s specialization.
  */
 template <typename T>
-inline const T* data(const std::valarray<T>& c) {
+inline const T* data(const std::valarray<T>& c)
+{
   return &c[0];
 }
 
@@ -48,7 +51,8 @@ inline const T* data(const std::valarray<T>& c) {
  * @brief Raw array specialization.
  */
 template <class T, std::size_t N>
-inline const T* data(const T (&c)[N]) noexcept {
+inline const T* data(const T (&c)[N]) noexcept
+{
   return c;
 }
 
@@ -62,8 +66,8 @@ inline const T* data(const T (&c)[N]) noexcept {
  */
 template <typename TContainer>
 class StdHolder {
-
 public:
+
   /**
    * @brief The concrete container type.
    */
@@ -76,7 +80,8 @@ public:
    * @brief Default or size-based constructor.
    */
   template <typename U = typename TContainer::value_type>
-  explicit StdHolder(std::size_t size, U* data = nullptr) : m_container(size) {
+  explicit StdHolder(std::size_t size, U* data = nullptr) : m_container(size)
+  {
     if (data) {
       std::copy_n(data, size, const_cast<typename TContainer::value_type*>(this->begin()));
     }
@@ -85,7 +90,8 @@ public:
   /**
    * @brief Container-move constructor.
    */
-  explicit StdHolder(std::size_t size, Container&& container) : m_container(std::move(container)) {
+  explicit StdHolder(std::size_t size, Container&& container) : m_container(std::move(container))
+  {
     SizeError::may_throw(m_container.size(), size);
   }
 
@@ -94,7 +100,8 @@ public:
   /**
    * @brief Access the underlying container in read-only mode.
    */
-  const std::decay_t<Container>& container() const {
+  const std::decay_t<Container>& container() const
+  {
     return this->m_container;
   }
 
@@ -103,14 +110,16 @@ public:
   /**
    * @brief Get an iterator to the beginning.
    */
-  inline const typename TContainer::value_type* begin() const {
+  inline const typename TContainer::value_type* begin() const
+  {
     return &*m_container.begin();
   }
 
   /**
    * @brief Get an iterator to the end.
    */
-  inline const typename TContainer::value_type* end() const {
+  inline const typename TContainer::value_type* end() const
+  {
     return &*m_container.end();
   }
 
@@ -131,7 +140,8 @@ public:
    * @warning
    * The container is not usable anymore after this call.
    */
-  Container& move_to(Container& destination) {
+  Container& move_to(Container& destination)
+  {
     destination = std::move(this->m_container);
     return destination;
   }
@@ -139,6 +149,7 @@ public:
   /// @}
 
 private:
+
   /**
    * @brief The underlying container.
    */
@@ -151,11 +162,12 @@ private:
  */
 template <typename T, std::size_t N>
 class StdHolder<std::array<T, N>> {
-
 public:
+
   using Container = std::array<T, N>;
 
-  explicit StdHolder(std::size_t size, const T* data = nullptr) : m_container {} {
+  explicit StdHolder(std::size_t size, const T* data = nullptr) : m_container {}
+  {
     if (size != N && size != 0) { // TODO allow size < N? => add m_size
       std::string msg = "Size mismatch in StdHolder<std::array> specialization. ";
       msg += "Got " + std::to_string(size) + ", should be 0 or " + std::to_string(N) + ".";
@@ -166,28 +178,34 @@ public:
     }
   }
 
-  explicit StdHolder(std::size_t size, Container&& container) : m_container(std::move(container)) {
+  explicit StdHolder(std::size_t size, Container&& container) : m_container(std::move(container))
+  {
     SizeError::may_throw(m_container.size(), size);
   }
 
-  inline const T* begin() const {
+  inline const T* begin() const
+  {
     return m_container.begin();
   }
 
-  inline const T* end() const {
+  inline const T* end() const
+  {
     return m_container.end();
   }
 
-  const std::decay_t<Container>& container() const {
+  const std::decay_t<Container>& container() const
+  {
     return this->m_container;
   }
 
-  Container& move_to(Container& destination) {
+  Container& move_to(Container& destination)
+  {
     destination = std::move(this->m_container);
     return destination;
   }
 
 private:
+
   std::array<T, N> m_container;
 };
 
@@ -197,50 +215,59 @@ private:
  */
 template <typename T>
 class StdHolder<std::unique_ptr<T[]>> {
-
 public:
+
   using Container = std::unique_ptr<T[]>;
 
-  explicit StdHolder(std::size_t size, const T* data = nullptr) : m_size(size), m_container {new T[m_size]} {
+  explicit StdHolder(std::size_t size, const T* data = nullptr) : m_size(size), m_container {new T[m_size]}
+  {
     if (data) {
       std::copy_n(data, m_size, m_container.get());
     }
   }
 
-  explicit StdHolder(std::size_t size, Container&& container) : m_size(size), m_container(std::move(container)) {
+  explicit StdHolder(std::size_t size, Container&& container) : m_size(size), m_container(std::move(container))
+  {
     SizeError::may_throw(m_container.size(), size);
   }
 
   StdHolder(const StdHolder& other) : StdHolder(other.end() - other.begin(), other.begin()) {}
 
-  StdHolder& operator=(StdHolder other) {
+  StdHolder& operator=(StdHolder other)
+  {
     swap(*this, other);
     return *this;
   }
 
-  friend void swap(StdHolder& lhs, StdHolder& rhs) {
+  friend void swap(StdHolder& lhs, StdHolder& rhs)
+  {
     std::swap(lhs.m_size, rhs.m_size);
     std::swap(lhs.m_container, rhs.m_container);
   }
 
-  inline const T* begin() const {
+  inline const T* begin() const
+  {
     return m_container.get();
   }
 
-  inline const T* end() const {
+  inline const T* end() const
+  {
     return begin() + m_size;
   }
 
-  const std::decay_t<Container>& container() const {
+  const std::decay_t<Container>& container() const
+  {
     return this->m_container;
   }
 
-  Container& move_to(Container& destination) {
+  Container& move_to(Container& destination)
+  {
     destination = std::move(this->m_container);
     return destination;
   }
 
 private:
+
   std::size_t m_size;
   std::unique_ptr<T[]> m_container;
 };
@@ -254,21 +281,24 @@ private:
  */
 template <typename T>
 class PtrHolder {
-
 public:
+
   explicit PtrHolder(std::size_t size = 0) : m_begin(nullptr), m_end(nullptr) {}
 
   explicit PtrHolder(std::size_t size, T* data) : m_begin(data), m_end(m_begin + size) {}
 
-  inline const T* begin() const {
+  inline const T* begin() const
+  {
     return m_begin;
   }
 
-  inline const T* end() const {
+  inline const T* end() const
+  {
     return m_end;
   }
 
 private:
+
   T* m_begin;
   T* m_end;
 };

@@ -30,6 +30,7 @@ namespace Linx {
 template <typename TUnit>
 class Chronometer {
 public:
+
   /**
    * @brief The time unit.
    */
@@ -38,14 +39,16 @@ public:
   /**
    * @brief Create a chronometer with optional offset.
    */
-  Chronometer(TUnit offset = TUnit()) : m_tic(), m_toc(), m_running(false), m_container(), m_elapsed(offset) {
+  Chronometer(TUnit offset = TUnit()) : m_tic(), m_toc(), m_running(false), m_container(), m_elapsed(offset)
+  {
     reset(offset);
   }
 
   /**
    * @brief Reset the chronometer with optional offset.
    */
-  void reset(TUnit offset = TUnit()) {
+  void reset(TUnit offset = TUnit())
+  {
     m_toc = m_tic;
     m_running = false;
     m_container.resize(0);
@@ -55,7 +58,8 @@ public:
   /**
    * @brief Start or restart the chronometer.
    */
-  void start() {
+  void start()
+  {
     m_tic = std::chrono::steady_clock::now();
     m_running = true;
   }
@@ -63,7 +67,8 @@ public:
   /**
    * @brief Stop the chronometer and get the last time increment.
    */
-  TUnit stop() {
+  TUnit stop()
+  {
     m_toc = std::chrono::steady_clock::now();
     m_running = false;
     const auto inc = std::chrono::duration_cast<TUnit>(m_toc - m_tic);
@@ -75,35 +80,40 @@ public:
   /**
    * @brief Test whether the chronometer is running.
    */
-  bool is_running() const {
+  bool is_running() const
+  {
     return m_running; // TODO m_running could be removed by comparing m_toc to m_tic, but is it relevant?
   }
 
   /**
    * @brief The last increment.
    */
-  TUnit last() const {
+  TUnit last() const
+  {
     return TUnit {typename TUnit::rep(m_container[m_container.size() - 1])};
   }
 
   /**
    * @brief The elapsed time.
    */
-  TUnit elapsed() const {
+  TUnit elapsed() const
+  {
     return m_elapsed;
   }
 
   /**
    * @brief The number of increments.
    */
-  std::size_t size() const {
+  std::size_t size() const
+  {
     return m_container.size();
   }
 
   /**
    * @brief Get the increments.
    */
-  const std::vector<double>& increments() const {
+  const std::vector<double>& increments() const
+  {
     return m_container;
   }
 
@@ -111,7 +121,8 @@ public:
    * @brief Get the minimum increment.
    * @see `distribution()`
    */
-  double min() const {
+  double min() const
+  {
     return *std::min_element(m_container.begin(), m_container.end());
   }
 
@@ -119,7 +130,8 @@ public:
    * @brief Get the maximum increment.
    * @see `distribution()`
    */
-  double max() const {
+  double max() const
+  {
     return *std::max_element(m_container.begin(), m_container.end());
   }
 
@@ -127,7 +139,8 @@ public:
    * @brief Get the pair of min and max increments.
    * @see `distribution()`
    */
-  std::pair<TUnit, TUnit> minmax() const {
+  std::pair<TUnit, TUnit> minmax() const
+  {
     const auto its = std::minmax_element(m_container.begin(), m_container.end());
     return {*its.first, *its.second};
   }
@@ -135,11 +148,13 @@ public:
   /**
    * @brief Get the increments distribution.
    */
-  DataDistribution<double> distribution() const {
+  DataDistribution<double> distribution() const
+  {
     return DataDistribution<double>(m_container);
   }
 
 private:
+
   /**
    * @brief The time at which start() was called.
    */

@@ -14,7 +14,8 @@ BOOST_AUTO_TEST_SUITE(Math_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(abspow_test) {
+BOOST_AUTO_TEST_CASE(abspow_test)
+{
   BOOST_TEST(abspow<0>(0) == 0);
   BOOST_TEST(abspow<0>(2) == 1);
   BOOST_TEST(abspow<0>(-2) == 1);
@@ -32,8 +33,8 @@ BOOST_AUTO_TEST_CASE(abspow_test) {
   BOOST_TEST(abspow<4>(-2) == 16);
 }
 
-BOOST_AUTO_TEST_CASE(FIXME_test) {
-
+BOOST_AUTO_TEST_CASE(FIXME_test)
+{
   BOOST_FAIL("!!!! Please implement your tests !!!!");
 }
 

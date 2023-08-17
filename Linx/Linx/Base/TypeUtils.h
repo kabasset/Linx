@@ -118,7 +118,8 @@ struct TypeTraits {
    * Return the value itself if `T` is already scalar,
    * or a complex with same real and imaginary parts if `T` is complex.
    */
-  static inline T from_scalar(Scalar in) {
+  static inline T from_scalar(Scalar in)
+  {
     return in;
   }
 
@@ -128,7 +129,8 @@ struct TypeTraits {
    * If `T` is complex, apply the function twice to get the real and imaginary parts.
    */
   template <typename TFunc, typename TArg>
-  static inline T apply_scalar(TFunc&& func, TArg&& arg) {
+  static inline T apply_scalar(TFunc&& func, TArg&& arg)
+  {
     return std::forward<TFunc>(func)(std::forward<TArg>(arg));
   }
 };
@@ -136,17 +138,18 @@ struct TypeTraits {
 /// @cond
 template <typename T>
 struct TypeTraits<std::complex<T>> {
-
   using Floating = std::complex<T>;
 
   using Scalar = T;
 
-  static inline std::complex<T> from_scalar(T in) {
+  static inline std::complex<T> from_scalar(T in)
+  {
     return {in, in};
   }
 
   template <typename TFunc, typename TArg>
-  static inline std::complex<T> apply_scalar(TFunc&& func, TArg&& arg) {
+  static inline std::complex<T> apply_scalar(TFunc&& func, TArg&& arg)
+  {
     return {std::forward<TFunc>(func)(std::forward<TArg>(arg)), std::forward<TFunc>(func)(std::forward<TArg>(arg))};
   }
 };
@@ -156,7 +159,8 @@ struct TypeTraits<std::complex<T>> {
  * @brief Clamp some input value between a min and max values.
  */
 template <typename T, typename U>
-inline T clamp(T in, U min, U max) {
+inline T clamp(T in, U min, U max)
+{
   return in < min ? min : in > max ? max : in;
 }
 
@@ -164,7 +168,8 @@ inline T clamp(T in, U min, U max) {
  * @brief Compute the floor of an input floating point value, as an integer value.
  */
 template <typename TInt, typename TFloat>
-TInt floor(TFloat in) {
+TInt floor(TFloat in)
+{
   TInt out = in;
   return out - (in < 0);
 }
@@ -174,7 +179,6 @@ TInt floor(TFloat in) {
  */
 template <typename T>
 struct Limits {
-
   /**
    * @brief The type for real numbers, the component type for complex numbers.
    */
@@ -183,35 +187,40 @@ struct Limits {
   /**
    * @brief 0 in general, or `false` for Booleans.
    */
-  static T zero() {
+  static T zero()
+  {
     return TypeTraits<T>::from_scalar(0);
   }
 
   /**
    * @brief 1 in general, or `true` for Booleans, or 1 + i for complexes.
    */
-  static T one() {
+  static T one()
+  {
     return TypeTraits<T>::from_scalar(1);
   }
 
   /**
    * @brief The lowest possible value.
    */
-  static T min() {
+  static T min()
+  {
     return TypeTraits<T>::from_scalar(std::numeric_limits<Scalar>::lowest());
   }
 
   /**
    * @brief The highest possible value.
    */
-  static T max() {
+  static T max()
+  {
     return TypeTraits<T>::from_scalar(std::numeric_limits<Scalar>::max());
   }
 
   /**
    * @brief The infinity value if defined, or `max()` otherwise.
    */
-  static T inf() {
+  static T inf()
+  {
     constexpr auto infinity = std::numeric_limits<Scalar>::infinity();
     return infinity ? TypeTraits<T>::from_scalar(infinity) : max();
   }
@@ -219,35 +228,40 @@ struct Limits {
   /**
    * @brief The difference between two consecutive values.
    */
-  static T epsilon() {
+  static T epsilon()
+  {
     return TypeTraits<T>::from_scalar(std::numeric_limits<Scalar>::epsilon());
   }
 
   /**
    * @brief The min plus one epsilon.
    */
-  static T almost_min() {
+  static T almost_min()
+  {
     return min() + epsilon();
   }
 
   /**
    * @brief The max minus one epsilon.
    */
-  static T almost_max() {
+  static T almost_max()
+  {
     return max() - epsilon();
   }
 
   /**
    * @brief The min over two.
    */
-  static T half_min() {
+  static T half_min()
+  {
     return min() / 2;
   }
 
   /**
    * @brief The max over two in general, rounded up for integers, or `true` for Booleans.
    */
-  static T half_max() {
+  static T half_max()
+  {
     return max() / 2 + std::is_integral<T>::value;
   }
 };

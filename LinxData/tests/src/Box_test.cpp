@@ -15,7 +15,8 @@ BOOST_AUTO_TEST_SUITE(Box_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(ctors_test) {
+BOOST_AUTO_TEST_CASE(ctors_test)
+{
   Position<7> front;
   ++front;
   Position<7> back {2, 8, 6, 1, 9, 8, 9};
@@ -25,7 +26,8 @@ BOOST_AUTO_TEST_CASE(ctors_test) {
   BOOST_TEST(from_shape.back() == back);
 }
 
-BOOST_AUTO_TEST_CASE(translation_test) {
+BOOST_AUTO_TEST_CASE(translation_test)
+{
   const Position<3> front {1, 2, 3};
   const Position<3> back {4, 5, 6};
   Box<3> region {front, back};
@@ -35,7 +37,8 @@ BOOST_AUTO_TEST_CASE(translation_test) {
   BOOST_TEST(region.front() == back);
 }
 
-BOOST_AUTO_TEST_CASE(surrounding_test) {
+BOOST_AUTO_TEST_CASE(surrounding_test)
+{
   const auto central = Box<2>::from_shape({1, 1}, {4, 3});
   const Box<2> margin {{-3, -2}, {2, 1}};
   const auto chunks = central.surround(margin);

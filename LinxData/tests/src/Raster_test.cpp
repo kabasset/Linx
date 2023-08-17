@@ -14,8 +14,8 @@ BOOST_AUTO_TEST_SUITE(Raster_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(index_test) {
-
+BOOST_AUTO_TEST_CASE(index_test)
+{
   /* Fixed dimension */
   Position<4> fixed_shape;
   for (auto& length : fixed_shape) {
@@ -37,33 +37,38 @@ BOOST_AUTO_TEST_CASE(index_test) {
   BOOST_TEST(variable_index == fixed_index);
 }
 
-BOOST_AUTO_TEST_CASE(ptrraster_data_test) {
+BOOST_AUTO_TEST_CASE(ptrraster_data_test)
+{
   int data[] = {0, 1, 2};
   PtrRaster<int, 1> raster({3}, data);
   BOOST_TEST(raster.data() != nullptr);
   BOOST_TEST(raster[{0}] == 0);
 }
 
-BOOST_AUTO_TEST_CASE(const_ptrraster_data_test) {
+BOOST_AUTO_TEST_CASE(const_ptrraster_data_test)
+{
   const int c_data[] = {3, 4, 5};
   PtrRaster<const int, 1> c_raster({3}, c_data);
   BOOST_TEST(c_raster.data() != nullptr);
   BOOST_TEST(c_raster[{0}] == 3);
 }
 
-BOOST_AUTO_TEST_CASE(vecraster_data_test) {
+BOOST_AUTO_TEST_CASE(vecraster_data_test)
+{
   VecRaster<int, 1> vec_raster({3});
   BOOST_TEST(vec_raster.data() != nullptr);
   BOOST_TEST(vec_raster[{0}] == 0);
 }
 
-BOOST_AUTO_TEST_CASE(const_vecraster_data_test) {
+BOOST_AUTO_TEST_CASE(const_vecraster_data_test)
+{
   const VecRaster<int, 1> c_vec_raster({3});
   BOOST_TEST(c_vec_raster.data() != nullptr);
   BOOST_TEST(c_vec_raster[{0}] == 0);
 }
 
-BOOST_AUTO_TEST_CASE(alignedraster_owned_and_shared_test) {
+BOOST_AUTO_TEST_CASE(alignedraster_owned_and_shared_test)
+{
   constexpr Index width = 3;
   constexpr Index height = 4;
   constexpr Index size = width * height;
@@ -86,7 +91,8 @@ BOOST_AUTO_TEST_CASE(alignedraster_owned_and_shared_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(alignedraster_alignment_test) {
+BOOST_AUTO_TEST_CASE(alignedraster_alignment_test)
+{
   constexpr Index width = 3;
   constexpr Index height = 4;
   AlignedRaster<int> aligned({width, height});
@@ -95,7 +101,8 @@ BOOST_AUTO_TEST_CASE(alignedraster_alignment_test) {
   BOOST_TEST(raw.alignment() == sizeof(int));
 }
 
-BOOST_AUTO_TEST_CASE(variable_dimension_raster_size_test) {
+BOOST_AUTO_TEST_CASE(variable_dimension_raster_size_test)
+{
   const Index width = 4;
   const Index height = 3;
   const Index size = width * height;
@@ -104,7 +111,8 @@ BOOST_AUTO_TEST_CASE(variable_dimension_raster_size_test) {
   BOOST_TEST(raster.size() == size);
 }
 
-BOOST_AUTO_TEST_CASE(subscript_bounds_test) {
+BOOST_AUTO_TEST_CASE(subscript_bounds_test)
+{
   const Index width = 4;
   const Index height = 3;
   auto raster = random<int>({width, height});
@@ -123,7 +131,8 @@ BOOST_AUTO_TEST_CASE(subscript_bounds_test) {
   BOOST_CHECK_THROW(raster.at({0, -1 - height}), OutOfBoundsError);
 }
 
-BOOST_AUTO_TEST_CASE(vecraster_move_test) {
+BOOST_AUTO_TEST_CASE(vecraster_move_test)
+{
   auto raster = random<int>({14, 3});
   const auto copied = raster.container();
   const auto data = raster.data();
@@ -133,7 +142,8 @@ BOOST_AUTO_TEST_CASE(vecraster_move_test) {
   BOOST_TEST(moved.data() == data);
 }
 
-BOOST_AUTO_TEST_CASE(make_raster_test) {
+BOOST_AUTO_TEST_CASE(make_raster_test)
+{
   constexpr Index width = 16;
   constexpr Index height = 9;
   constexpr Index depth = 3;
@@ -151,8 +161,8 @@ BOOST_AUTO_TEST_CASE(make_raster_test) {
   BOOST_TEST(c_raster3.dimension() == 3);
 }
 
-BOOST_AUTO_TEST_CASE(slicing_test) {
-
+BOOST_AUTO_TEST_CASE(slicing_test)
+{
   auto raster = random<float, 3>({5, 3, 4});
 
   // Several x-y planes
@@ -189,8 +199,8 @@ BOOST_AUTO_TEST_CASE(slicing_test) {
   BOOST_CHECK_THROW(raster.slice<3>(bad), Exception);
 }
 
-BOOST_AUTO_TEST_CASE(sectionning_test) {
-
+BOOST_AUTO_TEST_CASE(sectionning_test)
+{
   const auto raster3d = random<short, 3>({8, 9, 12});
 
   // 3D
@@ -220,7 +230,8 @@ BOOST_AUTO_TEST_CASE(sectionning_test) {
   BOOST_TEST((*section0d.data() == raster3d[{2, 6, 3}]));
 }
 
-BOOST_AUTO_TEST_CASE(raster_row_test) {
+BOOST_AUTO_TEST_CASE(raster_row_test)
+{
   const auto raster = Raster<int>({6, 5}).range();
   const auto row0 = raster.row({0});
   const auto row1 = raster.row({1});
@@ -236,7 +247,8 @@ BOOST_AUTO_TEST_CASE(raster_row_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(raster_profile_test) {
+BOOST_AUTO_TEST_CASE(raster_profile_test)
+{
   const auto raster = Raster<int, 3>({6, 5, 4}).range();
   const auto profile00 = raster.profile<1>({0, 0});
   const auto profile13 = raster.profile<1>({1, -1});
@@ -252,7 +264,8 @@ BOOST_AUTO_TEST_CASE(raster_profile_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(raster_apply_generate_test) {
+BOOST_AUTO_TEST_CASE(raster_apply_generate_test)
+{
   Position<3> shape {3, 14, 15};
   auto a = random<std::int16_t>(shape);
   auto b = random<std::int32_t>(shape);

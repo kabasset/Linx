@@ -43,8 +43,8 @@ class Patch :
     public ArithmeticMixin<EuclidArithmetic, T, Patch<T, TParent, TRegion>>,
     public MathFunctionsMixin<T, Patch<T, TParent, TRegion>>,
     public RangeMixin<T, Patch<T, TParent, TRegion>> {
-
 public:
+
   /**
    * @brief The value type.
    */
@@ -90,8 +90,8 @@ public:
   /**
    * @brief Constructor.
    */
-  Patch(Parent& parent, Region region) :
-      m_parent(&parent), m_region(std::move(region)), m_indexing(*m_parent, m_region) {}
+  Patch(Parent& parent, Region region) : m_parent(&parent), m_region(std::move(region)), m_indexing(*m_parent, m_region)
+  {}
   // std::move(region) not applicable to const Region& // TODO decay?
 
   /// @group_properties
@@ -99,35 +99,40 @@ public:
   /**
    * @brief Get the patch bounding box.
    */
-  Box<Dimension> box() const {
+  Box<Dimension> box() const
+  {
     return box(m_region);
   }
 
   /**
    * @brief Get the number of pixels in the patch.
    */
-  std::size_t size() const {
+  std::size_t size() const
+  {
     return m_region.size();
   }
 
   /**
    * @brief Get the region.
    */
-  const TRegion& domain() const {
+  const TRegion& domain() const
+  {
     return m_region;
   }
 
   /**
    * @brief Access the parent raster or extrapolator.
    */
-  const Parent& parent() const {
+  const Parent& parent() const
+  {
     return *m_parent;
   }
 
   /**
    * @brief Access the parent raster or extrapolator.
    */
-  Parent& parent() {
+  Parent& parent()
+  {
     return *m_parent;
   }
 
@@ -144,7 +149,8 @@ public:
    * Generally, it should be avoided in hot paths.
    */
   template <typename TPos>
-  const Value& operator[](const TPos& pos) const {
+  const Value& operator[](const TPos& pos) const
+  {
     return (*m_parent)[m_region[pos]];
   }
 
@@ -152,35 +158,40 @@ public:
    * @copybrief operator[]()const
    */
   template <typename TPos>
-  Value& operator[](const TPos& pos) {
+  Value& operator[](const TPos& pos)
+  {
     return (*m_parent)[m_region[pos]];
   }
 
   /**
    * @brief Constant iterator to the front pixel.
    */
-  Iterator<const Value> begin() const {
+  Iterator<const Value> begin() const
+  {
     return m_indexing.template begin<const Value>(*m_parent, m_region);
   }
 
   /**
    * @brief Iterator to the front pixel.
    */
-  Iterator<Value> begin() {
+  Iterator<Value> begin()
+  {
     return m_indexing.template begin<Value>(*m_parent, m_region);
   }
 
   /**
    * @brief Constant end iterator.
    */
-  Iterator<const Value> end() const {
+  Iterator<const Value> end() const
+  {
     return m_indexing.template end<const Value>(*m_parent, m_region);
   }
 
   /**
    * @brief End iterator.
    */
-  Iterator<Value> end() {
+  Iterator<Value> end()
+  {
     return m_indexing.template end<Value>(*m_parent, m_region);
   }
 
@@ -189,7 +200,8 @@ public:
   /**
    * @brief Translate the patch by a given vector.
    */
-  Patch& translate(const Position<Dimension>& vector) {
+  Patch& translate(const Position<Dimension>& vector)
+  {
     m_region += vector;
     return *this;
   }
@@ -197,7 +209,8 @@ public:
   /**
    * @brief Translate the patch by the opposite of a given vector.
    */
-  Patch& translate_back(const Position<Dimension>& vector) {
+  Patch& translate_back(const Position<Dimension>& vector)
+  {
     m_region -= vector;
     return *this;
   }
@@ -207,27 +220,31 @@ public:
   /**
    * @brief Check whether two masks are equal.
    */
-  bool operator==(const Patch<T, TParent, TRegion>& other) const {
+  bool operator==(const Patch<T, TParent, TRegion>& other) const
+  {
     return m_parent == other.m_parent && m_region == other.m_region;
   }
 
   /**
    * @brief Create a cropped patch.
    */
-  Patch<const T, const TParent, TRegion> patch(const Box<TParent::Dimension>& box) const {
+  Patch<const T, const TParent, TRegion> patch(const Box<TParent::Dimension>& box) const
+  {
     return Patch<const T, const TParent, TRegion>(*m_parent, m_region & box);
   }
 
   /**
    * @brief Create a cropped patch.
    */
-  Patch<T, TParent, TRegion> patch(const Box<TParent::Dimension>& box) {
+  Patch<T, TParent, TRegion> patch(const Box<TParent::Dimension>& box)
+  {
     return Patch<T, TParent, TRegion>(*m_parent, m_region & box);
   }
 
   /// @}
 
 private:
+
   /**
    * @brief The parent raster.
    */
@@ -256,7 +273,8 @@ struct IsPatchImpl<Patch<T, TParent, TRegion>> : std::true_type {};
 /// @endcond
 
 template <typename T>
-constexpr bool is_patch() {
+constexpr bool is_patch()
+{
   return Internal::IsPatchImpl<T>::value;
 }
 
@@ -268,7 +286,8 @@ constexpr bool is_patch() {
  * then the underlying decorated raster is effectively returned.
  */
 template <typename T, typename TParent, typename TRegion>
-const auto& rasterize(const Patch<T, TParent, TRegion>& in) {
+const auto& rasterize(const Patch<T, TParent, TRegion>& in)
+{
   return rasterize(in.parent());
 }
 

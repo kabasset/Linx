@@ -11,8 +11,10 @@ using namespace Linx;
 
 struct ChronoFixture : public Chronometer<std::chrono::milliseconds> {
   ChronoFixture(std::chrono::milliseconds chrono_offset = std::chrono::milliseconds {std::rand()}) :
-      Chronometer<std::chrono::milliseconds>(chrono_offset), offset(chrono_offset) {}
-  void wait(std::int64_t ms = default_wait) {
+      Chronometer<std::chrono::milliseconds>(chrono_offset), offset(chrono_offset)
+  {}
+  void wait(std::int64_t ms = default_wait)
+  {
     std::this_thread::sleep_for(Unit(ms));
   }
   Unit offset;
@@ -27,13 +29,15 @@ BOOST_FIXTURE_TEST_SUITE(Chronometer_test, ChronoFixture)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(init_test) {
+BOOST_AUTO_TEST_CASE(init_test)
+{
   BOOST_TEST(elapsed().count() == offset.count());
   BOOST_TEST(not is_running());
   BOOST_TEST(size() == 0);
 }
 
-BOOST_AUTO_TEST_CASE(one_inc_test) {
+BOOST_AUTO_TEST_CASE(one_inc_test)
+{
   start();
   BOOST_TEST(is_running());
   wait();
@@ -50,7 +54,8 @@ BOOST_AUTO_TEST_CASE(one_inc_test) {
   BOOST_TEST(max() == inc);
 }
 
-BOOST_AUTO_TEST_CASE(two_incs_test) {
+BOOST_AUTO_TEST_CASE(two_incs_test)
+{
   start();
   wait(); // Wait
   stop();

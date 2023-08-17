@@ -31,7 +31,8 @@ using SupportedFitsTypes = std::tuple<
     float,
     double>;
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(fits_write_read_test, T, SupportedFitsTypes) { // FIXME for several Ns
+BOOST_AUTO_TEST_CASE_TEMPLATE(fits_write_read_test, T, SupportedFitsTypes)
+{ // FIXME for several Ns
   Raster<T> in({16, 16});
   in.range();
   std::string name("BITPIX");
@@ -47,7 +48,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(fits_write_read_test, T, SupportedFitsTypes) { // 
   BOOST_TEST(out == in);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(auto_write_read_test, T, SupportedFitsTypes) {
+BOOST_AUTO_TEST_CASE_TEMPLATE(auto_write_read_test, T, SupportedFitsTypes)
+{
   Raster<T> in({16, 16});
   in.range();
   std::string name("BITPIX");
@@ -61,7 +63,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(auto_write_read_test, T, SupportedFitsTypes) {
   BOOST_TEST(out == in);
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(auto_append_read_test, T, SupportedFitsTypes) {
+BOOST_AUTO_TEST_CASE_TEMPLATE(auto_append_read_test, T, SupportedFitsTypes)
+{
   Raster<T> in({16, 16});
   in.range();
   std::string name("BITPIX");
@@ -76,7 +79,8 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(auto_append_read_test, T, SupportedFitsTypes) {
   BOOST_TEST(out == in);
 }
 
-BOOST_AUTO_TEST_CASE(auto_read_wrong_format_test) {
+BOOST_AUTO_TEST_CASE(auto_read_wrong_format_test)
+{
   TemporaryPath path("dummy.txt"); // FIXME .fits
   BOOST_ASSERT(not std::filesystem::exists(path));
   std::ofstream f(path.string());
@@ -85,11 +89,13 @@ BOOST_AUTO_TEST_CASE(auto_read_wrong_format_test) {
   BOOST_CHECK_THROW(read<int>(path), FileFormatError);
 }
 
-BOOST_AUTO_TEST_CASE(auto_read_missing_file_test) {
+BOOST_AUTO_TEST_CASE(auto_read_missing_file_test)
+{
   BOOST_CHECK_THROW(read<int>("no_such_file.fits"), FileNotFoundError);
 }
 
-BOOST_AUTO_TEST_CASE(auto_write_mode_errors_test) {
+BOOST_AUTO_TEST_CASE(auto_write_mode_errors_test)
+{
   TemporaryPath path("dummy.fits");
   BOOST_CHECK_THROW(write(Raster<int, 1>({1}), path, 'a'), FileNotFoundError);
   std::ofstream f(path.string());

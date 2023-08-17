@@ -17,57 +17,68 @@ class RowGenerator :
     public std::iterator<
         std::forward_iterator_tag,
         decltype(TParent().row(Position < TParent::Dimension == -1 ? -1 : TParent::Dimension - 1 > ()))> {
-
 public:
+
   static constexpr Index Dimension = TParent::Dimension == -1 ? -1 : TParent::Dimension - 1;
   using Value = decltype(TParent().row(Position<Dimension>()));
 
   RowGenerator(TParent& in) : m_parent(&in), m_fronts(erase<0>(in.domain())), m_current(m_fronts.begin()) {}
 
-  RowGenerator begin() const {
+  RowGenerator begin() const
+  {
     return *this;
   }
 
-  RowGenerator& begin() {
+  RowGenerator& begin()
+  {
     return *this;
   }
 
-  RowGenerator end() const {
+  RowGenerator end() const
+  {
     return RowGenerator(m_fronts.end());
   }
 
-  Value operator*() const {
+  Value operator*() const
+  {
     return m_parent->row(*m_current);
   }
 
-  Value* operator->() const {
+  Value* operator->() const
+  {
     return &*(*this);
   }
 
-  RowGenerator& operator++() {
+  RowGenerator& operator++()
+  {
     ++m_current;
     return *this;
   }
 
-  RowGenerator operator++(int) {
+  RowGenerator operator++(int)
+  {
     auto out = *this;
     ++(*this);
     return out;
   }
 
-  bool operator==(const RowGenerator& rhs) const {
+  bool operator==(const RowGenerator& rhs) const
+  {
     return m_current == rhs.m_current;
   }
 
-  bool operator!=(const RowGenerator& rhs) const {
+  bool operator!=(const RowGenerator& rhs) const
+  {
     return m_current != rhs.m_current;
   }
 
-  Raster<std::decay_t<Value>, Dimension> raster() {
+  Raster<std::decay_t<Value>, Dimension> raster()
+  {
     return Raster<std::decay_t<Value>, Dimension>(m_fronts.shape(), *this);
   }
 
 private:
+
   RowGenerator(const typename Box<Dimension>::Iterator& current) :
       m_parent(nullptr), m_fronts(), m_current(current) {} // FIXME no copy
 

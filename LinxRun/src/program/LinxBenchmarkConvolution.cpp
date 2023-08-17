@@ -16,7 +16,8 @@ using Image = Linx::Raster<float>;
 using Kernel = const Linx::Kernel<Linx::KernelOp::Convolution, float>;
 using Duration = std::chrono::milliseconds;
 
-void filter_monolith(Image& image, Kernel& kernel) {
+void filter_monolith(Image& image, Kernel& kernel)
+{
   const auto extrapolation = Linx::extrapolate<Linx::NearestNeighbor>(image);
   const auto extrapolated = extrapolation.copy(image.domain() + kernel.window());
   // image = kernel.crop(extrapolated);
@@ -30,7 +31,8 @@ void filter_monolith(Image& image, Kernel& kernel) {
   }
 }
 
-void filter_hardcoded(Image& image, Kernel& kernel) {
+void filter_hardcoded(Image& image, Kernel& kernel)
+{
   const auto extrapolation = Linx::extrapolate<Linx::NearestNeighbor>(image);
   const auto extrapolated = extrapolation.copy(image.domain() + kernel.window());
   const auto kernel_data = kernel.raster();
@@ -54,7 +56,8 @@ void filter_hardcoded(Image& image, Kernel& kernel) {
 }
 
 template <typename TDuration>
-TDuration filter(Image& image, Kernel& kernel, char setup) {
+TDuration filter(Image& image, Kernel& kernel, char setup)
+{
   Linx::Chronometer<TDuration> chrono;
   chrono.start();
   switch (setup) {
@@ -77,9 +80,10 @@ TDuration filter(Image& image, Kernel& kernel, char setup) {
 }
 
 class RasterBenchmarkCorrelation : public Elements::Program {
-
 public:
-  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
+
+  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
+  {
     Linx::ProgramOptions options;
     options.named("case", "Test case: d (default), m (monolith)", 'd');
     options.named("image", "Raster length along each axis", 2048L);
@@ -87,7 +91,8 @@ public:
     return options.as_pair();
   }
 
-  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
+  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override
+  {
     const auto setup = args["case"].as<char>();
     const auto image_diameter = args["image"].as<Linx::Index>();
     const auto kernel_diameter = args["kernel"].as<Linx::Index>();

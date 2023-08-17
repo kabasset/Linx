@@ -15,7 +15,8 @@ BOOST_AUTO_TEST_SUITE(StructuringElement_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(constant0_3x3_test) {
+BOOST_AUTO_TEST_CASE(constant0_3x3_test)
+{
   Raster<int, 2> in({4, 3});
   in.fill(1);
   const auto extra = extrapolate(in, 0);

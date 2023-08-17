@@ -42,6 +42,7 @@ using Indices = Coordinates<Index, N>;
 template <typename T, Index N = 2>
 class Vector : public DataContainer<T, StdHolder<Coordinates<T, N>>, VectorArithmetic, Vector<T, N>> {
 public:
+
   /**
    * @brief The value type.
    */
@@ -73,7 +74,8 @@ public:
    * @brief Create a vector of given dimension.
    */
   template <typename TInt, typename std::enable_if_t<std::is_integral<TInt>::value>* = nullptr>
-  explicit Vector(TInt dim) : Container(std::size_t(dim)) {}
+  explicit Vector(TInt dim) : Container(std::size_t(dim))
+  {}
 
   /**
    * @brief Create a vector from a brace-enclosed list of indices.
@@ -84,12 +86,14 @@ public:
    * @brief Create a vector from a range.
    */
   template <typename TRange, typename std::enable_if_t<IsRange<TRange>::value>* = nullptr>
-  explicit Vector(TRange&& range) : Container(range.begin(), range.end()) {}
+  explicit Vector(TRange&& range) : Container(range.begin(), range.end())
+  {}
 
   /**
    * @brief Create a vector full of `Limits::zero()'s.
    */
-  static Vector<T, N> zero() {
+  static Vector<T, N> zero()
+  {
     Vector<T, N> res(std::abs(N));
     return res.fill(Limits<T>::zero());
   }
@@ -97,7 +101,8 @@ public:
   /**
    * @brief Create a vector full of `Limits::one()'s.
    */
-  static Vector<T, N> one() {
+  static Vector<T, N> one()
+  {
     Vector<T, N> res(std::abs(N));
     return res.fill(Limits<T>::one());
   }
@@ -105,7 +110,8 @@ public:
   /**
    * @brief Create a vector full of `Limits::inf()'s.
    */
-  static Vector<T, N> inf() {
+  static Vector<T, N> inf()
+  {
     Vector<T, N> res(std::abs(N));
     return res.fill(Limits<T>::inf());
   }
@@ -113,7 +119,8 @@ public:
   /**
    * @brief Check whether the vector is zero.
    */
-  bool is_zero() const {
+  bool is_zero() const
+  {
     for (auto i : *this) {
       if (i != Limits<T>::zero()) {
         return false;
@@ -125,7 +132,8 @@ public:
   /**
    * @brief Check whether the vector is one.
    */
-  bool is_one() const {
+  bool is_one() const
+  {
     for (auto i : *this) {
       if (i != Limits<T>::one()) {
         return false;
@@ -137,7 +145,8 @@ public:
   /**
    * @brief Check whether the vector is minus one.
    */
-  bool is_inf() const {
+  bool is_inf() const
+  {
     for (auto i : *this) {
       if (i != Limits<T>::inf()) {
         return false;
@@ -153,7 +162,8 @@ public:
    * The values up to dimension `M` are copied.
    */
   template <Index M>
-  Vector<T, M> slice() const { // FIXME free function
+  Vector<T, M> slice() const
+  { // FIXME free function
     Vector<T, M> res(M);
     std::copy_n(this->data(), M, res.data());
     return res;
@@ -167,7 +177,8 @@ public:
    * Those between dimensions `N` and `M` are taken from the given padding vector.
    */
   template <Index M>
-  Vector<T, M> extend(const Vector<T, M>& padding = Vector<T, M>::zero()) const { // FIXME free function
+  Vector<T, M> extend(const Vector<T, M>& padding = Vector<T, M>::zero()) const
+  { // FIXME free function
     auto res = padding;
     std::copy_n(this->data(), this->size(), res.data());
     return res;
@@ -181,7 +192,8 @@ public:
  * The size of the resulting vector is that of the input vector minus one.
  */
 template <Index I, typename T, Index N>
-Vector<T, N == -1 ? -1 : N - 1> erase(const Vector<T, N>& in) {
+Vector<T, N == -1 ? -1 : N - 1> erase(const Vector<T, N>& in)
+{
   static_assert(I >= 0);
   constexpr auto M = N == -1 ? -1 : N - 1;
   Vector<T, M> out(in.size() - 1);
@@ -201,7 +213,8 @@ Vector<T, N == -1 ? -1 : N - 1> erase(const Vector<T, N>& in) {
  * The size of the resulting vector is that of the input vector plus one.
  */
 template <Index I, typename T, Index N>
-Vector<T, N == -1 ? -1 : N + 1> insert(const Vector<T, N>& in, T&& value) {
+Vector<T, N == -1 ? -1 : N + 1> insert(const Vector<T, N>& in, T&& value)
+{
   static_assert(I >= 0);
   constexpr auto M = N == -1 ? -1 : N + 1;
   Vector<T, M> out(in.size() + 1);
@@ -243,7 +256,8 @@ using Position = Vector<Index, N>;
  * @brief Get the stride along a given axis.
  */
 template <Index N>
-Index shape_stride(const Position<N>& shape, Index axis) {
+Index shape_stride(const Position<N>& shape, Index axis)
+{
   return std::accumulate(shape.begin(), shape.begin() + axis, 1L, [](auto s, auto l) {
     return l > 0 ? s * l : 0; // FIXME here or for shape_size only?
   });
@@ -254,7 +268,8 @@ Index shape_stride(const Position<N>& shape, Index axis) {
  * @brief Get the stride along a given axis.
  */
 template <Index Axis, Index N>
-Index shape_stride(const Position<N>& shape) {
+Index shape_stride(const Position<N>& shape)
+{
   return shape_stride(shape, Axis);
 }
 
@@ -263,7 +278,8 @@ Index shape_stride(const Position<N>& shape) {
  * @brief Compute the number of pixels in a given shape.
  */
 template <Index N = 2>
-Index shape_size(const Position<N>& shape) {
+Index shape_size(const Position<N>& shape)
+{
   const auto size = shape.size();
   if (size == 0) {
     return 0;
@@ -276,7 +292,8 @@ Index shape_size(const Position<N>& shape) {
  * @tparam P The power
  */
 template <Index P, typename T, Index N>
-T norm(const Vector<T, N>& in) {
+T norm(const Vector<T, N>& in)
+{
   T out(0);
   for (const auto& e : in) {
     out += abspow<P>(e);
@@ -289,7 +306,8 @@ T norm(const Vector<T, N>& in) {
  * @tparam P The power
  */
 template <Index P, typename T, Index N>
-T distance(const Vector<T, N>& lhs, const Vector<T, N>& rhs) {
+T distance(const Vector<T, N>& lhs, const Vector<T, N>& rhs)
+{
   return std::inner_product(lhs.begin(), lhs.end(), rhs.begin(), 0., std::plus<T> {}, [](T a, T b) {
     return abspow<P>(b - a);
   });

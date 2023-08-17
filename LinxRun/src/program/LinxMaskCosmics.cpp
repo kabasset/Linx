@@ -17,9 +17,10 @@
 Elements::Logging logger = Elements::Logging::getLogger("LinxDemoAffinity");
 
 class LinxDemoAffinity : public Elements::Program {
-
 public:
-  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
+
+  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
+  {
     Linx::ProgramOptions options;
     options.positional<std::string>("input", "Input data file name");
     options.positional<std::string>("output", "Output mask file name");
@@ -29,8 +30,8 @@ public:
     return options.as_pair();
   }
 
-  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override {
-
+  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override
+  {
     Linx::Fits input(args["input"].as<std::string>());
     Linx::Fits output(args["output"].as<std::string>());
     const auto hdu = args["hdu"].as<long>();
@@ -46,7 +47,7 @@ public:
     logger.info() << "Detecting cosmics...";
     logger.info() << "  \\Phi^{-1}(" << pfa << ") = " << factor;
     chrono.start();
-    auto mask = dilate(Linx::flag_cosmics<unsigned char>(data, factor), radius);
+    auto mask = Linx::Cosmics::dilate_flagmap(Linx::Cosmics::flag<unsigned char>(data, factor), radius);
     chrono.stop();
     logger.info() << "  Done in: " << chrono.last().count() << " ms";
 

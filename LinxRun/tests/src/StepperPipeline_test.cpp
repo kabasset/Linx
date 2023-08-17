@@ -26,23 +26,29 @@ struct Step2 : PipelineStep<std::tuple<Step1a, Step1b>, long> {
 
 class Dag : public StepperPipeline<Dag> {
 public:
-  Step0::Return get0() const {
+
+  Step0::Return get0() const
+  {
     return m_0.value;
   }
 
-  Step1a::Return get1a() const {
+  Step1a::Return get1a() const
+  {
     return m_1a.value;
   }
 
-  Step1b::Return get1b() const {
+  Step1b::Return get1b() const
+  {
     return m_1b.value;
   }
 
-  Step2::Return get2() const {
+  Step2::Return get2() const
+  {
     return m_2.value;
   }
 
 protected:
+
   template <typename S>
   void evaluate_impl();
 
@@ -50,6 +56,7 @@ protected:
   typename S::Return get_impl();
 
 private:
+
   char m_value = 0;
   Step0 m_0;
   Step1a m_1a;
@@ -58,46 +65,54 @@ private:
 };
 
 template <>
-void Dag::evaluate_impl<Step0>() {
+void Dag::evaluate_impl<Step0>()
+{
   ++m_value;
   m_0.value = m_value;
 }
 
 template <>
-void Dag::evaluate_impl<Step1a>() {
+void Dag::evaluate_impl<Step1a>()
+{
   ++m_value;
   m_1a.value = m_value;
 }
 
 template <>
-void Dag::evaluate_impl<Step1b>() {
+void Dag::evaluate_impl<Step1b>()
+{
   ++m_value;
   m_1b.value = m_value;
 }
 
 template <>
-void Dag::evaluate_impl<Step2>() {
+void Dag::evaluate_impl<Step2>()
+{
   ++m_value;
   m_2.value = m_value;
 }
 
 template <>
-Step0::Return Dag::get_impl<Step0>() {
+Step0::Return Dag::get_impl<Step0>()
+{
   return m_0.value;
 }
 
 template <>
-Step1a::Return Dag::get_impl<Step1a>() {
+Step1a::Return Dag::get_impl<Step1a>()
+{
   return m_1a.value;
 }
 
 template <>
-Step1b::Return Dag::get_impl<Step1b>() {
+Step1b::Return Dag::get_impl<Step1b>()
+{
   return m_1b.value;
 }
 
 template <>
-Step2::Return Dag::get_impl<Step2>() {
+Step2::Return Dag::get_impl<Step2>()
+{
   return m_2.value;
 }
 
@@ -107,8 +122,8 @@ BOOST_AUTO_TEST_SUITE(StepperPipeline_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(back_and_forth_test) {
-
+BOOST_AUTO_TEST_CASE(back_and_forth_test)
+{
   // Init
   Dag dag;
   BOOST_TEST(dag.get0() == 0);
@@ -155,7 +170,8 @@ BOOST_AUTO_TEST_CASE(back_and_forth_test) {
   BOOST_TEST(dag.milliseconds<Step2>() > 0);
 }
 
-BOOST_AUTO_TEST_CASE(all_in_one_test) {
+BOOST_AUTO_TEST_CASE(all_in_one_test)
+{
   Dag dag;
   const auto z = dag.get<Step2>();
   BOOST_TEST(dag.get0() == 1);

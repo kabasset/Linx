@@ -54,7 +54,8 @@ struct TypeCardinality<std::tuple<Ts...>> {
  * @see `TypeCardinality`
  */
 template <typename S>
-constexpr std::size_t prerequisite_cardinality() {
+constexpr std::size_t prerequisite_cardinality()
+{
   return TypeCardinality<typename S::Prerequisite>::value;
 }
 
@@ -86,13 +87,14 @@ constexpr std::size_t prerequisite_cardinality() {
  */
 template <typename TDerived>
 class StepperPipeline {
-
 public:
+
   /**
    * @brief Evaluation of step `S`.
    */
   template <typename S>
-  typename S::Return get() {
+  typename S::Return get()
+  {
     if constexpr (Internal::prerequisite_cardinality<S>() == 1) {
       get<typename S::Prerequisite>();
     } else if constexpr (Internal::prerequisite_cardinality<S>() > 1) {
@@ -105,7 +107,8 @@ public:
    * @brief Check whether some step `S` has already been evaluated.
    */
   template <typename S>
-  bool evaluated() const {
+  bool evaluated() const
+  {
     return m_milliseconds.find(key<S>()) != m_milliseconds.end();
   }
 
@@ -114,7 +117,8 @@ public:
    * @return The time in millisecond if the step was evaluated, or -1 otherwise.
    */
   template <typename S>
-  double milliseconds() const {
+  double milliseconds() const
+  {
     const auto it = m_milliseconds.find(key<S>());
     if (it != m_milliseconds.end()) {
       return it->second;
@@ -125,26 +129,31 @@ public:
   /**
    * @brief Get the total elapsed time.
    */
-  double milliseconds() const {
+  double milliseconds() const
+  {
     return std::accumulate(m_milliseconds.begin(), m_milliseconds.end(), 0., [](const auto sum, const auto& e) {
       return sum + e.second;
     });
   }
 
 protected:
+
   /**
    * @brief Reset to initial step.
    */
-  void reset() {
+  void reset()
+  {
     m_milliseconds.clear();
   }
 
 private:
+
   /**
    * @brief Call `get()` on each element of a tuple.
    */
   template <typename STuple, std::size_t... Is>
-  void get_multiple(std::index_sequence<Is...>) {
+  void get_multiple(std::index_sequence<Is...>)
+  {
     using mock_unpack = int[];
     (void)mock_unpack {0, (get<std::tuple_element_t<Is, STuple>>(), void(), 0)...};
     // TODO could be done in threads!
@@ -155,11 +164,11 @@ private:
    */
   template <typename S>
   struct Accessor : TDerived {
-
     /**
      * @brief Call `algo.evaluate_impl<S>()`.
      */
-    static void evaluate(TDerived& algo) {
+    static void evaluate(TDerived& algo)
+    {
       auto f = &Accessor::template evaluate_impl<S>;
       (algo.*f)();
     }
@@ -167,7 +176,8 @@ private:
     /**
      * @brief Call `algo.get_impl<S>()`.
      */
-    static typename S::Return get(TDerived& algo) {
+    static typename S::Return get(TDerived& algo)
+    {
       auto f = &Accessor::template get_impl<S>;
       return (algo.*f)();
     }
@@ -177,7 +187,8 @@ private:
    * @brief Run step `S` if not done and return its output.
    */
   template <typename S>
-  typename S::Return evaluate_get() {
+  typename S::Return evaluate_get()
+  {
     if (not evaluated<S>()) { // FIXME not thread-safe
       const auto start = std::chrono::high_resolution_clock::now();
       Accessor<S>::evaluate(derived());
@@ -190,16 +201,19 @@ private:
   /**
    * @brief Cast as `TDerived`.
    */
-  inline TDerived& derived() {
+  inline TDerived& derived()
+  {
     return static_cast<TDerived&>(*this);
   }
 
 private:
+
   /**
    * @brief Get the key of a step `S`.
    */
   template <typename S>
-  std::type_index key() const {
+  std::type_index key() const
+  {
     return std::type_index(typeid(S));
   }
 

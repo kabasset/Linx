@@ -14,7 +14,8 @@ BOOST_AUTO_TEST_SUITE(AlignedBuffer_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(default_alignment_test) {
+BOOST_AUTO_TEST_CASE(default_alignment_test)
+{
   AlignedBuffer<int> owner(10);
   BOOST_TEST(owner.alignment_req() % 16 == 0);
   BOOST_TEST(owner.alignment() % 16 == 0);
@@ -28,7 +29,8 @@ BOOST_AUTO_TEST_CASE(default_alignment_test) {
   BOOST_TEST(aligned_view.alignment() % 16 == 0);
 }
 
-BOOST_AUTO_TEST_CASE(alignment_test) {
+BOOST_AUTO_TEST_CASE(alignment_test)
+{
   for (std::size_t as = 16; as <= 1024; as <<= 1) {
     AlignedBuffer<int> buffer(10, nullptr, as);
     BOOST_TEST(buffer.alignment_req() == as);
@@ -40,7 +42,8 @@ BOOST_AUTO_TEST_CASE(alignment_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(release_reset_test) {
+BOOST_AUTO_TEST_CASE(release_reset_test)
+{
   AlignedBuffer<int> owner(7);
   AlignedBuffer<const int> viewer(7, owner.begin());
   BOOST_TEST(not viewer.release());

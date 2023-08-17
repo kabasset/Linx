@@ -14,8 +14,8 @@ BOOST_AUTO_TEST_SUITE(Patch_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(mixins_test) {
-
+BOOST_AUTO_TEST_CASE(mixins_test)
+{
   // Setup
   Raster<int, 1> raster({16});
   raster.range();

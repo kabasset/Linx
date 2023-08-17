@@ -14,8 +14,8 @@ BOOST_AUTO_TEST_SUITE(Vector_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(vector_init_test) {
-
+BOOST_AUTO_TEST_CASE(vector_init_test)
+{
   const std::vector<Index> indices {1, 2, 3};
 
   Position<-1> list {indices[0], indices[1], indices[2]};
@@ -36,8 +36,8 @@ BOOST_AUTO_TEST_CASE(vector_init_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(array_init_test) {
-
+BOOST_AUTO_TEST_CASE(array_init_test)
+{
   const std::array<Index, 3> indices {1, 2, 3};
 
   Position<3> list {indices[0], indices[1], indices[2]};
@@ -58,8 +58,8 @@ BOOST_AUTO_TEST_CASE(array_init_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(arithmetics_test) {
-
+BOOST_AUTO_TEST_CASE(arithmetics_test)
+{
   const Position<4> indices {0, 1, 2, 3};
   const Position<4> evens {0, 2, 4, 6};
   const Position<4> positives {1, 2, 3, 4};
@@ -80,8 +80,8 @@ BOOST_AUTO_TEST_CASE(arithmetics_test) {
   BOOST_TEST(dec == indices);
 }
 
-BOOST_AUTO_TEST_CASE(norm_test) {
-
+BOOST_AUTO_TEST_CASE(norm_test)
+{
   Position<3> zero {0, 0, 0};
   Position<3> x {-4, 0, 0};
   Position<3> y {0, -4, 0};

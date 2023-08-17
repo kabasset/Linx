@@ -32,6 +32,7 @@ using FftwPlanPtr = std::unique_ptr<fftw_plan>;
  */
 class FftwAllocator {
 private:
+
   /**
    * @brief Private constructor.
    */
@@ -40,7 +41,8 @@ private:
   /**
    * @brief Destructor which frees.
    */
-  ~FftwAllocator() {
+  ~FftwAllocator()
+  {
     fftw_cleanup();
   }
 
@@ -50,12 +52,14 @@ private:
    * Get the singleton if it exists already or instantiate it otherwise,
    * which triggers cleanup at destruction, i.e. when program ends.
    */
-  static FftwAllocator& instantiate() {
+  static FftwAllocator& instantiate()
+  {
     static FftwAllocator allocator;
     return allocator;
   }
 
 public:
+
   /**
    * @brief Deleted copy constructor.
    */
@@ -72,7 +76,8 @@ public:
    * `in` and `out` are filled with garbage.
    */
   template <typename TTransform, typename TIn, typename TOut>
-  static Internal::FftwPlanPtr create_plan(TIn& in, TOut& out) {
+  static Internal::FftwPlanPtr create_plan(TIn& in, TOut& out)
+  {
     instantiate();
     return TTransform::allocate_fftw_plan(in, out);
   }
@@ -80,7 +85,8 @@ public:
   /**
    * @brief Destroy a plan.
    */
-  static void destroy_plan(Internal::FftwPlanPtr& plan) {
+  static void destroy_plan(Internal::FftwPlanPtr& plan)
+  {
     if (plan) {
       fftw_destroy_plan(*plan);
     }

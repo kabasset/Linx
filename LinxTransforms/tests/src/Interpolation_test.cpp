@@ -15,7 +15,8 @@ BOOST_AUTO_TEST_SUITE(Interpolation_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(constant_nn_test) {
+BOOST_AUTO_TEST_CASE(constant_nn_test)
+{
   Raster<int, 3> raster({2, 2, 2});
   raster.fill(1);
 
@@ -34,8 +35,8 @@ BOOST_AUTO_TEST_CASE(constant_nn_test) {
   BOOST_TEST(interextra(vector) == 1);
 }
 
-BOOST_AUTO_TEST_CASE(periodic_test) {
-
+BOOST_AUTO_TEST_CASE(periodic_test)
+{
   Raster<int, 3> raster({2, 2, 2});
   raster.range(1);
 
@@ -47,8 +48,8 @@ BOOST_AUTO_TEST_CASE(periodic_test) {
   BOOST_TEST(extra[positive] == (raster[{0, 1, 0}]));
 }
 
-BOOST_AUTO_TEST_CASE(linear_test) {
-
+BOOST_AUTO_TEST_CASE(linear_test)
+{
   Raster<int, 3> raster({2, 2, 2});
   raster.range(1);
 
@@ -63,8 +64,8 @@ BOOST_AUTO_TEST_CASE(linear_test) {
   BOOST_TEST(center == 4.5);
 }
 
-BOOST_AUTO_TEST_CASE(cubic_test) {
-
+BOOST_AUTO_TEST_CASE(cubic_test)
+{
   Raster<int, 3> raster({4, 4, 4});
   raster.range(1);
 

@@ -28,8 +28,8 @@ namespace Linx {
  * \endcode
  */
 class ProgramOptions {
-
 public:
+
   /**
    * @brief Shortcut for Boost.ProgramOptions type.
    */
@@ -49,13 +49,15 @@ public:
    * @brief Make a `ProgramOptions` with optional description string.
    */
   ProgramOptions(const std::string& description = "") :
-      m_named(describe(description)), m_add(m_named.add_options()), m_positional(), m_variables() {}
+      m_named(describe(description)), m_add(m_named.add_options()), m_positional(), m_variables()
+  {}
 
   /**
    * @brief Declare a positional option.
    */
   template <typename T>
-  void positional(const char* name, const char* description) {
+  void positional(const char* name, const char* description)
+  {
     positional(name, boost::program_options::value<T>(), description);
   }
 
@@ -63,14 +65,16 @@ public:
    * @brief Declare a positional option with default value.
    */
   template <typename T>
-  void positional(const char* name, const char* description, T default_value) {
+  void positional(const char* name, const char* description, T default_value)
+  {
     positional(name, boost::program_options::value<T>()->default_value(default_value), description);
   }
 
   /**
    * @brief Declare a positional option with custom semantics.
    */
-  void positional(const char* name, const ValueSemantics* value, const char* description) {
+  void positional(const char* name, const ValueSemantics* value, const char* description)
+  {
     m_add(name, value, description);
     const int max_args = value->max_tokens();
     m_positional.add(name, max_args);
@@ -82,7 +86,8 @@ public:
    * A short form (1-character) of the option can be provided, separated by a comma.
    */
   template <typename T>
-  void named(const char* name, const char* description) {
+  void named(const char* name, const char* description)
+  {
     named(name, boost::program_options::value<T>(), description);
   }
 
@@ -92,7 +97,8 @@ public:
    * A short form (1-character) of the option can be provided, separated by a comma.
    */
   template <typename T>
-  void named(const char* name, const char* description, T default_value) {
+  void named(const char* name, const char* description, T default_value)
+  {
     named(name, boost::program_options::value<T>()->default_value(default_value), description);
   }
 
@@ -101,28 +107,32 @@ public:
    * 
    * A short form (1-character) of the option can be provided, separated by a comma.
    */
-  void named(const char* name, const ValueSemantics* value, const char* description) {
+  void named(const char* name, const ValueSemantics* value, const char* description)
+  {
     m_add(name, value, description);
   }
 
   /**
    * @brief Declare a flag option.
    */
-  void flag(const char* name, const char* description) {
+  void flag(const char* name, const char* description)
+  {
     named(name, boost::program_options::value<bool>()->default_value(false)->implicit_value(true), description);
   }
 
   /**
    * @brief Get the named (flags included) and positional options as a pair.
    */
-  std::pair<OptionsDescription, PositionalOptionsDescription> as_pair() const {
+  std::pair<OptionsDescription, PositionalOptionsDescription> as_pair() const
+  {
     return std::make_pair(m_named, m_positional);
   }
 
   /**
    * @brief Parse a command line (`main`-like).
    */
-  void parse(int argc, const char* const argv[]) {
+  void parse(int argc, const char* const argv[])
+  {
     boost::program_options::store(
         boost::program_options::command_line_parser(argc, argv).options(m_named).positional(m_positional).run(),
         m_variables);
@@ -132,14 +142,16 @@ public:
   /**
    * @brief Parse a command line (vector of `const char*` arguments).
    */
-  void parse(const std::vector<const char*>& args) {
+  void parse(const std::vector<const char*>& args)
+  {
     parse(args.size(), args.data());
   }
 
   /**
    * @brief Parse a command line (vector of string arguments).
    */
-  void parse(const std::vector<std::string>& args) {
+  void parse(const std::vector<std::string>& args)
+  {
     std::vector<const char*> cstr(args.size());
     std::transform(args.begin(), args.end(), cstr.begin(), [](const auto& a) {
       return a.c_str();
@@ -150,7 +162,8 @@ public:
   /**
    * @brief Parse a command line (space-separated arguments as a single string).
    */
-  void parse(const std::string& args) {
+  void parse(const std::string& args)
+  {
     std::istringstream iss(args);
     parse(std::vector<std::string>(std::istream_iterator<std::string> {iss}, std::istream_iterator<std::string>()));
   }
@@ -158,7 +171,8 @@ public:
   /**
    * @brief Check whether a given option is set.
    */
-  bool has(const char* name) const {
+  bool has(const char* name) const
+  {
     return m_variables.count(name);
   }
 
@@ -168,12 +182,15 @@ public:
    * Throws if the option is not set.
    */
   template <typename T>
-  T as(const char* name) const {
+  T as(const char* name) const
+  {
     return m_variables[name].as<T>();
   }
 
 private:
-  static std::string describe(const std::string& description) {
+
+  static std::string describe(const std::string& description)
+  {
     const std::string options_group = "Options:";
     if (description.length() > 0) {
       return description + "\n\n" + options_group;

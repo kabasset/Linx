@@ -23,8 +23,8 @@ namespace Linx {
  */
 template <typename TRaster, typename TMethod>
 class Extrapolator {
-
 public:
+
   /**
    * @brief The value type.
    */
@@ -39,33 +39,38 @@ public:
    * @brief Constructor.
    */
   explicit Extrapolator(const TRaster& raster, TMethod&& method = TMethod()) :
-      m_raster(raster), m_method(std::move(method)) {}
+      m_raster(raster), m_method(std::move(method))
+  {}
 
   /**
    * @brief Get the decorated raster.
    */
-  const TRaster& raster() const {
+  const TRaster& raster() const
+  {
     return m_raster;
   }
 
   /**
    * @brief Get the extrapolation method.
    */
-  const TMethod& method() const {
+  const TMethod& method() const
+  {
     return m_method;
   }
 
   /**
    * @brief Get the raster shape.
    */
-  const Position<Dimension>& shape() const {
+  const Position<Dimension>& shape() const
+  {
     return m_raster.shape();
   }
 
   /**
    * @brief Get the raster domain.
    */
-  Box<Dimension> domain() const {
+  Box<Dimension> domain() const
+  {
     return m_raster.domain();
   }
 
@@ -74,7 +79,8 @@ public:
    * 
    * If the position is outside the image domain, apply the extrapolation method.
    */
-  inline const Value& operator[](const Position<Dimension>& position) const {
+  inline const Value& operator[](const Position<Dimension>& position) const
+  {
     return m_method.at(m_raster, position);
   }
 
@@ -82,7 +88,8 @@ public:
    * @brief Get a decorated patch.
    */
   template <typename TRegion>
-  const Patch<const Value, const Extrapolator<TRaster, TMethod>, TRegion> patch(TRegion&& region) const {
+  const Patch<const Value, const Extrapolator<TRaster, TMethod>, TRegion> patch(TRegion&& region) const
+  {
     return Patch<const Value, const Extrapolator<TRaster, TMethod>, TRegion>(*this, std::forward<TRegion>(region));
   }
 
@@ -90,12 +97,14 @@ public:
    * @brief Get a copy of the data in a given region.
    */
   template <typename TRegion>
-  Raster<std::decay_t<Value>, Dimension> copy(TRegion&& region) const {
+  Raster<std::decay_t<Value>, Dimension> copy(TRegion&& region) const
+  {
     // FIXME optimize
     return Raster<std::decay_t<Value>, Dimension>(patch(std::forward<TRegion>(region)));
   }
 
 private:
+
   /**
    * @brief The input raster.
    */
@@ -122,7 +131,8 @@ struct IsExtrapolatorImpl<Patch<T, TParent, TRegion>> : IsExtrapolatorImpl<std::
 /// @endcond
 
 template <typename T>
-constexpr bool is_extrapolator() {
+constexpr bool is_extrapolator()
+{
   return Internal::IsExtrapolatorImpl<std::decay_t<T>>::value;
 }
 
@@ -131,7 +141,8 @@ constexpr bool is_extrapolator() {
  * @brief Get the raster decorated by an extrapolator.
  */
 template <typename TRaster, typename TMethod>
-const TRaster& rasterize(const Extrapolator<TRaster, TMethod>& in) {
+const TRaster& rasterize(const Extrapolator<TRaster, TMethod>& in)
+{
   return in.raster();
 }
 
@@ -140,7 +151,8 @@ const TRaster& rasterize(const Extrapolator<TRaster, TMethod>& in) {
  * @brief Make an extrapolator with given extrapolation method.
  */
 template <typename TMethod = NearestNeighbor, typename TRaster, typename... TArgs>
-auto extrapolate(const TRaster& raster, TArgs&&... args) -> decltype(auto) {
+auto extrapolate(const TRaster& raster, TArgs&&... args) -> decltype(auto)
+{
   return Extrapolator<TRaster, TMethod>(raster, TMethod(std::forward<TArgs>(args)...));
 }
 
@@ -149,7 +161,8 @@ auto extrapolate(const TRaster& raster, TArgs&&... args) -> decltype(auto) {
  * @brief Make an extrapolator with constant extrapolation value.
  */
 template <typename T, Index N, typename THolder>
-auto extrapolate(const Raster<T, N, THolder>& raster, T constant) -> decltype(auto) {
+auto extrapolate(const Raster<T, N, THolder>& raster, T constant) -> decltype(auto)
+{
   return Extrapolator<Raster<T, N, THolder>, OutOfBoundsConstant<T>>(raster, OutOfBoundsConstant<T>(constant));
 }
 
@@ -158,27 +171,32 @@ auto extrapolate(const Raster<T, N, THolder>& raster, T constant) -> decltype(au
  * @brief Do not extrapolate if `in` is an extrapolator or patch of an extrapolator.
  */
 template <typename T, Index N, typename THolder>
-Raster<T, N, THolder>& dont_extrapolate(Raster<T, N, THolder>& in) {
+Raster<T, N, THolder>& dont_extrapolate(Raster<T, N, THolder>& in)
+{
   return in;
 }
 
 template <typename T, Index N, typename THolder>
-const Raster<T, N, THolder>& dont_extrapolate(const Raster<T, N, THolder>& in) {
+const Raster<T, N, THolder>& dont_extrapolate(const Raster<T, N, THolder>& in)
+{
   return in;
 }
 
 template <typename TRaster, typename TMethod>
-const TRaster& dont_extrapolate(const Extrapolator<TRaster, TMethod>& in) {
+const TRaster& dont_extrapolate(const Extrapolator<TRaster, TMethod>& in)
+{
   return in.raster();
 }
 
 template <typename T, typename TParent, typename TRegion>
-auto dont_extrapolate(Patch<T, TParent, TRegion>& in) -> decltype(auto) {
+auto dont_extrapolate(Patch<T, TParent, TRegion>& in) -> decltype(auto)
+{
   return dont_extrapolate(in.parent()).patch(in.domain()); // FIXME avoid region copy if TParent is no extrapolator
 }
 
 template <typename T, typename TParent, typename TRegion>
-auto dont_extrapolate(const Patch<T, TParent, TRegion>& in) -> decltype(auto) {
+auto dont_extrapolate(const Patch<T, TParent, TRegion>& in) -> decltype(auto)
+{
   return dont_extrapolate(in.parent()).patch(in.domain()); // FIXME avoid region copy if TParent is no extrapolator
 }
 

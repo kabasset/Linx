@@ -15,7 +15,8 @@ BOOST_AUTO_TEST_SUITE(Grid_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(grid_is_screened_in_order_test) {
+BOOST_AUTO_TEST_CASE(grid_is_screened_in_order_test)
+{
   Grid<2> region(Box<2>({1, 2}, {6, 7}), {2, 3});
   std::vector<Position<2>> expected {{1, 2}, {3, 2}, {5, 2}, {1, 5}, {3, 5}, {5, 5}};
   std::vector<Position<2>> out;
@@ -25,8 +26,8 @@ BOOST_AUTO_TEST_CASE(grid_is_screened_in_order_test) {
   BOOST_TEST(out == expected);
 }
 
-BOOST_AUTO_TEST_CASE(grid_clamp_is_shrunk_test) {
-
+BOOST_AUTO_TEST_CASE(grid_clamp_is_shrunk_test)
+{
   const Grid<1> in({{1}, {9}}, {3});
   // -+--+--+--
   BOOST_TEST(in.front()[0] == 1);

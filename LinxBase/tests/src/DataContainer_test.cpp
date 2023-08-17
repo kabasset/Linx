@@ -15,13 +15,15 @@ BOOST_AUTO_TEST_SUITE(DataContainer_test)
 
 //-----------------------------------------------------------------------------
 
-void check_stream_insertion(MinimalDataContainer<int> container, const std::string& expected) {
+void check_stream_insertion(MinimalDataContainer<int> container, const std::string& expected)
+{
   std::stringstream os;
   os << container;
   BOOST_TEST(os.str() == expected);
 }
 
-BOOST_AUTO_TEST_CASE(stream_insertion_test) {
+BOOST_AUTO_TEST_CASE(stream_insertion_test)
+{
   check_stream_insertion(MinimalDataContainer<int>(), "[]");
   check_stream_insertion({0}, "[0]");
   check_stream_insertion({0, 1}, "[0, 1]");

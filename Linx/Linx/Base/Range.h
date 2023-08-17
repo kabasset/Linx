@@ -19,14 +19,14 @@ namespace Linx {
  */
 template <typename T, typename TDerived>
 struct RangeMixin {
-
   /// @{
   /// @group_modifiers
 
   /**
    * @brief Fill the container with a single value.
    */
-  TDerived& fill(const T& value) {
+  TDerived& fill(const T& value)
+  {
     std::fill(static_cast<TDerived&>(*this).begin(), static_cast<TDerived&>(*this).end(), value);
     return static_cast<TDerived&>(*this);
   }
@@ -40,7 +40,8 @@ struct RangeMixin {
    * as opposed to `linspace()`.
    * @see `linspace()`
    */
-  TDerived& range(const T& min = Limits<T>::zero(), const T& step = Limits<T>::one()) {
+  TDerived& range(const T& min = Limits<T>::zero(), const T& step = Limits<T>::one())
+  {
     auto v = min;
     auto& t = static_cast<TDerived&>(*this);
     for (auto& e : t) {
@@ -60,7 +61,8 @@ struct RangeMixin {
    * as opposed to `range()`.
    * @see `range()`
    */
-  TDerived& linspace(const T& min = Limits<T>::zero(), const T& max = Limits<T>::one()) {
+  TDerived& linspace(const T& min = Limits<T>::zero(), const T& max = Limits<T>::one())
+  {
     const std::size_t size = std::distance(static_cast<TDerived&>(*this).begin(), static_cast<TDerived&>(*this).end());
     const auto step = (max - min) / (size - 1);
     auto it = static_cast<TDerived&>(*this).begin();
@@ -86,7 +88,8 @@ struct RangeMixin {
    * \endcode
    */
   template <typename TFunc, typename... TContainers>
-  TDerived& generate(TFunc&& func, const TContainers&... args) {
+  TDerived& generate(TFunc&& func, const TContainers&... args)
+  {
     auto its = std::make_tuple(args.begin()...);
     auto& t = static_cast<TDerived&>(*this);
     for (auto& v : t) {
@@ -111,14 +114,16 @@ struct RangeMixin {
    * \endcode
    */
   template <typename TFunc, typename... TContainers>
-  TDerived& apply(TFunc&& func, const TContainers&... args) {
+  TDerived& apply(TFunc&& func, const TContainers&... args)
+  {
     return generate(std::forward<TFunc>(func), static_cast<TDerived&>(*this), args...);
   }
 
   /**
    * @brief Reverse the order of the elements.
    */
-  TDerived& reverse() {
+  TDerived& reverse()
+  {
     auto& t = static_cast<TDerived&>(*this);
     std::reverse(t.begin(), t.end());
     return t;
@@ -130,7 +135,8 @@ struct RangeMixin {
    * @brief Get a reference to the (first) min element.
    * @see `distribution()`
    */
-  const T& min() const {
+  const T& min() const
+  {
     return *std::min_element(static_cast<const TDerived&>(*this).begin(), static_cast<const TDerived&>(*this).end());
   }
 
@@ -138,7 +144,8 @@ struct RangeMixin {
    * @brief Get a reference to the (first) max element.
    * @see `distribution()`
    */
-  const T& max() const {
+  const T& max() const
+  {
     return *std::max_element(static_cast<const TDerived&>(*this).begin(), static_cast<const TDerived&>(*this).end());
   }
 
@@ -146,7 +153,8 @@ struct RangeMixin {
    * @brief Get a pair of references to the (first) min and max elements.
    * @see `distribution()`
    */
-  std::pair<const T&, const T&> minmax() const {
+  std::pair<const T&, const T&> minmax() const
+  {
     const auto its =
         std::minmax_element(static_cast<const TDerived&>(*this).begin(), static_cast<const TDerived&>(*this).end());
     return {*its.first, *its.second};
@@ -155,7 +163,8 @@ struct RangeMixin {
   /**
    * @brief Create a `DataDistribution` from the container.
    */
-  [[deprecated("Use free function")]] DataDistribution<T> distribution() const {
+  [[deprecated("Use free function")]] DataDistribution<T> distribution() const
+  {
     return DataDistribution<T>(static_cast<const TDerived&>(*this));
   }
 
@@ -167,7 +176,8 @@ struct RangeMixin {
  * @brief Create a `DataDistribution` from the container.
  */
 template <typename TRange>
-DataDistribution<typename TRange::value_type> distribution(const TRange& in) {
+DataDistribution<typename TRange::value_type> distribution(const TRange& in)
+{
   return DataDistribution<typename TRange::value_type>(in);
 }
 

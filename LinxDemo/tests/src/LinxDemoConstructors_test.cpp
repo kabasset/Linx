@@ -12,8 +12,8 @@ BOOST_AUTO_TEST_SUITE(LinxDemoConstructors_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(any_raster_ctors_test) {
-
+BOOST_AUTO_TEST_CASE(any_raster_ctors_test)
+{
   //! [Any raster]
   std::vector<int> vec {1, 2, 3, 4, 5, 6};
   const int* data = vec.data();
@@ -48,8 +48,8 @@ BOOST_AUTO_TEST_CASE(any_raster_ctors_test) {
   BOOST_TEST(moved_from_raster.data() == list_data);
 }
 
-BOOST_AUTO_TEST_CASE(vecraster_move_test) {
-
+BOOST_AUTO_TEST_CASE(vecraster_move_test)
+{
   //! [VecRaster moves]
   std::vector<int> vec {1, 2, 3, 4, 5, 6};
   const auto data = vec.data();
@@ -65,8 +65,8 @@ BOOST_AUTO_TEST_CASE(vecraster_move_test) {
   //! [VecRaster moves]
 }
 
-BOOST_AUTO_TEST_CASE(ptrraster_ctors_test) {
-
+BOOST_AUTO_TEST_CASE(ptrraster_ctors_test)
+{
   //! [PtrRaster write]
   int data[] = {1, 2, 3, 4, 5, 6};
 
@@ -94,8 +94,8 @@ BOOST_AUTO_TEST_CASE(ptrraster_ctors_test) {
   //! [PtrRaster read]
 }
 
-BOOST_AUTO_TEST_CASE(alignedraster_ctors_test) {
-
+BOOST_AUTO_TEST_CASE(alignedraster_ctors_test)
+{
   //! [AlignedRaster owns]
   Linx::AlignedRaster<int> default_aligned({3, 2}); // SIMD-aligned
   BOOST_TEST(default_aligned.alignment() % 16 == 0);
@@ -125,8 +125,8 @@ BOOST_AUTO_TEST_CASE(alignedraster_ctors_test) {
   //! [AlignedRaster shares]
 }
 
-BOOST_AUTO_TEST_CASE(fill_test) {
-
+BOOST_AUTO_TEST_CASE(fill_test)
+{
   //! [Filling]
   Linx::AlignedRaster<double> raster({3, 2});
 

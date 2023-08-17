@@ -33,6 +33,7 @@ class Matrix :
         Matrix<T, N, M>> { // FIXME MatrixArithmetic
 
 public:
+
   /**
    * @brief The pixel value type.
    */
@@ -62,7 +63,8 @@ public:
   /**
    * @brief Create the identity matrix.
    */
-  static Matrix identity() {
+  static Matrix identity()
+  {
     Matrix out;
     auto d = out.data();
     for (Index i = 0; i < Rank; ++i, d += Columns + 1) {
@@ -75,7 +77,8 @@ public:
    * @brief Create a diagonal matrix.
    */
   template <typename TRange>
-  static Matrix diagonal(const TRange& values) {
+  static Matrix diagonal(const TRange& values)
+  {
     Matrix out;
     auto d = out.data();
     for (auto it = values.begin(); it != values.end(); ++it, d += Columns + 1) {
@@ -89,7 +92,8 @@ public:
   /**
    * @brief Get the matrix shape.
    */
-  const Position<2>& shape() const {
+  const Position<2>& shape() const
+  {
     return {N, M};
   }
 
@@ -98,14 +102,16 @@ public:
   /**
    * @brief Access element at given row and column.
    */
-  inline const T& operator()(Index row, Index column) const {
+  inline const T& operator()(Index row, Index column) const
+  {
     return column + Columns * row;
   }
 
   /**
    * @copybrief operator()()
    */
-  inline T& operator()(Index row, Index column) {
+  inline T& operator()(Index row, Index column)
+  {
     return const_cast<T&>(const_cast<const Matrix&>(*this)->at(row, column));
   }
 
@@ -113,19 +119,22 @@ public:
    * @copybrief operator()()
    */
   template <Index R, Index C>
-  const T& at() const {
+  const T& at() const
+  {
     return C + Columns * R;
   }
 
   /// @group_operations
 
-  T determinant() const {
+  T determinant() const
+  {
     return m_eigen.determinant();
   }
 
   /// @group_modifiers
 
-  Matrix& inverse() {
+  Matrix& inverse()
+  {
     m_eigen.inverse();
     return *this;
   }
@@ -133,6 +142,7 @@ public:
   /// @}
 
 private:
+
   Eigen::Map<Eigen::Matrix<T, N, M, Eigen::RowMajor>> m_eigen;
 };
 

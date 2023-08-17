@@ -13,7 +13,8 @@
 namespace Linx {
 
 #define LINX_VECTOR_OPERATOR_INPLACE(op) \
-  TDerived& operator op##=(const TDerived& rhs) { \
+  TDerived& operator op##=(const TDerived& rhs) \
+  { \
     std::transform( \
         static_cast<TDerived*>(this)->begin(), \
         static_cast<TDerived*>(this)->end(), \
@@ -26,7 +27,8 @@ namespace Linx {
   }
 
 #define LINX_SCALAR_OPERATOR_INPLACE(op) \
-  TDerived& operator op##=(const T& rhs) { \
+  TDerived& operator op##=(const T& rhs) \
+  { \
     std::transform( \
         static_cast<TDerived*>(this)->begin(), \
         static_cast<TDerived*>(this)->end(), \
@@ -93,7 +95,6 @@ struct ArithmeticMixin<VectorArithmetic, T, TDerived> :
     boost::multiplicative<TDerived, T>,
     boost::modable<TDerived>,
     boost::modable<TDerived, T> {
-
   /// @{
   /// @group_modifiers
 
@@ -113,7 +114,8 @@ struct ArithmeticMixin<VectorArithmetic, T, TDerived> :
   /**
    * @brief ++V
    */
-  TDerived& operator++() {
+  TDerived& operator++()
+  {
     std::transform(
         static_cast<TDerived*>(this)->begin(),
         static_cast<TDerived*>(this)->end(),
@@ -127,7 +129,8 @@ struct ArithmeticMixin<VectorArithmetic, T, TDerived> :
   /**
    * @brief --V
    */
-  TDerived& operator--() {
+  TDerived& operator--()
+  {
     std::transform(
         static_cast<TDerived*>(this)->begin(),
         static_cast<TDerived*>(this)->end(),
@@ -143,14 +146,16 @@ struct ArithmeticMixin<VectorArithmetic, T, TDerived> :
   /**
    * @brief Copy.
    */
-  TDerived operator+() const {
+  TDerived operator+() const
+  {
     return *this;
   }
 
   /**
    * @brief Compute the opposite.
    */
-  TDerived operator-() const {
+  TDerived operator-() const
+  {
     TDerived res = static_cast<const TDerived&>(*this);
     std::transform(res.begin(), res.end(), res.begin(), [&](auto r) {
       return -r;
@@ -177,7 +182,6 @@ struct ArithmeticMixin<EuclidArithmetic, T, TDerived> :
     boost::multiplicative<TDerived, T>,
     boost::modable<TDerived>,
     boost::modable<TDerived, T> {
-
   /// @{
   /// @group_modifiers
 
@@ -199,7 +203,8 @@ struct ArithmeticMixin<EuclidArithmetic, T, TDerived> :
   /**
    * @brief ++V
    */
-  TDerived& operator++() {
+  TDerived& operator++()
+  {
     std::transform(
         static_cast<TDerived*>(this)->begin(),
         static_cast<TDerived*>(this)->end(),
@@ -213,7 +218,8 @@ struct ArithmeticMixin<EuclidArithmetic, T, TDerived> :
   /**
    * @brief --V
    */
-  TDerived& operator--() {
+  TDerived& operator--()
+  {
     std::transform(
         static_cast<TDerived*>(this)->begin(),
         static_cast<TDerived*>(this)->end(),
@@ -229,14 +235,16 @@ struct ArithmeticMixin<EuclidArithmetic, T, TDerived> :
   /**
    * @brief Copy.
    */
-  TDerived operator+() const {
+  TDerived operator+() const
+  {
     return *this;
   }
 
   /**
    * @brief Compute the opposite.
    */
-  TDerived operator-() const {
+  TDerived operator-() const
+  {
     TDerived res = static_cast<const TDerived&>(*this);
     std::transform(res.begin(), res.end(), res.begin(), [&](auto r) {
       return -r;

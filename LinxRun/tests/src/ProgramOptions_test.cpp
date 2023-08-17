@@ -9,10 +9,10 @@
 using namespace Linx;
 
 struct TestProgramOptions {
-
   ProgramOptions po;
 
-  TestProgramOptions() : po("Description") {
+  TestProgramOptions() : po("Description")
+  {
     po.positional<int>("positional", "Positional option, no short form, no default");
     po.positional("positional-default", "Positional option with short form and default", 0);
     po.named<int>("named", "Named option, no short form, no default");
@@ -29,7 +29,8 @@ BOOST_FIXTURE_TEST_SUITE(ProgramOptionsTest, TestProgramOptions)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(positional_test) {
+BOOST_AUTO_TEST_CASE(positional_test)
+{
   po.parse("exe 1");
   BOOST_TEST(po.as<int>("positional") == 1);
   BOOST_TEST(po.as<int>("positional-default") == 0);
@@ -38,7 +39,8 @@ BOOST_AUTO_TEST_CASE(positional_test) {
   BOOST_TEST(po.as<int>("positional-default") == 2);
 }
 
-BOOST_AUTO_TEST_CASE(named_test) {
+BOOST_AUTO_TEST_CASE(named_test)
+{
   po.parse("exe --named 1 -n2");
   BOOST_TEST(po.as<int>("named") == 1);
   BOOST_TEST(po.as<int>("named-short") == 2);
@@ -47,7 +49,8 @@ BOOST_AUTO_TEST_CASE(named_test) {
   BOOST_TEST(po.as<int>("named-default") == 3);
 }
 
-BOOST_AUTO_TEST_CASE(flag_test) {
+BOOST_AUTO_TEST_CASE(flag_test)
+{
   po.parse("exe");
   BOOST_TEST(not po.as<bool>("flag"));
   BOOST_TEST(not po.as<bool>("flag-short"));
@@ -57,7 +60,8 @@ BOOST_AUTO_TEST_CASE(flag_test) {
   BOOST_TEST(po.as<bool>("flag-short"));
 }
 
-BOOST_AUTO_TEST_CASE(bad_option_test) {
+BOOST_AUTO_TEST_CASE(bad_option_test)
+{
   BOOST_CHECK_THROW(po.parse("exe --bad 0"), std::exception);
   BOOST_CHECK_THROW(po.parse("exe --named"), std::exception);
 }

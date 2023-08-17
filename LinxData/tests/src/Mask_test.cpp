@@ -16,7 +16,8 @@ BOOST_AUTO_TEST_SUITE(Mask_test)
 //-----------------------------------------------------------------------------
 
 template <Index P>
-void check_ball(double radius = 2) {
+void check_ball(double radius = 2)
+{
   const auto center = Position<3>::one();
   const auto ball = Mask<3>::ball<P>(radius, center);
   std::vector<Position<3>> out;
@@ -33,19 +34,23 @@ void check_ball(double radius = 2) {
   BOOST_TEST(out == expected);
 }
 
-BOOST_AUTO_TEST_CASE(l0_ball_test) {
+BOOST_AUTO_TEST_CASE(l0_ball_test)
+{
   check_ball<0>();
 }
 
-BOOST_AUTO_TEST_CASE(l1_ball_test) {
+BOOST_AUTO_TEST_CASE(l1_ball_test)
+{
   check_ball<1>();
 }
 
-BOOST_AUTO_TEST_CASE(l2_ball_test) {
+BOOST_AUTO_TEST_CASE(l2_ball_test)
+{
   check_ball<2>();
 }
 
-BOOST_AUTO_TEST_CASE(empty_mask_iterator_passes_test) {
+BOOST_AUTO_TEST_CASE(empty_mask_iterator_passes_test)
+{
   Box<2> box {Position<2>::zero(), Position<2>::one()};
   Mask<2> mask(box, false);
   BOOST_CHECK(box.size() > 0);

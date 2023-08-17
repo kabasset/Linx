@@ -16,7 +16,8 @@ BOOST_AUTO_TEST_SUITE(DataDistribution_test)
 //-----------------------------------------------------------------------------
 
 template <Index Size>
-void check_quantiles() {
+void check_quantiles()
+{
   MinimalDataContainer<double> data(Size);
   data.range();
   auto dist = data.distribution();
@@ -32,12 +33,14 @@ void check_quantiles() {
   }
 }
 
-BOOST_AUTO_TEST_CASE(quantiles_test) {
+BOOST_AUTO_TEST_CASE(quantiles_test)
+{
   check_quantiles<10>();
   check_quantiles<13>();
 }
 
-BOOST_AUTO_TEST_CASE(robust_test) {
+BOOST_AUTO_TEST_CASE(robust_test)
+{
   MinimalDataContainer<int> data {2, 1, 9, 4, 1, 2, 6};
   auto dist = data.distribution();
   BOOST_TEST(dist.min() == 1);
@@ -46,7 +49,8 @@ BOOST_AUTO_TEST_CASE(robust_test) {
   BOOST_TEST(dist.mad() == 1);
 }
 
-BOOST_AUTO_TEST_CASE(histogram_test) {
+BOOST_AUTO_TEST_CASE(histogram_test)
+{
   MinimalDataContainer<int> data(10);
   data.range();
   const std::vector<double> bins {-10, -.5, 0, 1.5, 4, 9, 12};

@@ -8,14 +8,16 @@ namespace Linx {
 
 IterationBenchmark::IterationBenchmark(Index side) :
     m_width(side), m_height(side), m_depth(side), m_a({side, side, side}), m_b({side, side, side}),
-    m_c({side, side, side}) {
+    m_c({side, side, side})
+{
   //! [Randomize]
   m_a.generate(UniformNoise<Value>(-50, 50));
   m_b.generate(GaussianNoise<Value>(0, 10));
   //! [Randomize]
 }
 
-IterationBenchmark::Duration IterationBenchmark::loop_over_xyz() {
+IterationBenchmark::Duration IterationBenchmark::loop_over_xyz()
+{
   m_chrono.start();
   //! [x-y-z]
   for (Index x = 0; x < m_width; ++x) {
@@ -29,7 +31,8 @@ IterationBenchmark::Duration IterationBenchmark::loop_over_xyz() {
   return m_chrono.stop();
 }
 
-IterationBenchmark::Duration IterationBenchmark::loop_over_zyx() {
+IterationBenchmark::Duration IterationBenchmark::loop_over_zyx()
+{
   m_chrono.start();
   //! [z-y-x]
   for (Index z = 0; z < m_depth; ++z) {
@@ -43,7 +46,8 @@ IterationBenchmark::Duration IterationBenchmark::loop_over_zyx() {
   return m_chrono.stop();
 }
 
-IterationBenchmark::Duration IterationBenchmark::iterate_over_positions() {
+IterationBenchmark::Duration IterationBenchmark::iterate_over_positions()
+{
   m_chrono.start();
   //! [position]
   for (const auto& p : m_c.domain()) {
@@ -53,7 +57,8 @@ IterationBenchmark::Duration IterationBenchmark::iterate_over_positions() {
   return m_chrono.stop();
 }
 
-IterationBenchmark::Duration IterationBenchmark::iterate_over_positions_optimized() {
+IterationBenchmark::Duration IterationBenchmark::iterate_over_positions_optimized()
+{
   m_chrono.start();
   //! [position-index]
   for (const auto& p : m_c.domain()) {
@@ -64,7 +69,8 @@ IterationBenchmark::Duration IterationBenchmark::iterate_over_positions_optimize
   return m_chrono.stop();
 }
 
-IterationBenchmark::Duration IterationBenchmark::loop_over_indices() {
+IterationBenchmark::Duration IterationBenchmark::loop_over_indices()
+{
   m_chrono.start();
   //! [index]
   const auto size = m_c.size();
@@ -75,7 +81,8 @@ IterationBenchmark::Duration IterationBenchmark::loop_over_indices() {
   return m_chrono.stop();
 }
 
-IterationBenchmark::Duration IterationBenchmark::iterate_over_values() {
+IterationBenchmark::Duration IterationBenchmark::iterate_over_values()
+{
   m_chrono.start();
   //! [value]
   auto ait = m_a.begin();
@@ -89,7 +96,8 @@ IterationBenchmark::Duration IterationBenchmark::iterate_over_values() {
   return m_chrono.stop();
 }
 
-IterationBenchmark::Duration IterationBenchmark::call_operator() {
+IterationBenchmark::Duration IterationBenchmark::call_operator()
+{
   m_chrono.start();
   //! [operator]
   m_c = m_a + m_b;
@@ -97,7 +105,8 @@ IterationBenchmark::Duration IterationBenchmark::call_operator() {
   return m_chrono.stop();
 }
 
-IterationBenchmark::Duration IterationBenchmark::call_generate() {
+IterationBenchmark::Duration IterationBenchmark::call_generate()
+{
   m_chrono.start();
   //! [generate]
   m_c.generate(

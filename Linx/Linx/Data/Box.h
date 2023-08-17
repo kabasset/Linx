@@ -29,6 +29,7 @@ class Box : boost::additive<Box<N>, Box<N>>, boost::additive<Box<N>, Position<N>
   friend class Internal::BorderedBox<N>; // FIXME rm? make private class, friend of FilterMixin?
 
 public:
+
   /**
    * @brief The dimension parameter.
    */
@@ -57,14 +58,16 @@ public:
   /**
    * @brief Create a box from a front position and shape.
    */
-  static Box<N> from_shape(Position<N> front, Position<N> shape) {
+  static Box<N> from_shape(Position<N> front, Position<N> shape)
+  {
     return {front, front + shape - 1};
   }
 
   /**
    * @brief Create a box from a radius and center position.
    */
-  static Box<N> from_center(Index radius = 1, const Position<N> center = Position<N>::zero()) {
+  static Box<N> from_center(Index radius = 1, const Position<N> center = Position<N>::zero())
+  {
     return {center - radius, center + radius};
   }
 
@@ -73,7 +76,8 @@ public:
    * 
    * Front and back bounds along each axis are respectively 0 and inf.
    */
-  static Box<N> whole() {
+  static Box<N> whole()
+  {
     return {Position<N>::zero(), Position<N>::inf()};
   }
 
@@ -82,42 +86,48 @@ public:
   /**
    * @brief Get the front position.
    */
-  const Position<N>& front() const {
+  const Position<N>& front() const
+  {
     return m_front;
   }
 
   /**
    * @brief Get the back position.
    */
-  const Position<N>& back() const {
+  const Position<N>& back() const
+  {
     return m_back;
   }
 
   /**
    * @brief `Position::one()` for compatibility with `Grid`.
    */
-  Position<N> step() const {
+  Position<N> step() const
+  {
     return Position<N>::one();
   }
 
   /**
    * @brief Compute the box shape.
    */
-  Position<N> shape() const {
+  Position<N> shape() const
+  {
     return m_back - m_front + 1;
   }
 
   /**
    * @brief Get the number of dimensions.
    */
-  Index dimension() const {
+  Index dimension() const
+  {
     return m_front.size();
   }
 
   /**
    * @brief Compute the box size, i.e. number of positions.
    */
-  Index size() const {
+  Index size() const
+  {
     return shape_size(shape());
   }
 
@@ -125,14 +135,16 @@ public:
    * @brief Get the box length along given axis.
    */
   template <Index I>
-  Index length() const {
+  Index length() const
+  {
     return m_back[I] - m_front[I] + 1;
   }
 
   /**
    * @brief Get the box length along given axis.
    */
-  Index length(Index i) const {
+  Index length(Index i) const
+  {
     return m_back[i] - m_front[i] + 1;
   }
 
@@ -141,21 +153,24 @@ public:
   /**
    * @brief Get the absolute position given a position in the box referential.
    */
-  inline Position<N> operator[](const Position<N>& p) const {
+  inline Position<N> operator[](const Position<N>& p) const
+  {
     return p + m_front;
   }
 
   /**
    * @brief Get an iterator to the beginning.
    */
-  Iterator begin() const {
+  Iterator begin() const
+  {
     return Iterator::begin(*this);
   }
 
   /**
    * @brief Get an iterator to the end.
    */
-  Iterator end() const {
+  Iterator end() const
+  {
     return Iterator::end(*this);
   }
 
@@ -164,21 +179,24 @@ public:
   /**
    * @brief Check whether two boxes are equal.
    */
-  bool operator==(const Box<N>& other) const {
+  bool operator==(const Box<N>& other) const
+  {
     return m_front == other.m_front && m_back == other.m_back;
   }
 
   /**
    * @brief Check whether two boxes are different.
    */
-  bool operator!=(const Box<N>& other) const {
+  bool operator!=(const Box<N>& other) const
+  {
     return m_front != other.m_front || m_back != other.m_back;
   }
 
   /**
    * @brief Check whether a position lies inside the box.
    */
-  bool contains(const Position<N>& position) const {
+  bool contains(const Position<N>& position) const
+  {
     for (Index i = 0; i < dimension(); ++i) {
       if (position[i] < m_front[i] || position[i] > m_back[i]) {
         return false;
@@ -200,15 +218,14 @@ public:
    * `union.front = in.front + margin.front` and `union.back = in.back + margin.back`.
    * Partitioning is optimized for data locality when scanning raster pixels in the boxes.
    */
-  std::vector<Box<N>> surround(const Box<N>& margin) const {
-
+  std::vector<Box<N>> surround(const Box<N>& margin) const
+  {
     Box<N> current = *this;
     const auto dim = dimension();
     std::vector<Box<N>> out;
     out.reserve(dim * 2);
 
     for (Index i = 0; i < dim; ++i) {
-
       // Front
       const auto f = margin.m_front[i];
       if (f < 0) {
@@ -238,7 +255,8 @@ public:
    * 
    * The back of the box is set to the same coordinate as the front along the axis.
    */
-  Box<N>& project(Index axis = 0) {
+  Box<N>& project(Index axis = 0)
+  {
     m_back[axis] = m_front[axis];
     return *this;
   }
@@ -246,7 +264,8 @@ public:
   /**
    * @brief Check whether the box is contained within another box.
    */
-  bool operator<=(const Box<N>& rhs) const {
+  bool operator<=(const Box<N>& rhs) const
+  {
     for (Index i = 0; i < dimension(); ++i) {
       if (m_front[i] < rhs.front()[i]) {
         return false;
@@ -261,7 +280,8 @@ public:
   /**
    * @brief Check whether the box is stricly contained within another box.
    */
-  bool operator<(const Box<N>& rhs) const {
+  bool operator<(const Box<N>& rhs) const
+  {
     for (Index i = 0; i < dimension(); ++i) {
       if (m_front[i] <= rhs.front()[i]) {
         return false;
@@ -276,7 +296,8 @@ public:
   /**
    * @brief Check whether the box contains another box.
    */
-  bool operator>=(const Box<N>& rhs) const {
+  bool operator>=(const Box<N>& rhs) const
+  {
     for (Index i = 0; i < dimension(); ++i) {
       if (m_front[i] > rhs.front()[i]) {
         return false;
@@ -291,7 +312,8 @@ public:
   /**
    * @brief Check whether the box stricly contains another box.
    */
-  bool operator>(const Box<N>& rhs) const {
+  bool operator>(const Box<N>& rhs) const
+  {
     for (Index i = 0; i < dimension(); ++i) {
       if (m_front[i] >= rhs.front()[i]) {
         return false;
@@ -306,7 +328,8 @@ public:
   /**
    * @brief Shrink the box inside another box (i.e. get the intersection of both).
    */
-  Box<N>& operator&=(const Box<N>& rhs) {
+  Box<N>& operator&=(const Box<N>& rhs)
+  {
     for (Index i = 0; i < dimension(); ++i) {
       m_front[i] = std::max(m_front[i], rhs.front()[i]);
       m_back[i] = std::min(m_back[i], rhs.back()[i]);
@@ -317,7 +340,8 @@ public:
   /**
    * @brief Minimally grow the box to include another box (i.e. get the minimum box which contains both).
    */
-  Box<N>& operator|=(const Box<N>& rhs) {
+  Box<N>& operator|=(const Box<N>& rhs)
+  {
     for (Index i = 0; i < dimension(); ++i) {
       m_front[i] = std::min(m_front[i], rhs.front()[i]);
       m_back[i] = std::max(m_back[i], rhs.back()[i]);
@@ -328,7 +352,8 @@ public:
   /**
    * @brief Grow the box by a given margin.
    */
-  Box<N>& operator+=(const Box<N>& margin) {
+  Box<N>& operator+=(const Box<N>& margin)
+  {
     m_front += margin.m_front;
     m_back += margin.m_back;
     return *this;
@@ -337,7 +362,8 @@ public:
   /**
    * @brief Shrink the box by a given margin.
    */
-  Box<N>& operator-=(const Box<N>& margin) {
+  Box<N>& operator-=(const Box<N>& margin)
+  {
     m_front -= margin.m_front;
     m_back -= margin.m_back;
     return *this;
@@ -346,7 +372,8 @@ public:
   /**
    * @brief Translate the box by a given vector.
    */
-  Box<N>& operator+=(const Position<N>& vector) {
+  Box<N>& operator+=(const Position<N>& vector)
+  {
     m_front += vector;
     m_back += vector;
     return *this;
@@ -355,7 +382,8 @@ public:
   /**
    * @brief Translate the box by the opposite of a given vector.
    */
-  Box<N>& operator-=(const Position<N>& vector) {
+  Box<N>& operator-=(const Position<N>& vector)
+  {
     m_front -= vector;
     m_back -= vector;
     return *this;
@@ -364,7 +392,8 @@ public:
   /**
     * @brief Add a scalar to each coordinate.
     */
-  Box<N>& operator+=(Index scalar) {
+  Box<N>& operator+=(Index scalar)
+  {
     m_front += scalar;
     m_back += scalar;
     return *this;
@@ -373,7 +402,8 @@ public:
   /**
    * @brief Subtract a scalar to each coordinate.
    */
-  Box<N>& operator-=(Index scalar) {
+  Box<N>& operator-=(Index scalar)
+  {
     m_front -= scalar;
     m_back -= scalar;
     return *this;
@@ -382,34 +412,39 @@ public:
   /**
    * @brief Add 1 to each coordinate.
    */
-  Box<N>& operator++() {
+  Box<N>& operator++()
+  {
     return *this += 1;
   }
 
   /**
    * @brief Subtract 1 to each coordinate.
    */
-  Box<N>& operator--() {
+  Box<N>& operator--()
+  {
     return *this -= 1;
   }
 
   /**
    * @brief Copy.
    */
-  Box<N> operator+() {
+  Box<N> operator+()
+  {
     return *this;
   }
 
   /**
    * @brief Invert the sign of each coordinate.
    */
-  Box<N> operator-() {
+  Box<N> operator-()
+  {
     return {-m_front, -m_back};
   }
 
   /// @}
 
 private:
+
   /**
    * @brief The front position in the box.
    */
@@ -426,7 +461,8 @@ private:
  * @brief Flatten the box along a given axis.
  */
 template <Index N>
-Box<N> project(const Box<N>& in, Index axis = 0) {
+Box<N> project(const Box<N>& in, Index axis = 0)
+{
   auto out = in;
   return out.project(axis);
 }
@@ -437,7 +473,8 @@ Box<N> project(const Box<N>& in, Index axis = 0) {
  * @tparam The index of the axis
  */
 template <Index I, Index N>
-Box<N == -1 ? -1 : N - 1> erase(const Box<N>& in) {
+Box<N == -1 ? -1 : N - 1> erase(const Box<N>& in)
+{
   return {erase<I>(in.front()), erase<I>(in.back())};
 }
 
@@ -449,7 +486,8 @@ Box<N == -1 ? -1 : N - 1> erase(const Box<N>& in) {
  * @param back The back bound along axis `I`
  */
 template <Index I, Index N>
-Box<N == -1 ? -1 : N + 1> insert(const Box<N>& in, Index front, Index back) {
+Box<N == -1 ? -1 : N + 1> insert(const Box<N>& in, Index front, Index back)
+{
   return {insert<I>(in.front(), front), insert<I>(in.back(), back)};
 }
 
@@ -458,7 +496,8 @@ Box<N == -1 ? -1 : N + 1> insert(const Box<N>& in, Index front, Index back) {
  * @brief Clamp a position inside a box.
  */
 template <typename T, Index N = 2>
-Vector<T, N> clamp(const Vector<T, N>& position, const Box<N>& box) {
+Vector<T, N> clamp(const Vector<T, N>& position, const Box<N>& box)
+{
   Vector<T, N> out(box.dimension());
   for (std::size_t i = 0; i < out.dimension(); ++i) {
     out[i] = clamp(position[i], box.front[i], box.back[i]); // TODO transform
@@ -471,7 +510,8 @@ Vector<T, N> clamp(const Vector<T, N>& position, const Box<N>& box) {
  * @brief Clamp a position inside a shape.
  */
 template <typename T, Index N = 2>
-Vector<T, N> clamp(const Vector<T, N>& position, const Position<N>& shape) {
+Vector<T, N> clamp(const Vector<T, N>& position, const Position<N>& shape)
+{
   Vector<T, N> out(shape.size());
   std::transform(position.begin(), position.end(), shape.begin(), out.begin(), [](auto p, auto s) {
     return clamp(p, Index(0), s - 1);
@@ -496,7 +536,8 @@ Vector<T, N> clamp(const Vector<T, N>& position, const Position<N>& shape) {
  * @brief Identity, for compatibility with `Region`.
  */
 template <Index N>
-inline const Box<N>& box(const Box<N>& region) {
+inline const Box<N>& box(const Box<N>& region)
+{
   return region;
 }
 
@@ -508,7 +549,8 @@ inline const Box<N>& box(const Box<N>& region) {
  * it iterates over all of the positions.
  */
 template <typename TIn>
-inline Box<TIn::Dimension> box(const TIn& region) {
+inline Box<TIn::Dimension> box(const TIn& region)
+{
   Position<TIn::Dimension> front;
   Position<TIn::Dimension> back;
   for (const auto& p : region) {
@@ -525,7 +567,8 @@ inline Box<TIn::Dimension> box(const TIn& region) {
  * @brief Get the intersection of two boxes.
  */
 template <Index N>
-inline Box<N> operator&(const Box<N>& region, const Box<N>& bounds) {
+inline Box<N> operator&(const Box<N>& region, const Box<N>& bounds)
+{
   auto out = region;
   out &= bounds;
   return out;

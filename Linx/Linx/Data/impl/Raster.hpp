@@ -26,11 +26,11 @@ namespace Internal {
  */
 template <Index N, Index I = N - 1>
 struct IndexRecursionImpl {
-
   /**
    * @brief Index of given position in given shape for Raster::index.
    */
-  static Index index(const Position<N>& shape, const Position<N>& pos) {
+  static Index index(const Position<N>& shape, const Position<N>& pos)
+  {
     return std::get<N - 1 - I>(pos.container()) +
         std::get<N - 1 - I>(shape.container()) * IndexRecursionImpl<N, I - 1>::index(shape, pos);
   }
@@ -41,11 +41,11 @@ struct IndexRecursionImpl {
  */
 template <Index N>
 struct IndexRecursionImpl<N, 0> {
-
   /**
    * @brief pos[N - 1]
    */
-  static Index index(const Position<N>& shape, const Position<N>& pos) {
+  static Index index(const Position<N>& shape, const Position<N>& pos)
+  {
     (void)(shape);
     return std::get<N - 1>(pos.container());
   }
@@ -56,11 +56,11 @@ struct IndexRecursionImpl<N, 0> {
  */
 template <Index I>
 struct IndexRecursionImpl<-1, I> {
-
   /**
    * @brief pos[0] + shape[1] * (pos[1] + shape[2] * (pos[2] + shape[3] * (...)))
    */
-  static Index index(const Position<-1>& shape, const Position<-1>& pos) {
+  static Index index(const Position<-1>& shape, const Position<-1>& pos)
+  {
     const auto n = shape.size();
     SizeError::may_throw(pos.size(), n);
     Index res = 0;
@@ -77,43 +77,51 @@ struct IndexRecursionImpl<-1, I> {
 // Raster
 
 template <typename T, Index N, typename THolder>
-const Position<N>& Raster<T, N, THolder>::shape() const {
+const Position<N>& Raster<T, N, THolder>::shape() const
+{
   return m_shape;
 }
 
 template <typename T, Index N, typename THolder>
-Box<N> Raster<T, N, THolder>::domain() const {
+Box<N> Raster<T, N, THolder>::domain() const
+{
   return Box<N>::from_shape(Position<N>::zero(), m_shape);
 }
 
 template <typename T, Index N, typename THolder>
-inline Index Raster<T, N, THolder>::dimension() const {
+inline Index Raster<T, N, THolder>::dimension() const
+{
   return m_shape.size();
 }
 
 template <typename T, Index N, typename THolder>
 template <Index I>
-inline Index Raster<T, N, THolder>::length() const {
+inline Index Raster<T, N, THolder>::length() const
+{
   return std::get<I>(m_shape.container());
 }
 
 template <typename T, Index N, typename THolder>
-inline Index Raster<T, N, THolder>::index(const Position<N>& pos) const {
+inline Index Raster<T, N, THolder>::index(const Position<N>& pos) const
+{
   return Internal::IndexRecursionImpl<N>::index(m_shape, pos);
 }
 
 template <typename T, Index N, typename THolder>
-inline const T& Raster<T, N, THolder>::operator[](const Position<N>& pos) const {
+inline const T& Raster<T, N, THolder>::operator[](const Position<N>& pos) const
+{
   return (*this)[index(pos)];
 }
 
 template <typename T, Index N, typename THolder>
-inline T& Raster<T, N, THolder>::operator[](const Position<N>& pos) {
+inline T& Raster<T, N, THolder>::operator[](const Position<N>& pos)
+{
   return const_cast<T&>(const_cast<const Raster&>(*this)[pos]);
 }
 
 template <typename T, Index N, typename THolder>
-inline const T& Raster<T, N, THolder>::at(const Position<N>& pos) const {
+inline const T& Raster<T, N, THolder>::at(const Position<N>& pos) const
+{
   auto bounded_pos = pos;
   for (Index i = 0; i < dimension(); ++i) {
     auto& b = bounded_pos[i];
@@ -127,13 +135,15 @@ inline const T& Raster<T, N, THolder>::at(const Position<N>& pos) const {
 }
 
 template <typename T, Index N, typename THolder>
-inline T& Raster<T, N, THolder>::at(const Position<N>& pos) {
+inline T& Raster<T, N, THolder>::at(const Position<N>& pos)
+{
   return const_cast<T&>(const_cast<const Raster&>(*this).at(pos));
 }
 
 template <typename T, Index N, typename THolder>
 template <Index M>
-PtrRaster<const T, M> Raster<T, N, THolder>::slice(const Box<N>& region) const {
+PtrRaster<const T, M> Raster<T, N, THolder>::slice(const Box<N>& region) const
+{
   // FIXME resolve
   if (not is_contiguous<M>(region)) {
     throw Exception("Cannot slice: Box is not contiguous."); // FIXME clarify
@@ -149,7 +159,8 @@ PtrRaster<const T, M> Raster<T, N, THolder>::slice(const Box<N>& region) const {
 
 template <typename T, Index N, typename THolder>
 template <Index M>
-PtrRaster<T, M> Raster<T, N, THolder>::slice(const Box<N>& region) {
+PtrRaster<T, M> Raster<T, N, THolder>::slice(const Box<N>& region)
+{
   if (not is_contiguous<M>(region)) {
     throw Exception("Cannot slice: Box is not contiguous."); // FIXME clarify
   }
@@ -164,7 +175,8 @@ PtrRaster<T, M> Raster<T, N, THolder>::slice(const Box<N>& region) {
 }
 
 template <typename T, Index N, typename THolder>
-PtrRaster<const T, N> Raster<T, N, THolder>::section(Index front, Index back) const {
+PtrRaster<const T, N> Raster<T, N, THolder>::section(Index front, Index back) const
+{
   const auto last = dimension() - 1;
   auto f = Position<N>::zero();
   auto b = shape() - 1;
@@ -174,7 +186,8 @@ PtrRaster<const T, N> Raster<T, N, THolder>::section(Index front, Index back) co
 }
 
 template <typename T, Index N, typename THolder>
-PtrRaster<T, N> Raster<T, N, THolder>::section(Index front, Index back) {
+PtrRaster<T, N> Raster<T, N, THolder>::section(Index front, Index back)
+{
   const auto last = dimension() - 1;
   auto f = Position<N>::zero();
   auto b = shape() - 1;
@@ -184,7 +197,8 @@ PtrRaster<T, N> Raster<T, N, THolder>::section(Index front, Index back) {
 }
 
 template <typename T, Index N, typename THolder>
-PtrRaster<const T, N == -1 ? -1 : N - 1> Raster<T, N, THolder>::section(Index index) const {
+PtrRaster<const T, N == -1 ? -1 : N - 1> Raster<T, N, THolder>::section(Index index) const
+{
   const auto last = dimension() - 1;
   auto f = Position<N>::zero();
   auto b = shape() - 1;
@@ -195,7 +209,8 @@ PtrRaster<const T, N == -1 ? -1 : N - 1> Raster<T, N, THolder>::section(Index in
 }
 
 template <typename T, Index N, typename THolder>
-PtrRaster<T, N == -1 ? -1 : N - 1> Raster<T, N, THolder>::section(Index index) {
+PtrRaster<T, N == -1 ? -1 : N - 1> Raster<T, N, THolder>::section(Index index)
+{
   const auto last = dimension() - 1;
   auto f = Position<N>::zero();
   auto b = shape() - 1;
@@ -206,7 +221,8 @@ PtrRaster<T, N == -1 ? -1 : N - 1> Raster<T, N, THolder>::section(Index index) {
 }
 
 template <typename T, Index N, typename THolder>
-PtrRaster<const T, 1> Raster<T, N, THolder>::row(const Position<N == -1 ? -1 : N - 1>& position) const {
+PtrRaster<const T, 1> Raster<T, N, THolder>::row(const Position<N == -1 ? -1 : N - 1>& position) const
+{
   Position<N> f(dimension());
   for (Index i = 1; i < dimension(); ++i) {
     const auto p = position[i - 1];
@@ -217,7 +233,8 @@ PtrRaster<const T, 1> Raster<T, N, THolder>::row(const Position<N == -1 ? -1 : N
 }
 
 template <typename T, Index N, typename THolder>
-PtrRaster<T, 1> Raster<T, N, THolder>::row(const Position<N == -1 ? -1 : N - 1>& position) {
+PtrRaster<T, 1> Raster<T, N, THolder>::row(const Position<N == -1 ? -1 : N - 1>& position)
+{
   Position<N> f(dimension());
   for (Index i = 1; i < dimension(); ++i) {
     const auto p = position[i - 1];
@@ -230,7 +247,8 @@ PtrRaster<T, 1> Raster<T, N, THolder>::row(const Position<N == -1 ? -1 : N - 1>&
 template <typename T, Index N, typename THolder>
 template <Index I>
 Patch<const T, const Raster<T, N, THolder>, Line<I, N>>
-Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position) const {
+Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position) const
+{
   Position<N> f(dimension());
   for (Index i = 0; i < I; ++i) {
     const auto p = position[i];
@@ -247,7 +265,8 @@ Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position) c
 template <typename T, Index N, typename THolder>
 template <Index I>
 Patch<T, Raster<T, N, THolder>, Line<I, N>>
-Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position) {
+Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position)
+{
   Position<N> f(dimension());
   for (Index i = 0; i < I; ++i) {
     f[i] = position[i];
@@ -261,19 +280,22 @@ Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position) {
 
 template <typename T, Index N, typename THolder>
 template <typename TRegion>
-Patch<const T, const Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::patch(TRegion region) const {
+Patch<const T, const Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::patch(TRegion region) const
+{
   return {*this, std::move(region)};
 }
 
 template <typename T, Index N, typename THolder>
 template <typename TRegion>
-Patch<T, Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::patch(TRegion region) {
+Patch<T, Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::patch(TRegion region)
+{
   return {*this, std::move(region)};
 }
 
 template <typename T, Index N, typename THolder>
 template <Index M>
-bool Raster<T, N, THolder>::is_contiguous(const Box<N>& region) const {
+bool Raster<T, N, THolder>::is_contiguous(const Box<N>& region) const
+{
   const auto& f = region.front();
   const auto& b = region.back();
   for (Index i = 0; i < M - 1; ++i) {

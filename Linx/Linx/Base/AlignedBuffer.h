@@ -19,7 +19,8 @@ namespace Linx {
  * @brief Check whether some pointer is aligned as required.
  */
 template <typename T>
-bool is_aligned(const T* ptr, Index as) {
+bool is_aligned(const T* ptr, Index as)
+{
   if (not ptr) {
     throw NullPtrError("Null pointer tested for alignment.");
   }
@@ -34,7 +35,8 @@ bool is_aligned(const T* ptr, Index as) {
  * @brief Get the highest power of two some pointer is aligned as.
  */
 template <typename T>
-Index alignment(const T* ptr) {
+Index alignment(const T* ptr)
+{
   if (not ptr) {
     throw NullPtrError("Null pointer tested for alignment.");
   }
@@ -48,7 +50,8 @@ Index alignment(const T* ptr) {
 /**
  * @brief Convert a pointer address to string.
  */
-inline std::string to_string(const void* ptr) {
+inline std::string to_string(const void* ptr)
+{
   std::stringstream ss;
   ss << ptr;
   return ss.str();
@@ -68,7 +71,8 @@ struct AlignmentError : Exception {
   /**
    * @brief Throw if the alignement requirement is not met.
    */
-  static void may_throw(const void* ptr, Index alignment) {
+  static void may_throw(const void* ptr, Index alignment)
+  {
     if (not is_aligned(ptr, alignment)) {
       throw AlignmentError(ptr, alignment);
     }
@@ -94,8 +98,8 @@ struct AlignmentError : Exception {
  */
 template <typename T>
 struct AlignedBuffer {
-
 public:
+
   /**
    * @brief Constructor.
    * @param size The number of elements
@@ -114,7 +118,8 @@ public:
    * \snippet LinxDemoConstructors_test.cpp AlignedRaster shares
    */
   AlignedBuffer(std::size_t size, T* data = nullptr, Index align = 0) :
-      m_container(nullptr), m_begin(data), m_end(data + size), m_as(align_as(data, align)) {
+      m_container(nullptr), m_begin(data), m_end(data + size), m_as(align_as(data, align))
+  {
     if (m_begin) {
       AlignmentError::may_throw(m_begin, m_as);
     } else {
@@ -126,7 +131,8 @@ public:
    * @brief Copy constructor.
    */
   AlignedBuffer(const AlignedBuffer& other) :
-      AlignedBuffer(other.m_end - other.m_begin, other.owns() ? nullptr : other.m_begin, other.m_as) {
+      AlignedBuffer(other.m_end - other.m_begin, other.owns() ? nullptr : other.m_begin, other.m_as)
+  {
     if (other.owns()) {
       std::copy(other.m_begin, other.m_end, const_cast<std::remove_cv_t<T>*>(m_begin));
       // Safe because if T is const, other is not owning (or should we throw?)
@@ -137,14 +143,16 @@ public:
    * @brief Move constructor.
    */
   AlignedBuffer(AlignedBuffer&& other) :
-      m_container(other.release()), m_begin(other.m_begin), m_end(other.m_end), m_as(other.m_as) {
+      m_container(other.release()), m_begin(other.m_begin), m_end(other.m_end), m_as(other.m_as)
+  {
     other.reset();
   }
 
   /**
    * @brief Copy assignment.
    */
-  AlignedBuffer& operator=(const AlignedBuffer& other) {
+  AlignedBuffer& operator=(const AlignedBuffer& other)
+  {
     if (this != &other) {
       m_as = other.m_as; // Must be set before allocate()
       if (other.owns()) {
@@ -162,7 +170,8 @@ public:
   /**
    * @brief Move assignment.
    */
-  AlignedBuffer& operator=(AlignedBuffer&& other) {
+  AlignedBuffer& operator=(AlignedBuffer&& other)
+  {
     if (this != &other) {
       m_container = other.release();
       m_begin = other.m_begin;
@@ -178,21 +187,24 @@ public:
    * 
    * Frees memory if owned.
    */
-  ~AlignedBuffer() {
+  ~AlignedBuffer()
+  {
     reset();
   }
 
   /**
    * @brief Get an iterator to the beginning.
    */
-  inline const T* begin() const {
+  inline const T* begin() const
+  {
     return m_begin;
   }
 
   /**
    * @brief Get an iterator to the end.
    */
-  inline const T* end() const {
+  inline const T* end() const
+  {
     return m_end;
   }
 
@@ -202,21 +214,24 @@ public:
    * Returns false if the data is owned by another object,
    * or if it is empty, e.g. was owned but has been moved.
    */
-  bool owns() const {
+  bool owns() const
+  {
     return m_container;
   }
 
   /**
    * @brief Get the required data alignment.
    */
-  Index alignment_req() const { // FIXME overalignment() as in std doc?
+  Index alignment_req() const
+  { // FIXME overalignment() as in std doc?
     return m_as;
   }
 
   /**
    * @brief Get the actual data alignment, which may be better than required.
    */
-  std::size_t alignment() const {
+  std::size_t alignment() const
+  {
     return Linx::alignment(m_begin);
   }
 
@@ -228,7 +243,8 @@ public:
    * 
    * Aligned memory address is still accessible as `data()`.
    */
-  void* release() {
+  void* release()
+  {
     void* out = m_container;
     m_container = nullptr;
     return out;
@@ -240,7 +256,8 @@ public:
    * Size is set to 0, alignment requirement to 1, and pointers are nullified.
    * If the buffer is owned, memory is freed.
    */
-  void reset() {
+  void reset()
+  {
     if (m_container) {
       std::free(m_container);
       m_container = nullptr;
@@ -251,14 +268,17 @@ public:
   }
 
 private:
-  void allocate(std::size_t size) {
+
+  void allocate(std::size_t size)
+  {
     const auto valid_size = ((size + m_as - 1) / m_as) * m_as; // Smallest multiple of m_as >= size
     m_container = std::aligned_alloc(m_as, sizeof(T) * valid_size);
     m_begin = reinterpret_cast<T*>(m_container);
     m_end = m_begin + size;
   }
 
-  static std::size_t align_as(const void* data, Index align) {
+  static std::size_t align_as(const void* data, Index align)
+  {
     constexpr std::size_t simd = 32; // 64 for AVX512; TODO detect?
     switch (align) {
       case -1:
@@ -271,6 +291,7 @@ private:
   }
 
 protected:
+
   /**
    * @brief The container if owned, or `nullptr` if shared.
    */

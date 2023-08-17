@@ -17,17 +17,20 @@ namespace Linx {
  */
 class FileNotFoundError : public Exception {
 public:
+
   /**
    * @brief Constructor.
    */
-  FileNotFoundError(const std::filesystem::path& path) : Exception("File does not exist") {
+  FileNotFoundError(const std::filesystem::path& path) : Exception("File does not exist")
+  {
     append(path);
   }
 
   /**
    * @brief Throw if a given path is not a file.
    */
-  static void may_throw(const std::filesystem::path& path) {
+  static void may_throw(const std::filesystem::path& path)
+  {
     if (not std::filesystem::is_regular_file(path)) {
       throw FileNotFoundError(path);
     }
@@ -39,17 +42,20 @@ public:
  */
 class PathExistsError : public Exception {
 public:
+
   /**
    * @brief Constructor.
    */
-  PathExistsError(const std::filesystem::path& path) : Exception("Path already exists") {
+  PathExistsError(const std::filesystem::path& path) : Exception("Path already exists")
+  {
     append(path);
   }
 
   /**
    * @brief Throw if a given path is not a file.
    */
-  static void may_throw(const std::filesystem::path& path) {
+  static void may_throw(const std::filesystem::path& path)
+  {
     if (std::filesystem::exists(path)) {
       throw PathExistsError(path);
     }
@@ -61,8 +67,10 @@ public:
  */
 class FileFormatError : public Exception {
 public:
+
   FileFormatError(const std::string& message, const std::filesystem::path& path) :
-      Exception("File format error", message) {
+      Exception("File format error", message)
+  {
     append(path);
   }
 };

@@ -27,8 +27,8 @@ namespace Linx {
  */
 template <typename TParent, typename TMethod>
 class Interpolator {
-
 public:
+
   /**
    * @brief The input value type.
    */
@@ -48,58 +48,67 @@ public:
    * @brief Constructor.
    */
   explicit Interpolator(const TParent& parent, TMethod&& method = TMethod()) :
-      m_parent(parent), m_method(std::move(method)) {}
+      m_parent(parent), m_method(std::move(method))
+  {}
 
   /**
    * @brief Get the decorated parent.
    */
-  const TParent& parent() const {
+  const TParent& parent() const
+  {
     return m_parent;
   }
 
   /**
    * @brief Get the decorated raster.
    */
-  auto raster() const -> decltype(auto) { // FIXME As free function?
+  auto raster() const -> decltype(auto)
+  { // FIXME As free function?
     return Linx::rasterize(m_parent);
   }
 
   /**
    * @brief Get the interpolation method.
    */
-  const TMethod& method() const {
+  const TMethod& method() const
+  {
     return m_method;
   }
 
   /**
    * @brief Get the raster shape.
    */
-  const Position<Dimension>& shape() const {
+  const Position<Dimension>& shape() const
+  {
     return m_parent.shape();
   }
 
   /**
    * @brief Get the raster domain.
    */
-  Box<Dimension> domain() const {
+  Box<Dimension> domain() const
+  {
     return m_parent.domain();
   }
 
   /**
    * @brief Get the value at given integral position.
    */
-  inline const Value& operator[](const Position<Dimension>& position) const {
+  inline const Value& operator[](const Position<Dimension>& position) const
+  {
     return m_parent[position];
   }
 
   /**
    * @brief Compute the interpolated value at given position.
    */
-  inline Floating operator()(const Vector<double, Dimension>& position) const {
+  inline Floating operator()(const Vector<double, Dimension>& position) const
+  {
     return m_method.template at<Floating>(m_parent, position);
   }
 
 private:
+
   /**
    * @brief The raster or extrapolator.
    */
@@ -116,7 +125,8 @@ private:
  * @brief Make an interpolator with given interpolation method.
  */
 template <typename TMethod = NearestNeighbor, typename TParent, typename... TArgs>
-auto interpolate(const TParent& parent, TArgs&&... args) -> decltype(auto) {
+auto interpolate(const TParent& parent, TArgs&&... args) -> decltype(auto)
+{
   return Interpolator<TParent, TMethod>(parent, TMethod(std::forward<TArgs>(args)...));
 }
 
