@@ -9,7 +9,6 @@
 #include "Linx/Run/ProgramOptions.h"
 #include "LinxRun/Cosmics.h"
 
-#include <boost/math/special_functions/erf.hpp>
 #include <map>
 #include <string>
 #include <vector>
@@ -26,7 +25,7 @@ public:
     options.positional<std::string>("output", "Output mask file name");
     options.named("hdu,i", "The 0-based input HDU index", 0L);
     options.named("pfa,p", "The probability of false alarm", 0.01);
-    options.named("strel", "The radius of the structuring element for morphological closing", 0L);
+    options.named("dilate", "The flag map dilation radius", 0L);
     return options.as_pair();
   }
 
@@ -36,25 +35,29 @@ public:
     Linx::Fits output(args["output"].as<std::string>());
     const auto hdu = args["hdu"].as<long>();
     const auto pfa = args["pfa"].as<double>();
-    const auto radius = args["strel"].as<long>();
-    const auto factor = boost::math::erfc_inv(pfa * 2) * std::sqrt(2);
+    const auto radius = args["dilate"].as<long>();
 
     Linx::Chronometer<std::chrono::milliseconds> chrono;
 
     logger.info() << "Reading data: " << input.path();
     const auto data = input.read<Linx::Raster<double>>(hdu);
+    output.write(data, 'w');
 
     logger.info() << "Detecting cosmics...";
-    logger.info() << "  \\Phi^{-1}(" << pfa << ") = " << factor;
     chrono.start();
-    auto mask = Linx::Cosmics::dilate_flagmap(Linx::Cosmics::flag<unsigned char>(data, factor), radius);
+    auto mask = Linx::Cosmics::flag<unsigned char>(data, pfa);
     chrono.stop();
     logger.info() << "  Done in: " << chrono.last().count() << " ms";
-
-    logger.info() << "Writing output: " << output.path();
-    output.write(data, 'w');
     output.write(mask, 'a');
-    logger.info() << "  Done.";
+
+    if (radius != 0) {
+      logger.info() << "Dilating flag map...";
+      chrono.start();
+      mask = Linx::Cosmics::dilate_flagmap(mask, radius);
+      chrono.stop();
+      logger.info() << "  Done in: " << chrono.last().count() << " ms";
+      output.write(mask, 'a');
+    }
 
     return Elements::ExitCode::OK;
   }

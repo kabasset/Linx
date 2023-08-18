@@ -15,7 +15,7 @@ namespace Cosmics {
 /**
  * @brief Detect cosmic rays and flag affected pixels.
  * @param in The input 2D raster
- * @param factor The detection threshold factor relative to the noise standard deviation
+ * @param pfa The detection probability of false alarm
  * @param out The output flag map
  * @param flag The flag value
  * 
@@ -26,17 +26,20 @@ namespace Cosmics {
  * @see Another, non isotropic approach: Umbaugh, Scott E. (2011). Digital image processing and analysis (2nd ed.).
  */
 template <typename TIn, typename TOut>
-void flag_to(const TIn& in, double factor, TOut& out, typename TOut::Value flag = true)
+void flag_to(const TIn& in, double pfa, TOut& out, typename TOut::Value flag = true)
 {
   using T = typename TIn::Value;
 
   const auto laplacian = convolution(Raster<T>({3, 3}, {-.25, -.5, -.25, -.5, 3, -.5, -.25, -.5, -.25})) *
       extrapolate<NearestNeighbor>(in);
 
-  const auto mean = 0.0;
-  const auto var =
-      std::inner_product(laplacian.begin(), laplacian.end(), laplacian.begin(), 0.0) / (laplacian.size() - 1);
-  const auto threshold = factor * std::sqrt(var) + mean;
+  // Empirically assume Laplace distribution
+  double b = 0;
+  for (const auto& e : laplacian) {
+    b += std::abs(e);
+  }
+  b /= laplacian.size();
+  const auto threshold = -b * std::log(2.0 * pfa);
 
   out.apply(
       [=](auto f, auto c) {
