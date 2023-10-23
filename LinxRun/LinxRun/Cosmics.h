@@ -13,79 +13,104 @@ namespace Linx {
 namespace Cosmics {
 
 /**
- * @brief Detect cosmic rays and flag affected pixels.
+ * @brief Detect cosmic rays.
  * @param in The input 2D raster
  * @param pfa The detection probability of false alarm
- * @param out The output flag map
- * @param flag The flag value
  * 
  * This is a simple adaptive Laplacian thresholding.
  * The input raster is convolved with some Laplacian kernel.
- * The Gaussian noise parameters of the result are estimated to deduce the detection threshold.
- * 
- * @see Another, non isotropic approach: Umbaugh, Scott E. (2011). Digital image processing and analysis (2nd ed.).
+ * The parameters of the background noise (empirically assumed Laplace-distributed)
+ * of the filtered image are estimated to deduce the detection threshold from a PFA.
  */
-template <typename TIn, typename TOut>
-void flag_to(const TIn& in, double pfa, TOut& out, typename TOut::Value flag = true)
+template <typename TIn>
+Raster<char> detect(const TIn& in, float pfa)
 {
-  using T = typename TIn::Value;
-
-  const auto laplacian = convolution(Raster<T>({3, 3}, {-.25, -.5, -.25, -.5, 3, -.5, -.25, -.5, -.25})) *
+  const auto laplacian =
+      convolution(Raster<float>(
+          {3, 3},
+          {-1. / 6., -2. / 3., -1. / 6., -2. / 3., 10. / 3, -2. / 3., -1. / 6., -2. / 3., -1. / 6.})) *
       extrapolate<NearestNeighbor>(in);
 
   // Empirically assume Laplace distribution
-  double b = 0;
+  float b = 0;
   for (const auto& e : laplacian) {
     b += std::abs(e);
   }
-  b /= laplacian.size();
-  const auto threshold = -b * std::log(2.0 * pfa);
+  const auto threshold = -b / laplacian.size() * std::log(2.0 * pfa);
 
-  out.apply(
-      [=](auto f, auto c) {
-        return c > threshold ? flag : f;
+  Raster<char> out(in.shape());
+  out.generate(
+      [=](auto c) {
+        return c > threshold;
       },
       laplacian);
-}
-
-/**
- * @brief Detect cosmic rays and return a binary flag.
- * @tparam T The flag value type
- * @param in A 2D raster
- * @param factor The detection threshold factor relative to the noise standard deviation
- */
-template <typename T, typename TIn>
-Raster<T> flag(const TIn& in, double factor)
-{
-  Raster<T> out(in.shape());
-  flag_to(in, factor, out);
   return out;
 }
 
 /**
- * @brief Perform morphological closing in place.
+ * @brief Compute the minimum intensity distance between a point and its neighbors in a mask.
  */
-template <typename TIn>
-void close_flagmap(TIn& in, long radius = 1)
+template <typename TIn, typename TMask>
+float distance(const TIn& input, const TMask& mask, const Position<2>& p)
 {
-  using T = typename TIn::Value;
-  // auto strel = Mask<2>::ball<2>(radius); // FIXME accept masks in StructuringElement
-  auto strel = Box<2>::from_center(radius);
-  auto dilated = dilation<T>(strel) * extrapolate<NearestNeighbor>(in);
-  erosion<T>(strel).transform(extrapolate<NearestNeighbor>(dilated), in);
+  auto d = std::numeric_limits<float>::max();
+  for (const auto& q : Box<2>::from_center(1, p) & input.domain()) {
+    if (q != p && mask[q]) {
+      auto delta = std::abs((input[q] - input[p]) / input[q]);
+      if (delta < d) {
+        d = delta;
+      }
+    }
+  }
+  return d;
 }
 
 /**
- * @brief Dilate the flag map.
+ * @brief Compute a sigma-clipping threshold.
+ * @param abs The absolute values of the samples
+ * @param factor The factor to apply
+ * 
+ * Assuming a centered distribution, compute sigma as 1.48 * MAD.
  */
 template <typename TIn>
-auto dilate_flagmap(const TIn& in, long radius = 1)
+float sigma_clip(const TIn& abs, float factor)
 {
-  if (radius == 0) {
-    return in;
+  TIn nonconst = abs;
+  auto it = nonconst.begin() + nonconst.size() / 2;
+  std::nth_element(nonconst.begin(), nonconst.end(), it);
+  return factor * 1.48 * *it;
+}
+
+/**
+ * @brief Segment detected cosmic rays.
+ * @param mask The detection map
+ * @param factor The detection clipping factor
+ * 
+ * Given a detection map, neighbors of flagged pixels are considered as candidate cosmic rays.
+ * Some intensity distance is computed in the neighborhood
+ * in order to decide whether the cadidate belongs to the cosmic ray or to the background by sigma-clipping.
+ */
+template <typename TIn, typename TMask>
+void segment(const TIn& input, TMask& mask, float factor)
+{
+  // FIXME optimize out: loop over flagged pixels and update neighbor distance
+  auto candidates = dilation<typename TMask::Value>(Box<2>::from_center(1)) * extrapolate(mask, '\0') - mask;
+  std::vector<Position<2>> positions;
+  std::vector<float> distances;
+  for (const auto& p : candidates.domain()) {
+    if (candidates[p]) {
+      auto d = distance(input, mask, p);
+      positions.push_back(p);
+      distances.push_back(d);
+    }
   }
-  using T = typename TIn::Value;
-  return dilation<T>(Box<2>::from_center(radius)) * extrapolate<NearestNeighbor>(in);
+  auto t = sigma_clip(distances, factor); // FIXME simple threshold? => merge loop?
+
+  for (std::size_t i = 0; i < positions.size(); ++i) {
+    if (distances[i] < t) {
+      mask[positions[i]] = true;
+    }
+  }
 }
 
 } // namespace Cosmics

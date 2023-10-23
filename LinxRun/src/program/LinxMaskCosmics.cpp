@@ -9,13 +9,14 @@
 #include "Linx/Run/ProgramOptions.h"
 #include "LinxRun/Cosmics.h"
 
+#include <boost/algorithm/string.hpp>
 #include <map>
 #include <string>
 #include <vector>
 
-Elements::Logging logger = Elements::Logging::getLogger("LinxDemoAffinity");
+Elements::Logging logger = Elements::Logging::getLogger("LinxMaskCosmics");
 
-class LinxDemoAffinity : public Elements::Program {
+class LinxMaskCosmics : public Elements::Program {
 public:
 
   std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
@@ -23,9 +24,9 @@ public:
     Linx::ProgramOptions options;
     options.positional<std::string>("input", "Input data file name");
     options.positional<std::string>("output", "Output mask file name");
-    options.named("hdu,i", "The 0-based input HDU index", 0L);
+    options.named("hdu,i", "The 0-based input HDU index slice", 0L);
     options.named("pfa,p", "The probability of false alarm", 0.01);
-    options.named("dilate", "The flag map dilation radius", 0L);
+    options.named("sigma,s", "The sigma-clipping factor", 3.);
     return options.as_pair();
   }
 
@@ -33,34 +34,34 @@ public:
   {
     Linx::Fits input(args["input"].as<std::string>());
     Linx::Fits output(args["output"].as<std::string>());
-    const auto hdu = args["hdu"].as<long>();
+    const auto hdu = args["hdu"].as<Linx::Index>();
     const auto pfa = args["pfa"].as<double>();
-    const auto radius = args["dilate"].as<long>();
+    const auto factor = args["sigma"].as<double>();
 
     Linx::Chronometer<std::chrono::milliseconds> chrono;
 
     logger.info() << "Reading data: " << input.path();
-    const auto data = input.read<Linx::Raster<double>>(hdu);
+    auto data = input.read<Linx::Raster<double>>(hdu); // FIXME flexible type
     output.write(data, 'w');
 
     logger.info() << "Detecting cosmics...";
     chrono.start();
-    auto mask = Linx::Cosmics::flag<unsigned char>(data, pfa);
+    auto mask = Linx::Cosmics::detect(data, pfa);
     chrono.stop();
     logger.info() << "  Done in: " << chrono.last().count() << " ms";
     output.write(mask, 'a');
 
-    if (radius != 0) {
-      logger.info() << "Dilating flag map...";
-      chrono.start();
-      mask = Linx::Cosmics::dilate_flagmap(mask, radius);
-      chrono.stop();
-      logger.info() << "  Done in: " << chrono.last().count() << " ms";
-      output.write(mask, 'a');
-    }
+    logger.info() << "Segmenting cosmics...";
+    chrono.start();
+    Linx::Cosmics::segment(data, mask, factor);
+    chrono.stop();
+    logger.info() << "  Done in: " << chrono.last().count() << " ms";
+    output.write(mask, 'a');
+
+    logger.info() << "Saved output as: " << output.path();
 
     return Elements::ExitCode::OK;
   }
 };
 
-MAIN_FOR(LinxDemoAffinity)
+MAIN_FOR(LinxMaskCosmics)
