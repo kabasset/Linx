@@ -8,6 +8,7 @@
 #include "Linx/Base/DataDistribution.h"
 
 #include <algorithm>
+#include <numeric> // accumulate
 
 namespace Linx {
 
@@ -170,6 +171,38 @@ struct RangeMixin {
 
   /// @}
 };
+
+/**
+ * @relates RangeMixin
+ * @brief Compute the sum of a range.
+ * @param offset An offset
+ */
+template <typename TRange>
+double sum(const TRange& in, double offset = 0)
+{
+  return std::accumulate(in.begin(), in.end(), offset);
+}
+
+/**
+ * @relates RangeMixin
+ * @brief Compute the product of a range.
+ * @param factor A factor
+ */
+template <typename TRange>
+double product(const TRange& in, double factor = 1)
+{
+  return std::accumulate(in.begin(), in.end(), factor, std::multiplies<double> {});
+}
+
+/**
+ * @relates RangeMixin
+ * @brief Compute the mean of a range.
+ */
+template <typename TRange>
+double mean(const TRange& in)
+{
+  return sum(in) / in.size();
+}
 
 /**
  * @relates RangeMixin
