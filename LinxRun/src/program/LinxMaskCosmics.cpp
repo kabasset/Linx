@@ -56,6 +56,7 @@ public:
     Linx::Cosmics::segment(data, mask, factor);
     chrono.stop();
     logger.info() << "  Done in: " << chrono.last().count() << " ms";
+    logger.info() << "  Density: " << Linx::mean(mask);
     output.write(mask, 'a');
 
     logger.info() << "Saved output as: " << output.path();
