@@ -25,8 +25,9 @@ public:
     options.positional<std::string>("input", "Input data file name");
     options.positional<std::string>("output", "Output mask file name");
     options.named("hdu,i", "The 0-based input HDU index slice", 0L);
-    options.named("pfa,p", "The probability of false alarm", 0.01);
-    options.named("sigma,s", "The sigma-clipping factor", 3.);
+    options.named("pfa,p", "The detection probability of false alarm", 0.01);
+    options.named("threshold,t", "The segmentation distance threshold", 0.5);
+    options.named("niter,n", "The number of segmentation iterations", 1L);
     return options.as_pair();
   }
 
@@ -36,7 +37,8 @@ public:
     Linx::Fits output(args["output"].as<std::string>());
     const auto hdu = args["hdu"].as<Linx::Index>();
     const auto pfa = args["pfa"].as<double>();
-    const auto factor = args["sigma"].as<double>();
+    const auto threshold = args["threshold"].as<double>();
+    const auto iter_count = args["niter"].as<Linx::Index>();
 
     Linx::Chronometer<std::chrono::milliseconds> chrono;
 
@@ -49,15 +51,19 @@ public:
     auto mask = Linx::Cosmics::detect(data, pfa);
     chrono.stop();
     logger.info() << "  Done in: " << chrono.last().count() << " ms";
+    logger.info() << "  Density: " << Linx::mean(mask);
     output.write(mask, 'a');
 
     logger.info() << "Segmenting cosmics...";
-    chrono.start();
-    Linx::Cosmics::segment(data, mask, factor);
-    chrono.stop();
-    logger.info() << "  Done in: " << chrono.last().count() << " ms";
-    logger.info() << "  Density: " << Linx::mean(mask);
-    output.write(mask, 'a');
+    for (Linx::Index i = 0; i < iter_count; ++i) {
+      logger.info() << "  Iteration " << i + 1 << "/" << iter_count;
+      chrono.start();
+      Linx::Cosmics::segment(data, mask, threshold);
+      chrono.stop();
+      logger.info() << "    Done in: " << chrono.last().count() << " ms";
+      logger.info() << "    Density: " << Linx::mean(mask);
+      output.write(mask, 'a');
+    }
 
     logger.info() << "Saved output as: " << output.path();
 
