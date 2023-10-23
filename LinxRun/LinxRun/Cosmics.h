@@ -54,7 +54,7 @@ template <typename TIn, typename TMask>
 float distance(const TIn& input, const TMask& mask, const Position<2>& p)
 {
   auto d = std::numeric_limits<float>::max();
-  for (const auto& q : Box<2>::from_center(1, p) & input.domain()) {
+  for (const auto& q : Box<2>::from_center(1, p) & input.domain()) { // FIXME optimize
     if (q != p && mask[q]) {
       auto delta = std::abs((input[q] - input[p]) / input[q]);
       if (delta < d) {
@@ -84,31 +84,22 @@ float sigma_clip(const TIn& abs, float factor)
 /**
  * @brief Segment detected cosmic rays.
  * @param mask The detection map
- * @param factor The detection clipping factor
+ * @param threshold The distance threshold
  * 
  * Given a detection map, neighbors of flagged pixels are considered as candidate cosmic rays.
- * Some intensity distance is computed in the neighborhood
- * in order to decide whether the cadidate belongs to the cosmic ray or to the background by sigma-clipping.
+ * Some relative intensity distance is computed in the neighborhood
+ * in order to decide whether the cadidate belongs to the cosmic ray or to the background by thresholding.
  */
 template <typename TIn, typename TMask>
-void segment(const TIn& input, TMask& mask, float factor)
+void segment(const TIn& input, TMask& mask, float threshold)
 {
-  // FIXME optimize out: loop over flagged pixels and update neighbor distance
   auto candidates = dilation<typename TMask::Value>(Box<2>::from_center(1)) * extrapolate(mask, '\0') - mask;
-  std::vector<Position<2>> positions;
-  std::vector<float> distances;
   for (const auto& p : candidates.domain()) {
     if (candidates[p]) {
       auto d = distance(input, mask, p);
-      positions.push_back(p);
-      distances.push_back(d);
-    }
-  }
-  auto t = sigma_clip(distances, factor); // FIXME simple threshold? => merge loop?
-
-  for (std::size_t i = 0; i < positions.size(); ++i) {
-    if (distances[i] < t) {
-      mask[positions[i]] = true;
+      if (d < threshold) {
+        mask[p] = true;
+      }
     }
   }
 }
