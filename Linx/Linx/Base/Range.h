@@ -174,6 +174,40 @@ struct RangeMixin {
 
 /**
  * @relates RangeMixin
+ * @brief Get a reference to the (first) min element.
+ * @see `distribution()`
+ */
+template <typename TRange>
+const typename TRange::value_type& min(const TRange& in)
+{
+  return *std::min_element(in.begin(), in.end());
+}
+
+/**
+ * @relates RangeMixin
+ * @brief Get a reference to the (first) max element.
+ * @see `distribution()`
+ */
+template <typename TRange>
+const typename TRange::value_type& max(const TRange& in)
+{
+  return *std::max_element(in.begin(), in.end());
+}
+
+/**
+ * @relates RangeMixin
+ * @brief Get a pair of references to the (first) min and max elements.
+ * @see `distribution()`
+ */
+template <typename TRange>
+std::pair<const typename TRange::value_type&, const typename TRange::value_type&> minmax(const TRange& in)
+{
+  const auto its = std::minmax_element(in.begin(), in.end());
+  return {*its.first, *its.second};
+}
+
+/**
+ * @relates RangeMixin
  * @brief Compute the sum of a range.
  * @param offset An offset
  */
@@ -197,6 +231,7 @@ double product(const TRange& in, double factor = 1)
 /**
  * @relates RangeMixin
  * @brief Compute the mean of a range.
+ * @see `distribution()`
  */
 template <typename TRange>
 double mean(const TRange& in)

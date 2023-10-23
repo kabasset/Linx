@@ -44,6 +44,9 @@ public:
 
     logger.info() << "Reading data: " << input.path();
     auto data = input.read<Linx::Raster<double>>(hdu); // FIXME flexible type
+    if (Linx::min(data) > 0) {
+      data.log();
+    }
     output.write(data, 'w');
 
     logger.info() << "Detecting cosmics...";
