@@ -126,7 +126,8 @@ public:
     auto shape = raster.shape();
     fits_create_img(fptr, image_typecode<typename TRaster::Value>(), raster.dimension(), shape.data(), &status);
     if (raster.size() > 0) {
-      fits_write_img(fptr, typecode<typename TRaster::Value>(), 1, raster.size(), raster.data(), &status);
+      std::vector<std::decay_t<typename TRaster::Value>> nonconst(raster.begin(), raster.end());
+      fits_write_img(fptr, typecode<typename TRaster::Value>(), 1, raster.size(), nonconst.data(), &status);
     }
     fits_close_file(fptr, &status);
     if (status != 0) {
