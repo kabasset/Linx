@@ -48,56 +48,44 @@ Raster<char> detect(const TIn& in, float pfa)
 }
 
 /**
- * @brief Compute the minimum intensity distance between a point and its neighbors in a mask.
+ * @brief Compute the minimum contrast between a point and its neighbors in a mask.
+ * 
+ * The contrast is negative when the point intensity is higher than that of the neighborhood.
  */
 template <typename TIn, typename TMask>
-float distance(const TIn& input, const TMask& mask, const Position<2>& p)
+float min_contrast(const TIn& input, const TMask& mask, const Position<2>& p)
 {
-  auto d = std::numeric_limits<float>::max();
-  for (const auto& q : Box<2>::from_center(1, p) & input.domain()) { // FIXME optimize
-    if (q != p && mask[q]) {
-      auto delta = std::abs((input[q] - input[p]) / input[q]);
-      if (delta < d) {
-        d = delta;
+  auto out = std::numeric_limits<float>::max();
+  const Position<2> dx {0, 1};
+  const Position<2> dy {1, 0};
+  for (const auto& neighbor : {p - dx, p + dx, p - dy, p + dy}) { // FIXME optimize?
+    if (mask[neighbor]) {
+      auto contrast = (input[neighbor] - input[p]) / input[neighbor]; // FIXME assumes input > 0
+      if (contrast < out) {
+        out = contrast;
       }
     }
   }
-  return d;
-}
-
-/**
- * @brief Compute a sigma-clipping threshold.
- * @param abs The absolute values of the samples
- * @param factor The factor to apply
- * 
- * Assuming a centered distribution, compute sigma as 1.48 * MAD.
- */
-template <typename TIn>
-float sigma_clip(const TIn& abs, float factor)
-{
-  TIn nonconst = abs;
-  auto it = nonconst.begin() + nonconst.size() / 2;
-  std::nth_element(nonconst.begin(), nonconst.end(), it);
-  return factor * 1.48 * *it;
+  return out;
 }
 
 /**
  * @brief Segment detected cosmic rays.
  * @param mask The detection map
- * @param threshold The distance threshold
+ * @param threshold The similarity threshold
  * 
  * Given a detection map, neighbors of flagged pixels are considered as candidate cosmic rays.
- * Some relative intensity distance is computed in the neighborhood
- * in order to decide whether the cadidate belongs to the cosmic ray or to the background by thresholding.
+ * Some similarity distance is computed in the neighborhood in order to decide
+ * whether the cadidate belongs to the cosmic ray or to the background, by thresholding.
  */
 template <typename TIn, typename TMask>
 void segment(const TIn& input, TMask& mask, float threshold)
 {
+  // FIXME Mask<2>::ball<1>(1)
   auto candidates = dilation<typename TMask::Value>(Box<2>::from_center(1)) * extrapolate(mask, '\0') - mask;
-  for (const auto& p : candidates.domain()) {
+  for (const auto& p : candidates.domain() - Box<2>::from_center(1)) {
     if (candidates[p]) {
-      auto d = distance(input, mask, p);
-      if (d < threshold) {
+      if (min_contrast(input, mask, p) < threshold) {
         mask[p] = true;
       }
     }
