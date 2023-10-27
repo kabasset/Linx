@@ -453,12 +453,14 @@ public:
    */
   template <typename TFunc>
   Patch<const T, const Raster<T, N, THolder>, Mask<N>> where(TFunc&& condition) const;
+  // FIXME mask?
 
   /**
    * @copybrief where()const
    */
   template <typename TFunc>
   Patch<T, Raster<T, N, THolder>, Mask<N>> where(TFunc&& condition);
+  // FIXME mask?
 
   /// @}
 
