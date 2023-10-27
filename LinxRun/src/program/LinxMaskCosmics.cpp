@@ -22,8 +22,9 @@ public:
   std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
   {
     Linx::ProgramOptions options;
-    options.positional<std::string>("input", "Input data file name");
-    options.positional<std::string>("output", "Output mask file name");
+    options.positional<std::string>("input", "The input data file name");
+    options.positional<std::string>("output", "The output mask file name");
+    options.named<std::string>("psf", "The PSF file name");
     options.named("hdu,i", "The 0-based input HDU index slice", 0L);
     options.named("pfa,p", "The detection probability of false alarm", 0.01);
     options.named("threshold,t", "The segmentation distance threshold", 0.5);
@@ -35,6 +36,7 @@ public:
   {
     Linx::Fits input(args["input"].as<std::string>());
     Linx::Fits output(args["output"].as<std::string>());
+    Linx::Fits psf(args["psf"].as<std::string>());
     const auto hdu = args["hdu"].as<Linx::Index>();
     const auto pfa = args["pfa"].as<double>();
     const auto threshold = args["threshold"].as<double>();
@@ -43,11 +45,18 @@ public:
     Linx::Chronometer<std::chrono::milliseconds> chrono;
 
     logger.info() << "Reading data: " << input.path();
-    auto data = input.read<Linx::Raster<double>>(hdu); // FIXME flexible type
-    if (Linx::min(data) > 0) {
-      data.log();
-    }
+    auto data = input.read<Linx::Raster<float>>(hdu); // FIXME flexible type
+    // if (Linx::min(data) > 0) {
+    //   data.log();
+    // }
     output.write(data, 'w');
+
+    logger.info() << "Discarding stars...";
+    chrono.start();
+    Linx::Cosmics::discard_stars(data, psf.read<Linx::Raster<float>>());
+    chrono.stop();
+    logger.info() << "  Done in: " << chrono.last().count() << " ms";
+    // output.write(data, 'a');
 
     logger.info() << "Detecting cosmics...";
     chrono.start();

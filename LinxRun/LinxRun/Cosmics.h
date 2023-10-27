@@ -32,11 +32,7 @@ Raster<char> detect(const TIn& in, float pfa)
       extrapolate<NearestNeighbor>(in);
 
   // Empirically assume Laplace distribution
-  float b = 0;
-  for (const auto& e : laplacian) {
-    b += std::abs(e);
-  }
-  const auto threshold = -b / laplacian.size() * std::log(2.0 * pfa);
+  const auto threshold = -norm<1>(laplacian) / laplacian.size() * std::log(2.0 * pfa);
 
   Raster<char> out(in.shape());
   out.generate(
@@ -53,20 +49,37 @@ Raster<char> detect(const TIn& in, float pfa)
  * The contrast is negative when the point intensity is higher than that of the neighborhood.
  */
 template <typename TIn, typename TMask>
-float min_contrast(const TIn& input, const TMask& mask, const Position<2>& p)
+float min_contrast(const TIn& in, const TMask& mask, const Position<2>& p)
 {
   auto out = std::numeric_limits<float>::max();
   const Position<2> dx {0, 1};
   const Position<2> dy {1, 0};
   for (const auto& neighbor : {p - dx, p + dx, p - dy, p + dy}) { // FIXME optimize?
     if (mask[neighbor]) {
-      auto contrast = (input[neighbor] - input[p]) / input[neighbor]; // FIXME assumes input > 0
+      auto contrast = (in[neighbor] - in[p]) / in[neighbor]; // FIXME assumes in > 0
       if (contrast < out) {
         out = contrast;
       }
     }
   }
   return out;
+}
+
+template <typename TIn, typename TPsf>
+void discard_stars(const TIn& in, const TPsf& psf)
+{
+  auto out = correlation(psf) * extrapolate<NearestNeighbor>(in);
+  Fits("/tmp/cosmic.fits").write(out, 'a');
+  Fits("/tmp/cosmic.fits").write(in / out, 'a');
+
+  // Empirically assume Laplace distribution
+  const auto pfa = 0.00001; // FIXME
+  const auto threshold = -norm<1>(out) / out.size() * std::log(2.0 * pfa);
+  printf("Threshold: %f\n", threshold);
+  out.apply([=](auto e) {
+    return e > threshold;
+  });
+  Fits("/tmp/cosmic.fits").write(out, 'a');
 }
 
 /**
@@ -79,13 +92,13 @@ float min_contrast(const TIn& input, const TMask& mask, const Position<2>& p)
  * whether the cadidate belongs to the cosmic ray or to the background, by thresholding.
  */
 template <typename TIn, typename TMask>
-void segment(const TIn& input, TMask& mask, float threshold)
+void segment(const TIn& in, TMask& mask, float threshold)
 {
   // FIXME Mask<2>::ball<1>(1)
   auto candidates = dilation<typename TMask::Value>(Box<2>::from_center(1)) * extrapolate(mask, '\0') - mask;
   for (const auto& p : candidates.domain() - Box<2>::from_center(1)) {
     if (candidates[p]) {
-      if (min_contrast(input, mask, p) < threshold) {
+      if (min_contrast(in, mask, p) < threshold) {
         mask[p] = true;
       }
     }
