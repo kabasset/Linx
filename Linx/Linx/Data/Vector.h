@@ -287,32 +287,6 @@ Index shape_size(const Position<N>& shape)
   return shape_stride(shape, size);
 }
 
-/**
- * @brief Compute the Lp-norm of a vector raised to the power p.
- * @tparam P The power
- */
-template <Index P, typename T, Index N>
-T norm(const Vector<T, N>& in)
-{
-  T out(0);
-  for (const auto& e : in) {
-    out += abspow<P>(e);
-  }
-  return out;
-}
-
-/**
- * @brief Compute the absolute Lp-distance between two vectors raised to the power p.
- * @tparam P The power
- */
-template <Index P, typename T, Index N>
-T distance(const Vector<T, N>& lhs, const Vector<T, N>& rhs)
-{
-  return std::inner_product(lhs.begin(), lhs.end(), rhs.begin(), 0., std::plus<T> {}, [](T a, T b) {
-    return abspow<P>(b - a);
-  });
-}
-
 } // namespace Linx
 
 #endif

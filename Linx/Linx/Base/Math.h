@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <numeric> // inner_product
 
 namespace Linx {
 
@@ -22,55 +23,24 @@ T pi()
   return out;
 }
 
-/// @cond
-namespace Internal {
-
-template <Index P>
-struct AbspowImpl {
-  template <typename T>
-  static T pow(T x)
-  {
-    return x * x * AbspowImpl<P - 2>::pow(x);
-  }
-};
-
-template <>
-struct AbspowImpl<0> {
-  template <typename T>
-  static T pow(T x)
-  {
-    return bool(x);
-  }
-};
-
-template <>
-struct AbspowImpl<1> {
-  template <typename T>
-  static T pow(T x)
-  {
-    return std::abs(x);
-  }
-};
-
-template <>
-struct AbspowImpl<2> {
-  template <typename T>
-  static T pow(T x)
-  {
-    return x * x;
-  }
-};
-
-} // namespace Internal
-/// @endcond
-
 /**
  * @brief Compute the absolute value of an integral power.
  */
 template <Index P, typename T>
 T abspow(T x)
 {
-  return Internal::AbspowImpl<P>::pow(x);
+  if constexpr (P == 0) {
+    return bool(x);
+  }
+  if constexpr (P == 1) {
+    return std::abs(x);
+  }
+  if constexpr (P == 2) {
+    return x * x;
+  }
+  if constexpr (P > 2) {
+    return x * x * abspow<P - 2>(x);
+  }
 }
 
 /**
@@ -239,6 +209,38 @@ LINX_MATH_UNARY_NEWINSTANCE(lgamma)
 
 #undef LINX_MATH_UNARY_NEWINSTANCE
 #undef LINX_MATH_BINARY_NEWINSTANCE
+
+/**
+ * @brief Compute the Lp-norm of a vector raised to the power p.
+ * @tparam P The power
+ */
+template <Index P, typename T, typename TDerived>
+T norm(const MathFunctionsMixin<T, TDerived>& in)
+{
+  T out(0);
+  for (const auto& e : static_cast<const TDerived&>(in)) {
+    out += abspow<P>(e);
+  }
+  return out;
+}
+
+/**
+ * @brief Compute the absolute Lp-distance between two vectors raised to the power p.
+ * @tparam P The power
+ */
+template <Index P, typename T, typename TDerived, typename U, typename UDerived>
+T distance(const MathFunctionsMixin<T, TDerived>& lhs, const MathFunctionsMixin<U, UDerived>& rhs)
+{
+  return std::inner_product(
+      static_cast<const TDerived&>(lhs).begin(),
+      static_cast<const TDerived&>(lhs).end(),
+      static_cast<const UDerived&>(rhs).begin(),
+      0.,
+      std::plus<T> {},
+      [](T a, T b) {
+        return abspow<P>(b - a);
+      });
+}
 
 } // namespace Linx
 
