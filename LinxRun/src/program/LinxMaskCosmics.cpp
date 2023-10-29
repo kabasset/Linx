@@ -46,21 +46,14 @@ public:
 
     logger.info() << "Reading data: " << input.path();
     auto data = input.read<Linx::Raster<float>>(hdu); // FIXME flexible type
-    // if (Linx::min(data) > 0) {
-    //   data.log();
-    // }
+    if (Linx::min(data) > 0) {
+      data.log();
+    }
     output.write(data, 'w');
-
-    logger.info() << "Discarding stars...";
-    chrono.start();
-    Linx::Cosmics::discard_stars(data, psf.read<Linx::Raster<float>>());
-    chrono.stop();
-    logger.info() << "  Done in: " << chrono.last().count() << " ms";
-    // output.write(data, 'a');
 
     logger.info() << "Detecting cosmics...";
     chrono.start();
-    auto mask = Linx::Cosmics::detect(data, pfa);
+    auto mask = Linx::Cosmics::detect(data, psf.read<Linx::Raster<float>>(), pfa);
     chrono.stop();
     logger.info() << "  Done in: " << chrono.last().count() << " ms";
     logger.info() << "  Density: " << Linx::mean(mask);

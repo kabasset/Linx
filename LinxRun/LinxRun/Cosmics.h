@@ -22,14 +22,20 @@ namespace Cosmics {
  * The parameters of the background noise (empirically assumed Laplace-distributed)
  * of the filtered image are estimated to deduce the detection threshold from a PFA.
  */
-template <typename TIn>
-Raster<char> detect(const TIn& in, float pfa)
+template <typename TIn, typename TPsf>
+Raster<char> detect(const TIn& in, const TPsf& psf, float pfa)
 {
-  const auto laplacian =
-      convolution(Raster<float>(
-          {3, 3},
-          {-1. / 6., -2. / 3., -1. / 6., -2. / 3., 10. / 3, -2. / 3., -1. / 6., -2. / 3., -1. / 6.})) *
+  auto laplacian = convolution(Raster<float>(
+                       {3, 3},
+                       {-1. / 6., -2. / 3., -1. / 6., -2. / 3., 10. / 3, -2. / 3., -1. / 6., -2. / 3., -1. / 6.})) *
       extrapolate<NearestNeighbor>(in);
+  Fits("/tmp/cosmic.fits").write(laplacian, 'a');
+
+  auto stars = dilation<typename TPsf::Value>(Box<2>::from_center(1)) *
+      extrapolate<NearestNeighbor>(correlation(psf) * extrapolate<NearestNeighbor>(in));
+  Fits("/tmp/cosmic.fits").write(stars, 'a');
+  laplacian -= stars / 2;
+  Fits("/tmp/cosmic.fits").write(laplacian, 'a');
 
   // Empirically assume Laplace distribution
   const auto threshold = -norm<1>(laplacian) / laplacian.size() * std::log(2.0 * pfa);
@@ -63,23 +69,6 @@ float min_contrast(const TIn& in, const TMask& mask, const Position<2>& p)
     }
   }
   return out;
-}
-
-template <typename TIn, typename TPsf>
-void discard_stars(const TIn& in, const TPsf& psf)
-{
-  auto out = correlation(psf) * extrapolate<NearestNeighbor>(in);
-  Fits("/tmp/cosmic.fits").write(out, 'a');
-  Fits("/tmp/cosmic.fits").write(in / out, 'a');
-
-  // Empirically assume Laplace distribution
-  const auto pfa = 0.00001; // FIXME
-  const auto threshold = -norm<1>(out) / out.size() * std::log(2.0 * pfa);
-  printf("Threshold: %f\n", threshold);
-  out.apply([=](auto e) {
-    return e > threshold;
-  });
-  Fits("/tmp/cosmic.fits").write(out, 'a');
 }
 
 /**
