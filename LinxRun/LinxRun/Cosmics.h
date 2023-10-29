@@ -25,20 +25,30 @@ namespace Cosmics {
 template <typename TIn, typename TPsf>
 Raster<char> detect(const TIn& in, const TPsf& psf, float pfa)
 {
-  auto laplacian = convolution(Raster<float>(
-                       {3, 3},
-                       {-1. / 6., -2. / 3., -1. / 6., -2. / 3., 10. / 3, -2. / 3., -1. / 6., -2. / 3., -1. / 6.})) *
-      extrapolate<NearestNeighbor>(in);
+  const auto laplacian_filter = convolution(
+      Raster<float>({3, 3}, {-1. / 6., -2. / 3., -1. / 6., -2. / 3., 10. / 3, -2. / 3., -1. / 6., -2. / 3., -1. / 6.}));
+
+  auto laplacian = laplacian_filter * extrapolate<NearestNeighbor>(in);
   Fits("/tmp/cosmic.fits").write(laplacian, 'a');
 
+  const auto psf_filter = correlation(psf);
   auto stars = dilation<typename TPsf::Value>(Box<2>::from_center(1)) *
-      extrapolate<NearestNeighbor>(correlation(psf) * extrapolate<NearestNeighbor>(in));
+      extrapolate<NearestNeighbor>(psf_filter * extrapolate<NearestNeighbor>(in));
   Fits("/tmp/cosmic.fits").write(stars, 'a');
-  laplacian -= stars / 2;
+
+  const auto psf_laplacian = laplacian_filter * extrapolate(psf, 0.F); // FIXME optimize: compute only at center
+  const auto center_pos = -psf_filter.window().front();
+  const auto psf_laplacian_center = psf_laplacian[center_pos];
+  const auto psf_center = psf[center_pos];
+  printf("Central PSF Laplacian: %f\n", psf_laplacian_center);
+  printf("Central PSF value: %f\n", psf_center);
+
+  laplacian -= stars * psf_laplacian_center;
   Fits("/tmp/cosmic.fits").write(laplacian, 'a');
 
   // Empirically assume Laplace distribution
   const auto threshold = -norm<1>(laplacian) / laplacian.size() * std::log(2.0 * pfa);
+  printf("Threshold: %f\n", threshold);
 
   Raster<char> out(in.shape());
   out.generate(
