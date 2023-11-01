@@ -12,6 +12,54 @@
 namespace Linx {
 namespace Cosmics {
 
+template <typename T>
+class QuotientFilter {
+public:
+
+  using Value = T;
+
+  template <typename... TArgs>
+  QuotientFilter(TArgs&&... args) : m_template(std::forward<TArgs>(args)...)
+  {}
+
+  Value operator()(const std::vector<Value>& neighbors) const
+  {
+    Value out = std::numeric_limits<Value>::max();
+    Value sum = 0;
+    for (std::size_t i = 0; i < m_template.size(); ++i) {
+      const auto ni = neighbors[i];
+      sum += ni;
+      const auto q = ni / m_template[i];
+      if (q < out) {
+        out = q;
+      }
+    }
+    return out / sum * m_template.size();
+  }
+
+private:
+
+  std::vector<Value> m_template;
+};
+
+template <typename TIn, typename TPsf>
+Raster<typename TPsf::Value> quotient(const TIn& in, const TPsf& psf)
+{
+  using T = typename TPsf::Value;
+  auto filter = StructuringElement<QuotientFilter<T>, Box<2>>(
+      QuotientFilter<T>(psf.begin(), psf.end()),
+      psf.domain() - (psf.shape() - 1) / 2);
+  return filter * extrapolate<NearestNeighbor>(in);
+}
+
+template <typename TIn>
+Raster<typename TIn::Value> dilate(const TIn& in, Index radius = 1)
+{
+  using T = typename TIn::Value;
+  auto filter = dilation<T>(Box<2>::from_center(radius)); // FIXME L2-ball
+  return filter * extrapolate<NearestNeighbor>(in);
+}
+
 /**
  * @brief Detect cosmic rays.
  * @param in The input 2D raster
@@ -23,39 +71,28 @@ namespace Cosmics {
  * of the filtered image are estimated to deduce the detection threshold from a PFA.
  */
 template <typename TIn, typename TPsf>
-Raster<char> detect(const TIn& in, const TPsf& psf, float pfa)
+Raster<char> detect(const TIn& in, const TPsf& psf, float pfa, float tq)
 {
   const auto laplacian_filter = convolution(
       Raster<float>({3, 3}, {-1. / 6., -2. / 3., -1. / 6., -2. / 3., 10. / 3, -2. / 3., -1. / 6., -2. / 3., -1. / 6.}));
 
-  auto laplacian = laplacian_filter * extrapolate<NearestNeighbor>(in);
-  Fits("/tmp/cosmic.fits").write(laplacian, 'a');
-
-  const auto psf_filter = correlation(psf);
-  auto stars = dilation<typename TPsf::Value>(Box<2>::from_center(1)) *
-      extrapolate<NearestNeighbor>(psf_filter * extrapolate<NearestNeighbor>(in));
-  Fits("/tmp/cosmic.fits").write(stars, 'a');
-
-  const auto psf_laplacian = laplacian_filter * extrapolate(psf, 0.F); // FIXME optimize: compute only at center
-  const auto center_pos = -psf_filter.window().front();
-  const auto psf_laplacian_center = psf_laplacian[center_pos];
-  const auto psf_center = psf[center_pos];
-  printf("Central PSF Laplacian: %f\n", psf_laplacian_center);
-  printf("Central PSF value: %f\n", psf_center);
-
-  laplacian -= stars * psf_laplacian_center;
-  Fits("/tmp/cosmic.fits").write(laplacian, 'a');
+  auto laplacian_map = laplacian_filter * extrapolate<NearestNeighbor>(in);
+  Fits("/tmp/cosmic.fits").write(laplacian_map, 'a');
 
   // Empirically assume Laplace distribution
-  const auto threshold = -norm<1>(laplacian) / laplacian.size() * std::log(2.0 * pfa);
-  printf("Threshold: %f\n", threshold);
+  const auto tl = -norm<1>(laplacian_map) / laplacian_map.size() * std::log(2.0 * pfa);
+  printf("Threshold: %f\n", tl);
+
+  auto quotient_map = dilate(quotient(in, psf));
+  Fits("/tmp/cosmic.fits").write(quotient_map, 'a');
 
   Raster<char> out(in.shape());
   out.generate(
-      [=](auto c) {
-        return c > threshold;
+      [=](auto l, auto q) {
+        return l > tl && q < tq; // FIXME compute quotient only where l > tl
       },
-      laplacian);
+      laplacian_map,
+      quotient_map);
   return out;
 }
 

@@ -27,50 +27,51 @@ public:
     options.named<std::string>("psf", "The PSF file name");
     options.named("hdu,i", "The 0-based input HDU index slice", 0L);
     options.named("pfa,p", "The detection probability of false alarm", 0.01);
-    options.named("threshold,t", "The segmentation distance threshold", 0.5);
+    options.named("quotient,q", "The star rejection quotient threshold", 0.1);
+    options.named("contrast,c", "The region-growing contrast threshold", 0.5);
     options.named("niter,n", "The number of segmentation iterations", 1L);
     return options.as_pair();
   }
 
   ExitCode mainMethod(std::map<std::string, VariableValue>& args) override
   {
-    Linx::Fits input(args["input"].as<std::string>());
-    Linx::Fits output(args["output"].as<std::string>());
-    Linx::Fits psf(args["psf"].as<std::string>());
+    Linx::Fits data_fits(args["input"].as<std::string>());
+    Linx::Fits map_fits(args["output"].as<std::string>());
+    Linx::Fits psf_fits(args["psf"].as<std::string>());
     const auto hdu = args["hdu"].as<Linx::Index>();
     const auto pfa = args["pfa"].as<double>();
-    const auto threshold = args["threshold"].as<double>();
+    const auto tq = args["quotient"].as<double>();
+    const auto tc = args["contrast"].as<double>();
     const auto iter_count = args["niter"].as<Linx::Index>();
 
     Linx::Chronometer<std::chrono::milliseconds> chrono;
 
-    logger.info() << "Reading data: " << input.path();
-    auto data = input.read<Linx::Raster<float>>(hdu); // FIXME flexible type
-    if (Linx::min(data) > 0) {
-      data.log();
-    }
-    output.write(data, 'w');
+    logger.info() << "Reading data: " << data_fits.path();
+    auto data = data_fits.read<Linx::Raster<float>>(hdu);
+    logger.info() << "Reading PSF: " << psf_fits.path();
+    auto psf = psf_fits.read<Linx::Raster<float>>();
+    map_fits.write(data, 'w');
 
     logger.info() << "Detecting cosmics...";
     chrono.start();
-    auto mask = Linx::Cosmics::detect(data, psf.read<Linx::Raster<float>>(), pfa);
+    auto mask = Linx::Cosmics::detect(data, psf, pfa, tq);
     chrono.stop();
     logger.info() << "  Done in: " << chrono.last().count() << " ms";
     logger.info() << "  Density: " << Linx::mean(mask);
-    output.write(mask, 'a');
+    map_fits.write(mask, 'a');
 
     logger.info() << "Segmenting cosmics...";
     for (Linx::Index i = 0; i < iter_count; ++i) {
       logger.info() << "  Iteration " << i + 1 << "/" << iter_count;
       chrono.start();
-      Linx::Cosmics::segment(data, mask, threshold);
+      Linx::Cosmics::segment(data, mask, tc);
       chrono.stop();
       logger.info() << "    Done in: " << chrono.last().count() << " ms";
       logger.info() << "    Density: " << Linx::mean(mask);
-      output.write(mask, 'a');
+      map_fits.write(mask, 'a');
     }
 
-    logger.info() << "Saved output as: " << output.path();
+    logger.info() << "Saved map as: " << map_fits.path();
 
     return Elements::ExitCode::OK;
   }
