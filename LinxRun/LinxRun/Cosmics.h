@@ -25,16 +25,17 @@ public:
   Value operator()(const std::vector<Value>& neighbors) const
   {
     Value out = std::numeric_limits<Value>::max();
-    Value sum = 0;
+    Value norm2 = 0;
     for (std::size_t i = 0; i < m_template.size(); ++i) {
       const auto ni = neighbors[i];
-      sum += ni;
-      const auto q = ni / m_template[i];
+      const auto ti = m_template[i];
+      const auto q = ni / ti;
+      norm2 += q * q;
       if (q < out) {
         out = q;
       }
     }
-    return out / sum * m_template.size();
+    return out / std::sqrt(norm2);
   }
 
 private:
@@ -53,10 +54,27 @@ Raster<typename TPsf::Value> quotient(const TIn& in, const TPsf& psf)
 }
 
 template <typename TIn>
+Raster<typename TIn::Value> laplacian(const TIn& in)
+{
+  using T = typename TIn::Value;
+  const auto filter = convolution(
+      Raster<T>({3, 3}, {-1. / 6., -2. / 3., -1. / 6., -2. / 3., 10. / 3, -2. / 3., -1. / 6., -2. / 3., -1. / 6.}));
+  return filter * extrapolate<NearestNeighbor>(in);
+}
+
+template <typename TIn>
 Raster<typename TIn::Value> dilate(const TIn& in, Index radius = 1)
 {
   using T = typename TIn::Value;
   auto filter = dilation<T>(Box<2>::from_center(radius)); // FIXME L2-ball
+  return filter * extrapolate<NearestNeighbor>(in);
+}
+
+template <typename TIn>
+Raster<typename TIn::Value> blur(const TIn& in, Index radius = 1)
+{
+  using T = typename TIn::Value;
+  auto filter = mean_filter<T>(Box<2>::from_center(radius)); // FIXME L2-ball
   return filter * extrapolate<NearestNeighbor>(in);
 }
 
@@ -73,17 +91,14 @@ Raster<typename TIn::Value> dilate(const TIn& in, Index radius = 1)
 template <typename TIn, typename TPsf>
 Raster<char> detect(const TIn& in, const TPsf& psf, float pfa, float tq)
 {
-  const auto laplacian_filter = convolution(
-      Raster<float>({3, 3}, {-1. / 6., -2. / 3., -1. / 6., -2. / 3., 10. / 3, -2. / 3., -1. / 6., -2. / 3., -1. / 6.}));
-
-  auto laplacian_map = laplacian_filter * extrapolate<NearestNeighbor>(in);
+  auto laplacian_map = laplacian(in);
   Fits("/tmp/cosmic.fits").write(laplacian_map, 'a');
 
   // Empirically assume Laplace distribution
   const auto tl = -norm<1>(laplacian_map) / laplacian_map.size() * std::log(2.0 * pfa);
   printf("Threshold: %f\n", tl);
 
-  auto quotient_map = dilate(quotient(in, psf));
+  auto quotient_map = blur(quotient(in, psf));
   Fits("/tmp/cosmic.fits").write(quotient_map, 'a');
 
   Raster<char> out(in.shape());
