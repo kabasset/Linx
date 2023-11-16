@@ -12,6 +12,43 @@
 namespace Linx {
 namespace Cosmics {
 
+/**
+ * @brief Pearson correlation coefficient functor.
+*/
+template <typename T>
+class PearsonCorrelation {
+public:
+
+  using Value = T;
+
+  template <typename... TArgs>
+  PearsonCorrelation(TArgs&&... args) : m_template(std::forward<TArgs>(args)...), m_sum2()
+  {
+    const auto mean = std::accumulate(m_template.begin(), m_template.end(), Value()) / m_template.size();
+    std::transform(m_template.begin(), m_template.end(), m_template.begin(), [=](auto& e) {
+      return e - mean;
+    });
+    m_sum2 = std::inner_product(m_template.begin(), m_template.end(), m_template.begin(), Value());
+  }
+
+  Value operator()(const std::vector<Value>& neighbors) const // FIXME nonconst? member?
+  {
+    const auto mean = std::accumulate(neighbors.begin(), neighbors.end(), Value()) / neighbors.size();
+    auto centered = neighbors;
+    std::transform(centered.begin(), centered.end(), centered.begin(), [=](auto& e) {
+      return e - mean;
+    });
+    const auto sum2 = std::inner_product(centered.begin(), centered.end(), centered.begin(), Value());
+    return std::inner_product(m_template.begin(), m_template.end(), centered.begin(), Value()) /
+        std::sqrt(m_sum2 * sum2);
+  }
+
+private:
+
+  std::vector<Value> m_template;
+  Value m_sum2;
+};
+
 template <typename T>
 class QuotientFilter {
 public:
@@ -27,15 +64,15 @@ public:
     Value out = std::numeric_limits<Value>::max();
     Value norm2 = 0;
     for (std::size_t i = 0; i < m_template.size(); ++i) {
-      const auto ni = neighbors[i];
+      const auto ni = neighbors[i]; // FIXME rm offset?
       const auto ti = m_template[i];
       const auto q = ni / ti;
       norm2 += q * q;
-      if (q < out) {
+      if (q < out) { // FIXME more robust, median?
         out = q;
       }
     }
-    return out / std::sqrt(norm2);
+    return out * std::sqrt(m_template.size() / norm2);
   }
 
 private:
@@ -49,6 +86,16 @@ Raster<typename TPsf::Value> quotient(const TIn& in, const TPsf& psf)
   using T = typename TPsf::Value;
   auto filter = StructuringElement<QuotientFilter<T>, Box<2>>(
       QuotientFilter<T>(psf.begin(), psf.end()),
+      psf.domain() - (psf.shape() - 1) / 2);
+  return filter * extrapolate<NearestNeighbor>(in);
+}
+
+template <typename TIn, typename TPsf>
+Raster<typename TPsf::Value> match(const TIn& in, const TPsf& psf)
+{
+  using T = typename TPsf::Value;
+  auto filter = StructuringElement<PearsonCorrelation<T>, Box<2>>(
+      PearsonCorrelation<T>(psf.begin(), psf.end()),
       psf.domain() - (psf.shape() - 1) / 2);
   return filter * extrapolate<NearestNeighbor>(in);
 }
