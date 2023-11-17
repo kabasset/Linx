@@ -49,6 +49,9 @@ private:
   Value m_sum2;
 };
 
+/**
+ * @brief Quotient filter, i.e. minimum value of the ratio between neighbors and template, normalized.
+*/
 template <typename T>
 class QuotientFilter {
 public:
@@ -64,9 +67,7 @@ public:
     Value out = std::numeric_limits<Value>::max();
     Value norm2 = 0;
     for (std::size_t i = 0; i < m_template.size(); ++i) {
-      const auto ni = neighbors[i]; // FIXME rm offset?
-      const auto ti = m_template[i];
-      const auto q = ni / ti;
+      const auto q = neighbors[i] / m_template[i]; // FIXME rm offset?
       norm2 += q * q;
       if (q < out) { // FIXME more robust, median?
         out = q;
@@ -145,7 +146,9 @@ Raster<char> detect(const TIn& in, const TPsf& psf, float pfa, float tq)
   const auto tl = -norm<1>(laplacian_map) / laplacian_map.size() * std::log(2.0 * pfa);
   printf("Threshold: %f\n", tl);
 
-  auto quotient_map = blur(quotient(in, psf));
+  const Index radius = std::sqrt(psf.size()) / 4;
+  printf("Radius: %li\n", radius);
+  auto quotient_map = dilate(quotient(in, psf), radius);
   Fits("/tmp/cosmic.fits").write(quotient_map, 'a');
 
   Raster<char> out(in.shape());
