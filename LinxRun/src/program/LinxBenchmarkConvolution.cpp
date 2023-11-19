@@ -5,12 +5,32 @@
 #include "ElementsKernel/ProgramHeaders.h"
 #include "Linx/Run/Chronometer.h"
 #include "Linx/Run/ProgramOptions.h"
-#include "Linx/Transforms/Kernel.h"
+#include "Linx/Transforms/Kernel.h" // FIXME replace with Filter
+#include "Linx/Transforms/StructuringElement.h" // FIXME replace with Filter
 
 #include <map>
 #include <string>
 
 static Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkConvolution");
+
+template <typename T>
+class ConvolutionFunctor {
+public:
+
+  using Value = T;
+
+  ConvolutionFunctor(std::vector<T> kernel) : m_kernel(std::move(kernel)) {}
+
+  template <typename TIn>
+  inline Value operator()(const TIn& neighbors) const
+  {
+    return std::inner_product(m_kernel.rbegin(), m_kernel.rend(), neighbors.begin(), Value {});
+  }
+
+private:
+
+  std::vector<T> m_kernel;
+};
 
 using Image = Linx::Raster<float>;
 using Kernel = const Linx::Kernel<Linx::KernelOp::Convolution, float>;
@@ -55,6 +75,14 @@ void filter_hardcoded(Image& image, Kernel& kernel)
   image = out;
 }
 
+void filter_functor(Image& image, Kernel& kernel)
+{
+  const auto raster = kernel.raster();
+  std::vector<float> values(raster.begin(), raster.end());
+  Linx::StructuringElement<ConvolutionFunctor<float>, Linx::Box<2>> filter(std::move(values), kernel.window());
+  image = filter * Linx::extrapolate<Linx::NearestNeighbor>(image);
+}
+
 template <typename TDuration>
 TDuration filter(Image& image, Kernel& kernel, char setup)
 {
@@ -73,6 +101,9 @@ TDuration filter(Image& image, Kernel& kernel, char setup)
     case 'h':
       filter_hardcoded(image, kernel);
       break;
+    case 'f':
+      filter_functor(image, kernel);
+      break;
     default:
       throw std::runtime_error("Case not implemented"); // FIXME CaseNotImplemented
   }
@@ -85,7 +116,7 @@ public:
   std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
   {
     Linx::ProgramOptions options;
-    options.named("case", "Test case: d (default), m (monolith)", 'd');
+    options.named("case", "Test case: d (default), m (monolith), h (hardcoded), f (functor)", 'd');
     options.named("image", "Raster length along each axis", 2048L);
     options.named("kernel", "Kernel length along each axis", 5L);
     return options.as_pair();
