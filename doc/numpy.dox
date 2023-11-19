@@ -199,9 +199,9 @@ Linx:
 \code{.cpp}
 auto a = Linx::Raster<int>({10, 10}).range();
 auto box = Linx::Box<2>({3, 1}, {6, 5});
-auto b = a.patch(box); // Box-based patch
+auto b = a.patch(box);
 auto grid = Linx::Grid<2>(box, {1, 2});
-auto b = a.patch(grid); // Grid-based patch
+auto c = a.patch(grid);
 ++b;
 \endcode
 
@@ -217,8 +217,7 @@ b = a[:2]
 
 # Selector
 
-indices = a > 4  # Sequence of indices
-a[indices] = 0
+a[a > 4] = 0
 
 # L1-norm ball
 
@@ -233,17 +232,16 @@ Linx:
 \code{.cpp}
 // Column
 
-auto b = a.profile<1>(2); // Line-based patch
+auto b = a.profile<1>(2);
 
 // Selector
 
-auto patch = a.where([](auto e) { return e > 4; }); // Mask-based patch
-patch.fill(0);
+a.apply([](auto e) { return e > 4 ? 0 : e; });
 
 // L1-norm ball
 
 auto ball = Mask<2>::ball<1>({5, 4}, 3);
-auto c = a.patch(ball); // Mask-based patch
+auto c = a.patch(ball);
 \endcode
 
 */
