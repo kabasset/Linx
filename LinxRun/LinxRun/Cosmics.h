@@ -106,7 +106,7 @@ Raster<typename TIn::Value> laplacian(const TIn& in)
 {
   using T = typename TIn::Value;
   const auto filter = convolution(
-      Raster<T>({3, 3}, {-1. / 6., -2. / 3., -1. / 6., -2. / 3., 10. / 3, -2. / 3., -1. / 6., -2. / 3., -1. / 6.}));
+      Raster<T>({3, 3}, {-1. / 6., -2. / 3., -1. / 6., -2. / 3., 10. / 3., -2. / 3., -1. / 6., -2. / 3., -1. / 6.}));
   return filter * extrapolate<NearestNeighbor>(in);
 }
 
@@ -139,7 +139,7 @@ Raster<typename TIn::Value> blur(const TIn& in, Index radius = 1)
 template <typename TIn, typename TPsf>
 Raster<char> detect(const TIn& in, const TPsf& psf, float pfa, float tq)
 {
-  auto laplacian_map = laplacian(in);
+  auto laplacian_map = laplacian(Linx::log(in));
   Fits("/tmp/cosmic.fits").write(laplacian_map, 'a');
 
   // Empirically assume Laplace distribution
