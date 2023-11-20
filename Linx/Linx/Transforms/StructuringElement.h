@@ -22,7 +22,9 @@ namespace MorphologyOp {
 template <typename T>
 struct MeanFilter {
   using Value = T; // FIXME deduce from operator()
-  T operator()(const std::vector<T>& neighbors) const
+
+  template <typename TIn>
+  T operator()(const TIn& neighbors) const
   {
     return std::accumulate(neighbors.begin(), neighbors.end(), T()) / neighbors.size();
   }
@@ -34,10 +36,13 @@ struct MeanFilter {
 template <typename T>
 struct MedianFilter {
   using Value = T;
-  T operator()(std::vector<T>& neighbors) const
+
+  template <typename TIn>
+  T operator()(const TIn& neighbors) const
   {
-    const auto size = neighbors.size();
-    auto b = neighbors.data();
+    std::vector<Value> v(neighbors.begin(), neighbors.end());
+    const auto size = v.size();
+    auto b = v.data();
     auto e = b + size;
     auto n = b + size / 2;
     std::nth_element(b, n, e);
@@ -55,7 +60,9 @@ struct MedianFilter {
 template <typename T>
 struct Erosion {
   using Value = T;
-  T operator()(const std::vector<T>& neighbors) const
+
+  template <typename TIn>
+  T operator()(const TIn& neighbors) const
   {
     return *std::min_element(neighbors.begin(), neighbors.end());
   }
@@ -67,7 +74,9 @@ struct Erosion {
 template <typename T>
 struct Dilation {
   using Value = T;
-  T operator()(const std::vector<T>& neighbors) const
+
+  template <typename TIn>
+  T operator()(const TIn& neighbors) const
   {
     return *std::max_element(neighbors.begin(), neighbors.end());
   }
@@ -115,10 +124,9 @@ public:
    * @brief Estimation operator.
    */
   template <typename TIn>
-  Value operator()(const TIn& neighbors) const
+  inline Value operator()(const TIn& neighbors) const
   {
-    m_neighbors.assign(neighbors.begin(), neighbors.end());
-    return m_op(m_neighbors);
+    return m_op(neighbors);
   }
 
 private:
@@ -127,11 +135,6 @@ private:
    * @brief The operation.
    */
   TOp m_op;
-
-  /**
-   * @brief The neighbor buffer.
-   */
-  mutable std::vector<Value> m_neighbors;
 };
 
 template <typename T, typename TWindow>

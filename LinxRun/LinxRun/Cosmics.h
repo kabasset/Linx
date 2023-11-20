@@ -31,7 +31,8 @@ public:
     m_sum2 = std::inner_product(m_template.begin(), m_template.end(), m_template.begin(), Value());
   }
 
-  Value operator()(const std::vector<Value>& neighbors) const // FIXME nonconst? member?
+  template <typename TIn>
+  T operator()(const TIn& neighbors) const
   {
     const auto mean = std::accumulate(neighbors.begin(), neighbors.end(), Value()) / neighbors.size();
     auto centered = neighbors;
@@ -62,16 +63,19 @@ public:
   QuotientFilter(TArgs&&... args) : m_template(std::forward<TArgs>(args)...)
   {}
 
-  Value operator()(const std::vector<Value>& neighbors) const
+  template <typename TIn>
+  T operator()(const TIn& neighbors) const
   {
     Value out = std::numeric_limits<Value>::max();
     Value norm2 = 0;
-    for (std::size_t i = 0; i < m_template.size(); ++i) {
-      const auto q = neighbors[i] / m_template[i]; // FIXME rm offset?
+    auto tit = m_template.begin();
+    for (auto n : neighbors) {
+      const auto q = n / *tit;
       norm2 += q * q;
-      if (q < out) { // FIXME more robust, median?
+      if (q < out) { // FIXME more robust? median? quantile?
         out = q;
       }
+      ++tit;
     }
     return out * std::sqrt(m_template.size() / norm2);
   }
