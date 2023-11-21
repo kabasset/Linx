@@ -145,9 +145,19 @@ Raster<char> detect(const TIn& in, const TPsf& psf, float pfa, float tq)
 {
   auto laplacian_map = laplacian(Linx::log(in));
   Fits("/tmp/cosmic.fits").write(laplacian_map, 'a');
+  float n = 0;
+  float s = 0;
+  for (auto e : laplacian_map) {
+    if (not std::isnan(e)) {
+      n += std::abs(e);
+      ++s;
+    }
+  }
+  printf("Norm: %f\n", n);
 
   // Empirically assume Laplace distribution
-  const auto tl = -norm<1>(laplacian_map) / laplacian_map.size() * std::log(2.0 * pfa);
+  // const auto tl = -norm<1>(laplacian_map) / laplacian_map.size() * std::log(2.0 * pfa);
+  const auto tl = -n / s * std::log(2.0 * pfa);
   printf("Threshold: %f\n", tl);
 
   const Index radius = std::sqrt(psf.size()) / 4;
