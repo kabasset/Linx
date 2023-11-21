@@ -38,7 +38,7 @@ using Duration = std::chrono::milliseconds;
 
 void filter_monolith(Image& image, Kernel& kernel)
 {
-  const auto extrapolation = Linx::extrapolate<Linx::NearestNeighbor>(image);
+  const auto extrapolation = Linx::extrapolation<Linx::NearestNeighbor>(image);
   const auto extrapolated = extrapolation.copy(image.domain() + kernel.window());
   // image = kernel.crop(extrapolated);
   auto patch = extrapolated.patch(kernel.window() - kernel.window().front());
@@ -53,7 +53,7 @@ void filter_monolith(Image& image, Kernel& kernel)
 
 void filter_hardcoded(Image& image, Kernel& kernel)
 {
-  const auto extrapolation = Linx::extrapolate<Linx::NearestNeighbor>(image);
+  const auto extrapolation = Linx::extrapolation<Linx::NearestNeighbor>(image);
   const auto extrapolated = extrapolation.copy(image.domain() + kernel.window());
   const auto kernel_data = kernel.raster();
   auto it = kernel_data.end();
@@ -80,7 +80,7 @@ void filter_functor(Image& image, Kernel& kernel)
   const auto raster = kernel.raster();
   std::vector<float> values(raster.begin(), raster.end());
   Linx::StructuringElement<ConvolutionFunctor<float>, Linx::Box<2>> filter(std::move(values), kernel.window());
-  image = filter * Linx::extrapolate<Linx::NearestNeighbor>(image);
+  image = filter * Linx::extrapolation<Linx::NearestNeighbor>(image);
 }
 
 template <typename TDuration>
@@ -90,10 +90,10 @@ TDuration filter(Image& image, Kernel& kernel, char setup)
   chrono.start();
   switch (setup) {
     case '0':
-      image = kernel * Linx::extrapolate(image, 0.0F);
+      image = kernel * Linx::extrapolation(image, 0.0F);
       break;
     case 'd':
-      image = kernel * Linx::extrapolate<Linx::NearestNeighbor>(image);
+      image = kernel * Linx::extrapolation<Linx::NearestNeighbor>(image);
       break;
     case 'm':
       filter_monolith(image, kernel);

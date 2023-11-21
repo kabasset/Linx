@@ -22,7 +22,7 @@ namespace Linx {
  * The the extrapolation formula is implemented as `TMethod::at()`.
  */
 template <typename TRaster, typename TMethod>
-class Extrapolator {
+class Extrapolation {
 public:
 
   /**
@@ -38,7 +38,7 @@ public:
   /**
    * @brief Constructor.
    */
-  explicit Extrapolator(const TRaster& raster, TMethod&& method = TMethod()) :
+  explicit Extrapolation(const TRaster& raster, TMethod&& method = TMethod()) :
       m_raster(raster), m_method(std::move(method))
   {}
 
@@ -88,9 +88,9 @@ public:
    * @brief Get a decorated patch.
    */
   template <typename TRegion>
-  const Patch<const Value, const Extrapolator<TRaster, TMethod>, TRegion> patch(TRegion&& region) const
+  const Patch<const Value, const Extrapolation<TRaster, TMethod>, TRegion> patch(TRegion&& region) const
   {
-    return Patch<const Value, const Extrapolator<TRaster, TMethod>, TRegion>(*this, std::forward<TRegion>(region));
+    return Patch<const Value, const Extrapolation<TRaster, TMethod>, TRegion>(*this, std::forward<TRegion>(region));
   }
 
   /**
@@ -122,7 +122,7 @@ template <typename T>
 struct IsExtrapolatorImpl : std::false_type {};
 
 template <typename T, typename TMethod>
-struct IsExtrapolatorImpl<Extrapolator<T, TMethod>> : std::true_type {};
+struct IsExtrapolatorImpl<Extrapolation<T, TMethod>> : std::true_type {};
 
 template <typename T, typename TParent, typename TRegion>
 struct IsExtrapolatorImpl<Patch<T, TParent, TRegion>> : IsExtrapolatorImpl<std::decay_t<TParent>> {};
@@ -137,37 +137,37 @@ constexpr bool is_extrapolator()
 }
 
 /**
- * @relatesalso Extrapolator
+ * @relatesalso Extrapolation
  * @brief Get the raster decorated by an extrapolator.
  */
 template <typename TRaster, typename TMethod>
-const TRaster& rasterize(const Extrapolator<TRaster, TMethod>& in)
+const TRaster& rasterize(const Extrapolation<TRaster, TMethod>& in)
 {
   return in.raster();
 }
 
 /**
- * @relatesalso Extrapolator
+ * @relatesalso Extrapolation
  * @brief Make an extrapolator with given extrapolation method.
  */
 template <typename TMethod = NearestNeighbor, typename TRaster, typename... TArgs>
-auto extrapolate(const TRaster& raster, TArgs&&... args) -> decltype(auto)
+auto extrapolation(const TRaster& raster, TArgs&&... args) -> decltype(auto)
 {
-  return Extrapolator<TRaster, TMethod>(raster, TMethod(std::forward<TArgs>(args)...));
+  return Extrapolation<TRaster, TMethod>(raster, TMethod(std::forward<TArgs>(args)...));
 }
 
 /**
- * @relatesalso Extrapolator
+ * @relatesalso Extrapolation
  * @brief Make an extrapolator with constant extrapolation value.
  */
 template <typename T, Index N, typename THolder>
-auto extrapolate(const Raster<T, N, THolder>& raster, T constant) -> decltype(auto)
+auto extrapolation(const Raster<T, N, THolder>& raster, T constant) -> decltype(auto)
 {
-  return Extrapolator<Raster<T, N, THolder>, OutOfBoundsConstant<T>>(raster, OutOfBoundsConstant<T>(constant));
+  return Extrapolation<Raster<T, N, THolder>, OutOfBoundsConstant<T>>(raster, OutOfBoundsConstant<T>(constant));
 }
 
 /**
- * @relatesalso Extrapolator
+ * @relatesalso Extrapolation
  * @brief Do not extrapolate if `in` is an extrapolator or patch of an extrapolator.
  */
 template <typename T, Index N, typename THolder>
@@ -183,7 +183,7 @@ const Raster<T, N, THolder>& dont_extrapolate(const Raster<T, N, THolder>& in)
 }
 
 template <typename TRaster, typename TMethod>
-const TRaster& dont_extrapolate(const Extrapolator<TRaster, TMethod>& in)
+const TRaster& dont_extrapolate(const Extrapolation<TRaster, TMethod>& in)
 {
   return in.raster();
 }

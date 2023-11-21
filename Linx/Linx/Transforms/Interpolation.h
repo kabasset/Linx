@@ -26,7 +26,7 @@ namespace Linx {
  * This is the fastest option when no value outside the raster domain has to be evaluated.
  */
 template <typename TParent, typename TMethod>
-class Interpolator {
+class Interpolation {
 public:
 
   /**
@@ -47,7 +47,7 @@ public:
   /**
    * @brief Constructor.
    */
-  explicit Interpolator(const TParent& parent, TMethod&& method = TMethod()) :
+  explicit Interpolation(const TParent& parent, TMethod&& method = TMethod()) :
       m_parent(parent), m_method(std::move(method))
   {}
 
@@ -121,13 +121,13 @@ private:
 };
 
 /**
- * @relatesalso Interpolator
+ * @relatesalso Interpolation
  * @brief Make an interpolator with given interpolation method.
  */
 template <typename TMethod = NearestNeighbor, typename TParent, typename... TArgs>
-auto interpolate(const TParent& parent, TArgs&&... args) -> decltype(auto)
+auto interpolation(const TParent& parent, TArgs&&... args) -> decltype(auto)
 {
-  return Interpolator<TParent, TMethod>(parent, TMethod(std::forward<TArgs>(args)...));
+  return Interpolation<TParent, TMethod>(parent, TMethod(std::forward<TArgs>(args)...));
 }
 
 } // namespace Linx

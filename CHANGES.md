@@ -15,7 +15,7 @@
 * FFTW-wrapper `DftPlan`
 * Linear filtering through `Kernel` class
 * Median filtering and morphology through `StructuringElement` class
-* Extrapolation and interpolation with `Extrapolator` and `Interpolator`
+* Extrapolation and interpolation with `Extrapolation` and `Interpolation`
 * Affine transformations as `Affinity`
 * `Raster` has Euclidean ring arithmetic (not only vector space arithmetic)
 * Containers support mathematical functions (`abs()`, `min()`, `sin()`, `exp()`...)

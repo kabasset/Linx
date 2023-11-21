@@ -29,9 +29,9 @@ BOOST_AUTO_TEST_CASE(orthogonal_associativity_commutativity_test)
   const auto b = OrientedKernel<int, 1>({1, 2, 3});
   const auto c = a * b;
   const auto raster = Raster<int>({3, 3}).range();
-  const auto direct = c * extrapolate(raster, 0);
-  const auto associated = a * b * extrapolate(raster, 0);
-  const auto commutated = b * a * extrapolate(raster, 0);
+  const auto direct = c * extrapolation(raster, 0);
+  const auto associated = a * b * extrapolation(raster, 0);
+  const auto commutated = b * a * extrapolation(raster, 0);
   BOOST_TEST(associated == direct);
   BOOST_TEST(commutated == direct);
 }
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(sum3x3_dirichlet_test)
 {
   const SeparableKernel<int, 0, 1, 2> kernel({1, 1, 1});
   const auto raster = Raster<int, 3>({3, 3, 3}).fill(1);
-  const auto sum = kernel * extrapolate(raster, 0);
+  const auto sum = kernel * extrapolation(raster, 0);
   const std::vector<int> expected {
       8,  12, 8,  12, 18, 12, 8,  12, 8, // z = 0
       12, 18, 12, 18, 27, 18, 12, 18, 12, // z = 1
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(sum3x3_neumann_test)
 {
   const SeparableKernel<int, 0, 1, 2> kernel({1, 1, 1});
   const auto raster = Raster<int, 3>({3, 3, 3}).fill(1);
-  const auto sum = kernel * extrapolate<NearestNeighbor>(raster);
+  const auto sum = kernel * extrapolation<NearestNeighbor>(raster);
   const std::vector<int> expected(raster.size(), kernel.window().size());
   for (std::size_t i = 0; i < 3 * 3 * 3; ++i) {
     BOOST_TEST(sum[i] == expected[i]);
@@ -66,8 +66,8 @@ BOOST_AUTO_TEST_CASE(sobel_test)
   const auto sobel0 = SeparableKernel<int, 0, 1>::sobel();
   const auto sobel1 = SeparableKernel<int, 1, 0>::sobel(-1);
   const auto raster = Raster<int, 3>({3, 3, 3}).fill(1);
-  const auto edges0 = sobel0 * extrapolate(raster, 0);
-  const auto edges1 = sobel1 * extrapolate(raster, 0);
+  const auto edges0 = sobel0 * extrapolation(raster, 0);
+  const auto edges1 = sobel1 * extrapolation(raster, 0);
   const std::vector<int> expected0 {
       3, 0, -3, 4, 0, -4, 3, 0, -3, // z = 0
       3, 0, -3, 4, 0, -4, 3, 0, -3, // z = 1

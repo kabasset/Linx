@@ -136,7 +136,7 @@ public:
     const auto o = -w.front();
     auto raster = Raster<Value, Dimension>(w.shape());
     raster[o] = T(1); // FIXME or back-o?
-    auto impulse = *this * extrapolate(raster, 0);
+    auto impulse = *this * extrapolation(raster, 0);
     return convolution(impulse.reverse(), o); // FIXME use KernelOp
   }
 
@@ -189,7 +189,7 @@ private:
   {
     const auto tmp = correlate_kth_kernel<TIn, TOut, sizeof...(Is) - sizeof...(Js)>(in);
     const auto& method = in.method();
-    const Extrapolator<TOut, decltype(method)> extrapolator(tmp, method);
+    const Extrapolation<TOut, decltype(method)> extrapolator(tmp, method);
     correlate_kernel_seq<decltype(extrapolator), TOut, Js...>(extrapolator, out);
   }
 

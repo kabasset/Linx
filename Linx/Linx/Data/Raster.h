@@ -524,8 +524,8 @@ PtrRaster<T, sizeof...(Longs)> rasterize(T* data, Longs... shape)
  * @relatesalso Raster
  * @brief Identity.
  * 
- * This function is provided for compatibility with `Extrapolator`
- * in cases where functions accept either a `Raster` or an `Extrapolator`.
+ * This function is provided for compatibility with `Extrapolation`
+ * in cases where functions accept either a `Raster` or an `Extrapolation`.
  */
 template <typename T, Index N, typename THolder>
 const Raster<T, N, THolder>& rasterize(const Raster<T, N, THolder>& in)

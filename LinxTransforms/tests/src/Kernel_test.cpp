@@ -19,7 +19,7 @@ BOOST_AUTO_TEST_CASE(full_test)
   // FIXME make fixture
   auto in = Raster<int>({4, 3}).fill(1);
   auto k = convolution(Raster<int>({3, 3}).fill(1));
-  auto out = k * extrapolate(in, 0);
+  auto out = k * extrapolation(in, 0);
   std::cout << out << "\n";
   std::vector<int> expected = {4, 6, 6, 4, 6, 9, 9, 6, 4, 6, 6, 4};
   for (std::size_t i = 0; i < 12; ++i) {
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(full_test)
 BOOST_AUTO_TEST_CASE(crop_test)
 {
   const auto in = Raster<int>({10, 8}).range();
-  const auto extrapolated = extrapolate(in, 0);
+  const auto extrapolated = extrapolation(in, 0);
   const auto k = convolution(Raster<int>({3, 3}).fill(1));
   const auto expected = k * extrapolated;
 
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(crop_test)
 BOOST_AUTO_TEST_CASE(inner_box_test)
 {
   const auto in = Raster<int, 3>({5, 6, 7}).range();
-  const auto extrapolated = extrapolate(in, 0);
+  const auto extrapolated = extrapolation(in, 0);
   const auto k = convolution(Raster<int, 3>({3, 3, 3}).fill(1));
   const auto expected = k * extrapolated;
 
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(inner_box_test)
 BOOST_AUTO_TEST_CASE(inner_decimate_test)
 {
   const auto in = Raster<int, 3>({5, 6, 7}).range();
-  const auto extrapolated = extrapolate(in, 0);
+  const auto extrapolated = extrapolation(in, 0);
   const auto k = convolution(Raster<int, 3>({3, 3, 3}).fill(1));
   const auto expected = k * extrapolated;
 
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(inner_decimate_test)
 BOOST_AUTO_TEST_CASE(extrapolated_decimate_1d_test)
 {
   const auto in = Raster<int, 1>({13}).range();
-  const auto extrapolated = extrapolate(in, 0);
+  const auto extrapolated = extrapolation(in, 0);
   const auto k = convolution(Raster<int, 1>({7}).fill(1));
   const auto expected = k * extrapolated;
 
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE(extrapolated_decimate_1d_test)
 BOOST_AUTO_TEST_CASE(extrapolated_decimate_2d_test)
 {
   const auto in = Raster<int, 2>({13, 13}).range();
-  const auto extrapolated = extrapolate(in, 0);
+  const auto extrapolated = extrapolation(in, 0);
   const auto k = convolution(Raster<int, 2>({7, 7}).fill(1));
   const auto expected = k * extrapolated;
 
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(extrapolated_decimate_2d_test)
 BOOST_AUTO_TEST_CASE(extrapolated_decimate_3d_test)
 {
   const auto in = Raster<int, 3>({5, 6, 7}).range();
-  const auto extrapolated = extrapolate(in, 0);
+  const auto extrapolated = extrapolation(in, 0);
   const auto k = convolution(Raster<int, 3>({3, 3, 3}).fill(1));
   const auto expected = k * extrapolated;
 

@@ -22,20 +22,20 @@ BOOST_AUTO_TEST_CASE(extrapolate_interpolate_test)
 
   //! [Extra]
   Linx::Position<2> outside {-1, -1};
-  const auto dirichlet = Linx::extrapolate(raster, 0);
-  const auto neumann = Linx::extrapolate<Linx::NearestNeighbor>(raster);
+  const auto dirichlet = Linx::extrapolation(raster, 0);
+  const auto neumann = Linx::extrapolation<Linx::NearestNeighbor>(raster);
   BOOST_TEST(dirichlet[outside] == 0);
   BOOST_TEST(neumann[outside] == raster[0]);
   //! [Extra]
 
   //! [Inter]
   Linx::Vector<double, 2> inbetween {.5, .5};
-  const auto nn = Linx::interpolate<Linx::NearestNeighbor>(raster);
+  const auto nn = Linx::interpolation<Linx::NearestNeighbor>(raster);
   BOOST_TEST(nn(inbetween) == raster.at(-1));
   //! [Inter]
 
   //! [Inter-extra]
-  const auto linear_dirichlet = Linx::interpolate<Linx::Linear>(dirichlet);
+  const auto linear_dirichlet = Linx::interpolation<Linx::Linear>(dirichlet);
   BOOST_TEST(linear_dirichlet[outside] == 0);
   BOOST_TEST(linear_dirichlet(inbetween) == 2.5);
   //! [Inter-extra]

@@ -8,7 +8,7 @@ This project is a work in progress to gather ND array related features
 of [EleFits](https://cnes.github.io/EleFits/)' `Raster` -- an extensible ND data storage class with pixel-wise operations --
 and PhiFun's operations -- e.g. Fourier transforms, linear filtering, and interpolation.
 
-The target is a header-only library focused on ease of use
+The target is a header-only library focused on ease of use, extensibility,
 and which interfaces seamlessly with the standard C++ library.
 At some point, the ND array implementation of EleFits should be droped in favor of Linx.
 
@@ -110,7 +110,7 @@ constexpr Linx::Index Dimension = 2;
 const auto raw = Linx::read<Pixel, Dimension>(input);
 
 const auto ball = Linx::Mask<Dimension>::ball<2>(radius);
-const auto dilated = dilate(ball) * raw;
+const auto dilated = dilation(ball) * raw;
 
 Linx::write(dilated, output);
 ```

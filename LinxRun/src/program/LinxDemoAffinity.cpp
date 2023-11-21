@@ -43,8 +43,8 @@ public:
     input.fill(1);
     Linx::Box<2> square({quarter, quarter}, {3 * quarter, 3 * quarter});
     input.patch(square).fill(2);
-    auto extrapolator = Linx::extrapolate(input, 0.F);
-    auto interpolator = Linx::interpolate<Linx::Linear>(extrapolator);
+    auto extrapolator = Linx::extrapolation(input, 0.F);
+    auto interpolator = Linx::interpolation<Linx::Linear>(extrapolator);
 
     Linx::Raster<float> output(input.shape());
     Linx::Affinity<2> affinity({2 * quarter, 2 * quarter});

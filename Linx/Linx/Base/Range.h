@@ -173,7 +173,7 @@ struct RangeMixin {
 };
 
 /**
- * @relates RangeMixin
+ * @relatesalo RangeMixin
  * @brief Get a reference to the (first) min element.
  * @see `distribution()`
  */
@@ -184,7 +184,7 @@ const typename TRange::value_type& min(const TRange& in)
 }
 
 /**
- * @relates RangeMixin
+ * @relatesalo RangeMixin
  * @brief Get a reference to the (first) max element.
  * @see `distribution()`
  */
@@ -195,7 +195,7 @@ const typename TRange::value_type& max(const TRange& in)
 }
 
 /**
- * @relates RangeMixin
+ * @relatesalo RangeMixin
  * @brief Get a pair of references to the (first) min and max elements.
  * @see `distribution()`
  */
@@ -207,7 +207,7 @@ std::pair<const typename TRange::value_type&, const typename TRange::value_type&
 }
 
 /**
- * @relates RangeMixin
+ * @relatesalo RangeMixin
  * @brief Compute the sum of a range.
  * @param offset An offset
  */
@@ -218,7 +218,7 @@ double sum(const TRange& in, double offset = 0)
 }
 
 /**
- * @relates RangeMixin
+ * @relatesalo RangeMixin
  * @brief Compute the product of a range.
  * @param factor A factor
  */
@@ -229,7 +229,7 @@ double product(const TRange& in, double factor = 1)
 }
 
 /**
- * @relates RangeMixin
+ * @relatesalo RangeMixin
  * @brief Compute the mean of a range.
  * @see `distribution()`
  */
@@ -240,7 +240,7 @@ double mean(const TRange& in)
 }
 
 /**
- * @relates RangeMixin
+ * @relatesalo RangeMixin
  * @brief Create a `DataDistribution` from the container.
  */
 template <typename TRange>

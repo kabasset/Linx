@@ -23,14 +23,14 @@ BOOST_AUTO_TEST_CASE(constant_nn_test)
   Position<3> position {-1, -1, -1};
   Vector<double, 3> vector {.5, .5, .5};
 
-  const auto extra = extrapolate(raster, 0);
+  const auto extra = extrapolation(raster, 0);
   BOOST_TEST(extra[position] == 0);
 
-  const auto inter = interpolate<NearestNeighbor>(raster);
+  const auto inter = interpolation<NearestNeighbor>(raster);
   BOOST_TEST(&inter[position] < raster.data()); // Out of bounds
   BOOST_TEST(inter(vector) == 1);
 
-  const auto interextra = interpolate<NearestNeighbor>(extra);
+  const auto interextra = interpolation<NearestNeighbor>(extra);
   BOOST_TEST(interextra[position] == 0);
   BOOST_TEST(interextra(vector) == 1);
 }
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(periodic_test)
   Position<3> negative {-1, -1, -1};
   Position<3> positive {2, 3, 4};
 
-  const auto extra = extrapolate<Periodic>(raster);
+  const auto extra = extrapolation<Periodic>(raster);
   BOOST_TEST(extra[negative] == raster.at(-1));
   BOOST_TEST(extra[positive] == (raster[{0, 1, 0}]));
 }
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(linear_test)
   Raster<int, 3> raster({2, 2, 2});
   raster.range(1);
 
-  const auto interpolator = interpolate<Linear>(raster);
+  const auto interpolator = interpolation<Linear>(raster);
 
   const auto front = interpolator[{0, 0, 0}];
   const auto back = interpolator[{1, 1, 1}];
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(cubic_test)
   Raster<int, 3> raster({4, 4, 4});
   raster.range(1);
 
-  const auto interpolator = interpolate<Cubic>(raster);
+  const auto interpolator = interpolation<Cubic>(raster);
 
   const auto front = interpolator[{0, 0, 0}];
   const auto back = interpolator[{3, 3, 3}];
