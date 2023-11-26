@@ -13,31 +13,12 @@
 
 static Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkConvolution");
 
-template <typename T>
-class ConvolutionFunctor {
-public:
-
-  using Value = T;
-
-  ConvolutionFunctor(std::vector<T> kernel) : m_kernel(std::move(kernel)) {}
-
-  template <typename TIn>
-  inline Value operator()(const TIn& neighbors) const
-  {
-    return std::inner_product(m_kernel.rbegin(), m_kernel.rend(), neighbors.begin(), Value {});
-  }
-
-private:
-
-  std::vector<T> m_kernel;
-};
-
 using Image = Linx::Raster<float>;
-using Kernel = const Linx::Kernel<Linx::KernelOp::Convolution, float>;
 using Duration = std::chrono::milliseconds;
 
-void filter_monolith(Image& image, Kernel& kernel)
+void filter_monolith(Image& image, const Image& values)
 {
+  auto kernel = Linx::convolution(values);
   const auto extrapolation = Linx::extrapolation<Linx::NearestNeighbor>(image);
   const auto extrapolated = extrapolation.copy(image.domain() + kernel.window());
   // image = kernel.crop(extrapolated);
@@ -51,12 +32,12 @@ void filter_monolith(Image& image, Kernel& kernel)
   }
 }
 
-void filter_hardcoded(Image& image, Kernel& kernel)
+void filter_hardcoded(Image& image, const Image& values)
 {
+  auto kernel = Linx::convolution(values);
   const auto extrapolation = Linx::extrapolation<Linx::NearestNeighbor>(image);
   const auto extrapolated = extrapolation.copy(image.domain() + kernel.window());
-  const auto kernel_data = kernel.raster();
-  auto it = kernel_data.end();
+  auto it = image.end();
   Image out(image.shape());
   auto out_it = out.begin();
   const auto inner = image.domain() - kernel.window().front();
@@ -75,34 +56,23 @@ void filter_hardcoded(Image& image, Kernel& kernel)
   image = out;
 }
 
-void filter_functor(Image& image, Kernel& kernel)
-{
-  const auto raster = kernel.raster();
-  std::vector<float> values(raster.begin(), raster.end());
-  Linx::StructuringElement<ConvolutionFunctor<float>, Linx::Box<2>> filter(std::move(values), kernel.window());
-  image = filter * Linx::extrapolation<Linx::NearestNeighbor>(image);
-}
-
 template <typename TDuration>
-TDuration filter(Image& image, Kernel& kernel, char setup)
+TDuration filter(Image& image, const Image& kernel, char setup)
 {
   Linx::Chronometer<TDuration> chrono;
   chrono.start();
   switch (setup) {
     case '0':
-      image = kernel * Linx::extrapolation(image, 0.0F);
+      image = Linx::convolution(kernel) * Linx::extrapolation(image, 0.0F);
       break;
     case 'd':
-      image = kernel * Linx::extrapolation<Linx::NearestNeighbor>(image);
+      image = Linx::convolution(kernel) * Linx::extrapolation<Linx::NearestNeighbor>(image);
       break;
     case 'm':
       filter_monolith(image, kernel);
       break;
     case 'h':
       filter_hardcoded(image, kernel);
-      break;
-    case 'f':
-      filter_functor(image, kernel);
       break;
     default:
       throw std::runtime_error("Case not implemented"); // FIXME CaseNotImplemented
@@ -116,7 +86,7 @@ public:
   std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
   {
     Linx::ProgramOptions options;
-    options.named("case", "Test case: d (default), m (monolith), h (hardcoded), f (functor)", 'd');
+    options.named("case", "Test case: d (default), m (monolith), h (hardcoded)", 'd');
     options.named("image", "Raster length along each axis", 2048L);
     options.named("kernel", "Kernel length along each axis", 5L);
     return options.as_pair();
@@ -133,7 +103,7 @@ public:
 
     logger.info("Generating raster and kernel...");
     auto image = Image(image_shape).range();
-    const auto kernel = Linx::convolution(Image(kernel_shape).range());
+    const auto kernel = Image(kernel_shape).range();
     logger.info() << "  input: " << image;
 
     logger.info("Filtering...");

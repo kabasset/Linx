@@ -5,6 +5,8 @@
 #ifndef _LINXTRANSFORMS_KERNEL_H
 #define _LINXTRANSFORMS_KERNEL_H
 
+#include "Linx/Base/TypeUtils.h"
+#include "Linx/Transforms/StructuringElement.h"
 #include "Linx/Transforms/impl/Filter.h"
 
 namespace Linx {
@@ -75,65 +77,145 @@ private:
 };
 
 /**
+ * @brief Correlation operation.
+ */
+template <typename T>
+class Correlation {
+public:
+
+  /**
+   * @brief The correlation type.
+   */
+  using Value = T;
+
+  /**
+   * @brief Constructor.
+   */
+  template <typename TRange>
+  Correlation(TRange&& values) : m_kernel(std::move(values))
+  {
+    if constexpr (is_complex<T>()) {
+      for (auto& e : m_kernel) {
+        e = std::conj(e);
+      }
+    }
+  }
+
+  /**
+   * @brief Perform the operation on given neighborhood values.
+   */
+  template <typename TIn>
+  inline Value operator()(const TIn& neighbors) const
+  {
+    return std::inner_product(m_kernel.begin(), m_kernel.end(), neighbors.begin(), Value {});
+  }
+
+private:
+
+  /**
+   * @brief The kernel.
+   */
+  std::vector<T> m_kernel;
+};
+
+/**
+ * @brief Convolution operation.
+ */
+template <typename T>
+class Convolution {
+public:
+
+  /**
+   * @brief The convolution type.
+   */
+  using Value = T;
+
+  /**
+   * @brief Constructor.
+   */
+  template <typename TRange>
+  Convolution(TRange&& values) : m_kernel(std::move(values))
+  {}
+
+  /**
+   * @brief Perform the operation on given neighborhood values.
+   */
+  template <typename TIn>
+  inline Value operator()(const TIn& neighbors) const
+  {
+    return std::inner_product(m_kernel.rbegin(), m_kernel.rend(), neighbors.begin(), Value {});
+  }
+
+private:
+
+  /**
+   * @brief The kernel.
+   */
+  std::vector<T> m_kernel;
+};
+
+/**
  * @relatesalso Kernel
  * @brief Make a convolution kernel from values and a window.
  */
 template <typename T, Index N = 2>
-Kernel<KernelOp::Convolution, T, N> convolution(const T* values, Box<N> window)
+auto convolution(const T* values, Box<N> window)
 {
-  return Kernel<KernelOp::Convolution, T, N>(values, std::move(window));
+  const T* end = values + window.size();
+  return StructuringElement<Convolution<T>, Box<N>>(std::vector<T>(values, end), std::move(window));
 }
 
 /**
  * @relatesalso Kernel
- * @brief Make a kernel from a raster and origin position.
+ * @brief Make a convolution kernel from a raster and origin position.
  */
 template <typename T, Index N, typename THolder>
-Kernel<KernelOp::Convolution, T, N> convolution(const Raster<T, N, THolder>& values, Position<N> origin)
+auto convolution(const Raster<T, N, THolder>& values, Position<N> origin)
 {
   return convolution(values.data(), values.domain() - origin);
 }
 
 /**
  * @relatesalso Kernel
- * @brief Make a kernel from a raster, with centered origin.
+ * @brief Make a convolution kernel from a raster, with centered origin.
  * 
  * In case of even lengths, origin position is rounded down.
  */
 template <typename T, Index N, typename THolder>
-Kernel<KernelOp::Convolution, T, N> convolution(const Raster<T, N, THolder>& values)
+auto convolution(const Raster<T, N, THolder>& values)
 {
   return convolution(values.data(), values.domain() - (values.shape() - 1) / 2);
 }
 
 /**
  * @relatesalso Kernel
- * @brief Make a convolution kernel from values and a window.
+ * @brief Make a correlation kernel from values and a window.
  */
 template <typename T, Index N = 2>
-Kernel<KernelOp::Correlation, T, N> correlation(const T* values, Box<N> window)
+auto correlation(const T* values, Box<N> window)
 {
-  return Kernel<KernelOp::Correlation, T, N>(values, std::move(window));
+  const T* end = values + window.size();
+  return StructuringElement<Correlation<T>, Box<N>>(std::vector(values, end), std::move(window));
 }
 
 /**
  * @relatesalso Kernel
- * @brief Make a kernel from a raster and origin position.
+ * @brief Make a correlation kernel from a raster and origin position.
  */
 template <typename T, Index N, typename THolder>
-Kernel<KernelOp::Correlation, T, N> correlation(const Raster<T, N, THolder>& values, Position<N> origin)
+auto correlation(const Raster<T, N, THolder>& values, Position<N> origin)
 {
   return correlation(values.data(), values.domain() - origin);
 }
 
 /**
  * @relatesalso Kernel
- * @brief Make a kernel from a raster, with centered origin.
+ * @brief Make a correlation kernel from a raster, with centered origin.
  * 
  * In case of even lengths, origin position is rounded down.
  */
 template <typename T, Index N, typename THolder>
-Kernel<KernelOp::Correlation, T, N> correlation(const Raster<T, N, THolder>& values)
+auto correlation(const Raster<T, N, THolder>& values)
 {
   return correlation(values.data(), values.domain() - (values.shape() - 1) / 2);
 }

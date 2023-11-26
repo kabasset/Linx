@@ -266,6 +266,26 @@ struct Limits {
   }
 };
 
+/// @cond
+template <typename T>
+struct IsComplex;
+
+template <typename T>
+struct IsComplex : std::false_type {};
+
+template <typename T>
+struct IsComplex<std::complex<T>> : std::true_type {};
+/// @endcond
+
+/**
+ * @brief Test whether a type is complex.
+ */
+template <typename T>
+constexpr bool is_complex()
+{
+  return IsComplex<T>::value;
+}
+
 } // namespace Linx
 
 #endif

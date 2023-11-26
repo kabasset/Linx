@@ -130,7 +130,7 @@ public:
   /**
    * @brief Convolve the separable components as a single ND kernel.
    */
-  Kernel<KernelOp::Convolution, Value, Dimension> compose() const
+  auto compose() const
   { // FIXME inherit KernelOp
     const auto w = window();
     const auto o = -w.front();
