@@ -6,7 +6,7 @@
 #define _LINXTRANSFORMS_KERNEL_H
 
 #include "Linx/Base/TypeUtils.h"
-#include "Linx/Transforms/StructuringElement.h"
+#include "Linx/Transforms/Filter.h"
 #include "Linx/Transforms/impl/Filter.h"
 
 namespace Linx {
@@ -58,7 +58,7 @@ public:
    */
   template <typename TIn>
   inline Value operator()(const TIn& neighbors) const
-  { // FIXME use StructuringElement design
+  { // FIXME use Filter design
     if constexpr (TOp == KernelOp::Correlation) {
       return std::inner_product(m_values.begin(), m_values.end(), neighbors.begin(), Value {});
       // FIXME conjugate for complex values
@@ -162,7 +162,7 @@ template <typename T, Index N = 2>
 auto convolution(const T* values, Box<N> window)
 {
   const T* end = values + window.size();
-  return StructuringElement<Convolution<T>, Box<N>>(std::vector<T>(values, end), std::move(window));
+  return Filter<Convolution<T>, Box<N>>(std::vector<T>(values, end), std::move(window));
 }
 
 /**
@@ -195,7 +195,7 @@ template <typename T, Index N = 2>
 auto correlation(const T* values, Box<N> window)
 {
   const T* end = values + window.size();
-  return StructuringElement<Correlation<T>, Box<N>>(std::vector(values, end), std::move(window));
+  return Filter<Correlation<T>, Box<N>>(std::vector(values, end), std::move(window));
 }
 
 /**

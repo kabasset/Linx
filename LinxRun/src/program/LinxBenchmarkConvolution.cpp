@@ -5,8 +5,8 @@
 #include "ElementsKernel/ProgramHeaders.h"
 #include "Linx/Run/Chronometer.h"
 #include "Linx/Run/ProgramOptions.h"
+#include "Linx/Transforms/Filter.h" // FIXME replace with Filter
 #include "Linx/Transforms/Kernel.h" // FIXME replace with Filter
-#include "Linx/Transforms/StructuringElement.h" // FIXME replace with Filter
 
 #include <map>
 #include <string>

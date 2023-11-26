@@ -6,8 +6,8 @@
 #define _LINXRUN_COSMICS_H
 
 #include "Linx/Data/Raster.h"
+#include "Linx/Transforms/Filter.h" // FIXME Morphology
 #include "Linx/Transforms/Kernel.h" // FIXME Filtering
-#include "Linx/Transforms/StructuringElement.h" // FIXME Morphology
 
 namespace Linx {
 namespace Cosmics {
@@ -89,7 +89,7 @@ template <typename TIn, typename TPsf>
 Raster<typename TPsf::Value> quotient(const TIn& in, const TPsf& psf)
 {
   using T = typename TPsf::Value;
-  auto filter = StructuringElement<QuotientFilter<T>, Box<2>>(
+  auto filter = Filter<QuotientFilter<T>, Box<2>>(
       QuotientFilter<T>(psf.begin(), psf.end()),
       psf.domain() - (psf.shape() - 1) / 2);
   return filter * extrapolation<NearestNeighbor>(in);
@@ -99,7 +99,7 @@ template <typename TIn, typename TPsf>
 Raster<typename TPsf::Value> match(const TIn& in, const TPsf& psf)
 {
   using T = typename TPsf::Value;
-  auto filter = StructuringElement<PearsonCorrelation<T>, Box<2>>(
+  auto filter = Filter<PearsonCorrelation<T>, Box<2>>(
       PearsonCorrelation<T>(psf.begin(), psf.end()),
       psf.domain() - (psf.shape() - 1) / 2);
   return filter * extrapolation<NearestNeighbor>(in);

@@ -36,7 +36,7 @@ elements_add_unit_test(SeparableKernel tests/src/SeparableKernel_test.cpp
                      EXECUTABLE LinxTransforms_SeparableKernel_test
                      LINK_LIBRARIES Linx
                      TYPE Boost)
-elements_add_unit_test(StructuringElement tests/src/StructuringElement_test.cpp 
-                     EXECUTABLE LinxTransforms_StructuringElement_test
+elements_add_unit_test(Filter tests/src/Filter_test.cpp 
+                     EXECUTABLE LinxTransforms_Filter_test
                      LINK_LIBRARIES Linx
                      TYPE Boost)

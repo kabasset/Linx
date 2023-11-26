@@ -91,7 +91,7 @@ struct Dilation {
  * @tparam TWindow The type of window, e.g. `Box` or `Mask`
  */
 template <typename TOp, typename TWindow>
-class StructuringElement : public FilterMixin<typename TOp::Value, TWindow, StructuringElement<TOp, TWindow>> {
+class Filter : public FilterMixin<typename TOp::Value, TWindow, Filter<TOp, TWindow>> {
 public:
 
   /**
@@ -108,17 +108,15 @@ public:
    * @brief Explcit window constructor.
    * @param window The filter window
    */
-  explicit StructuringElement(TOp&& op, TWindow window) :
-      FilterMixin<Value, TWindow, StructuringElement<TOp, TWindow>>(std::move(window)), m_op(std::forward<TOp>(op))
+  explicit Filter(TOp&& op, TWindow window) :
+      FilterMixin<Value, TWindow, Filter<TOp, TWindow>>(std::move(window)), m_op(std::forward<TOp>(op))
   {}
 
   /**
    * @brief Hypercube window constructor.
    * @param radius The hypercube radius
    */
-  explicit StructuringElement(TOp&& op, Index radius = 1) :
-      StructuringElement(std::forward<TOp>(op), Box<Dimension>::from_center(radius))
-  {}
+  explicit Filter(TOp&& op, Index radius = 1) : Filter(std::forward<TOp>(op), Box<Dimension>::from_center(radius)) {}
 
   /**
    * @brief Estimation operator.
@@ -138,29 +136,27 @@ private:
 };
 
 template <typename T, typename TWindow>
-StructuringElement<MorphologyOp::MeanFilter<T>, TWindow> mean_filter(TWindow window)
+Filter<MorphologyOp::MeanFilter<T>, TWindow> mean_filter(TWindow window)
 {
-  return StructuringElement<MorphologyOp::MeanFilter<T>, TWindow>(MorphologyOp::MeanFilter<T> {}, std::move(window));
+  return Filter<MorphologyOp::MeanFilter<T>, TWindow>(MorphologyOp::MeanFilter<T> {}, std::move(window));
 }
 
 template <typename T, typename TWindow>
-StructuringElement<MorphologyOp::MedianFilter<T>, TWindow> median_filter(TWindow window)
+Filter<MorphologyOp::MedianFilter<T>, TWindow> median_filter(TWindow window)
 {
-  return StructuringElement<MorphologyOp::MedianFilter<T>, TWindow>(
-      MorphologyOp::MedianFilter<T> {},
-      std::move(window));
+  return Filter<MorphologyOp::MedianFilter<T>, TWindow>(MorphologyOp::MedianFilter<T> {}, std::move(window));
 }
 
 template <typename T, typename TWindow>
-StructuringElement<MorphologyOp::Erosion<T>, TWindow> erosion(TWindow window)
+Filter<MorphologyOp::Erosion<T>, TWindow> erosion(TWindow window)
 {
-  return StructuringElement<MorphologyOp::Erosion<T>, TWindow>(MorphologyOp::Erosion<T> {}, std::move(window));
+  return Filter<MorphologyOp::Erosion<T>, TWindow>(MorphologyOp::Erosion<T> {}, std::move(window));
 }
 
 template <typename T, typename TWindow>
-StructuringElement<MorphologyOp::Dilation<T>, TWindow> dilation(TWindow window)
+Filter<MorphologyOp::Dilation<T>, TWindow> dilation(TWindow window)
 {
-  return StructuringElement<MorphologyOp::Dilation<T>, TWindow>(MorphologyOp::Dilation<T> {}, std::move(window));
+  return Filter<MorphologyOp::Dilation<T>, TWindow>(MorphologyOp::Dilation<T> {}, std::move(window));
 }
 
 } // namespace Linx
