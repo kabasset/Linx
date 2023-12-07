@@ -31,15 +31,17 @@ public:
   using Value = typename std::decay_t<decltype((std::declval<TFilters>(), ...))>::Value;
 
   /**
-   * @brief The logical dimension of the combined kernel.
+   * @brief The logical dimension of the composed kernel.
    */
   static constexpr Index Dimension = std::max({TFilters::Dimension...});
 
   /**
    * @brief Constructor.
+   * 
+   * @note Filter sequences are better constructed by multiplying simple filters.
    */
   template <typename... TArgs>
-  explicit FilterSeq(TArgs&&... args) : m_filters(std::forward<Ts>(args)...)
+  explicit FilterSeq(TArgs&&... args) : m_filters(std::forward<TArgs>(args)...)
   {}
 
   /// @group_properties
@@ -49,11 +51,15 @@ public:
    */
   Box<Dimension> window() const
   {
+    // FIXME support Dimension = -1
     auto front = Position<Dimension>::zero();
     auto back = Position<Dimension>::zero();
     seq_foreach(m_filters, [&](const auto& k) {
-      front[k.Axis] = std::min(front[k.Axis], k.window().front());
-      back[k.Axis] = std::max(back[k.Axis], k.window().back());
+      const auto& w = k.window();
+      for (Index i = 0; i < w.dimension(); ++i) {
+        front[i] = std::min(front[i], w.front()[i]);
+        back[i] = std::max(back[i], w.back()[i]);
+      }
     });
     return {front, back};
   }
@@ -66,7 +72,7 @@ public:
     const auto w = window();
     const auto o = -w.front();
     auto raster = Raster<Value, Dimension>(w.shape());
-    raster[o] = T(1); // FIXME or back-o?
+    raster[o] = Value(1); // FIXME or back-o?
     auto impulse = *this * extrapolation(raster, 0);
     return convolution(impulse.reverse(), o); // FIXME use KernelOp
   }
@@ -94,54 +100,57 @@ public:
    */
   template <typename T, typename TWindow>
   friend FilterSeq<Filter<T, TWindow>, TFilters...>
-  operator*(Filter<T, TWindow>&& lhs, const FilterSeq<T, I0, Is...>& rhs)
+  operator*(Filter<T, TWindow>&& lhs, const FilterSeq<TFilters...>& rhs)
   {
     return FilterSeq<Filter<T, TWindow>, TFilters...>(
         std::tuple_cat(std::make_tuple(std::forward<Filter<T, TWindow>>(lhs)), rhs.m_filters));
   }
 
   /**
-   * @brief Apply the correlation kernels to an input extrapolator.
+   * @brief Apply the filters to an input extrapolator.
    */
   template <typename TIn>
-  Raster<std::decay_t<typename TIn::Value>, TIn::Dimension> operator*(const TIn& in) const
+  Raster<Value, TIn::Dimension> operator*(const TIn& in) const
   {
-    Raster<std::decay_t<typename TIn::Value>, TIn::Dimension> out(in.shape());
-    correlate_to(in, out);
+    Raster<Value, TIn::Dimension> out(in.shape());
+    full_to(in, out);
+    // FIXME other cases
     return out;
-  }
-
-  /**
-   * @copydoc correlate()
-   */
-  template <typename TIn, typename TOut>
-  void correlate_to(const TIn& in, TOut& out) const
-  {
-    correlate_kernel_seq<TIn, TOut, I0, Is...>(in, out);
   }
 
 private:
 
-  template <typename TIn, typename TOut, Index J0, Index... Js>
-  void correlate_kernel_seq(const TIn& in, TOut& out) const
+  template <typename TIn, typename TOut>
+  void full_to(const TIn& in, TOut& out) const
   {
-    // FIXME extrapolate once for all and correlate_crop
-    const auto tmp = correlate_kth_kernel<TIn, TOut, sizeof...(Is) - sizeof...(Js)>(in);
-    const auto& method = in.method();
-    const Extrapolation<TOut, decltype(method)> extrapolator(tmp, method);
-    correlate_kernel_seq<decltype(extrapolator), TOut, Js...>(extrapolator, out);
+    const auto extrapolated = in.copy(Linx::box(in.domain()) + window()); // FIXME split
+    crop_to(extrapolated, out);
   }
 
   template <typename TIn, typename TOut>
-  void correlate_kernel_seq(const TIn& in, TOut& out) const
+  void crop_to(const TIn& in, TOut& out) const
   {
-    out = rasterize(in); // FIXME swap? move?
+    upto_kth_to<sizeof...(TFilters) - 1>(in, out);
   }
 
-  template <typename TIn, typename TOut, std::size_t K>
-  TOut correlate_kth_kernel(const TIn& in) const
+  template <std::size_t K, typename TIn, typename TOut>
+  void upto_kth_to(const TIn& in, TOut& out) const
   {
-    return std::get<K>(m_filters) * in;
+    if constexpr (K == 0) {
+      out = std::get<0>(m_filters) * in;
+    } else {
+      out = std::get<K>(m_filters) * upto_kth<K - 1>(in);
+    }
+  }
+
+  template <std::size_t K, typename TIn>
+  auto upto_kth(const TIn& in) const
+  {
+    if constexpr (K == 0) {
+      return std::get<0>(m_filters) * in;
+    } else {
+      return std::get<K>(m_filters) * upto_kth<K - 1>(in);
+    }
   }
 
 private:
@@ -155,24 +164,27 @@ private:
 template <typename TOp, typename TWindow, typename UOp, typename UWindow>
 FilterSeq<Filter<TOp, TWindow>, Filter<UOp, UWindow>> operator*(Filter<TOp, TWindow> lhs, Filter<UOp, UWindow> rhs)
 {
-  return FilterSeq<Filter<TOp, TWindow>, Filter<UOp, UWindow>>(std::make_tuple(std::moce(lhs), std::move(rhs)));
+  return FilterSeq<Filter<TOp, TWindow>, Filter<UOp, UWindow>>(std::make_tuple(std::move(lhs), std::move(rhs)));
 }
 
-template <typename T, Index I>
-Filter<Correlation<T>, Box<I + 1>> correlation_along(TIn values)
-{
-  const auto radius = values.size() / 2;
-  auto front = Position<I + 1>::zero();
-  front[I] = -radius; // FIXME +1?
-  auto back = Position<I + 1>::zero();
-  back[I] = values.size() - radius - 1;
-  return correlation<T>(values, {front, back}); // FIXME line-based window
-}
-
+/**
+ * @brief Create a filter made of identical 1D correlation kernels along given axes.
+ * 
+ * Axis need not be different, e.g. to define some iterative kernel.
+ */
 template <typename T, Index I0, Index... Is>
-auto correlation_along(TIn values)
+auto correlation_along(std::vector<T> values)
 {
-  return correlation_along<T, I0>(values) * correlation_along<T, Is...>(values);
+  if constexpr (sizeof...(Is) == 0) {
+    const auto radius = values.size() / 2;
+    auto front = Position<I0 + 1>::zero();
+    front[I0] = -radius; // FIXME +1?
+    auto back = Position<I0 + 1>::zero();
+    back[I0] = values.size() - radius - 1;
+    return correlation<T, I0 + 1>(values.data(), {front, back}); // FIXME line-based window
+  } else {
+    return correlation_along<T, I0>(values) * correlation_along<T, Is...>(values);
+  }
 }
 
 /**
@@ -181,8 +193,8 @@ auto correlation_along(TIn values)
  * The kernel along the `IAveraging` axes is `{1, 1, 1}` and that along `IDerivation` is `{-sign, 0, sign}`.
  * @see `sobel()`
  */
-template <Index IDerivation, Index... IAveraging>
-static FilterSeq prewitt_filter(T sign = 1)
+template <typename T, Index IDerivation, Index... IAveraging>
+auto prewitt_filter(T sign = 1)
 {
   const auto derivation = correlation_along<T, IDerivation>({-sign, 0, sign});
   const auto averaging = correlation_along<T, IAveraging...>({1, 1, 1});
@@ -203,8 +215,8 @@ static FilterSeq prewitt_filter(T sign = 1)
  * auto dy = kernel * raster;
  * \endcode
  */
-template <Index IDerivation, Index... IAveraging>
-static auto sobel_filter(T sign = 1)
+template <typename T, Index IDerivation, Index... IAveraging>
+auto sobel_filter(T sign = 1)
 {
   const auto derivation = correlation_along<T, IDerivation>({-sign, 0, sign});
   const auto averaging = correlation_along<T, IAveraging...>({1, 2, 1});
@@ -217,11 +229,11 @@ static auto sobel_filter(T sign = 1)
  * The kernel along the `IAveraging` axes is `{3, 10, 3}` and that along `IDerivation` is `{-sign, 0, sign}`.
  * @see `sobel()`
  */
-template <Index IDerivation, Index... IAveraging>
-static auto scharr_filter(T sign = 1)
+template <typename T, Index IDerivation, Index... IAveraging>
+auto scharr_filter(T sign = 1)
 {
-  const auto derivation = OrientedKernel<T, IDerivation>({-sign, 0, sign});
-  const auto averaging = FilterSeq<T, Is...>({3, 10, 3});
+  const auto derivation = correlation_along<T, IDerivation>({-sign, 0, sign});
+  const auto averaging = correlation_along<T, IAveraging...>({3, 10, 3});
   return derivation * averaging;
 }
 
@@ -231,10 +243,10 @@ static auto scharr_filter(T sign = 1)
  * The kernel is built as a sequence of 1D kernels `{1, -2, 1}` if `sign` is 1,
  * or `{-1, 2, -1}` if sign is -1.
  */
-template <Index... Is>
-static auto separable_laplacian_filter(T sign = 1)
+template <typename T, Index... Is>
+auto separable_laplacian_filter(T sign = 1)
 {
-  return FilterSeq<T, I0, Is...>({sign, sign * -2, sign});
+  return correlation_along<T, Is...>({sign, sign * -2, sign});
 }
 
 } // namespace Linx

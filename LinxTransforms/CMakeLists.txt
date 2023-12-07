@@ -20,6 +20,10 @@ elements_add_unit_test(DftPlan tests/src/DftPlan_test.cpp
                      EXECUTABLE LinxTransforms_DftPlan_test
                      LINK_LIBRARIES Linx
                      TYPE Boost)
+elements_add_unit_test(FilterSeq tests/src/FilterSeq_test.cpp 
+                    EXECUTABLE LinxTransforms_FilterSeq_test
+                    LINK_LIBRARIES Linx
+                    TYPE Boost)
 elements_add_unit_test(Interpolation tests/src/Interpolation_test.cpp 
                      EXECUTABLE LinxTransforms_Interpolation_test
                      LINK_LIBRARIES Linx
