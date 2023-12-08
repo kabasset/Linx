@@ -56,8 +56,9 @@ public:
    * 
    */
   template <typename TIn>
-  Raster<Value, Dimension> operator*(const TIn& in) const
+  Raster<Value, TIn::Dimension> operator*(const TIn& in) const
   {
+    // FIXME support arbitrary patches
     if constexpr (is_patch<TIn>()) {
       if (in.domain().step().is_one()) { // Box
         return box(in);
@@ -77,9 +78,9 @@ public:
    * The output raster has the same shape as the input raster.
    */
   template <typename TExtrapolator>
-  Raster<Value, Dimension> full(const TExtrapolator& in) const
+  Raster<Value, TExtrapolator::Dimension> full(const TExtrapolator& in) const
   {
-    Raster<Value, Dimension> out(in.raster().shape());
+    Raster<Value, TExtrapolator::Dimension> out(in.raster().shape());
     transform_splits(in, out);
     return out;
   }
@@ -91,11 +92,11 @@ public:
    * such that the output domain is `in.domain() - filter.window()`.
    */
   template <typename TRaster>
-  Raster<Value, Dimension> crop(const TRaster& in) const
+  Raster<Value, TRaster::Dimension> crop(const TRaster& in) const
   {
     // FIXME check region is a Box
-    const auto region = Linx::box(in.domain()) - m_window; // box() needed to compile given that Grid is acceptable
-    Raster<Value, Dimension> out(region.shape());
+    const auto region = Linx::box(in.domain()) - Linx::box(m_window);
+    Raster<Value, TRaster::Dimension> out(region.shape());
     transform_monolith(in.patch(region), out);
     return out;
   }
@@ -111,10 +112,10 @@ public:
    * The output raster has the same shape as the box.
    */
   template <typename TPatch>
-  Raster<Value, Dimension> box(const TPatch& in) const
+  Raster<Value, TPatch::Dimension> box(const TPatch& in) const
   {
     // FIXME check region is a Box
-    Raster<Value, Dimension> out(in.domain().shape());
+    Raster<Value, TPatch::Dimension> out(in.domain().shape());
     transform(in, out);
     return out;
   }
@@ -132,13 +133,13 @@ public:
    * The output raster has the same shape as the grid.
    */
   template <typename TPatch>
-  Raster<Value, Dimension> decimate(const TPatch& in) const
+  Raster<Value, TPatch::Dimension> decimate(const TPatch& in) const
   { // FIXME adjust?
 
     const auto& raw = dont_extrapolate(in);
     const auto& front = in.domain().front();
     const auto& step = in.domain().step();
-    Raster<Value, Dimension> out(in.domain().shape());
+    Raster<Value, TPatch::Dimension> out(in.domain().shape());
 
     const auto grid_to_box = [&](const auto& g) {
       auto f = g.front() - front;
