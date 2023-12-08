@@ -25,8 +25,8 @@ class BorderedBox; // for friendness // FIXME rm?
  * Like `Position`, this class stores no pixel values, but coordinates.
  */
 template <Index N = 2>
-class Box : boost::additive<Box<N>, Box<N>>, boost::additive<Box<N>, Position<N>>, boost::additive<Box<N>, Index> {
-  friend class Internal::BorderedBox<N>; // FIXME rm? make private class, friend of FilterMixin?
+class Box : boost::additive<Box<N>, Index> {
+  friend class Internal::BorderedBox<N>; // FIXME move to FilterMixin, sole user
 
 public:
 
@@ -352,40 +352,48 @@ public:
   /**
    * @brief Grow the box by a given margin.
    */
-  Box<N>& operator+=(const Box<N>& margin)
+  template <Index M>
+  Box<N>& operator+=(const Box<M>& margin)
   {
-    m_front += margin.m_front;
-    m_back += margin.m_back;
+    // FIXME allow N=-1
+    m_front += margin.front().template extend<N>();
+    m_back += margin.back().template extend<N>();
     return *this;
   }
 
   /**
    * @brief Shrink the box by a given margin.
    */
-  Box<N>& operator-=(const Box<N>& margin)
+  template <Index M>
+  Box<N>& operator-=(const Box<M>& margin)
   {
-    m_front -= margin.m_front;
-    m_back -= margin.m_back;
+    // FIXME allow N=-1
+    m_front -= margin.front().template extend<N>();
+    m_back -= margin.back().template extend<N>();
     return *this;
   }
 
   /**
    * @brief Translate the box by a given vector.
    */
-  Box<N>& operator+=(const Position<N>& vector)
+  template <Index M>
+  Box<N>& operator+=(const Position<M>& vector)
   {
-    m_front += vector;
-    m_back += vector;
+    // FIXME allow N=-1
+    m_front += vector.template extend<N>();
+    m_back += vector.template extend<N>();
     return *this;
   }
 
   /**
    * @brief Translate the box by the opposite of a given vector.
    */
-  Box<N>& operator-=(const Position<N>& vector)
+  template <Index M>
+  Box<N>& operator-=(const Position<M>& vector)
   {
-    m_front -= vector;
-    m_back -= vector;
+    // FIXME allow N=-1
+    m_front -= vector.template extend<N>();
+    m_back -= vector.template extend<N>();
     return *this;
   }
 
@@ -560,6 +568,46 @@ inline Box<TIn::Dimension> box(const TIn& region)
     }
   }
   return {front, back};
+}
+
+/**
+ * @relatesalso Box
+ */
+template <Index N, Index M>
+Box<N> operator+(Box<N> in, const Box<M>& margin)
+{
+  in += margin;
+  return in;
+}
+
+/**
+ * @relatesalso Box
+ */
+template <Index N, Index M>
+Box<N> operator-(Box<N> in, const Box<M>& margin)
+{
+  in -= margin;
+  return in;
+}
+
+/**
+ * @relatesalso Box
+ */
+template <Index N, Index M>
+Box<N> operator+(Box<N> in, const Position<M>& vector)
+{
+  in += vector;
+  return in;
+}
+
+/**
+ * @relatesalso Box
+ */
+template <Index N, Index M>
+Box<N> operator-(Box<N> in, const Position<M>& vector)
+{
+  in -= vector;
+  return in;
 }
 
 /**
