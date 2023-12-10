@@ -14,6 +14,25 @@
 namespace Linx {
 
 /**
+ * @brief Create a vector of higher dimension.
+ */
+template <Index M, typename T, Index N>
+Vector<T, M> extend(const Vector<T, N>& vector, Vector<T, M> padding = Vector<T, M>::zero())
+{ // FIXME to Vector.h
+  std::copy(vector.begin(), vector.end(), padding.begin());
+  return padding;
+}
+
+/**
+ * @brief Create a box of higher dimension.
+ */
+template <Index M, Index N>
+Box<M> extend(const Box<N>& in, const Position<M>& padding = Position<M>::zero())
+{ // FIXME to Box.h
+  return {extend<M>(in.front(), padding), extend<M>(in.back(), padding)};
+}
+
+/**
  * @brief Spatial filtering mixin.
  */
 template <typename T, typename TWindow, typename TDerived>
@@ -215,7 +234,8 @@ private:
   template <typename TIn, typename TOut>
   void transform_monolith(const TIn& in, TOut& out) const
   {
-    auto patch = in.parent().patch(m_window);
+    // FIXME accept any region
+    auto patch = in.parent().patch(extend<TIn::Dimension>(m_window));
     auto out_it = out.begin();
     for (const auto& p : in.domain()) {
       patch.translate(p);
