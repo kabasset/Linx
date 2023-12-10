@@ -68,7 +68,7 @@ public:
    * @brief Convolve the separable components as a single ND kernel.
    */
   auto compose() const
-  { // FIXME inherit KernelOp
+  { // FIXME rename as impulse
     const auto w = window();
     const auto o = -w.front();
     auto raster = Raster<Value, Dimension>(w.shape());
@@ -145,7 +145,7 @@ private:
 
   template <std::size_t K, typename TIn>
   auto upto_kth(const TIn& in) const
-  {
+  { // FIXME reuse memory
     if constexpr (K == 0) {
       return std::get<0>(m_filters) * in;
     } else {
