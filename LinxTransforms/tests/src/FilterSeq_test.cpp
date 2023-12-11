@@ -15,12 +15,52 @@ BOOST_AUTO_TEST_SUITE(FilterSeq_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(composition_test)
+BOOST_AUTO_TEST_CASE(prewitt_inc_test)
 {
-  const auto kernel = sobel_filter<int, 0, 1>(-1).compose();
-  std::vector<int> values {1, 0, -1, 2, 0, -2, 1, 0, -1};
-  Raster<int, 2> expected({3, 3}, std::move(values));
-  // BOOST_TEST(kernel.raster() == expected);
+  Raster<int> expected({3, 3}, {1, 0, -1, 1, 0, -1, 1, 0, -1});
+  BOOST_TEST((prewitt_filter<int, 0, 1>().impulse()) == expected);
+}
+
+BOOST_AUTO_TEST_CASE(prewitt_dec_test)
+{
+  Raster<int> expected({3, 3}, {-1, 0, 1, -1, 0, 1, -1, 0, 1});
+  BOOST_TEST((prewitt_filter<int, 0, 1>(-1).impulse()) == expected);
+}
+
+BOOST_AUTO_TEST_CASE(sobel_inc_test)
+{
+  Raster<int> expected({3, 3}, {1, 0, -1, 2, 0, -2, 1, 0, -1});
+  BOOST_TEST((sobel_filter<int, 0, 1>().impulse()) == expected);
+}
+
+BOOST_AUTO_TEST_CASE(sobel_dec_test)
+{
+  Raster<int> expected({3, 3}, {-1, 0, 1, -2, 0, 2, -1, 0, 1});
+  BOOST_TEST((sobel_filter<int, 0, 1>(-1).impulse()) == expected);
+}
+
+BOOST_AUTO_TEST_CASE(scharr_inc_test)
+{
+  Raster<int> expected({3, 3}, {3, 0, -3, 10, 0, -10, 3, 0, -3});
+  BOOST_TEST((scharr_filter<int, 0, 1>().impulse()) == expected);
+}
+
+BOOST_AUTO_TEST_CASE(scharr_dec_test)
+{
+  Raster<int> expected({3, 3}, {-3, 0, 3, -10, 0, 10, -3, 0, 3});
+  BOOST_TEST((scharr_filter<int, 0, 1>(-1).impulse()) == expected);
+}
+
+BOOST_AUTO_TEST_CASE(laplacian_plus_test)
+{
+  Raster<int> expected({3, 3}, {0, 1, 0, 1, -2, 1, 0, 1, 0});
+  BOOST_TEST((laplacian_filter<int, 0, 1>().impulse()) == expected);
+}
+
+BOOST_AUTO_TEST_CASE(laplacian_minus_test)
+{
+  Raster<int> expected({3, 3}, {0, -1, 0, -1, 2, -1, 0, -1, 0});
+  BOOST_TEST((laplacian_filter<int, 0, 1>(-1).impulse()) == expected);
 }
 
 BOOST_AUTO_TEST_CASE(orthogonal_associativity_commutativity_test)

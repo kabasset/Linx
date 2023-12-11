@@ -65,16 +65,15 @@ public:
   }
 
   /**
-   * @brief Convolve the separable components as a single ND kernel.
+   * @brief Compute the impulse response of the filter.
    */
-  auto compose() const
-  { // FIXME rename as impulse
-    const auto w = window();
+  auto impulse() const
+  {
+    const auto& w = window();
     const auto o = -w.front();
     auto raster = Raster<Value, Dimension>(w.shape());
     raster[o] = Value(1); // FIXME or back-o?
-    auto impulse = *this * extrapolation(raster, 0);
-    return convolution(impulse.reverse(), o); // FIXME use KernelOp
+    return *this * extrapolation(raster, 0);
   }
 
   /**
@@ -188,65 +187,95 @@ auto correlation_along(std::vector<T> values)
 }
 
 /**
- * @brief Make a Prewitt filter along given axes.
+ * @brief Create a filter made of identical 1D convolution kernels along given axes.
  * 
- * The kernel along the `IAveraging` axes is `{1, 1, 1}` and that along `IDerivation` is `{-sign, 0, sign}`.
- * @see `sobel()`
+ * Axis need not be different, e.g. to define some iterative kernel.
  */
-template <typename T, Index IDerivation, Index... IAveraging>
-auto prewitt_filter(T sign = 1)
+template <typename T, Index I0, Index... Is>
+auto convolution_along(std::vector<T> values)
 {
-  const auto derivation = correlation_along<T, IDerivation>({-sign, 0, sign});
-  const auto averaging = correlation_along<T, IAveraging...>({1, 1, 1});
-  return derivation * averaging;
+  if constexpr (sizeof...(Is) == 0) {
+    const auto radius = values.size() / 2;
+    auto front = Position<I0 + 1>::zero();
+    front[I0] = -radius; // FIXME +1?
+    auto back = Position<I0 + 1>::zero();
+    back[I0] = values.size() - radius - 1;
+    return convolution<T, I0 + 1>(values.data(), {front, back}); // FIXME line-based window
+  } else {
+    return convolution_along<T, I0>(values) * convolution_along<T, Is...>(values);
+  }
 }
 
 /**
- * @brief Make a Sobel filter along given axes.
+ * @brief Make a Prewitt filter along given axes.
+ * @tparam T The filter output type
+ * @tparam IDerivation The derivation axis
+ * @tparam IAveraging The possibly multiple averaging axes
  * @param sign The differentiation sign (-1 or 1)
  * 
- * The kernel along the `IAveraging` axes is `{1, 2, 1}` and that along `IDerivation` is `{-sign, 0, sign}`.
+ * The convolution kernel along the `IAveraging` axes is `{1, 1, 1}` and that along `IDerivation` is `{sign, 0, -sign}`.
  * For differenciation in the increasing-index direction, keep `sign = 1`;
  * for the opposite direction, set `sign = -1`.
  * 
  * For example, to compute the derivative along axis 1 backward, while averaging along axes 0 and 2, do:
  * \code
- * auto kernel = sobel_filter<int, 1, 0, 2>(-1);
+ * auto kernel = prewitt_filter<int, 1, 0, 2>(-1);
  * auto dy = kernel * raster;
  * \endcode
+ * 
+ * @see `sobel_filter()`
+ * @see `scharr_filter()`
+ */
+template <typename T, Index IDerivation, Index... IAveraging>
+auto prewitt_filter(T sign = 1)
+{
+  const auto derivation = convolution_along<T, IDerivation>({sign, 0, -sign});
+  const auto averaging = convolution_along<T, IAveraging...>({1, 1, 1});
+  return derivation * averaging;
+}
+
+/**
+ * @brief Make a Sobel filter along given axes.
+ * 
+ * The convolution kernel along the `IAveraging` axes is `{1, 2, 1}` and that along `IDerivation` is `{sign, 0, -sign}`.
+ * 
+ * @see `prewitt_filter()`
+ * @see `scharr_filter()`
  */
 template <typename T, Index IDerivation, Index... IAveraging>
 auto sobel_filter(T sign = 1)
 {
-  const auto derivation = correlation_along<T, IDerivation>({-sign, 0, sign});
-  const auto averaging = correlation_along<T, IAveraging...>({1, 2, 1});
+  const auto derivation = convolution_along<T, IDerivation>({sign, 0, -sign});
+  const auto averaging = convolution_along<T, IAveraging...>({1, 2, 1});
   return derivation * averaging;
 }
 
 /**
  * @brief Make a Scharr filter along given axes.
  * 
- * The kernel along the `IAveraging` axes is `{3, 10, 3}` and that along `IDerivation` is `{-sign, 0, sign}`.
- * @see `sobel()`
+ * The kernel along the `IAveraging` axes is `{3, 10, 3}` and that along `IDerivation` is `{sign, 0, -sign}`.
+ * 
+ * @see `prewitt_filter()`
+ * @see `sobel_filter()`
  */
 template <typename T, Index IDerivation, Index... IAveraging>
 auto scharr_filter(T sign = 1)
 {
-  const auto derivation = correlation_along<T, IDerivation>({-sign, 0, sign});
-  const auto averaging = correlation_along<T, IAveraging...>({3, 10, 3});
+  const auto derivation = convolution_along<T, IDerivation>({sign, 0, -sign});
+  const auto averaging = convolution_along<T, IAveraging...>({3, 10, 3});
   return derivation * averaging;
 }
 
 /**
- * @brief Make a separable Laplacian filter along given axes.
+ * @brief Make a Laplacian filter along given axes.
  * 
- * The kernel is built as a sequence of 1D kernels `{1, -2, 1}` if `sign` is 1,
- * or `{-1, 2, -1}` if sign is -1.
+ * The convolution kernel is built as a sum of 1D kernels `{sign, -2 * sign, sign}`.
  */
 template <typename T, Index... Is>
-auto separable_laplacian_filter(T sign = 1)
+auto laplacian_filter(T sign = 1)
 {
-  return correlation_along<T, Is...>({sign, sign * -2, sign});
+  return convolution_along<T, Is...>({sign, sign * -2, sign});
+  // FIXME return (convolution_along<T, Is>({sign, sign * -2, sign}) + ...);
 }
 
 } // namespace Linx
