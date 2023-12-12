@@ -34,6 +34,8 @@ Box<M> extend(const Box<N>& in, const Position<M>& padding = Position<M>::zero()
 
 /**
  * @brief Spatial filtering mixin.
+ * 
+ * Child classes must implement `window()` and `transform(in, out)`.
  */
 template <typename T, typename TWindow, typename TDerived>
 class FilterMixin {
@@ -48,19 +50,6 @@ public:
    * @brief The dimension parameter.
    */
   static constexpr Index Dimension = TWindow::Dimension;
-
-  /**
-   * @brief Constructor.
-   */
-  FilterMixin(TWindow window) : m_window(std::move(window)) {}
-
-  /**
-   * @brief Get the filtering window.
-   */
-  const TWindow& window() const
-  {
-    return m_window;
-  }
 
   /**
    * @brief Apply the filter according to the input type.
@@ -114,9 +103,9 @@ public:
   Raster<Value, TRaster::Dimension> crop(const TRaster& in) const
   {
     // FIXME check region is a Box
-    const auto region = Linx::box(in.domain()) - Linx::box(m_window);
+    const auto region = Linx::box(in.domain()) - Linx::box(reinterpret_cast<const TDerived&>(*this).window());
     Raster<Value, TRaster::Dimension> out(region.shape());
-    transform(in.patch(region), out);
+    reinterpret_cast<const TDerived&>(*this).transform(in.patch(region), out);
     return out;
   }
 
@@ -139,7 +128,7 @@ public:
       transform_splits(in, out);
     } else {
       // FIXME check no extrapolation is required
-      transform(in, out);
+      reinterpret_cast<const TDerived&>(*this).transform(in, out);
     }
     return out;
   }
@@ -173,35 +162,22 @@ public:
       return Box<Dimension>::from_shape(f, g.shape());
     };
 
-    const auto box = Internal::BorderedBox<Dimension>(rasterize(in).domain(), m_window);
+    const auto box =
+        Internal::BorderedBox<Dimension>(rasterize(in).domain(), reinterpret_cast<const TDerived&>(*this).window());
     box.apply_inner_border(
         [&](const auto& ib) {
           const auto insub = raw.patch(ib);
           auto outsub = out.patch(grid_to_box(insub.domain()));
-          transform(insub, outsub);
+          reinterpret_cast<const TDerived&>(*this).transform(insub, outsub);
         },
         [&](const auto& ib) {
           const auto insub = in.patch(ib);
           auto outsub = out.patch(grid_to_box(insub.domain()));
-          transform(insub, outsub);
+          reinterpret_cast<const TDerived&>(*this).transform(insub, outsub);
         });
 
     return out;
   }
-
-  /**
-   * @brief Filter an input extrapolator or patch into an output raster or patch.
-   * @param in A extrapolator or patch (or both)
-   * @param out A raster or patch with compatible domain
-   * 
-   * If the filtering bounding box requires input values from outside the input domain,
-   * then `in` must be an extrapolator.
-   * If the bounding box of `in` is small enough so that no extrapolated values are required,
-   * then `in` can be a raw patch.
-   */
-  template <typename TIn, typename TOut>
-  void transform_deprecated(const TIn& in, TOut& out) const
-  {}
 
 private:
 
@@ -212,12 +188,13 @@ private:
   void transform_splits(const TIn& in, TOut& out) const
   {
     const auto& raw = dont_extrapolate(in);
-    const auto box = Internal::BorderedBox<Dimension>(Linx::box(raw.domain()), m_window);
+    const auto box =
+        Internal::BorderedBox<Dimension>(Linx::box(raw.domain()), reinterpret_cast<const TDerived&>(*this).window());
     box.apply_inner_border(
         [&](const auto& ib) {
           const auto insub = raw.patch(ib);
           auto outsub = out.patch(insub.domain());
-          transform(insub, outsub);
+          reinterpret_cast<const TDerived&>(*this).transform(insub, outsub);
         },
         [&](const auto& ib) {
           const auto insub = in.patch(ib);
@@ -230,33 +207,14 @@ private:
    * @brief Filter a monolithic patch (no region splitting).
    */
   template <typename TIn, typename TOut>
-  void transform(const TIn& in, TOut& out) const
-  {
-    // FIXME accept any region
-    auto patch = in.parent().patch(extend<TIn::Dimension>(m_window));
-    auto out_it = out.begin();
-    for (const auto& p : in.domain()) {
-      patch.translate(p);
-      *out_it = reinterpret_cast<const TDerived&>(*this)(patch);
-      ++out_it;
-      patch.translate_back(p);
-    }
-  }
-
-  template <typename TIn, typename TOut>
   void transform_monolith_extrapolator(const TIn& in, TOut& out) const
   {
-    const auto extrapolated = in.parent().copy(Linx::box(in.domain()) + m_window);
-    const auto box = extrapolated.domain() - m_window; // FIXME region - m_window.front()?
-    transform(extrapolated.patch(box), out);
+    const auto extrapolated =
+        in.parent().copy(Linx::box(in.domain()) + reinterpret_cast<const TDerived&>(*this).window());
+    const auto box = extrapolated.domain() - reinterpret_cast<const TDerived&>(*this).window();
+    // FIXME region - reinterpret_cast<const TDerived&>(*this).window().front()?
+    reinterpret_cast<const TDerived&>(*this).transform(extrapolated.patch(box), out);
   }
-
-protected:
-
-  /**
-   * @brief The window with origin at position 0.
-   */
-  TWindow m_window;
 };
 
 } // namespace Linx

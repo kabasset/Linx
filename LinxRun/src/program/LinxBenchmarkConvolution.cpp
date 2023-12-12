@@ -21,12 +21,13 @@ void filter_monolith(Image& image, const Image& values)
   auto kernel = Linx::convolution(values);
   const auto extrapolation = Linx::extrapolation<Linx::NearestNeighbor>(image);
   const auto extrapolated = extrapolation.copy(image.domain() + kernel.window());
-  // image = kernel.crop(extrapolated);
   auto patch = extrapolated.patch(kernel.window() - kernel.window().front());
   auto out_it = image.begin();
+  const auto rbegin = std::reverse_iterator(values.end());
+  const auto rend = std::reverse_iterator(values.begin());
   for (const auto& p : image.domain()) {
     patch.translate(p);
-    *out_it = kernel(patch);
+    *out_it = std::inner_product(rbegin, rend, patch.begin(), 0.F);
     ++out_it;
     patch.translate_back(p);
   }

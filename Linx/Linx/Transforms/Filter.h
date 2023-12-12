@@ -108,9 +108,7 @@ public:
    * @brief Explcit window constructor.
    * @param window The filter window
    */
-  explicit Filter(TOp&& op, TWindow window) :
-      FilterMixin<Value, TWindow, Filter<TOp, TWindow>>(std::move(window)), m_op(std::forward<TOp>(op))
-  {}
+  explicit Filter(TOp&& op, TWindow window) : m_op(std::forward<TOp>(op)), m_window(std::forward<TWindow>(window)) {}
 
   /**
    * @brief Hypercube window constructor.
@@ -119,12 +117,35 @@ public:
   explicit Filter(TOp&& op, Index radius = 1) : Filter(std::forward<TOp>(op), Box<Dimension>::from_center(radius)) {}
 
   /**
-   * @brief Estimation operator.
+   * @brief Get the filtering window.
    */
-  template <typename TIn>
-  inline Value operator()(const TIn& neighbors) const
+  const TWindow& window() const
   {
-    return m_op(neighbors);
+    return m_window;
+  }
+
+  /**
+   * @brief Filter an input extrapolator or patch into an output raster or patch.
+   * @param in A extrapolator or patch (or both)
+   * @param out A raster or patch with compatible domain
+   * 
+   * If the filtering bounding box requires input values from outside the input domain,
+   * then `in` must be an extrapolator.
+   * If the bounding box of `in` is small enough so that no extrapolated values are required,
+   * then `in` can be a raw patch.
+   */
+  template <typename TIn, typename TOut>
+  void transform(const TIn& in, TOut& out) const
+  {
+    // FIXME accept any region
+    auto patch = in.parent().patch(extend<TIn::Dimension>(m_window));
+    auto out_it = out.begin();
+    for (const auto& p : in.domain()) {
+      patch.translate(p);
+      *out_it = m_op(patch);
+      ++out_it;
+      patch.translate_back(p);
+    }
   }
 
 private:
@@ -133,6 +154,11 @@ private:
    * @brief The operation.
    */
   TOp m_op;
+
+  /**
+   * @brief The window with origin at position 0.
+   */
+  TWindow m_window;
 };
 
 template <typename T, typename TWindow>
