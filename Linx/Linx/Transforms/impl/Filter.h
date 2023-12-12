@@ -52,6 +52,18 @@ public:
   static constexpr Index Dimension = TWindow::Dimension;
 
   /**
+   * @brief Compute the impulse response of the filter.
+   */
+  auto impulse() const
+  {
+    const auto& w = reinterpret_cast<const TDerived&>(*this).window();
+    const auto o = -w.front();
+    auto raster = Raster<Value, Dimension>(w.shape());
+    raster[o] = Value(1); // FIXME or back-o?
+    return *this * extrapolation(raster, 0);
+  }
+
+  /**
    * @brief Apply the filter according to the input type.
    * 
    * Here is the mapping between the input type and associated operation:
@@ -159,11 +171,11 @@ public:
       for (std::size_t i = 0; i < f.size(); ++i) { // FIXME simplify with Linx
         f[i] /= step[i];
       }
-      return Box<Dimension>::from_shape(f, g.shape());
+      return Box<TPatch::Dimension>::from_shape(f, g.shape());
     };
 
-    const auto box =
-        Internal::BorderedBox<Dimension>(rasterize(in).domain(), reinterpret_cast<const TDerived&>(*this).window());
+    const auto& window = extend<TPatch::Dimension>(reinterpret_cast<const TDerived&>(*this).window());
+    const auto box = Internal::BorderedBox<TPatch::Dimension>(rasterize(in).domain(), window);
     box.apply_inner_border(
         [&](const auto& ib) {
           const auto insub = raw.patch(ib);
@@ -188,8 +200,8 @@ private:
   void transform_splits(const TIn& in, TOut& out) const
   {
     const auto& raw = dont_extrapolate(in);
-    const auto box =
-        Internal::BorderedBox<Dimension>(Linx::box(raw.domain()), reinterpret_cast<const TDerived&>(*this).window());
+    const auto& window = extend<TIn::Dimension>(reinterpret_cast<const TDerived&>(*this).window());
+    const auto box = Internal::BorderedBox<TIn::Dimension>(Linx::box(raw.domain()), window);
     box.apply_inner_border(
         [&](const auto& ib) {
           const auto insub = raw.patch(ib);
