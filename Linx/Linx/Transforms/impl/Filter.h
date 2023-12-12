@@ -116,7 +116,7 @@ public:
     // FIXME check region is a Box
     const auto region = Linx::box(in.domain()) - Linx::box(m_window);
     Raster<Value, TRaster::Dimension> out(region.shape());
-    transform_monolith(in.patch(region), out);
+    transform(in.patch(region), out);
     return out;
   }
 
@@ -135,7 +135,12 @@ public:
   {
     // FIXME check region is a Box
     Raster<Value, TPatch::Dimension> out(in.domain().shape());
-    transform(in, out);
+    if constexpr (is_extrapolator<TPatch>()) {
+      transform_splits(in, out);
+    } else {
+      // FIXME check no extrapolation is required
+      transform(in, out);
+    }
     return out;
   }
 
@@ -173,12 +178,12 @@ public:
         [&](const auto& ib) {
           const auto insub = raw.patch(ib);
           auto outsub = out.patch(grid_to_box(insub.domain()));
-          transform_monolith(insub, outsub);
+          transform(insub, outsub);
         },
         [&](const auto& ib) {
           const auto insub = in.patch(ib);
           auto outsub = out.patch(grid_to_box(insub.domain()));
-          transform_monolith(insub, outsub);
+          transform(insub, outsub);
         });
 
     return out;
@@ -195,15 +200,8 @@ public:
    * then `in` can be a raw patch.
    */
   template <typename TIn, typename TOut>
-  void transform(const TIn& in, TOut& out) const
-  {
-    if constexpr (is_extrapolator<TIn>()) {
-      transform_splits(in, out);
-    } else {
-      // FIXME check no extrapolation is required
-      transform_monolith(in, out);
-    }
-  }
+  void transform_deprecated(const TIn& in, TOut& out) const
+  {}
 
 private:
 
@@ -219,7 +217,7 @@ private:
         [&](const auto& ib) {
           const auto insub = raw.patch(ib);
           auto outsub = out.patch(insub.domain());
-          transform_monolith(insub, outsub);
+          transform(insub, outsub);
         },
         [&](const auto& ib) {
           const auto insub = in.patch(ib);
@@ -232,7 +230,7 @@ private:
    * @brief Filter a monolithic patch (no region splitting).
    */
   template <typename TIn, typename TOut>
-  void transform_monolith(const TIn& in, TOut& out) const
+  void transform(const TIn& in, TOut& out) const
   {
     // FIXME accept any region
     auto patch = in.parent().patch(extend<TIn::Dimension>(m_window));
@@ -250,7 +248,7 @@ private:
   {
     const auto extrapolated = in.parent().copy(Linx::box(in.domain()) + m_window);
     const auto box = extrapolated.domain() - m_window; // FIXME region - m_window.front()?
-    transform_monolith(extrapolated.patch(box), out);
+    transform(extrapolated.patch(box), out);
   }
 
 protected:

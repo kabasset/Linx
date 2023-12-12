@@ -57,6 +57,7 @@ public:
     seq_foreach(m_filters, [&](const auto& k) {
       const auto& w = k.window();
       for (Index i = 0; i < w.dimension(); ++i) {
+        // FIXME sum radius instead of min/max
         front[i] = std::min(front[i], w.front()[i]);
         back[i] = std::max(back[i], w.back()[i]);
       }
