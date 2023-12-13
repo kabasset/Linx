@@ -60,172 +60,29 @@ public:
     const auto o = -w.front();
     auto raster = Raster<Value, Dimension>(w.shape());
     raster[o] = Value(1); // FIXME or back-o?
-    return *this * extrapolation(raster, 0);
+    return *this * extrapolation(raster);
   }
 
   /**
    * @brief Apply the filter according to the input type.
    * 
-   * Here is the mapping between the input type and associated operation:
-   * - If `in` is an extrapolated raster, then `full(in)` is returned;
-   * - If `in` is a raw raster, then `crop(in)` is returned;
-   * - If `in` is a box-based patch, then `box(in)` is returned;
-   * - If `in` is a grid-based batch, then `decimate(in)` is returned.
-   * 
-   * For any other case, the method won't compile (see `transform()`).
-   * 
+   * This is equivalent to calling the overload of `transform()` suitable to `TIn` with an output of minimal shape.
    */
   template <typename TIn>
   Raster<Value, TIn::Dimension> operator*(const TIn& in) const
   {
-    // FIXME support arbitrary patches
+    Raster<Value, TIn::Dimension> out;
     if constexpr (is_patch<TIn>()) {
-      if (in.domain().step().is_one()) { // Box
-        return box(in);
-      } else { // Grid
-        return decimate(in);
-      }
+      out = Raster<Value, TIn::Dimension>(in.domain().shape()); // Box or Grid
+      // FIXME support arbitrary patches
     } else if constexpr (is_extrapolator<TIn>()) {
-      return full(in);
+      out = Raster<Value, TIn::Dimension>(in.shape());
     } else {
-      return crop(in);
+      const auto& window = reinterpret_cast<const TDerived&>(*this).window();
+      out = Raster<Value, TIn::Dimension>(in.shape() - extend<TIn::Dimension>(window.shape()));
     }
-  }
-
-  /**
-   * @brief Filter an extrapolated raster.
-   * 
-   * The output raster has the same shape as the input raster.
-   */
-  template <typename TExtrapolator>
-  Raster<Value, TExtrapolator::Dimension> full(const TExtrapolator& in) const
-  {
-    Raster<Value, TExtrapolator::Dimension> out(in.raster().shape());
-    transform_splits(in, out);
+    reinterpret_cast<const TDerived&>(*this).transform(in, out);
     return out;
-  }
-
-  /**
-   * @brief Filter and crop an input raster.
-   * 
-   * Border regions which would require extrapolation are cropped-out,
-   * such that the output domain is `in.domain() - filter.window()`.
-   */
-  template <typename TRaster>
-  Raster<Value, TRaster::Dimension> crop(const TRaster& in) const
-  {
-    // FIXME check region is a Box
-    const auto region = Linx::box(in.domain()) - Linx::box(reinterpret_cast<const TDerived&>(*this).window());
-    Raster<Value, TRaster::Dimension> out(region.shape());
-    reinterpret_cast<const TDerived&>(*this).transform(in.patch(region), out);
-    return out;
-  }
-
-  /**
-   * @brief Filter a box-based patch.
-   * 
-   * If input values from outside the raster domain are required,
-   * then `in` must be an extrapolator.
-   * On the contrary, if the box of `in` is small enough so that no extrapolated values are required,
-   * then `in` can be a raw patch.
-   * 
-   * The output raster has the same shape as the box.
-   */
-  template <typename TPatch>
-  Raster<Value, TPatch::Dimension> box(const TPatch& in) const
-  {
-    // FIXME check region is a Box
-    Raster<Value, TPatch::Dimension> out(in.domain().shape());
-    if constexpr (is_extrapolator<TPatch>()) {
-      transform_splits(in, out);
-    } else {
-      // FIXME check no extrapolation is required
-      reinterpret_cast<const TDerived&>(*this).transform(in, out);
-    }
-    return out;
-  }
-
-  /**
-   * @brief Filter and decimate a grid-based patch.
-   * 
-   * Decimation is especially useful for downsampling.
-   * 
-   * If input values from outside the raster domain are required,
-   * then `in` must be an extrapolator.
-   * On the contrary, if the box of `in` is small enough so that no extrapolated values are required,
-   * then `in` can be a raw patch.
-   * 
-   * The output raster has the same shape as the grid.
-   */
-  template <typename TPatch>
-  Raster<Value, TPatch::Dimension> decimate(const TPatch& in) const
-  { // FIXME adjust?
-
-    const auto& raw = dont_extrapolate(in);
-    const auto& front = in.domain().front();
-    const auto& step = in.domain().step();
-    Raster<Value, TPatch::Dimension> out(in.domain().shape());
-
-    const auto grid_to_box = [&](const auto& g) {
-      auto f = g.front() - front;
-      for (std::size_t i = 0; i < f.size(); ++i) { // FIXME simplify with Linx
-        f[i] /= step[i];
-      }
-      return Box<TPatch::Dimension>::from_shape(f, g.shape());
-    };
-
-    const auto& window = extend<TPatch::Dimension>(reinterpret_cast<const TDerived&>(*this).window());
-    const auto box = Internal::BorderedBox<TPatch::Dimension>(rasterize(in).domain(), window);
-    box.apply_inner_border(
-        [&](const auto& ib) {
-          const auto insub = raw.patch(ib);
-          auto outsub = out.patch(grid_to_box(insub.domain()));
-          reinterpret_cast<const TDerived&>(*this).transform(insub, outsub);
-        },
-        [&](const auto& ib) {
-          const auto insub = in.patch(ib);
-          auto outsub = out.patch(grid_to_box(insub.domain()));
-          reinterpret_cast<const TDerived&>(*this).transform(insub, outsub);
-        });
-
-    return out;
-  }
-
-private:
-
-  /**
-   * @brief Filter by splitting inner and border regions.
-   */
-  template <typename TIn, typename TOut>
-  void transform_splits(const TIn& in, TOut& out) const
-  {
-    const auto& raw = dont_extrapolate(in);
-    const auto& window = extend<TIn::Dimension>(reinterpret_cast<const TDerived&>(*this).window());
-    const auto box = Internal::BorderedBox<TIn::Dimension>(Linx::box(raw.domain()), window);
-    box.apply_inner_border(
-        [&](const auto& ib) {
-          const auto insub = raw.patch(ib);
-          auto outsub = out.patch(insub.domain());
-          reinterpret_cast<const TDerived&>(*this).transform(insub, outsub);
-        },
-        [&](const auto& ib) {
-          const auto insub = in.patch(ib);
-          auto outsub = out.patch(insub.domain());
-          transform_monolith_extrapolator(insub, outsub);
-        });
-  }
-
-  /**
-   * @brief Filter a monolithic patch (no region splitting).
-   */
-  template <typename TIn, typename TOut>
-  void transform_monolith_extrapolator(const TIn& in, TOut& out) const
-  {
-    const auto extrapolated =
-        in.parent().copy(Linx::box(in.domain()) + reinterpret_cast<const TDerived&>(*this).window());
-    const auto box = extrapolated.domain() - reinterpret_cast<const TDerived&>(*this).window();
-    // FIXME region - reinterpret_cast<const TDerived&>(*this).window().front()?
-    reinterpret_cast<const TDerived&>(*this).transform(extrapolated.patch(box), out);
   }
 };
 

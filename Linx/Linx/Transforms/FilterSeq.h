@@ -19,7 +19,11 @@ namespace Linx {
  * @brief A sequence of filters.
  */
 template <typename... TFilters>
-class FilterSeq {
+class FilterSeq :
+    public FilterMixin<
+        typename std::decay_t<decltype((std::declval<TFilters>(), ...))>::Value,
+        Box<std::max({TFilters::Dimension...})>,
+        FilterSeq<TFilters...>> {
   template <typename... UFilters>
   friend class FilterSeq; // FIXME useful?
 
@@ -36,6 +40,14 @@ public:
   static constexpr Index Dimension = std::max({TFilters::Dimension...});
 
   /**
+   * @brief Bring to scope FilterMixin::operator*.
+   */
+  using FilterMixin<
+      typename std::decay_t<decltype((std::declval<TFilters>(), ...))>::Value,
+      Box<std::max({TFilters::Dimension...})>,
+      FilterSeq<TFilters...>>::operator*;
+
+  /**
    * @brief Constructor.
    * 
    * @note Filter sequences are better constructed by multiplying simple filters.
@@ -43,39 +55,6 @@ public:
   template <typename... TArgs>
   explicit FilterSeq(TArgs&&... args) : m_filters(std::forward<TArgs>(args)...)
   {}
-
-  /// @group_properties
-
-  /**
-   * @brief The logical window of the kernel.
-   */
-  Box<Dimension> window() const
-  {
-    // FIXME support Dimension = -1
-    auto front = Position<Dimension>::zero();
-    auto back = Position<Dimension>::zero();
-    seq_foreach(m_filters, [&](const auto& k) {
-      const auto& w = k.window();
-      for (Index i = 0; i < w.dimension(); ++i) {
-        // FIXME sum radius instead of min/max
-        front[i] = std::min(front[i], w.front()[i]);
-        back[i] = std::max(back[i], w.back()[i]);
-      }
-    });
-    return {front, back};
-  }
-
-  /**
-   * @brief Compute the impulse response of the filter.
-   */
-  auto impulse() const
-  {
-    const auto& w = window();
-    const auto o = -w.front();
-    auto raster = Raster<Value, Dimension>(w.shape());
-    raster[o] = Value(1); // FIXME or back-o?
-    return *this * extrapolation(raster, 0);
-  }
 
   /**
    * @brief Combine two sequences of kernels.
@@ -106,42 +85,81 @@ public:
         std::tuple_cat(std::make_tuple(std::forward<Filter<T, TWindow>>(lhs)), rhs.m_filters));
   }
 
+  /// @group_properties
+
   /**
-   * @brief Apply the filters to an input extrapolator.
+   * @brief The logical window of the kernel.
    */
-  template <typename TIn>
-  Raster<Value, TIn::Dimension> operator*(const TIn& in) const
+  Box<Dimension> window() const
   {
-    Raster<Value, TIn::Dimension> out(in.shape());
-    full_to(in, out);
-    // FIXME other cases
-    return out;
+    // FIXME support Dimension = -1
+    auto front = Position<Dimension>::zero();
+    auto back = Position<Dimension>::zero();
+    seq_foreach(m_filters, [&](const auto& k) {
+      const auto& w = k.window();
+      for (Index i = 0; i < w.dimension(); ++i) {
+        // FIXME sum radius instead of min/max
+        front[i] = std::min(front[i], w.front()[i]);
+        back[i] = std::max(back[i], w.back()[i]);
+      }
+    });
+    return {front, back};
+  }
+
+  /**
+   * @brief Get the i-th filter.
+   */
+  template <Index I>
+  const auto& filter() const
+  {
+    return std::get<I>(m_filters);
+  }
+
+  /**
+   * @brief Filter an input raster.
+   * 
+   * The input is cropped according to the filter window just enough so no extrapolation is required.
+   */
+  template <typename T, Index N, typename THolder, typename TOut>
+  void transform(const Raster<T, N, THolder>& in, TOut& out) const
+  {
+    const auto out0 = filter<0>() * in;
+    const auto outK = upto_kth<sizeof...(TFilters) - 2>(out0);
+    filter<sizeof...(TFilters) - 1>().transform(outK, out);
+  }
+
+  /**
+   * @brief Filter an input extrapolated raster.
+   * 
+   * The input and output must have the same size, although not necessarily the same domain.
+   */
+  template <typename TRaster, typename TMethod, typename TOut>
+  void transform(const Extrapolation<TRaster, TMethod>& in, TOut& out) const
+  {
+    const auto domain0 = in.domain() + extend<TRaster::Dimension>(window());
+    const auto out0 = filter<0>() * in.patch(domain0);
+    const auto outK = upto_kth<sizeof...(TFilters) - 2>(out0);
+    filter<sizeof...(TFilters) - 1>().transform(outK, out);
+  }
+
+  /**
+   * @brief Filter an input patch.
+   */
+  template <typename T, typename TParent, typename TRegion, typename TOut>
+  void transform(const Patch<T, TParent, TRegion>& in, TOut& out) const
+  {
+    const auto& raw = raster(in);
+    const auto& domain = in.domain();
+    const auto& extrapolate = in.method();
+    static constexpr Index N = sizeof...(TFilters);
+    const auto domain0 = box(domain) + extend<TParent::Dimension>(window());
+    auto out0 = filter<0>() * extrapolate(raw.patch(domain0));
+    auto outK = upto_kth<N - 2>(out0);
+    const auto domainK = in.domain() + filter<N - 1>().origin();
+    filter<N - 1>().transform(outK.patch(domainK), out);
   }
 
 private:
-
-  template <typename TIn, typename TOut>
-  void full_to(const TIn& in, TOut& out) const
-  {
-    const auto extrapolated = in.copy(Linx::box(in.domain()) + window()); // FIXME split
-    crop_to(extrapolated, out);
-  }
-
-  template <typename TIn, typename TOut>
-  void crop_to(const TIn& in, TOut& out) const
-  {
-    upto_kth_to<sizeof...(TFilters) - 1>(in, out);
-  }
-
-  template <std::size_t K, typename TIn, typename TOut>
-  void upto_kth_to(const TIn& in, TOut& out) const
-  {
-    if constexpr (K == 0) {
-      out = std::get<0>(m_filters) * in;
-    } else {
-      out = std::get<K>(m_filters) * upto_kth<K - 1>(in);
-    }
-  }
 
   template <std::size_t K, typename TIn>
   auto upto_kth(const TIn& in) const
@@ -149,7 +167,7 @@ private:
     if constexpr (K == 0) {
       return std::get<0>(m_filters) * in;
     } else {
-      return std::get<K>(m_filters) * upto_kth<K - 1>(in);
+      return std::get<K>(m_filters).crop(upto_kth<K - 1>(in));
     }
   }
 
