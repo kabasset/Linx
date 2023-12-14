@@ -78,8 +78,8 @@ public:
     } else if constexpr (is_extrapolator<TIn>()) {
       out = Raster<Value, TIn::Dimension>(in.shape());
     } else {
-      const auto& window = reinterpret_cast<const TDerived&>(*this).window();
-      out = Raster<Value, TIn::Dimension>(in.shape() - extend<TIn::Dimension>(window.shape()));
+      const auto& window = box(reinterpret_cast<const TDerived&>(*this).window());
+      out = Raster<Value, TIn::Dimension>(in.shape() - extend<TIn::Dimension>(window.shape() - 1));
     }
     reinterpret_cast<const TDerived&>(*this).transform(in, out);
     return out;

@@ -145,31 +145,20 @@ public:
   template <typename TRaster, typename TMethod, typename TOut>
   void transform(const Extrapolation<TRaster, TMethod>& in, TOut& out) const
   {
-    transform_splits(in, out); // FIXME duplicate
-  }
-
-  /**
-   * @brief Filter a box-based patch.
-   * 
-   * If input values from outside the raster domain are required,
-   * then `in` must be an extrapolator.
-   * On the contrary, if the box of `in` is small enough so that no extrapolated values are required,
-   * then `in` can be a raw patch.
-   * 
-   * The output raster has the same shape as the box.
-   */
-  template <typename TPatch>
-  Raster<Value, TPatch::Dimension> box(const TPatch& in) const
-  {
-    // FIXME check region is a Box
-    Raster<Value, TPatch::Dimension> out(in.domain().shape());
-    if constexpr (is_extrapolator<TPatch>()) {
-      transform_splits(in, out);
-    } else {
-      // FIXME check no extrapolation is required
-      transform_monolith(in, out);
-    }
-    return out;
+    const auto& raw = dont_extrapolate(in);
+    const auto bbox =
+        Internal::BorderedBox<TRaster::Dimension>(raw.domain(), extend<TRaster::Dimension>(box(m_window)));
+    bbox.apply_inner_border(
+        [&](const auto& ib) {
+          const auto insub = raw.patch(ib);
+          auto outsub = out.patch(insub.domain());
+          transform_monolith(insub, outsub);
+        },
+        [&](const auto& ib) {
+          const auto insub = in.patch(ib);
+          auto outsub = out.patch(insub.domain());
+          transform_monolith_extrapolator(insub, outsub);
+        });
   }
 
   /**
@@ -186,8 +175,7 @@ public:
    */
   template <typename T, typename TParent, typename TRegion, typename TOut>
   void transform(const Patch<T, TParent, TRegion>& in, TOut& out) const
-  { // FIXME adjust?
-
+  {
     const auto& raw = dont_extrapolate(in);
     const auto& front = in.domain().front();
     const auto& step = in.domain().step();
@@ -216,27 +204,6 @@ public:
   }
 
 private:
-
-  /**
-   * @brief Filter by splitting inner and border regions.
-   */
-  template <typename TIn, typename TOut>
-  void transform_splits(const TIn& in, TOut& out) const
-  {
-    const auto& raw = dont_extrapolate(in);
-    const auto box = Internal::BorderedBox<TIn::Dimension>(Linx::box(raw.domain()), extend<TIn::Dimension>(m_window));
-    box.apply_inner_border(
-        [&](const auto& ib) {
-          const auto insub = raw.patch(ib);
-          auto outsub = out.patch(insub.domain());
-          transform_monolith(insub, outsub);
-        },
-        [&](const auto& ib) {
-          const auto insub = in.patch(ib);
-          auto outsub = out.patch(insub.domain());
-          transform_monolith_extrapolator(insub, outsub);
-        });
-  }
 
   /**
    * @brief Filter a monolithic patch (no region splitting).

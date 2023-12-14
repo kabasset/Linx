@@ -96,7 +96,7 @@ public:
     auto front = Position<Dimension>::zero();
     auto back = Position<Dimension>::zero();
     seq_foreach(m_filters, [&](const auto& k) {
-      const auto& w = k.window();
+      const auto& w = box(k.window());
       for (Index i = 0; i < w.dimension(); ++i) {
         // FIXME sum radius instead of min/max
         front[i] = std::min(front[i], w.front()[i]);
@@ -123,8 +123,7 @@ public:
   template <typename T, Index N, typename THolder, typename TOut>
   void transform(const Raster<T, N, THolder>& in, TOut& out) const
   {
-    const auto out0 = filter<0>() * in;
-    const auto outK = upto_kth<sizeof...(TFilters) - 2>(out0);
+    const auto outK = upto_kth<sizeof...(TFilters) - 2>(in);
     filter<sizeof...(TFilters) - 1>().transform(outK, out);
   }
 
@@ -137,8 +136,7 @@ public:
   void transform(const Extrapolation<TRaster, TMethod>& in, TOut& out) const
   {
     const auto domain0 = in.domain() + extend<TRaster::Dimension>(window());
-    const auto out0 = filter<0>() * in.patch(domain0);
-    const auto outK = upto_kth<sizeof...(TFilters) - 2>(out0);
+    const auto outK = upto_kth<sizeof...(TFilters) - 2>(in.patch(domain0));
     filter<sizeof...(TFilters) - 1>().transform(outK, out);
   }
 
@@ -153,8 +151,7 @@ public:
     const auto& extrapolate = in.method();
     static constexpr Index N = sizeof...(TFilters);
     const auto domain0 = box(domain) + extend<TParent::Dimension>(window());
-    auto out0 = filter<0>() * extrapolate(raw.patch(domain0));
-    auto outK = upto_kth<N - 2>(out0);
+    auto outK = upto_kth<N - 2>(extrapolate(raw.patch(domain0)));
     const auto domainK = in.domain() + filter<N - 1>().origin();
     filter<N - 1>().transform(outK.patch(domainK), out);
   }
@@ -163,11 +160,13 @@ private:
 
   template <std::size_t K, typename TIn>
   auto upto_kth(const TIn& in) const
-  { // FIXME reuse memory
+  {
+    const auto& domain = in.domain() - extend<TIn::Dimension>(Linx::box(filter<K>().window()));
+    const auto patch = in.patch(domain);
     if constexpr (K == 0) {
-      return std::get<0>(m_filters) * in;
+      return filter<0>() * patch;
     } else {
-      return std::get<K>(m_filters).crop(upto_kth<K - 1>(in));
+      return filter<K>() * upto_kth<K - 1>(patch);
     }
   }
 
