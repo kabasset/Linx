@@ -36,6 +36,7 @@ public:
    */
   BorderedBox(const Box<N>& box, const Box<N>& margin) : m_inner(box - margin), m_fronts(), m_backs()
   {
+    // FIXME m_fronts = {box} if m_inner.size() <= 0
     auto current = m_inner;
     const auto dim = m_inner.dimension();
     m_backs.reserve(dim);
@@ -45,7 +46,9 @@ public:
         auto before = current;
         before.m_back[i] = current.m_front[i] - 1;
         before.m_front[i] = current.m_front[i] += f;
-        m_fronts.push_front(before);
+        if (before.size() > 0) {
+          m_fronts.push_front(std::move(before));
+        }
       }
 
       const auto b = margin.back()[i];
@@ -53,7 +56,9 @@ public:
         auto after = current;
         after.m_front[i] = current.m_back[i] + 1;
         after.m_back[i] = current.m_back[i] += b;
-        m_backs.push_back(after);
+        if (after.size() > 0) {
+          m_backs.push_back(std::move(after));
+        }
       }
     }
   }
@@ -69,7 +74,9 @@ public:
     for (const auto& box : m_fronts) {
       std::forward<TBorderFunc>(border_func)(box);
     }
-    std::forward<TInnerFunc>(inner_func)(m_inner);
+    if (m_inner.size() > 0) {
+      std::forward<TInnerFunc>(inner_func)(m_inner);
+    }
     for (const auto& box : m_backs) {
       std::forward<TBorderFunc>(border_func)(box);
     }

@@ -188,18 +188,23 @@ public:
       return Box<TParent::Dimension>::from_shape(f, g.shape());
     };
 
-    const auto& window = extend<TParent::Dimension>(m_window);
-    const auto box = Internal::BorderedBox<TParent::Dimension>(rasterize(in).domain(), window);
-    box.apply_inner_border(
+    const auto& window = extend<TParent::Dimension>(box(m_window));
+    const auto bbox = Internal::BorderedBox<TParent::Dimension>(rasterize(in).domain(), window);
+    // FIXME accept non-Box window, and of lower dim
+    bbox.apply_inner_border(
         [&](const auto& ib) {
           const auto insub = raw.patch(ib);
           auto outsub = out.patch(grid_to_box(insub.domain()));
-          transform(insub, outsub);
+          if (insub.size() > 0) { // FIXME needed?
+            transform_monolith(insub, outsub);
+          }
         },
         [&](const auto& ib) {
           const auto insub = in.patch(ib);
           auto outsub = out.patch(grid_to_box(insub.domain()));
-          transform(insub, outsub);
+          if (outsub.size() > 0) {
+            transform_monolith(insub, outsub);
+          }
         });
   }
 

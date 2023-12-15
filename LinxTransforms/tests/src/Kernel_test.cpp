@@ -20,7 +20,6 @@ BOOST_AUTO_TEST_CASE(full_test)
   auto in = Raster<int>({4, 3}).fill(1);
   auto k = convolution(Raster<int>({3, 3}).fill(1));
   auto out = k * extrapolation(in, 0);
-  std::cout << out << "\n";
   std::vector<int> expected = {4, 6, 6, 4, 6, 9, 9, 6, 4, 6, 6, 4};
   for (std::size_t i = 0; i < 12; ++i) {
     BOOST_TEST(out[i] == expected[i]);
