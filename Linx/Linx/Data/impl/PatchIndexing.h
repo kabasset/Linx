@@ -79,7 +79,7 @@ public:
    */
   StrideBasedIndexing(const TParent& parent, const Box<TParent::Dimension>& region) :
       m_step(1), m_width(region.template length<0>()),
-      m_offsets(region.size() / m_width + 1) // +1 in order to dereference m_offsets.end() in iterator
+      m_offsets(region.size() / std::max(m_width, 1L) + 1) // +1 in order to dereference m_offsets.end() in iterator
   {
     auto plane = (region - region.front()).project();
     std::transform(plane.begin(), plane.end(), m_offsets.begin(), [&](const auto& p) {
