@@ -557,12 +557,13 @@ inline const Box<N>& box(const Box<N>& region)
  * it iterates over all of the positions.
  */
 template <typename TIn>
-inline Box<TIn::Dimension> box(const TIn& region)
+Box<TIn::Dimension> box(const TIn& region)
 {
-  Position<TIn::Dimension> front;
-  Position<TIn::Dimension> back;
+  const auto dim = region.dimension();
+  auto front = Position<TIn::Dimension>(dim).fill(std::numeric_limits<Index>::max());
+  auto back = Position<TIn::Dimension>(dim).fill(std::numeric_limits<Index>::min());
   for (const auto& p : region) {
-    for (Index i = 0; i < TIn::Dimension; ++i) {
+    for (Index i = 0; i < dim; ++i) {
       front[i] = std::min(front[i], p[i]);
       back[i] = std::max(back[i], p[i]);
     }
