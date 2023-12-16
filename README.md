@@ -16,9 +16,9 @@ The image processing feature set is expected to grow steadily on demand.
 Currently supported operations are:
 
 * Pixel-wise operations (`+`, `*`, `exp()`, `apply()`...) on `Raster`s and on `Raster` regions;
+* Noise generation (`GaussianNoise`, `PoissonNoise`, `ImpulseNoise`...);
 * Discrete Fourier transforms (FFTW wrapper) through the `DftPlan` class;
-* Linear filtering through the `Kernel` class;
-* Morphology and rank-order filtering through the `StructuringElement` class;
+* Linear, rank-order, and morphological filtering through the `Filter`, `FilterSeq` and `FilterAgg` classes;
 * Interpolation and extrapolation (`NearestNeighbor`, `Linear`, `OutOfBoundsConstant`...);
 * Affine transformations.
 

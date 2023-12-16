@@ -20,27 +20,19 @@ elements_add_unit_test(DftPlan tests/src/DftPlan_test.cpp
                      EXECUTABLE LinxTransforms_DftPlan_test
                      LINK_LIBRARIES Linx
                      TYPE Boost)
-elements_add_unit_test(FilterSeq tests/src/FilterSeq_test.cpp 
-                    EXECUTABLE LinxTransforms_FilterSeq_test
-                    LINK_LIBRARIES Linx
-                    TYPE Boost)
-elements_add_unit_test(Interpolation tests/src/Interpolation_test.cpp 
-                     EXECUTABLE LinxTransforms_Interpolation_test
-                     LINK_LIBRARIES Linx
-                     TYPE Boost)
-elements_add_unit_test(Kernel tests/src/Kernel_test.cpp 
-                     EXECUTABLE LinxTransforms_Kernel_test
-                     LINK_LIBRARIES Linx
-                     TYPE Boost)
-elements_add_unit_test(OrientedKernel tests/src/OrientedKernel_test.cpp 
-                     EXECUTABLE LinxTransforms_OrientedKernel_test
-                     LINK_LIBRARIES Linx
-                     TYPE Boost)
-elements_add_unit_test(SeparableKernel tests/src/SeparableKernel_test.cpp 
-                     EXECUTABLE LinxTransforms_SeparableKernel_test
-                     LINK_LIBRARIES Linx
-                     TYPE Boost)
 elements_add_unit_test(Filter tests/src/Filter_test.cpp 
                      EXECUTABLE LinxTransforms_Filter_test
+                     LINK_LIBRARIES Linx
+                     TYPE Boost)
+elements_add_unit_test(FilterLib tests/src/FilterLib_test.cpp 
+                     EXECUTABLE LinxTransforms_FilterLib_test
+                     LINK_LIBRARIES Linx
+                     TYPE Boost)
+elements_add_unit_test(FilterSeq tests/src/FilterSeq_test.cpp 
+                     EXECUTABLE LinxTransforms_FilterSeq_test
+                     LINK_LIBRARIES Linx
+                     TYPE Boost)
+elements_add_unit_test(Interpolation tests/src/Interpolation_test.cpp 
+                     EXECUTABLE LinxTransforms_Interpolation_test
                      LINK_LIBRARIES Linx
                      TYPE Boost)

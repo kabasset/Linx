@@ -6,8 +6,7 @@
 #define _LINXRUN_COSMICS_H
 
 #include "Linx/Data/Raster.h"
-#include "Linx/Transforms/Filter.h" // FIXME Morphology
-#include "Linx/Transforms/Kernel.h" // FIXME Filtering
+#include "Linx/Transforms/FilterLib.h"
 
 namespace Linx {
 namespace Cosmics {

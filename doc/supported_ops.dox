@@ -38,15 +38,15 @@ namespace Linx {
 <tr><td>Convolution and correlation<td>`Raster`
 <td><ul>
 <li>Module \ref correlation
-<li>Class `Kernel`
-<li>Class `LineKernel`
-<li>Class `SeparableKernel`
+<li>Class `Filter`
+<li>Class `FilterSeq`
+<li>Class `FilterAgg`
 <li>Module \ref interpolation
 <li>Class `Extrapolation`
 <tr><td>Bilateral filtering<td>`Raster`
 <td><ul>
 <li>Module \ref nl_filters
-<li>Class `Kernel`
+<li>Class `Filter`
 <li>Module \ref interpolation
 <li>Class `Extrapolation`
 <tr><td>Median and rank-order filtering<td>`Raster`

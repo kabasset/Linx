@@ -4,4 +4,4 @@
 
 #include "Linx/Transforms/Affinity.h"
 #include "Linx/Transforms/Dft.h"
-#include "Linx/Transforms/Kernel.h"
+#include "Linx/Transforms/FilterLib.h"

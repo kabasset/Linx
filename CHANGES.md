@@ -1,11 +1,11 @@
 # Change Log
 
-# 1.0 (wrt. EleFits 5.0)
+# 1.0 (wrt. EleFits 5)
 
 ## Breaking changes
 
 * Namespace change (`Linx`)
-* `makeRaster()` renamed as `rasterize()`
+* `camelCase` replaced with `snake_case`
 * `Region` replaced with `Box`
 * `Dim` renamed as `Dimension`
 * `Position::max()` replaced with `Position::inf()`
@@ -13,10 +13,10 @@
 ## New features
 
 * FFTW-wrapper `DftPlan`
-* Linear filtering through `Kernel` class
-* Median filtering and morphology through `StructuringElement` class
+* Linear, rank and morphology filtering through `Filter` class
+* Composite filters with `FilterAgg` and/or `FilterSeq`
 * Extrapolation and interpolation with `Extrapolation` and `Interpolation`
-* Affine transformations as `Affinity`
+* Affine transformations with `Affinity`
 * `Raster` has Euclidean ring arithmetic (not only vector space arithmetic)
 * Containers support mathematical functions (`abs()`, `min()`, `sin()`, `exp()`...)
 * Containers support filling methods (`fill()`, `range()`...),

@@ -8,8 +8,7 @@
 #include "Linx/Base/SeqUtils.h"
 #include "Linx/Data/Raster.h"
 #include "Linx/Transforms/Extrapolation.h"
-#include "Linx/Transforms/Kernel.h"
-#include "Linx/Transforms/OrientedKernel.h"
+#include "Linx/Transforms/impl/Filter.h"
 
 #include <type_traits> // decay
 
@@ -24,8 +23,10 @@ class FilterSeq :
         typename std::decay_t<decltype((std::declval<TFilters>(), ...))>::Value,
         Box<std::max({TFilters::Dimension...})>,
         FilterSeq<TFilters...>> {
-  template <typename... UFilters>
-  friend class FilterSeq; // FIXME useful?
+  friend class FilterMixin<
+      typename std::decay_t<decltype((std::declval<TFilters>(), ...))>::Value,
+      Box<std::max({TFilters::Dimension...})>,
+      FilterSeq<TFilters...>>; // FIXME simplify
 
 public:
 
@@ -68,29 +69,40 @@ public:
   /**
    * @brief Append a filter to the sequence.
    */
-  template <typename T, typename TWindow>
-  FilterSeq<TFilters..., Filter<T, TWindow>> operator*(Filter<T, TWindow>&& rhs) const
+  template <typename T, typename TWindow, typename TDerived>
+  auto operator*(FilterMixin<T, TWindow, TDerived>&& rhs) const
   {
-    return FilterSeq<TFilters..., Filter<T, TWindow>>(std::tuple_cat(m_filters, std::forward<Filter<T, TWindow>>(rhs)));
+    return FilterSeq<TFilters..., FilterMixin<T, TWindow, TDerived>>(
+        std::tuple_cat(m_filters, std::forward<FilterMixin<T, TWindow, TDerived>>(rhs)));
   }
 
   /**
    * @brief Prepend a filter to the sequence.
    */
-  template <typename T, typename TWindow>
-  friend FilterSeq<Filter<T, TWindow>, TFilters...>
-  operator*(Filter<T, TWindow>&& lhs, const FilterSeq<TFilters...>& rhs)
+  template <typename T, typename TWindow, typename TDerived>
+  friend auto operator*(FilterMixin<T, TWindow, TDerived>&& lhs, const FilterSeq<TFilters...>& rhs)
   {
-    return FilterSeq<Filter<T, TWindow>, TFilters...>(
-        std::tuple_cat(std::make_tuple(std::forward<Filter<T, TWindow>>(lhs)), rhs.m_filters));
+    return FilterSeq<FilterMixin<T, TWindow, TDerived>, TFilters...>(
+        std::tuple_cat(std::make_tuple(std::forward<FilterMixin<T, TWindow, TDerived>>(lhs)), rhs.m_filters));
   }
 
   /// @group_properties
 
   /**
+   * @brief Get the i-th filter.
+   */
+  template <Index I>
+  const auto& filter() const
+  {
+    return std::get<I>(m_filters);
+  }
+
+protected:
+
+  /**
    * @brief The logical window of the kernel.
    */
-  Box<Dimension> window() const
+  Box<Dimension> window_impl() const
   {
     // FIXME support Dimension = -1
     auto front = Position<Dimension>::zero();
@@ -107,21 +119,12 @@ public:
   }
 
   /**
-   * @brief Get the i-th filter.
-   */
-  template <Index I>
-  const auto& filter() const
-  {
-    return std::get<I>(m_filters);
-  }
-
-  /**
    * @brief Filter an input raster.
    * 
    * The input is cropped according to the filter window just enough so no extrapolation is required.
    */
   template <typename T, Index N, typename THolder, typename TOut>
-  void transform(const Raster<T, N, THolder>& in, TOut& out) const
+  void transform_impl(const Raster<T, N, THolder>& in, TOut& out) const
   {
     const auto outK = upto_kth<sizeof...(TFilters) - 2>(in);
     filter<sizeof...(TFilters) - 1>().transform(outK, out);
@@ -133,9 +136,9 @@ public:
    * The input and output must have the same size, although not necessarily the same domain.
    */
   template <typename TRaster, typename TMethod, typename TOut>
-  void transform(const Extrapolation<TRaster, TMethod>& in, TOut& out) const
+  void transform_impl(const Extrapolation<TRaster, TMethod>& in, TOut& out) const
   {
-    const auto domain0 = in.domain() + extend<TRaster::Dimension>(window());
+    const auto domain0 = in.domain() + extend<TRaster::Dimension>(window_impl());
     const auto outK = upto_kth<sizeof...(TFilters) - 2>(in.patch(domain0));
     filter<sizeof...(TFilters) - 1>().transform(outK, out);
   }
@@ -144,13 +147,13 @@ public:
    * @brief Filter an input patch.
    */
   template <typename T, typename TParent, typename TRegion, typename TOut>
-  void transform(const Patch<T, TParent, TRegion>& in, TOut& out) const
+  void transform_impl(const Patch<T, TParent, TRegion>& in, TOut& out) const
   {
     const auto& raw = raster(in);
     const auto& domain = in.domain();
     const auto& extrapolate = in.method();
     static constexpr Index N = sizeof...(TFilters);
-    const auto domain0 = box(domain) + extend<TParent::Dimension>(window());
+    const auto domain0 = box(domain) + extend<TParent::Dimension>(window_impl());
     auto outK = upto_kth<N - 2>(extrapolate(raw.patch(domain0)));
     const auto domainK = in.domain() + filter<N - 1>().origin();
     filter<N - 1>().transform(outK.patch(domainK), out);
@@ -176,124 +179,13 @@ private:
 };
 
 /**
- * @brief Combine two filters.
+ * @brief Combine two filters as a sequence.
  */
-template <typename TOp, typename TWindow, typename UOp, typename UWindow>
-FilterSeq<Filter<TOp, TWindow>, Filter<UOp, UWindow>> operator*(Filter<TOp, TWindow> lhs, Filter<UOp, UWindow> rhs)
+template <typename T, typename TWindow, typename TDerived, typename U, typename UWindow, typename UDerived>
+auto operator*(FilterMixin<T, TWindow, TDerived> lhs, FilterMixin<U, UWindow, UDerived> rhs)
 {
-  return FilterSeq<Filter<TOp, TWindow>, Filter<UOp, UWindow>>(std::make_tuple(std::move(lhs), std::move(rhs)));
-}
-
-/**
- * @brief Create a filter made of identical 1D correlation kernels along given axes.
- * 
- * Axis need not be different, e.g. to define some iterative kernel.
- */
-template <typename T, Index I0, Index... Is>
-auto correlation_along(std::vector<T> values)
-{
-  if constexpr (sizeof...(Is) == 0) {
-    const auto radius = values.size() / 2;
-    auto front = Position<I0 + 1>::zero();
-    front[I0] = -radius; // FIXME +1?
-    auto back = Position<I0 + 1>::zero();
-    back[I0] = values.size() - radius - 1;
-    return correlation<T, I0 + 1>(values.data(), {front, back}); // FIXME line-based window
-  } else {
-    return correlation_along<T, I0>(values) * correlation_along<T, Is...>(values);
-  }
-}
-
-/**
- * @brief Create a filter made of identical 1D convolution kernels along given axes.
- * 
- * Axis need not be different, e.g. to define some iterative kernel.
- */
-template <typename T, Index I0, Index... Is>
-auto convolution_along(std::vector<T> values)
-{
-  if constexpr (sizeof...(Is) == 0) {
-    const auto radius = values.size() / 2;
-    auto front = Position<I0 + 1>::zero();
-    front[I0] = -radius; // FIXME +1?
-    auto back = Position<I0 + 1>::zero();
-    back[I0] = values.size() - radius - 1;
-    return convolution<T, I0 + 1>(values.data(), {front, back}); // FIXME line-based window
-  } else {
-    return convolution_along<T, I0>(values) * convolution_along<T, Is...>(values);
-  }
-}
-
-/**
- * @brief Make a Prewitt filter along given axes.
- * @tparam T The filter output type
- * @tparam IDerivation The derivation axis
- * @tparam IAveraging The possibly multiple averaging axes
- * @param sign The differentiation sign (-1 or 1)
- * 
- * The convolution kernel along the `IAveraging` axes is `{1, 1, 1}` and that along `IDerivation` is `{sign, 0, -sign}`.
- * For differenciation in the increasing-index direction, keep `sign = 1`;
- * for the opposite direction, set `sign = -1`.
- * 
- * For example, to compute the derivative along axis 1 backward, while averaging along axes 0 and 2, do:
- * \code
- * auto kernel = prewitt_filter<int, 1, 0, 2>(-1);
- * auto dy = kernel * raster;
- * \endcode
- * 
- * @see `sobel_filter()`
- * @see `scharr_filter()`
- */
-template <typename T, Index IDerivation, Index... IAveraging>
-auto prewitt_filter(T sign = 1)
-{
-  const auto derivation = convolution_along<T, IDerivation>({sign, 0, -sign});
-  const auto averaging = convolution_along<T, IAveraging...>({1, 1, 1});
-  return derivation * averaging;
-}
-
-/**
- * @brief Make a Sobel filter along given axes.
- * 
- * The convolution kernel along the `IAveraging` axes is `{1, 2, 1}` and that along `IDerivation` is `{sign, 0, -sign}`.
- * 
- * @see `prewitt_filter()`
- * @see `scharr_filter()`
- */
-template <typename T, Index IDerivation, Index... IAveraging>
-auto sobel_filter(T sign = 1)
-{
-  const auto derivation = convolution_along<T, IDerivation>({sign, 0, -sign});
-  const auto averaging = convolution_along<T, IAveraging...>({1, 2, 1});
-  return derivation * averaging;
-}
-
-/**
- * @brief Make a Scharr filter along given axes.
- * 
- * The kernel along the `IAveraging` axes is `{3, 10, 3}` and that along `IDerivation` is `{sign, 0, -sign}`.
- * 
- * @see `prewitt_filter()`
- * @see `sobel_filter()`
- */
-template <typename T, Index IDerivation, Index... IAveraging>
-auto scharr_filter(T sign = 1)
-{
-  const auto derivation = convolution_along<T, IDerivation>({sign, 0, -sign});
-  const auto averaging = convolution_along<T, IAveraging...>({3, 10, 3});
-  return derivation * averaging;
-}
-
-/**
- * @brief Make a Laplacian filter along given axes.
- * 
- * The convolution kernel is built as a sum of 1D kernels `{sign, -2 * sign, sign}`.
- */
-template <typename T, Index... Is>
-auto laplacian_filter(T sign = 1)
-{
-  return convolution_along<T, Is...>({sign, sign * -2, sign});
-  // FIXME return (convolution_along<T, Is>({sign, sign * -2, sign}) + ...);
+  return FilterSeq<FilterMixin<T, TWindow, TDerived>, FilterMixin<U, UWindow, UDerived>>(
+      std::make_tuple(std::move(lhs), std::move(rhs))); // FIXME forward?
 }
 
 } // namespace Linx

@@ -92,6 +92,8 @@ struct Dilation {
  */
 template <typename TOp, typename TWindow>
 class Filter : public FilterMixin<typename TOp::Value, TWindow, Filter<TOp, TWindow>> {
+  friend class FilterMixin<typename TOp::Value, TWindow, Filter<TOp, TWindow>>; // FIXME simplify
+
 public:
 
   /**
@@ -116,10 +118,12 @@ public:
    */
   explicit Filter(TOp&& op, Index radius = 1) : Filter(std::forward<TOp>(op), Box<Dimension>::from_center(radius)) {}
 
+protected:
+
   /**
    * @brief Get the filtering window.
    */
-  const TWindow& window() const
+  const TWindow& window_impl() const
   {
     return m_window;
   }
@@ -131,9 +135,9 @@ public:
    * such that the output domain is `in.domain() - filter.window()`.
    */
   template <typename T, Index N, typename THolder, typename TOut>
-  void transform(const Raster<T, N, THolder>& in, TOut& out) const
+  void transform_impl(const Raster<T, N, THolder>& in, TOut& out) const
   {
-    const auto region = in.domain() - Linx::box(window());
+    const auto region = in.domain() - Linx::box(window_impl());
     transform_monolith(in.patch(region), out);
   }
 
@@ -143,7 +147,7 @@ public:
    * The output raster has the same shape as the input raster.
    */
   template <typename TRaster, typename TMethod, typename TOut>
-  void transform(const Extrapolation<TRaster, TMethod>& in, TOut& out) const
+  void transform_impl(const Extrapolation<TRaster, TMethod>& in, TOut& out) const
   {
     const auto& raw = dont_extrapolate(in);
     const auto bbox =
@@ -174,7 +178,7 @@ public:
    * The output raster has the same shape as the grid.
    */
   template <typename T, typename TParent, typename TRegion, typename TOut>
-  void transform(const Patch<T, TParent, TRegion>& in, TOut& out) const
+  void transform_impl(const Patch<T, TParent, TRegion>& in, TOut& out) const
   {
     const auto& raw = dont_extrapolate(in);
     const auto& front = in.domain().front();
@@ -188,7 +192,7 @@ public:
       return Box<TParent::Dimension>::from_shape(f, g.shape());
     };
 
-    const auto& window = extend<TParent::Dimension>(box(m_window));
+    const auto window = extend<TParent::Dimension>(box(m_window));
     const auto bbox = Internal::BorderedBox<TParent::Dimension>(rasterize(in).domain(), window);
     // FIXME accept non-Box window, and of lower dim
     bbox.apply_inner_border(
@@ -216,8 +220,8 @@ private:
   template <typename TIn, typename TOut>
   void transform_monolith_extrapolator(const TIn& in, TOut& out) const
   {
-    const auto extrapolated = in.parent().copy(Linx::box(in.domain()) + window());
-    const auto box = extrapolated.domain() - window();
+    const auto extrapolated = in.parent().copy(Linx::box(in.domain()) + window_impl());
+    const auto box = extrapolated.domain() - window_impl();
     // FIXME region - window().front()?
     transform_monolith(extrapolated.patch(box), out);
   }

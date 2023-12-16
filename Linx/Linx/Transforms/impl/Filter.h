@@ -11,6 +11,8 @@
 #include "Linx/Data/Raster.h"
 #include "Linx/Transforms/Extrapolation.h"
 
+#include <iostream> // FIXME cout
+
 namespace Linx {
 
 /**
@@ -52,11 +54,19 @@ public:
   static constexpr Index Dimension = TWindow::Dimension;
 
   /**
+   * @brief Get the filter window.
+   */
+  auto window() const
+  {
+    return static_cast<const TDerived&>(*this).window_impl();
+  }
+
+  /**
    * @brief Compute the impulse response of the filter.
    */
   auto impulse() const
   {
-    const auto& w = reinterpret_cast<const TDerived&>(*this).window();
+    const auto& w = window();
     const auto o = -w.front();
     auto raster = Raster<Value, Dimension>(w.shape());
     raster[o] = Value(1); // FIXME or back-o?
@@ -64,24 +74,61 @@ public:
   }
 
   /**
-   * @brief Apply the filter according to the input type.
-   * 
-   * This is equivalent to calling the overload of `transform()` suitable to `TIn` with an output of minimal shape.
+   * @brief Apply the filter into a given output.
    */
-  template <typename TIn>
-  Raster<Value, TIn::Dimension> operator*(const TIn& in) const
+  template <typename TIn, typename TOut>
+  void transform(const TIn& in, TOut& out) const
   {
-    Raster<Value, TIn::Dimension> out;
-    if constexpr (is_patch<TIn>()) {
-      out = Raster<Value, TIn::Dimension>(in.domain().shape()); // Box or Grid
-      // FIXME support arbitrary patches
-    } else if constexpr (is_extrapolator<TIn>()) {
-      out = Raster<Value, TIn::Dimension>(in.shape());
-    } else {
-      const auto& window = box(reinterpret_cast<const TDerived&>(*this).window());
-      out = Raster<Value, TIn::Dimension>(in.shape() - extend<TIn::Dimension>(window.shape() - 1));
-    }
-    reinterpret_cast<const TDerived&>(*this).transform(in, out);
+    static_cast<const TDerived&>(*this).transform_impl(in, out);
+  }
+
+  /**
+   * @brief Apply the filter with cropping.
+   */
+  template <typename U, Index N, typename UHolder>
+  Raster<Value, N> operator*(const Raster<U, N, UHolder>& in) const
+  {
+    const auto w = box(window());
+    std::cout << "window: " << window().front() << " - " << window().back() << std::endl;
+    std::cout << "box: " << w.front() << " - " << w.back() << std::endl;
+    std::cout << "in: " << in.shape() << std::endl;
+    const auto shape = in.shape() - extend<N>(w.shape() - 1);
+    std::cout << "Raster: " << shape << std::endl;
+    Raster<Value, N> out(shape);
+    std::cout << "transform()" << std::endl;
+    transform(in, out);
+    std::cout << "Done." << std::endl;
+    return out;
+  }
+
+  /**
+   * @brief Apply the filter with extrapolation.
+   */
+  template <typename URaster, typename UMethod>
+  Raster<Value, URaster::Dimension> operator*(const Extrapolation<URaster, UMethod>& in) const
+  {
+    std::cout
+        << "Extrapolation: " << in.domain().front() << " - " << in.domain().back() << " = " << in.shape() << std::endl;
+    Raster<Value, URaster::Dimension> out(in.shape());
+    std::cout << "transform(): " << in.shape() << " -> " << out.shape() << std::endl;
+    transform(in, out);
+    std::cout << "Done." << std::endl;
+    return out;
+  }
+
+  /**
+   * @brief Apply the filter to a patch.
+   */
+  template <typename U, typename UParent, typename URegion>
+  Raster<Value, UParent::Dimension> operator*(const Patch<U, UParent, URegion>& in) const
+  {
+    // FIXME support arbitrary patches
+    std::cout
+        << "Patch: " << in.domain().front() << " - " << in.domain().back() << " = " << in.domain().shape() << std::endl;
+    Raster<Value, UParent::Dimension> out(in.domain().shape()); // Box or Grid
+    std::cout << "transform(): " << in.domain().shape() << " -> " << out.shape() << std::endl;
+    transform(in, out);
+    std::cout << "Done." << std::endl;
     return out;
   }
 };
