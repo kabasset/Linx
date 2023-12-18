@@ -78,6 +78,7 @@ protected:
   void transform_impl(const TIn& in, TOut& out) const
   {
     // out.generate(std::forward<TFunc>(m_op), m_filters * in...); // FIXME apply expand m_filters
+    out.generate(m_op, std::get<0>(m_filters) * in, std::get<1>(m_filters) * in); // FIXME any number of filters
   }
 
 private:
