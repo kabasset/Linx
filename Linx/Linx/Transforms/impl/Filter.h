@@ -11,8 +11,6 @@
 #include "Linx/Data/Raster.h"
 #include "Linx/Transforms/Extrapolation.h"
 
-#include <iostream> // FIXME cout
-
 namespace Linx {
 
 /**
@@ -89,15 +87,9 @@ public:
   Raster<Value, N> operator*(const Raster<U, N, UHolder>& in) const
   {
     const auto& w = box(window());
-    std::cout << "window: " << window().front() << " - " << window().back() << std::endl;
-    std::cout << "box: " << w.front() << " - " << w.back() << std::endl;
-    std::cout << "in: " << in.shape() << std::endl;
     const auto shape = in.shape() - extend<N>(w.shape() - 1);
-    std::cout << "Raster: " << shape << std::endl;
     Raster<Value, N> out(shape);
-    std::cout << "transform()" << std::endl;
     transform(in, out);
-    std::cout << "Done." << std::endl;
     return out;
   }
 
@@ -107,12 +99,8 @@ public:
   template <typename URaster, typename UMethod>
   Raster<Value, URaster::Dimension> operator*(const Extrapolation<URaster, UMethod>& in) const
   {
-    std::cout
-        << "Extrapolation: " << in.domain().front() << " - " << in.domain().back() << " = " << in.shape() << std::endl;
     Raster<Value, URaster::Dimension> out(in.shape());
-    std::cout << "transform(): " << in.shape() << " -> " << out.shape() << std::endl;
     transform(in, out);
-    std::cout << "Done." << std::endl;
     return out;
   }
 
@@ -123,12 +111,8 @@ public:
   Raster<Value, UParent::Dimension> operator*(const Patch<U, UParent, URegion>& in) const
   {
     // FIXME support arbitrary patches
-    std::cout
-        << "Patch: " << in.domain().front() << " - " << in.domain().back() << " = " << in.domain().shape() << std::endl;
     Raster<Value, UParent::Dimension> out(in.domain().shape()); // Box or Grid
-    std::cout << "transform(): " << in.domain().shape() << " -> " << out.shape() << std::endl;
     transform(in, out);
-    std::cout << "Done." << std::endl;
     return out;
   }
 };

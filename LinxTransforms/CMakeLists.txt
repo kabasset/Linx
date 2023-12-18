@@ -24,6 +24,10 @@ elements_add_unit_test(Filter tests/src/Filter_test.cpp
                      EXECUTABLE LinxTransforms_Filter_test
                      LINK_LIBRARIES Linx
                      TYPE Boost)
+elements_add_unit_test(FilterAgg tests/src/FilterAgg_test.cpp 
+                     EXECUTABLE LinxTransforms_FilterAgg_test
+                     LINK_LIBRARIES Linx
+                     TYPE Boost)
 elements_add_unit_test(FilterLib tests/src/FilterLib_test.cpp 
                      EXECUTABLE LinxTransforms_FilterLib_test
                      LINK_LIBRARIES Linx

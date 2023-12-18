@@ -9,8 +9,6 @@
 #include "Linx/Transforms/Extrapolation.h"
 #include "Linx/Transforms/impl/Filter.h"
 
-#include <iostream> // FIXME cout
-
 namespace Linx {
 
 /**
@@ -198,37 +196,25 @@ protected:
       return Box<TParent::Dimension>::from_shape(f, g.shape());
     };
 
-    std::cout << "m_win: " << m_window.front() << " - " << m_window.back() << std::endl;
     const auto window = extend<TParent::Dimension>(box(m_window));
-    std::cout << "win: " << window.front() << " - " << window.back() << std::endl;
     decltype(auto) domain = rasterize(in).domain();
-    std::cout << "in: " << domain.front() << " - " << domain.back() << std::endl;
     const auto bbox = Internal::BorderedBox<TParent::Dimension>(domain, window);
     // FIXME accept non-Box window, and of lower dim
     bbox.apply_inner_border(
         [&](const auto& ib) {
-          std::cout << "INNER: " << ib.front() << " - " << ib.back() << std::endl;
           const auto insub = raw.patch(ib);
-          std::cout << "insub: " << insub.domain().front() << " - " << insub.domain().back() << std::endl;
           if (insub.size() > 0) { // FIXME needed?
-            std::cout << "transform()" << std::endl;
             auto outsub = out.patch(grid_to_box(insub.domain()));
-            std::cout << "outsub: " << outsub.domain().front() << " - " << outsub.domain().back() << std::endl;
             transform_monolith(insub, outsub);
           }
         },
         [&](const auto& ib) {
-          std::cout << "OUTER: " << ib.front() << " - " << ib.back() << std::endl;
           const auto insub = in.patch(ib);
-          std::cout << "insub: " << insub.domain().front() << " - " << insub.domain().back() << std::endl;
           if (insub.size() > 0) {
-            std::cout << "transform()" << std::endl;
             auto outsub = out.patch(grid_to_box(insub.domain()));
-            std::cout << "outsub: " << outsub.domain().front() << " - " << outsub.domain().back() << std::endl;
             transform_monolith(insub, outsub);
           }
         });
-    std::cout << "Done." << std::endl;
   }
 
 private:

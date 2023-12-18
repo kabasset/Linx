@@ -106,11 +106,8 @@ protected:
     Box<Dimension> out {Position<Dimension>::zero(), Position<Dimension>::zero()};
     seq_foreach(m_filters, [&](const auto& f) {
       const auto& tmp = f.window();
-      std::cout << "window: " << tmp.front() << " - " << tmp.back() << std::endl;
       const auto& w = extend<Dimension>(box(f.window())); // FIXME allow -1
-      std::cout << "w: " << w.front() << " - " << w.back() << std::endl;
       out += w;
-      std::cout << "out: " << out.front() << " - " << out.back() << std::endl;
     });
     return out;
   }
@@ -181,8 +178,6 @@ private:
 template <typename TFilter, typename UFilter, typename std::enable_if_t<is_filter<UFilter>()>* = nullptr>
 auto operator*(const TFilter& lhs, const UFilter& rhs)
 {
-  std::cout << "lhs: " << lhs.window().front() << " - " << lhs.window().back() << std::endl;
-  std::cout << "rhs: " << rhs.window().front() << " - " << rhs.window().back() << std::endl;
   return FilterSeq<TFilter, UFilter>(lhs, rhs);
 }
 

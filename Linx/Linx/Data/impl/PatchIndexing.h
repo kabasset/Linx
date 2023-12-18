@@ -12,8 +12,6 @@
 #include "Linx/Data/Raster.h"
 #include "Linx/Data/Sequence.h"
 
-#include <iostream> // FIXME cout
-
 namespace Linx {
 
 /**
@@ -86,13 +84,8 @@ public:
     if (region.size() <= 0) { // FIXME needed?
       return;
     }
-    std::cout << "region: " << region.front() << " - " << region.back() << std::endl;
-    std::cout << "offsets: " << m_offsets.size() << std::endl;
     auto plane = (region - region.front()).project();
-    std::cout << "plane: " << plane.front() << " - " << plane.back() << std::endl;
-    std::cout << "distance: " << std::distance(plane.begin(), plane.end()) << std::endl;
     std::transform(plane.begin(), plane.end(), m_offsets.begin(), [&](const auto& p) {
-      std::cout << p << std::endl;
       return parent.index(p);
     });
   }

@@ -7,6 +7,7 @@
 
 #include "Linx/Base/TypeUtils.h"
 #include "Linx/Transforms/Filter.h"
+#include "Linx/Transforms/FilterAgg.h"
 #include "Linx/Transforms/FilterSeq.h"
 
 namespace Linx {
@@ -263,8 +264,7 @@ auto scharr_filter(T sign = 1)
 template <typename T, Index... Is>
 auto laplacian_filter(T sign = 1)
 {
-  return convolution_along<T, Is...>({sign, sign * -2, sign});
-  // FIXME return (convolution_along<T, Is>({sign, sign * -2, sign}) + ...);
+  return FilterAgg(std::plus<T>(), convolution_along<T, Is>({sign, sign * -2, sign})...);
 }
 
 } // namespace Linx
