@@ -69,21 +69,19 @@ public:
   /**
    * @brief Append a filter to the sequence.
    */
-  template <typename T, typename TWindow, typename TDerived>
-  auto operator*(FilterMixin<T, TWindow, TDerived>&& rhs) const
+  template <typename UFilter>
+  auto operator*(const std::enable_if_t<is_filter<UFilter>(), UFilter>& rhs) const
   {
-    return FilterSeq<TFilters..., FilterMixin<T, TWindow, TDerived>>(
-        std::tuple_cat(m_filters, std::forward<FilterMixin<T, TWindow, TDerived>>(rhs)));
+    return FilterSeq<TFilters..., UFilter>(std::tuple_cat(m_filters, rhs));
   }
 
   /**
    * @brief Prepend a filter to the sequence.
    */
-  template <typename T, typename TWindow, typename TDerived>
-  friend auto operator*(FilterMixin<T, TWindow, TDerived>&& lhs, const FilterSeq<TFilters...>& rhs)
+  template <typename UFilter>
+  friend auto operator*(const std::enable_if_t<is_filter<UFilter>(), UFilter>& lhs, const FilterSeq<TFilters...>& rhs)
   {
-    return FilterSeq<FilterMixin<T, TWindow, TDerived>, TFilters...>(
-        std::tuple_cat(std::make_tuple(std::forward<FilterMixin<T, TWindow, TDerived>>(lhs)), rhs.m_filters));
+    return FilterSeq<UFilter, TFilters...>(std::tuple_cat(std::make_tuple(lhs), rhs.m_filters));
   }
 
   /// @group_properties
@@ -105,17 +103,16 @@ protected:
   Box<Dimension> window_impl() const
   {
     // FIXME support Dimension = -1
-    auto front = Position<Dimension>::zero();
-    auto back = Position<Dimension>::zero();
-    seq_foreach(m_filters, [&](const auto& k) {
-      const auto& w = box(k.window());
-      for (Index i = 0; i < w.dimension(); ++i) {
-        // FIXME sum radius instead of min/max
-        front[i] = std::min(front[i], w.front()[i]);
-        back[i] = std::max(back[i], w.back()[i]);
-      }
+    Box<Dimension> out {Position<Dimension>::zero(), Position<Dimension>::zero()};
+    seq_foreach(m_filters, [&](const auto& f) {
+      const auto& tmp = f.window();
+      std::cout << "window: " << tmp.front() << " - " << tmp.back() << std::endl;
+      const auto& w = extend<Dimension>(box(f.window())); // FIXME allow -1
+      std::cout << "w: " << w.front() << " - " << w.back() << std::endl;
+      out += w;
+      std::cout << "out: " << out.front() << " - " << out.back() << std::endl;
     });
-    return {front, back};
+    return out;
   }
 
   /**
@@ -181,11 +178,12 @@ private:
 /**
  * @brief Combine two filters as a sequence.
  */
-template <typename T, typename TWindow, typename TDerived, typename U, typename UWindow, typename UDerived>
-auto operator*(FilterMixin<T, TWindow, TDerived> lhs, FilterMixin<U, UWindow, UDerived> rhs)
+template <typename TFilter, typename UFilter, typename std::enable_if_t<is_filter<UFilter>()>* = nullptr>
+auto operator*(const TFilter& lhs, const UFilter& rhs)
 {
-  return FilterSeq<FilterMixin<T, TWindow, TDerived>, FilterMixin<U, UWindow, UDerived>>(
-      std::make_tuple(std::move(lhs), std::move(rhs))); // FIXME forward?
+  std::cout << "lhs: " << lhs.window().front() << " - " << lhs.window().back() << std::endl;
+  std::cout << "rhs: " << rhs.window().front() << " - " << rhs.window().back() << std::endl;
+  return FilterSeq<TFilter, UFilter>(lhs, rhs);
 }
 
 } // namespace Linx

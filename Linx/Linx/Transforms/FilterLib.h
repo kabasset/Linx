@@ -130,7 +130,7 @@ template <typename T, Index N = 2>
 auto correlation(const T* values, Box<N> window)
 {
   const T* end = values + window.size();
-  return Filter<Correlation<T>, Box<N>>(std::vector(values, end), std::move(window));
+  return Filter<Correlation<T>, Box<N>>(std::vector<T>(values, end), std::move(window));
 }
 
 /**
@@ -158,10 +158,10 @@ auto correlation(const Raster<T, N, THolder>& values)
 /**
  * @brief Create a filter made of identical 1D correlation kernels along given axes.
  * 
- * Axis need not be different, e.g. to define some iterative kernel.
+ * Axes need not be different, e.g. to define some iterative kernel.
  */
 template <typename T, Index I0, Index... Is>
-auto correlation_along(std::vector<T> values)
+auto correlation_along(const std::vector<T>& values)
 {
   if constexpr (sizeof...(Is) == 0) {
     const auto radius = values.size() / 2;
@@ -181,7 +181,7 @@ auto correlation_along(std::vector<T> values)
  * Axis need not be different, e.g. to define some iterative kernel.
  */
 template <typename T, Index I0, Index... Is>
-auto convolution_along(std::vector<T> values)
+auto convolution_along(const std::vector<T>& values)
 {
   if constexpr (sizeof...(Is) == 0) {
     const auto radius = values.size() / 2;
