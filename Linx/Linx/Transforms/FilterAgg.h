@@ -77,8 +77,15 @@ protected:
   template <typename TIn, typename TOut>
   void transform_impl(const TIn& in, TOut& out) const
   {
-    // out.generate(std::forward<TFunc>(m_op), m_filters * in...); // FIXME apply expand m_filters
-    out.generate(m_op, std::get<0>(m_filters) * in, std::get<1>(m_filters) * in); // FIXME any number of filters
+    transform_impl(in, out, std::make_index_sequence<sizeof...(TFilters)> {});
+  }
+
+private:
+
+  template <typename TIn, typename TOut, std::size_t... Is>
+  void transform_impl(const TIn& in, TOut& out, std::index_sequence<Is...>) const
+  {
+    out.generate(m_op, std::get<Is>(m_filters) * in...);
   }
 
 private:
