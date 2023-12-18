@@ -56,7 +56,7 @@ public:
   /**
    * @brief Get the filter window.
    */
-  auto window() const
+  decltype(auto) window() const
   {
     return static_cast<const TDerived&>(*this).window_impl();
   }
@@ -88,7 +88,7 @@ public:
   template <typename U, Index N, typename UHolder>
   Raster<Value, N> operator*(const Raster<U, N, UHolder>& in) const
   {
-    const auto w = box(window());
+    const auto& w = box(window());
     std::cout << "window: " << window().front() << " - " << window().back() << std::endl;
     std::cout << "box: " << w.front() << " - " << w.back() << std::endl;
     std::cout << "in: " << in.shape() << std::endl;
