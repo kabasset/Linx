@@ -12,6 +12,8 @@
 #include "Linx/Data/Raster.h"
 #include "Linx/Data/Sequence.h"
 
+#include <iostream> // FIXME cout
+
 namespace Linx {
 
 /**
@@ -78,11 +80,19 @@ public:
    * @brief Constructor for boxes.
    */
   StrideBasedIndexing(const TParent& parent, const Box<TParent::Dimension>& region) :
-      m_step(1), m_width(region.template length<0>()),
-      m_offsets(region.size() / std::max(m_width, 1L) + 1) // +1 in order to dereference m_offsets.end() in iterator
+      m_step(1), m_width(region.template length<0>()), m_offsets(region.size() / std::max(m_width, 1L) + 1)
+  // max to prevent division by 0, +1 in order to dereference m_offsets.end() in iterator
   {
+    if (region.size() <= 0) { // FIXME needed?
+      return;
+    }
+    std::cout << "region: " << region.front() << " - " << region.back() << std::endl;
+    std::cout << "offsets: " << m_offsets.size() << std::endl;
     auto plane = (region - region.front()).project();
+    std::cout << "plane: " << plane.front() << " - " << plane.back() << std::endl;
+    std::cout << "distance: " << std::distance(plane.begin(), plane.end()) << std::endl;
     std::transform(plane.begin(), plane.end(), m_offsets.begin(), [&](const auto& p) {
+      std::cout << p << std::endl;
       return parent.index(p);
     });
   }
@@ -92,8 +102,12 @@ public:
    */
   StrideBasedIndexing(const TParent& parent, const Grid<TParent::Dimension>& region) :
       m_step(region.step()[0]), m_width(region.template length<0>()),
-      m_offsets(region.size() / m_width + 1) // +1 see above
+      m_offsets(region.size() / std::max(m_width, 1L) + 1)
+  // for max and +1 see above
   {
+    if (region.size() <= 0) { // FIXME needed?
+      return;
+    }
     const auto plane = (region - region.front()).project();
     std::transform(plane.begin(), plane.end(), m_offsets.begin(), [&](const auto& p) {
       return parent.index(p);
@@ -101,7 +115,7 @@ public:
   }
 
   /**
-   * @brief Constructor for slices.
+   * @brief Constructor for lines.
    */
   template <Index I>
   StrideBasedIndexing(const TParent& parent, const Line<I, TParent::Dimension>& region) :
