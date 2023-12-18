@@ -283,7 +283,7 @@ template <typename T>
 class PtrHolder {
 public:
 
-  explicit PtrHolder(std::size_t size = 0) : m_begin(nullptr), m_end(nullptr) {}
+  explicit PtrHolder(std::size_t = 0) : m_begin(nullptr), m_end(nullptr) {}
 
   explicit PtrHolder(std::size_t size, T* data) : m_begin(data), m_end(m_begin + size) {}
 
