@@ -47,7 +47,7 @@ public:
     auto interpolator = Linx::interpolation<Linx::Linear>(extrapolator);
 
     Linx::Raster<float> output(input.shape());
-    Linx::Affinity<2> affinity({2 * quarter, 2 * quarter});
+    Linx::Affinity<2> affinity({2. * quarter, 2. * quarter});
     affinity += {vector, 0};
     affinity *= factor;
     affinity.rotate_degrees(angle);

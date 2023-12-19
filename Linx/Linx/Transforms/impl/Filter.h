@@ -117,26 +117,13 @@ public:
   }
 };
 
-namespace Internal {
-
-template <template <typename...> class C, typename... Ts>
-std::true_type is_base_of_template_impl(const C<Ts...>*); // FIXME swap args
-
-template <template <typename...> class C>
-std::false_type is_base_of_template_impl(...); // FIXME swap args
-
-template <typename T, template <typename...> class C>
-using is_base_of_template = decltype(is_base_of_template_impl<C>(std::declval<T*>())); // FIXME to TypeUtils
-
-} // namespace Internal
-
 /**
  * @brief Test whether a class is a filter, i.e. implements `FilterMixin`.
-*/
+ */
 template <typename T>
 constexpr bool is_filter()
 {
-  return Internal::is_base_of_template<T, FilterMixin>::value;
+  return is_base_template_of<FilterMixin, T>();
 }
 
 } // namespace Linx

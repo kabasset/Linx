@@ -105,7 +105,6 @@ protected:
     // FIXME support Dimension = -1
     Box<Dimension> out {Position<Dimension>::zero(), Position<Dimension>::zero()};
     seq_foreach(m_filters, [&](const auto& f) {
-      const auto& tmp = f.window();
       const auto& w = extend<Dimension>(box(f.window())); // FIXME allow -1
       out += w;
     });

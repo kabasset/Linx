@@ -286,6 +286,27 @@ constexpr bool is_complex()
   return IsComplex<T>::value;
 }
 
+/// @cond
+namespace Internal {
+
+template <template <typename...> class C, typename... Ts>
+std::true_type is_base_template_of_impl(const C<Ts...>*);
+
+template <template <typename...> class C>
+std::false_type is_base_template_of_impl(...);
+
+} // namespace Internal
+/// @endcond
+
+/**
+ * @brief Test whether a class derives from a base class template.
+ */
+template <template <typename...> class TBase, typename TDerived>
+constexpr bool is_base_template_of()
+{
+  return decltype(Internal::is_base_template_of_impl<TBase>(std::declval<TDerived*>()))::value;
+}
+
 } // namespace Linx
 
 #endif
