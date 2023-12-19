@@ -12,11 +12,13 @@
 namespace Linx {
 
 /**
+ * @ingroup filtering
  * @brief Structuring element-based operations.
  */
-namespace MorphologyOp {
+namespace MorphologyOp { // FIXME rm
 
 /**
+ * @ingroup filtering
  * @brief Mean filtering.
  */
 template <typename T>
@@ -31,6 +33,7 @@ struct MeanFilter {
 };
 
 /**
+ * @ingroup filtering
  * @brief Median filtering.
  */
 template <typename T>
@@ -55,6 +58,7 @@ struct MedianFilter {
 };
 
 /**
+ * @ingroup filtering
  * @brief Erosion (i.e. min filtering).
  */
 template <typename T>
@@ -69,6 +73,7 @@ struct Erosion {
 };
 
 /**
+ * @ingroup filtering
  * @brief Dilation (i.e. max filtering).
  */
 template <typename T>
@@ -85,6 +90,7 @@ struct Dilation {
 } // namespace MorphologyOp
 
 /**
+ * @ingroup filtering
  * @brief A structuring element for morphological operations.
  * @tparam TOp The morphological operator
  * @tparam T The value type
@@ -268,24 +274,36 @@ private:
   TWindow m_window;
 };
 
+/**
+ * @ingroup filtering
+ */
 template <typename T, typename TWindow>
 Filter<MorphologyOp::MeanFilter<T>, TWindow> mean_filter(TWindow window)
 {
   return Filter<MorphologyOp::MeanFilter<T>, TWindow>(MorphologyOp::MeanFilter<T> {}, std::move(window));
 }
 
+/**
+ * @ingroup filtering
+ */
 template <typename T, typename TWindow>
 Filter<MorphologyOp::MedianFilter<T>, TWindow> median_filter(TWindow window)
 {
   return Filter<MorphologyOp::MedianFilter<T>, TWindow>(MorphologyOp::MedianFilter<T> {}, std::move(window));
 }
 
+/**
+ * @ingroup filtering
+ */
 template <typename T, typename TWindow>
 Filter<MorphologyOp::Erosion<T>, TWindow> erosion(TWindow window)
 {
   return Filter<MorphologyOp::Erosion<T>, TWindow>(MorphologyOp::Erosion<T> {}, std::move(window));
 }
 
+/**
+ * @ingroup filtering
+ */
 template <typename T, typename TWindow>
 Filter<MorphologyOp::Dilation<T>, TWindow> dilation(TWindow window)
 {

@@ -1,0 +1,82 @@
+namespace Linx {
+/**
+
+\addtogroup filtering
+
+
+\section filtering-intro Introduction
+
+
+In Linx, filters are operators which act on values in a neighborhood.
+In general, the neighborhood is moved over an input image in order to get an output value per input neighborhood.
+Typically, convolution, morphological operations and template matching are represented by filters.
+Convolution computes the dot product between the values in the neighborhood and those of a kernel,
+while morphological operators often rely on extremal values in the neighborhood.
+
+
+\section filtering-separable Simple vs. separable filters
+
+
+Simple filters are single-pass: they directly transform one input patch into one output value.
+Separable filters, on the other hand, consist in multiple transforms which can be applied in sequence or in parallel.
+They are generally employed for optimization purpose.
+
+For example, the 2D Laplace operator can be seen as a convolution with a 3x3 kernel:
+
+\code
+      |  0  1  0 |
+out = |  1 -4  1 | * in
+      |  0  1  0 |
+\endcode
+
+or as the sum of two convolutions with 3x1 and 1x3 kernels (which is faster):
+
+\code
+                          |  1 |
+out = |  1 -2  1 | * in + | -2 | * in
+                          |  1 |
+\endcode
+
+The Sobel gradient can be seen as a convolution with a 3x3 kernel:
+
+\code
+      |  1  0 -1 |
+out = |  2  0 -2 | * in
+      |  1  0 -1 |
+\endcode
+
+or as a sequence of two convolutions with 3x1 and 1x3 kernels (which is faster):
+
+\code
+                     |  1 |
+out = |  1  0 -1 | * |  2 | * in
+                     |  1 |
+\endcode
+
+\section filtering-convolution Convolution and correlation
+
+
+\section filtering-bilateral Bilateral filtering
+
+
+FIXME
+
+
+\section filtering-strel Structuring element-based filtering
+
+
+\section filtering-matching Template matching
+
+
+FIXME
+
+
+\section filtering-lib API and filter library
+
+
+TODO `operator*`, `transform()`
+
+Among others, the predefined filters, declared in `FilterLib.h`, are listed below.
+
+*/
+}

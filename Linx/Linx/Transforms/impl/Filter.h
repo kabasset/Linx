@@ -33,6 +33,7 @@ Box<M> extend(const Box<N>& in, const Position<M>& padding = Position<M>::zero()
 }
 
 /**
+ * @ingroup filtering
  * @brief Spatial filtering mixin.
  * 
  * Child classes must implement `window()` and `transform(in, out)`.
@@ -118,6 +119,7 @@ public:
 };
 
 /**
+ * @ingroup filtering
  * @brief Test whether a class is a filter, i.e. implements `FilterMixin`.
  */
 template <typename T>

@@ -15,7 +15,8 @@
 namespace Linx {
 
 /**
- * @brief A sequence of filters.
+ * @ingroup filtering
+ * @brief An aggregate of filters.
  */
 template <typename TFunc, typename... TFilters>
 class FilterAgg :
@@ -93,6 +94,8 @@ private:
 };
 
 /**
+ * @ingroup filtering
+ * @relatesalso FilterAgg
  * @brief Sum two filters.
  */
 template <
@@ -105,6 +108,8 @@ auto operator+(const TFilter& lhs, const UFilter& rhs)
 }
 
 /**
+ * @ingroup filtering
+ * @relatesalso FilterAgg
  * @brief Get the P-norm of several filters.
  */
 template <

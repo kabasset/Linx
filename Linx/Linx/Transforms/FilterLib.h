@@ -13,6 +13,7 @@
 namespace Linx {
 
 /**
+ * @ingroup filtering
  * @brief Correlation operation.
  */
 template <typename T>
@@ -55,6 +56,7 @@ private:
 };
 
 /**
+ * @ingroup filtering
  * @brief Convolution operation.
  */
 template <typename T>
@@ -91,7 +93,7 @@ private:
 };
 
 /**
- * @relatesalso Filter
+ * @ingroup filtering
  * @brief Make a convolution kernel from values and a window.
  */
 template <typename T, Index N = 2>
@@ -102,7 +104,7 @@ auto convolution(const T* values, Box<N> window)
 }
 
 /**
- * @relatesalso Filter
+ * @ingroup filtering
  * @brief Make a convolution kernel from a raster and origin position.
  */
 template <typename T, Index N, typename THolder>
@@ -112,7 +114,7 @@ auto convolution(const Raster<T, N, THolder>& values, Position<N> origin)
 }
 
 /**
- * @relatesalso Filter
+ * @ingroup filtering
  * @brief Make a convolution kernel from a raster, with centered origin.
  * 
  * In case of even lengths, origin position is rounded down.
@@ -124,7 +126,7 @@ auto convolution(const Raster<T, N, THolder>& values)
 }
 
 /**
- * @relatesalso Filter
+ * @ingroup filtering
  * @brief Make a correlation kernel from values and a window.
  */
 template <typename T, Index N = 2>
@@ -135,7 +137,7 @@ auto correlation(const T* values, Box<N> window)
 }
 
 /**
- * @relatesalso Filter
+ * @ingroup filtering
  * @brief Make a correlation kernel from a raster and origin position.
  */
 template <typename T, Index N, typename THolder>
@@ -145,7 +147,7 @@ auto correlation(const Raster<T, N, THolder>& values, Position<N> origin)
 }
 
 /**
- * @relatesalso Filter
+ * @ingroup filtering
  * @brief Make a correlation kernel from a raster, with centered origin.
  * 
  * In case of even lengths, origin position is rounded down.
@@ -157,6 +159,7 @@ auto correlation(const Raster<T, N, THolder>& values)
 }
 
 /**
+ * @ingroup filtering
  * @brief Create a filter made of identical 1D correlation kernels along given axes.
  * 
  * Axes need not be different, e.g. to define some iterative kernel.
@@ -177,6 +180,7 @@ auto correlation_along(const std::vector<T>& values)
 }
 
 /**
+ * @ingroup filtering
  * @brief Create a filter made of identical 1D convolution kernels along given axes.
  * 
  * Axis need not be different, e.g. to define some iterative kernel.
@@ -197,6 +201,7 @@ auto convolution_along(const std::vector<T>& values)
 }
 
 /**
+ * @ingroup filtering
  * @brief Make a Prewitt gradient filter along given axes.
  * @tparam T The filter output type
  * @tparam IDerivation The derivation axis
@@ -225,6 +230,7 @@ auto prewitt_gradient(T sign = 1) // FIXME rename as prewitt_gradient
 }
 
 /**
+ * @ingroup filtering
  * @brief Make a Sobel gradient filter along given axes.
  * 
  * The convolution kernel along the `IAveraging` axes is `{1, 2, 1}` and that along `IDerivation` is `{sign, 0, -sign}`.
@@ -241,6 +247,7 @@ auto sobel_gradient(T sign = 1) // FIXME rename as sobel_gradient
 }
 
 /**
+ * @ingroup filtering
  * @brief Make a Scharr gradient filter along given axes.
  * 
  * The kernel along the `IAveraging` axes is `{3, 10, 3}` and that along `IDerivation` is `{sign, 0, -sign}`.
@@ -257,6 +264,7 @@ auto scharr_gradient(T sign = 1) // FIXME rename as scharr_gradient
 }
 
 /**
+ * @ingroup filtering
  * @brief Make a Laplace operator along given axes.
  * 
  * The convolution kernel is built as a sum of 1D kernels `{sign, -2 * sign, sign}`.

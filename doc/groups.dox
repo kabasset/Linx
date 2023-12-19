@@ -31,30 +31,23 @@
 \brief Snippets compared, adapted from NumPy's tutorial.
 \example LinxDemoBasics_test.cpp
 
-\defgroup geometry Geometrical Transforms
+\defgroup transforms Geometrical Transforms
 \brief Transforms which act on pixel locations.
 
 \defgroup interpolation Interpolation and Extrapolation
-\ingroup geometry
+\ingroup transforms
 \brief Handling of values between pixels or outside the raster domain.
 
 \defgroup affinity Affine Transforms
-\ingroup geometry
+\ingroup transforms
 \brief Translation, rotation, scaling
 
 \defgroup filtering Filtering
-\brief Linear and non-linear filtering.
-
-\defgroup correlation Linear Filters
-\ingroup filtering
-\brief Correlation and convolution operations.
-
-\defgroup nl_filters Non-Linear Filters
-\ingroup filtering
-\brief Bilateral filtering and morphological operations.
+\ingroup transforms
+\brief Linear and non-linear filtering, e.g. convolution, bilateral filtering, morphology.
 
 \defgroup dft Discrete Fourier Transforms
-\ingroup filtering
+\ingroup transforms
 \brief FFTW wrapper with automatic memory management.
 \example LinxDemoDft_test.cpp
 

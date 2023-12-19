@@ -15,6 +15,7 @@
 namespace Linx {
 
 /**
+ * @ingroup filtering
  * @brief A sequence of filters.
  */
 template <typename... TFilters>
@@ -172,6 +173,8 @@ private:
 };
 
 /**
+ * @ingroup filtering
+ * @relatesalso FilterSeq
  * @brief Combine two filters as a sequence.
  */
 template <typename TFilter, typename UFilter, typename std::enable_if_t<is_filter<UFilter>()>* = nullptr>
