@@ -197,7 +197,7 @@ auto convolution_along(const std::vector<T>& values)
 }
 
 /**
- * @brief Make a Prewitt filter along given axes.
+ * @brief Make a Prewitt gradient filter along given axes.
  * @tparam T The filter output type
  * @tparam IDerivation The derivation axis
  * @tparam IAveraging The possibly multiple averaging axes
@@ -209,15 +209,15 @@ auto convolution_along(const std::vector<T>& values)
  * 
  * For example, to compute the derivative along axis 1 backward, while averaging along axes 0 and 2, do:
  * \code
- * auto kernel = prewitt_filter<int, 1, 0, 2>(-1);
+ * auto kernel = prewitt_gradient<int, 1, 0, 2>(-1);
  * auto dy = kernel * raster;
  * \endcode
  * 
- * @see `sobel_filter()`
- * @see `scharr_filter()`
+ * @see `sobel_gradient()`
+ * @see `scharr_gradient()`
  */
 template <typename T, Index IDerivation, Index... IAveraging>
-auto prewitt_filter(T sign = 1)
+auto prewitt_gradient(T sign = 1) // FIXME rename as prewitt_gradient
 {
   const auto derivation = convolution_along<T, IDerivation>({sign, 0, -sign});
   const auto averaging = convolution_along<T, IAveraging...>({1, 1, 1});
@@ -225,15 +225,15 @@ auto prewitt_filter(T sign = 1)
 }
 
 /**
- * @brief Make a Sobel filter along given axes.
+ * @brief Make a Sobel gradient filter along given axes.
  * 
  * The convolution kernel along the `IAveraging` axes is `{1, 2, 1}` and that along `IDerivation` is `{sign, 0, -sign}`.
  * 
- * @see `prewitt_filter()`
- * @see `scharr_filter()`
+ * @see `prewitt_gradient()`
+ * @see `scharr_gradient()`
  */
 template <typename T, Index IDerivation, Index... IAveraging>
-auto sobel_filter(T sign = 1)
+auto sobel_gradient(T sign = 1) // FIXME rename as sobel_gradient
 {
   const auto derivation = convolution_along<T, IDerivation>({sign, 0, -sign});
   const auto averaging = convolution_along<T, IAveraging...>({1, 2, 1});
@@ -241,15 +241,15 @@ auto sobel_filter(T sign = 1)
 }
 
 /**
- * @brief Make a Scharr filter along given axes.
+ * @brief Make a Scharr gradient filter along given axes.
  * 
  * The kernel along the `IAveraging` axes is `{3, 10, 3}` and that along `IDerivation` is `{sign, 0, -sign}`.
  * 
- * @see `prewitt_filter()`
- * @see `sobel_filter()`
+ * @see `prewitt_gradient()`
+ * @see `sobel_gradient()`
  */
 template <typename T, Index IDerivation, Index... IAveraging>
-auto scharr_filter(T sign = 1)
+auto scharr_gradient(T sign = 1) // FIXME rename as scharr_gradient
 {
   const auto derivation = convolution_along<T, IDerivation>({sign, 0, -sign});
   const auto averaging = convolution_along<T, IAveraging...>({3, 10, 3});
@@ -257,12 +257,12 @@ auto scharr_filter(T sign = 1)
 }
 
 /**
- * @brief Make a Laplacian filter along given axes.
+ * @brief Make a Laplace operator along given axes.
  * 
  * The convolution kernel is built as a sum of 1D kernels `{sign, -2 * sign, sign}`.
  */
 template <typename T, Index... Is>
-auto laplacian_filter(T sign = 1)
+auto laplace_operator(T sign = 1)
 {
   return FilterAgg(std::plus<T>(), convolution_along<T, Is>({sign, sign * -2, sign})...);
 }

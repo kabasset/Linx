@@ -51,37 +51,37 @@ BOOST_AUTO_TEST_CASE(odd_window_2d_test)
 BOOST_AUTO_TEST_CASE(prewitt_inc_test)
 {
   Raster<int> expected({3, 3}, {1, 0, -1, 1, 0, -1, 1, 0, -1});
-  BOOST_TEST((prewitt_filter<int, 0, 1>().impulse()) == expected);
+  BOOST_TEST((prewitt_gradient<int, 0, 1>().impulse()) == expected);
 }
 
 BOOST_AUTO_TEST_CASE(prewitt_dec_test)
 {
   Raster<int> expected({3, 3}, {-1, 0, 1, -1, 0, 1, -1, 0, 1});
-  BOOST_TEST((prewitt_filter<int, 0, 1>(-1).impulse()) == expected);
+  BOOST_TEST((prewitt_gradient<int, 0, 1>(-1).impulse()) == expected);
 }
 
 BOOST_AUTO_TEST_CASE(sobel_inc_test)
 {
   Raster<int> expected({3, 3}, {1, 0, -1, 2, 0, -2, 1, 0, -1});
-  BOOST_TEST((sobel_filter<int, 0, 1>().impulse()) == expected);
+  BOOST_TEST((sobel_gradient<int, 0, 1>().impulse()) == expected);
 }
 
 BOOST_AUTO_TEST_CASE(sobel_dec_test)
 {
   Raster<int> expected({3, 3}, {-1, 0, 1, -2, 0, 2, -1, 0, 1});
-  BOOST_TEST((sobel_filter<int, 0, 1>(-1).impulse()) == expected);
+  BOOST_TEST((sobel_gradient<int, 0, 1>(-1).impulse()) == expected);
 }
 
 BOOST_AUTO_TEST_CASE(scharr_inc_test)
 {
   Raster<int> expected({3, 3}, {3, 0, -3, 10, 0, -10, 3, 0, -3});
-  BOOST_TEST((scharr_filter<int, 0, 1>().impulse()) == expected);
+  BOOST_TEST((scharr_gradient<int, 0, 1>().impulse()) == expected);
 }
 
 BOOST_AUTO_TEST_CASE(scharr_dec_test)
 {
   Raster<int> expected({3, 3}, {-3, 0, 3, -10, 0, 10, -3, 0, 3});
-  BOOST_TEST((scharr_filter<int, 0, 1>(-1).impulse()) == expected);
+  BOOST_TEST((scharr_gradient<int, 0, 1>(-1).impulse()) == expected);
 }
 
 BOOST_AUTO_TEST_CASE(orthogonal_associativity_commutativity_test)

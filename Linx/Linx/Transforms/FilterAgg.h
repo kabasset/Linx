@@ -49,8 +49,6 @@ public:
       m_op(std::forward<TFunc>(op)), m_filters(std::forward<TFilters>(filters)...)
   {}
 
-  /// @group_properties
-
 protected:
 
   /**
@@ -93,6 +91,34 @@ private:
   TFunc m_op;
   std::tuple<TFilters...> m_filters;
 };
+
+/**
+ * @brief Sum two filters.
+ */
+template <
+    typename TFilter,
+    typename UFilter,
+    typename std::enable_if_t<is_filter<TFilter>() && is_filter<UFilter>()>* = nullptr>
+auto operator+(const TFilter& lhs, const UFilter& rhs)
+{
+  return FilterAgg<TFilter, UFilter>(std::plus<typename TFilter::Value>(), lhs, rhs);
+}
+
+/**
+ * @brief Get the P-norm of several filters.
+ */
+template <
+    Index P = 2,
+    typename TFilter0,
+    typename std::enable_if_t<is_filter<TFilter0>()>* = nullptr,
+    typename... TFilters>
+auto norm(const TFilter0& filter0, const TFilters&... filters)
+{
+  auto agg = [&](const typename TFilter0::Value& e0, const typename TFilters::Value&... es) {
+    return abspow<P>(e0) + (abspow<P>(es) + ...);
+  };
+  return FilterAgg<decltype(agg), TFilter0, TFilters...>(agg, filter0, filters...);
+}
 
 } // namespace Linx
 
