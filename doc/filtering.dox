@@ -23,35 +23,50 @@ They are generally employed for optimization purpose.
 
 For example, the 2D Laplace operator can be seen as a convolution with a 3x3 kernel:
 
-\code
-      |  0  1  0 |
-out = |  1 -4  1 | * in
-      |  0  1  0 |
-\endcode
+\f[
+out = \begin{pmatrix}
+0 & +1 & 0 \\
++1 & -4 & +1 \\
+0 & +1 & 0
+\end{pmatrix}
+\ast in
+\f]
 
 or as the sum of two convolutions with 3x1 and 1x3 kernels (which is faster):
 
-\code
-                          |  1 |
-out = |  1 -2  1 | * in + | -2 | * in
-                          |  1 |
-\endcode
+\f[
+out = \begin{pmatrix}
++1 & -2 & +1
+\end{pmatrix}
+\ast in
++ \begin{pmatrix}
++1 \\
+-2 \\
++1 \end{pmatrix}
+\ast in
+\f]
 
 The Sobel gradient can be seen as a convolution with a 3x3 kernel:
 
-\code
-      |  1  0 -1 |
-out = |  2  0 -2 | * in
-      |  1  0 -1 |
-\endcode
+\f[
+out = \begin{pmatrix}
++1 & 0 & -1 \\
++2 & 0 & -2 \\
++1 & 0 & -1 \end{pmatrix}
+\ast in
+\f]
 
 or as a sequence of two convolutions with 3x1 and 1x3 kernels (which is faster):
 
-\code
-                     |  1 |
-out = |  1  0 -1 | * |  2 | * in
-                     |  1 |
-\endcode
+\f[
+out = \begin{pmatrix}
++1 & 0 & -1 \end{pmatrix}
+\ast \begin{pmatrix}
++1 \\
++2 \\
++1 \end{pmatrix}
+\ast in
+\f]
 
 \section filtering-convolution Convolution and correlation
 
