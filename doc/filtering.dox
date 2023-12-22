@@ -9,9 +9,10 @@ namespace Linx {
 
 In Linx, filters are operators which act on values in a neighborhood.
 In general, the neighborhood is moved over an input image in order to get an output value per input neighborhood.
-Typically, convolution, morphological operations and template matching are represented by filters.
-Convolution computes the dot product between the values in the neighborhood and those of a kernel,
-while morphological operators often rely on extremal values in the neighborhood.
+Typically, convolution, correlation, morphological operations and template matching are represented by filters.
+They only differ in the operation which is performed on the neighbors:
+Correlation computes the dot product between the values in the neighborhood and those of a kernel,
+while morphological dilation returns the maximum value of the neighborhood.
 
 
 \section filtering-separable Simple vs. separable filters
@@ -68,7 +69,18 @@ out = \begin{pmatrix}
 \ast in
 \f]
 
+
 \section filtering-convolution Convolution and correlation
+
+
+Many filters are based on convolution or correlation.
+Makers are provided to create those easily:
+
+\code
+auto simple_convolution = convolution<int>(Box<2>{{-1, -1}, {1, 1}}, {0, 1, 0, 1, -4, 1, 0, 1, 0});
+auto convolution_aggregation = convolution_along<int, 0>({1, -2, 1}) + convolution_along<int, 1>({1, -2, 1});
+auto convolution_sequence = convolution_along<int, 0, 1>({1, -2, 1});
+\endcode
 
 
 \section filtering-bilateral Bilateral filtering
@@ -90,6 +102,15 @@ FIXME
 
 
 TODO `operator*`, `transform()`
+
+\code
+auto laplace_op = convolution_along<int, 0>({1, -2, 1}) + convolution_along<int, 1>({1, -2, 1});
+auto laplace = laplace_op * extrapolation(in);
+
+auto sobel_op = convolution_along<int, 0>({1, 0, -1}) * convolution_along<int, 1>({1, 2, 1});
+auto sobel = sobel_op * extrapolation<NearestNeighbor>(in);
+\endcode
+
 
 Among others, the predefined filters, declared in `FilterLib.h`, are listed below.
 

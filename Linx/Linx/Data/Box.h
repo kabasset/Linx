@@ -466,6 +466,16 @@ private:
 
 /**
  * @relatesalso Box
+ * @brief Create a box of higher dimension.
+ */
+template <Index M, Index N>
+Box<M> extend(const Box<N>& in, const Position<M>& padding = Position<M>::zero())
+{
+  return {extend<M>(in.front(), padding), extend<M>(in.back(), padding)}; // FIXME move padding once
+}
+
+/**
+ * @relatesalso Box
  * @brief Flatten the box along a given axis.
  */
 template <Index N>

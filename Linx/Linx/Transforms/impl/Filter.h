@@ -14,25 +14,6 @@
 namespace Linx {
 
 /**
- * @brief Create a vector of higher dimension.
- */
-template <Index M, typename T, Index N>
-Vector<T, M> extend(const Vector<T, N>& vector, Vector<T, M> padding = Vector<T, M>::zero())
-{ // FIXME to Vector.h
-  std::copy(vector.begin(), vector.end(), padding.begin());
-  return padding;
-}
-
-/**
- * @brief Create a box of higher dimension.
- */
-template <Index M, Index N>
-Box<M> extend(const Box<N>& in, const Position<M>& padding = Position<M>::zero())
-{ // FIXME to Box.h
-  return {extend<M>(in.front(), padding), extend<M>(in.back(), padding)};
-}
-
-/**
  * @ingroup filtering
  * @brief Spatial filtering mixin.
  * 

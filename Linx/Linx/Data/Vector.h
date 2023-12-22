@@ -162,7 +162,7 @@ public:
    * The values up to dimension `M` are copied.
    */
   template <Index M>
-  Vector<T, M> slice() const
+  [[deprecated]] Vector<T, M> slice() const
   { // FIXME free function
     Vector<T, M> res(M);
     std::copy_n(this->data(), M, res.data());
@@ -171,19 +171,43 @@ public:
 
   /**
    * @brief Create a vector of higher dimension.
-   * @tparam M The new dimension; cannot be -1
-   * 
-   * The values up to dimension `N` are copied.
-   * Those between dimensions `N` and `M` are taken from the given padding vector.
    */
   template <Index M>
-  Vector<T, M> extend(const Vector<T, M>& padding = Vector<T, M>::zero()) const
+  [[deprecated]] Vector<T, M> extend(const Vector<T, M>& padding = Vector<T, M>::zero()) const
   { // FIXME free function
     auto res = padding;
     std::copy_n(this->data(), this->size(), res.data());
     return res;
   }
 };
+
+/**
+   * @brief Create a vector of lower dimension.
+   * @tparam M The new dimension; cannot be -1
+   * 
+   * The values up to dimension `M` are copied.
+   */
+template <Index M, typename T, Index N>
+Vector<T, M> slice(const Vector<T, N>& vector)
+{
+  Vector<T, M> res(M);
+  std::copy_n(vector.data(), M, res.data());
+  return res;
+}
+
+/**
+ * @brief Create a vector of higher dimension.
+   * @tparam M The new dimension; cannot be -1
+   * 
+   * The values up to dimension `N` are copied.
+   * Those between dimensions `N` and `M` are taken from the given padding vector.
+ */
+template <Index M, typename T, Index N>
+Vector<T, M> extend(const Vector<T, N>& vector, Vector<T, M> padding = Vector<T, M>::zero())
+{
+  std::copy(vector.begin(), vector.end(), padding.begin());
+  return padding;
+}
 
 /**
  * @relatesalso Vector
@@ -281,10 +305,7 @@ template <Index N = 2>
 Index shape_size(const Position<N>& shape)
 {
   const auto size = shape.size();
-  if (size == 0) {
-    return 0;
-  }
-  return shape_stride(shape, size);
+  return size == 0 ? 0 : shape_stride(shape, size);
 }
 
 } // namespace Linx

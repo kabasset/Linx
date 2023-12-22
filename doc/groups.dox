@@ -31,8 +31,8 @@
 \brief Snippets compared, adapted from NumPy's tutorial.
 \example LinxDemoBasics_test.cpp
 
-\defgroup transforms Geometrical Transforms
-\brief Transforms which act on pixel locations.
+\defgroup transforms Transforms
+\brief Transforms which act on geometry or pixel values.
 
 \defgroup interpolation Interpolation and Extrapolation
 \ingroup transforms
@@ -40,7 +40,7 @@
 
 \defgroup affinity Affine Transforms
 \ingroup transforms
-\brief Translation, rotation, scaling
+\brief Geometrical translation, rotation, scaling
 
 \defgroup filtering Filtering
 \ingroup transforms
