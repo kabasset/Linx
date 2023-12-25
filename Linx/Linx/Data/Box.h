@@ -5,7 +5,7 @@
 #ifndef _LINXDATA_BOX_H
 #define _LINXDATA_BOX_H
 
-#include "Linx/Data/Vector.h"
+#include "Linx/Data/mixins/Region.h"
 
 #include <boost/operators.hpp>
 
@@ -38,7 +38,7 @@ public:
   /**
    * @brief A position iterator.
    * 
-   * The scanning order maximizes data locality for row-major ordered data like rasters.
+   * The scanning order maximizes data locality for row-major ordered data, like rasters.
    * 
    * That is, the increment operator is such that the corresponding offset in a raster is always increasing.
    * In particular, when screening a whole raster, pixels are visited in the storage order.
@@ -100,7 +100,7 @@ public:
   }
 
   /**
-   * @brief `Position::one()` for compatibility with `Grid`.
+   * @brief `Position::one()`, for compatibility with `Grid`.
    */
   Position<N> step() const
   {
@@ -116,7 +116,7 @@ public:
   }
 
   /**
-   * @brief Get the number of dimensions.
+   * @brief Get the number of axes.
    */
   Index dimension() const
   {
@@ -218,8 +218,8 @@ public:
    * `union.front = in.front + margin.front` and `union.back = in.back + margin.back`.
    * Partitioning is optimized for data locality when scanning raster pixels in the boxes.
    */
-  std::vector<Box<N>> surround(const Box<N>& margin) const
-  {
+  [[deprecated]] std::vector<Box<N>> surround(const Box<N>& margin) const
+  { // FIXME useless thanks to BorderedBox?
     Box<N> current = *this;
     const auto dim = dimension();
     std::vector<Box<N>> out;
@@ -368,8 +368,8 @@ public:
   Box<N>& operator-=(const Box<M>& margin)
   {
     // FIXME allow N=-1
-    m_front -= margin.front().template extend<N>();
-    m_back -= margin.back().template extend<N>();
+    m_front -= extend<N>(margin.front());
+    m_back -= extend<N>(margin.back());
     return *this;
   }
 
@@ -380,8 +380,8 @@ public:
   Box<N>& operator+=(const Position<M>& vector)
   {
     // FIXME allow N=-1
-    m_front += vector.template extend<N>();
-    m_back += vector.template extend<N>();
+    m_front += extend<N>(vector);
+    m_back += extend<N>(vector);
     return *this;
   }
 
@@ -392,8 +392,8 @@ public:
   Box<N>& operator-=(const Position<M>& vector)
   {
     // FIXME allow N=-1
-    m_front -= vector.template extend<N>();
-    m_back -= vector.template extend<N>();
+    m_front -= extend<N>(vector);
+    m_back -= extend<N>(vector);
     return *this;
   }
 
@@ -479,10 +479,10 @@ Box<M> extend(const Box<N>& in, const Position<M>& padding = Position<M>::zero()
  * @brief Flatten the box along a given axis.
  */
 template <Index N>
-Box<N> project(const Box<N>& in, Index axis = 0)
+Box<N> project(Box<N> in, Index axis = 0)
 {
-  auto out = in;
-  return out.project(axis);
+  in.project(axis);
+  return in;
 }
 
 /**
@@ -518,7 +518,7 @@ Vector<T, N> clamp(const Vector<T, N>& position, const Box<N>& box)
 {
   Vector<T, N> out(box.dimension());
   for (std::size_t i = 0; i < out.dimension(); ++i) {
-    out[i] = clamp(position[i], box.front[i], box.back[i]); // TODO transform
+    out[i] = clamp(position[i], box.front()[i], box.back()[i]); // TODO transform
   }
   return out;
 }
@@ -538,18 +538,6 @@ Vector<T, N> clamp(const Vector<T, N>& position, const Position<N>& shape)
 }
 
 /**
- * @ingroup concepts
- * @requirements{Region}
- * @brief A set of positions which can be translated and clamped (intersected by a box).
- * 
- * TODO
- * - Region += Position
- * - Region -= Position
- * - Region &= Box
- * - box(Region) -> Box
- */
-
-/**
  * @relatesalso Box
  * @brief Identity, for compatibility with `Region`.
  */
@@ -557,28 +545,6 @@ template <Index N>
 inline const Box<N>& box(const Box<N>& region)
 {
   return region;
-}
-
-/**
- * @relatesalso Box
- * @brief Get the bounding box of a region.
- * 
- * This generic implementation is unoptimized:
- * it iterates over all of the positions.
- */
-template <typename TIn>
-Box<TIn::Dimension> box(const TIn& region)
-{
-  const auto dim = region.dimension();
-  auto front = Position<TIn::Dimension>(dim).fill(std::numeric_limits<Index>::max());
-  auto back = Position<TIn::Dimension>(dim).fill(std::numeric_limits<Index>::min());
-  for (const auto& p : region) {
-    for (Index i = 0; i < dim; ++i) {
-      front[i] = std::min(front[i], p[i]);
-      back[i] = std::max(back[i], p[i]);
-    }
-  }
-  return {front, back};
 }
 
 /**
