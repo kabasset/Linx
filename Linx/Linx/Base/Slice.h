@@ -16,7 +16,7 @@ namespace Linx {
  * and an optional step which is the distance between two consecutive indices.
  * The slice size is the number of indices it contains.
  */
-class Slice {
+class Slice { // FIXME useless?
 public:
 
   /**

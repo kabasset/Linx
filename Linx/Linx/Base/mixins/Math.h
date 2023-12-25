@@ -2,8 +2,8 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LINXBASE_MATH_H
-#define _LINXBASE_MATH_H
+#ifndef _LINXBASE_MIXINS_MATH_H
+#define _LINXBASE_MIXINS_MATH_H
 
 #include "Linx/Base/SeqUtils.h" // IsRange
 

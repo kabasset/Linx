@@ -2,8 +2,8 @@
 // This file is part of Linx <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LINXTRANSFORMS_IMPL_FILTER_H
-#define _LINXTRANSFORMS_IMPL_FILTER_H
+#ifndef _LINXTRANSFORMS_MIXINS_FILTER_H
+#define _LINXTRANSFORMS_MIXINS_FILTER_H
 
 #include "Linx/Data/BorderedBox.h"
 #include "Linx/Data/Box.h"

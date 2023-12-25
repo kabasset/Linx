@@ -6,7 +6,7 @@
 #define _LINXDATA_RASTER_H
 
 #include "Linx/Base/AlignedBuffer.h"
-#include "Linx/Base/DataContainer.h"
+#include "Linx/Base/mixins/DataContainer.h"
 #include "Linx/Base/Exceptions.h"
 #include "Linx/Base/Random.h"
 #include "Linx/Data/Box.h"

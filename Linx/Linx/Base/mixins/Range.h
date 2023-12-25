@@ -2,8 +2,8 @@
 // This file is part of Linx <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LINXBASE_RANGE_H
-#define _LINXBASE_RANGE_H
+#ifndef _LINXBASE_MIXINS_RANGE_H
+#define _LINXBASE_MIXINS_RANGE_H
 
 #include "Linx/Base/DataDistribution.h"
 

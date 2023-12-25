@@ -2,18 +2,18 @@
 // This file is part of Linx <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LINXBASE_DATACONTAINER_H
-#define _LINXBASE_DATACONTAINER_H
+#ifndef _LINXBASE_MIXINS_DATACONTAINER_H
+#define _LINXBASE_MIXINS_DATACONTAINER_H
 
-#include "Linx/Base/Arithmetic.h"
-#include "Linx/Base/ContiguousContainer.h"
 #include "Linx/Base/DataDistribution.h"
 #include "Linx/Base/Exceptions.h"
 #include "Linx/Base/Holders.h"
-#include "Linx/Base/Math.h"
-#include "Linx/Base/Range.h"
 #include "Linx/Base/SeqUtils.h" // IsRange
 #include "Linx/Base/TypeUtils.h" // Index, Limits
+#include "Linx/Base/mixins/Arithmetic.h"
+#include "Linx/Base/mixins/ContiguousContainer.h"
+#include "Linx/Base/mixins/Math.h"
+#include "Linx/Base/mixins/Range.h"
 
 #include <cstddef> // size_t
 #include <initializer_list>

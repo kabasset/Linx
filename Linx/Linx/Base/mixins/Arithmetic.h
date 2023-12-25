@@ -2,8 +2,8 @@
 // This file is part of Linx <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LINXBASE_ARITHMETIC_H
-#define _LINXBASE_ARITHMETIC_H
+#ifndef _LINXBASE_MIXINS_ARITHMETIC_H
+#define _LINXBASE_MIXINS_ARITHMETIC_H
 
 #include <algorithm>
 #include <boost/operators.hpp>
@@ -13,7 +13,7 @@
 namespace Linx {
 
 #define LINX_VECTOR_OPERATOR_INPLACE(op) \
-  TDerived& operator op##=(const TDerived& rhs) \
+  TDerived& operator op##=(const TDerived & rhs) \
   { \
     std::transform( \
         static_cast<TDerived*>(this)->begin(), \
@@ -27,7 +27,7 @@ namespace Linx {
   }
 
 #define LINX_SCALAR_OPERATOR_INPLACE(op) \
-  TDerived& operator op##=(const T& rhs) \
+  TDerived& operator op##=(const T & rhs) \
   { \
     std::transform( \
         static_cast<TDerived*>(this)->begin(), \

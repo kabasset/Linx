@@ -2,8 +2,8 @@
 // This file is part of Linx <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LINXTRANSFORMS_INTERPOLATIONMETHODS_H
-#define _LINXTRANSFORMS_INTERPOLATIONMETHODS_H
+#ifndef _LINXTRANSFORMS_IMPL_INTERPOLATIONMETHODS_H
+#define _LINXTRANSFORMS_IMPL_INTERPOLATIONMETHODS_H
 
 #include "Linx/Data/Raster.h"
 

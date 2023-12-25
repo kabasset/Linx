@@ -8,7 +8,7 @@
 #include "Linx/Base/SeqUtils.h"
 #include "Linx/Data/Raster.h"
 #include "Linx/Transforms/Extrapolation.h"
-#include "Linx/Transforms/impl/Filter.h"
+#include "Linx/Transforms/mixins/Filter.h"
 
 #include <type_traits> // decay
 

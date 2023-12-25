@@ -2,8 +2,8 @@
 // This file is part of Linx <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LINXBASE_CONTIGUOUSCONTAINER_H
-#define _LINXBASE_CONTIGUOUSCONTAINER_H
+#ifndef _LINXBASE_MIXINS_CONTIGUOUSCONTAINER_H
+#define _LINXBASE_MIXINS_CONTIGUOUSCONTAINER_H
 
 #include <algorithm> // equal
 #include <ostream>

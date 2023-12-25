@@ -5,8 +5,8 @@
 #ifndef _LINXDATA_PATCH_H
 #define _LINXDATA_PATCH_H
 
-#include "Linx/Base/Arithmetic.h"
-#include "Linx/Base/Math.h"
+#include "Linx/Base/mixins/Arithmetic.h"
+#include "Linx/Base/mixins/Math.h"
 #include "Linx/Data/Box.h"
 #include "Linx/Data/Raster.h"
 #include "Linx/Data/impl/PatchIndexing.h"

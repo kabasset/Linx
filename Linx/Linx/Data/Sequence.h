@@ -5,10 +5,10 @@
 #ifndef _LINXDATA_SEQUENCE_H
 #define _LINXDATA_SEQUENCE_H
 
-#include "Linx/Base/Arithmetic.h"
-#include "Linx/Base/DataContainer.h"
+#include "Linx/Base/mixins/Arithmetic.h"
+#include "Linx/Base/mixins/DataContainer.h"
 #include "Linx/Base/Holders.h"
-#include "Linx/Base/Math.h"
+#include "Linx/Base/mixins/Math.h"
 #include "Linx/Base/Random.h"
 
 namespace Linx {
