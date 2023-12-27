@@ -78,6 +78,14 @@ public:
   /// @group_properties
 
   /**
+   * @brief Get the number of dimensions.
+   */
+  Index dimension() const
+  {
+    return m_flags.dimension();
+  }
+
+  /**
    * @brief Get the bounding box.
    */
   const Box<N>& box() const
@@ -94,14 +102,6 @@ public:
   }
 
   /**
-   * @brief Get the number of dimensions.
-   */
-  Index dimension() const
-  {
-    return m_flags.dimension();
-  }
-
-  /**
    * @brief Compute the mask size, i.e. number of positions.
    */
   Index size() const
@@ -113,7 +113,7 @@ public:
    * @brief Get the bounding box length along given axis.
    */
   template <Index I>
-  Index length() const
+  [[deprecated]] Index length() const
   {
     return m_box.template length<I>();
   }
@@ -127,6 +127,23 @@ public:
   }
 
   /// @group_elements
+
+  /**
+   * @brief Check whether a position is set in the mask.
+   */
+  bool operator[](const Position<N>& position) const
+  {
+    return m_box.contains(position) && m_flags[position - m_box.front()];
+  }
+
+  /**
+   * @brief Set or unset a position in the mask.
+   */
+  bool& operator[](const Position<N>& position)
+  {
+    // FIXME check bounds here or do not in const overload
+    return m_flags[position - m_box.front()];
+  }
 
   /**
    * @brief Get an iterator to the beginning.
@@ -162,24 +179,17 @@ public:
     return m_box != other.m_box || m_flags != other.m_flags;
   }
 
-  /**
-   * @brief Check whether a position is set in the mask.
-   */
-  bool operator[](const Position<N>& position) const
-  {
-    return m_box[position] && m_flags[position - m_box.front()];
-  }
-
-  /**
-   * @brief Set or unset a position in the mask.
-   */
-  bool& operator[](const Position<N>& position)
-  {
-    // FIXME check bounds
-    return m_flags[position - m_box.front()];
-  }
-
   /// @group_modifiers
+
+  Mask<N>& operator&=(const Box<N>& box)
+  {
+    const auto front = m_box.front();
+    m_box &= box;
+    const auto patch = m_flags.patch(m_box - front);
+    m_flags = patch.copy();
+    return *this;
+    // FIXME test
+  }
 
   /**
    * @brief Translate the mask by a given vector.
@@ -279,17 +289,13 @@ inline const Box<N>& box(const Mask<N>& region)
 
 /**
  * @relatesalso Mask
- * @brief Clamp a mask inside a bounding box.
+ * @brief Clamp a mask inside a box.
  */
 template <Index N>
-inline Mask<N> operator&(const Mask<N>& region, const Box<N>& bounds)
+inline Mask<N> operator&(Mask<N> region, const Box<N>& bounds)
 {
-  const auto box = region.box() & bounds;
-  Mask<N> out(box, false);
-  for (const auto& p : box) { // FIXME optimize
-    out[p] = region[p];
-  }
-  return out;
+  region &= bounds;
+  return region;
 }
 
 } // namespace Linx

@@ -60,7 +60,7 @@ public:
    */
   static Box<N> from_shape(Position<N> front, Position<N> shape)
   {
-    return {front, front + shape - 1};
+    return {front, front + std::move(shape) - 1}; // FIXME move front once
   }
 
   /**
@@ -68,7 +68,7 @@ public:
    */
   static Box<N> from_center(Index radius = 1, const Position<N> center = Position<N>::zero())
   {
-    return {center - radius, center + radius};
+    return {center - radius, center + radius}; // FIXME move center once
   }
 
   /**
@@ -84,9 +84,17 @@ public:
   /// @group_properties
 
   /**
+   * @brief Get the number of axes.
+   */
+  Index dimension() const
+  {
+    return m_front.size();
+  }
+
+  /**
    * @brief Get the front position.
    */
-  const Position<N>& front() const
+  inline const Position<N>& front() const
   {
     return m_front;
   }
@@ -94,7 +102,7 @@ public:
   /**
    * @brief Get the back position.
    */
-  const Position<N>& back() const
+  inline const Position<N>& back() const
   {
     return m_back;
   }
@@ -102,7 +110,7 @@ public:
   /**
    * @brief `Position::one()`, for compatibility with `Grid`.
    */
-  Position<N> step() const
+  static Position<N> step()
   {
     return Position<N>::one();
   }
@@ -112,15 +120,7 @@ public:
    */
   Position<N> shape() const
   {
-    return m_back - m_front + 1;
-  }
-
-  /**
-   * @brief Get the number of axes.
-   */
-  Index dimension() const
-  {
-    return m_front.size();
+    return m_back - m_front + 1; // FIXME optimize
   }
 
   /**
@@ -135,7 +135,7 @@ public:
    * @brief Get the box length along given axis.
    */
   template <Index I>
-  Index length() const
+  [[deprecated]] Index length() const
   {
     return m_back[I] - m_front[I] + 1;
   }
@@ -143,7 +143,7 @@ public:
   /**
    * @brief Get the box length along given axis.
    */
-  Index length(Index i) const
+  constexpr Index length(Index i) const
   {
     return m_back[i] - m_front[i] + 1;
   }
@@ -466,6 +466,16 @@ private:
 
 /**
  * @relatesalso Box
+ * @brief Identity, for compatibility with `Region`.
+ */
+template <Index N>
+inline const Box<N>& box(const Box<N>& region)
+{
+  return region;
+}
+
+/**
+ * @relatesalso Box
  * @brief Create a box of higher dimension.
  */
 template <Index M, Index N>
@@ -518,7 +528,7 @@ Vector<T, N> clamp(const Vector<T, N>& position, const Box<N>& box)
 {
   Vector<T, N> out(box.dimension());
   for (std::size_t i = 0; i < out.dimension(); ++i) {
-    out[i] = clamp(position[i], box.front()[i], box.back()[i]); // TODO transform
+    out[i] = std::clamp(position[i], box.front()[i], box.back()[i]); // TODO transform
   }
   return out;
 }
@@ -532,19 +542,9 @@ Vector<T, N> clamp(const Vector<T, N>& position, const Position<N>& shape)
 {
   Vector<T, N> out(shape.size());
   std::transform(position.begin(), position.end(), shape.begin(), out.begin(), [](auto p, auto s) {
-    return clamp(p, Index(0), s - 1);
+    return std::clamp(p, Index(0), s - 1);
   });
   return out;
-}
-
-/**
- * @relatesalso Box
- * @brief Identity, for compatibility with `Region`.
- */
-template <Index N>
-inline const Box<N>& box(const Box<N>& region)
-{
-  return region;
 }
 
 /**
@@ -592,11 +592,10 @@ Box<N> operator-(Box<N> in, const Position<M>& vector)
  * @brief Get the intersection of two boxes.
  */
 template <Index N>
-inline Box<N> operator&(const Box<N>& region, const Box<N>& bounds)
+inline Box<N> operator&(Box<N> region, const Box<N>& bounds)
 {
-  auto out = region;
-  out &= bounds;
-  return out;
+  region &= bounds;
+  return region;
 }
 
 } // namespace Linx

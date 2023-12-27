@@ -156,15 +156,6 @@ struct TypeTraits<std::complex<T>> {
 /// @endcond
 
 /**
- * @brief Clamp some input value between a min and max values.
- */
-template <typename T, typename U>
-inline T clamp(T in, U min, U max)
-{
-  return in < min ? min : in > max ? max : in;
-}
-
-/**
  * @brief Compute the floor of an input floating point value, as an integer value.
  */
 template <typename TInt, typename TFloat>

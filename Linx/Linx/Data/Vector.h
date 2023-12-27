@@ -5,9 +5,9 @@
 #ifndef _LINXDATA_VECTOR_H
 #define _LINXDATA_VECTOR_H
 
+#include "Linx/Base/TypeUtils.h"
 #include "Linx/Base/mixins/DataContainer.h"
 #include "Linx/Base/mixins/Math.h" // abspow
-#include "Linx/Base/TypeUtils.h"
 
 #include <numeric> // accumulate, multiplies
 #include <type_traits> // conditional

@@ -73,6 +73,14 @@ public:
   /// @group_properties
 
   /**
+   * @brief Get the number of dimensions.
+   */
+  Index dimension() const
+  {
+    return m_box.dimension();
+  }
+
+  /**
    * @brief Get the bounding box.
    */
   const Box<N>& box() const
@@ -105,14 +113,6 @@ public:
   }
 
   /**
-   * @brief Get the number of dimensions.
-   */
-  Index dimension() const
-  {
-    return m_box.dimension();
-  }
-
-  /**
    * @brief Get the number of grid nodes along each axis
    */
   Position<Dimension> shape() const
@@ -140,7 +140,7 @@ public:
    * @brief Get the number of nodes along given axis.
    */
   template <Index I>
-  Index length() const
+  [[deprecated]] Index length() const
   {
     return (m_box.template length<I>() - 1) / m_step[I] + 1;
   }
@@ -148,7 +148,7 @@ public:
   /**
    * @brief Get the number of nodes along given axis.
    */
-  Index length(Index i) const
+  constexpr Index length(Index i) const
   {
     return (m_box.length(i) - 1) / m_step[i] + 1;
   }
@@ -158,9 +158,15 @@ public:
   /**
    * @brief Get the absolute position given a position in the grid referential.
    */
-  inline Position<N> operator[](const Position<N>& p) const
+  inline Position<N> operator[](Position<N> p) const
   {
-    return p * m_step + m_box.front();
+    p.apply(
+        [](auto pi, auto si, auto fi) {
+          return pi * si + fi;
+        },
+        m_step,
+        m_box.front());
+    return p;
   }
 
   /**

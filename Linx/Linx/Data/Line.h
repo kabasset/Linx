@@ -64,13 +64,11 @@ public:
   /// @group_properties
 
   /**
-   * @brief Get the absolute position given an index in the line referential.
+   * @brief Get the number of dimensions.
    */
-  inline Position<N> operator[](Index i) const
+  Index dimension() const
   {
-    auto out = m_front;
-    out[I] += i * m_step;
-    return out;
+    return m_front.dimension();
   }
 
   /**
@@ -124,11 +122,13 @@ public:
   }
 
   /**
-   * @brief Get the number of dimensions.
+   * @brief Get the shape, i.e. the number of positions along the line axis, and 1's along the other axes.
    */
-  Index dimension() const
+  Position<N> shape() const
   {
-    return m_front.dimension();
+    auto out = Position<N>::one();
+    out[I] = m_size;
+    return out;
   }
 
   /**
@@ -140,6 +140,16 @@ public:
   }
 
   /// @group_elements
+
+  /**
+   * @brief Get the absolute position given an index in the line referential.
+   */
+  inline Position<N> operator[](Index i) const
+  {
+    auto out = m_front;
+    out[I] += i * m_step;
+    return out;
+  }
 
   /**
    * @brief Get an iterator to the beginning.
@@ -175,7 +185,31 @@ public:
     return m_front != other.m_front || m_step != other.m_step || m_size != other.m_size;
   }
 
+  /**
+   * @brief Check whether a positon belongs to the line.
+   */
+  bool contains(const Position<N>& p) const
+  {
+    const auto pi = p[I];
+    const auto fi = front_index();
+    if (pi < fi || pi > back_index() || (pi - fi) / step % m_step != 0) {
+      return false;
+    }
+    for (Index i = 0; i < pi.dimension(); ++i) {
+      if (i != I && p[i] != m_front[i]) {
+        return false; // FIXME test
+      }
+    }
+    return true;
+  }
+
   /// @group_modifiers
+
+  Line<I, N>& operator&=(const Box<N>& box)
+  {
+    *this = *this & box;
+    return *this;
+  }
 
   /**
    * @brief Translate the box by a given vector.
@@ -273,6 +307,25 @@ template <Index I, Index N>
 inline const Box<N>& box(const Line<I, N>& region)
 {
   return region.box();
+}
+
+/**
+ * @relatesalso Line
+ * @brief Clamp a line inside a box.
+ */
+template <Index I, Index N>
+inline Line<N> operator&(Line<I, N> region, const Box<N>& bounds)
+{
+  const auto end = region.end();
+  auto it = std::find_if(region.begin(), end, [&](const auto& p) {
+    return bounds.contains(p);
+  });
+  if (it == end) {
+    Line<I, N>::from_size(*it, 0);
+  }
+  auto back = std::min(region.back_index(), bounds[I]);
+  return Line<I, N>(*it, back, region.step());
+  // FIXME test
 }
 
 } // namespace Linx
