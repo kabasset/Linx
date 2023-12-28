@@ -99,6 +99,16 @@ Box<TIn::Dimension> box(const TIn& region)
   return {front, back};
 }
 
+/**
+ * @relatesalso Region
+ * @brief Make a single-position box.
+ */
+template <Index N>
+Box<N> box(const Position<N>& pos)
+{
+  return {pos, pos};
+}
+
 } // namespace Linx
 
 #endif

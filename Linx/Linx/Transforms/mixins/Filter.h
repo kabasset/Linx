@@ -36,9 +36,9 @@ public:
   /**
    * @brief Get the filter window.
    */
-  decltype(auto) window() const
+  inline decltype(auto) window() const
   {
-    return static_cast<const TDerived&>(*this).window_impl();
+    return LINX_CRTP_CONST_DERIVED.window_impl();
   }
 
   /**
@@ -54,12 +54,25 @@ public:
   }
 
   /**
+   * @brief Apply the filter at a given position.
+   */
+  template <typename TIn>
+  Value apply(const TIn& in, const Position<TIn::Dimension>& p) const
+  {
+    // FIXME simplify for simple filters
+    const auto patch = in.patch(box(p));
+    std::array<Value, 1> out;
+    transform(patch, out);
+    return out[0];
+  }
+
+  /**
    * @brief Apply the filter into a given output.
    */
   template <typename TIn, typename TOut>
-  void transform(const TIn& in, TOut& out) const
+  inline void transform(const TIn& in, TOut& out) const
   {
-    static_cast<const TDerived&>(*this).transform_impl(in, out);
+    LINX_CRTP_CONST_DERIVED.transform_impl(in, out);
   }
 
   /**
