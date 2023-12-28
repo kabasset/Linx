@@ -88,6 +88,26 @@ using LinxSupportedTypesTuple = std::tuple<LINX_SUPPORTED_TYPES>;
   classname& operator=(classname&&) = delete;
 
 /**
+ * @brief Non-function `std::move`.
+ */
+#define LINX_MOVE(...) static_cast<std::remove_reference_t<decltype(__VA_ARGS__)>&&>(__VA_ARGS__)
+
+/**
+ * @brief Non-function `std::forward`.
+ */
+#define LINX_FORWARD(...) static_cast<decltype(__VA_ARGS__)&&>(__VA_ARGS__)
+
+/**
+ * @brief Static cast to the derived type.
+ */
+#define LINX_CRTP_DERIVED static_cast<TDerived&>(*this)
+
+/**
+ * @brief Static cast to the constant derived type.
+ */
+#define LINX_CRTP_CONST_DERIVED static_cast<const TDerived&>(*this)
+
+/**
  * @brief The signed integer type which represents indices.
  */
 using Index = long;

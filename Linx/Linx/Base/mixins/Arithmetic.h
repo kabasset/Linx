@@ -5,6 +5,8 @@
 #ifndef _LINXBASE_MIXINS_ARITHMETIC_H
 #define _LINXBASE_MIXINS_ARITHMETIC_H
 
+#include "Linx/Base/TypeUtils.h" // LINX_FORWARD
+
 #include <algorithm>
 #include <boost/operators.hpp>
 #include <functional>
@@ -16,27 +18,23 @@ namespace Linx {
   TDerived& operator op##=(const TDerived & rhs) \
   { \
     std::transform( \
-        static_cast<TDerived*>(this)->begin(), \
-        static_cast<TDerived*>(this)->end(), \
+        LINX_CRTP_DERIVED.begin(), \
+        LINX_CRTP_DERIVED.end(), \
         rhs.begin(), \
-        static_cast<TDerived*>(this)->begin(), \
+        LINX_CRTP_DERIVED.begin(), \
         [](auto e, auto f) { \
           return e op f; \
         }); \
-    return static_cast<TDerived&>(*this); \
+    return LINX_CRTP_DERIVED; \
   }
 
 #define LINX_SCALAR_OPERATOR_INPLACE(op) \
   TDerived& operator op##=(const T & rhs) \
   { \
-    std::transform( \
-        static_cast<TDerived*>(this)->begin(), \
-        static_cast<TDerived*>(this)->end(), \
-        static_cast<TDerived*>(this)->begin(), \
-        [&](auto e) { \
-          return e op rhs; \
-        }); \
-    return static_cast<TDerived&>(*this); \
+    std::transform(LINX_CRTP_DERIVED.begin(), LINX_CRTP_DERIVED.end(), LINX_CRTP_DERIVED.begin(), [&](auto e) { \
+      return e op rhs; \
+    }); \
+    return LINX_CRTP_DERIVED; \
   }
 
 /**
@@ -116,14 +114,10 @@ struct ArithmeticMixin<VectorArithmetic, T, TDerived> :
    */
   TDerived& operator++()
   {
-    std::transform(
-        static_cast<TDerived*>(this)->begin(),
-        static_cast<TDerived*>(this)->end(),
-        static_cast<TDerived*>(this)->begin(),
-        [](auto rhs) {
-          return ++rhs;
-        });
-    return static_cast<TDerived&>(*this);
+    std::transform(LINX_CRTP_DERIVED.begin(), LINX_CRTP_DERIVED.end(), LINX_CRTP_DERIVED.begin(), [](auto rhs) {
+      return ++rhs;
+    });
+    return LINX_CRTP_DERIVED;
   }
 
   /**
@@ -131,14 +125,10 @@ struct ArithmeticMixin<VectorArithmetic, T, TDerived> :
    */
   TDerived& operator--()
   {
-    std::transform(
-        static_cast<TDerived*>(this)->begin(),
-        static_cast<TDerived*>(this)->end(),
-        static_cast<TDerived*>(this)->begin(),
-        [](auto rhs) {
-          return --rhs;
-        });
-    return static_cast<TDerived&>(*this);
+    std::transform(LINX_CRTP_DERIVED.begin(), LINX_CRTP_DERIVED.end(), LINX_CRTP_DERIVED.begin(), [](auto rhs) {
+      return --rhs;
+    });
+    return LINX_CRTP_DERIVED;
   }
 
   /// @group_operations
@@ -156,7 +146,7 @@ struct ArithmeticMixin<VectorArithmetic, T, TDerived> :
    */
   TDerived operator-() const
   {
-    TDerived res = static_cast<const TDerived&>(*this);
+    TDerived res = LINX_CRTP_CONST_DERIVED;
     std::transform(res.begin(), res.end(), res.begin(), [&](auto r) {
       return -r;
     });
@@ -205,14 +195,10 @@ struct ArithmeticMixin<EuclidArithmetic, T, TDerived> :
    */
   TDerived& operator++()
   {
-    std::transform(
-        static_cast<TDerived*>(this)->begin(),
-        static_cast<TDerived*>(this)->end(),
-        static_cast<TDerived*>(this)->begin(),
-        [](auto rhs) {
-          return ++rhs;
-        });
-    return static_cast<TDerived&>(*this);
+    std::transform(LINX_CRTP_DERIVED.begin(), LINX_CRTP_DERIVED.end(), LINX_CRTP_DERIVED.begin(), [](auto rhs) {
+      return ++rhs;
+    });
+    return LINX_CRTP_DERIVED;
   }
 
   /**
@@ -220,14 +206,10 @@ struct ArithmeticMixin<EuclidArithmetic, T, TDerived> :
    */
   TDerived& operator--()
   {
-    std::transform(
-        static_cast<TDerived*>(this)->begin(),
-        static_cast<TDerived*>(this)->end(),
-        static_cast<TDerived*>(this)->begin(),
-        [](auto rhs) {
-          return --rhs;
-        });
-    return static_cast<TDerived&>(*this);
+    std::transform(LINX_CRTP_DERIVED.begin(), LINX_CRTP_DERIVED.end(), LINX_CRTP_DERIVED.begin(), [](auto rhs) {
+      return --rhs;
+    });
+    return LINX_CRTP_DERIVED;
   }
 
   /// @group_operations
