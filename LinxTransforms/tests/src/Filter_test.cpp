@@ -4,6 +4,7 @@
 
 #include "Linx/Data/Raster.h"
 #include "Linx/Transforms/Filter.h"
+#include "Linx/Transforms/FilterLib.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -33,6 +34,17 @@ BOOST_AUTO_TEST_CASE(constant0_3x3_test)
   auto dilate_out = dilation<int>(box) * extra;
   std::vector<int> dilate_expected {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
   BOOST_TEST(dilate_out.container() == dilate_expected);
+}
+
+BOOST_AUTO_TEST_CASE(pixelwise_test)
+{
+  const auto in = Raster<double>({4, 3}).range();
+  const auto extra = extrapolation<NearestNeighbor>(in);
+  const auto k = convolution(Raster<float>({2, 2}).range());
+  const auto out = k * extra;
+  for (const auto& p : in.domain()) {
+    BOOST_TEST(k.apply(extra, p) == out[p]);
+  }
 }
 
 //-----------------------------------------------------------------------------

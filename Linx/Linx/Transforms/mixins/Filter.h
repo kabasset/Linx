@@ -61,7 +61,7 @@ public:
   {
     // FIXME simplify for simple filters
     const auto patch = in.patch(box(p));
-    std::array<Value, 1> out;
+    Raster<Value, TIn::Dimension> out(p.one());
     transform(patch, out);
     return out[0];
   }
