@@ -39,7 +39,7 @@ public:
    * @brief Constructor.
    */
   explicit Extrapolation(const TRaster& raster, TMethod&& method = TMethod()) :
-      m_raster(raster), m_method(std::move(method))
+      m_raster(raster), m_method(LINX_MOVE(method))
   {}
 
   /**
@@ -87,10 +87,25 @@ public:
   /**
    * @brief Get a decorated patch.
    */
-  template <typename TRegion>
-  const Patch<const Value, const Extrapolation<TRaster, TMethod>, TRegion> patch(TRegion&& region) const
+  template <typename TRegion, typename std::enable_if_t<is_region<TRegion>()>* = nullptr>
+  const Patch<const Value, const Extrapolation<TRaster, TMethod>, TRegion> operator|(TRegion&& region) const
   {
-    return Patch<const Value, const Extrapolation<TRaster, TMethod>, TRegion>(*this, std::forward<TRegion>(region));
+    return Patch<const Value, const Extrapolation<TRaster, TMethod>, TRegion>(*this, LINX_FORWARD(region));
+  }
+
+  /**
+   * @brief Get a decorated patch.
+   */
+  const Patch<const Value, const Extrapolation<TRaster, TMethod>, Box<Dimension>>
+  operator|(const Position<Dimension>& position) const
+  {
+    return *this | Box<Dimension>(position, position);
+  }
+
+  template <typename TRegion>
+  [[deprecated]] const Patch<const Value, const Extrapolation<TRaster, TMethod>, TRegion> patch(TRegion&& region) const
+  {
+    return Patch<const Value, const Extrapolation<TRaster, TMethod>, TRegion>(*this, LINX_FORWARD(region));
   }
 
   /**
@@ -100,7 +115,7 @@ public:
   Raster<std::decay_t<Value>, Dimension> copy(TRegion&& region) const
   {
     // FIXME optimize
-    return Raster<std::decay_t<Value>, Dimension>(patch(std::forward<TRegion>(region)));
+    return Raster<std::decay_t<Value>, Dimension>(patch(LINX_FORWARD(region)));
   }
 
 private:
@@ -118,6 +133,7 @@ private:
 
 /// @cond
 namespace Internal {
+
 template <typename T>
 struct IsExtrapolatorImpl : std::false_type {};
 

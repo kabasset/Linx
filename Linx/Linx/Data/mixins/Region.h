@@ -77,6 +77,28 @@ public:
   static constexpr Index Dimension = N;
 };
 
+/// @cond
+namespace Internal {
+
+template <typename, typename = void>
+struct IsRegionImpl : std::false_type {};
+
+template <typename T>
+struct IsRegionImpl<T, std::void_t<decltype(std::declval<T>().begin())>> :
+    std::is_convertible<decltype(*std::declval<T>().begin()), const Position<T::Dimension>> {};
+
+} // namespace Internal
+
+/**
+ * @relatesalso Region
+ * @brief Check whether a class can be used as a region.
+ */
+template <typename T>
+constexpr bool is_region()
+{
+  return Internal::IsRegionImpl<std::decay_t<T>>::value;
+}
+
 /**
  * @relatesalso Region
  * @brief Get the bounding box of a region.

@@ -113,6 +113,15 @@ using LinxSupportedTypesTuple = std::tuple<LINX_SUPPORTED_TYPES>;
 using Index = long;
 
 /**
+ * @brief Get the value type of a container.
+ * 
+ * If the container is constant, then the type is, too.
+ */
+template <typename TContainer>
+using Value =
+    std::conditional_t<std::is_const_v<TContainer>, const typename TContainer::Value, typename TContainer::Value>;
+
+/**
  * @brief Type traits.
  */
 template <typename T>

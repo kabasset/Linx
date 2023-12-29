@@ -60,7 +60,7 @@ public:
   Value apply(const TIn& in, const Position<TIn::Dimension>& p) const
   {
     // FIXME simplify for simple filters
-    const auto patch = in.patch(box(p));
+    const auto patch = in | p;
     Raster<Value, TIn::Dimension> out(p.one());
     transform(patch, out);
     return out[0];

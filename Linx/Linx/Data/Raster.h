@@ -6,9 +6,9 @@
 #define _LINXDATA_RASTER_H
 
 #include "Linx/Base/AlignedBuffer.h"
-#include "Linx/Base/mixins/DataContainer.h"
 #include "Linx/Base/Exceptions.h"
 #include "Linx/Base/Random.h"
+#include "Linx/Base/mixins/DataContainer.h"
 #include "Linx/Data/Box.h"
 
 #include <complex>
@@ -440,13 +440,41 @@ public:
    * @see section()
    */
   template <typename TRegion>
-  Patch<const T, const Raster<T, N, THolder>, TRegion> patch(TRegion region) const;
+  Patch<const T, const Raster, TRegion> operator|(std::enable_if_t<is_region<TRegion>(), TRegion>&& region) const
+  {
+    return Patch<const T, const Raster, TRegion>(*this, LINX_FORWARD(region));
+  }
 
   /**
-   * @copybrief patch(TRegion)const
+   * @copybrief operator|(TRegion)const
    */
   template <typename TRegion>
-  Patch<T, Raster<T, N, THolder>, TRegion> patch(TRegion region);
+  Patch<T, Raster, TRegion> operator|(std::enable_if_t<is_region<TRegion>(), TRegion>&& region)
+  {
+    return Patch<T, Raster, TRegion>(*this, LINX_FORWARD(region));
+  }
+
+  /**
+   * @copybrief operator|(TRegion)const
+   */
+  Patch<const T, const Raster, Box<N>> operator|(const Position<N>& position) const
+  {
+    return *this | Box<N>(position, position);
+  }
+
+  /**
+   * @copybrief operator|(TRegion)const
+   */
+  Patch<T, Raster, Box<N>> operator|(const Position<N>& position)
+  {
+    return *this | Box<N>(position, position);
+  }
+
+  template <typename TRegion>
+  [[deprecated]] Patch<const T, const Raster<T, N, THolder>, TRegion> patch(TRegion region) const;
+
+  template <typename TRegion>
+  [[deprecated]] Patch<T, Raster<T, N, THolder>, TRegion> patch(TRegion region);
 
   /// @}
 
@@ -457,6 +485,28 @@ private:
    */
   Position<N> m_shape;
 };
+
+/// @cond
+namespace Internal {
+
+template <typename>
+struct IsRasterImpl : std::false_type {};
+
+template <typename T, Index N, typename THolder>
+struct IsRasterImpl<Raster<T, N, THolder>> : std::true_type {};
+
+} // namespace Internal
+/// @endcond
+
+/**
+ * @relatesalso Raster
+ * @brief Check whether a class can be used as a raster.
+ */
+template <typename T>
+constexpr bool is_raster()
+{
+  return Internal::IsRasterImpl<std::decay_t<T>>::value;
+}
 
 /**
  * @relatesalso Raster

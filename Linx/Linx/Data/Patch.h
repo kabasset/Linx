@@ -5,11 +5,13 @@
 #ifndef _LINXDATA_PATCH_H
 #define _LINXDATA_PATCH_H
 
+#include "Linx/Base/TypeUtils.h"
 #include "Linx/Base/mixins/Arithmetic.h"
 #include "Linx/Base/mixins/Math.h"
 #include "Linx/Data/Box.h"
 #include "Linx/Data/Raster.h"
 #include "Linx/Data/impl/PatchIndexing.h"
+#include "Linx/Data/mixins/Region.h"
 
 #include <algorithm> // accumulate
 #include <functional> // multiplies
@@ -228,7 +230,7 @@ public:
   /**
    * @brief Create a cropped patch.
    */
-  Patch<const T, const TParent, TRegion> patch(const Box<TParent::Dimension>& box) const
+  Patch<const T, const TParent, TRegion> operator|(const Box<Dimension>& box) const
   {
     return Patch<const T, const TParent, TRegion>(*m_parent, m_region & box);
   }
@@ -236,7 +238,39 @@ public:
   /**
    * @brief Create a cropped patch.
    */
-  Patch<T, TParent, TRegion> patch(const Box<TParent::Dimension>& box)
+  Patch<T, TParent, TRegion> operator|(const Box<Dimension>& box)
+  {
+    return Patch<T, TParent, TRegion>(*m_parent, m_region & box);
+  }
+
+  /**
+   * @brief Create a cropped patch.
+   */
+  Patch<const T, const TParent, Box<Dimension>> operator|(const Position<Dimension>& position) const
+  {
+    return *this | Box<Dimension>(position, position);
+  }
+
+  /**
+   * @brief Create a cropped patch.
+   */
+  Patch<T, TParent, Box<Dimension>> operator|(const Position<Dimension>& position)
+  {
+    return *this | Box<Dimension>(position, position);
+  }
+
+  /**
+   * @brief Create a cropped patch.
+   */
+  [[deprecated]] Patch<const T, const TParent, TRegion> patch(const Box<TParent::Dimension>& box) const
+  {
+    return Patch<const T, const TParent, TRegion>(*m_parent, m_region & box);
+  }
+
+  /**
+   * @brief Create a cropped patch.
+   */
+  [[deprecated]] Patch<T, TParent, TRegion> patch(const Box<TParent::Dimension>& box)
   {
     return Patch<T, TParent, TRegion>(*m_parent, m_region & box);
   }
@@ -263,19 +297,40 @@ private:
 
 /// @cond
 namespace Internal {
+
 template <typename T>
 struct IsPatchImpl : std::false_type {};
 
 template <typename T, typename TParent, typename TRegion>
 struct IsPatchImpl<Patch<T, TParent, TRegion>> : std::true_type {};
 
+template <typename, typename = void>
+struct IsPatchableImpl : std::false_type {};
+
+template <typename T>
+struct IsPatchableImpl<T, std::void_t<decltype(std::declval<const T>().domain())>> :
+    Internal::IsRegionImpl<std::decay_t<decltype(std::declval<const T>().domain())>> {}; // FIXME only for boxes?
+
 } // namespace Internal
 /// @endcond
 
+/**
+ * @brief Check whether a class is a patch.
+ */
 template <typename T>
 constexpr bool is_patch()
 {
-  return Internal::IsPatchImpl<T>::value;
+  return Internal::IsPatchImpl<std::decay_t<T>>::value;
+}
+
+/**
+ * @relatesalso Patch
+ * @brief Check whether a class can be used as a patch parent.
+ */
+template <typename T>
+constexpr bool is_patchable() // FIXME rm?
+{
+  return Internal::IsPatchableImpl<std::decay_t<T>>::value;
 }
 
 /**
