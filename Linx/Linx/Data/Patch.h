@@ -202,7 +202,7 @@ public:
   /**
    * @brief Translate the patch by a given vector.
    */
-  Patch& translate(const Position<Dimension>& vector)
+  Patch& operator>>=(const Position<Dimension>& vector)
   {
     m_region += vector;
     return *this;
@@ -211,7 +211,7 @@ public:
   /**
    * @brief Translate the patch by the opposite of a given vector.
    */
-  Patch& translate_back(const Position<Dimension>& vector)
+  Patch& operator<<=(const Position<Dimension>& vector)
   {
     m_region -= vector;
     return *this;

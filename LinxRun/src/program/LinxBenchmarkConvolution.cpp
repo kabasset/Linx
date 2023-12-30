@@ -25,10 +25,10 @@ void filter_monolith(Image& image, const Image& values)
   const auto rbegin = std::reverse_iterator(values.end());
   const auto rend = std::reverse_iterator(values.begin());
   for (const auto& p : image.domain()) {
-    patch.translate(p);
+    patch >>= p;
     *out_it = std::inner_product(rbegin, rend, patch.begin(), 0.F);
     ++out_it;
-    patch.translate_back(p);
+    patch <<= p;
   }
 }
 
@@ -44,13 +44,13 @@ void filter_hardcoded(Image& image, const Image& values)
   auto patch = extrapolated | inner;
   for (const auto& q : kernel.window()) {
     --it;
-    patch.translate(q);
+    patch >>= q;
     const auto k = *it;
     for (const auto& v : patch) {
       *out_it += k * v;
       ++out_it;
     }
-    patch.translate_back(q);
+    patch <<= q;
     out_it = out.begin();
   }
   image = out;

@@ -254,10 +254,10 @@ private:
     auto patch = in.parent() | extend<TIn::Dimension>(m_window);
     auto out_it = out.begin();
     for (const auto& p : in.domain()) {
-      patch.translate(p);
+      patch >>= p;
       *out_it = m_op(patch);
       ++out_it;
-      patch.translate_back(p);
+      patch <<= p;
     }
   }
 
