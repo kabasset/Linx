@@ -42,7 +42,7 @@ public:
     Linx::Raster<float> input({side, side});
     input.fill(1);
     Linx::Box<2> square({quarter, quarter}, {3 * quarter, 3 * quarter});
-    input.patch(square).fill(2);
+    (input | square).fill(2);
     auto extrapolator = Linx::extrapolation(input, 0.F);
     auto interpolator = Linx::interpolation<Linx::Linear>(extrapolator);
 

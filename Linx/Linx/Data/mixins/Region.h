@@ -85,7 +85,7 @@ struct IsRegionImpl : std::false_type {};
 
 template <typename T>
 struct IsRegionImpl<T, std::void_t<decltype(std::declval<T>().begin())>> :
-    std::is_convertible<decltype(*std::declval<T>().begin()), const Position<T::Dimension>> {};
+    Internal::IsPositionImpl<std::decay_t<decltype(*std::declval<T>().begin())>> {};
 
 } // namespace Internal
 

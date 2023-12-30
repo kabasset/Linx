@@ -207,13 +207,13 @@ const TRaster& dont_extrapolate(const Extrapolation<TRaster, TMethod>& in)
 template <typename T, typename TParent, typename TRegion>
 decltype(auto) dont_extrapolate(Patch<T, TParent, TRegion>& in)
 {
-  return dont_extrapolate(in.parent()).patch(in.domain()); // FIXME avoid region copy if TParent is no extrapolator
+  return dont_extrapolate(in.parent()) | in.domain(); // FIXME avoid region copy if TParent is no extrapolator
 }
 
 template <typename T, typename TParent, typename TRegion>
 decltype(auto) dont_extrapolate(const Patch<T, TParent, TRegion>& in)
 {
-  return dont_extrapolate(in.parent()).patch(in.domain()); // FIXME avoid region copy if TParent is no extrapolator
+  return dont_extrapolate(in.parent()) | in.domain(); // FIXME avoid region copy if TParent is no extrapolator
 }
 
 } // namespace Linx

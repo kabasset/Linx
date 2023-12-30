@@ -275,6 +275,27 @@ Vector<T, N == -1 ? -1 : N + 1> insert(const Vector<T, N>& in, T&& value)
 template <Index N = 2>
 using Position = Vector<Index, N>;
 
+/// @cond
+namespace Internal {
+
+template <typename>
+struct IsPositionImpl : std::false_type {};
+
+template <Index N>
+struct IsPositionImpl<Position<N>> : std::true_type {};
+
+} // namespace Internal
+
+/**
+ * @relatesalso Position
+ * @brief Check whether a class is a position.
+ */
+template <typename T>
+static constexpr bool is_position()
+{
+  return Internal::IsPositionImpl<std::decay_t<T>>::value;
+}
+
 /**
  * @relatesalso Position
  * @brief Get the stride along a given axis.

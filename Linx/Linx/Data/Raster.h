@@ -439,8 +439,8 @@ public:
    * @see slice()
    * @see section()
    */
-  template <typename TRegion>
-  Patch<const T, const Raster, TRegion> operator|(std::enable_if_t<is_region<TRegion>(), TRegion>&& region) const
+  template <typename TRegion, typename std::enable_if_t<is_region<TRegion>()>* = nullptr>
+  Patch<const T, const Raster, TRegion> operator|(TRegion&& region) const
   {
     return Patch<const T, const Raster, TRegion>(*this, LINX_FORWARD(region));
   }
@@ -448,8 +448,8 @@ public:
   /**
    * @copybrief operator|(TRegion)const
    */
-  template <typename TRegion>
-  Patch<T, Raster, TRegion> operator|(std::enable_if_t<is_region<TRegion>(), TRegion>&& region)
+  template <typename TRegion, typename std::enable_if_t<is_region<TRegion>()>* = nullptr>
+  Patch<T, Raster, TRegion> operator|(TRegion&& region)
   {
     return Patch<T, Raster, TRegion>(*this, LINX_FORWARD(region));
   }

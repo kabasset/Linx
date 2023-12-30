@@ -20,7 +20,7 @@ void filter_monolith(Image& image, const Image& values)
   auto kernel = Linx::convolution(values);
   const auto extrapolation = Linx::extrapolation<Linx::NearestNeighbor>(image);
   const auto extrapolated = extrapolation.copy(image.domain() + kernel.window());
-  auto patch = extrapolated.patch(kernel.window() - kernel.window().front());
+  auto patch = extrapolated | (kernel.window() - kernel.window().front());
   auto out_it = image.begin();
   const auto rbegin = std::reverse_iterator(values.end());
   const auto rend = std::reverse_iterator(values.begin());
@@ -41,7 +41,7 @@ void filter_hardcoded(Image& image, const Image& values)
   Image out(image.shape());
   auto out_it = out.begin();
   const auto inner = image.domain() - kernel.window().front();
-  auto patch = extrapolated.patch(inner);
+  auto patch = extrapolated | inner;
   for (const auto& q : kernel.window()) {
     --it;
     patch.translate(q);

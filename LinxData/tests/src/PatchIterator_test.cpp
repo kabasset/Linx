@@ -30,7 +30,7 @@ void check_iterator(const Position<N>& shape, const TRegion& region)
 
   std::vector<float> out;
   out.reserve(expected.size());
-  for (const auto& v : raster.patch(region)) {
+  for (const auto& v : raster | region) {
     out.push_back(v);
   }
 

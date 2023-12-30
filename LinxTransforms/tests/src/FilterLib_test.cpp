@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(inner_box_test)
 
   const Box<3> region {Position<3>::one(), in.shape() - 2}; // No extrapolation needed
   BOOST_TEST(region <= (in.domain() - k.window())); // inner
-  const auto out = k * in.patch(region);
+  const auto out = k * (in | region);
   BOOST_TEST(out.shape() == region.shape());
   for (const auto& p : out.domain()) {
     BOOST_TEST(out[p] == expected[p + region.front()]);
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(inner_decimate_test)
 
   const Box<3> crop {Position<3>::one(), in.shape() - 2};
   const auto region = Grid<3>(crop, Position<3>::one() * 3);
-  const auto out = k * in.patch(region);
+  const auto out = k * (in | region);
   BOOST_TEST(out.shape() == region.shape());
   for (const auto& p : out.domain()) {
     BOOST_TEST(out[p] == expected[region.front() + p * 3]);
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(extrapolated_decimate_1d_test)
   const auto expected = k * extrapolated;
 
   const auto region = Grid<1>({Position<1> {1}, Position<1> {10}}, Position<1> {3});
-  const auto out = k * extrapolated.patch(region);
+  const auto out = k * (extrapolated | region);
   BOOST_TEST(out.shape() == region.shape());
   for (std::size_t i = 0; i < out.size(); ++i) {
     BOOST_TEST(out[i] == expected[1 + i * 3]);
@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(extrapolated_decimate_2d_test)
   const auto expected = k * extrapolated;
 
   const auto region = Grid<2>({Position<2> {1, 1}, Position<2> {10, 10}}, Position<2> {3, 3});
-  const auto out = k * extrapolated.patch(region);
+  const auto out = k * (extrapolated | region);
   BOOST_TEST(out.shape() == region.shape());
   for (const auto& p : out.domain()) {
     BOOST_TEST(out[p] == expected[region.front() + p * 3]);
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(extrapolated_decimate_3d_test)
   const auto expected = k * extrapolated;
 
   const auto region = Grid<3>(in.domain(), Position<3>::one() * 3);
-  const auto out = k * extrapolated.patch(region);
+  const auto out = k * (extrapolated | region);
   BOOST_TEST(out.shape() == region.shape());
   for (const auto& p : out.domain()) {
     BOOST_TEST(out[p] == expected[region.front() + p * 3]);

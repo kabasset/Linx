@@ -185,7 +185,7 @@ public:
   {
     const auto front = m_box.front();
     m_box &= box;
-    const auto patch = m_flags.patch(m_box - front);
+    const auto patch = m_flags | (m_box - front);
     m_flags = patch.copy();
     return *this;
     // FIXME test

@@ -101,7 +101,7 @@ np.exp(b, out=b)
 Linx:
 
 \code{.cpp}
-auto a = Linx::Sequence<double>({20, 30, 40, 50});
+auto a = Linx::Sequence<double>{20, 30, 40, 50};
 auto b = Linx::Sequence<double>(4).range();
 
 // New instance
@@ -157,11 +157,12 @@ Linx:
 \code{.cpp}
 // Creation
 
-int f(int x, int y) {
-  return 10 * x + y;
+int f(const Position<2>& p) {
+  return 10 * p[0] + p[1];
 }
 
-auto a = Linx::Raster<int>({4, 5}).pos_generate(f);
+Linx::Raster<int> a({4, 5});
+a.generate(f, a.domain());
 
 // Access
 
@@ -198,10 +199,8 @@ Linx:
 
 \code{.cpp}
 auto a = Linx::Raster<int>({10, 10}).range();
-auto box = Linx::Box<2>({3, 1}, {6, 5});
-auto b = a.patch(box);
-auto grid = Linx::Grid<2>(box, {1, 2});
-auto c = a.patch(grid);
+auto b = a | Linx::Box<2>({3, 1}, {6, 5});
+auto c = a | Linx::Grid<2>({3, 1}, {6, 5}, {1, 2});
 ++b;
 \endcode
 
@@ -240,8 +239,7 @@ a.apply([](auto e) { return e > 4 ? 0 : e; });
 
 // L1-norm ball
 
-auto ball = Mask<2>::ball<1>({5, 4}, 3);
-auto c = a.patch(ball);
+auto c = a | Linx::Mask<2>::ball<1>({5, 4}, 3);
 \endcode
 
 */

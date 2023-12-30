@@ -111,7 +111,7 @@ auto sections(TRaster& in, Index thickness = 1)
 template <Index I, typename TRaster>
 auto profiles(TRaster& in)
 {
-  using TPatch = std::decay_t<decltype(in.patch(Line<I, TRaster::Dimension>()))>;
+  using TPatch = std::decay_t<decltype(in | Line<I, TRaster::Dimension>())>;
   const auto domain = in.domain();
   const auto size = domain.template length<I>();
   const auto step = domain.step();
@@ -119,7 +119,7 @@ auto profiles(TRaster& in)
   Raster<TPatch, TRaster::Dimension> out(plane.shape());
   auto front_it = plane.begin();
   for (auto& e : out) {
-    e = in.patch(Line<I, TRaster::Dimension>::from_size(*front_it, size, step[I]));
+    e = in | Line<I, TRaster::Dimension>::from_size(*front_it, size, step[I]);
     ++front_it;
   }
   return out;
