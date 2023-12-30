@@ -133,7 +133,7 @@ protected:
   void transform_impl(const Extrapolation<TRaster, TMethod>& in, TOut& out) const
   {
     const auto domain0 = in.domain() + extend<TRaster::Dimension>(window_impl());
-    const auto outK = upto_kth<sizeof...(TFilters) - 2>(in | domain0);
+    const auto outK = upto_kth<sizeof...(TFilters) - 2>(in(domain0));
     filter<sizeof...(TFilters) - 1>().transform(outK, out);
   }
 
@@ -148,9 +148,9 @@ protected:
     const auto& extrapolate = in.method();
     static constexpr Index N = sizeof...(TFilters);
     const auto domain0 = box(domain) + extend<TParent::Dimension>(window_impl());
-    auto outK = upto_kth<N - 2>(extrapolate(raw | domain0));
+    auto outK = upto_kth<N - 2>(extrapolate(raw(domain0)));
     const auto domainK = in.domain() + filter<N - 1>().origin();
-    filter<N - 1>().transform(outK | domainK, out);
+    filter<N - 1>().transform(outK(domainK), out);
   }
 
 private:
@@ -159,7 +159,7 @@ private:
   auto upto_kth(const TIn& in) const
   {
     const auto& domain = in.domain() - extend<TIn::Dimension>(Linx::box(filter<K>().window()));
-    const auto patch = in | domain;
+    const auto patch = in(domain);
     if constexpr (K == 0) {
       return filter<0>() * patch;
     } else {

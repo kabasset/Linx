@@ -279,20 +279,6 @@ Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position)
 }
 
 template <typename T, Index N, typename THolder>
-template <typename TRegion>
-Patch<const T, const Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::patch(TRegion region) const
-{
-  return {*this, std::move(region)};
-}
-
-template <typename T, Index N, typename THolder>
-template <typename TRegion>
-Patch<T, Raster<T, N, THolder>, TRegion> Raster<T, N, THolder>::patch(TRegion region)
-{
-  return {*this, std::move(region)};
-}
-
-template <typename T, Index N, typename THolder>
 template <Index M>
 bool Raster<T, N, THolder>::is_contiguous(const Box<N>& region) const
 {

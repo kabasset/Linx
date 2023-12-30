@@ -230,7 +230,7 @@ public:
   /**
    * @brief Create a cropped patch.
    */
-  Patch<const T, const TParent, TRegion> operator|(const Box<Dimension>& box) const
+  Patch<const T, const TParent, TRegion> operator()(const Box<Dimension>& box) const
   {
     return Patch<const T, const TParent, TRegion>(*m_parent, m_region & box);
   }
@@ -238,7 +238,7 @@ public:
   /**
    * @brief Create a cropped patch.
    */
-  Patch<T, TParent, TRegion> operator|(const Box<Dimension>& box)
+  Patch<T, TParent, TRegion> operator()(const Box<Dimension>& box)
   {
     return Patch<T, TParent, TRegion>(*m_parent, m_region & box);
   }
@@ -246,33 +246,17 @@ public:
   /**
    * @brief Create a cropped patch.
    */
-  Patch<const T, const TParent, Box<Dimension>> operator|(const Position<Dimension>& position) const
+  Patch<const T, const TParent, Box<Dimension>> operator()(const Position<Dimension>& position) const
   {
-    return *this | Box<Dimension>(position, position);
+    return (*this)(Box<Dimension>(position, position)); // FIXME ArrSequence<Position>?
   }
 
   /**
    * @brief Create a cropped patch.
    */
-  Patch<T, TParent, Box<Dimension>> operator|(const Position<Dimension>& position)
+  Patch<T, TParent, Box<Dimension>> operator()(const Position<Dimension>& position)
   {
-    return *this | Box<Dimension>(position, position);
-  }
-
-  /**
-   * @brief Create a cropped patch.
-   */
-  [[deprecated]] Patch<const T, const TParent, TRegion> patch(const Box<TParent::Dimension>& box) const
-  {
-    return Patch<const T, const TParent, TRegion>(*m_parent, m_region & box);
-  }
-
-  /**
-   * @brief Create a cropped patch.
-   */
-  [[deprecated]] Patch<T, TParent, TRegion> patch(const Box<TParent::Dimension>& box)
-  {
-    return Patch<T, TParent, TRegion>(*m_parent, m_region & box);
+    return (*this)(Box<Dimension>(position, position)); // FIXME ArrSequence<Position>?
   }
 
   /// @}

@@ -28,22 +28,22 @@ TDuration filter(Linx::Raster<int, 3>& in, const Linx::Box<3>& box, char setup)
   switch (setup) {
     case 'b':
       //! [Iterate over box]
-      (in | box) += 1;
+      in(box) += 1;
       //! [Iterate over box]
       break;
     case 'g':
       //! [Iterate over grid]
-      (in | grid) += 1;
+      in(grid) += 1;
       //! [Iterate over grid]
       break;
     case 'm':
       //! [Iterate over mask]
-      (in | mask) += 1;
+      in(mask) += 1;
       //! [Iterate over mask]
       break;
     case 's':
       //! [Iterate over sequence]
-      (in | sequence) += 1;
+      in(sequence) += 1;
       //! [Iterate over sequence]
       break;
     default:

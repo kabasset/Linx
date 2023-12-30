@@ -440,41 +440,35 @@ public:
    * @see section()
    */
   template <typename TRegion, typename std::enable_if_t<is_region<TRegion>()>* = nullptr>
-  Patch<const T, const Raster, TRegion> operator|(TRegion&& region) const
+  Patch<const T, const Raster, TRegion> operator()(TRegion&& region) const
   {
     return Patch<const T, const Raster, TRegion>(*this, LINX_FORWARD(region));
   }
 
   /**
-   * @copybrief operator|(TRegion)const
+   * @copybrief operator()(TRegion)const
    */
   template <typename TRegion, typename std::enable_if_t<is_region<TRegion>()>* = nullptr>
-  Patch<T, Raster, TRegion> operator|(TRegion&& region)
+  Patch<T, Raster, TRegion> operator()(TRegion&& region)
   {
     return Patch<T, Raster, TRegion>(*this, LINX_FORWARD(region));
   }
 
   /**
-   * @copybrief operator|(TRegion)const
+   * @copybrief operator()(TRegion)const
    */
-  Patch<const T, const Raster, Box<N>> operator|(const Position<N>& position) const
+  Patch<const T, const Raster, Box<N>> operator()(const Position<N>& position) const
   {
-    return *this | Box<N>(position, position);
+    return (*this)(Box<N>(position, position)); // FIXME use ArrSequence<Position>?
   }
 
   /**
-   * @copybrief operator|(TRegion)const
+   * @copybrief operator()(TRegion)const
    */
-  Patch<T, Raster, Box<N>> operator|(const Position<N>& position)
+  Patch<T, Raster, Box<N>> operator()(const Position<N>& position)
   {
-    return *this | Box<N>(position, position);
+    return (*this)(Box<N>(position, position)); // FIXME use ArrSequence<Position>?
   }
-
-  template <typename TRegion>
-  [[deprecated]] Patch<const T, const Raster<T, N, THolder>, TRegion> patch(TRegion region) const;
-
-  template <typename TRegion>
-  [[deprecated]] Patch<T, Raster<T, N, THolder>, TRegion> patch(TRegion region);
 
   /// @}
 

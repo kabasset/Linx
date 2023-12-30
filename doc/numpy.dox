@@ -199,8 +199,10 @@ Linx:
 
 \code{.cpp}
 auto a = Linx::Raster<int>({10, 10}).range();
-auto b = a | Linx::Box<2>({3, 1}, {6, 5});
-auto c = a | Linx::Grid<2>({3, 1}, {6, 5}, {1, 2});
+auto box = Linx::Box<2>({3, 1}, {6, 5})
+auto b = a(box);
+auto grid = Linx::Grid<2>(box, {1, 2});
+auto c = a(grid);
 ++b;
 \endcode
 
@@ -239,7 +241,7 @@ a.apply([](auto e) { return e > 4 ? 0 : e; });
 
 // L1-norm ball
 
-auto c = a | Linx::Mask<2>::ball<1>({5, 4}, 3);
+auto c = a(Linx::Mask<2>::ball<1>({5, 4}, 3));
 \endcode
 
 */

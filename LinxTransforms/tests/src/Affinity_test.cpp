@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(patch_rotation_center_30z_test)
   const auto rotation = Affinity<2>::rotation_degrees(30, 0, 1, {2, 2});
   const auto inv = inverse(rotation);
   Raster<double> out(in.shape());
-  auto patch = out | Box<2>({1, 1}, {3, 3});
+  auto patch = out(Box<2>({1, 1}, {3, 3}));
   rotation.transform(interpolator, patch);
   for (const auto& p : out.domain()) {
     if (patch.domain().contains(p)) {

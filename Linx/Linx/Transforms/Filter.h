@@ -144,7 +144,7 @@ protected:
   void transform_impl(const Raster<T, N, THolder>& in, TOut& out) const
   {
     const auto region = in.domain() - Linx::box(window_impl());
-    transform_monolith(in | region, out);
+    transform_monolith(in(region), out);
   }
 
   /**
@@ -160,16 +160,16 @@ protected:
         Internal::BorderedBox<TRaster::Dimension>(raw.domain(), extend<TRaster::Dimension>(box(m_window)));
     bbox.apply_inner_border(
         [&](const auto& ib) {
-          const auto insub = raw | ib;
+          const auto insub = raw(ib);
           if (insub.size() > 0) {
-            auto outsub = out | insub.domain();
+            auto outsub = out(insub.domain());
             transform_monolith(insub, outsub);
           }
         },
         [&](const auto& ib) {
-          const auto insub = in | ib;
+          const auto insub = in(ib);
           if (insub.size() > 0) {
-            auto outsub = out | insub.domain();
+            auto outsub = out(insub.domain());
             transform_monolith_extrapolator(insub, outsub);
           }
         });
@@ -208,16 +208,16 @@ protected:
     // FIXME accept non-Box window, and of lower dim
     bbox.apply_inner_border(
         [&](const auto& ib) {
-          const auto insub = raw | ib;
+          const auto insub = raw(ib);
           if (insub.size() > 0) { // FIXME needed?
-            auto outsub = out | grid_to_box(insub.domain());
+            auto outsub = out(grid_to_box(insub.domain()));
             transform_monolith(insub, outsub);
           }
         },
         [&](const auto& ib) {
-          const auto insub = in | ib;
+          const auto insub = in(ib);
           if (insub.size() > 0) {
-            auto outsub = out | grid_to_box(insub.domain());
+            auto outsub = out(grid_to_box(insub.domain()));
             transform_monolith(insub, outsub);
           }
         });
@@ -234,7 +234,7 @@ private:
     const auto extrapolated = in.parent().copy(Linx::box(in.domain()) + window_impl());
     const auto box = extrapolated.domain() - window_impl();
     // FIXME region - window().front()?
-    transform_monolith(extrapolated | box, out);
+    transform_monolith(extrapolated(box), out);
   }
 
   /**
@@ -251,7 +251,7 @@ private:
   void transform_monolith(const TIn& in, TOut& out) const
   {
     // FIXME accept any region
-    auto patch = in.parent() | extend<TIn::Dimension>(m_window);
+    auto patch = in.parent()(extend<TIn::Dimension>(m_window));
     auto out_it = out.begin();
     for (const auto& p : in.domain()) {
       patch >>= p;

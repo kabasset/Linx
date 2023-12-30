@@ -20,7 +20,7 @@ BOOST_AUTO_TEST_CASE(mixins_test)
   Raster<int, 1> raster({16});
   raster.range();
   Box<1> region {{1}, {14}};
-  auto patch = raster | region;
+  auto patch = raster(region);
 
   // Arithmetic
   ++patch;

@@ -88,7 +88,7 @@ public:
    * @brief Get a decorated patch.
    */
   template <typename TRegion, typename std::enable_if_t<is_region<TRegion>()>* = nullptr>
-  const Patch<const Value, const Extrapolation<TRaster, TMethod>, TRegion> operator|(TRegion&& region) const
+  const Patch<const Value, const Extrapolation<TRaster, TMethod>, TRegion> operator()(TRegion&& region) const
   {
     return Patch<const Value, const Extrapolation<TRaster, TMethod>, TRegion>(*this, LINX_FORWARD(region));
   }
@@ -97,15 +97,9 @@ public:
    * @brief Get a decorated patch.
    */
   const Patch<const Value, const Extrapolation<TRaster, TMethod>, Box<Dimension>>
-  operator|(const Position<Dimension>& position) const
+  operator()(const Position<Dimension>& position) const
   {
-    return *this | Box<Dimension>(position, position);
-  }
-
-  template <typename TRegion>
-  [[deprecated]] const Patch<const Value, const Extrapolation<TRaster, TMethod>, TRegion> patch(TRegion&& region) const
-  {
-    return Patch<const Value, const Extrapolation<TRaster, TMethod>, TRegion>(*this, LINX_FORWARD(region));
+    return (*this)(Box<Dimension>(position, position));
   }
 
   /**
@@ -115,7 +109,7 @@ public:
   Raster<std::decay_t<Value>, Dimension> copy(TRegion&& region) const
   {
     // FIXME optimize
-    return Raster<std::decay_t<Value>, Dimension>(patch(LINX_FORWARD(region)));
+    return Raster<std::decay_t<Value>, Dimension>((*this)(LINX_FORWARD(region)));
   }
 
 private:
@@ -205,15 +199,15 @@ const TRaster& dont_extrapolate(const Extrapolation<TRaster, TMethod>& in)
 }
 
 template <typename T, typename TParent, typename TRegion>
-decltype(auto) dont_extrapolate(Patch<T, TParent, TRegion>& in)
+decltype(auto) dont_extrapolate(const Patch<T, TParent, TRegion>& in)
 {
-  return dont_extrapolate(in.parent()) | in.domain(); // FIXME avoid region copy if TParent is no extrapolator
+  return dont_extrapolate(in.parent())(in.domain()); // FIXME avoid region copy if TParent is no extrapolator
 }
 
 template <typename T, typename TParent, typename TRegion>
-decltype(auto) dont_extrapolate(const Patch<T, TParent, TRegion>& in)
+decltype(auto) dont_extrapolate(Patch<T, TParent, TRegion>& in)
 {
-  return dont_extrapolate(in.parent()) | in.domain(); // FIXME avoid region copy if TParent is no extrapolator
+  return dont_extrapolate(in.parent())(in.domain()); // FIXME avoid region copy if TParent is no extrapolator
 }
 
 } // namespace Linx
