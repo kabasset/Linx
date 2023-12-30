@@ -15,6 +15,19 @@ BOOST_AUTO_TEST_SUITE(Mask_test)
 
 //-----------------------------------------------------------------------------
 
+BOOST_AUTO_TEST_CASE(is_region_test)
+{
+  BOOST_TEST(is_region<Mask<1>>());
+  BOOST_TEST(is_region<Mask<2>>());
+  BOOST_TEST(is_region<Mask<3>>());
+  BOOST_TEST(is_region<const Mask<1>>());
+  BOOST_TEST(is_region<const Mask<2>>());
+  BOOST_TEST(is_region<const Mask<3>>());
+  BOOST_TEST(is_region<const Mask<1>&>());
+  BOOST_TEST(is_region<const Mask<2>&>());
+  BOOST_TEST(is_region<const Mask<3>&>());
+}
+
 template <Index P>
 void check_ball(double radius = 2)
 {

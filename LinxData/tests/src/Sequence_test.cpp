@@ -2,8 +2,8 @@
 // This file is part of Raster <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "Linx/Base/TypeUtils.h"
 #include "Linx/Data/Sequence.h"
+#include "Linx/Data/mixins/Region.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -14,6 +14,13 @@ using namespace Linx;
 BOOST_AUTO_TEST_SUITE(Sequence_test)
 
 //-----------------------------------------------------------------------------
+
+BOOST_AUTO_TEST_CASE(is_region_test)
+{
+  BOOST_TEST(is_region<Sequence<Position<1>>>());
+  BOOST_TEST(is_region<const Sequence<Position<1>>>());
+  BOOST_TEST(is_region<const Sequence<Position<1>>&>());
+}
 
 LINX_TEST_CASE_TEMPLATE(element_access_test)
 {

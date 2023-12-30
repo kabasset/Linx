@@ -7,6 +7,7 @@
 
 #include "Linx/Data/Box.h"
 #include "Linx/Data/Vector.h"
+#include "Linx/Data/mixins/Region.h"
 
 #include <boost/operators.hpp>
 

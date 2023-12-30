@@ -15,6 +15,19 @@ BOOST_AUTO_TEST_SUITE(Box_test)
 
 //-----------------------------------------------------------------------------
 
+BOOST_AUTO_TEST_CASE(is_region_test)
+{
+  BOOST_TEST(is_region<Box<1>>());
+  BOOST_TEST(is_region<Box<2>>());
+  BOOST_TEST(is_region<Box<3>>());
+  BOOST_TEST(is_region<const Box<1>>());
+  BOOST_TEST(is_region<const Box<2>>());
+  BOOST_TEST(is_region<const Box<3>>());
+  BOOST_TEST(is_region<const Box<1>&>());
+  BOOST_TEST(is_region<const Box<2>&>());
+  BOOST_TEST(is_region<const Box<3>&>());
+}
+
 BOOST_AUTO_TEST_CASE(ctors_test)
 {
   Position<7> front;

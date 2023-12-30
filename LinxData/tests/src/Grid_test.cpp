@@ -15,6 +15,19 @@ BOOST_AUTO_TEST_SUITE(Grid_test)
 
 //-----------------------------------------------------------------------------
 
+BOOST_AUTO_TEST_CASE(is_region_test)
+{
+  BOOST_TEST(is_region<Grid<1>>());
+  BOOST_TEST(is_region<Grid<2>>());
+  BOOST_TEST(is_region<Grid<3>>());
+  BOOST_TEST(is_region<const Grid<1>>());
+  BOOST_TEST(is_region<const Grid<2>>());
+  BOOST_TEST(is_region<const Grid<3>>());
+  BOOST_TEST(is_region<const Grid<1>&>());
+  BOOST_TEST(is_region<const Grid<2>&>());
+  BOOST_TEST(is_region<const Grid<3>&>());
+}
+
 BOOST_AUTO_TEST_CASE(grid_is_screened_in_order_test)
 {
   Grid<2> region(Box<2>({1, 2}, {6, 7}), {2, 3});
