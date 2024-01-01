@@ -85,21 +85,30 @@ public:
   }
 
   /**
-   * @brief Get a decorated patch.
+   * @brief Get an extrapolable patch.
    */
   template <typename TRegion, typename std::enable_if_t<is_region<TRegion>()>* = nullptr>
-  const Patch<const Value, const Extrapolation<TRaster, TMethod>, TRegion> operator()(TRegion&& region) const
+  const Patch<const Value, const Extrapolation, std::decay_t<TRegion>> operator()(TRegion&& region) const
   {
-    return Patch<const Value, const Extrapolation<TRaster, TMethod>, TRegion>(*this, LINX_FORWARD(region));
+    return Patch<const Value, const Extrapolation, std::decay_t<TRegion>>(*this, LINX_FORWARD(region));
   }
 
   /**
-   * @brief Get a decorated patch.
+   * @brief Get a possibly-extrapolated pixel.
    */
-  const Patch<const Value, const Extrapolation<TRaster, TMethod>, Box<Dimension>>
-  operator()(const Position<Dimension>& position) const
+  const Patch<const Value, const Extrapolation, Position<Dimension>> operator()(Position<Dimension> p) const
   {
-    return (*this)(Box<Dimension>(position, position));
+    return Patch<const Value, const Extrapolation, Position<Dimension>>(*this, LINX_MOVE(p));
+  }
+
+  /**
+   * @brief Get a sequence of possibly extrapolated pixels as a sequence-based patch.
+   */
+  template <typename... TPositions>
+  const auto operator()(Position<Dimension> p0, TPositions&&... ps) const
+  {
+    return (*this)(
+        ArrSequence<Position<Dimension>, sizeof...(TPositions) + 1>(std::array {LINX_MOVE(p0), LINX_FORWARD(ps)...}));
   }
 
   /**

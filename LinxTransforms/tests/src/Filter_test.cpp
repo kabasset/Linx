@@ -36,14 +36,46 @@ BOOST_AUTO_TEST_CASE(constant0_3x3_test)
   BOOST_TEST(dilate_out.container() == dilate_expected);
 }
 
-BOOST_AUTO_TEST_CASE(pixelwise_test)
+BOOST_AUTO_TEST_CASE(pixel_test)
 {
   const auto in = Raster<double>({4, 3}).range();
   const auto extra = extrapolation<NearestNeighbor>(in);
   const auto k = convolution(Raster<float>({2, 2}).range());
   const auto out = k * extra;
   for (const auto& p : in.domain()) {
-    BOOST_TEST(k.apply(extra, p) == out[p]);
+    auto out_p = k * extra(p);
+    BOOST_TEST(out_p == out[p]);
+  }
+  for (const auto& p : in.domain() - k.window()) {
+    auto out_p = k * in(p);
+    BOOST_TEST(out_p == out[p]);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(pixel_sequence_test)
+{
+  const auto in = Raster<double>({4, 3}).range();
+  const auto extra = extrapolation<NearestNeighbor>(in);
+  const auto k = convolution(Raster<float>({2, 2}).range());
+  Sequence<Position<2>> positions(in.size());
+  std::copy(in.domain().begin(), in.domain().end(), positions.begin());
+  const auto out = k * extra;
+  const auto out_seq = k * extra(positions);
+  for (std::size_t i = 0; i < in.size(); ++i) {
+    BOOST_TEST(out_seq[i] == out[i]);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(pixel_list_test)
+{
+  const auto in = Raster<double>({4, 3}).range();
+  const auto extra = extrapolation<NearestNeighbor>(in);
+  const auto k = convolution(Raster<float>({2, 2}).range());
+  const auto out = k * extra;
+  const auto out_seq = k * extra(Position<2>::zero(), Position<2>::one(), Position<2> {2, 2});
+  for (Index i = 0; i <= 2; ++i) {
+    auto out_i = out[{i, i}];
+    BOOST_TEST(out_seq[i] == out_i);
   }
 }
 

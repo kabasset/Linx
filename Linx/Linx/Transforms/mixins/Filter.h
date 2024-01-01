@@ -54,24 +54,12 @@ public:
   }
 
   /**
-   * @brief Apply the filter at a given position.
-   */
-  template <typename TIn>
-  Value apply(const TIn& in, const Position<TIn::Dimension>& p) const
-  {
-    // FIXME simplify for simple filters
-    const auto patch = in(p);
-    Raster<Value, TIn::Dimension> out(p.one());
-    transform(patch, out);
-    return out[0];
-  }
-
-  /**
    * @brief Apply the filter into a given output.
    */
   template <typename TIn, typename TOut>
   inline void transform(const TIn& in, TOut& out) const
   {
+    // FIXME make applicable to Sequence<Position>?
     LINX_CRTP_CONST_DERIVED.transform_impl(in, out);
   }
 
@@ -100,14 +88,40 @@ public:
   }
 
   /**
-   * @brief Apply the filter to a patch.
+   * @brief Apply the filter to a box-, line- or grid-based patch.
    */
   template <typename U, typename UParent, typename URegion>
-  Raster<Value, UParent::Dimension> operator*(const Patch<U, UParent, URegion>& in) const
+  Raster<Value, URegion::Dimension> operator*(const Patch<U, UParent, URegion>& in) const
   {
+    // URegion::Dimension is not defined for Sequence
+    Raster<Value, URegion::Dimension> out(in.domain().shape()); // Box or Grid
     // FIXME support arbitrary patches
-    Raster<Value, UParent::Dimension> out(in.domain().shape()); // Box or Grid
     transform(in, out);
+    return out;
+  }
+
+  /**
+   * @brief Apply the filter to a single pixel.
+   */
+  template <typename U, typename UParent>
+  Value operator*(const Patch<U, UParent, Position<UParent::Dimension>>& in) const
+  {
+    Raster<Value, UParent::Dimension, StdHolder<std::array<Value, 1>>> out(Position<UParent::Dimension>::one());
+    const auto patch = in.parent()(Box<UParent::Dimension>(in.domain(), in.domain())); // Position to Box
+    transform(patch, out);
+    return out[0];
+  }
+
+  /**
+   * @brief Apply the filter to a sequence of pixels.
+   */
+  template <typename U, typename UParent, typename UHolder>
+  Sequence<Value> operator*(const Patch<U, UParent, Sequence<Position<UParent::Dimension>, UHolder>>& in) const
+  {
+    Sequence<Value> out(in.size());
+    std::transform(in.domain().begin(), in.domain().end(), out.begin(), [&](const auto& p) {
+      return (*this) * in.parent()(p);
+    });
     return out;
   }
 };

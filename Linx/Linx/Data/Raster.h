@@ -10,6 +10,7 @@
 #include "Linx/Base/Random.h"
 #include "Linx/Base/mixins/DataContainer.h"
 #include "Linx/Data/Box.h"
+#include "Linx/Data/Sequence.h"
 
 #include <complex>
 #include <cstdint>
@@ -440,34 +441,54 @@ public:
    * @see section()
    */
   template <typename TRegion, typename std::enable_if_t<is_region<TRegion>()>* = nullptr>
-  Patch<const T, const Raster, TRegion> operator()(TRegion&& region) const
+  Patch<const T, const Raster, std::decay_t<TRegion>> operator()(TRegion&& region) const
   {
-    return Patch<const T, const Raster, TRegion>(*this, LINX_FORWARD(region));
+    return Patch<const T, const Raster, std::decay_t<TRegion>>(*this, LINX_FORWARD(region));
   }
 
   /**
    * @copybrief operator()(TRegion)const
    */
   template <typename TRegion, typename std::enable_if_t<is_region<TRegion>()>* = nullptr>
-  Patch<T, Raster, TRegion> operator()(TRegion&& region)
+  Patch<T, Raster, std::decay_t<TRegion>> operator()(TRegion&& region)
   {
-    return Patch<T, Raster, TRegion>(*this, LINX_FORWARD(region));
+    return Patch<T, Raster, std::decay_t<TRegion>>(*this, LINX_FORWARD(region));
   }
 
   /**
    * @copybrief operator()(TRegion)const
    */
-  Patch<const T, const Raster, Box<N>> operator()(const Position<N>& position) const
+  auto operator()(Position<N> p0) const
   {
-    return (*this)(Box<N>(position, position)); // FIXME use ArrSequence<Position>?
+    return Patch<const T, const Raster, Position<N>>(*this, LINX_MOVE(p0));
   }
 
   /**
    * @copybrief operator()(TRegion)const
    */
-  Patch<T, Raster, Box<N>> operator()(const Position<N>& position)
+  auto operator()(Position<N> p0)
   {
-    return (*this)(Box<N>(position, position)); // FIXME use ArrSequence<Position>?
+    return Patch<T, Raster, Position<N>>(*this, LINX_MOVE(p0));
+  }
+
+  /**
+   * @copybrief operator()(TRegion)const
+   */
+  template <typename... TPositions>
+  auto operator()(Position<N> p0, TPositions&&... ps) const
+  {
+    using R = ArrSequence<Position<N>, sizeof...(TPositions) + 1>;
+    return Patch<const T, const Raster, R>(*this, {LINX_MOVE(p0), LINX_FORWARD(ps)...});
+  }
+
+  /**
+   * @copybrief operator()(TRegion)const
+   */
+  template <typename... TPositions>
+  auto operator()(Position<N> p0, TPositions&&... ps)
+  {
+    using R = ArrSequence<Position<N>, sizeof...(TPositions) + 1>;
+    return Patch<T, Raster, R>(*this, {LINX_MOVE(p0), LINX_FORWARD(ps)...});
   }
 
   /// @}

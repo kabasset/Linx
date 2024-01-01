@@ -5,11 +5,11 @@
 #ifndef _LINXDATA_SEQUENCE_H
 #define _LINXDATA_SEQUENCE_H
 
+#include "Linx/Base/Holders.h"
+#include "Linx/Base/Random.h"
 #include "Linx/Base/mixins/Arithmetic.h"
 #include "Linx/Base/mixins/DataContainer.h"
-#include "Linx/Base/Holders.h"
 #include "Linx/Base/mixins/Math.h"
-#include "Linx/Base/Random.h"
 
 namespace Linx {
 
@@ -31,10 +31,17 @@ public:
   {}
 
   template <typename TRange, typename std::enable_if_t<IsRange<TRange>::value>* = nullptr, typename... TArgs>
-  explicit Sequence(TRange& range, TArgs&&... args) :
+  explicit Sequence(const TRange& range, TArgs&&... args) :
       Container(range.begin(), range.end(), std::forward<TArgs>(args)...)
   {}
 };
+
+/**
+ * @relatesalso Sequence
+ * @brief `Sequence` which owns a `std::array`.
+ */
+template <typename T, std::size_t Capacity>
+using ArrSequence = Sequence<T, StdHolder<std::array<T, Capacity>>>;
 
 /**
  * @relatesalso Sequence
