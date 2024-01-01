@@ -61,15 +61,15 @@ read an image, dilate it with an L2-ball structuring element, and write the outp
 ITK:
 
 ```cpp
-using Pixel = unsigned char;
-constexpr unsigned int Dimension = 2;
+using T = unsigned char;
+static constexpr unsigned int N = 2;
 
-using Image = itk::Image<Pixel, Dimension>;
+using Image = itk::Image<T, N>;
 using Reader = itk::ImageFileReader<Image>;
 Reader::Pointer reader = Reader::New();
 reader->SetFileName(input);
 
-using StructuringElement = itk::FlatStructuringElement<Dimension>;
+using StructuringElement = itk::FlatStructuringElement<N>;
 StructuringElement::RadiusType strelRadius;
 strelRadius.Fill(radius);
 StructuringElementType ball = StructuringElement::Ball(strelRadius);
@@ -88,14 +88,14 @@ writer->Update();
 CImg:
 
 ```cpp
-using Pixel = unsigned char;
+using T = unsigned char;
 
-const auto raw = cimg::CImg<Pixel>().load(input);
+auto raw = cimg::CImg<T>().load(input);
 
 cimg::CImg<bool> ball(2 * radius + 1, 2 * radius + 1, 1, 1, false);
-bool[1] color = {true};
+bool color[1] = {true};
 ball.draw_circle(radius, radius, radius, color);
-const auto dilated = raw.get_dilate(ball);
+auto dilated = raw.get_dilate(ball);
 
 dilated.write(output);
 ```
@@ -104,13 +104,13 @@ Linx:
 
 
 ```cpp
-using Pixel = unsigned char;
-constexpr Linx::Index Dimension = 2;
+using T = unsigned char;
+static constexpr Linx::Index N = 2;
 
-const auto raw = Linx::read<Pixel, Dimension>(input);
+auto raw = Linx::read<T, N>(input);
 
-const auto ball = Linx::Mask<Dimension>::ball<2>(radius);
-const auto dilated = dilation(ball) * raw;
+auto ball = Linx::Mask<N>::ball<2>(radius);
+auto dilated = dilation(ball) * raw;
 
 Linx::write(dilated, output);
 ```
