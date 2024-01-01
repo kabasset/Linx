@@ -63,29 +63,23 @@ ITK:
 ```cpp
 using T = unsigned char;
 static constexpr unsigned int N = 2;
-
 using Image = itk::Image<T, N>;
-using Reader = itk::ImageFileReader<Image>;
-Reader::Pointer reader = Reader::New();
-reader->SetFileName(input);
+
+auto raw = itk::ReadImage<ImageType>(input);
 
 using StructuringElement = itk::FlatStructuringElement<N>;
 StructuringElement::RadiusType strelRadius;
 strelRadius.Fill(radius);
 StructuringElementType ball = StructuringElement::Ball(strelRadius);
-using BinaryDilateImageFilter = itk::BinaryDilateImageFilter<Image, Image, StructuringElement>;
-BinaryDilateImageFilter::Pointer dilateFilter = BinaryDilateImageFilter::New();
-dilateFilter->SetInput(reader->GetOutput());
+using GrayscaleDilateImageFilter = itk::GrayscaleDilateImageFilter<Image, Image, StructuringElement>;
+GrayscaleDilateImageFilter::Pointer dilateFilter = GrayscaleDilateImageFilter::New();
+dilateFilter->SetInput(input);
 dilateFilter->SetKernel(ball);
 
-itk::ImageFileWriter<Image>::Pointer writer;
-writer = itk::ImageFileWriter<Image>::New();
-writer->SetInput(dilateFilter->GetOutput());
-writer->SetFileName(output);
-writer->Update();
+itk::WriteImage(dilateFilter->GetOutput(), output);
 ```
 
-CImg:
+CImg (limited to N <= 3):
 
 ```cpp
 using T = unsigned char;
@@ -95,7 +89,7 @@ auto raw = cimg::CImg<T>().load(input);
 cimg::CImg<bool> ball(2 * radius + 1, 2 * radius + 1, 1, 1, false);
 bool color[1] = {true};
 ball.draw_circle(radius, radius, radius, color);
-auto dilated = raw.get_dilate(ball);
+auto dilated = raw.get_dilate(ball, 0, true);
 
 dilated.write(output);
 ```
@@ -110,7 +104,7 @@ static constexpr Linx::Index N = 2;
 auto raw = Linx::read<T, N>(input);
 
 auto ball = Linx::Mask<N>::ball<2>(radius);
-auto dilated = dilation(ball) * raw;
+auto dilated = dilation(ball) * extrapolation(raw);
 
 Linx::write(dilated, output);
 ```
@@ -121,7 +115,7 @@ NumPy/SciKit:
 raw = np.load(input)
 
 ball = skimage.morphology.disk(radius)
-dilated = skimage.morphology.binary_dilation(raw, ball)
+dilated = skimage.morphology.dilation(raw, ball)
 
 np.save(output, dilated)
 ```
