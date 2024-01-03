@@ -104,7 +104,7 @@ static constexpr Linx::Index N = 2;
 auto raw = Linx::read<T, N>(input);
 
 auto ball = Linx::Mask<N>::ball<2>(radius);
-auto dilated = dilation(ball) * extrapolation(raw);
+auto dilated = dilation<T>(ball) * extrapolation(raw);
 
 Linx::write(dilated, output);
 ```

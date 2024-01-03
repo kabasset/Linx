@@ -20,31 +20,57 @@ namespace Concept {
  * @brief An iterable of positions.
  * 
  * Any iterable of positions is a valid region, but functions can be specialized for optimization purpose.
+ * Additionally, translatable regions support operators `+=(Position<N>)` and `-=(Position<N>)`,
+ * and croppable regions support operator `&=(Box<N>)`.
  */
 template <Index N>
 struct Region {
   /**
-   * @brief Move the region by a given vector.
+   * @brief Iterator to the beginning.
    */
-  Region& operator+=(Position<N>&);
+  Iterator begin() const;
 
   /**
-   * @brief Move the region by the opposite of a given vector.
+   * @brief Iterator to the end.
    */
-  Region& operator-=(Position<N>&);
+  Iterator end() const;
 
   /**
-   * @brief Clamp the region by a box.
+   * @brief Translate the region by a given vector.
    */
-  Region& operator&=(Box<N>&);
+  Region& operator+=(const Position<N>&);
+
+  /**
+   * @brief Translate the region by the opposite of a given vector.
+   */
+  Region& operator-=(const Position<N>&);
+
+  /**
+   * @brief Clamp the region inside a box.
+   */
+  Region& operator&=(const Box<N>&);
 };
 
 /**
  * @relatesalso Region
- * @brief Get the bounding box of the region.
+ * @brief Get a region translated by a given vector.
  */
 template <Index N>
-Box<N> box(const Region&);
+Region<N> operator+(Region<N>, const Position<N>&);
+
+/**
+ * @relatesalso Region
+ * @brief Get a region translated by the opposite of a given vector.
+ */
+template <Index N>
+Region<N> operator-(Region<N>, const Position<N>&);
+
+/**
+ * @relatesalso Region
+ * @brief Get a region clamped inside a box.
+ */
+template <Index N>
+Region<N> operator&(const Box<N>&);
 
 } // namespace Concept
 
@@ -88,9 +114,10 @@ struct IsRegionImpl<T, std::void_t<decltype(std::declval<T>().begin())>> :
     Internal::IsPositionImpl<std::decay_t<decltype(*std::declval<T>().begin())>> {};
 
 } // namespace Internal
+/// @endcond
 
 /**
- * @relatesalso Region
+ * @relatesalso Concept::Region
  * @brief Check whether a class can be used as a region.
  */
 template <typename T>
@@ -100,11 +127,12 @@ constexpr bool is_region()
 }
 
 /**
- * @relatesalso Region
+ * @relatesalso Concept::Region
  * @brief Get the bounding box of a region.
  * 
  * This generic implementation is unoptimized:
  * it iterates over all of the positions.
+ * Linx-defined regions overload it for performance.
  */
 template <typename TIn>
 Box<TIn::Dimension> box(const TIn& region)
@@ -122,7 +150,7 @@ Box<TIn::Dimension> box(const TIn& region)
 }
 
 /**
- * @relatesalso Region
+ * @relatesalso Position
  * @brief Make a single-position box.
  */
 template <Index N>
