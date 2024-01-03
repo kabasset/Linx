@@ -94,6 +94,76 @@ private:
 
 /**
  * @ingroup filtering
+ * @brief Mean filtering.
+ */
+template <typename T>
+struct MeanFilter {
+  using Value = T; // FIXME deduce from operator()
+
+  template <typename TIn>
+  T operator()(const TIn& neighbors) const
+  {
+    return std::accumulate(neighbors.begin(), neighbors.end(), T()) / neighbors.size();
+  }
+};
+
+/**
+ * @ingroup filtering
+ * @brief Median filtering.
+ */
+template <typename T>
+struct MedianFilter {
+  using Value = T;
+
+  template <typename TIn>
+  T operator()(const TIn& neighbors) const
+  {
+    std::vector<Value> v(neighbors.begin(), neighbors.end());
+    const auto size = v.size();
+    auto b = v.data();
+    auto e = b + size;
+    auto n = b + size / 2;
+    std::nth_element(b, n, e);
+    if (size % 2 == 1) {
+      return *n;
+    }
+    std::nth_element(b, n + 1, e);
+    return (*n + *(n + 1)) * .5;
+  }
+};
+
+/**
+ * @ingroup filtering
+ * @brief Erosion (i.e. min filtering).
+ */
+template <typename T>
+struct Erosion {
+  using Value = T;
+
+  template <typename TIn>
+  T operator()(const TIn& neighbors) const
+  {
+    return *std::min_element(neighbors.begin(), neighbors.end());
+  }
+};
+
+/**
+ * @ingroup filtering
+ * @brief Dilation (i.e. max filtering).
+ */
+template <typename T>
+struct Dilation {
+  using Value = T;
+
+  template <typename TIn>
+  T operator()(const TIn& neighbors) const
+  {
+    return *std::max_element(neighbors.begin(), neighbors.end());
+  }
+};
+
+/**
+ * @ingroup filtering
  * @brief Make a convolution kernel from values and a window.
  */
 template <typename T, Index N = 2>
@@ -273,6 +343,42 @@ template <typename T, Index... Is>
 auto laplace_operator(T sign = 1)
 {
   return FilterAgg(std::plus<T>(), convolution_along<T, Is>({sign, sign * -2, sign})...);
+}
+
+/**
+ * @ingroup filtering
+ */
+template <typename T, typename TWindow>
+SimpleFilter<MeanFilter<T>, TWindow> mean_filter(TWindow window)
+{
+  return SimpleFilter<MeanFilter<T>, TWindow>(MeanFilter<T> {}, std::move(window)); // FIXME separable
+}
+
+/**
+ * @ingroup filtering
+ */
+template <typename T, typename TWindow>
+SimpleFilter<MedianFilter<T>, TWindow> median_filter(TWindow window)
+{
+  return SimpleFilter<MedianFilter<T>, TWindow>(MedianFilter<T> {}, std::move(window));
+}
+
+/**
+ * @ingroup filtering
+ */
+template <typename T, typename TWindow>
+SimpleFilter<Erosion<T>, TWindow> erosion(TWindow window)
+{
+  return SimpleFilter<Erosion<T>, TWindow>(Erosion<T> {}, std::move(window));
+}
+
+/**
+ * @ingroup filtering
+ */
+template <typename T, typename TWindow>
+SimpleFilter<Dilation<T>, TWindow> dilation(TWindow window)
+{
+  return SimpleFilter<Dilation<T>, TWindow>(Dilation<T> {}, std::move(window));
 }
 
 } // namespace Linx

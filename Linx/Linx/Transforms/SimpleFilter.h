@@ -13,84 +13,6 @@ namespace Linx {
 
 /**
  * @ingroup filtering
- * @brief Structuring element-based operations.
- */
-namespace MorphologyOp { // FIXME rm
-
-/**
- * @ingroup filtering
- * @brief Mean filtering.
- */
-template <typename T>
-struct MeanFilter {
-  using Value = T; // FIXME deduce from operator()
-
-  template <typename TIn>
-  T operator()(const TIn& neighbors) const
-  {
-    return std::accumulate(neighbors.begin(), neighbors.end(), T()) / neighbors.size();
-  }
-};
-
-/**
- * @ingroup filtering
- * @brief Median filtering.
- */
-template <typename T>
-struct MedianFilter {
-  using Value = T;
-
-  template <typename TIn>
-  T operator()(const TIn& neighbors) const
-  {
-    std::vector<Value> v(neighbors.begin(), neighbors.end());
-    const auto size = v.size();
-    auto b = v.data();
-    auto e = b + size;
-    auto n = b + size / 2;
-    std::nth_element(b, n, e);
-    if (size % 2 == 1) {
-      return *n;
-    }
-    std::nth_element(b, n + 1, e);
-    return (*n + *(n + 1)) * .5;
-  }
-};
-
-/**
- * @ingroup filtering
- * @brief Erosion (i.e. min filtering).
- */
-template <typename T>
-struct Erosion {
-  using Value = T;
-
-  template <typename TIn>
-  T operator()(const TIn& neighbors) const
-  {
-    return *std::min_element(neighbors.begin(), neighbors.end());
-  }
-};
-
-/**
- * @ingroup filtering
- * @brief Dilation (i.e. max filtering).
- */
-template <typename T>
-struct Dilation {
-  using Value = T;
-
-  template <typename TIn>
-  T operator()(const TIn& neighbors) const
-  {
-    return *std::max_element(neighbors.begin(), neighbors.end());
-  }
-};
-
-} // namespace MorphologyOp
-
-/**
- * @ingroup filtering
  * @brief A structuring element for morphological operations.
  * @tparam TOp The morphological operator
  * @tparam T The value type
@@ -276,42 +198,6 @@ private:
    */
   TWindow m_window;
 };
-
-/**
- * @ingroup filtering
- */
-template <typename T, typename TWindow>
-SimpleFilter<MorphologyOp::MeanFilter<T>, TWindow> mean_filter(TWindow window)
-{
-  return SimpleFilter<MorphologyOp::MeanFilter<T>, TWindow>(MorphologyOp::MeanFilter<T> {}, std::move(window));
-}
-
-/**
- * @ingroup filtering
- */
-template <typename T, typename TWindow>
-SimpleFilter<MorphologyOp::MedianFilter<T>, TWindow> median_filter(TWindow window)
-{
-  return SimpleFilter<MorphologyOp::MedianFilter<T>, TWindow>(MorphologyOp::MedianFilter<T> {}, std::move(window));
-}
-
-/**
- * @ingroup filtering
- */
-template <typename T, typename TWindow>
-SimpleFilter<MorphologyOp::Erosion<T>, TWindow> erosion(TWindow window)
-{
-  return SimpleFilter<MorphologyOp::Erosion<T>, TWindow>(MorphologyOp::Erosion<T> {}, std::move(window));
-}
-
-/**
- * @ingroup filtering
- */
-template <typename T, typename TWindow>
-SimpleFilter<MorphologyOp::Dilation<T>, TWindow> dilation(TWindow window)
-{
-  return SimpleFilter<MorphologyOp::Dilation<T>, TWindow>(MorphologyOp::Dilation<T> {}, std::move(window));
-}
 
 } // namespace Linx
 
