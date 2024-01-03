@@ -20,23 +20,23 @@ elements_add_unit_test(DftPlan tests/src/DftPlan_test.cpp
                      EXECUTABLE LinxTransforms_DftPlan_test
                      LINK_LIBRARIES Linx
                      TYPE Boost)
-elements_add_unit_test(Filter tests/src/Filter_test.cpp 
-                     EXECUTABLE LinxTransforms_Filter_test
-                     LINK_LIBRARIES Linx
-                     TYPE Boost)
 elements_add_unit_test(FilterAgg tests/src/FilterAgg_test.cpp 
                      EXECUTABLE LinxTransforms_FilterAgg_test
-                     LINK_LIBRARIES Linx
-                     TYPE Boost)
-elements_add_unit_test(FilterLib tests/src/FilterLib_test.cpp 
-                     EXECUTABLE LinxTransforms_FilterLib_test
                      LINK_LIBRARIES Linx
                      TYPE Boost)
 elements_add_unit_test(FilterSeq tests/src/FilterSeq_test.cpp 
                      EXECUTABLE LinxTransforms_FilterSeq_test
                      LINK_LIBRARIES Linx
                      TYPE Boost)
+elements_add_unit_test(Filters tests/src/Filters_test.cpp 
+                     EXECUTABLE LinxTransforms_Filters_test
+                     LINK_LIBRARIES Linx
+                     TYPE Boost)
 elements_add_unit_test(Interpolation tests/src/Interpolation_test.cpp 
                      EXECUTABLE LinxTransforms_Interpolation_test
+                     LINK_LIBRARIES Linx
+                     TYPE Boost)
+elements_add_unit_test(SimpleFilter tests/src/SimpleFilter_test.cpp 
+                     EXECUTABLE LinxTransforms_SimpleFilter_test
                      LINK_LIBRARIES Linx
                      TYPE Boost)

@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "Linx/Data/Raster.h"
-#include "Linx/Transforms/Filter.h"
-#include "Linx/Transforms/FilterLib.h"
+#include "Linx/Transforms/Filters.h"
+#include "Linx/Transforms/SimpleFilter.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -12,7 +12,7 @@ using namespace Linx;
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(Filter_test)
+BOOST_AUTO_TEST_SUITE(SimpleFilter_test)
 
 //-----------------------------------------------------------------------------
 

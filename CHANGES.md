@@ -13,7 +13,7 @@
 ## New features
 
 * FFTW-wrapper `DftPlan`
-* Linear, rank and morphology filtering through `Filter` class
+* Linear, rank and morphology filtering through `SimpleFilter` class
 * Composite filters with `FilterAgg` and/or `FilterSeq`
 * Extrapolation and interpolation with `Extrapolation` and `Interpolation`
 * Affine transformations with `Affinity`

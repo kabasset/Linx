@@ -5,7 +5,7 @@
 #include "ElementsKernel/ProgramHeaders.h"
 #include "Linx/Run/Chronometer.h"
 #include "Linx/Run/ProgramOptions.h"
-#include "Linx/Transforms/FilterLib.h"
+#include "Linx/Transforms/Filters.h"
 
 #include <map>
 #include <string>

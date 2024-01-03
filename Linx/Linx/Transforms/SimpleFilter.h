@@ -2,8 +2,8 @@
 // This file is part of Linx <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LINXTRANSFORMS_STRUCTURINGELEMENT_H
-#define _LINXTRANSFORMS_STRUCTURINGELEMENT_H
+#ifndef _LINXTRANSFORMS_SIMPLEFILTER_H
+#define _LINXTRANSFORMS_SIMPLEFILTER_H
 
 #include "Linx/Data/Raster.h"
 #include "Linx/Transforms/Extrapolation.h"
@@ -97,8 +97,8 @@ struct Dilation {
  * @tparam TWindow The type of window, e.g. `Box` or `Mask`
  */
 template <typename TOp, typename TWindow>
-class Filter : public FilterMixin<typename TOp::Value, TWindow, Filter<TOp, TWindow>> {
-  friend class FilterMixin<typename TOp::Value, TWindow, Filter<TOp, TWindow>>; // FIXME simplify
+class SimpleFilter : public FilterMixin<typename TOp::Value, TWindow, SimpleFilter<TOp, TWindow>> {
+  friend class FilterMixin<typename TOp::Value, TWindow, SimpleFilter<TOp, TWindow>>; // FIXME simplify
 
 public:
 
@@ -116,13 +116,16 @@ public:
    * @brief Explcit window constructor.
    * @param window The filter window
    */
-  explicit Filter(TOp&& op, TWindow window) : m_op(std::forward<TOp>(op)), m_window(std::forward<TWindow>(window)) {}
+  explicit SimpleFilter(TOp&& op, TWindow window) : m_op(std::forward<TOp>(op)), m_window(std::forward<TWindow>(window))
+  {}
 
   /**
    * @brief Hypercube window constructor.
    * @param radius The hypercube radius
    */
-  explicit Filter(TOp&& op, Index radius = 1) : Filter(std::forward<TOp>(op), Box<Dimension>::from_center(radius)) {}
+  explicit SimpleFilter(TOp&& op, Index radius = 1) :
+      SimpleFilter(std::forward<TOp>(op), Box<Dimension>::from_center(radius))
+  {}
 
 protected:
 
@@ -278,36 +281,36 @@ private:
  * @ingroup filtering
  */
 template <typename T, typename TWindow>
-Filter<MorphologyOp::MeanFilter<T>, TWindow> mean_filter(TWindow window)
+SimpleFilter<MorphologyOp::MeanFilter<T>, TWindow> mean_filter(TWindow window)
 {
-  return Filter<MorphologyOp::MeanFilter<T>, TWindow>(MorphologyOp::MeanFilter<T> {}, std::move(window));
+  return SimpleFilter<MorphologyOp::MeanFilter<T>, TWindow>(MorphologyOp::MeanFilter<T> {}, std::move(window));
 }
 
 /**
  * @ingroup filtering
  */
 template <typename T, typename TWindow>
-Filter<MorphologyOp::MedianFilter<T>, TWindow> median_filter(TWindow window)
+SimpleFilter<MorphologyOp::MedianFilter<T>, TWindow> median_filter(TWindow window)
 {
-  return Filter<MorphologyOp::MedianFilter<T>, TWindow>(MorphologyOp::MedianFilter<T> {}, std::move(window));
+  return SimpleFilter<MorphologyOp::MedianFilter<T>, TWindow>(MorphologyOp::MedianFilter<T> {}, std::move(window));
 }
 
 /**
  * @ingroup filtering
  */
 template <typename T, typename TWindow>
-Filter<MorphologyOp::Erosion<T>, TWindow> erosion(TWindow window)
+SimpleFilter<MorphologyOp::Erosion<T>, TWindow> erosion(TWindow window)
 {
-  return Filter<MorphologyOp::Erosion<T>, TWindow>(MorphologyOp::Erosion<T> {}, std::move(window));
+  return SimpleFilter<MorphologyOp::Erosion<T>, TWindow>(MorphologyOp::Erosion<T> {}, std::move(window));
 }
 
 /**
  * @ingroup filtering
  */
 template <typename T, typename TWindow>
-Filter<MorphologyOp::Dilation<T>, TWindow> dilation(TWindow window)
+SimpleFilter<MorphologyOp::Dilation<T>, TWindow> dilation(TWindow window)
 {
-  return Filter<MorphologyOp::Dilation<T>, TWindow>(MorphologyOp::Dilation<T> {}, std::move(window));
+  return SimpleFilter<MorphologyOp::Dilation<T>, TWindow>(MorphologyOp::Dilation<T> {}, std::move(window));
 }
 
 } // namespace Linx

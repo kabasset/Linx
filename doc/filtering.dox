@@ -112,7 +112,7 @@ auto sobel = sobel_op * extrapolation<NearestNeighbor>(in);
 \endcode
 
 
-Among others, the predefined filters, declared in `FilterLib.h`, are listed below.
+Among others, the predefined filters, declared in `Filters.h`, are listed below.
 
 */
 }

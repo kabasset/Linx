@@ -6,7 +6,7 @@
 #define _LINXRUN_COSMICS_H
 
 #include "Linx/Data/Raster.h"
-#include "Linx/Transforms/FilterLib.h"
+#include "Linx/Transforms/Filters.h"
 
 namespace Linx {
 namespace Cosmics {
@@ -88,7 +88,7 @@ template <typename TIn, typename TPsf>
 Raster<typename TPsf::Value> quotient(const TIn& in, const TPsf& psf)
 {
   using T = typename TPsf::Value;
-  auto filter = Filter<QuotientFilter<T>, Box<2>>(
+  auto filter = SimpleFilter<QuotientFilter<T>, Box<2>>(
       QuotientFilter<T>(psf.begin(), psf.end()),
       psf.domain() - (psf.shape() - 1) / 2);
   return filter * extrapolation<NearestNeighbor>(in);
@@ -98,7 +98,7 @@ template <typename TIn, typename TPsf>
 Raster<typename TPsf::Value> match(const TIn& in, const TPsf& psf)
 {
   using T = typename TPsf::Value;
-  auto filter = Filter<PearsonCorrelation<T>, Box<2>>(
+  auto filter = SimpleFilter<PearsonCorrelation<T>, Box<2>>(
       PearsonCorrelation<T>(psf.begin(), psf.end()),
       psf.domain() - (psf.shape() - 1) / 2);
   return filter * extrapolation<NearestNeighbor>(in);

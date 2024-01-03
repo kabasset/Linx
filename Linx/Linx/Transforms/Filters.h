@@ -6,9 +6,9 @@
 #define _LINXTRANSFORMS_FILTERLIB_H
 
 #include "Linx/Base/TypeUtils.h"
-#include "Linx/Transforms/Filter.h"
 #include "Linx/Transforms/FilterAgg.h"
 #include "Linx/Transforms/FilterSeq.h"
+#include "Linx/Transforms/SimpleFilter.h"
 
 namespace Linx {
 
@@ -100,7 +100,7 @@ template <typename T, Index N = 2>
 auto convolution(const T* values, Box<N> window)
 {
   const T* end = values + window.size();
-  return Filter<Convolution<T>, Box<N>>(std::vector<T>(values, end), std::move(window));
+  return SimpleFilter<Convolution<T>, Box<N>>(std::vector<T>(values, end), std::move(window));
 }
 
 /**
@@ -133,7 +133,7 @@ template <typename T, Index N = 2>
 auto correlation(const T* values, Box<N> window)
 {
   const T* end = values + window.size();
-  return Filter<Correlation<T>, Box<N>>(std::vector<T>(values, end), std::move(window));
+  return SimpleFilter<Correlation<T>, Box<N>>(std::vector<T>(values, end), std::move(window));
 }
 
 /**

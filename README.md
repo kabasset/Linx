@@ -18,7 +18,7 @@ Currently supported operations are:
 * Pixel-wise operations (`+`, `*`, `exp()`, `apply()`...) on `Raster`s and on `Raster` regions;
 * Noise generation (`GaussianNoise`, `PoissonNoise`, `ImpulseNoise`...);
 * Discrete Fourier transforms (FFTW wrapper) through the `DftPlan` class;
-* Linear, rank-order, and morphological filtering through the `Filter`, `FilterSeq` and `FilterAgg` classes;
+* Linear, rank-order, and morphological filtering through the `SimpleFilter`, `FilterSeq` and `FilterAgg` classes;
 * Interpolation and extrapolation (`NearestNeighbor`, `Linear`, `OutOfBoundsConstant`...);
 * Affine transformations.
 

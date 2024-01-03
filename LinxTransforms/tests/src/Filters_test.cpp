@@ -2,7 +2,7 @@
 // This file is part of Linx <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "Linx/Transforms/FilterLib.h"
+#include "Linx/Transforms/Filters.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -10,7 +10,7 @@ using namespace Linx;
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_SUITE(FilterLib_test)
+BOOST_AUTO_TEST_SUITE(Filters_test)
 
 //-----------------------------------------------------------------------------
 
