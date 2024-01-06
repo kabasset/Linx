@@ -52,7 +52,7 @@ Affinity<N> inverse(const Affinity<N>& in);
  * auto y = affinity(x);
  * \code
  * 
- * The affinity can be applied to a raster, or patch, too, e.g. with `operator*()`.
+ * The affinity can be applied to a raster or patch, e.g. using method `warp()`.
  * For example, let us scale an input raster by a factor 3 around its center:
  * 
  * \code
@@ -60,17 +60,16 @@ Affinity<N> inverse(const Affinity<N>& in);
  * center /= 2;
  * Affinity<2> affinity(center);
  * affinity *= 3;
- * out = affinity * in;
+ * out = affinity.warp<Cubic>(in);
  * \endcode
  * 
  * This use case is very classical and a shortcut is therefore provided:
  * 
  * \code
- * auto out = scale(in, 3);
+ * auto out = scale<Cubic>(in, 3);
  * \endcode
  * 
- * Note that `in` must at least be an interpolator.
- * If values outside its domain are required, then it must also be an extrapolator.
+ * Note that if values outside its domain are required, then `in` must be an extrapolator.
  * 
  * Let us also stress out that the output is of the same shape as the input.
  * It is possible to resample the output with:
@@ -79,17 +78,17 @@ Affinity<N> inverse(const Affinity<N>& in);
  * Raster<int> out(in.shape() * 3);
  * Affinity<2> upscale;
  * upscale *= 3;
- * upscale.transform(in, out);
+ * upscale.transform(interpolation<Cubic>(in), out);
  * \endcode
  * 
  * Which is equivalent to:
  * 
  * \code
- * out = upsample(in, 3);
+ * out = upsample<Cubic>(in, 3);
  * \endcode
  * 
  * \note
- * This class depends on Eigen
+ * This class depends on Eigen.
  */
 template <Index N>
 class Affinity {
@@ -120,22 +119,22 @@ public:
   }
 
   /**
-   * @brief Create a scaling.
+   * @brief Create an isotropic scaling.
+   */
+  static Affinity scaling(double value, const Vector<double, N>& center = Vector<double, N>::zero())
+  {
+    Affinity out(center);
+    out *= value;
+    return out;
+  }
+
+  /**
+   * @brief Create an arbitrary scaling.
    */
   static Affinity scaling(const Vector<double, N>& vector, const Vector<double, N>& center = Vector<double, N>::zero())
   {
     Affinity out(center);
     out *= vector;
-    return out;
-  }
-
-  /**
-   * @brief Create an isotropic scaling.
-   */
-  static Affinity scaling(double scalar, const Vector<double, N>& center = Vector<double, N>::zero())
-  {
-    Affinity out(center);
-    out *= scalar;
     return out;
   }
 
@@ -164,9 +163,9 @@ public:
   /**
    * @brief Translate by a given value along all axes.
    */
-  Affinity& operator+=(double scalar)
+  Affinity& operator+=(double value)
   {
-    m_translation += scalar;
+    m_translation += value;
     return *this;
   }
 
@@ -184,9 +183,9 @@ public:
   /**
    * @brief Translate by the opposite of a given value along all axes.
    */
-  Affinity& operator-=(double scalar)
+  Affinity& operator-=(double value)
   {
-    m_translation -= scalar;
+    m_translation -= value;
     return *this;
   }
 
@@ -222,7 +221,7 @@ public:
   }
 
   /**
-   * @brief Scale by a the inverse of given factor along all axes.
+   * @brief Scale isotropically by a the inverse of given factor.
    */
   Affinity& operator/=(double value)
   {
@@ -284,19 +283,6 @@ public:
   {
     return Vector<double, N>(m_translation + m_center + m_map * (to_eigen_vector(in) - m_center));
     // TODO faster without cast, i.e. without Eigen?
-  }
-
-  /**
-   * @brief Apply the transform to an input interpolator.
-   * 
-   * The output raster has the same shape as the input (which can be a patch).
-   */
-  template <typename TIn>
-  [[deprecated]] Raster<typename TIn::Value, TIn::Dimension> operator*(const TIn& in) const
-  {
-    Raster<typename TIn::Value, TIn::Dimension> out(in.shape());
-    transform(in, out);
-    return out;
   }
 
   /**
@@ -372,7 +358,7 @@ Affinity<N> inverse(const Affinity<N>& in)
 
 /**
  * @relatesalso Affinity
- * @brief Translate an input interpolator.
+ * @brief Translate some input data using a given interpolation method.
  */
 template <typename TInterpolation, typename TIn>
 Raster<typename TIn::Value, TIn::Dimension> translate(const TIn& in, const Vector<double, TIn::Dimension>& vector)
@@ -382,7 +368,7 @@ Raster<typename TIn::Value, TIn::Dimension> translate(const TIn& in, const Vecto
 
 /**
  * @relatesalso Affinity
- * @brief Scale an input interpolator from its center.
+ * @brief Scale some input data from its center using a given interpolation method.
  */
 template <typename TInterpolation, typename TIn>
 Raster<typename TIn::Value, TIn::Dimension> scale(const TIn& in, double factor)
@@ -394,7 +380,7 @@ Raster<typename TIn::Value, TIn::Dimension> scale(const TIn& in, double factor)
 
 /**
  * @relatesalso Affinity
- * @brief Upsample an input interpolator.
+ * @brief Upsample some input data using a given interpolation method.
  */
 template <typename TInterpolation, typename TIn>
 Raster<typename TIn::Value, TIn::Dimension> upsample(const TIn& in, double factor)
@@ -407,7 +393,7 @@ Raster<typename TIn::Value, TIn::Dimension> upsample(const TIn& in, double facto
 
 /**
  * @relatesalso Affinity
- * @brief Downsample an input interpolator.
+ * @brief Downsample some input data using a given interpolation method.
  */
 template <typename TInterpolation, typename TIn>
 Raster<typename TIn::Value, TIn::Dimension> downsample(const TIn& in, double factor)
@@ -417,7 +403,7 @@ Raster<typename TIn::Value, TIn::Dimension> downsample(const TIn& in, double fac
 
 /**
  * @relatesalso Affinity
- * @brief Rotate an input interpolator around its center.
+ * @brief Rotate some input data around its center using a given interpolation method.
  */
 template <typename TInterpolation, typename TIn>
 Raster<typename TIn::Value, TIn::Dimension> rotate_rad(const TIn& in, double angle, Index from = 0, Index to = 1)
@@ -429,7 +415,7 @@ Raster<typename TIn::Value, TIn::Dimension> rotate_rad(const TIn& in, double ang
 
 /**
  * @relatesalso Affinity
- * @brief Rotate an input interpolator around its center.
+ * @brief Rotate some input data around its center using a given interpolation method.
  */
 template <typename TInterpolation, typename TIn>
 Raster<typename TIn::Value, TIn::Dimension> rotate_deg(const TIn& in, double angle, Index from = 0, Index to = 1)
