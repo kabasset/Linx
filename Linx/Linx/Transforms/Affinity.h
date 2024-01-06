@@ -48,7 +48,7 @@ Affinity<N> inverse(const Affinity<N>& in);
  * 
  * \code
  * Affinity<2> affinity({100, 50});
- * affinity.rotate_degrees(30, 1, 0);
+ * affinity.rotate_deg(30, 1, 0);
  * auto y = affinity(x);
  * \code
  * 
@@ -142,28 +142,22 @@ public:
   /**
    * @brief Create a rotation by an angle given in radians.
    */
-  static Affinity rotation_radians(
-      double angle,
-      Index from = 0,
-      Index to = 1,
-      const Vector<double, N>& center = Vector<double, N>::zero())
+  static Affinity
+  rotation_rad(double angle, Index from = 0, Index to = 1, const Vector<double, N>& center = Vector<double, N>::zero())
   {
     Affinity out(center);
-    out.rotate_radians(angle, from, to);
+    out.rotate_rad(angle, from, to);
     return out;
   }
 
   /**
    * @brief Create a rotation by an angle given in degrees.
    */
-  static Affinity rotation_degrees(
-      double angle,
-      Index from = 0,
-      Index to = 1,
-      const Vector<double, N>& center = Vector<double, N>::zero())
+  static Affinity
+  rotation_deg(double angle, Index from = 0, Index to = 1, const Vector<double, N>& center = Vector<double, N>::zero())
   {
     Affinity out(center);
-    out.rotate_degrees(angle, from, to);
+    out.rotate_deg(angle, from, to);
     return out;
   }
 
@@ -249,7 +243,7 @@ public:
   /**
    * @brief Rotate by an angle given in radians from a given axis to a given axis.
    */
-  Affinity& rotate_radians(double angle, Index from = 0, Index to = 1)
+  Affinity& rotate_rad(double angle, Index from = 0, Index to = 1)
   {
     if (angle != 0) {
       EigenMatrix rotation = EigenMatrix::Identity();
@@ -267,9 +261,9 @@ public:
   /**
    * @brief Rotate by an angle given in degrees from a given axis to a given axis.
    */
-  Affinity& rotate_degrees(double angle, Index from = 0, Index to = 1)
+  Affinity& rotate_deg(double angle, Index from = 0, Index to = 1)
   {
-    return rotate_radians(Linx::pi<double>() / 180. * angle, from, to);
+    return rotate_rad(Linx::pi<double>() / 180. * angle, from, to);
   }
 
   /**
@@ -426,11 +420,11 @@ Raster<typename TIn::Value, TIn::Dimension> downsample(const TIn& in, double fac
  * @brief Rotate an input interpolator around its center.
  */
 template <typename TInterpolation, typename TIn>
-Raster<typename TIn::Value, TIn::Dimension> rotate_radians(const TIn& in, double angle, Index from = 0, Index to = 1)
+Raster<typename TIn::Value, TIn::Dimension> rotate_rad(const TIn& in, double angle, Index from = 0, Index to = 1)
 {
   const auto& domain = in.domain();
   Vector<double, TIn::Dimension> sum(domain.front() + domain.back());
-  return Affinity<TIn::Dimension>::rotation_radians(angle, from, to, sum / 2).template warp<TInterpolation>(in);
+  return Affinity<TIn::Dimension>::rotation_rad(angle, from, to, sum / 2).template warp<TInterpolation>(in);
 }
 
 /**
@@ -438,11 +432,11 @@ Raster<typename TIn::Value, TIn::Dimension> rotate_radians(const TIn& in, double
  * @brief Rotate an input interpolator around its center.
  */
 template <typename TInterpolation, typename TIn>
-Raster<typename TIn::Value, TIn::Dimension> rotate_degrees(const TIn& in, double angle, Index from = 0, Index to = 1)
+Raster<typename TIn::Value, TIn::Dimension> rotate_deg(const TIn& in, double angle, Index from = 0, Index to = 1)
 {
   const auto& domain = in.domain();
   Vector<double, TIn::Dimension> sum(domain.front() + domain.back());
-  return Affinity<TIn::Dimension>::rotation_degrees(angle, from, to, sum / 2).template warp<TInterpolation>(in);
+  return Affinity<TIn::Dimension>::rotation_deg(angle, from, to, sum / 2).template warp<TInterpolation>(in);
 }
 
 } // namespace Linx

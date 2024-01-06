@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(scaling_origin_test)
 
 BOOST_AUTO_TEST_CASE(rotation_origin_90x_test)
 {
-  const auto rotation = Affinity<3>::rotation_degrees(90, 1, 2);
+  const auto rotation = Affinity<3>::rotation_deg(90, 1, 2);
   const Vector<double, 3> in {3, 4, 5};
   const auto out = rotation(in);
   const Vector<double, 3> expected {3, -5, 4};
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(rotation_origin_90x_test)
 
 BOOST_AUTO_TEST_CASE(rotation_origin_90y_test)
 {
-  const auto rotation = Affinity<3>::rotation_degrees(90, 2, 0);
+  const auto rotation = Affinity<3>::rotation_deg(90, 2, 0);
   const Vector<double, 3> in {3, 4, 5};
   const auto out = rotation(in);
   const Vector<double, 3> expected {5, 4, -3};
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(rotation_origin_90y_test)
 
 BOOST_AUTO_TEST_CASE(rotation_origin_90z_test)
 {
-  const auto rotation = Affinity<3>::rotation_degrees(90, 0, 1);
+  const auto rotation = Affinity<3>::rotation_deg(90, 0, 1);
   const Vector<double, 3> in {3, 4, 5};
   const auto out = rotation(in);
   const Vector<double, 3> expected {-4, 3, 5};
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(rotation_origin_90z_test)
 
 BOOST_AUTO_TEST_CASE(rotation_origin_270z_test)
 {
-  const auto rotation = Affinity<3>::rotation_degrees(90, 1, 0);
+  const auto rotation = Affinity<3>::rotation_deg(90, 1, 0);
   const Vector<double, 3> in {3, 4, 5};
   const auto out = rotation(in);
   const Vector<double, 3> expected {4, -3, 5};
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(rotation_origin_270z_test)
 BOOST_AUTO_TEST_CASE(rotation_int_90z_test)
 {
   const Vector<double, 3> center = {0, 1, 2};
-  const auto rotation = Affinity<3>::rotation_degrees(90, 0, 1, center);
+  const auto rotation = Affinity<3>::rotation_deg(90, 0, 1, center);
   const Vector<double, 3> in {3, 4, 5};
   const auto out = rotation(in);
   const Vector<double, 3> expected {-3, 4, 5};
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(rotation_int_90z_test)
 BOOST_AUTO_TEST_CASE(rotation_float_90z_test)
 {
   const Vector<double, 3> center = {1.5, 1.5, 0};
-  const auto rotation = Affinity<3>::rotation_degrees(90, 0, 1, center);
+  const auto rotation = Affinity<3>::rotation_deg(90, 0, 1, center);
   const Vector<double, 3> in {3, 4, 5};
   const auto out = rotation(in);
   const Vector<double, 3> expected {-1, 3, 5};
@@ -113,9 +113,9 @@ BOOST_AUTO_TEST_CASE(raster_scaling_center_2_test)
 BOOST_AUTO_TEST_CASE(raster_rotation_center_90z_test)
 {
   const auto in = Raster<Index>({4, 4}).range();
-  const auto rotation = Affinity<2>::rotation_degrees(90, 0, 1, {1.5, 1.5});
+  const auto rotation = Affinity<2>::rotation_deg(90, 0, 1, {1.5, 1.5});
   const auto out = rotation.warp<NearestNeighbor>(in);
-  const auto out2 = rotate_degrees<NearestNeighbor>(in, 90);
+  const auto out2 = rotate_deg<NearestNeighbor>(in, 90);
   const auto out_nn = interpolation<NearestNeighbor>(out);
   const auto out2_nn = interpolation<NearestNeighbor>(out2);
   for (const auto& p : in.domain()) {
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(patch_rotation_center_30z_test)
 {
   const auto in = Raster<Index>({5, 5}).range();
   const auto interpolator = interpolation<Linear>(in);
-  const auto rotation = Affinity<2>::rotation_degrees(30, 0, 1, {2, 2});
+  const auto rotation = Affinity<2>::rotation_deg(30, 0, 1, {2, 2});
   const auto inv = inverse(rotation);
   Raster<double> out(in.shape());
   auto patch = out(Box<2>({1, 1}, {3, 3}));

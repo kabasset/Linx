@@ -50,7 +50,7 @@ public:
     Linx::Affinity<2> affinity({2. * quarter, 2. * quarter});
     affinity += {vector, 0};
     affinity *= factor;
-    affinity.rotate_degrees(angle);
+    affinity.rotate_deg(angle);
 
     affinity.transform(interpolator, output);
 
