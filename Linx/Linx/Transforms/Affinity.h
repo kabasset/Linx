@@ -87,6 +87,9 @@ Affinity<N> inverse(const Affinity<N>& in);
  * \code
  * out = upsample(in, 3);
  * \endcode
+ * 
+ * \note
+ * This class depends on Eigen
  */
 template <Index N>
 class Affinity {
@@ -295,10 +298,21 @@ public:
    * The output raster has the same shape as the input (which can be a patch).
    */
   template <typename TIn>
-  Raster<typename TIn::Value, TIn::Dimension> operator*(const TIn& in) const
+  [[deprecated]] Raster<typename TIn::Value, TIn::Dimension> operator*(const TIn& in) const
   {
     Raster<typename TIn::Value, TIn::Dimension> out(in.shape());
     transform(in, out);
+    return out;
+  }
+
+  /**
+   * @brief Apply the transform with a given interpolation method.
+   */
+  template <typename TInterpolation, typename TIn, typename... TArgs>
+  Raster<typename TIn::Value, TIn::Dimension> warp(const TIn& in, TArgs&&... args) const
+  {
+    Raster<typename TIn::Value, TIn::Dimension> out(in.shape());
+    transform(interpolation<TInterpolation>(in, LINX_FORWARD(args)...), out);
     return out;
   }
 
@@ -366,34 +380,34 @@ Affinity<N> inverse(const Affinity<N>& in)
  * @relatesalso Affinity
  * @brief Translate an input interpolator.
  */
-template <typename TIn>
+template <typename TInterpolation, typename TIn>
 Raster<typename TIn::Value, TIn::Dimension> translate(const TIn& in, const Vector<double, TIn::Dimension>& vector)
 {
-  return Affinity<TIn::Dimension>::translate(vector) * in; // FIXME optimize
+  return Affinity<TIn::Dimension>::translate(vector).template warp<TInterpolation>(in); // FIXME optimize
 }
 
 /**
  * @relatesalso Affinity
  * @brief Scale an input interpolator from its center.
  */
-template <typename TIn>
+template <typename TInterpolation, typename TIn>
 Raster<typename TIn::Value, TIn::Dimension> scale(const TIn& in, double factor)
 {
   const auto& domain = in.domain();
   Vector<double, TIn::Dimension> sum(domain.front() + domain.back());
-  return Affinity<TIn::Dimension>::scaling(factor, sum / 2) * in; // FIXME optimize
+  return Affinity<TIn::Dimension>::scaling(factor, sum / 2).template warp<TInterpolation>(in); // FIXME optimize
 }
 
 /**
  * @relatesalso Affinity
  * @brief Upsample an input interpolator.
  */
-template <typename TIn>
+template <typename TInterpolation, typename TIn>
 Raster<typename TIn::Value, TIn::Dimension> upsample(const TIn& in, double factor)
 {
   Raster<typename TIn::Value, TIn::Dimension> out(in.shape() * factor);
   const auto scaling = Affinity<TIn::Dimension>::scaling(factor);
-  scaling.transform(in, out);
+  scaling.transform(interpolation<TInterpolation>(in), out);
   return out;
 }
 
@@ -401,34 +415,34 @@ Raster<typename TIn::Value, TIn::Dimension> upsample(const TIn& in, double facto
  * @relatesalso Affinity
  * @brief Downsample an input interpolator.
  */
-template <typename TIn>
+template <typename TInterpolation, typename TIn>
 Raster<typename TIn::Value, TIn::Dimension> downsample(const TIn& in, double factor)
 {
-  return upsample(in, 1. / factor);
+  return upsample<TInterpolation>(in, 1. / factor);
 }
 
 /**
  * @relatesalso Affinity
  * @brief Rotate an input interpolator around its center.
  */
-template <typename TIn>
+template <typename TInterpolation, typename TIn>
 Raster<typename TIn::Value, TIn::Dimension> rotate_radians(const TIn& in, double angle, Index from = 0, Index to = 1)
 {
   const auto& domain = in.domain();
   Vector<double, TIn::Dimension> sum(domain.front() + domain.back());
-  return Affinity<TIn::Dimension>::rotation_radians(angle, from, to, sum / 2) * in;
+  return Affinity<TIn::Dimension>::rotation_radians(angle, from, to, sum / 2).template warp<TInterpolation>(in);
 }
 
 /**
  * @relatesalso Affinity
  * @brief Rotate an input interpolator around its center.
  */
-template <typename TIn>
+template <typename TInterpolation, typename TIn>
 Raster<typename TIn::Value, TIn::Dimension> rotate_degrees(const TIn& in, double angle, Index from = 0, Index to = 1)
 {
   const auto& domain = in.domain();
   Vector<double, TIn::Dimension> sum(domain.front() + domain.back());
-  return Affinity<TIn::Dimension>::rotation_degrees(angle, from, to, sum / 2) * in;
+  return Affinity<TIn::Dimension>::rotation_degrees(angle, from, to, sum / 2).template warp<TInterpolation>(in);
 }
 
 } // namespace Linx

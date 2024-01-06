@@ -96,10 +96,9 @@ BOOST_AUTO_TEST_CASE(rotation_float_90z_test)
 BOOST_AUTO_TEST_CASE(raster_scaling_center_2_test)
 {
   const auto in = Raster<Index, 4>({3, 3, 3, 3}).range();
-  const auto interpolator = interpolation<Cubic>(in);
   const auto scaling = Affinity<4>::scaling(2, {1, 1, 1, 1});
-  const auto out = scaling * interpolator;
-  const auto out2 = scale(interpolator, 2);
+  const auto out = scaling.warp<Cubic>(in);
+  const auto out2 = scale<Cubic>(in, 2);
   const auto out_nn = interpolation<NearestNeighbor>(out);
   const auto out2_nn = interpolation<NearestNeighbor>(out2);
   for (const auto& p : in.domain()) {
@@ -114,10 +113,9 @@ BOOST_AUTO_TEST_CASE(raster_scaling_center_2_test)
 BOOST_AUTO_TEST_CASE(raster_rotation_center_90z_test)
 {
   const auto in = Raster<Index>({4, 4}).range();
-  const auto interpolator = interpolation<NearestNeighbor>(in);
   const auto rotation = Affinity<2>::rotation_degrees(90, 0, 1, {1.5, 1.5});
-  const auto out = rotation * interpolator;
-  const auto out2 = rotate_degrees(interpolator, 90);
+  const auto out = rotation.warp<NearestNeighbor>(in);
+  const auto out2 = rotate_degrees<NearestNeighbor>(in, 90);
   const auto out_nn = interpolation<NearestNeighbor>(out);
   const auto out2_nn = interpolation<NearestNeighbor>(out2);
   for (const auto& p : in.domain()) {
@@ -150,8 +148,7 @@ BOOST_AUTO_TEST_CASE(patch_rotation_center_30z_test)
 BOOST_AUTO_TEST_CASE(raster_upsampling_sesquiple_test)
 {
   const auto in = Raster<float>({3, 2}).range();
-  const auto interpolator = interpolation<NearestNeighbor>(in);
-  const auto out = upsample(interpolator, 1.5);
+  const auto out = upsample<NearestNeighbor>(in, 1.5);
   BOOST_TEST(out.shape() == in.shape() * 1.5);
   for (const auto& p : out.domain()) {
     Vector<double> q(p);
@@ -165,8 +162,7 @@ BOOST_AUTO_TEST_CASE(raster_upsampling_sesquiple_test)
 BOOST_AUTO_TEST_CASE(raster_upsampling_double_test)
 {
   const auto in = Raster<float>({3, 2}).range();
-  const auto interpolator = interpolation<NearestNeighbor>(in);
-  const auto out = upsample(interpolator, 2);
+  const auto out = upsample<NearestNeighbor>(in, 2); // FIXME out of bounds somehow
   BOOST_TEST(out.shape() == in.shape() * 2);
   for (const auto& p : out.domain()) {
     Vector<double> q(p);
@@ -180,8 +176,7 @@ BOOST_AUTO_TEST_CASE(raster_upsampling_double_test)
 BOOST_AUTO_TEST_CASE(raster_upsampling_triple_test)
 {
   const auto in = Raster<float>({3, 2}).range();
-  const auto interpolator = interpolation<NearestNeighbor>(in);
-  const auto out = upsample(interpolator, 3);
+  const auto out = upsample<NearestNeighbor>(in, 3);
   BOOST_TEST(out.shape() == in.shape() * 3);
   for (const auto& p : out.domain()) {
     Vector<double> q(p);
