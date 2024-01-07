@@ -24,6 +24,8 @@ class Affinity;
 template <Index N>
 Affinity<N> inverse(const Affinity<N>& in);
 
+/// @endcond
+
 /**
  * @relatesalso Affinity
  * @brief Get the center of some data.
@@ -36,8 +38,6 @@ Vector<double, TIn::Dimension> center(const TIn& in)
   out /= 2;
   return out;
 }
-
-/// @endcond
 
 /**
  * @ingroup affinity
@@ -392,12 +392,23 @@ Raster<typename TIn::Value, TIn::Dimension> scale(const TIn& in, double factor)
 /**
  * @relatesalso Affinity
  * @brief Upsample some input data using a given interpolation method.
+ * @tparam TInterpolation The interpolation method
+ * @tparam M The number of sampling dimensions
  */
-template <typename TInterpolation, typename TIn>
+template <typename TInterpolation, Index M = 2, typename TIn>
 Raster<typename TIn::Value, TIn::Dimension> upsample(const TIn& in, double factor)
 {
-  Raster<typename TIn::Value, TIn::Dimension> out(in.shape() * factor);
-  const auto scaling = Affinity<TIn::Dimension>::scaling(factor);
+  Vector<double, TIn::Dimension> factors(in.dimension());
+  auto shape = in.shape();
+  for (Index i = 0; i < M; ++i) {
+    factors[i] = factor;
+    shape[i] *= factor;
+  }
+  for (Index i = M; i < in.dimension(); ++i) {
+    factors[i] = 1;
+  }
+  Raster<typename TIn::Value, TIn::Dimension> out(std::move(shape));
+  const auto scaling = Affinity<TIn::Dimension>::scaling(std::move(factors));
   scaling.transform(interpolation<TInterpolation>(in), out);
   return out;
 }
@@ -405,11 +416,13 @@ Raster<typename TIn::Value, TIn::Dimension> upsample(const TIn& in, double facto
 /**
  * @relatesalso Affinity
  * @brief Downsample some input data using a given interpolation method.
+ * @tparam TInterpolation The interpolation method
+ * @tparam M The number of sampling dimensions
  */
-template <typename TInterpolation, typename TIn>
+template <typename TInterpolation, Index M = 2, typename TIn>
 Raster<typename TIn::Value, TIn::Dimension> downsample(const TIn& in, double factor)
 {
-  return upsample<TInterpolation>(in, 1. / factor);
+  return upsample<TInterpolation, M>(in, 1. / factor);
 }
 
 /**
