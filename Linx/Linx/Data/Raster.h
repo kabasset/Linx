@@ -183,6 +183,75 @@ public:
    */
   using Container = DataContainer<T, THolder, EuclidArithmetic, Raster<T, N, THolder>>;
 
+  /**
+   * @brief The section type.
+   * 
+   * A section is a contiguous view of dimension N-1, like a 2D plane in a 3D raster or a row in a 2D raster.
+   */
+  using Section = PtrRaster<T, N == -1 ? -1 : N - 1>;
+
+  /**
+   * @brief The constant section type.
+   * @see Section
+   */
+  using ConstSection = PtrRaster<const T, N == -1 ? -1 : N - 1>;
+
+  /**
+   * @brief The section range type.
+   * 
+   * A section range is a contiguous view of dimension N, like a consecutive set of rows in a 2D raster.
+   */
+  using Multisection = PtrRaster<T, N>;
+
+  /**
+   * @brief The constant section range type.
+   * @see Multisection
+   */
+  using ConstMultisection = PtrRaster<const T, N>;
+
+  /**
+   * @brief The row type.
+   * 
+   * A row is a contiguous view of dimension 1, along axis 0.
+   */
+  using Row = PtrRaster<T, 1>;
+
+  /**
+   * @brief The constant row type.
+   * @see Row
+   */
+  using ConstRow = PtrRaster<const T, 1>;
+
+  /**
+   * @brief The tile type.
+   * 
+   * A tile of dimension M is generally a non-contiguous view whose domain is a box of dimension M.
+   */
+  template <Index M>
+  using Tile = Patch<T, Raster, Box<M>>;
+
+  /**
+   * @brief The constant tile type.
+   * @see Tile
+   */
+  template <Index M>
+  using ConstTile = Patch<const T, const Raster, Box<M>>;
+
+  /**
+   * @brief The profile type.
+   * 
+   * A profile along axis I is a generally non-contiguous view of dimension 1.
+   */
+  template <Index I>
+  using Profile = Patch<T, Raster<T, N, THolder>, Line<I, N>>;
+
+  /**
+   * @brief The constant profile type.
+   * @see Profile
+   */
+  template <Index I>
+  using ConstProfile = Patch<const T, const Raster, Line<I, N>>;
+
   /// @{
   /// @group_construction
 
@@ -389,44 +458,44 @@ public:
    * 
    * @see slice()
    */
-  PtrRaster<const T, N> section(Index front, Index back) const;
+  ConstMultisection section(Index front, Index back) const;
 
   /**
    * @copybrief section(Index,Index)const
    */
-  PtrRaster<T, N> section(Index front, Index back);
+  Multisection section(Index front, Index back);
 
   /**
    * @brief Create a section at given index.
    */
-  PtrRaster<const T, N == -1 ? -1 : N - 1> section(Index index) const;
+  ConstSection section(Index index) const;
 
   /**
    * @copybrief section(Index)const
    */
-  PtrRaster<T, N == -1 ? -1 : N - 1> section(Index index);
+  Section section(Index index);
 
   /**
    * @brief Create a row-section at given position.
    */
-  PtrRaster<const T, 1> row(const Position<N == -1 ? -1 : N - 1>& position) const;
+  ConstRow row(const Position<N == -1 ? -1 : N - 1>& position) const;
 
   /**
    * @copybrief row()const
    */
-  PtrRaster<T, 1> row(const Position<N == -1 ? -1 : N - 1>& position);
+  Row row(const Position<N == -1 ? -1 : N - 1>& position);
 
   /**
    * @brief Create a line-patch at given position.
    */
   template <Index I>
-  Patch<const T, const Raster<T, N, THolder>, Line<I, N>> profile(const Position<N == -1 ? -1 : N - 1>& position) const;
+  ConstProfile<I> profile(const Position<N == -1 ? -1 : N - 1>& position) const;
 
   /**
    * @brief Create a line-patch at given position.
    */
   template <Index I>
-  Patch<T, Raster<T, N, THolder>, Line<I, N>> profile(const Position<N == -1 ? -1 : N - 1>& position);
+  Profile<I> profile(const Position<N == -1 ? -1 : N - 1>& position);
 
   /**
    * @brief Create a patch from given region.
@@ -460,7 +529,7 @@ public:
    */
   auto operator()(Position<N> p0) const
   {
-    return Patch<const T, const Raster, Position<N>>(*this, LINX_MOVE(p0));
+    return Patch<const T, const Raster, Position<N>>(*this, LINX_MOVE(p0)); // FIXME as PtrRaster<T, 1>
   }
 
   /**
@@ -468,7 +537,7 @@ public:
    */
   auto operator()(Position<N> p0)
   {
-    return Patch<T, Raster, Position<N>>(*this, LINX_MOVE(p0));
+    return Patch<T, Raster, Position<N>>(*this, LINX_MOVE(p0)); // FIXME as PtrRaster<T, 1>
   }
 
   /**
