@@ -19,7 +19,7 @@ Currently supported operations are:
 * Noise generation (`GaussianNoise`, `PoissonNoise`, `ImpulseNoise`...);
 * Discrete Fourier transforms (FFTW wrapper) through the `DftPlan` class;
 * Linear, rank-order, and morphological filtering through the `SimpleFilter`, `FilterSeq` and `FilterAgg` classes;
-* Interpolation and extrapolation (`NearestNeighbor`, `Linear`, `OutOfBoundsConstant`...);
+* Interpolation and extrapolation (`Nearest`, `Linear`, `Constant`...);
 * Affine transformations.
 
 # License

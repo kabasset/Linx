@@ -32,7 +32,7 @@ namespace Linx {
 <li>Method `DataContainer::distribution()`
 <tr><td>Extrapolation and interpolation<td>`Raster`
 <td><ul>
-<li>Module \ref interpolation
+<li>Module \ref resampling
 <li>Class `Extrapolation`
 <li>Class `Interpolation`
 <tr><td>Convolution and correlation<td>`Raster`
@@ -41,25 +41,25 @@ namespace Linx {
 <li>Class `SimpleFilter`
 <li>Class `FilterSeq`
 <li>Class `FilterAgg`
-<li>Module \ref interpolation
+<li>Module \ref resampling
 <li>Class `Extrapolation`
 <tr><td>Bilateral filtering<td>`Raster`
 <td><ul>
 <li>Module \ref nl_filters
 <li>Class `SimpleFilter`
-<li>Module \ref interpolation
+<li>Module \ref resampling
 <li>Class `Extrapolation`
 <tr><td>Median and rank-order filtering<td>`Raster`
 <td><ul>
 <li>Module \ref nl_filters
 <li>Class `StructuringElement`
-<li>Module \ref interpolation
+<li>Module \ref resampling
 <li>Class `Extrapolation`
 <tr><td>Morphological operations<td>`Raster`
 <td><ul>
 <li>Module \ref nl_filters
 <li>Class `StructuringElement`
-<li>Module \ref interpolation
+<li>Module \ref resampling
 <li>Class `Extrapolation`
 <tr><td>Discrete Fourier transforms<td>`Raster`
 <td><ul>
@@ -69,7 +69,7 @@ namespace Linx {
 <td><ul>
 <li>Module \ref geometry
 <li>Class `Affinity`
-<li>Module \ref interpolation
+<li>Module \ref resampling
 <li>Class `Extrapolation`
 <li>Class `Interpolation`
 </table>

@@ -91,7 +91,7 @@ Raster<typename TPsf::Value> quotient(const TIn& in, const TPsf& psf)
   auto filter = SimpleFilter<QuotientFilter<T>, Box<2>>(
       QuotientFilter<T>(psf.begin(), psf.end()),
       psf.domain() - (psf.shape() - 1) / 2);
-  return filter * extrapolation<NearestNeighbor>(in);
+  return filter * extrapolation<Nearest>(in);
 }
 
 template <typename TIn, typename TPsf>
@@ -101,7 +101,7 @@ Raster<typename TPsf::Value> match(const TIn& in, const TPsf& psf)
   auto filter = SimpleFilter<PearsonCorrelation<T>, Box<2>>(
       PearsonCorrelation<T>(psf.begin(), psf.end()),
       psf.domain() - (psf.shape() - 1) / 2);
-  return filter * extrapolation<NearestNeighbor>(in);
+  return filter * extrapolation<Nearest>(in);
 }
 
 template <typename TIn>
@@ -110,7 +110,7 @@ Raster<typename TIn::Value> laplacian(const TIn& in)
   using T = typename TIn::Value;
   const auto filter = convolution(
       Raster<T>({3, 3}, {-1. / 6., -2. / 3., -1. / 6., -2. / 3., 10. / 3., -2. / 3., -1. / 6., -2. / 3., -1. / 6.}));
-  return filter * extrapolation<NearestNeighbor>(in);
+  return filter * extrapolation<Nearest>(in);
 }
 
 template <typename TIn>
@@ -118,7 +118,7 @@ Raster<typename TIn::Value> dilate(const TIn& in, Index radius = 1)
 {
   using T = typename TIn::Value;
   auto filter = dilation<T>(Box<2>::from_center(radius)); // FIXME L2-ball
-  return filter * extrapolation<NearestNeighbor>(in);
+  return filter * extrapolation<Nearest>(in);
 }
 
 template <typename TIn>
@@ -126,7 +126,7 @@ Raster<typename TIn::Value> blur(const TIn& in, Index radius = 1)
 {
   using T = typename TIn::Value;
   auto filter = mean_filter<T>(Box<2>::from_center(radius)); // FIXME L2-ball
-  return filter * extrapolation<NearestNeighbor>(in);
+  return filter * extrapolation<Nearest>(in);
 }
 
 /**

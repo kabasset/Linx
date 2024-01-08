@@ -26,11 +26,11 @@ BOOST_AUTO_TEST_CASE(constant_nn_test)
   const auto extra = extrapolation(raster, 0);
   BOOST_TEST(extra[position] == 0);
 
-  const auto inter = interpolation<NearestNeighbor>(raster);
+  const auto inter = interpolation<Nearest>(raster);
   BOOST_TEST(&inter[position] < raster.data()); // Out of bounds
   BOOST_TEST(inter(vector) == 1);
 
-  const auto interextra = interpolation<NearestNeighbor>(extra);
+  const auto interextra = interpolation<Nearest>(extra);
   BOOST_TEST(interextra[position] == 0);
   BOOST_TEST(interextra(vector) == 1);
 }

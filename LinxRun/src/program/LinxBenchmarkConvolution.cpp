@@ -18,7 +18,7 @@ using Duration = std::chrono::milliseconds;
 void filter_monolith(Image& image, const Image& values)
 {
   auto kernel = Linx::convolution(values);
-  const auto extrapolation = Linx::extrapolation<Linx::NearestNeighbor>(image);
+  const auto extrapolation = Linx::extrapolation<Linx::Nearest>(image);
   const auto extrapolated = extrapolation.copy(image.domain() + kernel.window());
   auto patch = extrapolated(kernel.window() - kernel.window().front());
   auto out_it = image.begin();
@@ -35,7 +35,7 @@ void filter_monolith(Image& image, const Image& values)
 void filter_hardcoded(Image& image, const Image& values)
 {
   auto kernel = Linx::convolution(values);
-  const auto extrapolation = Linx::extrapolation<Linx::NearestNeighbor>(image);
+  const auto extrapolation = Linx::extrapolation<Linx::Nearest>(image);
   const auto extrapolated = extrapolation.copy(image.domain() + kernel.window());
   auto it = image.end();
   Image out(image.shape());
@@ -66,7 +66,7 @@ TDuration filter(Image& image, const Image& kernel, char setup)
       image = Linx::convolution(kernel) * Linx::extrapolation(image, 0.0F);
       break;
     case 'd':
-      image = Linx::convolution(kernel) * Linx::extrapolation<Linx::NearestNeighbor>(image);
+      image = Linx::convolution(kernel) * Linx::extrapolation<Linx::Nearest>(image);
       break;
     case 'm':
       filter_monolith(image, kernel);

@@ -6,12 +6,12 @@
 #define _LINXTRANSFORMS_EXTRAPOLATION_H
 
 #include "Linx/Data/Raster.h"
-#include "Linx/Transforms/impl/InterpolationMethods.h"
+#include "Linx/Transforms/impl/ResamplingMethods.h"
 
 namespace Linx {
 
 /**
- * @ingroup interpolation
+ * @ingroup resampling
  * @brief Extrapolation decorator.
  * @tparam TRaster The decorated raster type
  * @tparam TMethod The extrapolation method
@@ -169,7 +169,7 @@ const TRaster& rasterize(const Extrapolation<TRaster, TMethod>& in)
  * @relatesalso Extrapolation
  * @brief Make an extrapolator with given extrapolation method.
  */
-template <typename TMethod = NearestNeighbor, typename TRaster, typename... TArgs>
+template <typename TMethod = Nearest, typename TRaster, typename... TArgs>
 auto extrapolation(const TRaster& raster, TArgs&&... args) -> decltype(auto)
 {
   return Extrapolation<TRaster, TMethod>(raster, TMethod(std::forward<TArgs>(args)...));
@@ -182,7 +182,7 @@ auto extrapolation(const TRaster& raster, TArgs&&... args) -> decltype(auto)
 template <typename T, Index N, typename THolder>
 auto extrapolation(const Raster<T, N, THolder>& raster, T constant) -> decltype(auto)
 {
-  return Extrapolation<Raster<T, N, THolder>, OutOfBoundsConstant<T>>(raster, OutOfBoundsConstant<T>(constant));
+  return Extrapolation<Raster<T, N, THolder>, Constant<T>>(raster, Constant<T>(constant));
 }
 
 /**

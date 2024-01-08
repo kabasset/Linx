@@ -10,39 +10,48 @@
 namespace Linx {
 
 /**
- * @ingroup interpolation
+ * @ingroup resampling
  * @brief Constant, a.k.a. Dirichlet boundary conditions.
  */
 template <typename T>
-struct OutOfBoundsConstant {
+class Constant {
+public:
+
   /**
    * @brief Constructor.
    */
-  OutOfBoundsConstant(T v = T {}) : value(v) {}
+  Constant(T v = T {}) : m_value(v) {}
 
   /**
-   * @brief Return `value` if out of bounds.
+   * @brief Return the value if out of bounds.
    */
   template <typename TRaster>
   inline const T& at(TRaster& raster, const Position<TRaster::Dimension>& position) const
   {
-    if (raster.contains(position)) {
-      return raster[position];
-    }
-    return value;
+    return raster.contains(position) ? raster[position] : m_value;
   }
+
+  /**
+   * @brief Get the extrapolation value.
+   */
+  operator T() const
+  {
+    return m_value;
+  }
+
+private:
 
   /**
    * @brief The extrapolation value.
    */
-  T value;
+  T m_value; // FIXME private + operator T
 };
 
 /**
- * @ingroup interpolation
+ * @ingroup resampling
  * @brief Nearest-neighbor interpolation or extrapolation, a.k.a. zero-flux Neumann boundary conditions.
  */
-struct NearestNeighbor {
+struct Nearest {
   /**
    * @brief Return the value at the nearest in-bounds position.
    */
@@ -68,7 +77,7 @@ struct NearestNeighbor {
 };
 
 /**
- * @ingroup interpolation
+ * @ingroup resampling
  * @brief Periodic, a.k.a. symmetric or wrap-around, boundary conditions.
  */
 struct Periodic {
@@ -91,7 +100,7 @@ struct Periodic {
 };
 
 /**
- * @ingroup interpolation
+ * @ingroup resampling
  * @brief Linear interpolation.
  */
 struct Linear {
@@ -112,7 +121,7 @@ struct Linear {
    * @brief Return the interpolated value at given position.
    */
   template <typename T, Index N, typename TRaster, typename... TIndices>
-  inline std::enable_if_t<N != 1, T>
+  inline std::enable_if_t<N != 1, T> // FIXME use if constexpr
   at(const TRaster& raster, const Vector<double, N>& position, TIndices... indices) const
   {
     const auto f = floor<Index>(position.back());
@@ -125,7 +134,7 @@ struct Linear {
 };
 
 /**
- * @ingroup interpolation
+ * @ingroup resampling
  * @brief Cubic interpolation.
  */
 struct Cubic {
@@ -148,7 +157,7 @@ struct Cubic {
    * @brief Return the interpolated value at given position.
    */
   template <typename T, Index N, typename TRaster, typename... TIndices>
-  inline std::enable_if_t<N != 1, T>
+  inline std::enable_if_t<N != 1, T> // FIXME use if constexpr
   at(const TRaster& raster, const Vector<double, N>& position, TIndices... indices) const
   {
     const auto f = floor<Index>(position.back());

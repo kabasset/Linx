@@ -6,12 +6,12 @@
 #define _LINXTRANSFORMS_INTERPOLATION_H
 
 #include "Linx/Data/Raster.h"
-#include "Linx/Transforms/impl/InterpolationMethods.h"
+#include "Linx/Transforms/impl/ResamplingMethods.h"
 
 namespace Linx {
 
 /**
- * @ingroup interpolation
+ * @ingroup resampling
  * @brief Interpolation decorator with optional extrapolator.
  * @tparam TParent The decorated raster or extrapolator type
  * @tparam TMethod The interpolation method
@@ -124,7 +124,7 @@ private:
  * @relatesalso Interpolation
  * @brief Make an interpolator with given interpolation method.
  */
-template <typename TMethod = NearestNeighbor, typename TParent, typename... TArgs>
+template <typename TMethod = Nearest, typename TParent, typename... TArgs>
 auto interpolation(const TParent& parent, TArgs&&... args) -> decltype(auto)
 {
   return Interpolation<TParent, TMethod>(parent, TMethod(std::forward<TArgs>(args)...));

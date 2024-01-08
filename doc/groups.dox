@@ -34,7 +34,7 @@
 \defgroup transforms Transforms
 \brief Transforms which act on geometry or pixel values.
 
-\defgroup interpolation Interpolation and Extrapolation
+\defgroup resampling Interpolation and Extrapolation
 \ingroup transforms
 \brief Handling of values between pixels or outside the raster domain.
 

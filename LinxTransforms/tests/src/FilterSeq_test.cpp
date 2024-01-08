@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE(orthogonal_associativity_commutativity_test)
 // {
 //   const SeparableKernel<int, 0, 1, 2> kernel({1, 1, 1});
 //   const auto raster = Raster<int, 3>({3, 3, 3}).fill(1);
-//   const auto sum = kernel * extrapolation<NearestNeighbor>(raster);
+//   const auto sum = kernel * extrapolation<Nearest>(raster);
 //   const std::vector<int> expected(raster.size(), kernel.window().size());
 //   for (std::size_t i = 0; i < 3 * 3 * 3; ++i) {
 //     BOOST_TEST(sum[i] == expected[i]);

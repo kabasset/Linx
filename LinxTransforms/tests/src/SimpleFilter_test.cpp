@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(constant0_3x3_test)
 BOOST_AUTO_TEST_CASE(pixel_test)
 {
   const auto in = Raster<double>({4, 3}).range();
-  const auto extra = extrapolation<NearestNeighbor>(in);
+  const auto extra = extrapolation<Nearest>(in);
   const auto k = convolution(Raster<float>({2, 2}).range());
   const auto out = k * extra;
   for (const auto& p : in.domain()) {
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(pixel_test)
 BOOST_AUTO_TEST_CASE(pixel_sequence_test)
 {
   const auto in = Raster<double>({4, 3}).range();
-  const auto extra = extrapolation<NearestNeighbor>(in);
+  const auto extra = extrapolation<Nearest>(in);
   const auto k = convolution(Raster<float>({2, 2}).range());
   Sequence<Position<2>> positions(in.size());
   std::copy(in.domain().begin(), in.domain().end(), positions.begin());
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(pixel_sequence_test)
 BOOST_AUTO_TEST_CASE(pixel_list_test)
 {
   const auto in = Raster<double>({4, 3}).range();
-  const auto extra = extrapolation<NearestNeighbor>(in);
+  const auto extra = extrapolation<Nearest>(in);
   const auto k = convolution(Raster<float>({2, 2}).range());
   const auto out = k * extra;
   const auto out_seq = k * extra(Position<2>::zero(), Position<2>::one(), Position<2> {2, 2});

@@ -1,10 +1,10 @@
 namespace Linx {
 /**
 
-\addtogroup interpolation
+\addtogroup resampling
 
 
-\section interpolation-extrapolation Interpolation and/or Extrapolation
+\section resampling-extrapolation Interpolation and/or Extrapolation
 
 
 Interpolation and extrapolation are related.
@@ -18,14 +18,14 @@ For example, one might want to rotate a raster
 with linear interpolation and nearest-neighbor extrapolation.
 
 
-\section interpolation-policies Policies
+\section resampling-policies Policies
 
 
 TODO
 
 
 
-\section interpolation-extrapolate Extrapolate
+\section resampling-extrapolate Extrapolate
 
 
 TODO
@@ -33,7 +33,7 @@ TODO
 \snippet LinxDemoInterpolation_test.cpp Extra
 
 
-\section interpolation-interpolate Interpolate
+\section resampling-interpolate Interpolate
 
 
 Interpolators are templated by the interpolation policy and extrapolator or raster type,

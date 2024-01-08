@@ -108,7 +108,7 @@ auto laplace_op = convolution_along<int, 0>({1, -2, 1}) + convolution_along<int,
 auto laplace = laplace_op * extrapolation(in);
 
 auto sobel_op = convolution_along<int, 0>({1, 0, -1}) * convolution_along<int, 1>({1, 2, 1});
-auto sobel = sobel_op * extrapolation<NearestNeighbor>(in);
+auto sobel = sobel_op * extrapolation<Nearest>(in);
 \endcode
 
 
