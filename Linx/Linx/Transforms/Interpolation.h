@@ -62,7 +62,7 @@ public:
   /**
    * @brief Get the decorated raster.
    */
-  auto raster() const -> decltype(auto)
+  decltype(auto) raster() const
   { // FIXME As free function?
     return Linx::rasterize(m_parent);
   }
@@ -125,7 +125,7 @@ private:
  * @brief Make an interpolator with given interpolation method.
  */
 template <typename TMethod = Nearest, typename TParent, typename... TArgs>
-auto interpolation(const TParent& parent, TArgs&&... args) -> decltype(auto)
+decltype(auto) interpolation(const TParent& parent, TArgs&&... args)
 {
   return Interpolation<TParent, TMethod>(parent, TMethod(std::forward<TArgs>(args)...));
 }
