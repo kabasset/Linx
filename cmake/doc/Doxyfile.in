@@ -255,7 +255,7 @@ ALIASES                = FIXME=\todo \
                          TODO=\todo \
                          PROJECT_VERSION=@CMAKE_PROJECT_VERSION@ \
                          "requirements{1}=^^\interface \1^^" \
-                         "satisfies{1}=\implements \1^^\par Satisfies `\1` requirements^^\copydetails \1^^" \
+                         "satisfies{1}=\par Satisfies \1 requirements^^\copydetails \1^^" \
                          "tspecialization{1}=\par Template specialization \1^^\copybrief \1 \ref \1 \"More...\"" \
                          "par_example=\par Example^^" \
                          "group_construction=^^\}^^\name Construction^^\{" \
@@ -908,34 +908,9 @@ INPUT_ENCODING         = UTF-8
 # comment), *.py, *.pyw, *.f90, *.f95, *.f03, *.f08, *.f18, *.f, *.for, *.vhd,
 # *.vhdl, *.ucf, *.qsf and *.ice.
 
-FILE_PATTERNS          = *.d \
-                         *.java \
-                         *.ii \
-                         *.ixx \
-                         *.ipp \
-                         *.i++ \
-                         *.inl \
-                         *.h \
-                         *.hh \
-                         *.hxx \
-                         *.hpp \
-                         *.h++ \
-                         *.idl \
-                         *.odl \
-                         *.cs \
-                         *.php \
-                         *.php3 \
-                         *.inc \
-                         *.m \
-                         *.mm \
+FILE_PATTERNS          = *.h \
                          *.dox \
-                         *.md \
-                         *.f90 \
-                         *.f \
-                         *.for \
-                         *.vhd \
-                         *.vhdl \
-                         @DOXYGEN_EXTRA_FILE_PATTERNS@
+                         *.md
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.

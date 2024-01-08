@@ -89,7 +89,7 @@ auto rasterize(Internal::TileGenerator<TParent, N>& generator)
  * A range over the sections is returned.
  */
 template <typename TRaster>
-auto sections(TRaster& in, Index thickness = 1)
+auto sections(TRaster& in, Index thickness = 1) // FIXME overload for thickness = 1, with dimension N-1
 {
   using TSection = std::decay_t<decltype(in.section(0, thickness - 1))>;
   std::vector<TSection> out;

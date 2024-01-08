@@ -2,8 +2,8 @@
 // This file is part of Linx <github.com/kabasset/Raster>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LINXDATA_IMPL_ROWITERATOR_H
-#define _LINXDATA_IMPL_ROWITERATOR_H
+#ifndef _LINXDATA_IMPL_ROWGENERATOR_H
+#define _LINXDATA_IMPL_ROWGENERATOR_H
 
 #include "Linx/Data/Tiling.h"
 

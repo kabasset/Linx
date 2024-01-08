@@ -155,6 +155,9 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
  * @tspecialization{AlignedRaster}
  * 
  * @satisfies{ContiguousContainer}
+ * 
+ * @satisfies{VectorArithmetic}
+ * 
  * @satisfies{EuclidArithmetic}
  * 
  * @see `Position` for details on the fixed- and variable-dimension cases.
