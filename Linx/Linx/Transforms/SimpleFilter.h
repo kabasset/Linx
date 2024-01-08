@@ -18,45 +18,62 @@ namespace Linx {
  * @tparam T The value type
  * @tparam TWindow The type of window, e.g. `Box` or `Mask`
  */
-template <typename TOp, typename TWindow>
-class SimpleFilter : public FilterMixin<typename TOp::Value, TWindow, SimpleFilter<TOp, TWindow>> {
-  friend class FilterMixin<typename TOp::Value, TWindow, SimpleFilter<TOp, TWindow>>; // FIXME simplify
+template <typename TKernel>
+class SimpleFilter : public FilterMixin<typename TKernel::Value, typename TKernel::Window, SimpleFilter<TKernel>> {
+  friend class FilterMixin<typename TKernel::Value, typename TKernel::Window, SimpleFilter<TKernel>>;
 
 public:
 
   /**
    * @brief The value type.
    */
-  using Value = typename TOp::Value;
+  using Value = typename TKernel::Value;
 
   /**
    * @brief The dimension parameter.
    */
-  static constexpr Index Dimension = TWindow::Dimension;
+  static constexpr Index Dimension = TKernel::Dimension;
 
   /**
-   * @brief Explcit window constructor.
-   * @param window The filter window
+   * @brief Forwarding constructor.
    */
-  explicit SimpleFilter(TOp&& op, TWindow window) : m_op(std::forward<TOp>(op)), m_window(std::forward<TWindow>(window))
+  template <typename... TArgs>
+  explicit SimpleFilter(TArgs&&... args) : m_kernel(LINX_FORWARD(args)...)
   {}
 
   /**
-   * @brief Hypercube window constructor.
-   * @param radius The hypercube radius
+   * @brief Get the kernel.
    */
-  explicit SimpleFilter(TOp&& op, Index radius = 1) :
-      SimpleFilter(std::forward<TOp>(op), Box<Dimension>::from_center(radius))
-  {}
+  const TKernel& kernel() const
+  {
+    return m_kernel;
+  }
+
+  /**
+   * @brief Get the kernel.
+   */
+  TKernel& kernel()
+  {
+    return m_kernel;
+  }
 
 protected:
 
   /**
-   * @brief Get the filtering window.
+   * @brief Get the window.
    */
-  const TWindow& window_impl() const
+  decltype(auto) window_impl() const
   {
-    return m_window;
+    return kernel().window();
+  }
+
+  /**
+   * @brief Get the bounding box of the window, extended to a given dimension.
+   */
+  template <Index M>
+  decltype(auto) window_box() const
+  {
+    return extend<M>(box(kernel().window()));
   }
 
   /**
@@ -68,7 +85,7 @@ protected:
   template <typename T, Index N, typename THolder, typename TOut>
   void transform_impl(const Raster<T, N, THolder>& in, TOut& out) const
   {
-    const auto region = in.domain() - Linx::box(window_impl());
+    const auto region = in.domain() - window_box<N>();
     transform_monolith(in(region), out);
   }
 
@@ -81,8 +98,7 @@ protected:
   void transform_impl(const Extrapolation<TRaster, TMethod>& in, TOut& out) const
   {
     const auto& raw = dont_extrapolate(in);
-    const auto bbox =
-        Internal::BorderedBox<TRaster::Dimension>(raw.domain(), extend<TRaster::Dimension>(box(m_window)));
+    const auto bbox = Internal::BorderedBox<TRaster::Dimension>(raw.domain(), window_box<TRaster::Dimension>());
     bbox.apply_inner_border(
         [&](const auto& ib) {
           const auto insub = raw(ib);
@@ -127,8 +143,8 @@ protected:
       return Box<TParent::Dimension>::from_shape(f, g.shape());
     };
 
-    const auto window = extend<TParent::Dimension>(box(m_window));
-    decltype(auto) domain = rasterize(in).domain();
+    const auto& window = window_box<TParent::Dimension>();
+    const auto& domain = rasterize(in).domain();
     const auto bbox = Internal::BorderedBox<TParent::Dimension>(domain, window);
     // FIXME accept non-Box window, and of lower dim
     bbox.apply_inner_border(
@@ -156,8 +172,8 @@ private:
   template <typename TIn, typename TOut>
   void transform_monolith_extrapolator(const TIn& in, TOut& out) const
   {
-    const auto extrapolated = in.parent().copy(Linx::box(in.domain()) + window_impl());
-    const auto box = extrapolated.domain() - window_impl();
+    const auto extrapolated = in.parent().copy(Linx::box(in.domain()) + window_box<TIn::Dimension>());
+    const auto box = extrapolated.domain() - window_box<TIn::Dimension>();
     // FIXME region - window().front()?
     transform_monolith(extrapolated(box), out);
   }
@@ -176,11 +192,11 @@ private:
   void transform_monolith(const TIn& in, TOut& out) const
   {
     // FIXME accept any region
-    auto patch = in.parent()(extend<TIn::Dimension>(m_window));
+    auto patch = in.parent()(window_box<TIn::Dimension>());
     auto out_it = out.begin();
     for (const auto& p : in.domain()) {
       patch >>= p;
-      *out_it = m_op(patch);
+      *out_it = m_kernel(patch);
       ++out_it;
       patch <<= p;
     }
@@ -191,12 +207,7 @@ private:
   /**
    * @brief The operation.
    */
-  TOp m_op;
-
-  /**
-   * @brief The window with origin at position 0.
-   */
-  TWindow m_window;
+  TKernel m_kernel;
 };
 
 } // namespace Linx

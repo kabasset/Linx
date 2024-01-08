@@ -12,61 +12,58 @@ namespace Linx {
 namespace Cosmics {
 
 /**
- * @brief Pearson correlation coefficient functor.
+ * @brief Pearson correlation coefficient kernel.
 */
-template <typename T>
-class PearsonCorrelation {
+template <typename T, typename TWindow>
+class PearsonCorrelation : public KernelMixin<T, TWindow> {
 public:
 
-  using Value = T;
-
   template <typename... TArgs>
-  PearsonCorrelation(TArgs&&... args) : m_template(std::forward<TArgs>(args)...), m_sum2()
+  PearsonCorrelation(TWindow window, TArgs&&... args) :
+      KernelMixin<T, TWindow>(LINX_MOVE(window)), m_template(std::forward<TArgs>(args)...), m_sum2()
   {
-    const auto mean = std::accumulate(m_template.begin(), m_template.end(), Value()) / m_template.size();
+    const auto mean = std::accumulate(m_template.begin(), m_template.end(), T()) / m_template.size();
     std::transform(m_template.begin(), m_template.end(), m_template.begin(), [=](auto& e) {
       return e - mean;
     });
-    m_sum2 = std::inner_product(m_template.begin(), m_template.end(), m_template.begin(), Value());
+    m_sum2 = std::inner_product(m_template.begin(), m_template.end(), m_template.begin(), T());
   }
 
   template <typename TIn>
   T operator()(const TIn& neighbors) const
   {
-    const auto mean = std::accumulate(neighbors.begin(), neighbors.end(), Value()) / neighbors.size();
+    const auto mean = std::accumulate(neighbors.begin(), neighbors.end(), T()) / neighbors.size();
     auto centered = neighbors;
     std::transform(centered.begin(), centered.end(), centered.begin(), [=](auto& e) {
       return e - mean;
     });
-    const auto sum2 = std::inner_product(centered.begin(), centered.end(), centered.begin(), Value());
-    return std::inner_product(m_template.begin(), m_template.end(), centered.begin(), Value()) /
-        std::sqrt(m_sum2 * sum2);
+    const auto sum2 = std::inner_product(centered.begin(), centered.end(), centered.begin(), T());
+    return std::inner_product(m_template.begin(), m_template.end(), centered.begin(), T()) / std::sqrt(m_sum2 * sum2);
   }
 
 private:
 
-  std::vector<Value> m_template;
-  Value m_sum2;
+  std::vector<T> m_template;
+  T m_sum2;
 };
 
 /**
  * @brief Quotient filter, i.e. minimum value of the ratio between neighbors and template, normalized.
 */
-template <typename T>
-class QuotientFilter {
+template <typename T, typename TWindow>
+class QuotientFilter : public KernelMixin<T, TWindow> {
 public:
 
-  using Value = T;
-
   template <typename... TArgs>
-  QuotientFilter(TArgs&&... args) : m_template(std::forward<TArgs>(args)...)
+  QuotientFilter(TWindow window, TArgs&&... args) :
+      KernelMixin<T, TWindow>(LINX_MOVE(window)), m_template(std::forward<TArgs>(args)...)
   {}
 
   template <typename TIn>
   T operator()(const TIn& neighbors) const
   {
-    Value out = std::numeric_limits<Value>::max();
-    Value norm2 = 0;
+    T out = std::numeric_limits<T>::max();
+    T norm2 = 0;
     auto tit = m_template.begin();
     for (auto n : neighbors) {
       const auto q = n / *tit;
@@ -81,16 +78,14 @@ public:
 
 private:
 
-  std::vector<Value> m_template;
+  std::vector<T> m_template;
 };
 
 template <typename TIn, typename TPsf>
 Raster<typename TPsf::Value> quotient(const TIn& in, const TPsf& psf)
 {
   using T = typename TPsf::Value;
-  auto filter = SimpleFilter<QuotientFilter<T>, Box<2>>(
-      QuotientFilter<T>(psf.begin(), psf.end()),
-      psf.domain() - (psf.shape() - 1) / 2);
+  auto filter = SimpleFilter<QuotientFilter<T, Box<2>>>(psf.domain() - (psf.shape() - 1) / 2, psf.begin(), psf.end());
   return filter * extrapolation<Nearest>(in);
 }
 
@@ -98,9 +93,8 @@ template <typename TIn, typename TPsf>
 Raster<typename TPsf::Value> match(const TIn& in, const TPsf& psf)
 {
   using T = typename TPsf::Value;
-  auto filter = SimpleFilter<PearsonCorrelation<T>, Box<2>>(
-      PearsonCorrelation<T>(psf.begin(), psf.end()),
-      psf.domain() - (psf.shape() - 1) / 2);
+  auto filter =
+      SimpleFilter<PearsonCorrelation<T, Box<2>>>(psf.domain() - (psf.shape() - 1) / 2, psf.begin(), psf.end());
   return filter * extrapolation<Nearest>(in);
 }
 
@@ -117,7 +111,7 @@ template <typename TIn>
 Raster<typename TIn::Value> dilate(const TIn& in, Index radius = 1)
 {
   using T = typename TIn::Value;
-  auto filter = dilation<T>(Box<2>::from_center(radius)); // FIXME L2-ball
+  auto filter = dilation<T>(Box<2>::from_center(radius)); // FIXME L2-ball?
   return filter * extrapolation<Nearest>(in);
 }
 
@@ -125,7 +119,7 @@ template <typename TIn>
 Raster<typename TIn::Value> blur(const TIn& in, Index radius = 1)
 {
   using T = typename TIn::Value;
-  auto filter = mean_filter<T>(Box<2>::from_center(radius)); // FIXME L2-ball
+  auto filter = mean_filter<T>(Box<2>::from_center(radius)); // FIXME L2-ball?
   return filter * extrapolation<Nearest>(in);
 }
 

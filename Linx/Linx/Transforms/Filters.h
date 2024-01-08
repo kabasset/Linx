@@ -13,26 +13,64 @@
 namespace Linx {
 
 /**
- * @ingroup filtering
- * @brief Correlation operation.
+ * @brief Base class for kernels.
  */
-template <typename T>
-class Correlation {
+template <typename T, typename TWindow>
+class KernelMixin { // FIXME to mixins/
 public:
 
   /**
-   * @brief The correlation type.
+   * @brief The kernel type.
    */
   using Value = T;
+
+  /**
+   * @brief The kernel dimension.
+   */
+  static constexpr Index Dimension = TWindow::Dimension;
+
+  /**
+   * @brief The kernel window type.
+  */
+  using Window = TWindow;
+
+  /**
+   * @brief Constructor.
+   */
+  KernelMixin(TWindow window) : m_window(LINX_MOVE(window)) {}
+
+  /**
+   * @brief Get the window.
+   */
+  const TWindow& window() const
+  {
+    return m_window;
+  }
+
+private:
+
+  /**
+   * @brief The window.
+   */
+  TWindow m_window;
+};
+
+/**
+ * @ingroup filtering
+ * @brief Correlation kernel.
+ */
+template <typename T, typename TWindow>
+class Correlation : public KernelMixin<T, TWindow> {
+public:
 
   /**
    * @brief Constructor.
    */
   template <typename TRange>
-  Correlation(TRange&& values) : m_kernel(std::move(values))
+  Correlation(TWindow window, TRange&& values) : KernelMixin<T, TWindow>(LINX_MOVE(window)), m_values(LINX_MOVE(values))
   {
     if constexpr (is_complex<T>()) {
-      for (auto& e : m_kernel) {
+      for (auto& e : m_values) {
         e = std::conj(e);
       }
     }
@@ -42,64 +80,58 @@ public:
    * @brief Perform the operation on given neighborhood values.
    */
   template <typename TIn>
-  inline Value operator()(const TIn& neighbors) const
+  inline T operator()(const TIn& neighbors) const
   {
-    return std::inner_product(m_kernel.begin(), m_kernel.end(), neighbors.begin(), Value {});
+    return std::inner_product(m_values.begin(), m_values.end(), neighbors.begin(), T {});
   }
 
 private:
 
   /**
-   * @brief The kernel.
+   * @brief The kernel values.
    */
-  std::vector<T> m_kernel;
+  std::vector<T> m_values;
 };
 
 /**
  * @ingroup filtering
- * @brief Convolution operation.
+ * @brief Convolution kernel.
  */
-template <typename T>
-class Convolution {
+template <typename T, typename TWindow>
+class Convolution : public KernelMixin<T, TWindow> {
 public:
-
-  /**
-   * @brief The convolution type.
-   */
-  using Value = T;
 
   /**
    * @brief Constructor.
    */
   template <typename TRange>
-  Convolution(TRange&& values) : m_kernel(std::move(values))
+  Convolution(TWindow window, TRange&& values) : KernelMixin<T, TWindow>(LINX_MOVE(window)), m_values(LINX_MOVE(values))
   {}
 
   /**
    * @brief Perform the operation on given neighborhood values.
    */
   template <typename TIn>
-  inline Value operator()(const TIn& neighbors) const
+  inline T operator()(const TIn& neighbors) const
   {
-    return std::inner_product(m_kernel.rbegin(), m_kernel.rend(), neighbors.begin(), Value {});
+    return std::inner_product(m_values.rbegin(), m_values.rend(), neighbors.begin(), T {});
   }
 
 private:
 
   /**
-   * @brief The kernel.
+   * @brief The kernel values.
    */
-  std::vector<T> m_kernel;
+  std::vector<T> m_values;
 };
 
 /**
  * @ingroup filtering
- * @brief Mean filtering.
+ * @brief Mean filtering kernel.
  */
-template <typename T>
-struct MeanFilter {
-  using Value = T; // FIXME deduce from operator()
-
+template <typename T, typename TWindow>
+struct MeanFilter : public KernelMixin<T, TWindow> {
+  using KernelMixin<T, TWindow>::KernelMixin;
   template <typename TIn>
   T operator()(const TIn& neighbors) const
   {
@@ -109,16 +141,15 @@ struct MeanFilter {
 
 /**
  * @ingroup filtering
- * @brief Median filtering.
+ * @brief Median filtering kernel.
  */
-template <typename T>
-struct MedianFilter {
-  using Value = T;
-
+template <typename T, typename TWindow>
+struct MedianFilter : public KernelMixin<T, TWindow> { // FIXME even and odd specializations
+  using KernelMixin<T, TWindow>::KernelMixin;
   template <typename TIn>
   T operator()(const TIn& neighbors) const
   {
-    std::vector<Value> v(neighbors.begin(), neighbors.end());
+    std::vector<T> v(neighbors.begin(), neighbors.end());
     const auto size = v.size();
     auto b = v.data();
     auto e = b + size;
@@ -134,14 +165,13 @@ struct MedianFilter {
 
 /**
  * @ingroup filtering
- * @brief Erosion (i.e. min filtering).
+ * @brief Erosion (i.e. min filtering) kernel.
  */
-template <typename T>
-struct Erosion {
-  using Value = T;
-
+template <typename T, typename TWindow>
+struct Erosion : public KernelMixin<T, TWindow> {
+  using KernelMixin<T, TWindow>::KernelMixin;
   template <typename TIn>
-  T operator()(const TIn& neighbors) const
+  inline T operator()(const TIn& neighbors) const
   {
     return *std::min_element(neighbors.begin(), neighbors.end());
   }
@@ -149,14 +179,13 @@ struct Erosion {
 
 /**
  * @ingroup filtering
- * @brief Dilation (i.e. max filtering).
+ * @brief Dilation (i.e. max filtering) kernel.
  */
-template <typename T>
-struct Dilation {
-  using Value = T;
-
+template <typename T, typename TWindow>
+struct Dilation : public KernelMixin<T, TWindow> {
+  using KernelMixin<T, TWindow>::KernelMixin;
   template <typename TIn>
-  T operator()(const TIn& neighbors) const
+  inline T operator()(const TIn& neighbors) const
   {
     return *std::max_element(neighbors.begin(), neighbors.end());
   }
@@ -170,7 +199,7 @@ template <typename T, Index N = 2>
 auto convolution(const T* values, Box<N> window)
 {
   const T* end = values + window.size();
-  return SimpleFilter<Convolution<T>, Box<N>>(std::vector<T>(values, end), std::move(window));
+  return SimpleFilter<Convolution<T, Box<N>>>(LINX_MOVE(window), std::vector<T>(values, end));
 }
 
 /**
@@ -203,7 +232,7 @@ template <typename T, Index N = 2>
 auto correlation(const T* values, Box<N> window)
 {
   const T* end = values + window.size();
-  return SimpleFilter<Correlation<T>, Box<N>>(std::vector<T>(values, end), std::move(window));
+  return SimpleFilter<Correlation<T, Box<N>>>(LINX_MOVE(window), std::vector<T>(values, end));
 }
 
 /**
@@ -349,36 +378,36 @@ auto laplace_operator(T sign = 1)
  * @ingroup filtering
  */
 template <typename T, typename TWindow>
-SimpleFilter<MeanFilter<T>, TWindow> mean_filter(TWindow window)
+auto mean_filter(TWindow window)
 {
-  return SimpleFilter<MeanFilter<T>, TWindow>(MeanFilter<T> {}, std::move(window)); // FIXME separable
+  return SimpleFilter<MeanFilter<T, TWindow>>(MeanFilter<T, TWindow>(LINX_MOVE(window))); // FIXME separable
 }
 
 /**
  * @ingroup filtering
  */
 template <typename T, typename TWindow>
-SimpleFilter<MedianFilter<T>, TWindow> median_filter(TWindow window)
+auto median_filter(TWindow window)
 {
-  return SimpleFilter<MedianFilter<T>, TWindow>(MedianFilter<T> {}, std::move(window));
+  return SimpleFilter<MedianFilter<T, TWindow>>(MedianFilter<T, TWindow>(LINX_MOVE(window)));
 }
 
 /**
  * @ingroup filtering
  */
 template <typename T, typename TWindow>
-SimpleFilter<Erosion<T>, TWindow> erosion(TWindow window)
+auto erosion(TWindow window)
 {
-  return SimpleFilter<Erosion<T>, TWindow>(Erosion<T> {}, std::move(window));
+  return SimpleFilter<Erosion<T, TWindow>>(Erosion<T, TWindow>(LINX_MOVE(window)));
 }
 
 /**
  * @ingroup filtering
  */
 template <typename T, typename TWindow>
-SimpleFilter<Dilation<T>, TWindow> dilation(TWindow window)
+auto dilation(TWindow window)
 {
-  return SimpleFilter<Dilation<T>, TWindow>(Dilation<T> {}, std::move(window));
+  return SimpleFilter<Dilation<T, TWindow>>(Dilation<T, TWindow>(LINX_MOVE(window)));
 }
 
 } // namespace Linx
