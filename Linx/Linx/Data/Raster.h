@@ -187,19 +187,6 @@ public:
   using Container = DataContainer<T, THolder, EuclidArithmetic, Raster<T, N, THolder>>;
 
   /**
-   * @brief The section type.
-   * 
-   * A section is a contiguous view of dimension N-1, like a 2D plane in a 3D raster or a row in a 2D raster.
-   */
-  using Section = PtrRaster<T, N == -1 ? -1 : N - 1>;
-
-  /**
-   * @brief The constant section type.
-   * @see Section
-   */
-  using ConstSection = PtrRaster<const T, N == -1 ? -1 : N - 1>;
-
-  /**
    * @brief The section range type.
    * 
    * A section range is a contiguous view of dimension N, like a consecutive set of rows in a 2D raster.
@@ -211,6 +198,19 @@ public:
    * @see Multisection
    */
   using ConstMultisection = PtrRaster<const T, N>;
+
+  /**
+   * @brief The section type.
+   * 
+   * A section is a contiguous view of dimension N-1, like a 2D plane in a 3D raster or a row in a 2D raster.
+   */
+  using Section = PtrRaster<T, N == -1 ? -1 : N - 1>;
+
+  /**
+   * @brief The constant section type.
+   * @see Section
+   */
+  using ConstSection = PtrRaster<const T, N == -1 ? -1 : N - 1>;
 
   /**
    * @brief The row type.
