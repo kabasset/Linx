@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_SUITE(Tiling_test)
 
 //-----------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE(raster_sections_thickness_test)
+BOOST_AUTO_TEST_CASE(raster_multisections_thickness_test)
 {
   auto raster = Raster<Index, 3>({8, 3, 4}).fill(-1);
   Index i = 0;
@@ -27,6 +27,22 @@ BOOST_AUTO_TEST_CASE(raster_sections_thickness_test)
   }
   for (const auto& p : raster.domain()) {
     const auto expected = p[2] < 3 ? 0 : 1;
+    BOOST_TEST(raster[p] == expected);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(raster_sections_test)
+{
+  auto raster = Raster<Index, 3>({8, 3, 4}).fill(-1);
+  Index i = 0;
+  for (auto part : sections(raster)) {
+    for (auto& e : part) {
+      e = i;
+    }
+    ++i;
+  }
+  for (const auto& p : raster.domain()) {
+    const auto expected = p[2];
     BOOST_TEST(raster[p] == expected);
   }
 }

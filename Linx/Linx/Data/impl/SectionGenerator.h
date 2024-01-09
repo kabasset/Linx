@@ -74,13 +74,78 @@ public:
 
 private:
 
-  MultisectionGenerator(Index front) : m_parent(nullptr), m_current(front), m_next(front) {}
+  MultisectionGenerator(Index front) : m_parent(nullptr), m_size(0), m_thickness(0), m_current(front), m_next(0) {}
 
   TParent* m_parent;
   Index m_size;
   Index m_thickness;
   Index m_current;
   Index m_next;
+};
+
+template <typename TParent>
+class SectionGenerator : public std::iterator<std::forward_iterator_tag, decltype(TParent().section(0))> {
+public:
+
+  using Value = decltype(TParent().section(0));
+
+  SectionGenerator(TParent& in) : m_parent(&in), m_size(m_parent->length(TParent::Dimension - 1)), m_current(0) {}
+
+  SectionGenerator begin() const
+  {
+    return *this;
+  }
+
+  SectionGenerator end() const
+  {
+    return SectionGenerator(m_size);
+  }
+
+  Value operator*() const // FIXME return Value&?
+  {
+    return m_parent->section(m_current);
+  }
+
+  Value* operator->() const
+  {
+    return &*(*this);
+  }
+
+  SectionGenerator& operator++()
+  {
+    ++m_current;
+    return *this;
+  }
+
+  SectionGenerator operator++(int)
+  {
+    auto out = *this;
+    ++(*this);
+    return out;
+  }
+
+  bool operator==(const SectionGenerator& rhs) const
+  {
+    return m_current == rhs.m_current;
+  }
+
+  bool operator!=(const SectionGenerator& rhs) const
+  {
+    return m_current != rhs.m_current;
+  }
+
+  Raster<std::decay_t<Value>, 1> raster() const
+  {
+    return Raster<std::decay_t<Value>, 1>({m_size}, *this);
+  }
+
+private:
+
+  SectionGenerator(Index front) : m_parent(nullptr), m_size(0), m_current(front) {}
+
+  TParent* m_parent;
+  Index m_size;
+  Index m_current;
 };
 
 } // namespace Internal

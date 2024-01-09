@@ -87,9 +87,23 @@ auto rasterize(const Internal::TileGenerator<TParent, M>& generator)
  * A range over the sections is returned.
  */
 template <typename TRaster>
-auto sections(TRaster& in, Index thickness = 1) // FIXME overload for thickness = 1, with dimension N-1
+auto sections(TRaster& in, Index thickness)
 {
   return Internal::MultisectionGenerator<TRaster>(in, thickness);
+}
+
+/**
+ * @ingroup regions
+ * @brief Get a slicing of a raster as a range of cross-sections of given thickness.
+ * 
+ * The input raster domain is sliced along its last axis into sections of given thickness,
+ * except for the last section which may be thinner.
+ * A range over the sections is returned.
+ */
+template <typename TRaster>
+auto sections(TRaster& in)
+{
+  return Internal::SectionGenerator<TRaster>(in);
 }
 
 /**
