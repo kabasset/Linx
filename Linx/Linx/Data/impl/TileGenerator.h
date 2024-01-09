@@ -28,11 +28,6 @@ public:
     return *this;
   }
 
-  TileGenerator& begin()
-  {
-    return *this;
-  }
-
   TileGenerator end() const
   {
     return TileGenerator(m_fronts.end());

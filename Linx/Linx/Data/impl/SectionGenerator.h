@@ -28,11 +28,6 @@ public:
     return *this;
   }
 
-  SectionGenerator& begin()
-  {
-    return *this;
-  }
-
   SectionGenerator end() const
   {
     return SectionGenerator(m_size);

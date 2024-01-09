@@ -29,11 +29,6 @@ public:
     return *this;
   }
 
-  RowGenerator& begin()
-  {
-    return *this;
-  }
-
   RowGenerator end() const
   {
     return RowGenerator(m_fronts.end());
