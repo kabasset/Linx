@@ -15,7 +15,7 @@ namespace Internal {
 
 /**
  * @ingroup regions
- * @brief Iterator over the tiles of a raster.
+ * @brief Iterator over tiles of a raster.
  * @see tiles()
  */
 template <typename TRaster, Index M>
@@ -28,6 +28,14 @@ class TileGenerator;
  */
 template <typename TRaster>
 class SectionGenerator;
+
+/**
+ * @ingroup regions
+ * @brief Iterator over multi-sections of a raster.
+ * @see sections()
+ */
+template <typename TRaster>
+class MultisectionGenerator;
 
 /**
  * @ingroup regions
@@ -72,16 +80,6 @@ auto rasterize(const Internal::TileGenerator<TParent, M>& generator)
 
 /**
  * @ingroup regions
- * @brief Make a raster of tiles.
- */
-template <typename TParent, Index M>
-auto rasterize(Internal::TileGenerator<TParent, M>& generator)
-{
-  return generator.raster();
-}
-
-/**
- * @ingroup regions
  * @brief Get a slicing of a raster as a range of cross-sections of given thickness.
  * 
  * The input raster domain is sliced along its last axis into sections of given thickness,
@@ -91,7 +89,7 @@ auto rasterize(Internal::TileGenerator<TParent, M>& generator)
 template <typename TRaster>
 auto sections(TRaster& in, Index thickness = 1) // FIXME overload for thickness = 1, with dimension N-1
 {
-  return Internal::SectionGenerator<TRaster>(in, thickness);
+  return Internal::MultisectionGenerator<TRaster>(in, thickness);
 }
 
 /**
@@ -100,16 +98,6 @@ auto sections(TRaster& in, Index thickness = 1) // FIXME overload for thickness 
  */
 template <typename TParent>
 auto rasterize(const Internal::SectionGenerator<TParent>& generator)
-{
-  return generator.raster();
-}
-
-/**
- * @ingroup regions
- * @brief Make a raster of sections.
- */
-template <typename TParent>
-auto rasterize(Internal::SectionGenerator<TParent>& generator)
 {
   return generator.raster();
 }
@@ -160,16 +148,6 @@ auto rows(TRaster& in)
  */
 template <typename TParent>
 auto rasterize(const Internal::RowGenerator<TParent>& generator)
-{
-  return generator.raster();
-}
-
-/**
- * @ingroup regions
- * @brief Make a raster of rows.
- */
-template <typename TParent>
-auto rasterize(Internal::RowGenerator<TParent>& generator)
 {
   return generator.raster();
 }

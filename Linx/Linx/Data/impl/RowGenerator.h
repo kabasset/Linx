@@ -67,7 +67,7 @@ public:
     return m_current != rhs.m_current;
   }
 
-  Raster<std::decay_t<Value>, Dimension> raster()
+  Raster<std::decay_t<Value>, Dimension> raster() const
   {
     return Raster<std::decay_t<Value>, Dimension>(m_fronts.shape(), *this);
   }

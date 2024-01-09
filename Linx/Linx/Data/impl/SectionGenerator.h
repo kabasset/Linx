@@ -13,24 +13,24 @@ namespace Linx {
 namespace Internal {
 
 template <typename TParent>
-class SectionGenerator : public std::iterator<std::forward_iterator_tag, decltype(TParent().section(0, 0))> {
+class MultisectionGenerator : public std::iterator<std::forward_iterator_tag, decltype(TParent().section(0, 0))> {
 public:
 
   using Value = decltype(TParent().section(0, 0));
 
-  SectionGenerator(TParent& in, Index thickness) :
+  MultisectionGenerator(TParent& in, Index thickness) :
       m_parent(&in), m_size(m_parent->length(TParent::Dimension - 1)), m_thickness(thickness), m_current(0),
       m_next(thickness)
   {}
 
-  SectionGenerator begin() const
+  MultisectionGenerator begin() const
   {
     return *this;
   }
 
-  SectionGenerator end() const
+  MultisectionGenerator end() const
   {
-    return SectionGenerator(m_size);
+    return MultisectionGenerator(m_size);
   }
 
   Value operator*() const // FIXME return Value&?
@@ -43,38 +43,38 @@ public:
     return &*(*this);
   }
 
-  SectionGenerator& operator++()
+  MultisectionGenerator& operator++()
   {
     m_current = m_next;
     m_next = std::min(m_size, m_next + m_thickness);
     return *this;
   }
 
-  SectionGenerator operator++(int)
+  MultisectionGenerator operator++(int)
   {
     auto out = *this;
     ++(*this);
     return out;
   }
 
-  bool operator==(const SectionGenerator& rhs) const
+  bool operator==(const MultisectionGenerator& rhs) const
   {
     return m_current == rhs.m_current;
   }
 
-  bool operator!=(const SectionGenerator& rhs) const
+  bool operator!=(const MultisectionGenerator& rhs) const
   {
     return m_current != rhs.m_current;
   }
 
-  Raster<std::decay_t<Value>, 1> raster()
+  Raster<std::decay_t<Value>, 1> raster() const
   {
     return Raster<std::decay_t<Value>, 1>({(m_size + m_thickness - 1) / m_thickness}, *this);
   }
 
 private:
 
-  SectionGenerator(Index front) : m_parent(nullptr), m_current(front), m_next(front) {}
+  MultisectionGenerator(Index front) : m_parent(nullptr), m_current(front), m_next(front) {}
 
   TParent* m_parent;
   Index m_size;
