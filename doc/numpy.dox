@@ -133,7 +133,7 @@ NumPy:
 # Creation
 
 def f(y, x):
-    return 10 * y + x
+    return 10 * x + y
 
 a = np.fromfunction(f, (5, 4), dtype=int)
 
@@ -157,7 +157,7 @@ Linx:
 \code{.cpp}
 // Creation
 
-int f(const Position<2>& p) {
+int f(const Linx::Position<2>& p) {
   return 10 * p[0] + p[1];
 }
 
@@ -167,16 +167,16 @@ a.generate(f, a.domain());
 // Access
 
 auto some_pixel = a[{3, 2}];
-auto last_pixel = a[-1]; // or a[{-1, -1}]
+auto last_pixel = a.at(-1); // or a.at({-1, -1})
 auto last_row = a.row(-1);
 
 // Iteration
 
-for (const auto& pixel : a) {
+for (auto pixel : a) {
   std::cout << pixel << std::endl;
 }
 
-for (const auto& row : rows(a)) {
+for (auto row : rows(a)) {
   std::cout << row << std::endl;
 }
 \endcode
@@ -190,7 +190,7 @@ NumPy:
 
 \code{.py}
 a = np.arange(100, dtype=int).reshape(10, 10)
-b = a[1:5, 3, 6]
+b = a[1:5, 3:6]
 c = a[1:5:2, 3:6]
 b += 1
 \endcode
