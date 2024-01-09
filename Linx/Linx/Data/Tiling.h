@@ -64,8 +64,8 @@ auto tiles(TRaster& in, Position<M> shape)
  * @ingroup regions
  * @brief Make a raster of tiles.
  */
-template <typename TParent, Index N>
-auto rasterize(const Internal::TileGenerator<TParent, N>& generator)
+template <typename TParent, Index M>
+auto rasterize(const Internal::TileGenerator<TParent, M>& generator)
 {
   return generator.raster();
 }
@@ -74,8 +74,8 @@ auto rasterize(const Internal::TileGenerator<TParent, N>& generator)
  * @ingroup regions
  * @brief Make a raster of tiles.
  */
-template <typename TParent, Index N>
-auto rasterize(Internal::TileGenerator<TParent, N>& generator)
+template <typename TParent, Index M>
+auto rasterize(Internal::TileGenerator<TParent, M>& generator)
 {
   return generator.raster();
 }
@@ -91,13 +91,27 @@ auto rasterize(Internal::TileGenerator<TParent, N>& generator)
 template <typename TRaster>
 auto sections(TRaster& in, Index thickness = 1) // FIXME overload for thickness = 1, with dimension N-1
 {
-  using TSection = std::decay_t<decltype(in.section(0, thickness - 1))>;
-  std::vector<TSection> out;
-  const auto back = in.length(in.dimension() - 1); // FIXME implement length(-1)
-  for (Index i = 0; i <= back; i += thickness) {
-    out.push_back(in.section(i, std::min(i + thickness, back) - 1));
-  }
-  return out;
+  return Internal::SectionGenerator<TRaster>(in, thickness);
+}
+
+/**
+ * @ingroup regions
+ * @brief Make a raster of sections.
+ */
+template <typename TParent>
+auto rasterize(const Internal::SectionGenerator<TParent>& generator)
+{
+  return generator.raster();
+}
+
+/**
+ * @ingroup regions
+ * @brief Make a raster of sections.
+ */
+template <typename TParent>
+auto rasterize(Internal::SectionGenerator<TParent>& generator)
+{
+  return generator.raster();
 }
 
 /**
@@ -163,6 +177,7 @@ auto rasterize(Internal::RowGenerator<TParent>& generator)
 } // namespace Linx
 
 #include "Linx/Data/impl/RowGenerator.h"
+#include "Linx/Data/impl/SectionGenerator.h"
 #include "Linx/Data/impl/TileGenerator.h"
 
 #endif

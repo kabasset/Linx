@@ -19,7 +19,8 @@ BOOST_AUTO_TEST_CASE(raster_sections_thickness_test)
 {
   auto raster = Raster<Index, 3>({8, 3, 4}).fill(-1);
   Index i = 0;
-  for (auto& part : sections(raster, 3)) {
+  auto generator = sections(raster, 3);
+  for (auto part : generator) {
     for (auto& e : part) {
       e = i;
     }
