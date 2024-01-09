@@ -51,8 +51,8 @@ BOOST_AUTO_TEST_CASE(raster_profiles_ordering_test)
 {
   const auto raster = Raster<Index, 3>({3, 4, 5}).range();
   const auto parts = profiles<0>(raster);
-  const auto plane = parts.domain();
-  BOOST_TEST(plane == Box<3>({0, 0, 0}, {0, 3, 4}));
+  const auto plane = rasterize(parts).domain(); // FIXME implement parts.domain(), parts.shape()
+  BOOST_TEST(plane == Box<2>({0, 0}, {3, 4}));
   Index i = 0;
   for (const auto& p : parts) {
     for (const auto& j : p) {
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(raster_profiles_setting_test)
   auto raster = Raster<Index, 2>({3, 4}).fill(-1);
   auto parts = profiles<1>(raster);
   Index i = 0;
-  for (auto& p : parts) {
+  for (auto p : parts) {
     for (auto& j : p) {
       j = i;
       ++i;
