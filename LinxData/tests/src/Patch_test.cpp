@@ -41,6 +41,20 @@ BOOST_AUTO_TEST_CASE(mixins_test)
   }
 }
 
+BOOST_AUTO_TEST_CASE(contiguity_test)
+{
+  Raster<int> raster({8, 8});
+  for (Index i = 0; i < raster.length(1); ++i) {
+    BOOST_TEST(raster.row({i}).is_contiguous());
+  }
+  for (Index i = 0; i < raster.length(1); ++i) {
+    BOOST_TEST(raster.profile<0>({i}).is_contiguous());
+  }
+  for (Index i = 0; i < raster.length(0); ++i) {
+    BOOST_TEST(not raster.profile<1>({i}).is_contiguous());
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE_END()

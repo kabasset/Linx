@@ -39,7 +39,7 @@ namespace Linx {
  * 
  * @see pixelwise
  */
-template <typename T, typename TParent, typename TRegion, bool IsContiguous = false>
+template <typename T, typename TParent, typename TRegion, bool IsContiguous = false> // FIXME rename IsContiguous?
 class Patch :
     public ArithmeticMixin<EuclidArithmetic, T, Patch<T, TParent, TRegion, IsContiguous>>,
     public MathFunctionsMixin<T, Patch<T, TParent, TRegion, IsContiguous>>,
@@ -120,6 +120,17 @@ public:
   const TRegion& domain() const
   {
     return m_region;
+  }
+
+  /**
+   * @brief Check whether the patch is known to be contiguous.
+   * 
+   * Although there may be false negatives (undetected contiguous patches), there are no false positives.
+   * When the method returns `true` iterating over pointers is therefore safe.
+   */
+  bool is_contiguous() const // FIXME is_contiguous_by_construction()? is_safe_contiguous()?
+  {
+    return IsContiguous; // FIXME || m_indexing.is_contiguous()
   }
 
   /**
