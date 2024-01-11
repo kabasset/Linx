@@ -221,15 +221,15 @@ PtrRaster<T, N == -1 ? -1 : N - 1> Raster<T, N, THolder>::section(Index index)
 }
 
 template <typename T, Index N, typename THolder>
-PtrRaster<const T, 1> Raster<T, N, THolder>::row(const Position<N == -1 ? -1 : N - 1>& position) const
+typename Raster<T, N, THolder>::ConstRow
+Raster<T, N, THolder>::row(const Position<N == -1 ? -1 : N - 1>& position) const
 {
   Position<N> f(dimension());
   for (Index i = 1; i < dimension(); ++i) {
     const auto p = position[i - 1];
     f[i] = p >= 0 ? p : length(i) + p;
   }
-  const Position<1> shape({length<0>()});
-  return PtrRaster<const T, 1> {shape, &operator[](f)};
+  return {*this, Line<0, N>(f, length(0) - 1)};
 }
 
 template <typename T, Index N, typename THolder>
@@ -240,7 +240,7 @@ typename Raster<T, N, THolder>::Row Raster<T, N, THolder>::row(const Position<N 
     const auto p = position[i - 1];
     f[i] = p >= 0 ? p : length(i) + p;
   }
-  return {*this, Line<0, N>(f, length(0))};
+  return {*this, Line<0, N>(f, length(0) - 1)};
 }
 
 template <typename T, Index N, typename THolder>

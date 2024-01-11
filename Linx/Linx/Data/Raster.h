@@ -207,13 +207,13 @@ public:
    * 
    * A row is a contiguous view of dimension 1, along axis 0.
    */
-  using Row = Patch<T, Raster, Line<0, N>, true>; // PtrRaster<T, 1>;
+  using Row = Patch<T, Raster, Line<0, N>, true>;
 
   /**
    * @brief The constant row type.
    * @see Row
    */
-  using ConstRow = PtrRaster<const T, 1>;
+  using ConstRow = Patch<const T, const Raster, Line<0, N>, true>;
 
   /**
    * @brief The tile type.

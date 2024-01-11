@@ -50,7 +50,7 @@ public:
   template <typename T>
   Iterator<T> end(TParent& parent, const TRegion& region) const
   {
-    return begin + region.size();
+    return begin<T>(parent, region) + region.size();
   }
 };
 

@@ -41,9 +41,9 @@ namespace Linx {
  */
 template <typename T, typename TParent, typename TRegion, bool IsContiguous = false>
 class Patch :
-    public ArithmeticMixin<EuclidArithmetic, T, Patch<T, TParent, TRegion>>,
-    public MathFunctionsMixin<T, Patch<T, TParent, TRegion>>,
-    public RangeMixin<T, Patch<T, TParent, TRegion>> {
+    public ArithmeticMixin<EuclidArithmetic, T, Patch<T, TParent, TRegion, IsContiguous>>,
+    public MathFunctionsMixin<T, Patch<T, TParent, TRegion, IsContiguous>>,
+    public RangeMixin<T, Patch<T, TParent, TRegion, IsContiguous>> {
 public:
 
   /**
@@ -224,7 +224,7 @@ public:
   /**
    * @brief Check whether two patches are equal.
    */
-  bool operator==(const Patch<T, TParent, TRegion>& other) const
+  bool operator==(const Patch& other) const
   {
     return m_parent == other.m_parent && m_region == other.m_region;
   }
@@ -232,7 +232,7 @@ public:
   /**
    * @brief Check whether two patches are different.
    */
-  bool operator!=(const Patch<T, TParent, TRegion>& other) const
+  bool operator!=(const Patch& other) const
   {
     return not(*this == other);
   }
@@ -248,9 +248,9 @@ public:
   /**
    * @brief Create a cropped patch.
    */
-  Patch<T, TParent, TRegion> operator()(const Box<Dimension>& box)
+  Patch operator()(const Box<Dimension>& box)
   {
-    return Patch<T, TParent, TRegion>(*m_parent, m_region & box);
+    return Patch(*m_parent, m_region & box);
   }
 
   /**
@@ -295,8 +295,8 @@ namespace Internal {
 template <typename T>
 struct IsPatchImpl : std::false_type {};
 
-template <typename T, typename TParent, typename TRegion>
-struct IsPatchImpl<Patch<T, TParent, TRegion>> : std::true_type {};
+template <typename T, typename TParent, typename TRegion, bool IsContiguous>
+struct IsPatchImpl<Patch<T, TParent, TRegion, IsContiguous>> : std::true_type {};
 
 template <typename, typename = void>
 struct IsPatchableImpl : std::false_type {};
@@ -334,8 +334,8 @@ constexpr bool is_patchable() // FIXME rm?
  * As opposed to `Patch::parent()`, if the parent is an extrapolator,
  * then the underlying decorated raster is effectively returned.
  */
-template <typename T, typename TParent, typename TRegion>
-const auto& rasterize(const Patch<T, TParent, TRegion>& in)
+template <typename T, typename TParent, typename TRegion, bool IsContiguous>
+const auto& rasterize(const Patch<T, TParent, TRegion, IsContiguous>& in)
 {
   return rasterize(in.parent());
 }
