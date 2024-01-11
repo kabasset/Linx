@@ -82,9 +82,8 @@ BOOST_AUTO_TEST_CASE(raster_rows_ordering_test)
 BOOST_AUTO_TEST_CASE(raster_profiles_setting_test)
 {
   auto raster = Raster<Index, 2>({3, 4}).fill(-1);
-  auto parts = profiles<1>(raster);
   Index i = 0;
-  for (auto p : parts) {
+  for (auto p : profiles<1>(raster)) {
     for (auto& j : p) {
       j = i;
       ++i;

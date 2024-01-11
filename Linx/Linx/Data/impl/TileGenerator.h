@@ -13,10 +13,10 @@ namespace Linx {
 namespace Internal {
 
 template <typename TParent, Index M>
-class TileGenerator : public std::iterator<std::forward_iterator_tag, decltype(TParent()(Box<M>()))> {
+class TileGenerator : public std::iterator<std::forward_iterator_tag, decltype(std::declval<TParent>()(Box<M>()))> {
 public:
 
-  using Value = decltype(TParent()(Box<M>()));
+  using Value = decltype(std::declval<TParent>()(Box<M>()));
   static constexpr Index Dimension = M;
 
   TileGenerator(TParent& in, Position<M> shape) :
