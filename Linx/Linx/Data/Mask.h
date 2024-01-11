@@ -7,7 +7,6 @@
 
 #include "Linx/Data/Box.h"
 #include "Linx/Data/Raster.h"
-#include "Linx/Data/Sequence.h"
 
 namespace Linx {
 
