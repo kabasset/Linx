@@ -234,16 +234,17 @@ public:
    * @brief The profile type.
    * 
    * A profile along axis I is a generally non-contiguous view of dimension 1.
+   * It is contiguous if I = 0.
    */
   template <Index I>
-  using Profile = Patch<T, Raster<T, N, THolder>, Line<I, N>>;
+  using Profile = Patch<T, Raster<T, N, THolder>, Line<I, N>, I == 0>;
 
   /**
    * @brief The constant profile type.
    * @see Profile
    */
   template <Index I>
-  using ConstProfile = Patch<const T, const Raster, Line<I, N>>;
+  using ConstProfile = Patch<const T, const Raster, Line<I, N>, I == 0>;
 
   /// @{
   /// @group_construction

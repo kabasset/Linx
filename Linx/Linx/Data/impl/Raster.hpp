@@ -245,7 +245,7 @@ typename Raster<T, N, THolder>::Row Raster<T, N, THolder>::row(const Position<N 
 
 template <typename T, Index N, typename THolder>
 template <Index I>
-Patch<const T, const Raster<T, N, THolder>, Line<I, N>>
+Raster<T, N, THolder>::ConstProfile<I>
 Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position) const
 {
   Position<N> f(dimension());
@@ -263,8 +263,7 @@ Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position) c
 
 template <typename T, Index N, typename THolder>
 template <Index I>
-Patch<T, Raster<T, N, THolder>, Line<I, N>>
-Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position)
+Raster<T, N, THolder>::Profile<I> Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position)
 {
   Position<N> f(dimension());
   for (Index i = 0; i < I; ++i) {
