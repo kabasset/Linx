@@ -9,7 +9,6 @@
 #include "Linx/Base/mixins/Arithmetic.h"
 #include "Linx/Base/mixins/Math.h"
 #include "Linx/Data/Box.h"
-#include "Linx/Data/Raster.h"
 #include "Linx/Data/impl/PatchIndexing.h"
 #include "Linx/Data/mixins/Region.h"
 
@@ -25,10 +24,10 @@ namespace Linx {
  * @tparam T The value type
  * @tparam TParent The parent raster or extrapolator type
  * @tparam TRegion The region type
+ * @tparam IsContiguous A memory contiguity flag
  * 
  * As opposed to a raster, values of a patch are generally not contiguous in memory:
  * they are piece-wise contiguous when the region is a `Box`, and sometimes not even piece-wise contiguous.
- * When a region is indeed contiguous, it is better to rely on a `PtrRaster` instead: see `Raster::section()`.
  * 
  * Whatever the region type, patches are iterable,
  * and the iterator type depends on the parent and region types in order to maximize performance.
@@ -36,11 +35,11 @@ namespace Linx {
  * which makes them ideal to represent sliding windows, even of arbitrary shapes (e.g. when the region is a `Mask`).
  * 
  * In-place pixel-wise operations of rasters (like arithmetic operators and math functions)
- * are applicable to patches of mutable parents.
+ * are applicable to patches of mutable parent.
  * 
  * @see pixelwise
  */
-template <typename T, typename TParent, typename TRegion = Box<TParent::Dimension>>
+template <typename T, typename TParent, typename TRegion, bool IsContiguous = false>
 class Patch :
     public ArithmeticMixin<EuclidArithmetic, T, Patch<T, TParent, TRegion>>,
     public MathFunctionsMixin<T, Patch<T, TParent, TRegion>>,
@@ -61,7 +60,7 @@ public:
   /**
    * @brief The region type.
    */
-  using Region = std::decay_t<TRegion>; // FIXME no external reference allowed?
+  using Region = std::decay_t<TRegion>;
 
   /**
    * @brief The dimension.
@@ -71,10 +70,11 @@ public:
   /**
    * @brief The indexing strategy.
    */
-  using Indexing = typename PatchTraits<std::decay_t<Parent>, Region>::template Indexing<Parent, Region>;
+  using Indexing = typename PatchTraits<std::decay_t<Parent>, Region, IsContiguous>::template Indexing<Parent, Region>;
 
   /**
    * @brief The iterator type.
+   * @tparam The value type, can be `T` or `const T`
    */
   template <typename U>
   using Iterator = typename Indexing::template Iterator<U>;
@@ -201,6 +201,8 @@ public:
 
   /**
    * @brief Translate the patch by a given vector.
+   * 
+   * This is cheap iff the region translation itself is cheap.
    */
   Patch& operator>>=(const Position<Dimension>& vector)
   {
@@ -220,11 +222,19 @@ public:
   /// @group_operations
 
   /**
-   * @brief Check whether two masks are equal.
+   * @brief Check whether two patches are equal.
    */
   bool operator==(const Patch<T, TParent, TRegion>& other) const
   {
     return m_parent == other.m_parent && m_region == other.m_region;
+  }
+
+  /**
+   * @brief Check whether two patches are different.
+   */
+  bool operator!=(const Patch<T, TParent, TRegion>& other) const
+  {
+    return not(*this == other);
   }
 
   /**

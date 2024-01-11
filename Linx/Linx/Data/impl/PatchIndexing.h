@@ -5,14 +5,54 @@
 #ifndef _LINXDATA_IMPL_PATCHINDEXING_H
 #define _LINXDATA_IMPL_PATCHINDEXING_H
 
-#include "Linx/Data/Box.h"
-#include "Linx/Data/Grid.h"
-#include "Linx/Data/Line.h"
-#include "Linx/Data/Mask.h"
-#include "Linx/Data/Raster.h"
-#include "Linx/Data/Sequence.h"
-
 namespace Linx {
+
+/// @cond
+
+template <Index N>
+class Box;
+
+template <Index N>
+class Grid;
+
+template <Index I, Index N>
+class Line;
+
+template <Index N>
+class Mask;
+
+// Forward declaration for specializations
+template <typename T, Index N, typename THolder>
+class Raster;
+
+/// @endcond
+
+/**
+ * @brief Indexing based on (contiguous) pointers.
+ */
+template <typename TParent, typename TRegion>
+class ContiguousIndexing {
+public:
+
+  template <typename T>
+  using Iterator = T*;
+
+  ContiguousIndexing() {}
+
+  ContiguousIndexing(const TParent&, const TRegion&) {}
+
+  template <typename T>
+  Iterator<T> begin(TParent& parent, const TRegion& region) const
+  {
+    return &parent[*region.begin()];
+  }
+
+  template <typename T>
+  Iterator<T> end(TParent& parent, const TRegion& region) const
+  {
+    return begin + region.size();
+  }
+};
 
 /**
  * @brief Indexing based only on positions.
@@ -208,7 +248,7 @@ private:
   std::vector<Index> m_offsets;
 };
 
-template <typename TParent, typename TRegion>
+template <typename TParent, typename TRegion, bool IsContiguous = false>
 struct PatchTraits {
   /**
    * @brief The indexing strategy of a patch, depending on the type of parent and region.
@@ -217,7 +257,7 @@ struct PatchTraits {
    * Optimized regions for raster parents are:
    * - `Box`,
    * - `Grid`,
-   * - `Line`
+   * - `Line`,
    * - `Mask`.
    * 
    * For extrapolators, no optimization is performed.
@@ -225,6 +265,17 @@ struct PatchTraits {
   template <typename UParent, typename URegion>
   using Indexing = PositionBasedIndexing<UParent, URegion>;
 };
+
+/**
+ * @brief Contiguous view specialization.
+ */
+template <typename TParent, typename TRegion>
+struct PatchTraits<TParent, TRegion, true> {
+  template <typename UParent, typename URegion>
+  using Indexing = ContiguousIndexing<UParent, URegion>;
+};
+
+/// @cond
 
 /**
  * @brief `Box` specialization.
@@ -253,14 +304,6 @@ struct PatchTraits<Raster<T, N, THolder>, Line<I, N>> {
   using Indexing = StrideBasedIndexing<UParent, URegion>;
 };
 
-/// @cond
-// FIXME temporary workaround for
-// 'Mask' was not declared in this scope
-// (include issue?)
-template <Index N>
-class Mask;
-/// @endcond
-
 /**
  * @brief `Mask` specialization.
  */
@@ -269,6 +312,8 @@ struct PatchTraits<Raster<T, N, THolder>, Mask<N>> {
   template <typename UParent, typename URegion>
   using Indexing = OffsetBasedIndexing<UParent, URegion>;
 };
+
+/// @endcond
 
 } // namespace Linx
 

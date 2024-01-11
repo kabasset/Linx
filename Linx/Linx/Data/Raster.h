@@ -10,6 +10,8 @@
 #include "Linx/Base/Random.h"
 #include "Linx/Base/mixins/DataContainer.h"
 #include "Linx/Data/Box.h"
+#include "Linx/Data/Line.h"
+#include "Linx/Data/Patch.h"
 #include "Linx/Data/Sequence.h"
 
 #include <complex>
@@ -30,18 +32,6 @@ namespace Linx {
 
 /// @cond
 // Issue with forward declarations: https://github.com/doxygen/doxygen/issues/8177
-
-// Forward declaration for Raster::patch()
-template <typename T, typename TRaster, typename TRegion>
-class Patch;
-
-// Forward declaration for Raster::where()
-template <Index N>
-class Mask;
-
-// Forward declaration for Raster::profile()
-template <Index I, Index N>
-class Line;
 
 // Forward declaration for specializations
 template <typename T, Index N, typename THolder>
@@ -217,7 +207,7 @@ public:
    * 
    * A row is a contiguous view of dimension 1, along axis 0.
    */
-  using Row = PtrRaster<T, 1>;
+  using Row = Patch<T, Raster, Line<0, N>, true>; // PtrRaster<T, 1>;
 
   /**
    * @brief The constant row type.
