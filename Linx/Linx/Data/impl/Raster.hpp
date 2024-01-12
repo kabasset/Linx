@@ -175,7 +175,7 @@ PtrRaster<T, M> Raster<T, N, THolder>::slice(const Box<N>& region)
 }
 
 template <typename T, Index N, typename THolder>
-typename Raster<T, N, THolder>::ConstMultisection Raster<T, N, THolder>::section(Index front, Index back) const
+typename Raster<T, N, THolder>::ConstChunk Raster<T, N, THolder>::section(Index front, Index back) const
 {
   const auto last = dimension() - 1;
   auto f = Position<N>::zero(); // FIXME support N = -1
@@ -186,7 +186,7 @@ typename Raster<T, N, THolder>::ConstMultisection Raster<T, N, THolder>::section
 }
 
 template <typename T, Index N, typename THolder>
-typename Raster<T, N, THolder>::Multisection Raster<T, N, THolder>::section(Index front, Index back)
+typename Raster<T, N, THolder>::Chunk Raster<T, N, THolder>::section(Index front, Index back)
 {
   const auto last = dimension() - 1;
   auto f = Position<N>::zero(); // FIXME support N = -1

@@ -177,25 +177,12 @@ public:
   using Container = DataContainer<T, THolder, EuclidArithmetic, Raster<T, N, THolder>>;
 
   /**
-   * @brief The section range type.
-   * 
-   * A section range is a contiguous view of dimension N, like a consecutive set of rows in a 2D raster.
-   */
-  using Multisection = Patch<T, Raster, Box<N>, true>;
-
-  /**
-   * @brief The constant section range type.
-   * @see Multisection
-   */
-  using ConstMultisection = Patch<const T, const Raster, Box<N>, true>;
-
-  /**
    * @brief The section type.
    * 
    * A section is a contiguous view of dimension N-1, like a 2D plane in a 3D raster or a row in a 2D raster.
    * 
-   * In contrast, a section range has dimension N.
-   * For example, a 3D section range of a 3D raster of shape (x, y, z)
+   * In contrast, a chunk has dimension N.
+   * For example, a 3D chunk of a 3D raster of shape (x, y, z)
    * is a 3D patch of shape (x, y, t) where `t` < `z`,
    * while a 2D section of it is a 2D raster of shape (x, y).
    * 
@@ -205,7 +192,7 @@ public:
    * auto line = raster.section(4).section(2);
    * \endcode
    * 
-   * If the index along the last dimension must be known from the section, then a section range of thickness 1 should be used instead.
+   * If the index along the last dimension must be known from the section, then a chunk of thickness 1 should be used instead.
    * 
    * \code
    * auto raster3d = Raster<int, 3>({3, 4, 5}).random();
@@ -223,6 +210,19 @@ public:
   using ConstSection = PtrRaster<const T, N == -1 ? -1 : N - 1>;
 
   /**
+   * @brief The chunk type.
+   * 
+   * A chunk is a contiguous view of dimension N, like a consecutive set of rows in a 2D raster.
+   */
+  using Chunk = Patch<T, Raster, Box<N>, true>;
+
+  /**
+   * @brief The read-only chunk type.
+   * @see Chunk
+   */
+  using ConstChunk = Patch<const T, const Raster, Box<N>, true>;
+
+  /**
    * @brief The row type.
    * 
    * A row is a contiguous view of dimension 1, along axis 0.
@@ -230,7 +230,7 @@ public:
   using Row = Patch<T, Raster, Line<0, N>, true>;
 
   /**
-   * @brief The constant row type.
+   * @brief The read-only row type.
    * @see Row
    */
   using ConstRow = Patch<const T, const Raster, Line<0, N>, true>;
@@ -244,7 +244,7 @@ public:
   using Tile = Patch<T, Raster, Box<M>>;
 
   /**
-   * @brief The constant tile type.
+   * @brief The read-only tile type.
    * @see Tile
    */
   template <Index M>
@@ -260,7 +260,7 @@ public:
   using Profile = Patch<T, Raster<T, N, THolder>, Line<I, N>, I == 0>;
 
   /**
-   * @brief The constant profile type.
+   * @brief The read-only profile type.
    * @see Profile
    */
   template <Index I>
@@ -459,14 +459,14 @@ public:
    * @param front The section front index along the last axis
    * @param back The section back index along the last axis
    * 
-   * @see Multisection
+   * @see Chunk
    */
-  ConstMultisection section(Index front, Index back) const;
+  ConstChunk section(Index front, Index back) const;
 
   /**
    * @copybrief section(Index,Index)const
    */
-  Multisection section(Index front, Index back);
+  Chunk section(Index front, Index back);
 
   /**
    * @brief Create a section at given index.
