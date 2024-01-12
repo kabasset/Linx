@@ -1,11 +1,10 @@
 /**
 
+\defgroup glossary Glossary
+\brief Definition of terms.
+
 \defgroup basics Basics
 \brief Basic features and usage
-
-\defgroup glossary Glossary
-\ingroup basics
-\brief Definition of terms.
 
 \defgroup primer Primer
 \ingroup basics
