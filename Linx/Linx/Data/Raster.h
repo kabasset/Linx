@@ -181,18 +181,38 @@ public:
    * 
    * A section range is a contiguous view of dimension N, like a consecutive set of rows in a 2D raster.
    */
-  using Multisection = PtrRaster<T, N>;
+  using Multisection = Patch<T, Raster, Box<N>, true>;
 
   /**
    * @brief The constant section range type.
    * @see Multisection
    */
-  using ConstMultisection = PtrRaster<const T, N>;
+  using ConstMultisection = Patch<const T, const Raster, Box<N>, true>;
 
   /**
    * @brief The section type.
    * 
    * A section is a contiguous view of dimension N-1, like a 2D plane in a 3D raster or a row in a 2D raster.
+   * 
+   * In contrast, a section range has dimension N.
+   * For example, a 3D section range of a 3D raster of shape (x, y, z)
+   * is a 3D patch of shape (x, y, t) where `t` < `z`,
+   * while a 2D section of it is a 2D raster of shape (x, y).
+   * 
+   * If needed, `section()` can be applied recursively,
+   * e.g. to get the x-line at `z` = 4 and `y` = 2:
+   * \code
+   * auto line = raster.section(4).section(2);
+   * \endcode
+   * 
+   * If the index along the last dimension must be known from the section, then a section range of thickness 1 should be used instead.
+   * 
+   * \code
+   * auto raster3d = Raster<int, 3>({3, 4, 5}).random();
+   * auto section3d = raster3d.section(3, 3);
+   * auto section2d = raster3d.section(3);
+   * auto section_z = section3d.domain().front()[2]; // Unavailable to section2d
+   * \endcode
    */
   using Section = PtrRaster<T, N == -1 ? -1 : N - 1>;
 
@@ -367,7 +387,7 @@ public:
   /**
    * @copydoc length()
    */
-  Index length(Index i) const
+  [[deprecated]] Index length(Index i) const
   {
     return m_shape[i];
   }
@@ -439,18 +459,7 @@ public:
    * @param front The section front index along the last axis
    * @param back The section back index along the last axis
    * 
-   * A section is a maximal slice of dimension `N` or `N`-1.
-   * For example, a 3D section of a 3D raster of shape (x, y, z)
-   * is a 3D raster of shape (x, y, t) where `t` < `z`,
-   * while a 2D section of it is a 2D raster of shape (x, y).
-   * 
-   * If needed, `section()` can be applied recursively,
-   * e.g. to get the x-line at `z` = 4 and `y` = 2:
-   * \code
-   * auto line = raster.section(4).section(2);
-   * \endcode
-   * 
-   * @see slice()
+   * @see Multisection
    */
   ConstMultisection section(Index front, Index back) const;
 

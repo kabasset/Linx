@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE(sectionning_test)
 
   // 3D
   const auto section3d = raster3d.section(3, 5);
-  BOOST_TEST((section3d.shape() == Position<3>({8, 9, 3})));
+  BOOST_TEST((section3d.domain().shape() == Position<3>({8, 9, 3})));
   for (const auto& p : section3d.domain()) {
     BOOST_TEST((section3d[p] == raster3d[p + Position<3> {0, 0, 3}]));
   }

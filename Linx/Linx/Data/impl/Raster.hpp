@@ -175,49 +175,47 @@ PtrRaster<T, M> Raster<T, N, THolder>::slice(const Box<N>& region)
 }
 
 template <typename T, Index N, typename THolder>
-PtrRaster<const T, N> Raster<T, N, THolder>::section(Index front, Index back) const
+typename Raster<T, N, THolder>::ConstMultisection Raster<T, N, THolder>::section(Index front, Index back) const
 {
   const auto last = dimension() - 1;
-  auto f = Position<N>::zero();
+  auto f = Position<N>::zero(); // FIXME support N = -1
   auto b = shape() - 1;
   f[last] = front;
   b[last] = back;
-  return slice<N>(Box<N>(f, b));
+  return {*this, Box<N>(f, b)};
 }
 
 template <typename T, Index N, typename THolder>
-PtrRaster<T, N> Raster<T, N, THolder>::section(Index front, Index back)
+typename Raster<T, N, THolder>::Multisection Raster<T, N, THolder>::section(Index front, Index back)
 {
   const auto last = dimension() - 1;
-  auto f = Position<N>::zero();
+  auto f = Position<N>::zero(); // FIXME support N = -1
   auto b = shape() - 1;
   f[last] = front;
   b[last] = back;
-  return slice<N>(Box<N>(f, b));
+  return {*this, Box<N>(f, b)};
 }
 
 template <typename T, Index N, typename THolder>
-PtrRaster<const T, N == -1 ? -1 : N - 1> Raster<T, N, THolder>::section(Index index) const
+typename Raster<T, N, THolder>::ConstSection Raster<T, N, THolder>::section(Index index) const
 {
   const auto last = dimension() - 1;
-  auto f = Position<N>::zero();
+  auto f = Position<N>::zero(); // FIXME support -1
   auto b = shape() - 1;
   f[last] = index;
   b[last] = index;
-  return slice < N == -1 ? -1 : N - 1 > (Box<N>(f, b));
-  // FIXME duplication => return section(index, index).slice<N-1>(Box<N>::whole());
+  return slice<(N == -1 ? -1 : N - 1)>(Box<N>(f, b));
 }
 
 template <typename T, Index N, typename THolder>
-PtrRaster<T, N == -1 ? -1 : N - 1> Raster<T, N, THolder>::section(Index index)
+typename Raster<T, N, THolder>::Section Raster<T, N, THolder>::section(Index index)
 {
   const auto last = dimension() - 1;
-  auto f = Position<N>::zero();
+  auto f = Position<N>::zero(); // FIXME support -1
   auto b = shape() - 1;
   f[last] = index;
   b[last] = index;
-  return slice < N == -1 ? -1 : N - 1 > (Box<N>(f, b));
-  // FIXME duplication
+  return slice<(N == -1 ? -1 : N - 1)>(Box<N>(f, b));
 }
 
 template <typename T, Index N, typename THolder>
