@@ -3,6 +3,10 @@
 \defgroup basics Basics
 \brief Basic features and usage
 
+\defgroup glossary Glossary
+\ingroup basics
+\brief Definition of terms.
+
 \defgroup primer Primer
 \ingroup basics
 \brief Containers and core functionalities.

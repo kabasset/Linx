@@ -1,0 +1,39 @@
+namespace Linx {
+/**
+
+\addtogroup glossary
+
+
+\section glossary-geometry Geometry
+
+- Position: An ND index.
+- Region: A container of positions.
+
+  - Box: An axis-aligned bounding box, which is the simplest kind of region.
+  - Grid: An axis-aligned bounded linear grid; a box is a grid with step parameter = 1.
+  - Line: A 1D grid along a given axis.
+  - Mask: A region defined by a bounding box and a binary mask.
+  - Sequence of positions: A region defined by arbitrary positions, useful as a sparse mask.
+
+- Window: A region which can be translated for cheap; all aforementioned regions are windows except the sequence of positions.
+
+\section glossary-data Data
+
+- Pixel: A position and value.
+- Map: A container of pixels.
+
+  - Domain: The region over which the map is defined.
+  - Length (exists only for maps whose domain is a grid, box or line): The number of positions along a given axis.
+  - Shape: The lengths along every axes.
+
+- Raster: A ND contiguous container of pixels.
+- Patch: The restriction of a raster over a region, implemented as a view.
+
+  - Section: A contiguous slice of raster of dimension N-1, implemented as a non-owning raster.
+  - Chunk: A contiguous slice of a raster of dimension N, i.e. conceptually a range of sections, implemented as a patch.
+  - Profile: A patch over a line along any axis; the line is maximal, with step = 1.
+  - Row: A contiguous slice of a raster of dimension 1, i.e. a profile along axis 0.
+  - Tile: A patch over a box.
+
+*/
+}
