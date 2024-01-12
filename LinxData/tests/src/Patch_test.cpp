@@ -45,13 +45,13 @@ BOOST_AUTO_TEST_CASE(contiguity_test)
 {
   Raster<int> raster({8, 8});
   for (Index i = 0; i < raster.length(1); ++i) {
-    BOOST_TEST(raster.row({i}).is_contiguous());
+    BOOST_TEST(raster.row({i}).contiguity());
   }
   for (Index i = 0; i < raster.length(1); ++i) {
-    BOOST_TEST(raster.profile<0>({i}).is_contiguous());
+    BOOST_TEST(raster.profile<0>({i}).contiguity());
   }
   for (Index i = 0; i < raster.length(0); ++i) {
-    BOOST_TEST(not raster.profile<1>({i}).is_contiguous());
+    BOOST_TEST(raster.profile<1>({i}).contiguity() != 1);
   }
 }
 
