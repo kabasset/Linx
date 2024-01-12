@@ -6,6 +6,7 @@ namespace Linx {
 
 \section glossary-geometry Geometry
 
+
 - Dimension: The number of axes, typically of an image; multidimensional objects are often referred to as ND.
 - Position: An ND index.
 - Region: A container of positions.
@@ -19,7 +20,9 @@ namespace Linx {
 - Window: A region which can be translated for cheap, so that it can be used to scan an image or region;
   all of the aforementioned regions are windows except the sequence of positions.
 
+
 \section glossary-data Data
+
 
 - Pixel: A position and value.
 - Mapping: A container of pixels.
@@ -38,6 +41,18 @@ namespace Linx {
   - Tile: A patch over a box (generally not contiguous).
 
 - Neighborhood: A patch whose domain is a window.
+
+
+\section glossary-transforms Transforms
+
+
+- Extrapolation (also known as padding or boundary conditions): A method to generate values outside of a mapping domain, in accordance with the mapping;
+  well known methods are 0-padding, nearest neighbor and periodic extrapolations;
+  an extrapolated mapping is itself a mapping, although with unlimited domain.
+- Interpolation: A method to generate values in-between a mapping domain positions, i.e. at non-integral coordinates;
+  the mapping may be extrapolated, too;
+  well known methods are nearest-neighbor, linear and cubic interpolations.
+- Resampling method: An extrapolation or interpolation method.
 
 */
 }
