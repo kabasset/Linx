@@ -196,9 +196,9 @@ public:
    * 
    * \code
    * auto raster3d = Raster<int, 3>({3, 4, 5}).random();
-   * auto section3d = raster3d.section(3, 3);
+   * auto chunk3d = raster3d.chunk(3);
    * auto section2d = raster3d.section(3);
-   * auto section_z = section3d.domain().front()[2]; // Unavailable to section2d
+   * auto z = chunk3d.domain().front()[2]; // Unavailable to section2d
    * \endcode
    */
   using Section = PtrRaster<T, N == -1 ? -1 : N - 1>;
@@ -455,18 +455,34 @@ public:
   PtrRaster<T, M> slice(const Box<N>& region);
 
   /**
-   * @brief Create a section between given indices.
-   * @param front The section front index along the last axis
-   * @param back The section back index along the last axis
-   * 
+   * @brief Create a chunk between given indices.
+   * @param front The chunk front index along the last axis
+   * @param back The chunk back index along the last axis
    * @see Chunk
    */
-  ConstChunk section(Index front, Index back) const;
+  ConstChunk chunk(Index front, Index back) const;
 
   /**
-   * @copybrief section(Index,Index)const
+   * @copybrief chunk(Index,Index)const
    */
-  Chunk section(Index front, Index back);
+  Chunk chunk(Index front, Index back);
+
+  /**
+   * @brief Create a chunk at given index.
+   * @see Chunk
+   */
+  ConstChunk chunk(Index index) const
+  {
+    return chunk(index, index);
+  }
+
+  /**
+   * @copybrief chunk(Index)const
+   */
+  Chunk chunk(Index index)
+  {
+    return chunk(index, index);
+  }
 
   /**
    * @brief Create a section at given index.

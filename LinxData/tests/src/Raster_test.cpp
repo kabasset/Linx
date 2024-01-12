@@ -204,10 +204,10 @@ BOOST_AUTO_TEST_CASE(sectionning_test)
   const auto raster3d = random<short, 3>({8, 9, 12});
 
   // 3D
-  const auto section3d = raster3d.section(3, 5);
-  BOOST_TEST((section3d.domain().shape() == Position<3>({8, 9, 3})));
-  for (const auto& p : section3d.domain()) {
-    BOOST_TEST((section3d[p] == raster3d[p + Position<3> {0, 0, 3}]));
+  const auto chunk3d = raster3d.chunk(3, 5);
+  BOOST_TEST((chunk3d.domain().shape() == Position<3>({8, 9, 3})));
+  for (const auto& p : chunk3d.domain()) {
+    BOOST_TEST((chunk3d[p] == raster3d[p + Position<3> {0, 0, 3}]));
   }
 
   // 2D

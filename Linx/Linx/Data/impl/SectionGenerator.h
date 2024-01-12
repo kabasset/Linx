@@ -13,29 +13,29 @@ namespace Linx {
 namespace Internal {
 
 template <typename TParent>
-class MultisectionGenerator : public std::iterator<std::forward_iterator_tag, decltype(TParent().section(0, 0))> {
+class ChunkGenerator : public std::iterator<std::forward_iterator_tag, decltype(TParent().chunk(0, 0))> {
 public:
 
-  using Value = decltype(TParent().section(0, 0));
+  using Value = decltype(TParent().chunk(0, 0));
 
-  MultisectionGenerator(TParent& in, Index thickness) :
+  ChunkGenerator(TParent& in, Index thickness) :
       m_parent(&in), m_size(m_parent->length(TParent::Dimension - 1)), m_thickness(thickness), m_current(0),
       m_next(thickness)
   {}
 
-  MultisectionGenerator begin() const
+  ChunkGenerator begin() const
   {
     return *this;
   }
 
-  MultisectionGenerator end() const
+  ChunkGenerator end() const
   {
-    return MultisectionGenerator(m_size);
+    return ChunkGenerator(m_size);
   }
 
   Value operator*() const // FIXME return Value&?
   {
-    return m_parent->section(m_current, m_next - 1);
+    return m_parent->chunk(m_current, m_next - 1);
   }
 
   Value* operator->() const
@@ -43,26 +43,26 @@ public:
     return &*(*this);
   }
 
-  MultisectionGenerator& operator++()
+  ChunkGenerator& operator++()
   {
     m_current = m_next;
     m_next = std::min(m_size, m_next + m_thickness);
     return *this;
   }
 
-  MultisectionGenerator operator++(int)
+  ChunkGenerator operator++(int)
   {
     auto out = *this;
     ++(*this);
     return out;
   }
 
-  bool operator==(const MultisectionGenerator& rhs) const
+  bool operator==(const ChunkGenerator& rhs) const
   {
     return m_current == rhs.m_current;
   }
 
-  bool operator!=(const MultisectionGenerator& rhs) const
+  bool operator!=(const ChunkGenerator& rhs) const
   {
     return m_current != rhs.m_current;
   }
@@ -74,7 +74,7 @@ public:
 
 private:
 
-  MultisectionGenerator(Index front) : m_parent(nullptr), m_size(0), m_thickness(0), m_current(front), m_next(0) {}
+  ChunkGenerator(Index front) : m_parent(nullptr), m_size(0), m_thickness(0), m_current(front), m_next(0) {}
 
   TParent* m_parent;
   Index m_size;

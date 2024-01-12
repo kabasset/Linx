@@ -35,7 +35,7 @@ class SectionGenerator;
  * @see sections()
  */
 template <typename TParent>
-class MultisectionGenerator;
+class ChunkGenerator;
 
 /**
  * @ingroup regions
@@ -80,16 +80,16 @@ auto rasterize(const Internal::TileGenerator<TParent, M>& generator)
 
 /**
  * @ingroup regions
- * @brief Get a slicing of a raster as a range of cross-sections of given thickness.
+ * @brief Get a slicing of a raster as a range of chunks of given thickness.
  * 
- * The input raster domain is sliced along its last axis into sections of given thickness,
- * except for the last section which may be thinner.
- * A range over the sections is returned.
+ * The input raster domain is sliced along its last axis into chunks of given thickness,
+ * except for the last chunk which may be thinner.
+ * A range over the chunks is returned.
  */
 template <typename TParent>
-auto sections(TParent& in, Index thickness)
+auto chunks(TParent& in, Index thickness)
 {
-  return Internal::MultisectionGenerator<TParent>(in, thickness);
+  return Internal::ChunkGenerator<TParent>(in, thickness);
 }
 
 /**
