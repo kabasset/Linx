@@ -23,7 +23,7 @@ public:
   explicit Sequence(std::size_t size = 0, TArgs&&... args) : Container(size, std::forward<TArgs>(args)...)
   {}
 
-  Sequence(std::initializer_list<T> list) : Container(std::move(list)) {}
+  Sequence(std::initializer_list<T> list) : Container(list.begin(), list.end()) {}
 
   template <typename... TArgs>
   explicit Sequence(std::initializer_list<T> list, TArgs&&... args) :
