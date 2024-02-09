@@ -6,6 +6,7 @@
 #define _LINXRUN_PROGRAMOPTIONS_H
 
 #include <boost/program_options.hpp>
+#include <iostream>
 #include <sstream>
 
 namespace Linx {
@@ -14,15 +15,17 @@ namespace Linx {
  * @brief Helper class to declare positional, named and flag options, as well as some help message.
  * 
  * Here is an example use case for the following command line:
- * \verbatim Program <positional> --named1 <value1> --flag --named2 <value2> \endverbatim
+ * \verbatim Program <positional> --named1 <value1> -f --named2 <value2> \endverbatim
  * 
  * Here's an example program to handle it:
  * \code
- * std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override {
- *   auto options = ProgramOptions::from_auxdir("help.txt");
- *   options.positional("positional", value<std::string>(), "Positional option");
- *   options.named("named1", value<int>(), "Named option 1");
- *   options.named("named2", value<int>(), "Named option 2");
+ * std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
+ * {
+ *   ProgramOptions options("My program");
+ *   options.positional<std::string>("positional", "Positional option");
+ *   options.named<int>("named1", "Named option 1");
+ *   options.named<int>("named2", "Named option 2");
+ *   options.flag("flag,f", "Flag");
  *   return options.as_pair();
  * }
  * \endcode
@@ -46,11 +49,21 @@ public:
   using ValueSemantics = boost::program_options::value_semantic;
 
   /**
-   * @brief Make a `ProgramOptions` with optional description string.
+   * @brief Make a `ProgramOptions` with optional description string and help option.
+   * @param description The program description
+   * @param help The help option (disapled if parameter is empty)
    */
-  ProgramOptions(const std::string& description = "") :
-      m_named(describe(description)), m_add(m_named.add_options()), m_positional(), m_variables()
-  {}
+  ProgramOptions(const std::string& description = "", const std::string& help = "help,h") :
+      m_named("Options", 120), m_add(m_named.add_options()), m_positional(), m_variables(), m_desc(description),
+      m_help(help)
+  {
+    if (help.length() > 0) {
+      flag(m_help.c_str(), "Print help message");
+      if (m_help.length() > 3 && m_help[m_help.length() - 2] == ',') {
+        m_help = m_help.substr(0, m_help.length() - 2);
+      }
+    }
+  }
 
   /**
    * @brief Declare a positional option.
@@ -129,7 +142,9 @@ public:
   }
 
   /**
-   * @brief Parse a command line (`main`-like).
+   * @brief Parse a command line.
+   * 
+   * If the help option was enabled and is in the command line, then the help message is printed and the program stops.
    */
   void parse(int argc, const char* const argv[])
   {
@@ -137,6 +152,13 @@ public:
         boost::program_options::command_line_parser(argc, argv).options(m_named).positional(m_positional).run(),
         m_variables);
     boost::program_options::notify(m_variables);
+    if (not m_help.empty() && has(m_help.c_str())) {
+      if (not m_desc.empty()) {
+        std::cout << "\n" << m_desc << "\n";
+      }
+      std::cout << "\nUsage:\n  " << argv[0] << " [options]\n\n" << m_named << std::endl;
+      exit(0);
+    }
   }
 
   /**
@@ -189,19 +211,12 @@ public:
 
 private:
 
-  static std::string describe(const std::string& description)
-  {
-    const std::string options_group = "Options:";
-    if (description.length() > 0) {
-      return description + "\n\n" + options_group;
-    }
-    return options_group;
-  }
-
   OptionsDescription m_named;
   boost::program_options::options_description_easy_init m_add;
   PositionalOptionsDescription m_positional;
   boost::program_options::variables_map m_variables;
+  std::string m_desc;
+  std::string m_help;
 };
 
 } // namespace Linx
