@@ -5,6 +5,8 @@
 #ifndef _LINXBASE_MIXINS_CONTIGUOUSCONTAINER_H
 #define _LINXBASE_MIXINS_CONTIGUOUSCONTAINER_H
 
+#include "Linx/Base/TypeUtils.h"
+
 #include <algorithm> // equal
 #include <ostream>
 
@@ -103,7 +105,7 @@ struct ContiguousContainerMixin {
   }
 
   /**
-   * @brief Number of elements.
+   * @brief Get the number of elements.
    */
   std::size_t size() const
   {
@@ -111,11 +113,20 @@ struct ContiguousContainerMixin {
   }
 
   /**
-   * @brief Maximum number of elements the container is able to hold (same as `size()`).
+   * @brief Get the number of elements as a signed integer.
+   */
+  Index ssize() const
+  {
+    return static_cast<Linx::Index>(size());
+  }
+
+  /**
+   * @brief Get the maximum number of elements the container is able to hold (same as `size()`).
    */
   std::size_t max_size() const
   {
     return size();
+    // FIXME return std::numeric_limits<Index>::max()?
   }
 
   /// @group_elements
@@ -224,7 +235,7 @@ struct ContiguousContainerMixin {
    * @brief Check equality.
    */
   virtual bool operator==(const TDerived& rhs) const
-  {
+  { // FIXME test addresses
     const auto& lhs = static_cast<const TDerived&>(*this);
     return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
   }
