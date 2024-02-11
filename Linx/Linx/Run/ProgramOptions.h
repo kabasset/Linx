@@ -152,7 +152,7 @@ public:
         boost::program_options::command_line_parser(argc, argv).options(m_named).positional(m_positional).run(),
         m_variables);
     boost::program_options::notify(m_variables);
-    if (not m_help.empty() && has(m_help.c_str())) {
+    if (not m_help.empty() && as<bool>(m_help.c_str())) {
       if (not m_desc.empty()) {
         std::cout << "\n" << m_desc << "\n";
       }
@@ -195,7 +195,7 @@ public:
    */
   bool has(const char* name) const
   {
-    return m_variables.count(name);
+    return m_variables.count(name); // FIXME incompatible with flags
   }
 
   /**
