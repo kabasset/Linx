@@ -2,4 +2,4 @@
 // This file is part of Linx <github.com/kabasset/Linx>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "Linx/Run/Chronometer.h"
+#include "Linx/Run/Timer.h"

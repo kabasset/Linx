@@ -7,8 +7,8 @@
 #include "Linx/Data/Mask.h"
 #include "Linx/Data/Raster.h"
 #include "Linx/Data/Sequence.h"
-#include "Linx/Run/Chronometer.h"
 #include "Linx/Run/ProgramOptions.h"
+#include "Linx/Run/Timer.h"
 
 #include <map>
 #include <string>
@@ -18,13 +18,13 @@ Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkRegions");
 template <typename TDuration>
 TDuration filter(Linx::Raster<int, 3>& in, const Linx::Box<3>& box, char setup)
 {
-  Linx::Chronometer<TDuration> chrono;
+  Linx::Timer<TDuration> timer;
   //! [Make sparse regions]
   Linx::Grid<3> grid(box, Linx::Position<3>::one());
   Linx::Mask<3> mask(box);
   Linx::Sequence<Linx::Position<3>> sequence(box);
   //! [Make sparse regions]
-  chrono.start();
+  timer.start();
   switch (setup) {
     case 'b':
       //! [Iterate over box]
@@ -49,7 +49,7 @@ TDuration filter(Linx::Raster<int, 3>& in, const Linx::Box<3>& box, char setup)
     default:
       throw std::runtime_error("Case not implemented"); // FIXME CaseNotImplemented
   }
-  return chrono.stop();
+  return timer.stop();
 }
 
 class LinxBenchmarkRegions : public Elements::Program {

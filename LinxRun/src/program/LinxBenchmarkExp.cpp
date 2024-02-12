@@ -4,8 +4,8 @@
 
 #include "ElementsKernel/ProgramHeaders.h"
 #include "Linx/Data/Raster.h"
-#include "Linx/Run/Chronometer.h"
 #include "Linx/Run/ProgramOptions.h"
+#include "Linx/Run/Timer.h"
 
 #include <map>
 #include <string>
@@ -48,13 +48,13 @@ public:
     const auto side = args["side"].as<long>();
 
     using Duration = std::chrono::milliseconds;
-    Linx::Chronometer<Duration> chrono;
+    Linx::Timer<Duration> timer;
 
     logger.info("Generating random raster...");
     auto raster = Linx::Raster<double>({side, side}).generate(Linx::GaussianNoise<double>(0, 1, 0));
 
     logger.info("Computing exponential...");
-    chrono.start();
+    timer.start();
     switch (order) {
       case -1:
         raster.exp();
@@ -68,7 +68,7 @@ public:
       default:
         taylor_exp(raster, order);
     }
-    const auto duration = chrono.stop();
+    const auto duration = timer.stop();
 
     logger.info() << "  found: " << raster;
     logger.info() << "  in " << duration.count() << "ms";

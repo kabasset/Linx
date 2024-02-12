@@ -2,8 +2,8 @@
 // This file is part of Linx <github.com/kabasset/Linx>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#ifndef _LINXRUN_CHRONOMETER_H
-#define _LINXRUN_CHRONOMETER_H
+#ifndef _LINXRUN_TIMER_H
+#define _LINXRUN_TIMER_H
 
 #include "Linx/Base/DataDistribution.h"
 
@@ -14,21 +14,21 @@
 namespace Linx {
 
 /**
- * @brief A simple chronometer with increment times and elapsed time caching.
+ * @brief A simple timer with increment times and elapsed time caching.
  * @tparam TUnit The time unit, e.g. `std::chrono::milliseconds`
  * 
- * Each time the chronometer is started and stoped, an increment is computed,
+ * Each time the timer is started and stoped, an increment is computed,
  * and the total elapsed time is incremented.
  * An offset can be provided, which is the initial value of the elapsed time,
  * but has no effect on the increments.
  *
  * Simple statistics on the increments can be computed (e.g. mean increment).
  *
- * The chronometer can be reset, which means that the list of increments is emptied,
+ * The timer can be reset, which means that the list of increments is emptied,
  * and the elapsed time is set to 0 or the offset.
  */
 template <typename TUnit>
-class Chronometer {
+class Timer {
 public:
 
   /**
@@ -37,15 +37,15 @@ public:
   using Unit = TUnit;
 
   /**
-   * @brief Create a chronometer with optional offset.
+   * @brief Create a timer with optional offset.
    */
-  Chronometer(TUnit offset = TUnit()) : m_tic(), m_toc(), m_running(false), m_container(), m_elapsed(offset)
+  Timer(TUnit offset = TUnit()) : m_tic(), m_toc(), m_running(false), m_container(), m_elapsed(offset)
   {
     reset(offset);
   }
 
   /**
-   * @brief Reset the chronometer with optional offset.
+   * @brief Reset the timer with optional offset.
    */
   void reset(TUnit offset = TUnit())
   {
@@ -56,7 +56,7 @@ public:
   }
 
   /**
-   * @brief Start or restart the chronometer.
+   * @brief Start or restart the timer.
    */
   void start()
   {
@@ -65,7 +65,7 @@ public:
   }
 
   /**
-   * @brief Stop the chronometer and get the last time increment.
+   * @brief Stop the timer and get the last time increment.
    */
   TUnit stop()
   {
@@ -78,7 +78,7 @@ public:
   }
 
   /**
-   * @brief Test whether the chronometer is running.
+   * @brief Test whether the timer is running.
    */
   bool is_running() const
   {
@@ -166,7 +166,7 @@ private:
   std::chrono::steady_clock::time_point m_toc;
 
   /**
-   * @brief Flag the chronometer as running (started and not stopped).
+   * @brief Flag the timer as running (started and not stopped).
    */
   bool m_running;
 

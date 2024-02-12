@@ -32,10 +32,6 @@ elements_add_executable(LinxMaskCosmics src/program/LinxMaskCosmics.cpp
                     INCLUDE_DIRS LinxRun
                     LINK_LIBRARIES LinxRun)
 
-elements_add_unit_test(Chronometer tests/src/Chronometer_test.cpp 
-                     EXECUTABLE LinxRun_Chronometer_test
-                     LINK_LIBRARIES LinxRun
-                     TYPE Boost)
 elements_add_unit_test(IterationBenchmark tests/src/IterationBenchmark_test.cpp 
                      EXECUTABLE LinxRun_IterationBenchmark_test
                      LINK_LIBRARIES LinxRun
@@ -46,6 +42,10 @@ elements_add_unit_test(ProgramOptions tests/src/ProgramOptions_test.cpp
                      TYPE Boost)
 elements_add_unit_test(StepperPipeline tests/src/StepperPipeline_test.cpp 
                      EXECUTABLE LinxRun_StepperPipeline_test
+                     LINK_LIBRARIES LinxRun
+                     TYPE Boost)
+elements_add_unit_test(Timer tests/src/Timer_test.cpp 
+                     EXECUTABLE LinxRun_Timer_test
                      LINK_LIBRARIES LinxRun
                      TYPE Boost)
 

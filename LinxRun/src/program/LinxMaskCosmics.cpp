@@ -5,8 +5,8 @@
 #include "ElementsKernel/ProgramHeaders.h"
 #include "Linx/Data/Raster.h"
 #include "Linx/Io/Fits.h"
-#include "Linx/Run/Chronometer.h"
 #include "Linx/Run/ProgramOptions.h"
+#include "Linx/Run/Timer.h"
 #include "LinxRun/Cosmics.h"
 
 #include <boost/algorithm/string.hpp>
@@ -44,7 +44,7 @@ public:
     const auto tc = args["contrast"].as<double>();
     const auto iter_count = args["niter"].as<Linx::Index>();
 
-    Linx::Chronometer<std::chrono::milliseconds> chrono;
+    Linx::Timer<std::chrono::milliseconds> timer;
 
     logger.info() << "Reading data: " << data_fits.path();
     auto data = data_fits.read<Linx::Raster<float>>(hdu);
@@ -53,20 +53,20 @@ public:
     map_fits.write(data, 'w');
 
     logger.info() << "Detecting cosmics...";
-    chrono.start();
+    timer.start();
     auto mask = Linx::Cosmics::detect(data, psf, pfa, tq);
-    chrono.stop();
-    logger.info() << "  Done in: " << chrono.last().count() << " ms";
+    timer.stop();
+    logger.info() << "  Done in: " << timer.last().count() << " ms";
     logger.info() << "  Density: " << Linx::mean(mask);
     map_fits.write(mask, 'a');
 
     logger.info() << "Segmenting cosmics...";
     for (Linx::Index i = 0; i < iter_count; ++i) {
       logger.info() << "  Iteration " << i + 1 << "/" << iter_count;
-      chrono.start();
+      timer.start();
       Linx::Cosmics::segment(data, mask, tc);
-      chrono.stop();
-      logger.info() << "    Done in: " << chrono.last().count() << " ms";
+      timer.stop();
+      logger.info() << "    Done in: " << timer.last().count() << " ms";
       logger.info() << "    Density: " << Linx::mean(mask);
       map_fits.write(mask, 'a');
     }

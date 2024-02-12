@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "ElementsKernel/ProgramHeaders.h"
-#include "Linx/Run/Chronometer.h"
 #include "Linx/Run/ProgramOptions.h"
+#include "Linx/Run/Timer.h"
 #include "Linx/Transforms/Filters.h"
 
 #include <map>
@@ -59,8 +59,8 @@ void filter_hardcoded(Image& image, const Image& values)
 template <typename TDuration>
 TDuration filter(Image& image, const Image& kernel, char setup)
 {
-  Linx::Chronometer<TDuration> chrono;
-  chrono.start();
+  Linx::Timer<TDuration> timer;
+  timer.start();
   switch (setup) {
     case '0':
       image = Linx::convolution(kernel) * Linx::extrapolation(image, 0.0F);
@@ -77,7 +77,7 @@ TDuration filter(Image& image, const Image& kernel, char setup)
     default:
       throw std::runtime_error("Case not implemented"); // FIXME CaseNotImplemented
   }
-  return chrono.stop();
+  return timer.stop();
 }
 
 class RasterBenchmarkCorrelation : public Elements::Program {

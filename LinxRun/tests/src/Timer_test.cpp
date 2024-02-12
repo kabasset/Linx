@@ -2,16 +2,16 @@
 // This file is part of Linx <github.com/kabasset/Linx>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "Linx/Run/Chronometer.h"
+#include "Linx/Run/Timer.h"
 
 #include <boost/test/unit_test.hpp>
 #include <thread> // sleep_for
 
 using namespace Linx;
 
-struct ChronoFixture : public Chronometer<std::chrono::milliseconds> {
-  ChronoFixture(std::chrono::milliseconds chrono_offset = std::chrono::milliseconds {std::rand()}) :
-      Chronometer<std::chrono::milliseconds>(chrono_offset), offset(chrono_offset)
+struct TimerFixture : public Timer<std::chrono::milliseconds> {
+  TimerFixture(std::chrono::milliseconds timer_offset = std::chrono::milliseconds {std::rand()}) :
+      Timer<std::chrono::milliseconds>(timer_offset), offset(timer_offset)
   {}
   void wait(std::int64_t ms = default_wait)
   {
@@ -21,11 +21,11 @@ struct ChronoFixture : public Chronometer<std::chrono::milliseconds> {
   static constexpr std::int64_t default_wait = 10;
 };
 
-constexpr std::int64_t ChronoFixture::default_wait;
+constexpr std::int64_t TimerFixture::default_wait;
 
 //-----------------------------------------------------------------------------
 
-BOOST_FIXTURE_TEST_SUITE(Chronometer_test, ChronoFixture)
+BOOST_FIXTURE_TEST_SUITE(Timer_test, TimerFixture)
 
 //-----------------------------------------------------------------------------
 

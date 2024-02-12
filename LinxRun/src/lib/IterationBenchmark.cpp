@@ -18,7 +18,7 @@ IterationBenchmark::IterationBenchmark(Index side) :
 
 IterationBenchmark::Duration IterationBenchmark::loop_over_xyz()
 {
-  m_chrono.start();
+  m_timer.start();
   //! [x-y-z]
   for (Index x = 0; x < m_width; ++x) {
     for (Index y = 0; y < m_height; ++y) {
@@ -28,12 +28,12 @@ IterationBenchmark::Duration IterationBenchmark::loop_over_xyz()
     }
   }
   //! [x-y-z]
-  return m_chrono.stop();
+  return m_timer.stop();
 }
 
 IterationBenchmark::Duration IterationBenchmark::loop_over_zyx()
 {
-  m_chrono.start();
+  m_timer.start();
   //! [z-y-x]
   for (Index z = 0; z < m_depth; ++z) {
     for (Index y = 0; y < m_height; ++y) {
@@ -43,47 +43,47 @@ IterationBenchmark::Duration IterationBenchmark::loop_over_zyx()
     }
   }
   //! [z-y-x]
-  return m_chrono.stop();
+  return m_timer.stop();
 }
 
 IterationBenchmark::Duration IterationBenchmark::iterate_over_positions()
 {
-  m_chrono.start();
+  m_timer.start();
   //! [position]
   for (const auto& p : m_c.domain()) {
     m_c[p] = m_a[p] + m_b[p];
   }
   //! [position]
-  return m_chrono.stop();
+  return m_timer.stop();
 }
 
 IterationBenchmark::Duration IterationBenchmark::iterate_over_positions_optimized()
 {
-  m_chrono.start();
+  m_timer.start();
   //! [position-index]
   for (const auto& p : m_c.domain()) {
     const auto i = m_c.index(p);
     m_c[i] = m_a[i] + m_b[i];
   }
   //! [position-index]
-  return m_chrono.stop();
+  return m_timer.stop();
 }
 
 IterationBenchmark::Duration IterationBenchmark::loop_over_indices()
 {
-  m_chrono.start();
+  m_timer.start();
   //! [index]
   const auto size = m_c.size();
   for (std::size_t i = 0; i < size; ++i) {
     m_c[i] = m_a[i] + m_b[i];
   }
   //! [index]
-  return m_chrono.stop();
+  return m_timer.stop();
 }
 
 IterationBenchmark::Duration IterationBenchmark::iterate_over_values()
 {
-  m_chrono.start();
+  m_timer.start();
   //! [value]
   auto ait = m_a.begin();
   auto bit = m_b.begin();
@@ -93,21 +93,21 @@ IterationBenchmark::Duration IterationBenchmark::iterate_over_values()
     *cit = *ait + *bit;
   }
   //! [value]
-  return m_chrono.stop();
+  return m_timer.stop();
 }
 
 IterationBenchmark::Duration IterationBenchmark::call_operator()
 {
-  m_chrono.start();
+  m_timer.start();
   //! [operator]
   m_c = m_a + m_b;
   //! [operator]
-  return m_chrono.stop();
+  return m_timer.stop();
 }
 
 IterationBenchmark::Duration IterationBenchmark::call_generate()
 {
-  m_chrono.start();
+  m_timer.start();
   //! [generate]
   m_c.generate(
       [](auto e, auto f) {
@@ -116,7 +116,7 @@ IterationBenchmark::Duration IterationBenchmark::call_generate()
       m_a,
       m_b);
   //! [generate]
-  return m_chrono.stop();
+  return m_timer.stop();
 }
 
 } // namespace Linx

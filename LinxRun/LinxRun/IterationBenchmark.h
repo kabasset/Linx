@@ -6,7 +6,7 @@
 #define _LINXRUN_ITERATIONBENCHMARK_H
 
 #include "Linx/Data/Raster.h"
-#include "Linx/Run/Chronometer.h"
+#include "Linx/Run/Timer.h"
 
 namespace Linx {
 
@@ -84,7 +84,7 @@ protected:
   Raster<Value, Dimension> m_a;
   Raster<Value, Dimension> m_b;
   Raster<Value, Dimension> m_c;
-  Chronometer<Duration> m_chrono;
+  Timer<Duration> m_timer;
 };
 
 } // namespace Linx

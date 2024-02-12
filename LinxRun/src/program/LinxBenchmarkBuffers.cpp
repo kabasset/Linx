@@ -3,53 +3,53 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "Linx/Base/AlignedBuffer.h"
-#include "Linx/Run/Chronometer.h"
 #include "Linx/Run/ProgramOptions.h"
+#include "Linx/Run/Timer.h"
 
 #include <map>
 #include <string>
 #include <vector>
 
-using Chrono = Linx::Chronometer<std::chrono::milliseconds>;
+using Timer = Linx::Timer<std::chrono::milliseconds>;
 
-Chrono::Unit benchmark_buffer(Linx::Index size, Linx::Index alignment)
+Timer::Unit benchmark_buffer(Linx::Index size, Linx::Index alignment)
 {
-  Chrono chrono;
+  Timer timer;
   std::cout << "Assignment..." << std::endl;
-  chrono.start();
+  timer.start();
   Linx::AlignedBuffer<long> buffer(size, nullptr, alignment);
-  auto duration = chrono.stop();
+  auto duration = timer.stop();
   std::cout << "  Done in " << duration.count() << "ms" << std::endl; // FIXME cout << duration << endl?
   long sum = 0;
   std::cout << "Iteration..." << std::endl;
-  chrono.start();
+  timer.start();
   for (const auto& v : buffer) {
     sum += v + 1;
   }
-  duration = chrono.stop();
+  duration = timer.stop();
   std::cout << "  Sum:" << sum << std::endl;
   std::cout << "  Done in " << duration.count() << "ms" << std::endl;
-  return chrono.elapsed();
+  return timer.elapsed();
 }
 
-Chrono::Unit benchmark_vector(Linx::Index size)
+Timer::Unit benchmark_vector(Linx::Index size)
 {
-  Chrono chrono;
+  Timer timer;
   std::cout << "Initialization..." << std::endl;
-  chrono.start();
+  timer.start();
   std::vector<long> buffer(size);
-  auto duration = chrono.stop();
+  auto duration = timer.stop();
   std::cout << "  Done in " << duration.count() << "ms" << std::endl;
   long sum = 0;
   std::cout << "Iteration..." << std::endl;
-  chrono.start();
+  timer.start();
   for (const auto& v : buffer) {
     sum += v + 1;
   }
-  duration = chrono.stop();
+  duration = timer.stop();
   std::cout << "  Sum:" << sum << std::endl;
   std::cout << "  Done in " << duration.count() << "ms" << std::endl;
-  return chrono.elapsed();
+  return timer.elapsed();
 }
 
 int main(int argc, char const* argv[])
