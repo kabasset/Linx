@@ -56,7 +56,7 @@ public:
     timer.start();
     auto mask = Linx::Cosmics::detect(data, psf, pfa, tq);
     timer.stop();
-    logger.info() << "  Done in: " << timer.last().count() << " ms";
+    logger.info() << "  Done in: " << timer.back().count() << " ms";
     logger.info() << "  Density: " << Linx::mean(mask);
     map_fits.write(mask, 'a');
 
@@ -66,7 +66,7 @@ public:
       timer.start();
       Linx::Cosmics::segment(data, mask, tc);
       timer.stop();
-      logger.info() << "    Done in: " << timer.last().count() << " ms";
+      logger.info() << "    Done in: " << timer.back().count() << " ms";
       logger.info() << "    Density: " << Linx::mean(mask);
       map_fits.write(mask, 'a');
     }

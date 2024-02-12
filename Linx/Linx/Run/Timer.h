@@ -14,18 +14,19 @@
 namespace Linx {
 
 /**
- * @brief A simple timer with increment times and elapsed time caching.
+ * @brief A simple timer with split times and elapsed time recording.
  * @tparam TUnit The time unit, e.g. `std::chrono::milliseconds`
  * 
- * Each time the timer is started and stoped, an increment is computed,
+ * Each time the timer is started and stopped, a split is computed,
  * and the total elapsed time is incremented.
+ * Split times can also be requested without stopping the timer.
  * An offset can be provided, which is the initial value of the elapsed time,
- * but has no effect on the increments.
+ * but has no effect on the split times.
  *
- * Simple statistics on the increments can be computed (e.g. mean increment).
+ * Simple statistics on the split times can be computed (e.g. mean or standard deviation).
  *
- * The timer can be reset, which means that the list of increments is emptied,
- * and the elapsed time is set to 0 or the offset.
+ * The timer can be reset, which means that the list of split times is emptied,
+ * and the elapsed time is set to 0 or a given offset.
  */
 template <typename TUnit>
 class Timer {
@@ -39,7 +40,7 @@ public:
   /**
    * @brief Create a timer with optional offset.
    */
-  Timer(TUnit offset = TUnit()) : m_tic(), m_toc(), m_running(false), m_container(), m_elapsed(offset)
+  explicit Timer(TUnit offset = TUnit()) : m_tic(), m_toc(), m_running(false), m_container(), m_elapsed(offset)
   {
     reset(offset);
   }
@@ -65,7 +66,7 @@ public:
   }
 
   /**
-   * @brief Stop the timer and get the last time increment.
+   * @brief Stop the timer and get the last split time.
    */
   TUnit stop()
   {
@@ -78,6 +79,22 @@ public:
   }
 
   /**
+   * @brief Get a split time without stopping the timer.
+   * 
+   * The split is recorded, such that the function is conceptually equivalent to calling `stop()` and `start()` in a row,
+   * but does not introduce any latency.
+   */
+  TUnit split()
+  {
+    m_toc = std::chrono::steady_clock::now();
+    const auto inc = std::chrono::duration_cast<TUnit>(m_toc - m_tic);
+    m_elapsed += inc;
+    m_container.push_back(inc.count());
+    m_tic = m_toc;
+    return inc;
+  }
+
+  /**
    * @brief Test whether the timer is running.
    */
   bool is_running() const
@@ -86,23 +103,39 @@ public:
   }
 
   /**
-   * @brief The last increment.
+   * @brief Get the i-th split time.
    */
-  TUnit last() const
+  TUnit operator[](std::size_t i) const
   {
-    return TUnit {typename TUnit::rep(m_container[m_container.size() - 1])};
+    return TUnit {typename TUnit::rep(m_container[i])};
   }
 
   /**
-   * @brief The elapsed time.
+   * @brief Get the first split time.
    */
-  TUnit elapsed() const
+  TUnit front() const
+  {
+    return operator[](0);
+  }
+
+  /**
+   * @brief Get the last split time.
+   */
+  TUnit back() const
+  {
+    return operator[](m_container.size() - 1);
+  }
+
+  /**
+   * @brief Get the total elapsed time.
+   */
+  TUnit total() const // FIXME rename as sum?
   {
     return m_elapsed;
   }
 
   /**
-   * @brief The number of increments.
+   * @brief Get the number of split times.
    */
   std::size_t size() const
   {
@@ -110,15 +143,15 @@ public:
   }
 
   /**
-   * @brief Get the increments.
+   * @brief Get the split times as `double`s.
    */
-  const std::vector<double>& increments() const
+  const std::vector<double>& container() const
   {
     return m_container;
   }
 
   /**
-   * @brief Get the minimum increment.
+   * @brief Get the minimum split time.
    * @see `distribution()`
    */
   double min() const
@@ -127,7 +160,7 @@ public:
   }
 
   /**
-   * @brief Get the maximum increment.
+   * @brief Get the maximum split time.
    * @see `distribution()`
    */
   double max() const
@@ -136,7 +169,7 @@ public:
   }
 
   /**
-   * @brief Get the pair of min and max increments.
+   * @brief Get the pair of min and max split times.
    * @see `distribution()`
    */
   std::pair<TUnit, TUnit> minmax() const
@@ -146,7 +179,7 @@ public:
   }
 
   /**
-   * @brief Get the increments distribution.
+   * @brief Get the split times distribution.
    */
   DataDistribution<double> distribution() const
   {
@@ -156,12 +189,12 @@ public:
 private:
 
   /**
-   * @brief The time at which start() was called.
+   * @brief The time at which `start()` was called.
    */
   std::chrono::steady_clock::time_point m_tic;
 
   /**
-   * @brief The time at which stop() was called.
+   * @brief The time at which `stop()` was called.
    */
   std::chrono::steady_clock::time_point m_toc;
 
@@ -171,12 +204,12 @@ private:
   bool m_running;
 
   /**
-   * @brief The list of increments.
+   * @brief The list of split times.
    */
   std::vector<double> m_container;
 
   /**
-   * @brief The total m_elapsed time.
+   * @brief The total elapsed time.
    */
   TUnit m_elapsed;
 };

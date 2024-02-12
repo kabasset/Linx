@@ -29,7 +29,7 @@ Timer::Unit benchmark_buffer(Linx::Index size, Linx::Index alignment)
   duration = timer.stop();
   std::cout << "  Sum:" << sum << std::endl;
   std::cout << "  Done in " << duration.count() << "ms" << std::endl;
-  return timer.elapsed();
+  return timer.total();
 }
 
 Timer::Unit benchmark_vector(Linx::Index size)
@@ -49,7 +49,7 @@ Timer::Unit benchmark_vector(Linx::Index size)
   duration = timer.stop();
   std::cout << "  Sum:" << sum << std::endl;
   std::cout << "  Done in " << duration.count() << "ms" << std::endl;
-  return timer.elapsed();
+  return timer.total();
 }
 
 int main(int argc, char const* argv[])

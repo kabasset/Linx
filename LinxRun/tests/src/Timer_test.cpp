@@ -31,9 +31,22 @@ BOOST_FIXTURE_TEST_SUITE(Timer_test, TimerFixture)
 
 BOOST_AUTO_TEST_CASE(init_test)
 {
-  BOOST_TEST(elapsed().count() == offset.count());
+  BOOST_TEST(total().count() == offset.count());
   BOOST_TEST(not is_running());
   BOOST_TEST(size() == 0);
+}
+
+BOOST_AUTO_TEST_CASE(running_split_test)
+{
+  start();
+  BOOST_TEST(size() == 0);
+  const auto splitting = split();
+  BOOST_TEST(is_running());
+  BOOST_TEST(size() == 1);
+  stop();
+  BOOST_TEST(not is_running());
+  BOOST_TEST(size() == 2);
+  BOOST_TEST(splitting.count() == front().count());
 }
 
 BOOST_AUTO_TEST_CASE(one_inc_test)
@@ -43,11 +56,11 @@ BOOST_AUTO_TEST_CASE(one_inc_test)
   wait();
   stop();
   BOOST_TEST(not is_running());
-  BOOST_TEST(elapsed().count() >= offset.count());
+  BOOST_TEST(total().count() >= offset.count());
   BOOST_TEST(size() == 1);
-  const auto inc = last().count();
+  const auto inc = back().count();
   BOOST_TEST(inc >= default_wait);
-  BOOST_TEST(elapsed().count() == offset.count() + inc);
+  BOOST_TEST(total().count() == offset.count() + inc);
   BOOST_TEST(distribution().mean() == inc);
   BOOST_TEST(distribution().stdev(false) == 0.); // Exactly 0.
   BOOST_TEST(min() == inc);
@@ -64,12 +77,12 @@ BOOST_AUTO_TEST_CASE(two_incs_test)
   wait(default_wait * 10); // Wait more
   stop();
   BOOST_TEST(not is_running());
-  BOOST_TEST(elapsed().count() > offset.count());
+  BOOST_TEST(total().count() > offset.count());
   BOOST_TEST(size() == 2);
-  const auto fast = increments()[0];
-  const auto slow = increments()[1];
+  const auto fast = front().count();
+  const auto slow = back().count();
   BOOST_TEST(fast < slow); // FIXME Not that sure!
-  BOOST_TEST(elapsed().count() == offset.count() + fast + slow);
+  BOOST_TEST(total().count() == offset.count() + fast + slow);
   BOOST_TEST(distribution().mean() >= fast);
   BOOST_TEST(distribution().mean() <= slow);
   BOOST_TEST(distribution().stdev() > 0.);
