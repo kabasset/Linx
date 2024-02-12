@@ -24,7 +24,7 @@ Currently supported operations are:
 
 # License
 
-[LGPL-3.0-or-later](LICENSE.md)
+[Apache-2.0](LICENSE.txt)
 
 # Installation
 

@@ -1,6 +1,6 @@
 // @copyright 2022-2024, Antoine Basset (CNES)
 // This file is part of Linx <github.com/kabasset/Linx>
-// SPDX-License-Identifier: LGPL-3.0-or-later
+// SPDX-License-Identifier: Apache-2.0
 
 #ifndef _LINXTRANSFORMS_FILTERLIB_H
 #define _LINXTRANSFORMS_FILTERLIB_H
