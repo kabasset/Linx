@@ -2,15 +2,12 @@
 // This file is part of Linx <github.com/kabasset/Linx>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "ElementsKernel/ProgramHeaders.h"
 #include "Linx/Run/ProgramOptions.h"
 #include "Linx/Run/Timer.h"
 #include "Linx/Transforms/Filters.h"
 
 #include <map>
 #include <string>
-
-static Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkConvolution");
 
 using Image = Linx::Raster<float>;
 using Duration = std::chrono::milliseconds;
@@ -80,40 +77,30 @@ TDuration filter(Image& image, const Image& kernel, char setup)
   return timer.stop();
 }
 
-class RasterBenchmarkCorrelation : public Elements::Program {
-public:
+int main(int argc, char const* argv[])
+{
+  Linx::ProgramOptions options;
+  options.named("case", "Test case: d (default), m (monolith), h (hardcoded)", 'd');
+  options.named("image", "Raster length along each axis", 2048L);
+  options.named("kernel", "Kernel length along each axis", 5L);
+  options.parse(argc, argv);
+  const auto setup = options.as<char>("case");
+  const auto image_diameter = options.as<Linx::Index>("image");
+  const auto kernel_diameter = options.as<Linx::Index>("kernel");
 
-  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
-  {
-    Linx::ProgramOptions options;
-    options.named("case", "Test case: d (default), m (monolith), h (hardcoded)", 'd');
-    options.named("image", "Raster length along each axis", 2048L);
-    options.named("kernel", "Kernel length along each axis", 5L);
-    return options.as_pair();
-  }
+  Linx::Position<2> image_shape {image_diameter, image_diameter};
+  Linx::Position<2> kernel_shape {kernel_diameter, kernel_diameter};
 
-  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override
-  {
-    const auto setup = args["case"].as<char>();
-    const auto image_diameter = args["image"].as<Linx::Index>();
-    const auto kernel_diameter = args["kernel"].as<Linx::Index>();
+  std::cout << "Generating raster and kernel..." << std::endl;
+  auto image = Image(image_shape).range();
+  const auto kernel = Image(kernel_shape).range();
+  std::cout << "  input: " << image << std::endl;
 
-    Linx::Position<2> image_shape {image_diameter, image_diameter};
-    Linx::Position<2> kernel_shape {kernel_diameter, kernel_diameter};
+  std::cout << "Filtering..." << std::endl;
+  const auto duration = filter<Duration>(image, kernel, setup);
+  std::cout << "  output: " << image << std::endl;
 
-    logger.info("Generating raster and kernel...");
-    auto image = Image(image_shape).range();
-    const auto kernel = Image(kernel_shape).range();
-    logger.info() << "  input: " << image;
+  std::cout << "  Done in " << duration.count() << "ms" << std::endl;
 
-    logger.info("Filtering...");
-    const auto duration = filter<Duration>(image, kernel, setup);
-    logger.info() << "  output: " << image;
-
-    logger.info() << "  Done in " << duration.count() << "ms";
-
-    return ExitCode::OK;
-  }
-};
-
-MAIN_FOR(RasterBenchmarkCorrelation)
+  return 0;
+}

@@ -2,14 +2,11 @@
 // This file is part of Linx <github.com/kabasset/Linx>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "ElementsKernel/ProgramHeaders.h"
 #include "Linx/Run/ProgramOptions.h"
 #include "LinxRun/IterationBenchmark.h"
 
 #include <map>
 #include <string>
-
-Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkIteration");
 
 Linx::IterationBenchmark::Duration iterate(Linx::IterationBenchmark& benchmark, char setup)
 {
@@ -35,32 +32,23 @@ Linx::IterationBenchmark::Duration iterate(Linx::IterationBenchmark& benchmark, 
   }
 }
 
-class LinxBenchmarkIteration : public Elements::Program {
-public:
+int main(int argc, char const* argv[])
+{
+  Linx::ProgramOptions options;
+  options.named<char>(
+      "case",
+      "Initial of the test case to be benchmarked: "
+      "x (x-y-z), z (z-y-x), p (position), i (index), v (value), o (operator), g (generate)");
+  options.named<long>("side", "Image width, height and depth (same value)", 400);
+  options.parse(argc, argv);
 
-  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
-  {
-    Linx::ProgramOptions options;
-    options.named<char>(
-        "case",
-        "Initial of the test case to be benchmarked: "
-        "x (x-y-z), z (z-y-x), p (position), i (index), v (value), o (operator), g (generate)");
-    options.named<long>("side", "Image width, height and depth (same value)", 400);
-    return options.as_pair();
-  }
+  std::cout << "Generating random rasters..." << std::endl;
+  Linx::IterationBenchmark benchmark(options.as<Linx::Index>("side"));
 
-  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override
-  {
-    logger.info("Generating random rasters...");
-    Linx::IterationBenchmark benchmark(args["side"].as<long>());
+  std::cout << "Iterating over them..." << std::endl;
+  const auto duration = iterate(benchmark, options.as<char>("case"));
 
-    logger.info("Iterating over them...");
-    const auto duration = iterate(benchmark, args["case"].as<char>());
+  std::cout << "Done in " << duration.count() << "ms" << std::endl;
 
-    logger.info() << "Done in " << duration.count() << "ms";
-
-    return Elements::ExitCode::OK;
-  }
-};
-
-MAIN_FOR(LinxBenchmarkIteration)
+  return 0;
+}

@@ -2,7 +2,6 @@
 // This file is part of Linx <github.com/kabasset/Linx>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "ElementsKernel/ProgramHeaders.h"
 #include "Linx/Data/Grid.h"
 #include "Linx/Data/Mask.h"
 #include "Linx/Data/Raster.h"
@@ -12,8 +11,6 @@
 
 #include <map>
 #include <string>
-
-Elements::Logging logger = Elements::Logging::getLogger("LinxBenchmarkRegions");
 
 template <typename TDuration>
 TDuration filter(Linx::Raster<int, 3>& in, const Linx::Box<3>& box, char setup)
@@ -52,44 +49,35 @@ TDuration filter(Linx::Raster<int, 3>& in, const Linx::Box<3>& box, char setup)
   return timer.stop();
 }
 
-class LinxBenchmarkRegions : public Elements::Program {
-public:
+int main(int argc, char const* argv[])
+{
+  using Duration = std::chrono::milliseconds;
 
-  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
-  {
-    Linx::ProgramOptions options;
-    options.named<char>(
-        "case",
-        "Initial of the test case to be benchmarked: "
-        "b (box), g (grid), m (mask), s (sequence)");
-    options.named<long>("side", "Image width, height and depth (same value)", 400);
-    options.named<long>("radius", "Region radius", 10);
-    return options.as_pair();
-  }
+  Linx::ProgramOptions options;
+  options.named<char>(
+      "case",
+      "Initial of the test case to be benchmarked: "
+      "b (box), g (grid), m (mask), s (sequence)");
+  options.named("side", "Image width, height and depth (same value)", 400L);
+  options.named("radius", "Region radius", 10L);
+  options.parse(argc, argv);
 
-  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override
-  {
-    using Duration = std::chrono::milliseconds;
+  const auto setup = options.as<char>("case");
+  const auto side = options.as<Linx::Index>("side");
+  const auto radius = options.as<Linx::Index>("radius");
 
-    const auto setup = args["case"].as<char>();
-    const auto side = args["side"].as<long>();
-    const auto radius = args["radius"].as<long>();
+  std::cout << "Generating random raster..." << std::endl;
+  auto raster = Linx::Raster<int, 3>({side, side, side});
+  //! [Make box]
+  const auto box = Linx::Box<3>::from_center(radius, {side / 2, side / 2, side / 2});
+  //! [Make box]
 
-    logger.info("Generating random raster...");
-    auto raster = Linx::Raster<int, 3>({side, side, side});
-    //! [Make box]
-    const auto box = Linx::Box<3>::from_center(radius, {side / 2, side / 2, side / 2});
-    //! [Make box]
+  std::cout << "Filtering it..." << std::endl;
+  const auto duration = filter<Duration>(raster, box, setup);
+  const auto count = std::accumulate(raster.begin(), raster.end(), 0);
 
-    logger.info("Filtering it...");
-    const auto duration = filter<Duration>(raster, box, setup);
-    const auto count = std::accumulate(raster.begin(), raster.end(), 0);
+  std::cout << "  Performed " << count << " additions" << std::endl;
+  std::cout << "  Done in " << duration.count() << "ms" << std::endl;
 
-    logger.info() << "Performed " << count << " additions";
-    logger.info() << "in " << duration.count() << "ms";
-
-    return Elements::ExitCode::OK;
-  }
-};
-
-MAIN_FOR(LinxBenchmarkRegions)
+  return 0;
+}
