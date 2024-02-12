@@ -2,12 +2,13 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 elements_subdir(LinxRun)
 
-elements_depends_on_subdirs(ElementsKernel)
 elements_depends_on_subdirs(Linx)
 
+find_package(Boost) # test
+
 elements_add_library(LinxRun src/lib/*.cpp
-                     INCLUDE_DIRS Linx ElementsKernel
-                     LINK_LIBRARIES Linx ElementsKernel
+                     INCLUDE_DIRS Linx
+                     LINK_LIBRARIES Linx
                      PUBLIC_HEADERS LinxRun)
 
 elements_add_executable(LinxBenchmarkBuffers src/program/LinxBenchmarkBuffers.cpp

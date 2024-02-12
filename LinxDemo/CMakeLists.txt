@@ -2,7 +2,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 
 elements_subdir(LinxDemo)
 
-elements_depends_on_subdirs(Linx Linx Linx)
+elements_depends_on_subdirs(Linx)
+
+find_package(Boost) # test
 
 elements_add_unit_test(LinxDemoBasics tests/src/LinxDemoBasics_test.cpp 
                      EXECUTABLE LinxDemoBasics_test

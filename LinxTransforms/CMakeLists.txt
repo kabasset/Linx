@@ -4,6 +4,8 @@ elements_subdir(LinxTransforms)
 
 elements_depends_on_subdirs(Linx)
 
+find_package(Boost) # test
+
 elements_add_unit_test(Affinity tests/src/Affinity_test.cpp 
                      EXECUTABLE LinxTransforms_Affinity_test
                      LINK_LIBRARIES Linx

@@ -2,7 +2,6 @@
 // This file is part of Linx <github.com/kabasset/Linx>
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
-#include "ElementsKernel/ProgramHeaders.h"
 #include "Linx/Data/Raster.h"
 #include "Linx/Io/Fits.h"
 #include "Linx/Run/ProgramOptions.h"
@@ -14,67 +13,55 @@
 #include <string>
 #include <vector>
 
-Elements::Logging logger = Elements::Logging::getLogger("LinxMaskCosmics");
+int main(int argc, char const* argv[])
+{
+  Linx::ProgramOptions options;
+  options.positional<std::string>("input", "The input data file name");
+  options.positional<std::string>("output", "The output mask file name");
+  options.named<std::string>("psf", "The PSF file name");
+  options.named("hdu,i", "The 0-based input HDU index slice", 0L);
+  options.named("pfa,p", "The detection probability of false alarm", 0.01);
+  options.named("quotient,q", "The star rejection quotient threshold", 0.1);
+  options.named("contrast,c", "The region-growing contrast threshold", 0.5);
+  options.named("niter,n", "The number of segmentation iterations", 1L);
+  options.parse(argc, argv);
+  Linx::Fits data_fits(options.as<std::string>("input"));
+  Linx::Fits map_fits(options.as<std::string>("output"));
+  Linx::Fits psf_fits(options.as<std::string>("psf"));
+  const auto hdu = options.as<Linx::Index>("hdu");
+  const auto pfa = options.as<double>("pfa");
+  const auto tq = options.as<double>("quotient");
+  const auto tc = options.as<double>("contrast");
+  const auto iter_count = options.as<Linx::Index>("niter");
 
-class LinxMaskCosmics : public Elements::Program {
-public:
+  Linx::Timer<std::chrono::milliseconds> timer;
 
-  std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
-  {
-    Linx::ProgramOptions options;
-    options.positional<std::string>("input", "The input data file name");
-    options.positional<std::string>("output", "The output mask file name");
-    options.named<std::string>("psf", "The PSF file name");
-    options.named("hdu,i", "The 0-based input HDU index slice", 0L);
-    options.named("pfa,p", "The detection probability of false alarm", 0.01);
-    options.named("quotient,q", "The star rejection quotient threshold", 0.1);
-    options.named("contrast,c", "The region-growing contrast threshold", 0.5);
-    options.named("niter,n", "The number of segmentation iterations", 1L);
-    return options.as_pair();
-  }
+  std::cout << "Reading data: " << data_fits.path() << std::endl;
+  auto data = data_fits.read<Linx::Raster<float>>(hdu);
+  std::cout << "Reading PSF: " << psf_fits.path() << std::endl;
+  auto psf = psf_fits.read<Linx::Raster<float>>();
+  map_fits.write(data, 'w');
 
-  ExitCode mainMethod(std::map<std::string, VariableValue>& args) override
-  {
-    Linx::Fits data_fits(args["input"].as<std::string>());
-    Linx::Fits map_fits(args["output"].as<std::string>());
-    Linx::Fits psf_fits(args["psf"].as<std::string>());
-    const auto hdu = args["hdu"].as<Linx::Index>();
-    const auto pfa = args["pfa"].as<double>();
-    const auto tq = args["quotient"].as<double>();
-    const auto tc = args["contrast"].as<double>();
-    const auto iter_count = args["niter"].as<Linx::Index>();
+  std::cout << "Detecting cosmics..." << std::endl;
+  timer.start();
+  auto mask = Linx::Cosmics::detect(data, psf, pfa, tq);
+  timer.stop();
+  std::cout << "  Done in: " << timer.back().count() << " ms" << std::endl;
+  std::cout << "  Density: " << Linx::mean(mask) << std::endl;
+  map_fits.write(mask, 'a');
 
-    Linx::Timer<std::chrono::milliseconds> timer;
-
-    logger.info() << "Reading data: " << data_fits.path();
-    auto data = data_fits.read<Linx::Raster<float>>(hdu);
-    logger.info() << "Reading PSF: " << psf_fits.path();
-    auto psf = psf_fits.read<Linx::Raster<float>>();
-    map_fits.write(data, 'w');
-
-    logger.info() << "Detecting cosmics...";
+  std::cout << "Segmenting cosmics..." << std::endl;
+  for (Linx::Index i = 0; i < iter_count; ++i) {
+    std::cout << "  Iteration " << i + 1 << "/" << iter_count << std::endl;
     timer.start();
-    auto mask = Linx::Cosmics::detect(data, psf, pfa, tq);
+    Linx::Cosmics::segment(data, mask, tc);
     timer.stop();
-    logger.info() << "  Done in: " << timer.back().count() << " ms";
-    logger.info() << "  Density: " << Linx::mean(mask);
+    std::cout << "    Done in: " << timer.back().count() << " ms" << std::endl;
+    std::cout << "    Density: " << Linx::mean(mask) << std::endl;
     map_fits.write(mask, 'a');
-
-    logger.info() << "Segmenting cosmics...";
-    for (Linx::Index i = 0; i < iter_count; ++i) {
-      logger.info() << "  Iteration " << i + 1 << "/" << iter_count;
-      timer.start();
-      Linx::Cosmics::segment(data, mask, tc);
-      timer.stop();
-      logger.info() << "    Done in: " << timer.back().count() << " ms";
-      logger.info() << "    Density: " << Linx::mean(mask);
-      map_fits.write(mask, 'a');
-    }
-
-    logger.info() << "Saved map as: " << map_fits.path();
-
-    return Elements::ExitCode::OK;
   }
-};
 
-MAIN_FOR(LinxMaskCosmics)
+  std::cout << "Saved map as: " << map_fits.path() << std::endl;
+
+  return 0;
+}

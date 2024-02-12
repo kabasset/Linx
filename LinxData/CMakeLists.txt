@@ -4,7 +4,7 @@ elements_subdir(LinxData)
 
 elements_depends_on_subdirs(Linx)
 
-find_package(Boost)
+find_package(Boost) # test
 
 elements_add_unit_test(BorderedBox tests/src/BorderedBox_test.cpp 
                      EXECUTABLE LinxData_BorderedBox_test

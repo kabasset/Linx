@@ -4,8 +4,7 @@ elements_subdir(LinxIo)
 
 elements_depends_on_subdirs(Linx)
 
-#find_package(Libpng)
-#find_package(Libtiff)
+find_package(Boost) # test
 
 elements_add_unit_test(Fits tests/src/Fits_test.cpp 
                      EXECUTABLE LinxIo_Fits_test

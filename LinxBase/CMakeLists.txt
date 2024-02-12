@@ -4,7 +4,7 @@ elements_subdir(LinxBase)
 
 elements_depends_on_subdirs(Linx)
 
-find_package(Boost) # Operators
+find_package(Boost) # test
 
 elements_add_unit_test(AlignedBuffer tests/src/AlignedBuffer_test.cpp 
                      EXECUTABLE LinxBase_AlignedBuffer_test
