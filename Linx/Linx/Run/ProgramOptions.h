@@ -59,7 +59,9 @@ public:
     /**
      * @brief Constructor.
      */
-    explicit Help(const std::string& description) : m_desc(description), m_usage(" [options]"), m_options() {}
+    explicit Help(const std::string& description) :
+        m_desc(description), m_usage(" [options]"), m_positionals(), m_nameds()
+    {}
 
     /**
      * @brief Check whether an option has a short name.
@@ -87,7 +89,7 @@ public:
     {
       const auto argument = "<" + long_name(name) + ">";
       m_usage += " " + argument;
-      m_options.emplace_back(argument + "\n      " + description);
+      m_positionals.emplace_back(argument + "\n      " + description);
     }
 
     /**
@@ -97,7 +99,7 @@ public:
     void positional(const std::string& name, const std::string& description, T&& default_value)
     {
       positional(name, description);
-      with_default(LINX_FORWARD(default_value));
+      with_default(m_positionals.back(), LINX_FORWARD(default_value));
     }
 
     /**
@@ -108,7 +110,7 @@ public:
       auto option = has_short_name(name) ? std::string {'-', name.back(), ',', ' '} : std::string();
       const auto ln = long_name(name);
       option += "--" + ln + " <" + ln + ">\n      " + description;
-      m_options.push_back(std::move(option));
+      m_nameds.push_back(std::move(option));
     }
 
     /**
@@ -118,7 +120,7 @@ public:
     void named(const std::string& name, const std::string& description, T&& default_value)
     {
       named(name, description);
-      with_default(LINX_FORWARD(default_value));
+      with_default(m_nameds.back(), LINX_FORWARD(default_value));
     }
 
     void flag(const std::string& name, const std::string& description)
@@ -126,7 +128,7 @@ public:
       auto option = has_short_name(name) ? std::string {'-', name.back(), ',', ' '} : std::string();
       const auto ln = long_name(name);
       option += "--" + ln + "\n      " + description;
-      m_options.push_back(std::move(option));
+      m_nameds.push_back(std::move(option));
     }
 
     /**
@@ -136,19 +138,27 @@ public:
     {
       // Help
       if (not m_desc.empty()) {
-        out << "\n" << m_desc << "\n\n";
+        out << "\n" << m_desc << "\n";
       }
 
       // Usage
-      out << "Usage:\n  " << argv0 << m_usage << "\n\n";
+      out << "\nUsage:\n\n  " << argv0 << m_usage << "\n";
       // FIXME split program name?
 
-      // Options
-      if (m_options.empty()) {
+      // Positional options
+      for (const auto& o : m_positionals) {
+        out << "\n  " << o;
+      }
+      if (not m_positionals.empty()) {
+        out << "\n";
+      }
+
+      // Named options
+      if (m_nameds.empty()) {
         return;
       }
-      out << "Options:";
-      for (const auto& o : m_options) {
+      out << "\nOptions:\n";
+      for (const auto& o : m_nameds) {
         out << "\n  " << o;
       }
 
@@ -162,14 +172,14 @@ public:
      * @brief Add a default value to the last declared option.
      */
     template <typename T>
-    void with_default(T&& value)
+    void with_default(std::string& option, T&& value)
     {
       if constexpr (std::is_same_v<std::decay_t<T>, char>) {
-        m_options.back().append("\n      [default: " + std::string {value} + "]");
+        option.append("\n      [default: " + std::string {value} + "]");
       } else if constexpr (std::is_same_v<std::decay_t<T>, std::string>) {
-        m_options.back().append("\n      [default: " + LINX_FORWARD(value) + "]");
+        option.append("\n      [default: " + LINX_FORWARD(value) + "]");
       } else {
-        m_options.back().append("\n      [default: " + std::to_string(LINX_FORWARD(value)) + "]");
+        option.append("\n      [default: " + std::to_string(LINX_FORWARD(value)) + "]");
       }
     }
 
@@ -177,7 +187,8 @@ public:
 
     std::string m_desc; ///< The program description
     std::string m_usage; ///< The program usage
-    std::vector<std::string> m_options; ///< The options description
+    std::vector<std::string> m_positionals; ///< The positional options description
+    std::vector<std::string> m_nameds; ///< The named options description
   };
 
   /**
