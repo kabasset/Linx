@@ -89,7 +89,7 @@ public:
     {
       const auto argument = "<" + long_name(name) + ">";
       m_usage += " " + argument;
-      m_positionals.emplace_back(argument + "\n      " + description);
+      m_positionals.emplace_back(argument + "\n      " + append_dot(description));
     }
 
     /**
@@ -98,7 +98,9 @@ public:
     template <typename T>
     void positional(const std::string& name, const std::string& description, T&& default_value)
     {
-      positional(name, description);
+      const auto argument = "<" + long_name(name) + ">";
+      m_usage += " [" + argument + "]";
+      m_positionals.emplace_back(argument + "\n      " + append_dot(description));
       with_default(m_positionals.back(), LINX_FORWARD(default_value));
     }
 
@@ -109,7 +111,7 @@ public:
     {
       auto option = has_short_name(name) ? std::string {'-', name.back(), ',', ' '} : std::string();
       const auto ln = long_name(name);
-      option += "--" + ln + " <" + ln + ">\n      " + description;
+      option += "--" + ln + " <" + ln + ">\n      " + append_dot(description);
       m_nameds.push_back(std::move(option));
     }
 
@@ -127,7 +129,7 @@ public:
     {
       auto option = has_short_name(name) ? std::string {'-', name.back(), ',', ' '} : std::string();
       const auto ln = long_name(name);
-      option += "--" + ln + "\n      " + description;
+      option += "--" + ln + "\n      " + append_dot(description);
       m_nameds.push_back(std::move(option));
     }
 
@@ -181,6 +183,14 @@ public:
       } else {
         option.append("\n      [default: " + std::to_string(LINX_FORWARD(value)) + "]");
       }
+    }
+
+    static std::string append_dot(const std::string description)
+    {
+      if (description.back() == '.') {
+        return description;
+      }
+      return description + '.';
     }
 
   private:
