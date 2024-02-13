@@ -13,42 +13,63 @@
 
 namespace Linx {
 
+/// @cond
+/**
+ * @brief Internal shortcut.
+ */
+namespace po = boost::program_options;
+/// @endcond
+
 /**
  * @brief Helper class to declare positional, named and flag options, as well as some help message.
  * 
- * Here is an example use case for the following command line:
- * \verbatim Program <positional> --named1 <value1> -f --named2 <value2> \endverbatim
+ * There are three kinds of options:
+ * - positional options: see `positional()`,
+ * - named options: see `named()`,
+ * - flags: see `flag()`.
  * 
- * Here's an example program to handle it:
+ * Positional and named options are optional if they are given a default value.
+ * Arguments of positional options are parsed in order.
+ * Named options and flags accept a short name, given after the long name, separated by a comma.
+ * Arguments of named options are separated from the option name by a space or equal sign.
+ * 
+ * Arguments are parsed from the command line with `parse()`.
+ * The function will print a nicely formatted one in case of failure or if explicitely requested, e.g. with option `--help`.
+ * 
+ * After parsing, arguments are queried with `as()`.
+ * 
+ * Here is an example command line with every kind of options:
+ * 
+ * `tree -d -L 2 --sort=size ~`
+ * 
+ * and a proposed implementation:
+ * 
  * \code
- * std::pair<OptionsDescription, PositionalOptionsDescription> defineProgramArguments() override
+ * 
+ * int main(int argc, const char* argv[])
  * {
- *   ProgramOptions options("My program");
- *   options.positional<std::string>("positional", "Positional option");
- *   options.named<int>("named1", "Named option 1");
- *   options.named<int>("named2", "Named option 2");
- *   options.flag("flag,f", "Flag");
- *   return options.as_pair();
+ *   ProgramOptions options("List contents of a directory");
+ * 
+ *   options.positional("dir", "The parent directory", std::string("."));
+ *   options.flag("dirsonly,d", "List directories only");
+ *   options.named("level,L", "Descend only level directories deep", 0);
+ *   options.named("sort", "Select sort: name,version,size,mtime,ctime", std::string("name"));
+ * 
+ *   options.parse(argc, argv);
+ * 
+ *   const auto dir = options.as<std::string>("dir");
+ *   const auto dirsonly = options.has("dirsonly");
+ *   const auto level = options.as<int>("level");
+ *   const auto sort = options.as<std::string>("sort");
+ * 
+ *   ...
+ * 
+ *   return 0;
  * }
  * \endcode
  */
 class ProgramOptions {
-public:
-
-  /**
-   * @brief Shortcut for Boost.ProgramOptions type.
-   */
-  using OptionsDescription = boost::program_options::options_description;
-
-  /**
-   * @brief Shortcut for Boost.ProgramOptions type.
-   */
-  using PositionalOptionsDescription = boost::program_options::positional_options_description;
-
-  /**
-   * @brief Shortcut for Boost.ProgramOptions type.
-   */
-  using ValueSemantics = boost::program_options::value_semantic;
+private:
 
   /**
    * @brief Helper class to print help messages!
@@ -201,10 +222,12 @@ public:
     std::vector<std::string> m_nameds; ///< The named options description
   };
 
+public:
+
   /**
    * @brief Make a `ProgramOptions` with optional description string and help option.
    * @param description The program description
-   * @param help The help option (disapled if parameter is empty)
+   * @param help The help option (disable with empty string)
    */
   ProgramOptions(const std::string& description = "", const std::string& help = "help,h") :
       m_named("Options", 120), m_add(m_named.add_options()), m_positional(), m_variables(), m_desc(description),
@@ -222,7 +245,7 @@ public:
   template <typename T>
   void positional(const char* name, const char* description)
   {
-    positional(name, boost::program_options::value<T>(), description);
+    positional(name, po::value<T>(), description);
     m_desc.positional(name, description);
   }
 
@@ -232,67 +255,58 @@ public:
   template <typename T>
   void positional(const char* name, const char* description, T default_value)
   {
-    positional(name, boost::program_options::value<T>()->default_value(default_value), description);
+    positional(name, po::value<T>()->default_value(default_value), description);
     m_desc.positional(name, description, default_value);
   }
 
   /**
    * @brief Declare a named option.
-   * 
-   * A short form (1-character) of the option can be provided, separated by a comma.
    */
   template <typename T>
   void named(const char* name, const char* description)
   {
-    named(name, boost::program_options::value<T>(), description);
+    named(name, po::value<T>(), description);
     m_desc.named(name, description);
   }
 
   /**
    * @brief Declare a named option with default value.
-   * 
-   * A short form (1-character) of the option can be provided, separated by a comma.
    */
   template <typename T>
   void named(const char* name, const char* description, T default_value)
   {
-    named(name, boost::program_options::value<T>()->default_value(default_value), description);
+    named(name, po::value<T>()->default_value(default_value), description);
     m_desc.named(name, description, default_value);
   }
 
   /**
    * @brief Declare a flag option.
-   * 
-   * A short form (1-character) of the option can be provided, separated by a comma.
    */
   void flag(const char* name, const char* description)
   {
-    named(name, boost::program_options::value<bool>()->default_value(false)->implicit_value(true), description);
+    named(name, po::value<bool>()->default_value(false)->implicit_value(true), description);
     m_desc.flag(name, description);
-  }
-
-  /**
-   * @brief Get the named (flags included) and positional options as a pair.
-   */
-  [[deprecated]] std::pair<OptionsDescription, PositionalOptionsDescription> as_pair() const
-  {
-    return std::make_pair(m_named, m_positional);
   }
 
   /**
    * @brief Parse a command line.
    * 
-   * If the help option was enabled and is in the command line, then the help message is printed and the program stops.
+   * If the help option was enabled and is in the command line, then the help message is printed and the program completes.
+   * If the parsing fails, then the help message is printed to the standard error and the program terminates with error code.
    */
   void parse(int argc, const char* const argv[])
   {
-    boost::program_options::store(
-        boost::program_options::command_line_parser(argc, argv).options(m_named).positional(m_positional).run(),
-        m_variables);
-    boost::program_options::notify(m_variables);
-    if (not m_help.empty() && has(m_help.c_str())) {
-      m_desc.to_stream(argv[0]);
-      exit(0);
+    try {
+      po::store(po::command_line_parser(argc, argv).options(m_named).positional(m_positional).run(), m_variables);
+      po::notify(m_variables);
+      if (not m_help.empty() && has(m_help.c_str())) {
+        m_desc.to_stream(argv[0]);
+        exit(0);
+      }
+    } catch (...) {
+      std::cerr << "\nFATAL: Cannot parse command line.\n";
+      m_desc.to_stream(argv[0], std::cerr);
+      std::rethrow_exception(std::current_exception());
     }
   }
 
@@ -353,7 +367,7 @@ private:
   /**
    * @brief Declare a positional option with custom semantics.
    */
-  void positional(const char* name, const ValueSemantics* value, const char* description)
+  void positional(const char* name, const po::value_semantic* value, const char* description)
   {
     m_add(name, value, description);
     const int max_args = value->max_tokens();
@@ -365,17 +379,17 @@ private:
    * 
    * A short form (1-character) of the option can be provided, separated by a comma.
    */
-  void named(const char* name, const ValueSemantics* value, const char* description)
+  void named(const char* name, const po::value_semantic* value, const char* description)
   {
     m_add(name, value, description);
   }
 
 private:
 
-  OptionsDescription m_named;
-  boost::program_options::options_description_easy_init m_add;
-  PositionalOptionsDescription m_positional;
-  boost::program_options::variables_map m_variables;
+  po::options_description m_named;
+  po::options_description_easy_init m_add;
+  po::positional_options_description m_positional;
+  po::variables_map m_variables;
   Help m_desc;
   std::string m_help;
 };
