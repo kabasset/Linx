@@ -290,7 +290,7 @@ public:
         boost::program_options::command_line_parser(argc, argv).options(m_named).positional(m_positional).run(),
         m_variables);
     boost::program_options::notify(m_variables);
-    if (not m_help.empty() && as<bool>(m_help.c_str())) {
+    if (not m_help.empty() && has(m_help.c_str())) {
       m_desc.to_stream(argv[0]);
       exit(0);
     }
@@ -330,7 +330,11 @@ public:
    */
   bool has(const char* name) const
   {
-    return m_variables.count(name); // FIXME incompatible with flags
+    try {
+      return as<bool>(name); // Throw for non booleans
+    } catch (boost::bad_any_cast&) {
+      return m_variables.count(name); // Incompatible with flags
+    }
   }
 
   /**
