@@ -245,7 +245,7 @@ public:
   template <typename T>
   void positional(const char* name, const char* description)
   {
-    positional(name, po::value<T>(), description);
+    positional(name, po::value<T>()->required(), description);
     m_desc.positional(name, description);
   }
 
@@ -265,7 +265,7 @@ public:
   template <typename T>
   void named(const char* name, const char* description)
   {
-    named(name, po::value<T>(), description);
+    named(name, po::value<T>()->required(), description);
     m_desc.named(name, description);
   }
 
