@@ -5,6 +5,8 @@
 #ifndef _LINXRUN_PROGRAMOPTIONS_H
 #define _LINXRUN_PROGRAMOPTIONS_H
 
+#include "Linx/Base/TypeUtils.h" // LINX_FORWARD
+
 #include <boost/program_options.hpp>
 #include <iostream>
 #include <sstream>
@@ -49,6 +51,136 @@ public:
   using ValueSemantics = boost::program_options::value_semantic;
 
   /**
+   * @brief Helper class to print help messages!
+   */
+  class Help {
+  public:
+
+    /**
+     * @brief Constructor.
+     */
+    explicit Help(const std::string& description) : m_desc(description), m_usage(" [options]"), m_options() {}
+
+    /**
+     * @brief Check whether an option has a short name.
+     */
+    static bool has_short_name(const std::string& name)
+    {
+      return name.length() > 3 && name[name.length() - 2] == ',';
+    }
+
+    /**
+     * @brief Get the long name of an option.
+     */
+    static std::string long_name(const std::string& name)
+    {
+      if (has_short_name(name)) {
+        return name.substr(0, name.length() - 2);
+      }
+      return name;
+    }
+
+    /**
+     * @brief Declare a positional option.
+     */
+    void positional(const std::string& name, const std::string& description)
+    {
+      const auto argument = "<" + long_name(name) + ">";
+      m_usage += " " + argument;
+      m_options.emplace_back(argument + "\n      " + description);
+    }
+
+    /**
+     * @brief Declare a positional option with default value.
+     */
+    template <typename T>
+    void positional(const std::string& name, const std::string& description, T&& default_value)
+    {
+      positional(name, description);
+      with_default(LINX_FORWARD(default_value));
+    }
+
+    /**
+     * @brief Declare a named option.
+     */
+    void named(const std::string& name, const std::string& description)
+    {
+      auto option = has_short_name(name) ? std::string {'-', name.back(), ',', ' '} : std::string();
+      const auto ln = long_name(name);
+      option += "--" + ln + " <" + ln + ">\n      " + description;
+      m_options.push_back(std::move(option));
+    }
+
+    /**
+     * @brief Declare a named option with default value.
+     */
+    template <typename T>
+    void named(const std::string& name, const std::string& description, T&& default_value)
+    {
+      named(name, description);
+      with_default(LINX_FORWARD(default_value));
+    }
+
+    void flag(const std::string& name, const std::string& description)
+    {
+      auto option = has_short_name(name) ? std::string {'-', name.back(), ',', ' '} : std::string();
+      const auto ln = long_name(name);
+      option += "--" + ln + "\n      " + description;
+      m_options.push_back(std::move(option));
+    }
+
+    /**
+     * @brief Print the help message to a given stream.
+     */
+    void to_stream(const std::string& argv0, std::ostream& out = std::cout)
+    {
+      // Help
+      if (not m_desc.empty()) {
+        out << "\n" << m_desc << "\n\n";
+      }
+
+      // Usage
+      out << "Usage:\n  " << argv0 << m_usage << "\n\n";
+      // FIXME split program name?
+
+      // Options
+      if (m_options.empty()) {
+        return;
+      }
+      out << "Options:";
+      for (const auto& o : m_options) {
+        out << "\n  " << o;
+      }
+
+      out << "\n\n";
+      std::flush(out);
+    }
+
+  private:
+
+    /**
+     * @brief Add a default value to the last declared option.
+     */
+    template <typename T>
+    void with_default(T&& value)
+    {
+      if constexpr (std::is_same_v<std::decay_t<T>, char>) {
+        m_options.back().append("\n      [default: " + std::string {value} + "]");
+      } else if constexpr (std::is_same_v<std::decay_t<T>, std::string>) {
+        m_options.back().append("\n      [default: " + LINX_FORWARD(value) + "]");
+      } else {
+        m_options.back().append("\n      [default: " + std::to_string(LINX_FORWARD(value)) + "]");
+      }
+    }
+
+  private:
+
+    std::string m_desc; ///< The program description
+    std::string m_usage; ///< The program usage
+    std::vector<std::string> m_options; ///< The options description
+  };
+
+  /**
    * @brief Make a `ProgramOptions` with optional description string and help option.
    * @param description The program description
    * @param help The help option (disapled if parameter is empty)
@@ -57,11 +189,9 @@ public:
       m_named("Options", 120), m_add(m_named.add_options()), m_positional(), m_variables(), m_desc(description),
       m_help(help)
   {
-    if (help.length() > 0) {
+    if (m_help.length() > 0) {
       flag(m_help.c_str(), "Print help message");
-      if (m_help.length() > 3 && m_help[m_help.length() - 2] == ',') {
-        m_help = m_help.substr(0, m_help.length() - 2);
-      }
+      m_help = Help::long_name(m_help);
     }
   }
 
@@ -72,6 +202,7 @@ public:
   void positional(const char* name, const char* description)
   {
     positional(name, boost::program_options::value<T>(), description);
+    m_desc.positional(name, description);
   }
 
   /**
@@ -81,16 +212,7 @@ public:
   void positional(const char* name, const char* description, T default_value)
   {
     positional(name, boost::program_options::value<T>()->default_value(default_value), description);
-  }
-
-  /**
-   * @brief Declare a positional option with custom semantics.
-   */
-  void positional(const char* name, const ValueSemantics* value, const char* description)
-  {
-    m_add(name, value, description);
-    const int max_args = value->max_tokens();
-    m_positional.add(name, max_args);
+    m_desc.positional(name, description, default_value);
   }
 
   /**
@@ -102,6 +224,7 @@ public:
   void named(const char* name, const char* description)
   {
     named(name, boost::program_options::value<T>(), description);
+    m_desc.named(name, description);
   }
 
   /**
@@ -113,30 +236,24 @@ public:
   void named(const char* name, const char* description, T default_value)
   {
     named(name, boost::program_options::value<T>()->default_value(default_value), description);
-  }
-
-  /**
-   * @brief Declare a named option with custom semantics.
-   * 
-   * A short form (1-character) of the option can be provided, separated by a comma.
-   */
-  void named(const char* name, const ValueSemantics* value, const char* description)
-  {
-    m_add(name, value, description);
+    m_desc.named(name, description, default_value);
   }
 
   /**
    * @brief Declare a flag option.
+   * 
+   * A short form (1-character) of the option can be provided, separated by a comma.
    */
   void flag(const char* name, const char* description)
   {
     named(name, boost::program_options::value<bool>()->default_value(false)->implicit_value(true), description);
+    m_desc.flag(name, description);
   }
 
   /**
    * @brief Get the named (flags included) and positional options as a pair.
    */
-  std::pair<OptionsDescription, PositionalOptionsDescription> as_pair() const
+  [[deprecated]] std::pair<OptionsDescription, PositionalOptionsDescription> as_pair() const
   {
     return std::make_pair(m_named, m_positional);
   }
@@ -153,10 +270,7 @@ public:
         m_variables);
     boost::program_options::notify(m_variables);
     if (not m_help.empty() && as<bool>(m_help.c_str())) {
-      if (not m_desc.empty()) {
-        std::cout << "\n" << m_desc << "\n";
-      }
-      std::cout << "\nUsage:\n  " << argv[0] << " [options]\n\n" << m_named << std::endl;
+      m_desc.to_stream(argv[0]);
       exit(0);
     }
   }
@@ -211,11 +325,33 @@ public:
 
 private:
 
+  /**
+   * @brief Declare a positional option with custom semantics.
+   */
+  void positional(const char* name, const ValueSemantics* value, const char* description)
+  {
+    m_add(name, value, description);
+    const int max_args = value->max_tokens();
+    m_positional.add(name, max_args);
+  }
+
+  /**
+   * @brief Declare a named option with custom semantics.
+   * 
+   * A short form (1-character) of the option can be provided, separated by a comma.
+   */
+  void named(const char* name, const ValueSemantics* value, const char* description)
+  {
+    m_add(name, value, description);
+  }
+
+private:
+
   OptionsDescription m_named;
   boost::program_options::options_description_easy_init m_add;
   PositionalOptionsDescription m_positional;
   boost::program_options::variables_map m_variables;
-  std::string m_desc;
+  Help m_desc;
   std::string m_help;
 };
 
