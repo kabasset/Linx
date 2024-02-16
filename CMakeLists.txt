@@ -19,5 +19,5 @@ set(ELEMENTS_PARALLEL ON
 
 elements_project(
     Linx 1.0
-    USE Elements 6.3
+    USE Elements 6.2.1
     DESCRIPTION "Extensible N-dimensional image laboratory")
