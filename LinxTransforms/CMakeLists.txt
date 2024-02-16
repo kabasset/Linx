@@ -4,7 +4,13 @@ elements_subdir(LinxTransforms)
 
 elements_depends_on_subdirs(Linx)
 
+find_package(FFTW REQUIRED)
 find_package(Boost) # test
+
+elements_add_library(LinxTransforms src/lib/*.cpp
+                     INCLUDE_DIRS FFTW Linx
+                     LINK_LIBRARIES FFTW Linx
+                     PUBLIC_HEADERS LinxTransforms)
 
 elements_add_unit_test(Affinity tests/src/Affinity_test.cpp 
                      EXECUTABLE LinxTransforms_Affinity_test
@@ -12,15 +18,15 @@ elements_add_unit_test(Affinity tests/src/Affinity_test.cpp
                      TYPE Boost)
 elements_add_unit_test(Dft tests/src/Dft_test.cpp 
                      EXECUTABLE LinxTransforms_Dft_test
-                     LINK_LIBRARIES Linx
+                     LINK_LIBRARIES Linx LinxTransforms
                      TYPE Boost)
 elements_add_unit_test(DftMemory tests/src/DftMemory_test.cpp 
                      EXECUTABLE LinxTransforms_DftMemory_test
-                     LINK_LIBRARIES Linx
+                     LINK_LIBRARIES Linx LinxTransforms
                      TYPE Boost)
 elements_add_unit_test(DftPlan tests/src/DftPlan_test.cpp 
                      EXECUTABLE LinxTransforms_DftPlan_test
-                     LINK_LIBRARIES Linx
+                     LINK_LIBRARIES Linx LinxTransforms
                      TYPE Boost)
 elements_add_unit_test(FilterAgg tests/src/FilterAgg_test.cpp 
                      EXECUTABLE LinxTransforms_FilterAgg_test

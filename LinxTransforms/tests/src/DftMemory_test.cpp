@@ -1,9 +1,9 @@
 // @copyright 2022-2024, Antoine Basset (CNES)
 // This file is part of Linx <github.com/kabasset/Linx>
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: GPL-3.0-or-later
 
-#include "Linx/Transforms/Dft.h"
-#include "Linx/Transforms/DftMemory.h"
+#include "LinxTransforms/Dft.h"
+#include "LinxTransforms/DftMemory.h"
 
 #include <boost/test/unit_test.hpp>
 

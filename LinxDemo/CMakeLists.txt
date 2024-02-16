@@ -3,6 +3,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8.12)
 elements_subdir(LinxDemo)
 
 elements_depends_on_subdirs(Linx)
+elements_depends_on_subdirs(LinxTransforms) # Dft
 
 find_package(Boost) # test
 
@@ -20,7 +21,7 @@ elements_add_unit_test(LinxDemoConstructors tests/src/LinxDemoConstructors_test.
                      TYPE Boost)
 elements_add_unit_test(LinxDemoDft tests/src/LinxDemoDft_test.cpp 
                      EXECUTABLE LinxDemoDft_test
-                     LINK_LIBRARIES Linx
+                     LINK_LIBRARIES Linx LinxTransforms
                      TYPE Boost)
 elements_add_unit_test(LinxDemoInterpolation tests/src/LinxDemoInterpolation_test.cpp 
                      EXECUTABLE LinxDemoInterpolation_test

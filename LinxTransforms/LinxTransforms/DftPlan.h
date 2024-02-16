@@ -1,12 +1,12 @@
 // @copyright 2022-2024, Antoine Basset (CNES)
 // This file is part of Linx <github.com/kabasset/Linx>
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 #ifndef _LINXTRANSFORMS_DFTPLAN_H
 #define _LINXTRANSFORMS_DFTPLAN_H
 
 #include "Linx/Data/Raster.h"
-#include "Linx/Transforms/DftMemory.h"
+#include "LinxTransforms/DftMemory.h"
 
 namespace Linx {
 

@@ -3,5 +3,4 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "Linx/Transforms/Affinity.h"
-#include "Linx/Transforms/Dft.h"
 #include "Linx/Transforms/Filters.h"
