@@ -161,7 +161,7 @@ STRIP_FROM_PATH        = @PROJECT_SOURCE_DIR@
 # specify the list of include paths that are normally passed to the compiler
 # using the -I flag.
 
-STRIP_FROM_INC_PATH    =
+STRIP_FROM_INC_PATH    = @PROJECT_SOURCE_DIR@/@PROJECT_NAME@
 
 # If the SHORT_NAMES tag is set to YES, doxygen will generate much shorter (but
 # less readable) file names. This can be useful is your file systems doesn't
@@ -880,7 +880,7 @@ INPUT                  = @PROJECT_SOURCE_DIR@/README.md \
                          @PROJECT_SOURCE_DIR@/LICENSE.txt \
                          @PROJECT_SOURCE_DIR@/CHANGES.md \
                          @PROJECT_SOURCE_DIR@/doc \
-                         @PROJECT_SOURCE_DIR@/@PROJECT_NAME@
+                         @PROJECT_SOURCE_DIR@/@PROJECT_NAME@/@PROJECT_NAME@
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
