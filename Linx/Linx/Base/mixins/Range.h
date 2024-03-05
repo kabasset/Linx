@@ -19,7 +19,7 @@ namespace Linx {
  * @tparam TDerived The child class which implements required methods
  */
 template <typename T, typename TDerived>
-struct RangeMixin {
+struct RangeMixin { // FIXME merge with DataContainer
   /// @{
   /// @group_modifiers
 
@@ -131,6 +131,44 @@ struct RangeMixin {
   }
 
   /// @group_operations
+
+  /**
+   * @brief Check whether the container contains a given value.
+   */
+  bool contains(const T& value) const
+  {
+    return std::find(static_cast<const TDerived&>(*this).begin(), static_cast<const TDerived&>(*this).end(), value) !=
+        static_cast<const TDerived&>(*this).end();
+  }
+
+  /**
+   * @brief Check whether the container contains NaNs.
+   */
+  bool contains_nan() const
+  {
+    return std::any_of(
+        static_cast<const TDerived&>(*this).begin(),
+        static_cast<const TDerived&>(*this).end(),
+        [&](const T& e) {
+          return e != e;
+        });
+  }
+
+  /**
+   * @brief Check whether all elements are equal to a given value.
+   * 
+   * If the container is empty, return `false`.
+   */
+  bool contains_only(const T& value) const
+  {
+    return static_cast<const TDerived&>(*this).size() != 0 &&
+        std::all_of(
+               static_cast<const TDerived&>(*this).begin(),
+               static_cast<const TDerived&>(*this).end(),
+               [&](const T& e) {
+                 return e == value;
+               });
+  }
 
   /**
    * @brief Get a reference to the (first) min element.

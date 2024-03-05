@@ -234,7 +234,7 @@ struct ContiguousContainerMixin {
   /**
    * @brief Check equality.
    */
-  virtual bool operator==(const TDerived& rhs) const
+  bool operator==(const TDerived& rhs) const
   { // FIXME test addresses
     const auto& lhs = static_cast<const TDerived&>(*this);
     return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
