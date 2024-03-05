@@ -63,7 +63,7 @@ public:
    * @brief Size-based constructor.
    */
   template <typename... TArgs>
-  explicit DataContainer(std::size_t s = 0, TArgs&&... args) : Holder(s, std::forward<TArgs>(args)...)
+  explicit DataContainer(std::size_t s = 0, TArgs&&... args) : Holder(s, LINX_FORWARD(args)...)
   {}
 
   /**
@@ -73,9 +73,9 @@ public:
    */
   template <typename TIt, typename... TArgs>
   explicit DataContainer(TIt begin, TIt end, TArgs&&... args) :
-      DataContainer(std::distance(begin, end), std::forward<TArgs>(args)...)
+      DataContainer(std::distance(begin, end), LINX_FORWARD(args)...)
   { // FIXME distance might be expensive
-    std::copy(std::move(begin), std::move(end), this->data());
+    std::copy(begin, end, this->data());
   }
 
   /// @group_elements
@@ -116,7 +116,7 @@ public:
   using Base = DataContainer<T, DefaultHolder<T>, void, MinimalDataContainer<T>>;
 
   template <typename... TArgs>
-  explicit MinimalDataContainer(std::size_t size = 0, TArgs&&... args) : Base(size, std::forward<TArgs>(args)...)
+  explicit MinimalDataContainer(std::size_t size = 0, TArgs&&... args) : Base(size, LINX_FORWARD(args)...)
   {}
 
   template <typename U>
@@ -125,12 +125,12 @@ public:
 
   template <typename U, typename... TArgs>
   explicit MinimalDataContainer(std::initializer_list<U> list, TArgs&&... args) :
-      Base(list.begin(), list.end(), std::forward<TArgs>(args)...)
+      Base(list.begin(), list.end(), LINX_FORWARD(args)...)
   {}
 
   template <typename TRange, typename std::enable_if_t<IsRange<TRange>::value>* = nullptr, typename... TArgs>
   explicit MinimalDataContainer(TRange& range, TArgs&&... args) :
-      Base(range.begin(), range.end(), std::forward<TArgs>(args)...)
+      Base(range.begin(), range.end(), LINX_FORWARD(args)...)
   {}
 };
 
