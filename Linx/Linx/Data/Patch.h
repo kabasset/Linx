@@ -250,9 +250,45 @@ public:
   }
 
   /**
+   * @brief Create a row at given relative position.
+   * @warning This only works for box-based patches.
+   */
+  auto row(const Position<Dimension == -1 ? -1 : Dimension - 1>& position) const
+  {
+    const auto& raster = rasterize(*this);
+    const auto d = raster.dimension();
+    Position<Dimension> front(d);
+    for (Index i = 1; i < d; ++i) {
+      const auto p = position[i - 1] + m_region.front()[i];
+      front[i] = p;
+    }
+    Position<Dimension> back = front;
+    back[0] = raster.length(0) - 1; // Too much but will be croped anyway
+    return operator()({front, back}); // FIXME test rows(patch)
+  }
+
+  /**
+   * @brief Create a row at given relative position.
+   * @warning This only works for box-based patches.
+   */
+  auto row(const Position<Dimension == -1 ? -1 : Dimension - 1>& position)
+  {
+    const auto& raster = rasterize(*this);
+    const auto d = raster.dimension();
+    Position<Dimension> front(d);
+    for (Index i = 1; i < d; ++i) {
+      const auto p = position[i - 1] + m_region.front()[i];
+      front[i] = p;
+    }
+    Position<Dimension> back = front;
+    back[0] = raster.length(0) - 1; // Too much but will be croped anyway
+    return operator()({front, back}); // FIXME test rows(patch)
+  }
+
+  /**
    * @brief Create a cropped patch.
    */
-  Patch<const T, const TParent, TRegion> operator()(const Box<Dimension>& box) const
+  Patch<const T, const TParent, TRegion> operator()(const Box<Dimension>& box) const // FIXME contiguity
   {
     return Patch<const T, const TParent, TRegion>(*m_parent, m_region & box);
   }
@@ -260,7 +296,7 @@ public:
   /**
    * @brief Create a cropped patch.
    */
-  Patch operator()(const Box<Dimension>& box)
+  Patch operator()(const Box<Dimension>& box) // FIXME contiguity
   {
     return Patch(*m_parent, m_region & box);
   }
@@ -268,7 +304,7 @@ public:
   /**
    * @brief Create a cropped patch.
    */
-  Patch<const T, const TParent, Box<Dimension>> operator()(const Position<Dimension>& position) const
+  Patch<const T, const TParent, Box<Dimension>, true> operator()(const Position<Dimension>& position) const
   {
     return (*this)(Box<Dimension>(position, position)); // FIXME ArrSequence<Position>?
   }
@@ -276,7 +312,7 @@ public:
   /**
    * @brief Create a cropped patch.
    */
-  Patch<T, TParent, Box<Dimension>> operator()(const Position<Dimension>& position)
+  Patch<T, TParent, Box<Dimension>, true> operator()(const Position<Dimension>& position)
   {
     return (*this)(Box<Dimension>(position, position)); // FIXME ArrSequence<Position>?
   }
