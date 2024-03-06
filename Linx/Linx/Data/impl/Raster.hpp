@@ -85,7 +85,7 @@ const Position<N>& Raster<T, N, THolder>::shape() const
 template <typename T, Index N, typename THolder>
 Box<N> Raster<T, N, THolder>::domain() const
 {
-  return Box<N>::from_shape(Position<N>::zero(), m_shape);
+  return Box<N>::from_shape(m_shape);
 }
 
 template <typename T, Index N, typename THolder>

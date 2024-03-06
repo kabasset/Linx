@@ -48,27 +48,38 @@ public:
   /// @{
   /// @group_construction
 
-  Box() : Box(Position<N>::one(), Position<N>::zero()) {}
+  Box() : Box(Position<N>::one(), Position<N>::zero()) {} // FIXME {zero(), -one()}
 
   /**
    * @brief Constructor.
    */
-  Box(Position<N> front, Position<N> back) : m_front(std::move(front)), m_back(std::move(back)) {}
+  Box(Position<N> front, Position<N> back) : m_front(LINX_MOVE(front)), m_back(LINX_MOVE(back)) {}
+
+  /**
+   * @brief Create a box from a shape (front is zero).
+   */
+  static Box<N> from_shape(Position<N> shape)
+  {
+    const auto dim = shape.size();
+    return from_shape(Position<N>::zero(dim), LINX_MOVE(shape));
+  }
 
   /**
    * @brief Create a box from a front position and shape.
    */
   static Box<N> from_shape(Position<N> front, Position<N> shape)
   {
-    return {front, front + std::move(shape) - 1}; // FIXME move front once
+    shape += front;
+    --shape; // FIXME merge the two loops
+    return {LINX_MOVE(front), LINX_MOVE(shape)};
   }
 
   /**
    * @brief Create a box from a radius and center position.
    */
-  static Box<N> from_center(Index radius = 1, const Position<N> center = Position<N>::zero())
+  static Box<N> from_center(Index radius = 1, const Position<N>& center = Position<N>::zero())
   {
-    return {center - radius, center + radius}; // FIXME move center once
+    return {center - radius, center + radius};
   }
 
   /**

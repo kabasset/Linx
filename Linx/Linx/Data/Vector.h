@@ -92,27 +92,27 @@ public:
   /**
    * @brief Create a vector full of `Limits::zero()'s.
    */
-  static Vector<T, N> zero()
+  static Vector<T, N> zero(Index size = std::abs(N))
   {
-    Vector<T, N> res(std::abs(N));
+    Vector<T, N> res(size);
     return res.fill(Limits<T>::zero());
   }
 
   /**
    * @brief Create a vector full of `Limits::one()'s.
    */
-  static Vector<T, N> one()
+  static Vector<T, N> one(Index size = std::abs(N))
   {
-    Vector<T, N> res(std::abs(N));
+    Vector<T, N> res(size);
     return res.fill(Limits<T>::one());
   }
 
   /**
    * @brief Create a vector full of `Limits::inf()'s.
    */
-  static Vector<T, N> inf()
+  static Vector<T, N> inf(Index size = std::abs(N))
   {
-    Vector<T, N> res(std::abs(N));
+    Vector<T, N> res(size);
     return res.fill(Limits<T>::inf());
   }
 
@@ -121,12 +121,7 @@ public:
    */
   bool is_zero() const
   {
-    for (auto i : *this) {
-      if (i != Limits<T>::zero()) {
-        return false;
-      }
-    }
-    return true;
+    return this->contains_only(Limits<T>::zero());
   }
 
   /**
@@ -134,12 +129,7 @@ public:
    */
   bool is_one() const
   {
-    for (auto i : *this) {
-      if (i != Limits<T>::one()) {
-        return false;
-      }
-    }
-    return true;
+    return this->contains_only(Limits<T>::one());
   }
 
   /**
@@ -147,12 +137,7 @@ public:
    */
   bool is_inf() const
   {
-    for (auto i : *this) {
-      if (i != Limits<T>::inf()) {
-        return false;
-      }
-    }
-    return true;
+    return this->contains_only(Limits<T>::inf());
   }
 
   /**
