@@ -251,16 +251,10 @@ public:
    */
   auto row(const Position<Patch::OneLessDimension> position) const
   {
-    const auto& raster = rasterize(*this);
-    const auto d = raster.dimension();
-    Position<Patch::Dimension> front(d);
-    for (Index i = 1; i < d; ++i) {
-      const auto p = position[i - 1] + m_region.front()[i];
-      front[i] = p;
-    }
+    Position<Patch::Dimension> front = insert<0>(position) + m_region.front();
     Position<Patch::Dimension> back = front;
-    back[0] = raster.length(0) - 1; // Too much but will be croped anyway
-    return operator()({front, back}); // FIXME test rows(patch)
+    back[0] += m_region.length(0) - 1;
+    return operator()({LINX_MOVE(front), LINX_MOVE(back)});
   }
 
   /**
@@ -269,16 +263,10 @@ public:
    */
   auto row(const Position<Patch::OneLessDimension>& position)
   {
-    const auto& raster = rasterize(*this);
-    const auto d = raster.dimension();
-    Position<Patch::Dimension> front(d);
-    for (Index i = 1; i < d; ++i) {
-      const auto p = position[i - 1] + m_region.front()[i];
-      front[i] = p;
-    }
+    Position<Patch::Dimension> front = insert<0>(position) + m_region.front();
     Position<Patch::Dimension> back = front;
-    back[0] = raster.length(0) - 1; // Too much but will be croped anyway
-    return operator()({front, back}); // FIXME test rows(patch)
+    back[0] += m_region.length(0) - 1;
+    return operator()({LINX_MOVE(front), LINX_MOVE(back)});
   }
 
   /**

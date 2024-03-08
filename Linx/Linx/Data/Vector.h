@@ -207,7 +207,7 @@ Vector<T, Dimensional<N>::OneLessDimension> erase(const Vector<T, N>& in)
  * The size of the resulting vector is that of the input vector plus one.
  */
 template <Index I, typename T, Index N>
-Vector<T, Dimensional<N>::OneMoreDimension> insert(const Vector<T, N>& in, T&& value)
+Vector<T, Dimensional<N>::OneMoreDimension> insert(const Vector<T, N>& in, T&& value = T {})
 {
   static_assert(I >= 0);
   constexpr auto M = Dimensional<N>::OneMoreDimension;

@@ -22,7 +22,10 @@ public:
   static constexpr Index Dimension = TParent::OneLessDimension;
   using Value = decltype(TParent().row(Position<Dimension>()));
 
-  RowGenerator(TParent& in) : m_parent(&in), m_fronts(erase<0>(in.domain())), m_current(m_fronts.begin()) {}
+  RowGenerator(TParent& in) :
+      m_parent(&in), m_fronts(erase<0>(Box<TParent::Dimension>::from_shape(in.domain().shape()))),
+      m_current(m_fronts.begin())
+  {}
 
   RowGenerator begin() const
   {

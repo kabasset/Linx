@@ -127,6 +127,21 @@ BOOST_AUTO_TEST_CASE(raster_tiles_parallelization_test)
   BOOST_TEST(raster.container() == threads);
 }
 
+BOOST_AUTO_TEST_CASE(patch_rows_test)
+{
+  const auto raster = Raster<Index, 3>({2, 3, 4});
+  const auto region = Linx::Box<3>::from_shape({1, 0, 1}, {2, 3, 3});
+  const auto patch = raster(region);
+  const auto plane = project(region);
+  auto pit = plane.begin();
+  for (auto row : rows(patch)) {
+    auto r = row.domain().front();
+    auto p = *pit;
+    BOOST_TEST(r == p);
+    ++pit;
+  }
+}
+
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE_END()
