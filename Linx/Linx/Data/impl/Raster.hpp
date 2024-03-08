@@ -13,9 +13,6 @@
 
 namespace Linx {
 
-template <typename T, Index N, typename THolder>
-constexpr Index Raster<T, N, THolder>::Dimension;
-
 /// @cond INTERNAL
 namespace Internal {
 
@@ -204,7 +201,7 @@ typename Raster<T, N, THolder>::ConstSection Raster<T, N, THolder>::section(Inde
   auto b = shape() - 1;
   f[last] = index;
   b[last] = index;
-  return slice<(N == -1 ? -1 : N - 1)>(Box<N>(f, b));
+  return slice<ConstSection::Dimension>(Box<N>(f, b));
 }
 
 template <typename T, Index N, typename THolder>
@@ -215,12 +212,12 @@ typename Raster<T, N, THolder>::Section Raster<T, N, THolder>::section(Index ind
   auto b = shape() - 1;
   f[last] = index;
   b[last] = index;
-  return slice<(N == -1 ? -1 : N - 1)>(Box<N>(f, b));
+  return slice<Section::Dimension>(Box<N>(f, b));
 }
 
 template <typename T, Index N, typename THolder>
 typename Raster<T, N, THolder>::ConstRow
-Raster<T, N, THolder>::row(const Position<N == -1 ? -1 : N - 1>& position) const
+Raster<T, N, THolder>::row(const Position<Raster<T, N, THolder>::OneLessDimension>& position) const
 {
   Position<N> f(dimension());
   for (Index i = 1; i < dimension(); ++i) {
@@ -231,7 +228,8 @@ Raster<T, N, THolder>::row(const Position<N == -1 ? -1 : N - 1>& position) const
 }
 
 template <typename T, Index N, typename THolder>
-typename Raster<T, N, THolder>::Row Raster<T, N, THolder>::row(const Position<N == -1 ? -1 : N - 1>& position)
+typename Raster<T, N, THolder>::Row
+Raster<T, N, THolder>::row(const Position<Raster<T, N, THolder>::OneLessDimension>& position)
 {
   Position<N> f(dimension());
   for (Index i = 1; i < dimension(); ++i) {
@@ -244,7 +242,7 @@ typename Raster<T, N, THolder>::Row Raster<T, N, THolder>::row(const Position<N 
 template <typename T, Index N, typename THolder>
 template <Index I>
 Raster<T, N, THolder>::ConstProfile<I>
-Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position) const
+Raster<T, N, THolder>::profile(const Position<Raster<T, N, THolder>::OneLessDimension>& position) const
 {
   Position<N> f(dimension());
   for (Index i = 0; i < I; ++i) {
@@ -261,7 +259,8 @@ Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position) c
 
 template <typename T, Index N, typename THolder>
 template <Index I>
-Raster<T, N, THolder>::Profile<I> Raster<T, N, THolder>::profile(const Position<N == -1 ? -1 : N - 1>& position)
+Raster<T, N, THolder>::Profile<I>
+Raster<T, N, THolder>::profile(const Position<Raster<T, N, THolder>::OneLessDimension>& position)
 {
   Position<N> f(dimension());
   for (Index i = 0; i < I; ++i) {

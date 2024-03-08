@@ -154,22 +154,13 @@ using AlignedRaster = Raster<T, N, AlignedBuffer<T>>;
  * @see \ref primer
  */
 template <typename T, Index N = 2, typename THolder = DefaultHolder<T>>
-class Raster : public DataContainer<T, THolder, EuclidArithmetic, Raster<T, N, THolder>> {
+class Raster : public Dimensional<N>, public DataContainer<T, THolder, EuclidArithmetic, Raster<T, N, THolder>> {
 public:
 
   /**
    * @brief The pixel value type.
    */
   using Value = T;
-
-  /**
-   * @brief The dimension template parameter.
-   * 
-   * The value of `Dimension` is always `N`, irrespective of its sign.
-   * In contrast, `dimension()` provides the actual, run-time dimension of the raster,
-   * even in the case of a variable dimension.
-   */
-  static constexpr Index Dimension = N;
 
   /**
    * @brief The container type.
@@ -201,13 +192,13 @@ public:
    * auto z = chunk3d.domain().front()[2]; // Unavailable to section2d
    * \endcode
    */
-  using Section = PtrRaster<T, N == -1 ? -1 : N - 1>;
+  using Section = PtrRaster<T, Raster::OneLessDimension>;
 
   /**
    * @brief The constant section type.
    * @see Section
    */
-  using ConstSection = PtrRaster<const T, N == -1 ? -1 : N - 1>;
+  using ConstSection = PtrRaster<const T, Raster::OneLessDimension>;
 
   /**
    * @brief The chunk type.
@@ -497,24 +488,24 @@ public:
   /**
    * @brief Create a row-section at given position.
    */
-  ConstRow row(const Position<N == -1 ? -1 : N - 1>& position) const;
+  ConstRow row(const Position<Raster::OneLessDimension>& position) const;
 
   /**
    * @copybrief row()const
    */
-  Row row(const Position<N == -1 ? -1 : N - 1>& position);
+  Row row(const Position<Raster::OneLessDimension>& position);
 
   /**
    * @brief Create a line-patch at given position.
    */
   template <Index I>
-  ConstProfile<I> profile(const Position<N == -1 ? -1 : N - 1>& position) const;
+  ConstProfile<I> profile(const Position<Raster::OneLessDimension>& position) const;
 
   /**
    * @brief Create a line-patch at given position.
    */
   template <Index I>
-  Profile<I> profile(const Position<N == -1 ? -1 : N - 1>& position);
+  Profile<I> profile(const Position<Raster::OneLessDimension>& position);
 
   /**
    * @brief Create a patch from given region.

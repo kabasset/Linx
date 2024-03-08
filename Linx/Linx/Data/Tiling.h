@@ -144,8 +144,7 @@ auto rasterize(const Internal::ProfileGenerator<TParent, I>& generator)
  * @ingroup regions
  * @brief Get a line-section partitioning of a raster.
  * 
- * This function is similar to `profiles<0>()` but parts are `PtrRaster`s instead of `Patch`es
- * since data is necessarily contiguous along axis 0.
+ * This function is similar to `profiles<0>()` but parts are necessarily contiguous along axis 0.
  * 
  * @see profiles()
  */

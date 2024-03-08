@@ -5,8 +5,8 @@
 #ifndef _LINXDATA_MATRIX_H
 #define _LINXDATA_MATRIX_H
 
-#include "Linx/Base/mixins/DataContainer.h"
 #include "Linx/Base/Exceptions.h"
+#include "Linx/Base/mixins/DataContainer.h"
 #include "Linx/Data/Vector.h"
 
 #include <eigen3/Eigen/Core>

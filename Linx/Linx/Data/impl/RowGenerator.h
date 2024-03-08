@@ -16,10 +16,10 @@ template <typename TParent>
 class RowGenerator :
     public std::iterator<
         std::forward_iterator_tag,
-        decltype(TParent().row(Position < TParent::Dimension == -1 ? -1 : TParent::Dimension - 1 > ()))> {
+        decltype(TParent().row(Position<TParent::OneLessDimension>()))> { // FIXME Dimensional?
 public:
 
-  static constexpr Index Dimension = TParent::Dimension == -1 ? -1 : TParent::Dimension - 1;
+  static constexpr Index Dimension = TParent::OneLessDimension;
   using Value = decltype(TParent().row(Position<Dimension>()));
 
   RowGenerator(TParent& in) : m_parent(&in), m_fronts(erase<0>(in.domain())), m_current(m_fronts.begin()) {}

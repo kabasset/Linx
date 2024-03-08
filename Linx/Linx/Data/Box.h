@@ -25,15 +25,10 @@ class BorderedBox; // for friendness // FIXME rm?
  * Like `Position`, this class stores no pixel values, but coordinates.
  */
 template <Index N = 2>
-class Box : boost::additive<Box<N>, Index> {
+class Box : public Dimensional<N>, public boost::additive<Box<N>, Index> {
   friend class Internal::BorderedBox<N>; // FIXME move to FilterMixin, sole user
 
 public:
-
-  /**
-   * @brief The dimension parameter.
-   */
-  static constexpr Index Dimension = N;
 
   /**
    * @brief A position iterator.
@@ -512,7 +507,7 @@ Box<N> project(Box<N> in, Index axis = 0)
  * @tparam The index of the axis
  */
 template <Index I, Index N>
-Box<N == -1 ? -1 : N - 1> erase(const Box<N>& in)
+Box<Dimensional<N>::OneLessDimension> erase(const Box<N>& in)
 {
   return {erase<I>(in.front()), erase<I>(in.back())};
 }
@@ -525,7 +520,7 @@ Box<N == -1 ? -1 : N - 1> erase(const Box<N>& in)
  * @param back The back bound along axis `I`
  */
 template <Index I, Index N>
-Box<N == -1 ? -1 : N + 1> insert(const Box<N>& in, Index front, Index back)
+Box<Dimensional<N>::OneMoreDimension> insert(const Box<N>& in, Index front, Index back)
 {
   return {insert<I>(in.front(), front), insert<I>(in.back(), back)};
 }

@@ -13,16 +13,16 @@ namespace Linx {
 namespace Internal {
 
 template <typename TParent, Index I>
-using ProfileGeneratorValueImpl =
-    decltype(TParent().template profile<I>(Position<(TParent::Dimension == -1 ? -1 : TParent::Dimension - 1)>()));
+using ProfileGeneratorValueImpl = decltype(TParent().template profile<I>(Position<(TParent::OneLessDimension)>()));
 
 // FIXME GeneratorMixin
 template <typename TParent, Index I>
-class ProfileGenerator : public std::iterator<std::forward_iterator_tag, ProfileGeneratorValueImpl<TParent, I>> {
+class ProfileGenerator :
+    public std::iterator<std::forward_iterator_tag, ProfileGeneratorValueImpl<TParent, I>> { // FIXME Dimensional?
 public:
 
   using Value = ProfileGeneratorValueImpl<TParent, I>;
-  static constexpr Index Dimension = TParent::Dimension == -1 ? -1 : TParent::Dimension - 1;
+  static constexpr Index Dimension = TParent::OneLessDimension;
 
   ProfileGenerator(TParent& in) : m_parent(&in), m_fronts(erase<I>(m_parent->domain())), m_current(m_fronts.begin()) {}
 

@@ -5,6 +5,7 @@
 #ifndef _LINXDATA_VECTOR_H
 #define _LINXDATA_VECTOR_H
 
+#include "Linx/Base/Dimension.h"
 #include "Linx/Base/TypeUtils.h"
 #include "Linx/Base/mixins/DataContainer.h"
 #include "Linx/Base/mixins/Math.h" // abspow
@@ -13,19 +14,6 @@
 #include <type_traits> // conditional
 
 namespace Linx {
-
-/**
- * @brief A container of coordinates.
- */
-template <typename T, Index N = 2>
-using Coordinates = typename std::conditional<(N == -1), std::vector<T>, std::array<T, (std::size_t)N>>::type;
-
-/**
- * @relatesalso Position
- * @brief The index container type.
- */
-template <Index N = 2>
-using Indices = Coordinates<Index, N>;
 
 /**
  * @ingroup data_classes
@@ -40,18 +28,15 @@ using Indices = Coordinates<Index, N>;
  * @tspecialization{Position}
  */
 template <typename T, Index N = 2>
-class Vector : public DataContainer<T, StdHolder<Coordinates<T, N>>, VectorArithmetic, Vector<T, N>> {
+class Vector :
+    public Dimensional<N>,
+    public DataContainer<T, StdHolder<Coordinates<T, N>>, VectorArithmetic, Vector<T, N>> {
 public:
 
   /**
    * @brief The value type.
    */
   using Value = T;
-
-  /**
-   * @brief The dimension template parameter.
-   */
-  static constexpr Index Dimension = N;
 
   /**
    * @brief The container type.
@@ -201,10 +186,10 @@ Vector<T, M> extend(const Vector<T, N>& vector, Vector<T, M> padding = Vector<T,
  * The size of the resulting vector is that of the input vector minus one.
  */
 template <Index I, typename T, Index N>
-Vector<T, N == -1 ? -1 : N - 1> erase(const Vector<T, N>& in)
+Vector<T, Dimensional<N>::OneLessDimension> erase(const Vector<T, N>& in)
 {
   static_assert(I >= 0);
-  constexpr auto M = N == -1 ? -1 : N - 1;
+  constexpr auto M = Dimensional<N>::OneLessDimension;
   Vector<T, M> out(in.size() - 1);
   for (std::size_t i = 0; i < I; ++i) {
     out[i] = in[i];
@@ -222,10 +207,10 @@ Vector<T, N == -1 ? -1 : N - 1> erase(const Vector<T, N>& in)
  * The size of the resulting vector is that of the input vector plus one.
  */
 template <Index I, typename T, Index N>
-Vector<T, N == -1 ? -1 : N + 1> insert(const Vector<T, N>& in, T&& value)
+Vector<T, Dimensional<N>::OneMoreDimension> insert(const Vector<T, N>& in, T&& value)
 {
   static_assert(I >= 0);
-  constexpr auto M = N == -1 ? -1 : N + 1;
+  constexpr auto M = Dimensional<N>::OneMoreDimension;
   Vector<T, M> out(in.size() + 1);
   for (std::size_t i = 0; i < I; ++i) {
     out[i] = in[i];
