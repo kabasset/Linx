@@ -205,6 +205,23 @@ public:
     return m_indexing.template end<Value>(*m_parent, m_region);
   }
 
+  /**
+   * @brief Get a pointer to the underlying array.
+   * @warning This method is only valid for contiguous patches.
+   */
+  const Value* data() const
+  {
+    return &(*begin());
+  }
+
+  /**
+   * @copydoc data()const
+   */
+  Value* data()
+  {
+    return &(*begin());
+  }
+
   /// @group_modifiers
 
   /**
@@ -247,7 +264,25 @@ public:
 
   /**
    * @brief Create a row at given relative position.
+   * @param i The row index following the data ordering
+   * @param position The row position
    * @warning This only works for box-based patches.
+   */
+  auto row(Index i) const
+  {
+    return row(Position<1> {i}); // FIXME accept other dimensions
+  }
+
+  /**
+   * @copydoc row(Index)const
+   */
+  auto row(Index i)
+  {
+    return row(Position<1> {i}); // FIXME accept other dimensions
+  }
+
+  /**
+   * @copydoc row(Index)const
    */
   auto row(const Position<Patch::OneLessDimension> position) const
   {
@@ -258,8 +293,7 @@ public:
   }
 
   /**
-   * @brief Create a row at given relative position.
-   * @warning This only works for box-based patches.
+   * @copydoc row(Index)const
    */
   auto row(const Position<Patch::OneLessDimension>& position)
   {

@@ -486,12 +486,30 @@ public:
   Section section(Index index);
 
   /**
-   * @brief Create a row-section at given position.
+   * @brief Create a row at given position.
+   * @param i The row index following the data ordering
+   * @param position The row position with dimension N - 1 (the coordinate along the first axis is not specified)
+   */
+  ConstRow row(Index i) const
+  {
+    return row(Position<1> {i}); // FIXME accept other dimensions
+  }
+
+  /**
+   * @copybrief row(Index)const
+   */
+  Row row(Index i)
+  {
+    return row(Position<1> {i}); // FIXME accept other dimensions
+  }
+
+  /**
+   * @copybrief row(Index)const
    */
   ConstRow row(const Position<Raster::OneLessDimension>& position) const;
 
   /**
-   * @copybrief row()const
+   * @copybrief row(Index)const
    */
   Row row(const Position<Raster::OneLessDimension>& position);
 
