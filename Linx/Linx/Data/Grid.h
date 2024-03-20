@@ -129,20 +129,11 @@ public:
    */
   Index size() const
   {
-    Index out = length<0>();
+    Index out = length(0);
     for (Index i = 1; i < dimension(); ++i) {
       out *= length(i);
     }
     return out;
-  }
-
-  /**
-   * @brief Get the number of nodes along given axis.
-   */
-  template <Index I>
-  [[deprecated]] Index length() const
-  {
-    return (m_box.template length<I>() - 1) / m_step[I] + 1;
   }
 
   /**

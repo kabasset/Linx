@@ -140,15 +140,6 @@ public:
   /**
    * @brief Get the box length along given axis.
    */
-  template <Index I>
-  [[deprecated]] Index length() const
-  {
-    return m_back[I] - m_front[I] + 1;
-  }
-
-  /**
-   * @brief Get the box length along given axis.
-   */
   constexpr Index length(Index i) const
   {
     return m_back[i] - m_front[i] + 1;
@@ -209,49 +200,6 @@ public:
       }
     }
     return true;
-  }
-
-  /**
-   * @brief Create a list of boxes around the box.
-   * @param margin The extent of the surrounding
-   * 
-   * The indices of `margin.front` must be negative or null
-   * while those of `margin.back` must be positive or null.
-   * No empty boxes are created, such that the number of output boxes
-   * is less than `2 * in.dimension()` if some indices are null.
-   * 
-   * The union of all output boxes and the input box is a box such that:
-   * `union.front = in.front + margin.front` and `union.back = in.back + margin.back`.
-   * Partitioning is optimized for data locality when scanning raster pixels in the boxes.
-   */
-  [[deprecated]] std::vector<Box<N>> surround(const Box<N>& margin) const
-  { // FIXME useless thanks to BorderedBox?
-    Box<N> current = *this;
-    const auto dim = dimension();
-    std::vector<Box<N>> out;
-    out.reserve(dim * 2);
-
-    for (Index i = 0; i < dim; ++i) {
-      // Front
-      const auto f = margin.m_front[i];
-      if (f < 0) {
-        auto before = current;
-        before.m_back[i] = current.m_front[i] - 1;
-        before.m_front[i] = current.m_front[i] += f;
-        out.push_back(before);
-      }
-
-      // Back
-      const auto b = margin.m_back[i];
-      if (b > 0) {
-        auto after = current;
-        after.m_front[i] = current.m_back[i] + 1;
-        after.m_back[i] = current.m_back[i] += b;
-        out.push_back(after);
-      }
-    }
-
-    return out;
   }
 
   /// @group_modifiers
@@ -362,8 +310,8 @@ public:
   Box<N>& operator+=(const Box<M>& margin)
   {
     // FIXME allow N=-1
-    m_front += margin.front().template extend<N>();
-    m_back += margin.back().template extend<N>();
+    m_front += extend<N>(margin.front());
+    m_back += extend<N>(margin.back());
     return *this;
   }
 

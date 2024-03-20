@@ -214,14 +214,14 @@ BOOST_AUTO_TEST_CASE(sectionning_test)
   const auto section2d = raster3d.section(3);
   BOOST_TEST(section2d.shape() == Position<2>({8, 9}));
   for (const auto& p : section2d.domain()) {
-    BOOST_TEST((section2d[p] == raster3d[p.extend<3>({0, 0, 3})]));
+    BOOST_TEST((section2d[p] == raster3d[extend<3>(p, {0, 0, 3})]));
   }
 
   // 1D
   const auto section1d = section2d.section(6);
   BOOST_TEST(section1d.shape() == Position<1> {8});
   for (const auto& p : section1d.domain()) {
-    BOOST_TEST((section1d[p] == raster3d[p.extend<3>({0, 6, 3})]));
+    BOOST_TEST((section1d[p] == raster3d[extend<3>(p, {0, 6, 3})]));
   }
 
   // 0D

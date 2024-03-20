@@ -118,7 +118,7 @@ public:
    * @brief Constructor for boxes.
    */
   StrideBasedIndexing(const TParent& parent, const Box<TParent::Dimension>& region) :
-      m_step(1), m_width(region.template length<0>()), m_offsets(region.size() / std::max(m_width, 1L) + 1)
+      m_step(1), m_width(region.length(0)), m_offsets(region.size() / std::max(m_width, 1L) + 1)
   // max to prevent division by 0, +1 in order to dereference m_offsets.end() in iterator
   {
     if (region.size() <= 0) { // FIXME needed?
@@ -134,8 +134,7 @@ public:
    * @brief Constructor for grids.
    */
   StrideBasedIndexing(const TParent& parent, const Grid<TParent::Dimension>& region) :
-      m_step(region.step()[0]), m_width(region.template length<0>()),
-      m_offsets(region.size() / std::max(m_width, 1L) + 1)
+      m_step(region.step()[0]), m_width(region.length(0)), m_offsets(region.size() / std::max(m_width, 1L) + 1)
   // for max and +1 see above
   {
     if (region.size() <= 0) { // FIXME needed?

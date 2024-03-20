@@ -126,7 +126,7 @@ struct Linear {
   {
     const auto f = floor<Index>(position.back());
     const auto d = position.back() - f;
-    const auto pos = position.template slice<N - 1>();
+    const auto pos = slice<N - 1>(position);
     const auto p = at<T>(raster, pos, f, indices...);
     const auto n = at<T>(raster, pos, f + 1, indices...);
     return d * (n - p) + p;
@@ -162,7 +162,7 @@ struct Cubic {
   {
     const auto f = floor<Index>(position.back());
     const auto d = position.back() - f;
-    const auto pos = position.template slice<N - 1>();
+    const auto pos = slice<N - 1>(position);
     const auto pp = at<T>(raster, pos, f - 1, indices...);
     const auto p = at<T>(raster, pos, f, indices...);
     const auto n = at<T>(raster, pos, f + 1, indices...);

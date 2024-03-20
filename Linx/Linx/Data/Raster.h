@@ -378,7 +378,7 @@ public:
   /**
    * @copydoc length()
    */
-  [[deprecated]] Index length(Index i) const
+  Index length(Index i) const
   {
     return m_shape[i];
   }

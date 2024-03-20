@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(fill_test)
 
   // Evenly spaced values (from min, max)
   raster.linspace(0, Linx::pi<double>());
-  std::cout << raster << std::endl; // [0, 0.2 π, 0.4 π...]
+  std::cout << raster << std::endl; // [0, 0.2, 0.4...]
   BOOST_TEST(raster[0] == 0);
 
   // Value generation

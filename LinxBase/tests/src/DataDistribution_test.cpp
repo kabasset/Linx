@@ -20,7 +20,7 @@ void check_quantiles()
 {
   MinimalDataContainer<double> data(Size);
   data.range();
-  auto dist = data.distribution();
+  auto dist = distribution(data);
   BOOST_TEST(dist.min() == 0);
   BOOST_TEST(dist.max() == Size - 1);
   BOOST_TEST(dist.quantile(0) == dist.min());
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(quantiles_test)
 BOOST_AUTO_TEST_CASE(robust_test)
 {
   MinimalDataContainer<int> data {2, 1, 9, 4, 1, 2, 6};
-  auto dist = data.distribution();
+  auto dist = distribution(data);
   BOOST_TEST(dist.min() == 1);
   BOOST_TEST(dist.max() == 9);
   BOOST_TEST(dist.median() == 2);
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(histogram_test)
   MinimalDataContainer<int> data(10);
   data.range();
   const std::vector<double> bins {-10, -.5, 0, 1.5, 4, 9, 12};
-  const auto hist = data.distribution().histogram(bins);
+  const auto hist = distribution(data).histogram(bins);
   const std::vector<std::size_t> expected {0, 0, 2, 2, 5, 1};
   BOOST_TEST(hist == expected);
   // FIXME better test

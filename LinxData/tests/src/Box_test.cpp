@@ -50,30 +50,6 @@ BOOST_AUTO_TEST_CASE(translation_test)
   BOOST_TEST(region.front() == back);
 }
 
-BOOST_AUTO_TEST_CASE(surrounding_test)
-{
-  const auto central = Box<2>::from_shape({1, 1}, {4, 3});
-  const Box<2> margin {{-3, -2}, {2, 1}};
-  const auto chunks = central.surround(margin);
-  const auto box = central + margin;
-  std::set<Indices<2>> all;
-  std::set<Indices<2>> chunked;
-  for (const auto& p : box) {
-    all.insert(p.container());
-  }
-  BOOST_TEST(all.size() == box.size());
-
-  for (const auto& p : central) {
-    chunked.insert(p.container());
-  }
-  for (const auto& c : chunks) {
-    for (const auto& p : c) {
-      chunked.insert(p.container());
-    }
-  }
-  BOOST_TEST(chunked == all);
-}
-
 //-----------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -199,14 +199,6 @@ struct RangeMixin { // FIXME merge with DataContainer
     return {*its.first, *its.second};
   }
 
-  /**
-   * @brief Create a `DataDistribution` from the container.
-   */
-  [[deprecated("Use free function")]] DataDistribution<T> distribution() const
-  {
-    return DataDistribution<T>(static_cast<const TDerived&>(*this));
-  }
-
   /// @}
 };
 

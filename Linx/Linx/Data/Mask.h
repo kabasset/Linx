@@ -111,16 +111,7 @@ public:
   /**
    * @brief Get the bounding box length along given axis.
    */
-  template <Index I>
-  [[deprecated]] Index length() const
-  {
-    return m_box.template length<I>();
-  }
-
-  /**
-   * @brief Get the bounding box length along given axis.
-   */
-  Index length(Index i) const
+  constexpr Index length(Index i) const
   {
     return m_box.length(i);
   }

@@ -124,31 +124,6 @@ public:
   {
     return this->contains_only(Limits<T>::inf());
   }
-
-  /**
-   * @brief Create a vector of lower dimension.
-   * @tparam M The new dimension; cannot be -1
-   * 
-   * The values up to dimension `M` are copied.
-   */
-  template <Index M>
-  [[deprecated]] Vector<T, M> slice() const
-  { // FIXME free function
-    Vector<T, M> res(M);
-    std::copy_n(this->data(), M, res.data());
-    return res;
-  }
-
-  /**
-   * @brief Create a vector of higher dimension.
-   */
-  template <Index M>
-  [[deprecated]] Vector<T, M> extend(const Vector<T, M>& padding = Vector<T, M>::zero()) const
-  { // FIXME free function
-    auto res = padding;
-    std::copy_n(this->data(), this->size(), res.data());
-    return res;
-  }
 };
 
 /**
