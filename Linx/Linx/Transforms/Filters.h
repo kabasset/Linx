@@ -165,6 +165,38 @@ struct MedianFilter : public KernelMixin<T, TWindow> { // FIXME even and odd spe
 
 /**
  * @ingroup filtering
+ * @brief Binary erosion kernel.
+ */
+template <typename T, typename TWindow>
+struct BinaryErosion : public KernelMixin<T, TWindow> {
+  using KernelMixin<T, TWindow>::KernelMixin;
+  template <typename TIn>
+  inline T operator()(const TIn& neighbors) const
+  {
+    return std::all_of(neighbors.begin(), neighbors.end(), [](auto e) {
+      return bool(e);
+    });
+  }
+};
+
+/**
+ * @ingroup filtering
+ * @brief Binary dilation kernel.
+ */
+template <typename T, typename TWindow>
+struct BinaryDilation : public KernelMixin<T, TWindow> {
+  using KernelMixin<T, TWindow>::KernelMixin;
+  template <typename TIn>
+  inline T operator()(const TIn& neighbors) const
+  {
+    return std::any_of(neighbors.begin(), neighbors.end(), [](auto e) {
+      return bool(e);
+    });
+  }
+};
+
+/**
+ * @ingroup filtering
  * @brief Erosion (i.e. min filtering) kernel.
  */
 template <typename T, typename TWindow>
@@ -396,6 +428,24 @@ auto median_filter(TWindow window)
  * @ingroup filtering
  */
 template <typename T, typename TWindow>
+auto binary_erosion(TWindow window)
+{
+  return SimpleFilter<BinaryErosion<T, TWindow>>(BinaryErosion<T, TWindow>(LINX_MOVE(window)));
+}
+
+/**
+ * @ingroup filtering
+ */
+template <typename T, typename TWindow>
+auto binary_dilation(TWindow window)
+{
+  return SimpleFilter<BinaryDilation<T, TWindow>>(BinaryDilation<T, TWindow>(LINX_MOVE(window)));
+}
+
+/**
+ * @ingroup filtering
+ */
+template <typename T, typename TWindow>
 auto erosion(TWindow window)
 {
   return SimpleFilter<Erosion<T, TWindow>>(Erosion<T, TWindow>(LINX_MOVE(window)));
@@ -409,6 +459,10 @@ auto dilation(TWindow window)
 {
   return SimpleFilter<Dilation<T, TWindow>>(Dilation<T, TWindow>(LINX_MOVE(window)));
 }
+
+// FIXME find better names for morphological operations, e.g.
+// - binary_erosion -> erosion
+// - erosion -> minimum_filter
 
 } // namespace Linx
 

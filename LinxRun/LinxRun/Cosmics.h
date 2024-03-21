@@ -136,7 +136,7 @@ Raster<typename TIn::Value> blur(const TIn& in, Index radius = 1)
 template <typename TIn, typename TPsf>
 Raster<char> detect(const TIn& in, const TPsf& psf, float pfa, float tq)
 {
-  auto laplacian_map = laplacian(Linx::log(in));
+  auto laplacian_map = laplacian(in);
   Fits("/tmp/cosmic.fits").write(laplacian_map, 'a');
   float n = 0;
   float s = 0;
