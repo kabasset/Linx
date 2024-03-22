@@ -146,6 +146,16 @@ private:
       with_default(m_nameds.back(), LINX_FORWARD(default_value));
     }
 
+    /**
+     * @brief Declare an implicit option.
+     */
+    template <typename T>
+    void implicit(const std::string& name, const std::string& description, T&& default_value, T&& implicit_value)
+    {
+      named(name, description);
+      with_implicit(m_nameds.back(), LINX_FORWARD(default_value), LINX_FORWARD(implicit_value));
+    }
+
     void flag(const std::string& name, const std::string& description)
     {
       auto option = has_short_name(name) ? std::string {'-', name.back(), ',', ' '} : std::string();
@@ -192,7 +202,7 @@ private:
   private:
 
     /**
-     * @brief Add a default value to the last declared option.
+     * @brief Add a default value to an option.
      */
     template <typename T>
     void with_default(std::string& option, T&& value)
@@ -206,9 +216,28 @@ private:
       }
     }
 
+    /**
+     * @brief Add default and implicit values to an option.
+     */
+    template <typename T>
+    void with_implicit(std::string& option, T&& default_value, T&& implicit_value)
+    {
+      with_default(option, default_value);
+      if constexpr (std::is_same_v<std::decay_t<T>, char>) {
+        option.append("\n      [implicit: " + std::string {implicit_value} + "]");
+      } else if constexpr (std::is_same_v<std::decay_t<T>, std::string>) {
+        option.append("\n      [implicit: " + LINX_FORWARD(implicit_value) + "]");
+      } else {
+        option.append("\n      [implicit: " + std::to_string(LINX_FORWARD(implicit_value)) + "]");
+      }
+    }
+
+    /**
+     * @brief Append a dot if there is not.
+     */
     static std::string append_dot(const std::string description)
     {
-      if (description.back() == '.') {
+      if (description.back() == '.') { // FIXME other punctuation marks
         return description;
       }
       return description + '.';
@@ -280,6 +309,20 @@ public:
   }
 
   /**
+   * @brief Declare an implicit option.
+   * 
+   * An implicit option has two default values:
+   * the first one is used when the option is not there, and
+   * the second one is used when the option is there with no argument.
+   */
+  template <typename T>
+  void implicit(const std::string& name, const std::string& description, T&& default_value, T&& implicit_value)
+  {
+    named(name, po::value<T>()->default_value(default_value)->implicit_value(implicit_value), description);
+    m_desc.implicit(name, description, default_value);
+  }
+
+  /**
    * @brief Declare a flag option.
    */
   void flag(const char* name, const char* description)
@@ -298,11 +341,11 @@ public:
   {
     try {
       po::store(po::command_line_parser(argc, argv).options(m_named).positional(m_positional).run(), m_variables);
-      po::notify(m_variables);
       if (not m_help.empty() && has(m_help.c_str())) {
         m_desc.to_stream(argv[0]);
         exit(0);
       }
+      po::notify(m_variables);
     } catch (...) {
       std::cerr << "\nFATAL: Cannot parse command line.\n";
       m_desc.to_stream(argv[0], std::cerr);
