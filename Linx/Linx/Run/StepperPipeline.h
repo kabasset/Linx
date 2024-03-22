@@ -5,6 +5,8 @@
 #ifndef _LINXRUN_STEPPERPIPELINE_H
 #define _LINXRUN_STEPPERPIPELINE_H
 
+#include "PipelineStep.h"
+
 #include <chrono>
 #include <map>
 #include <numeric> // accumulate
@@ -12,55 +14,6 @@
 #include <typeindex>
 
 namespace Linx {
-
-/// @cond
-namespace Internal {
-
-/**
- * @relatesalso StepperPipeline
- * @brief Traits class which gives the cardinality (number of elements) of a type.
- * 
- * Cardinality of:
- * - `void` is 0;
- * - a tuple is its size;
- * - any other type is 1.
- */
-template <typename T>
-struct TypeCardinality {
-  static constexpr std::size_t value = 1;
-};
-
-/**
- * @relatesalso StepperPipeline
- * @brief `void` specialization
- */
-template <>
-struct TypeCardinality<void> {
-  static constexpr std::size_t value = 0;
-};
-
-/**
- * @relatesalso StepperPipeline
- * @brief Tuple specialization
- */
-template <typename... Ts>
-struct TypeCardinality<std::tuple<Ts...>> {
-  static constexpr std::size_t value = sizeof...(Ts);
-};
-
-/**
- * @relatesalso StepperPipeline
- * @brief Cardinality of a step's prerequisite.
- * @see `TypeCardinality`
- */
-template <typename S>
-constexpr std::size_t prerequisite_cardinality()
-{
-  return TypeCardinality<typename S::Prerequisite>::value;
-}
-
-} // namespace Internal
-/// @endcond
 
 /**
  * @brief A pipeline or directed acyclic graph (DAG) which can be run step-by-step using lazy evaluation.
@@ -77,11 +30,11 @@ constexpr std::size_t prerequisite_cardinality()
  * \endcode
  * 
  * Child classes must provide a specialization of the following methods for each step `S`:
- * - `void evaluate_impl<S>()`, which evaluates `S` assuming upstream tasks were already computed;
- * - `S::Return get_impl<S>()`, which returns the computed value of `S`.
+ * - `void evaluate_impl<S>()`, which evaluates `S` assuming upstream steps were already computed;
+ * - `S::Value get_impl<S>()`, which returns the computed value of `S`.
  * 
  * A step `S` is a class which contains the following type definitions:
- * - `Return` is the return value type of `get<S>()`;
+ * - `Value` is the return value type of `get<S>()`;
  * - `Prerequisite` is (are) the step(s) which must be run prior to `S`, or `void` if there is no prerequisite;
  *   Multiple prerequisites are describled with tuples.
  */
@@ -93,12 +46,12 @@ public:
    * @brief Evaluation of step `S`.
    */
   template <typename S>
-  typename S::Return get()
+  typename S::Value get()
   {
-    if constexpr (Internal::prerequisite_cardinality<S>() == 1) {
+    if constexpr (S::Cardinality == 1) {
       get<typename S::Prerequisite>();
-    } else if constexpr (Internal::prerequisite_cardinality<S>() > 1) {
-      get_multiple<typename S::Prerequisite>(std::make_index_sequence<Internal::prerequisite_cardinality<S>()> {});
+    } else if constexpr (S::Cardinality > 1) {
+      get_multiple<typename S::Prerequisite>(std::make_index_sequence<S::Cardinality> {});
     }
     return evaluate_get<S>();
   }
@@ -176,7 +129,7 @@ private:
     /**
      * @brief Call `algo.get_impl<S>()`.
      */
-    static typename S::Return get(TDerived& algo)
+    static typename S::Value get(TDerived& algo)
     {
       auto f = &Accessor::template get_impl<S>;
       return (algo.*f)();
@@ -187,7 +140,7 @@ private:
    * @brief Run step `S` if not done and return its output.
    */
   template <typename S>
-  typename S::Return evaluate_get()
+  typename S::Value evaluate_get()
   {
     if (not evaluated<S>()) { // FIXME not thread-safe
       const auto start = std::chrono::high_resolution_clock::now();
@@ -221,38 +174,6 @@ private:
    * @brief The set of performed steps and durations.
    */
   std::map<std::type_index, double> m_milliseconds;
-};
-
-/**
- * @brief Helper class to declare a pipeline step.
- * 
- * Usage:
- * \code
- * struct Step0 : PipelineStep<void, char> {};
- * struct Step1a : PipelineStep<Step0, short> {};
- * struct Step1b : PipelineStep<Step0, int> {};
- * struct Step2 : PipelineStep<std::tuple<Step1a, Step1b>, long>{};
- * \endcode
- */
-template <typename TPrerequisite, typename TReturn>
-struct PipelineStep {
-  /**
-   * @brief The step's prerequisite's.
-   * 
-   * Can be:
-   * - `void` for no prerequisite;
-   * - `std::tuple` for multiple prerequisites;
-   * - Any other type for simple prerequisite.
-   */
-  using Prerequisite = TPrerequisite;
-
-  /**
-   * @brief The return type of the step.
-   * 
-   * This is exactly the return type of the `StepperPipeline::get()`
-   * which can for example be a const reference.
-   */
-  using Return = TReturn;
 };
 
 } // namespace Linx

@@ -8,41 +8,41 @@
 
 using namespace Linx;
 
-struct Step0 : PipelineStep<void, char> {
-  Return value = 0;
+struct Step0 : PipelineStep<char()> {
+  Value value = 0;
 };
 
-struct Step1a : PipelineStep<Step0, short> {
-  Return value = 0;
+struct Step1a : PipelineStep<short(Step0)> {
+  Value value = 0;
 };
 
-struct Step1b : PipelineStep<Step0, int> {
-  Return value = 0;
+struct Step1b : PipelineStep<int(Step0)> {
+  Value value = 0;
 };
 
-struct Step2 : PipelineStep<std::tuple<Step1a, Step1b>, long> {
-  Return value = 0;
+struct Step2 : PipelineStep<long(Step1a, Step1b)> {
+  Value value = 0;
 };
 
 class Dag : public StepperPipeline<Dag> {
 public:
 
-  Step0::Return get0() const
+  Step0::Value get0() const
   {
     return m_0.value;
   }
 
-  Step1a::Return get1a() const
+  Step1a::Value get1a() const
   {
     return m_1a.value;
   }
 
-  Step1b::Return get1b() const
+  Step1b::Value get1b() const
   {
     return m_1b.value;
   }
 
-  Step2::Return get2() const
+  Step2::Value get2() const
   {
     return m_2.value;
   }
@@ -53,7 +53,7 @@ protected:
   void evaluate_impl();
 
   template <typename S>
-  typename S::Return get_impl();
+  typename S::Value get_impl();
 
 private:
 
@@ -93,25 +93,25 @@ void Dag::evaluate_impl<Step2>()
 }
 
 template <>
-Step0::Return Dag::get_impl<Step0>()
+Step0::Value Dag::get_impl<Step0>()
 {
   return m_0.value;
 }
 
 template <>
-Step1a::Return Dag::get_impl<Step1a>()
+Step1a::Value Dag::get_impl<Step1a>()
 {
   return m_1a.value;
 }
 
 template <>
-Step1b::Return Dag::get_impl<Step1b>()
+Step1b::Value Dag::get_impl<Step1b>()
 {
   return m_1b.value;
 }
 
 template <>
-Step2::Return Dag::get_impl<Step2>()
+Step2::Value Dag::get_impl<Step2>()
 {
   return m_2.value;
 }
