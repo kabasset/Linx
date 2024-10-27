@@ -44,7 +44,7 @@ public:
   /**
    * @brief Constructor.
    */
-  Patch(const TParent& parent, TDomain region) : m_parent(parent), m_domain(LINX_MOVE(region)) {}
+  Patch(const Parent& parent, Domain region) : m_parent(parent), m_domain(LINX_MOVE(region)) {}
 
   /**
    * @brief The parent.

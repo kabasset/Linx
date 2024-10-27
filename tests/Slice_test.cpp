@@ -92,9 +92,9 @@ BOOST_AUTO_TEST_CASE(unbounded_singleton_span_test)
   Linx::Index stop = 14;
   auto slice = Linx::Slice()(index)(start, stop);
   BOOST_TEST(slice.n == 3);
-  BOOST_TEST(char(slice.template get<0>().Type) == char(Linx::SliceType::Unbounded));
-  BOOST_TEST(char(slice.template get<1>().Type) == char(Linx::SliceType::Singleton));
-  BOOST_TEST(char(slice.template get<2>().Type) == char(Linx::SliceType::RightOpen));
+  BOOST_TEST(char(slice.template get<0>().type) == char(Linx::SliceType::unbounded));
+  BOOST_TEST(char(slice.template get<1>().type) == char(Linx::SliceType::singleton));
+  BOOST_TEST(char(slice.template get<2>().type) == char(Linx::SliceType::right_open));
 
   auto str = (std::stringstream() << slice).str();
   BOOST_TEST(str == ":, " + std::to_string(index) + ", " + std::to_string(start) + ':' + std::to_string(stop));
@@ -107,9 +107,9 @@ BOOST_AUTO_TEST_CASE(span_singleton_unbounded_test)
   Linx::Index stop = 14;
   auto slice = Linx::Slice(start, stop)(index)();
   BOOST_TEST(slice.n == 3);
-  BOOST_TEST(char(slice.template get<0>().Type) == char(Linx::SliceType::RightOpen));
-  BOOST_TEST(char(slice.template get<2>().Type) == char(Linx::SliceType::Unbounded));
-  BOOST_TEST(char(slice.template get<1>().Type) == char(Linx::SliceType::Singleton));
+  BOOST_TEST(char(slice.template get<0>().type) == char(Linx::SliceType::right_open));
+  BOOST_TEST(char(slice.template get<2>().type) == char(Linx::SliceType::unbounded));
+  BOOST_TEST(char(slice.template get<1>().type) == char(Linx::SliceType::singleton));
 
   auto str = (std::stringstream() << slice).str();
   BOOST_TEST(str == std::to_string(start) + ':' + std::to_string(stop) + ", " + std::to_string(index) + ", :");

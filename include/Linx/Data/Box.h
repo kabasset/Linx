@@ -482,7 +482,7 @@ GBox<T, N> operator&(GBox<T, N> lhs, const GBox<U, M>& rhs)
  * @brief Get the 1D slice along the i-th axis.
  */
 template <int I, typename T, int N>
-Slice<T, SliceType::RightOpen> get(const GBox<T, N>& box)
+Slice<T, SliceType::right_open> get(const GBox<T, N>& box)
 {
   return {box.start(I), box.stop(I)};
 }
@@ -490,33 +490,33 @@ Slice<T, SliceType::RightOpen> get(const GBox<T, N>& box)
 namespace Impl {
 
 template <typename T>
-T slice_start_impl(const Slice<T, SliceType::Singleton>& slice)
+T slice_start_impl(const Slice<T, SliceType::singleton>& slice)
 {
   return slice.value();
 }
 
 template <std::integral T>
-T slice_stop_impl(const Slice<T, SliceType::Singleton>& slice)
+T slice_stop_impl(const Slice<T, SliceType::singleton>& slice)
 {
   return slice.value() + 1;
 }
 
 template <typename T>
-T slice_start_impl(const Slice<T, SliceType::RightOpen>& slice)
+T slice_start_impl(const Slice<T, SliceType::right_open>& slice)
 {
   return slice.start();
 }
 
 template <typename T>
-T slice_stop_impl(const Slice<T, SliceType::RightOpen>& slice)
+T slice_stop_impl(const Slice<T, SliceType::right_open>& slice)
 {
   return slice.stop();
 }
 
-template <typename TType, std::size_t... Is>
-auto box_impl(const TType& slice, std::index_sequence<Is...>)
+template <typename TSlice, std::size_t... Is>
+auto box_impl(const TSlice& slice, std::index_sequence<Is...>)
 {
-  using T = typename TType::size_type;
+  using T = typename TSlice::size_type;
   static constexpr int N = sizeof...(Is);
   return GBox<T, N>({slice_start_impl(get<Is>(slice))...}, {slice_stop_impl(get<Is>(slice))...});
 }
@@ -528,28 +528,28 @@ auto box_impl(const TType& slice, std::index_sequence<Is...>)
  * 
  * @warning Unbounded slices are not supported, and singleton slices must be integral.
  */
-template <typename T, SliceType... TTypes>
-GBox<T, sizeof...(TTypes)> box(const Slice<T, TTypes...>& slice)
+template <typename T, SliceType... Types>
+GBox<T, sizeof...(Types)> box(const Slice<T, Types...>& slice)
 {
-  static constexpr int n = sizeof...(TTypes);
+  static constexpr int n = sizeof...(Types);
   return Impl::box_impl(slice, std::make_index_sequence<n>());
 }
 
 /**
  * @brief Make a slice clamped by a box.
  */
-template <typename T, typename U, int N, SliceType... TTypes>
-auto operator&(const Slice<T, TTypes...>& slice, const GBox<U, N>& box)
+template <typename T, typename U, int N, SliceType... Types>
+auto operator&(const Slice<T, Types...>& slice, const GBox<U, N>& box)
 {
-  static constexpr auto last = sizeof...(TTypes) - 1;
+  static constexpr auto last = sizeof...(Types) - 1;
   return (slice.fronts() & box)(clamp(slice.back(), box.start(last), box.stop(last)));
 }
 
 /**
  * @brief Make a 1D slice clamped by a box.
  */
-template <typename T, SliceType TType, typename U, int N>
-auto operator&(const Slice<T, TType>& slice, const GBox<U, N>& box)
+template <typename T, SliceType Type, typename U, int N>
+auto operator&(const Slice<T, Type>& slice, const GBox<U, N>& box)
 {
   return clamp(slice, box.start(0), box.stop(0));
 }

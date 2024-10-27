@@ -18,44 +18,44 @@ namespace Linx {
  * @brief Type of 1D slice.
  */
 enum class SliceType : char {
-  Unbounded = '*', ///< Unbounded
-  Singleton = '=', ///< Single value
-  Closed = ']', ///< Closed interval
-  RightOpen = ')', ///< Right-open interval, a.k.a. span
-  RightInfinite = '+' ///< Right-infinite interval
+  unbounded = '*', ///< Unbounded
+  singleton = '=', ///< Single value
+  closed = ']', ///< Closed interval
+  right_open = ')', ///< Right-open interval, a.k.a. span
+  right_infinite = '+' ///< Right-infinite interval
 };
 
 LINX_STRONG_TYPE(Size)
 
 /// @cond
 
-template <typename T, SliceType TTypeN, SliceType... TTypes>
+template <typename T, SliceType TypeN, SliceType... Types>
 class Slice;
 
 /// @endcond
 
 template <typename T = Index> // Required by some compilers such as ICX
-Slice()->Slice<T, SliceType::Unbounded>;
+Slice()->Slice<T, SliceType::unbounded>;
 
 template <typename T>
-Slice(const T&) -> Slice<T, SliceType::Singleton>;
+Slice(const T&) -> Slice<T, SliceType::singleton>;
 
 template <typename T>
-Slice(const T&, const T&) -> Slice<T, SliceType::RightOpen>;
+Slice(const T&, const T&) -> Slice<T, SliceType::right_open>;
 
 template <typename T, typename U>
-Slice(const T&, const Size<U>&) -> Slice<T, SliceType::RightOpen>;
+Slice(const T&, const Size<U>&) -> Slice<T, SliceType::right_open>;
 
 template <typename T>
-Slice(const T& start, std::nullptr_t) -> Slice<T, SliceType::RightInfinite>;
+Slice(const T& start, std::nullptr_t) -> Slice<T, SliceType::right_infinite>;
 
 /**
  * @brief Get the slice along i-th axis.
  */
-template <int I, typename T, SliceType... TTypes>
-KOKKOS_INLINE_FUNCTION constexpr auto& get(const Slice<T, TTypes...>& slice)
+template <int I, typename T, SliceType... Types>
+KOKKOS_INLINE_FUNCTION constexpr auto& get(const Slice<T, Types...>& slice)
 {
-  if constexpr (sizeof...(TTypes) == 1) {
+  if constexpr (sizeof...(Types) == 1) {
     return slice;
   } else {
     return slice.template get<I>();
@@ -65,17 +65,17 @@ KOKKOS_INLINE_FUNCTION constexpr auto& get(const Slice<T, TTypes...>& slice)
 /**
  * @brief Append a 1D slice.
  */
-template <typename T, SliceType TTypeN, SliceType... TTypes>
-KOKKOS_INLINE_FUNCTION Slice<T, TTypeN, TTypes...> slice_push_back(Slice<T, TTypes...> slice, Slice<T, TTypeN> back)
+template <typename T, SliceType TypeN, SliceType... Types>
+KOKKOS_INLINE_FUNCTION Slice<T, TypeN, Types...> slice_push_back(Slice<T, Types...> slice, Slice<T, TypeN> back)
 {
-  return Slice<T, TTypeN, TTypes...>(slice, back);
+  return Slice<T, TypeN, Types...>(slice, back);
 }
 
 /**
  * @brief Emplace a 1D slice.
  */
-template <typename T, SliceType... TTypes>
-KOKKOS_INLINE_FUNCTION auto slice_emplace(Slice<T, TTypes...> slice, auto... args)
+template <typename T, SliceType... Types>
+KOKKOS_INLINE_FUNCTION auto slice_emplace(Slice<T, Types...> slice, auto... args)
 {
   return slice_push_back(slice, Slice(args...));
 }
@@ -90,19 +90,19 @@ KOKKOS_INLINE_FUNCTION auto slice_emplace(Slice<T, TTypes...> slice, auto... arg
  * - slices can be unbounded;
  * - slices are defined axis-by-axis while boxes are defined by two ND positions.
  */
-template <typename T, SliceType TTypeN, SliceType... TTypes>
+template <typename T, SliceType TypeN, SliceType... Types>
 class Slice {
 public:
 
   using size_type = T; ///< The value type
-  static constexpr int n = sizeof...(TTypes) + 1; ///< The dimension
+  static constexpr int n = sizeof...(Types) + 1; ///< The dimension
 
   /**
    * @brief Constructor.
    * 
    * Prefer creating slices using the `operator()` syntax.
    */
-  KOKKOS_INLINE_FUNCTION Slice(Slice<T, TTypes...> fronts, Slice<T, TTypeN> back) :
+  KOKKOS_INLINE_FUNCTION Slice(Slice<T, Types...> fronts, Slice<T, TypeN> back) :
       m_fronts(LINX_MOVE(fronts)), m_back(LINX_MOVE(back))
   {}
 
@@ -164,20 +164,20 @@ public:
 
 private:
 
-  Slice<T, TTypes...> m_fronts; ///< The front slices
-  Slice<T, TTypeN> m_back; ///< The back slice
+  Slice<T, Types...> m_fronts; ///< The front slices
+  Slice<T, TypeN> m_back; ///< The back slice
 };
 
 /**
  * @brief 1D unbounded specialization.
  */
 template <typename T>
-class Slice<T, SliceType::Unbounded> {
+class Slice<T, SliceType::unbounded> {
 public:
 
   using size_type = T;
   static constexpr int n = 1;
-  static constexpr SliceType Type = SliceType::Unbounded; // FIXME type?
+  static constexpr SliceType type = SliceType::unbounded; // FIXME type?
 
   KOKKOS_INLINE_FUNCTION Slice() {}
 
@@ -212,12 +212,12 @@ public:
  * @brief 1D singleton specialization.
  */
 template <typename T>
-class Slice<T, SliceType::Singleton> {
+class Slice<T, SliceType::singleton> {
 public:
 
   using size_type = T;
   static constexpr int n = 1;
-  static constexpr SliceType Type = SliceType::Singleton;
+  static constexpr SliceType type = SliceType::singleton;
 
   KOKKOS_INLINE_FUNCTION Slice(T value) : m_value(value) {}
 
@@ -261,12 +261,12 @@ private:
  * @brief 1D span specialization.
  */
 template <typename T>
-class Slice<T, SliceType::RightOpen> {
+class Slice<T, SliceType::right_open> {
 public:
 
   using size_type = T;
   static constexpr int n = 1;
-  static constexpr SliceType Type = SliceType::RightOpen;
+  static constexpr SliceType type = SliceType::right_open;
 
   KOKKOS_INLINE_FUNCTION Slice(const T& start, const T& stop) : m_start(start), m_stop(stop) {}
 
@@ -327,12 +327,12 @@ private:
  * @brief 1D span specialization.
  */
 template <typename T>
-class Slice<T, SliceType::RightInfinite> {
+class Slice<T, SliceType::right_infinite> {
 public:
 
   using size_type = T;
   static constexpr int n = 1;
-  static constexpr SliceType Type = SliceType::RightInfinite;
+  static constexpr SliceType type = SliceType::right_infinite;
 
   KOKKOS_INLINE_FUNCTION Slice(const T& start, std::nullptr_t) : m_start(start) {}
 
@@ -371,13 +371,13 @@ private:
  * @brief Shortcut for right-open slice.
  */
 template <typename T>
-using Span = Slice<T, SliceType::RightOpen>;
+using Span = Slice<T, SliceType::right_open>;
 
 /**
  * @brief Get the Kokkos execution policy of a span.
  */
 template <typename TSpace, std::integral T>
-auto kokkos_execution_policy(const Slice<T, SliceType::RightOpen>& region)
+auto kokkos_execution_policy(const Slice<T, SliceType::right_open>& region)
 {
   return Kokkos::RangePolicy<TSpace>(region.start(), region.stop());
 }
@@ -387,7 +387,7 @@ auto kokkos_execution_policy(const Slice<T, SliceType::RightOpen>& region)
  * @tparam TSpace The execution space
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace, std::integral T>
-void for_each(const std::string& label, const Slice<T, SliceType::RightOpen>& region, auto&& func)
+void for_each(const std::string& label, const Slice<T, SliceType::right_open>& region, auto&& func)
 {
   Kokkos::parallel_for(label, kokkos_execution_policy<TSpace>(region), LINX_FORWARD(func));
 }
@@ -396,7 +396,7 @@ void for_each(const std::string& label, const Slice<T, SliceType::RightOpen>& re
  * @brief Make a 1D slice clamped between bounds.
  */
 template <typename T>
-Slice<T, SliceType::RightOpen> clamp(const Slice<T, SliceType::Unbounded>&, auto start, auto stop)
+Slice<T, SliceType::right_open> clamp(const Slice<T, SliceType::unbounded>&, auto start, auto stop)
 {
   return {static_cast<T>(start), static_cast<T>(stop)};
 }
@@ -405,7 +405,7 @@ Slice<T, SliceType::RightOpen> clamp(const Slice<T, SliceType::Unbounded>&, auto
  * @brief Make a 1D slice clamped between bounds.
  */
 template <typename T>
-const Slice<T, SliceType::Singleton>& clamp(const Slice<T, SliceType::Singleton>& slice, auto start, auto stop)
+const Slice<T, SliceType::singleton>& clamp(const Slice<T, SliceType::singleton>& slice, auto start, auto stop)
 {
   OutOfBounds<'[', ')'>::may_throw("slice index", slice.value(), {start, stop});
   return slice;
@@ -415,7 +415,7 @@ const Slice<T, SliceType::Singleton>& clamp(const Slice<T, SliceType::Singleton>
  * @brief Make a 1D slice clamped between bounds.
  */
 template <typename T>
-Slice<T, SliceType::RightOpen> clamp(const Slice<T, SliceType::RightOpen>& slice, auto start, auto stop)
+Slice<T, SliceType::right_open> clamp(const Slice<T, SliceType::right_open>& slice, auto start, auto stop)
 {
   return {std::max<T>(slice.start(), start), std::min<T>(slice.stop(), stop)};
 }

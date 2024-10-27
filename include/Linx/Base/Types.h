@@ -75,45 +75,45 @@ using QuickTestTypes = std::tuple<bool, int, double, Kokkos::complex<float>>; //
 /**
  * @brief Define a default virtual destructor.
  */
-#define LINX_VIRTUAL_DTOR(classname) \
+#define LINX_VIRTUAL_DTOR(Class) \
   /** @brief Destructor. */ \
-  virtual ~classname() = default;
+  virtual ~Class() = default;
 
 /**
  * @brief Define default copy constructor and assignment operator.
  */
-#define LINX_DEFAULT_COPYABLE(classname) \
+#define LINX_DEFAULT_COPYABLE(Class) \
   /** @brief Copy constructor. */ \
-  KOKKOS_FUNCTION classname(const classname&) = default; \
+  KOKKOS_FUNCTION Class(const Class&) = default; \
   /** @brief Copy assignment operator. */ \
-  KOKKOS_FUNCTION classname& operator=(const classname&) = default;
+  KOKKOS_FUNCTION Class& operator=(const Class&) = default;
 
 /**
  * @brief Define deleted copy constructor and assignment operator.
  */
-#define LINX_NON_COPYABLE(classname) \
+#define LINX_NON_COPYABLE(Class) \
   /** @brief Deleted copy constructor. */ \
-  KOKKOS_FUNCTION classname(const classname&) = delete; \
+  KOKKOS_FUNCTION Class(const Class&) = delete; \
   /** @brief Deleted copy assignment operator. */ \
-  KOKKOS_FUNCTION classname& operator=(const classname&) = delete;
+  KOKKOS_FUNCTION Class& operator=(const Class&) = delete;
 
 /**
  * @brief Define default move constructor and assignment operator.
  */
-#define LINX_DEFAULT_MOVABLE(classname) \
+#define LINX_DEFAULT_MOVABLE(Class) \
   /** @brief Move constructor. */ \
-  KOKKOS_FUNCTION classname(classname&&) = default; \
+  KOKKOS_FUNCTION Class(Class&&) = default; \
   /** @brief Move assignment operator. */ \
-  KOKKOS_FUNCTION classname& operator=(classname&&) = default;
+  KOKKOS_FUNCTION Class& operator=(Class&&) = default;
 
 /**
  * @brief Define deleted move constructor and assignment operator.
  */
-#define LINX_NON_MOVABLE(classname) \
+#define LINX_NON_MOVABLE(Class) \
   /** @brief Deleted move constructor. */ \
-  KOKKOS_FUNCTION classname(classname&&) = delete; \
+  KOKKOS_FUNCTION Class(Class&&) = delete; \
   /** @brief Deleted move assignment operator. */ \
-  KOKKOS_FUNCTION classname& operator=(classname&&) = delete;
+  KOKKOS_FUNCTION Class& operator=(Class&&) = delete;
 
 /**
  * @brief Non-function `std::move`.
