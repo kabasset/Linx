@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXDATA_LINE_H
-#define _LINXDATA_LINE_H
+#ifndef LINX_DATA_LINE_H
+#define LINX_DATA_LINE_H
 
 #include "Linx/Base/Packs.h"
 #include "Linx/Base/Types.h"
@@ -16,11 +16,11 @@ template <typename T, int I, int N>
 class GLine {
 public:
 
-  static constexpr int Rank = N;
-  static constexpr int Axis = I;
+  static constexpr int n = N;
+  static constexpr int axis = I;
 
   using size_type = T;
-  using value_type = GPosition<size_type, Rank>;
+  using value_type = GPosition<size_type, n>;
 
   GLine() : m_start {}, m_stop(0), m_step(1) {}
 
@@ -33,7 +33,7 @@ public:
 
   KOKKOS_INLINE_FUNCTION constexpr size_type size() const
   {
-    return m_stop - m_start[Axis]; // FIXME m_step
+    return m_stop - m_start[axis]; // FIXME m_step
   }
 
   KOKKOS_INLINE_FUNCTION constexpr size_type start(int i) const
@@ -49,7 +49,7 @@ public:
   value_type operator()(int i) const
   {
     auto out = +m_start;
-    out[Axis] += i * m_step;
+    out[axis] += i * m_step;
     return out;
   }
 
@@ -68,14 +68,14 @@ public:
   KOKKOS_INLINE_FUNCTION GLine& operator+=(const auto& delta)
   {
     m_start += delta;
-    m_stop += delta[Axis];
+    m_stop += delta[axis];
     return *this;
   }
 
   KOKKOS_INLINE_FUNCTION GLine& operator-=(const auto& delta)
   {
     m_start -= delta;
-    m_stop -= delta[Axis];
+    m_stop -= delta[axis];
     return *this;
   }
 
@@ -85,14 +85,14 @@ private:
   KOKKOS_INLINE_FUNCTION void add_impl(const auto& values, std::index_sequence<Is...>)
   {
     ((m_start[Is] += get<Is>(values)), ...);
-    m_stop += get<Axis>(values);
+    m_stop += get<axis>(values);
   }
 
   template <std::size_t... Is>
   KOKKOS_INLINE_FUNCTION void subtract_impl(const auto& values, std::index_sequence<Is...>)
   {
     ((m_start[Is] -= get<Is>(values)), ...);
-    m_stop -= get<Axis>(values);
+    m_stop -= get<axis>(values);
   }
 
   value_type m_start;

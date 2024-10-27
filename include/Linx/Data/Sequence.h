@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXDATA_SEQUENCE_H
-#define _LINXDATA_SEQUENCE_H
+#ifndef LINX_DATA_SEQUENCE_H
+#define LINX_DATA_SEQUENCE_H
 
 #include "Linx/Base/Containers.h"
 #include "Linx/Base/Functional.h"
@@ -35,7 +35,7 @@ public:
 
   // FIXME most aliases and methods to DataMixin
 
-  static constexpr int Rank = N; ///< The size parameter
+  static constexpr int n = N; ///< The size parameter
   using Container = TContainer; ///< The underlying container type
   using Domain = Span<Index>;
 
@@ -68,17 +68,17 @@ public:
   /**
    * @copydoc Sequence()
    */
-  explicit Sequence(const std::string& label) : Sequence(label, std::max(0, Rank)) {}
+  explicit Sequence(const std::string& label) : Sequence(label, std::max(0, n)) {}
 
   /**
    * @copydoc Sequence()
    */
   explicit Sequence(const std::string& label, std::integral auto size) : m_container(label)
   {
-    if constexpr (Rank < 1) {
+    if constexpr (n < 1) {
       Kokkos::resize(m_container, size);
     } else {
-      // FIXME assert(size == Rank)
+      // FIXME assert(size == n)
     }
   }
 
@@ -158,7 +158,7 @@ public:
    * @brief Sequence().
    */
   template <typename U>
-  Sequence(const std::string& label, Constant<U> value, int size = std::abs(Rank)) : Sequence(label, size)
+  Sequence(const std::string& label, Constant<U> value, int size = std::abs(n)) : Sequence(label, size)
   {
     this->fill(value.value);
   }
@@ -167,7 +167,7 @@ public:
    * @brief Sequence().
    */
   template <typename U>
-  Sequence(Constant<U> value, int size = std::abs(Rank)) : Sequence("", value, size)
+  Sequence(Constant<U> value, int size = std::abs(n)) : Sequence("", value, size)
   {}
 
   /**

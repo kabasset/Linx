@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXTRANSFORMS_FILTERMIXIN_H
-#define _LINXTRANSFORMS_FILTERMIXIN_H
+#ifndef LINX_TRANSFORMS_FILTERMIXIN_H
+#define LINX_TRANSFORMS_FILTERMIXIN_H
 
 #include "Linx/Base/ArrayPool.h"
 #include "Linx/Data/Sequence.h"

@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(unbounded_singleton_span_test)
   Linx::Index start = 3;
   Linx::Index stop = 14;
   auto slice = Linx::Slice()(index)(start, stop);
-  BOOST_TEST(slice.Rank == 3);
+  BOOST_TEST(slice.n == 3);
   BOOST_TEST(char(slice.template get<0>().Type) == char(Linx::SliceType::Unbounded));
   BOOST_TEST(char(slice.template get<1>().Type) == char(Linx::SliceType::Singleton));
   BOOST_TEST(char(slice.template get<2>().Type) == char(Linx::SliceType::RightOpen));
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(span_singleton_unbounded_test)
   Linx::Index start = 3;
   Linx::Index stop = 14;
   auto slice = Linx::Slice(start, stop)(index)();
-  BOOST_TEST(slice.Rank == 3);
+  BOOST_TEST(slice.n == 3);
   BOOST_TEST(char(slice.template get<0>().Type) == char(Linx::SliceType::RightOpen));
   BOOST_TEST(char(slice.template get<2>().Type) == char(Linx::SliceType::Unbounded));
   BOOST_TEST(char(slice.template get<1>().Type) == char(Linx::SliceType::Singleton));
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE(clamp_test)
   auto box = Linx::Box({1, 2, 3, 4}, {11, 12, 13, 14});
   auto clamped = Linx::box(slice & box);
 
-  BOOST_TEST(clamped.Rank == 3);
+  BOOST_TEST(clamped.n == 3);
   BOOST_TEST(clamped.start(0) == 10);
   BOOST_TEST(clamped.start(1) == 2);
   BOOST_TEST(clamped.start(2) == 3);

@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXDATA_BOX_H
-#define _LINXDATA_BOX_H
+#ifndef LINX_DATA_BOX_H
+#define LINX_DATA_BOX_H
 
 #include "Linx/Base/Containers.h"
 #include "Linx/Base/Exceptions.h"
@@ -79,14 +79,14 @@ template <typename T, int N>
 class GBox {
 public:
 
-  static constexpr int Rank = N; ///< The dimension parameter
+  static constexpr int n = N; ///< The dimension parameter
   using size_type = T; ///< The coordinate type, which may be non-integral
   using value_type = GPosition<T, N>; ///< The position type
 
   /**
    * @brief Constructor.
    */
-  GBox() : GBox(std::abs(Rank)) {}
+  GBox() : GBox(std::abs(n)) {}
 
   /**
    * @copydoc GBox()
@@ -129,7 +129,7 @@ public:
   /**
    * @copydoc GBox()
    */
-  GBox(GPosition<size_type, Rank> start, Shape<size_type, Rank> shape) :
+  GBox(GPosition<size_type, n> start, Shape<size_type, n> shape) :
       m_start(LINX_MOVE(start)), m_stop(shape.value + m_start)
   {}
 
@@ -290,8 +290,8 @@ public:
   GBox& operator+=(const GBox<U, M>& margin)
   {
     // FIXME allow N=-1
-    m_start += pad<Rank>(margin.start());
-    m_stop += pad<Rank>(margin.stop());
+    m_start += pad<n>(margin.start());
+    m_stop += pad<n>(margin.stop());
     return *this;
   }
 
@@ -302,8 +302,8 @@ public:
   GBox& operator-=(const GBox<U, M>& margin)
   {
     // FIXME allow N=-1
-    m_start -= pad<Rank>(margin.start());
-    m_stop -= pad<Rank>(margin.stop());
+    m_start -= pad<n>(margin.start());
+    m_stop -= pad<n>(margin.stop());
     return *this;
   }
 
@@ -313,8 +313,8 @@ public:
   GBox& operator+=(const ArrayLike auto& vector)
   {
     // FIXME allow N=-1
-    m_start += pad<Rank>(vector);
-    m_stop += pad<Rank>(vector);
+    m_start += pad<n>(vector);
+    m_stop += pad<n>(vector);
     return *this;
   }
 
@@ -324,8 +324,8 @@ public:
   GBox& operator-=(const ArrayLike auto& vector)
   {
     // FIXME allow N=-1
-    m_start -= pad<Rank>(vector);
-    m_stop -= pad<Rank>(vector);
+    m_start -= pad<n>(vector);
+    m_stop -= pad<n>(vector);
     return *this;
   }
 
@@ -531,8 +531,8 @@ auto box_impl(const TType& slice, std::index_sequence<Is...>)
 template <typename T, SliceType... TTypes>
 GBox<T, sizeof...(TTypes)> box(const Slice<T, TTypes...>& slice)
 {
-  static constexpr int N = sizeof...(TTypes);
-  return Impl::box_impl(slice, std::make_index_sequence<N>());
+  static constexpr int n = sizeof...(TTypes);
+  return Impl::box_impl(slice, std::make_index_sequence<n>());
 }
 
 /**
@@ -541,8 +541,8 @@ GBox<T, sizeof...(TTypes)> box(const Slice<T, TTypes...>& slice)
 template <typename T, typename U, int N, SliceType... TTypes>
 auto operator&(const Slice<T, TTypes...>& slice, const GBox<U, N>& box)
 {
-  static constexpr auto Last = sizeof...(TTypes) - 1;
-  return (slice.fronts() & box)(clamp(slice.back(), box.start(Last), box.stop(Last)));
+  static constexpr auto last = sizeof...(TTypes) - 1;
+  return (slice.fronts() & box)(clamp(slice.back(), box.start(last), box.stop(last)));
 }
 
 /**

@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXBASE_ARRAYPOOL_H
-#define _LINXBASE_ARRAYPOOL_H
+#ifndef LINX_BASE_ARRAYPOOL_H
+#define LINX_BASE_ARRAYPOOL_H
 
 #include <Kokkos_Random.hpp> // Random_UniqueIndex::get_state_idx
 #include <cstddef> // size_t

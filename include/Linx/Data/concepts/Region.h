@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXDATA_CONCEPTS_REGION_H
-#define _LINXDATA_CONCEPTS_REGION_H
+#ifndef LINX_DATA_CONCEPTS_REGION_H
+#define LINX_DATA_CONCEPTS_REGION_H
 
 #include "Linx/Base/concepts/Arithmetic.h"
 
@@ -20,11 +20,11 @@ namespace Linx {
 template <typename T>
 concept Region = requires(const T region)
 {
-  T::Rank;
+  T::n;
   typename T::size_type;
   typename T::value_type;
   std::size(region);
-  // region & Box<typename T::size_type, T::Rank>(); // FIXME recursive
+  // region & Box<typename T::size_type, T::n>(); // FIXME recursive
   for_each("", region, [](auto... is) {});
 };
 

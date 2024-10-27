@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXDATA_TILING_H
-#define _LINXDATA_TILING_H
+#ifndef LINX_DATA_TILING_H
+#define LINX_DATA_TILING_H
 
 #include "Linx/Data/Image.h"
 #include "Linx/Data/Line.h"
@@ -15,7 +15,7 @@
 namespace Linx {
 
 template <int I, typename TIn>
-using Profile = Patch<TIn, Line<int, I, TIn::Rank>>;
+using Profile = Patch<TIn, Line<int, I, TIn::n>>;
 
 /**
  * @brief Get the collection of all the profiles of an image along a given axis.
@@ -34,8 +34,8 @@ using Profile = Patch<TIn, Line<int, I, TIn::Rank>>;
 template <int I, typename TIn>
 std::vector<Profile<I, TIn>> profiles(const TIn& in)
 {
-  static constexpr int N = TIn::Rank;
-  using Domain = Line<int, I, N>;
+  static constexpr int n = TIn::n;
+  using Domain = Line<int, I, n>;
   const auto& domain = in.domain();
   const auto& start = domain.start();
   auto shape = domain.shape();
@@ -47,10 +47,10 @@ std::vector<Profile<I, TIn>> profiles(const TIn& in)
   for (int i = 0; i < size; ++i) {
     vec.emplace_back(in, Domain(+start, stop)); // Shallow-copy is not enough
   }
-  Raster<Profile<I, TIn>, N> out(Wrap(vec.data()), shape); // FIXME owning raster somehow?
+  Raster<Profile<I, TIn>, n> out(Wrap(vec.data()), shape); // FIXME owning raster somehow?
   Linx::for_each<Kokkos::Serial>(
       "profiles",
-      Box<N> {Position<N> {}, shape}, // FIXME handle potential offset
+      Box<n> {Position<n> {}, shape}, // FIXME handle potential offset
       [&](auto... is) {
         out(is...).shift(is...);
       }); // This is serial for now, no KOKKOS_LAMBDA needed

@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXTRANSFORMS_MORPHOLOGY_H
-#define _LINXTRANSFORMS_MORPHOLOGY_H
+#ifndef LINX_TRANSFORMS_MORPHOLOGY_H
+#define LINX_TRANSFORMS_MORPHOLOGY_H
 
 #include "Linx/Base/Algorithm.h"
 #include "Linx/Base/ArrayPool.h"
@@ -75,7 +75,7 @@ public:
 template <typename TIn>
 auto erode(const std::string& label, Index radius, const TIn& in)
 {
-  constexpr auto N = TIn::Rank;
+  constexpr auto N = TIn::n;
   const auto rank = in.rank();
   auto strel = Box(Position<N>(Constant(-radius), rank), Position<N>(Constant(radius + 1), rank));
 
@@ -88,7 +88,7 @@ auto erode(const std::string& label, Index radius, const TIn& in)
 template <typename TIn>
 auto dilate(const std::string& label, Index radius, const TIn& in)
 {
-  constexpr auto N = TIn::Rank;
+  constexpr auto N = TIn::n;
   const auto rank = in.rank();
   auto strel = Box(Position<N>(Constant(-radius), rank), Position<N>(Constant(radius + 1), rank));
 

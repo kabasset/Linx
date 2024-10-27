@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXTRANSFORMS_CORRELATION_H
-#define _LINXTRANSFORMS_CORRELATION_H
+#ifndef LINX_TRANSFORMS_CORRELATION_H
+#define LINX_TRANSFORMS_CORRELATION_H
 
 #include "Linx/Data/Image.h"
 #include "Linx/Data/Sequence.h"

@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXDATA_DISTRIBUTION_H
-#define _LINXDATA_DISTRIBUTION_H
+#ifndef LINX_DATA_DISTRIBUTION_H
+#define LINX_DATA_DISTRIBUTION_H
 
 #include "Linx/Data/Sequence.h"
 
@@ -60,7 +60,7 @@ void histogram_to(const TIn& in, const TBins& bins, TOut& out)
 template <typename TOut = int, typename TBins>
 auto histogram(const auto& in, const TBins& bins)
 {
-  constexpr auto N = std::max(TBins::Rank - 1, -1);
+  constexpr auto N = std::max(TBins::n - 1, -1);
   Sequence<TOut, N> out(compose_label("histogram", in), bins.size() - 1);
   histogram_to(in, bins, out);
   return out;

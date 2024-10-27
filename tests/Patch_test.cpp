@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(span_unbounded_singleton_slice_test)
       KOKKOS_LAMBDA(int i, int j, int k) { image(i, j, k) = i + j + k; });
   auto slice = image[Linx::Slice(1, 5)()(3)];
   BOOST_TEST(slice.label() == image.label());
-  BOOST_TEST(slice.Rank == 2);
+  BOOST_TEST(slice.n == 2);
   BOOST_TEST(slice.extent(0) == 4);
   BOOST_TEST(slice.extent(1) == 9);
   BOOST_TEST(slice.domain().start(0) == 0);
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(box_slice_test)
       KOKKOS_LAMBDA(int i, int j, int k) { image(i, j, k) = i + j + k; });
   auto slice = image[box];
   BOOST_TEST(slice.label() == image.label());
-  BOOST_TEST(slice.Rank == 3);
+  BOOST_TEST(slice.n == 3);
   BOOST_TEST(slice.extent(0) == 4);
   BOOST_TEST(slice.extent(1) == 9);
   BOOST_TEST(slice.extent(2) == 1);
@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE(index_range_slice_test)
       KOKKOS_LAMBDA(int i, int j, int k) { image(i, j, k) = i + j + k; });
   auto slice = image[Linx::Slice(1, 3)];
   BOOST_TEST(slice.label() == image.label());
-  BOOST_TEST(slice.Rank == 3);
+  BOOST_TEST(slice.n == 3);
   BOOST_TEST(slice.extent(0) == 16);
   BOOST_TEST(slice.extent(1) == 9);
   BOOST_TEST(slice.extent(2) == 2);
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE(index_slice_test)
       KOKKOS_LAMBDA(int i, int j, int k) { image(i, j, k) = i + j + k; });
   auto slice = image[Linx::Slice(1)];
   BOOST_TEST(slice.label() == image.label());
-  BOOST_TEST(slice.Rank == 2);
+  BOOST_TEST(slice.n == 2);
   BOOST_TEST(slice.extent(0) == 16);
   BOOST_TEST(slice.extent(1) == 9);
   BOOST_TEST(slice.domain().start(0) == 0);
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(patch_unbounded_singleton_patch_test)
   auto patch = Linx::patch(image, Linx::Slice(1, 5)()(3));
   BOOST_TEST((Linx::root(patch) == image));
   BOOST_TEST((Linx::root(patch).container() == image.container()));
-  BOOST_TEST(patch.Rank == 3);
+  BOOST_TEST(patch.n == 3);
   const auto& domain = patch.domain();
   BOOST_TEST(domain.extent(0) == 4);
   BOOST_TEST(domain.extent(1) == 9);

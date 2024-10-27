@@ -2,8 +2,8 @@
 // This file is part of Linx <github.com/kabasset/Linx>
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXBASE_MIXINS_MATH_H
-#define _LINXBASE_MIXINS_MATH_H
+#ifndef LINX_BASE_MIXINS_MATH_H
+#define LINX_BASE_MIXINS_MATH_H
 
 #include "Linx/Base/Functional.h"
 #include "Linx/Base/Types.h"

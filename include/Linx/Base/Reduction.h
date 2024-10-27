@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXBASE_REDUCTION_H
-#define _LINXBASE_REDUCTION_H
+#ifndef LINX_BASE_REDUCTION_H
+#define LINX_BASE_REDUCTION_H
 
 #include "Linx/Base/Containers.h"
 #include "Linx/Base/Exceptions.h"
@@ -96,7 +96,7 @@ template <typename T, typename TProj, typename TRed, std::size_t... Is>
 class ProjectionReducer {
 public:
 
-  static constexpr std::size_t Rank = sizeof...(Is);
+  static constexpr std::size_t n = sizeof...(Is);
   using value_type = std::remove_cv_t<T>;
 
   /**
@@ -114,8 +114,8 @@ public:
   KOKKOS_INLINE_FUNCTION void operator()(Ts&&... args) const
   {
     auto tuple = forward_as_tuple(args...);
-    static_assert(sizeof...(args) == Rank + 1);
-    m_reducer.join(get<Rank>(tuple), m_projection(get<Is>(tuple)...));
+    static_assert(sizeof...(args) == n + 1);
+    m_reducer.join(get<n>(tuple), m_projection(get<Is>(tuple)...));
   }
 
 private:
@@ -135,7 +135,7 @@ void kokkos_reduce_impl(
     const TRed& reducer,
     std::index_sequence<Is...>)
 {
-  if constexpr (TRegion::Rank == 0) {
+  if constexpr (TRegion::n == 0) {
     return;
   } else {
     using T = typename TRed::value_type;
@@ -185,7 +185,7 @@ void kokkos_reduce(const std::string& label, const TRegion& region, const TProj&
       return; \
     }
 
-  if constexpr (TRegion::Rank == -1) {
+  if constexpr (TRegion::n == -1) {
     switch (region.rank()) {
       case 0:
         return;
@@ -199,7 +199,7 @@ void kokkos_reduce(const std::string& label, const TRegion& region, const TProj&
         throw Linx::OutOfBounds<'[', ']'>("Dynamic rank", region.rank(), {0, 6});
     }
   } else {
-    Impl::kokkos_reduce_impl<TSpace>(label, region, projection, reducer, std::make_index_sequence<TRegion::Rank>());
+    Impl::kokkos_reduce_impl<TSpace>(label, region, projection, reducer, std::make_index_sequence<TRegion::n>());
   }
 
 #undef LINX_CASE_RANK

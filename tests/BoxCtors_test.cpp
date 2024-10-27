@@ -12,7 +12,7 @@ template <typename T, Linx::Index N, typename TIn>
 void check_ctor(const TIn& in, const Linx::GBox<T, N>& expected)
 {
   BOOST_TEST((std::is_same_v<typename TIn::size_type, T>));
-  BOOST_TEST(TIn::Rank == N);
+  BOOST_TEST(TIn::n == N);
   BOOST_TEST((in == expected));
 }
 

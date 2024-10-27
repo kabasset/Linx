@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXDATA_IMAGE_H
-#define _LINXDATA_IMAGE_H
+#ifndef LINX_DATA_IMAGE_H
+#define LINX_DATA_IMAGE_H
 
 #include "Linx/Base/Containers.h"
 #include "Linx/Base/Functional.h"
@@ -55,7 +55,7 @@ class Image :
     public RangeMixin<is_contiguous<TContainer>(), T, Image<T, N, TContainer>> {
 public:
 
-  static constexpr int Rank = N; ///< The dimension parameter
+  static constexpr int n = N; ///< The dimension parameter
   using Container = TContainer; ///< The underlying container type
   using Shape = Position<N>; ///< The shape type
   using Domain = Box<N>; ///< The domain type
@@ -73,7 +73,7 @@ public:
 
 private:
 
-  static constexpr int MaxDynRank = (Rank == -1 ? 7 : Rank); ///< The max dynamic rank supported by Kokkos
+  static constexpr int max_dyn_rank = (n == -1 ? 7 : n); ///< The max dynamic rank supported by Kokkos
   // FIXME make public? protected in parent Dimensional?
 
 public:
@@ -104,15 +104,15 @@ public:
    * @copydoc Image()
    */
   template <std::integral TInt, typename UContainer>
-  explicit Image(const Sequence<TInt, Rank, UContainer>& shape) : Image("", shape) // FIXME use ArrayLike?
+  explicit Image(const Sequence<TInt, n, UContainer>& shape) : Image("", shape) // FIXME use ArrayLike?
   {}
 
   /**
    * @copydoc Image()
    */
   template <std::integral TInt, typename UContainer>
-  explicit Image(const std::string& label, const Sequence<TInt, Rank, UContainer>& shape) :
-      Image(label, shape, std::make_index_sequence<MaxDynRank>()) // FIXME use ArrayLike?
+  explicit Image(const std::string& label, const Sequence<TInt, n, UContainer>& shape) :
+      Image(label, shape, std::make_index_sequence<max_dyn_rank>()) // FIXME use ArrayLike?
   {} // FIXME support N = -1
 
   /**
@@ -143,8 +143,8 @@ public:
    * @copydoc Image()
    */
   template <typename U, std::integral TInt, typename UContainer>
-  explicit Image(Wrap<U*> data, const Sequence<TInt, Rank, UContainer>& shape) :
-      Image(data, shape, std::make_index_sequence<MaxDynRank>()) // FIXME use ArrayLike?
+  explicit Image(Wrap<U*> data, const Sequence<TInt, n, UContainer>& shape) :
+      Image(data, shape, std::make_index_sequence<max_dyn_rank>()) // FIXME use ArrayLike?
   {}
 
   /**
@@ -152,10 +152,10 @@ public:
    */
   KOKKOS_INLINE_FUNCTION int rank() const
   {
-    if constexpr (Rank == -1) {
+    if constexpr (n == -1) {
       return Kokkos::rank(m_container);
     } else {
-      return Rank;
+      return n;
     }
   }
 
@@ -204,7 +204,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION reference front() const
   {
-    return operator[](Position<Rank>(rank()));
+    return operator[](Position<n>(rank()));
   }
 
   /**
@@ -218,11 +218,11 @@ public:
   /**
    * @brief Reference to the element at given position.
    */
-  template <std::integral TInt = int, int M = Rank>
+  template <std::integral TInt = int, int M = n>
   KOKKOS_INLINE_FUNCTION reference operator[](const GPosition<TInt, M>& position) const
   {
     // FIXME validate M
-    return at(position, std::make_index_sequence<MaxDynRank>());
+    return at(position, std::make_index_sequence<max_dyn_rank>());
   }
 
   /**
@@ -242,7 +242,7 @@ public:
    * 
    * The `Slice` must have either a rank of:
    * - 1, in which case the slicing is performed on the last axis only;
-   * - `Rank`, in which case the slicing is performed on all axes.
+   * - `n`, in which case the slicing is performed on all axes.
    * 
    * As opposed to patches:
    * - If the slice contains singletons, the associated axes are droped;
@@ -263,10 +263,10 @@ public:
   {
     const auto& crop = region & domain(); // Resolve Kokkos::ALL to drop offsets with subview
     if constexpr (sizeof...(TTypes) == 1) {
-      using Container = decltype(slice_last(std::make_index_sequence<Rank - 1>(), crop));
-      return Image<T, Container::rank(), Container>(Forward {}, slice_last(std::make_index_sequence<Rank - 1>(), crop));
+      using Container = decltype(slice_last(std::make_index_sequence<n - 1>(), crop));
+      return Image<T, Container::rank(), Container>(Forward {}, slice_last(std::make_index_sequence<n - 1>(), crop));
     } else {
-      // FIXME assert sizeoff...(TTypes) == Rank?
+      // FIXME assert sizeoff...(TTypes) == n?
       using Container = decltype(slice_all(crop, std::make_index_sequence<sizeof...(TTypes)>()));
       return Image<T, Container::rank(), Container>(
           Forward {},
@@ -309,7 +309,7 @@ private:
   {
     Shape start("Image domain start");
     Shape stop("Image domain stop");
-    for (int i = 0; i < Rank; ++i) {
+    for (int i = 0; i < n; ++i) {
       start[i] = 0;
       stop[i] = container.extent_int(i);
     }

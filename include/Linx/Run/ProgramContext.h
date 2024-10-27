@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXRUN_PROGRAMCONTEXT_H
-#define _LINXRUN_PROGRAMCONTEXT_H
+#ifndef LINX_RUN_PROGRAMCONTEXT_H
+#define LINX_RUN_PROGRAMCONTEXT_H
 
 #include "Linx/Base/Types.h" // LINX_FORWARD
 

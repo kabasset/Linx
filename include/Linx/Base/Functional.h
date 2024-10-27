@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXBASE_FUNCTIONAL_H
-#define _LINXBASE_FUNCTIONAL_H
+#ifndef LINX_BASE_FUNCTIONAL_H
+#define LINX_BASE_FUNCTIONAL_H
 
 #include "Linx/Base/Types.h"
 

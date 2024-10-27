@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXDATA_PATCH_H
-#define _LINXDATA_PATCH_H
+#ifndef LINX_DATA_PATCH_H
+#define LINX_DATA_PATCH_H
 
 #include "Linx/Base/Functional.h"
 #include "Linx/Base/Types.h"
@@ -26,7 +26,7 @@ public:
 
   using Parent = TParent; ///< The parent, which may be a patch
   using Domain = TDomain; ///< The domain
-  static constexpr int Rank = Domain::Rank;
+  static constexpr int n = Domain::n;
 
   using memory_space = typename Parent::memory_space;
   using execution_space = typename Parent::execution_space;
@@ -193,7 +193,7 @@ auto patch(const Image<T, N, TContainer>& in, const GBox<U, N>& domain)
  * @copydoc patch()
  */
 template <typename TParent, typename TDomain, typename U>
-auto patch(const Patch<TParent, TDomain>& in, const GBox<U, TParent::Rank>& domain)
+auto patch(const Patch<TParent, TDomain>& in, const GBox<U, TParent::n>& domain)
 {
   return Patch<TParent, TDomain>(root(in), domain & in.domain());
 }

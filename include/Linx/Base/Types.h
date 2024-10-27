@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXBASE_TYPES_H
-#define _LINXBASE_TYPES_H
+#ifndef LINX_BASE_TYPES_H
+#define LINX_BASE_TYPES_H
 
 #include <Kokkos_Complex.hpp>
 #include <complex>

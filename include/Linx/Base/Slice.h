@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXBASE_SLICE_H
-#define _LINXBASE_SLICE_H
+#ifndef LINX_BASE_SLICE_H
+#define LINX_BASE_SLICE_H
 
 #include "Linx/Base/Exceptions.h"
 #include "Linx/Base/Types.h"
@@ -95,7 +95,7 @@ class Slice {
 public:
 
   using size_type = T; ///< The value type
-  static constexpr int Rank = sizeof...(TTypes) + 1; ///< The dimension
+  static constexpr int n = sizeof...(TTypes) + 1; ///< The dimension
 
   /**
    * @brief Constructor.
@@ -138,7 +138,7 @@ public:
   template <int I>
   KOKKOS_INLINE_FUNCTION constexpr auto& get() const
   {
-    if constexpr (I == Rank - 1) {
+    if constexpr (I == n - 1) {
       return m_back;
     } else {
       return Linx::get<I>(m_fronts);
@@ -176,8 +176,8 @@ class Slice<T, SliceType::Unbounded> {
 public:
 
   using size_type = T;
-  static constexpr int Rank = 1;
-  static constexpr SliceType Type = SliceType::Unbounded;
+  static constexpr int n = 1;
+  static constexpr SliceType Type = SliceType::Unbounded; // FIXME type?
 
   KOKKOS_INLINE_FUNCTION Slice() {}
 
@@ -216,7 +216,7 @@ class Slice<T, SliceType::Singleton> {
 public:
 
   using size_type = T;
-  static constexpr int Rank = 1;
+  static constexpr int n = 1;
   static constexpr SliceType Type = SliceType::Singleton;
 
   KOKKOS_INLINE_FUNCTION Slice(T value) : m_value(value) {}
@@ -265,7 +265,7 @@ class Slice<T, SliceType::RightOpen> {
 public:
 
   using size_type = T;
-  static constexpr int Rank = 1;
+  static constexpr int n = 1;
   static constexpr SliceType Type = SliceType::RightOpen;
 
   KOKKOS_INLINE_FUNCTION Slice(const T& start, const T& stop) : m_start(start), m_stop(stop) {}
@@ -331,7 +331,7 @@ class Slice<T, SliceType::RightInfinite> {
 public:
 
   using size_type = T;
-  static constexpr int Rank = 1;
+  static constexpr int n = 1;
   static constexpr SliceType Type = SliceType::RightInfinite;
 
   KOKKOS_INLINE_FUNCTION Slice(const T& start, std::nullptr_t) : m_start(start) {}

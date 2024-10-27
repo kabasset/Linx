@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef _LINXTRANSFORMS_RANKFILTERING_H
-#define _LINXTRANSFORMS_RANKFILTERING_H
+#ifndef LINX_TRANSFORMS_RANKFILTERING_H
+#define LINX_TRANSFORMS_RANKFILTERING_H
 
 #include "Linx/Base/Algorithm.h"
 #include "Linx/Base/ArrayPool.h"
@@ -147,7 +147,7 @@ auto median_filter(const std::string& label, const TStrel& strel, const TIn& in)
 template <typename TIn>
 auto median_filter(const std::string& label, Index radius, const TIn& in)
 {
-  constexpr auto N = TIn::Rank;
+  constexpr auto N = TIn::n;
   const auto rank = in.rank();
   auto strel = Box(Position<N>(Constant(-radius), rank), Position<N>(Constant(radius + 1), rank));
   return median_filter(label, strel, in);
@@ -156,7 +156,7 @@ auto median_filter(const std::string& label, Index radius, const TIn& in)
 template <typename TIn>
 auto min_filter(const std::string& label, Index radius, const TIn& in)
 {
-  constexpr auto N = TIn::Rank;
+  constexpr auto N = TIn::n;
   const auto rank = in.rank();
   auto strel = Box(Position<N>(Constant(-radius), rank), Position<N>(Constant(radius + 1), rank));
 
@@ -169,7 +169,7 @@ auto min_filter(const std::string& label, Index radius, const TIn& in)
 template <typename TIn>
 auto max_filter(const std::string& label, Index radius, const TIn& in)
 {
-  constexpr auto N = TIn::Rank;
+  constexpr auto N = TIn::n;
   const auto rank = in.rank();
   auto strel = Box(Position<N>(Constant(-radius), rank), Position<N>(Constant(radius + 1), rank));
 
