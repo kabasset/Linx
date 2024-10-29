@@ -29,7 +29,7 @@ public:
     return "Correlation";
   }
 
-  KOKKOS_INLINE_FUNCTION auto operator()(const std::integral auto&... is)
+  KOKKOS_INLINE_FUNCTION auto operator()(const std::integral auto&... is) const
   {
     auto in_ptr = &this->m_in(is...);
     element_type out {};
