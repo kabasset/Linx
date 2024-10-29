@@ -146,6 +146,10 @@ add_executable(Region_test tests/Region_test.cpp)
 target_link_libraries(Region_test Linx ${Boost_LIBRARIES})
 add_test(Region_test Region_test)
 
+add_executable(ResampleLinear_test tests/ResampleLinear_test.cpp)
+target_link_libraries(ResampleLinear_test Linx ${Boost_LIBRARIES})
+add_test(ResampleLinear_test ResampleLinear_test)
+
 add_executable(SequenceArithmetic_test tests/SequenceArithmetic_test.cpp)
 target_link_libraries(SequenceArithmetic_test Linx ${Boost_LIBRARIES})
 add_test(SequenceArithmetic_test SequenceArithmetic_test)
