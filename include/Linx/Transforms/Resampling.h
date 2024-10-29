@@ -25,9 +25,6 @@ public:
   using Parent = TParent;
   using Method = TMethod;
 
-  using value_type = typename TMethod::value_type; // FIXME check
-  using reference = typename TParent::reference;
-
   Interpolation(Parent parent, Method method) : m_parent(LINX_MOVE(parent)), m_method(LINX_MOVE(method)) {}
 
   std::string label() const
@@ -35,12 +32,12 @@ public:
     return compose_label("interpolate", m_parent, m_method);
   }
 
-  KOKKOS_INLINE_FUNCTION value_type operator()(std::floating_point auto... xs) const
+  KOKKOS_INLINE_FUNCTION auto operator()(std::floating_point auto... xs) const
   {
     return m_method(m_parent, xs...);
   }
 
-  KOKKOS_INLINE_FUNCTION reference operator()(std::integral auto... is) const
+  KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
   {
     return m_parent(is...);
   }

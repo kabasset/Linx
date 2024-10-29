@@ -118,6 +118,10 @@ add_executable(ImageRankFiltering_test tests/ImageRankFiltering_test.cpp)
 target_link_libraries(ImageRankFiltering_test Linx ${Boost_LIBRARIES})
 add_test(ImageRankFiltering_test ImageRankFiltering_test)
 
+add_executable(LinearInterpolation_test tests/LinearInterpolation_test.cpp)
+target_link_libraries(LinearInterpolation_test Linx ${Boost_LIBRARIES})
+add_test(LinearInterpolation_test LinearInterpolation_test)
+
 add_executable(Packs_test tests/Packs_test.cpp)
 target_link_libraries(Packs_test Linx ${Boost_LIBRARIES})
 add_test(Packs_test Packs_test)
@@ -145,10 +149,6 @@ add_test(Reduction_test Reduction_test)
 add_executable(Region_test tests/Region_test.cpp)
 target_link_libraries(Region_test Linx ${Boost_LIBRARIES})
 add_test(Region_test Region_test)
-
-add_executable(ResampleLinear_test tests/ResampleLinear_test.cpp)
-target_link_libraries(ResampleLinear_test Linx ${Boost_LIBRARIES})
-add_test(ResampleLinear_test ResampleLinear_test)
 
 add_executable(SequenceArithmetic_test tests/SequenceArithmetic_test.cpp)
 target_link_libraries(SequenceArithmetic_test Linx ${Boost_LIBRARIES})
