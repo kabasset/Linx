@@ -68,21 +68,76 @@ KOKKOS_INLINE_FUNCTION void project_reduce_to(TProj&& projection, TRed&& reducer
 }
 
 template <typename... Ts>
-struct Tuple {};
+class Tuple {
+public:
+
+  static constexpr std::size_t size()
+  {
+    return 0;
+  }
+};
 
 template <typename T0, typename... Ts>
-struct Tuple<T0, Ts...> {
+class Tuple<T0, Ts...> {
+public:
+
   KOKKOS_INLINE_FUNCTION Tuple(auto&& arg0, auto&&... args) :
       m_head {LINX_FORWARD(arg0)}, m_tail {LINX_FORWARD(args)...}
   {}
+
+  static constexpr std::size_t size()
+  {
+    return sizeof...(Ts) + 1;
+  }
+
+  KOKKOS_INLINE_FUNCTION constexpr const T0& front() const
+  {
+    return m_head;
+  }
+
+  KOKKOS_INLINE_FUNCTION constexpr const auto& back() const
+  {
+    return m_tail.back();
+  }
+
+  KOKKOS_INLINE_FUNCTION constexpr const Tuple<Ts...>& tail() const
+  {
+    return m_tail;
+  }
+
+private:
 
   T0 m_head;
   Tuple<Ts...> m_tail;
 };
 
 template <typename T>
-struct Tuple<T> {
+class Tuple<T> {
+public:
+
   KOKKOS_INLINE_FUNCTION Tuple(auto&& arg) : m_head {LINX_FORWARD(arg)} {}
+
+  static constexpr std::size_t size()
+  {
+    return 1;
+  }
+
+  KOKKOS_INLINE_FUNCTION constexpr const T& front() const
+  {
+    return m_head;
+  }
+
+  KOKKOS_INLINE_FUNCTION constexpr const T& back() const
+  {
+    return m_head;
+  }
+
+  KOKKOS_INLINE_FUNCTION constexpr Tuple<> tail() const
+  {
+    return Tuple<> {};
+  }
+
+private:
 
   T m_head;
 };
@@ -91,9 +146,9 @@ template <std::size_t I, typename T0, typename... Ts>
 KOKKOS_INLINE_FUNCTION constexpr decltype(auto) get(const Tuple<T0, Ts...>& tuple)
 {
   if constexpr (I == 0) {
-    return tuple.m_head;
+    return tuple.front();
   } else {
-    return get<I - 1>(tuple.m_tail);
+    return get<I - 1>(tuple.tail());
   }
 }
 
