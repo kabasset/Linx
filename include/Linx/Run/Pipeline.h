@@ -68,6 +68,8 @@ private:
   TTimer m_timer;
 };
 
+struct Output {};
+
 template <typename TContext, typename TView>
 class Pipeline {
 public:
@@ -82,27 +84,23 @@ public:
   }
 
   template <typename T>
-  auto operator|(T&& step) &
-  {
-    return Linx::Pipeline(m_context, LINX_FORWARD(step)(m_view));
-  }
-
-  template <typename T>
   auto operator|(T&& step) &&
   {
     return Linx::Pipeline(LINX_MOVE(m_context), LINX_FORWARD(step)(LINX_MOVE(m_view)));
   }
 
   template <Index N>
-  auto operator|(Box<N> box)
+  auto operator|(Box<N> box) &&
   {
-    // return patch(m_view, LINX_MOVE(box)).copy();
-    auto label = compose_label(m_view.label(), box.start(), box.stop());
-    auto out = Image<element_type, N>(label, box.shape()).copy_from(m_view);
+    auto label = compose_label("FIXME", box.start(), box.stop());
+    auto view = Image<element_type, N>(label, box.shape()).copy_from(m_view);
     // FIXME offset
-    m_context.log(label);
-    m_context.log_time();
-    return out;
+    return Linx::Pipeline(LINX_MOVE(m_context), LINX_MOVE(view));
+  }
+
+  auto operator|(Output) &&
+  {
+    return LINX_MOVE(m_view);
   }
 
 private:

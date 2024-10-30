@@ -11,7 +11,20 @@
 
 #include <boost/test/unit_test.hpp>
 
-namespace Linx {
+namespace Linx { // FIXME
+
+template <typename T>
+const auto& as_readonly(const Constant<T>& c)
+{
+  return c;
+}
+
+template <typename T>
+auto& operator<<(std::ostream& os, const Constant<T>& c)
+{
+  os << c();
+  return os;
+}
 
 auto generate(const std::string& label, const auto& func, std::integral auto... shape)
 {
@@ -57,11 +70,11 @@ BOOST_AUTO_TEST_CASE(rng_test)
 {
   auto width = 10;
   auto height = 3;
-  auto in = Linx::generate("in", Linx::Constant(1), width, height);
-  auto out = Linx::PipelineContext(Linx::CerrLogger()) | in // input
+  auto out = Linx::PipelineContext(Linx::CerrLogger()) // init
+      | Linx::Constant(1) | Linx::Box({0, 0}, {width, height}) // input
       | Linx::apply(Linx::Add(1), Linx::Multiply(3)) // pixelwise operations
-      | Linx::Box({0, 0}, {width, height}); // output
-  BOOST_TEST((out.shape() == in.shape()));
+      | Linx::Output(); // output
+  BOOST_TEST((out.shape() == Linx::Position({width, height})));
   BOOST_TEST(out.contains_only(6));
 }
 
