@@ -67,7 +67,7 @@ public:
 
   Pipeline(TContext context, TState state) : m_context(LINX_MOVE(context)), m_state(LINX_MOVE(state))
   {
-    m_context.log(label(m_state));
+    m_context.log(label(m_state)); // FIXME label the transform
   }
 
   template <typename T>

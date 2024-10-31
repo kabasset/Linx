@@ -63,6 +63,36 @@ auto apply(TFunc0 f0, TFuncs... fs)
   };
 }
 
+decltype(auto) compose(auto&& f)
+{
+  return LINX_FORWARD(f);
+}
+
+decltype(auto) compose(auto f0, auto... fs)
+{
+  return KOKKOS_LAMBDA(auto&&... args)
+  {
+    return compose(fs...)(f0(args...));
+  };
+}
+
+template <typename... TFuncs>
+struct Apply {
+  Apply(TFuncs... fs) : m_func(compose(fs...)) {}
+
+  std::string label() const
+  {
+    return "Apply";
+  }
+
+  decltype(auto) operator()(auto&& in0, auto&&... ins)
+  {
+    return in0.apply(label(), m_func, LINX_FORWARD(ins)...);
+  }
+
+  decltype(compose(std::declval<TFuncs>()...)) m_func;
+};
+
 } // namespace Linx
 
 LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
@@ -73,7 +103,7 @@ BOOST_AUTO_TEST_CASE(sequence_api_test)
   auto logger = Linx::TimerLogger();
   auto out = Linx::StartPipeline("(1 + 2) * 3", logger) // init
       | Linx::Constant(1) | Linx::Slice(0, size) // input
-      | Linx::apply(Linx::Add(2), Linx::Multiply(3)) // pixelwise operations
+      | Linx::Apply(Linx::Add(2), Linx::Multiply(3)) // pixelwise operations
       | Linx::StopPipeline(); // output
   std::cout << out << std::endl;
   for (const auto& kv : logger.timer()) {
@@ -90,7 +120,7 @@ BOOST_AUTO_TEST_CASE(image_api_test)
   auto logger = Linx::TimerLogger();
   auto out = Linx::StartPipeline("(1 + 2) * 3", logger) // init
       | Linx::Constant(1) | Linx::Box({0, 0}, {width, height}) // input
-      | Linx::apply(Linx::Add(2), Linx::Multiply(3)) // pixelwise operations
+      | Linx::Apply(Linx::Add(2), Linx::Multiply(3)) // pixelwise operations
       | Linx::StopPipeline(); // output
   logger.logger() << "Done.";
   for (const auto& kv : logger.timer()) {
