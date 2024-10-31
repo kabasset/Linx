@@ -5,8 +5,8 @@
 #ifndef LINX_RUN_TIMER_H
 #define LINX_RUN_TIMER_H
 
-#include <algorithm> // min_element, max_element
 #include <chrono>
+#include <utility> // pair
 #include <vector>
 
 namespace Linx {
@@ -66,13 +66,13 @@ public:
   /**
    * @brief Stop the timer and get the last split time.
    */
-  TUnit stop()
+  TUnit stop(const std::string& label)
   {
     m_toc = std::chrono::steady_clock::now();
     m_running = false;
     const auto inc = std::chrono::duration_cast<TUnit>(m_toc - m_tic);
     m_elapsed += inc;
-    m_container.push_back(inc.count());
+    m_container.push_back({label, inc.count()});
     return inc;
   }
 
@@ -82,12 +82,12 @@ public:
    * The split is recorded, such that the function is conceptually equivalent to calling `stop()` and `start()` in a row,
    * but does not introduce any latency.
    */
-  TUnit split()
+  TUnit split(const std::string& label)
   {
     m_toc = std::chrono::steady_clock::now();
     const auto inc = std::chrono::duration_cast<TUnit>(m_toc - m_tic);
     m_elapsed += inc;
-    m_container.push_back(inc.count());
+    m_container.push_back({label, inc.count()});
     m_tic = m_toc;
     return inc;
   }
@@ -105,7 +105,7 @@ public:
    */
   TUnit operator[](std::size_t i) const
   {
-    return TUnit {typename TUnit::rep(m_container[i])};
+    return TUnit {typename TUnit::rep(m_container[i].second)};
   }
 
   /**
@@ -140,40 +140,22 @@ public:
     return m_container.size();
   }
 
+  auto begin() const
+  {
+    return m_container.begin();
+  }
+
+  auto end() const
+  {
+    return m_container.end();
+  }
+
   /**
    * @brief Get the split times as `double`s.
    */
-  const std::vector<double>& container() const
+  const std::vector<std::pair<std::string, double>>& container() const
   {
     return m_container;
-  }
-
-  /**
-   * @brief Get the minimum split time.
-   * @see `distribution()`
-   */
-  double min() const
-  {
-    return *std::min_element(m_container.begin(), m_container.end());
-  }
-
-  /**
-   * @brief Get the maximum split time.
-   * @see `distribution()`
-   */
-  double max() const
-  {
-    return *std::max_element(m_container.begin(), m_container.end());
-  }
-
-  /**
-   * @brief Get the pair of min and max split times.
-   * @see `distribution()`
-   */
-  std::pair<TUnit, TUnit> minmax() const
-  {
-    const auto its = std::minmax_element(m_container.begin(), m_container.end());
-    return {*its.first, *its.second};
   }
 
   // /**
@@ -204,7 +186,7 @@ private:
   /**
    * @brief The list of split times.
    */
-  std::vector<double> m_container;
+  std::vector<std::pair<std::string, double>> m_container;
 
   /**
    * @brief The total elapsed time.

@@ -63,12 +63,12 @@ public:
   void operator<<(const std::string& label)
   {
     if (m_timer.is_running()) {
-      m_timer.split(); // FIXME label
+      m_timer.split(label);
       std::ostringstream os;
       os << label << " [" << m_timer.back().count() << "ms]"; // FIXME just back() to get the unit deduced, since GCC 12
       m_logger << os.str();
     } else {
-      m_timer.start(); // FIXME label
+      m_timer.start();
       m_logger << label;
     }
   }
