@@ -70,10 +70,12 @@ BOOST_AUTO_TEST_CASE(rng_test)
 {
   auto width = 10;
   auto height = 3;
-  auto out = Linx::PipelineContext(Linx::CerrLogger()) // init
+  auto logger = Linx::CerrLogger();
+  auto out = Linx::start(logger) // init
       | Linx::Constant(1) | Linx::Box({0, 0}, {width, height}) // input
       | Linx::apply(Linx::Add(1), Linx::Multiply(3)) // pixelwise operations
-      | Linx::Output(); // output
+      | Linx::Stop(); // output
+  logger << "Done.";
   BOOST_TEST((out.shape() == Linx::Position({width, height})));
   BOOST_TEST(out.contains_only(6));
 }

@@ -118,12 +118,12 @@ auto timer = Linx::Timer();
 Linx::start(timer) // Start a pipeline with embedded timer
     | Linx::read(science_path, dark_path) // Read two images
     | Linx::Subtract() // Subtract them
-    & Linx::input(flat_path) // Read another image
+    & Linx::read(flat_path) // Read another image
     | Linx::Divide() // Divide
-    | Linx::output(calibrated_path); // Write image
+    | Linx::write(calibrated_path); // Write image
 
 for (const auto& step : timer) {
-    std::cout << timer[step] << std::endl;
+    std::cout << step << ": " << timer[step] << std::endl;
 }
 ```
 

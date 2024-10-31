@@ -13,10 +13,6 @@
 
 namespace Linx {
 
-struct NoLogger {
-  constexpr void operator<<(auto&&) const {}
-};
-
 struct CerrLogger {
   constexpr void operator<<(auto&& in) const
   {
@@ -26,93 +22,79 @@ struct CerrLogger {
   }
 };
 
-struct NoTimer {
-  static constexpr bool start()
-  {
-    return false;
-  }
-
-  static constexpr bool stop()
-  {
-    return false;
-  }
-
-  static constexpr bool split()
-  {
-    return false;
-  }
-};
-
-template <typename TLogger = NoLogger, typename TTimer = NoTimer>
+template <typename TLogger = void>
 class PipelineContext {
 public:
 
-  PipelineContext(TLogger logger = TLogger(), TTimer timer = TTimer()) : m_logger(logger), m_timer(timer) {}
+  PipelineContext(TLogger* logger = nullptr) : m_logger(logger) {}
 
   void log(auto content)
   {
-    m_logger << content;
-  }
-
-  void log_time()
-  {
-    auto time = m_timer.split();
-    if (time) {
-      log(time);
+    if (m_logger) {
+      *m_logger << content;
     }
   }
 
 private:
 
-  TLogger m_logger;
-  TTimer m_timer;
+  TLogger* m_logger;
 };
 
-struct Output {};
+struct Stop {};
 
-template <typename TContext, typename TView>
+template <typename TContext, typename TState>
 class Pipeline {
 public:
 
-  using value_type = typename TView::value_type;
+  using value_type = typename TState::value_type;
   using element_type = typename std::remove_cvref_t<value_type>;
 
-  Pipeline(TContext context, TView view) : m_context(context), m_view(view)
+  Pipeline(TContext context, TState state) : m_context(context), m_state(state)
   {
-    m_context.log(label(m_view));
-    m_context.log_time();
+    m_context.log(label(m_state));
   }
 
   template <typename T>
   auto operator|(T&& step) &&
   {
-    return Linx::Pipeline(LINX_MOVE(m_context), LINX_FORWARD(step)(LINX_MOVE(m_view)));
+    return Linx::Pipeline(LINX_MOVE(m_context), LINX_FORWARD(step)(LINX_MOVE(m_state)));
   }
 
   template <Index N>
   auto operator|(Box<N> box) &&
   {
     auto label = compose_label("FIXME", box.start(), box.stop());
-    auto view = Image<element_type, N>(label, box.shape()).copy_from(m_view);
+    auto state = Image<element_type, N>(label, box.shape()).copy_from(m_state);
     // FIXME offset
-    return Linx::Pipeline(LINX_MOVE(m_context), LINX_MOVE(view));
+    return Linx::Pipeline(LINX_MOVE(m_context), LINX_MOVE(state));
   }
 
-  auto operator|(Output) &&
+  auto operator|(Stop) &&
   {
-    return LINX_MOVE(m_view);
+    return LINX_MOVE(m_state);
   }
 
 private:
 
   TContext m_context;
-  TView m_view;
+  TState m_state;
 };
 
-template <typename TLogger, typename TTimer, typename TView>
-Pipeline<PipelineContext<TLogger, TTimer>, TView> operator|(PipelineContext<TLogger, TTimer> context, TView view)
+template <typename TLogger, typename TState>
+Pipeline<PipelineContext<TLogger>, TState> operator|(PipelineContext<TLogger> context, TState state)
 {
-  return {LINX_MOVE(context), LINX_MOVE(view)};
+  return {LINX_MOVE(context), LINX_MOVE(state)};
+}
+
+PipelineContext<> start()
+{
+  return PipelineContext<>();
+}
+
+template <typename TLogger>
+auto start(TLogger& logger)
+{
+  return PipelineContext<TLogger>(&logger);
 }
 
 } // namespace Linx
