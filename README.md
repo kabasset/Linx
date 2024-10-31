@@ -55,26 +55,26 @@ auto c = +a; // Copies
 c *= 2; // Modifies c only
 ``` 
 
-**Element-wise transforms**
+**Pointwise transforms**
 
-Data classes offer a variety of element-wise services which can either modify the data in-place or return new instances or values.
+Data classes offer a variety of pointwise services which can either modify the data in-place or return new instances or values.
 In-place services are methods, such as `Image::exp()`, while new-instance services are free functions, such as `exp(const Image&)`:
 
 ```cpp
 auto a = Linx::Image(...);
 a.pow(2); // Modifies a in-place
 auto a2 = Linx::pow(a, 2); // Creates new instance
-auto norm2 = Linx::norm<2>(a); // Return value
+auto norm2 = Linx::norm<2>(a); // Returns a value
 ```
 
-Arbitrarily complex functions can also be applied element-wise with `apply()` or `generate()`:
+Arbitrarily complex functions can also be applied pointwise with `apply()` or `generate()`:
 
 ```cpp
 auto a = Linx::Image(...);
 auto b = Linx::Image(...);
 a.generate(
     "random noise",
-    Linx::GaussianNoise());
+    Linx::GaussianRng());
 a.apply(
     "logistic function",
     KOKKOS_LAMBDA(auto a_i) { return 1. / (1. + std::exp(-a_i)); });
@@ -106,6 +106,27 @@ auto fourier = Linx::Image("DFT", image.shape());
 Linx::dft_to(image, fourier); // Fills fourier
 ```
 
+**Pipeline**
+
+Transforms can be combined through a so-called pipeline, using the pipe operator `|` à-la Unix,
+as well as the `&` operator to combine data.
+Logging and timing tools can be plugged into the pipeline.
+
+```cpp
+auto timer = Linx::Timer();
+
+Linx::start(timer) // Start a pipeline with embedded timer
+    | Linx::read(science_path, dark_path) // Read two images
+    | Linx::Subtract() // Subtract them
+    & Linx::input(flat_path) // Read another image
+    | Linx::Divide() // Divide
+    | Linx::output(calibrated_path); // Write image
+
+for (const auto& step : timer) {
+    std::cout << timer[step] << std::endl;
+}
+```
+
 **Regional transforms**
 
 There are two ways to work on subsets of elements:
@@ -116,7 +137,7 @@ Patches are extremely lightweight and can be moved around when the region is a `
 
 Typical windows are `Box`, `Mask` or `Path` and can be used to apply filters.
 
-Patches are like data classes and can themselves be transformed element-wise:
+Patches are like data classes and can themselves be transformed pointwise:
 
 ```cpp
 auto image = Linx::Image(...):
