@@ -13,15 +13,6 @@
 
 namespace Linx {
 
-struct CerrLogger {
-  constexpr void operator<<(auto&& in) const
-  {
-    auto t = std::time(nullptr);
-    auto tm = *std::gmtime(&t);
-    std::cerr << std::put_time(&tm, "%F %TZ") << " | " << LINX_FORWARD(in) << std::endl;
-  }
-};
-
 template <typename TLogger = void>
 class PipelineContext {
 public:

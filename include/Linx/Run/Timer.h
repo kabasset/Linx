@@ -26,7 +26,7 @@ namespace Linx {
  * The timer can be reset, which means that the list of split times is emptied,
  * and the elapsed time is set to 0 or a given offset.
  */
-template <typename TUnit, typename TLogger = void>
+template <typename TUnit>
 class Timer {
 public:
 
@@ -38,8 +38,7 @@ public:
   /**
    * @brief Create a timer with optional offset.
    */
-  explicit Timer(TUnit offset = TUnit(), TLogger* logger = nullptr) :
-      m_tic(), m_toc(), m_running(false), m_container(), m_elapsed(offset), m_logger(logger)
+  explicit Timer(TUnit offset = TUnit()) : m_tic(), m_toc(), m_running(false), m_container(), m_elapsed(offset)
   {
     reset(offset);
   }
@@ -91,26 +90,6 @@ public:
     m_container.push_back(inc.count());
     m_tic = m_toc;
     return inc;
-  }
-
-  /**
-   * @brief Call `start()` if not already running, or `split()` otherwise and print the split time.
-   */
-  void operator<<(const std::string& label)
-  {
-    if (is_running()) {
-      split(); // FIXME label
-      if (m_logger) {
-        std::ostringstream os;
-        os << label << " [" << back().count() << "ms]"; // FIXME just back() to get the unit printed, since GCC 12
-        *m_logger << os.str();
-      }
-    } else {
-      start(); // FIXME label
-      if (m_logger) {
-        *m_logger << label;
-      }
-    }
   }
 
   /**
@@ -231,8 +210,6 @@ private:
    * @brief The total elapsed time.
    */
   TUnit m_elapsed;
-
-  TLogger* m_logger;
 };
 
 } // namespace Linx

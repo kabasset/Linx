@@ -6,9 +6,9 @@
 #include "Linx/Base/Functional.h"
 #include "Linx/Base/Random.h"
 #include "Linx/Data/Image.h"
+#include "Linx/Run/Logging.h"
 #include "Linx/Run/Pipeline.h"
 #include "Linx/Run/ProgramContext.h"
-#include "Linx/Run/Timer.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -71,13 +71,12 @@ BOOST_AUTO_TEST_CASE(api_test)
 {
   auto width = 10;
   auto height = 3;
-  auto logger = Linx::CerrLogger();
-  auto timer = Linx::Timer<std::chrono::milliseconds, Linx::CerrLogger>({}, &logger);
+  auto timer = Linx::TimerLogger();
   auto out = Linx::start("(1 + 1) * 3", timer) // init
       | Linx::Constant(1) | Linx::Box({0, 0}, {width, height}) // input
       | Linx::apply(Linx::Add(1), Linx::Multiply(3)) // pixelwise operations
       | Linx::Stop(); // output
-  logger << "Done.";
+  timer.logger() << "Done.";
   BOOST_TEST((out.shape() == Linx::Position({width, height})));
   BOOST_TEST(out.contains_only(6));
 }
