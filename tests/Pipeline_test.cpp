@@ -23,11 +23,11 @@ const auto& as_readonly(const Constant<T>& c)
 template <typename T>
 auto& operator<<(std::ostream& os, const Constant<T>& c)
 {
-  os << c();
+  os << compose_label("Constant", c());
   return os;
 }
 
-auto generate(const std::string& label, const auto& func, std::integral auto... shape)
+auto generate(const std::string& label, const auto& func, std::integral auto... shape) // FIXME to Image
 {
   using T = std::remove_cvref_t<decltype(func())>;
   return Image<T, sizeof...(shape)>(label, shape...).generate("generate", func); // FIXME uninitialized

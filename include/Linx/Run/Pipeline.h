@@ -79,7 +79,8 @@ public:
   template <typename T>
   auto operator|(Span<T> span) &&
   {
-    auto state = Sequence<element_type, -1>("Sequence", span.size()).copy_from(m_state); // FIXME make -1 the default
+    auto label = compose_label("Sequence", m_state);
+    auto state = Sequence<element_type, -1>(label, span.size()).copy_from(m_state); // FIXME make -1 the default
     // FIXME offset
     return Linx::Pipeline(LINX_MOVE(m_context), LINX_MOVE(state));
   }
@@ -87,7 +88,8 @@ public:
   template <Index N>
   auto operator|(Box<N> box) &&
   {
-    auto state = Image<element_type, N>("Image", box.shape()).copy_from(m_state);
+    auto label = compose_label("Image", m_state);
+    auto state = Image<element_type, N>(label, box.shape()).copy_from(m_state);
     // FIXME offset
     return Linx::Pipeline(LINX_MOVE(m_context), LINX_MOVE(state));
   }
