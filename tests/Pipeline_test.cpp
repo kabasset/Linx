@@ -8,6 +8,7 @@
 #include "Linx/Data/Image.h"
 #include "Linx/Run/Pipeline.h"
 #include "Linx/Run/ProgramContext.h"
+#include "Linx/Run/Timer.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -66,12 +67,13 @@ auto apply(TFunc0 f0, TFuncs... fs)
 
 LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
-BOOST_AUTO_TEST_CASE(rng_test)
+BOOST_AUTO_TEST_CASE(api_test)
 {
   auto width = 10;
   auto height = 3;
   auto logger = Linx::CerrLogger();
-  auto out = Linx::start(logger) // init
+  auto timer = Linx::Timer<std::chrono::milliseconds, Linx::CerrLogger>({}, &logger);
+  auto out = Linx::start("(1 + 1) * 3", timer) // init
       | Linx::Constant(1) | Linx::Box({0, 0}, {width, height}) // input
       | Linx::apply(Linx::Add(1), Linx::Multiply(3)) // pixelwise operations
       | Linx::Stop(); // output

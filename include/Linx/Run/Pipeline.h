@@ -18,7 +18,7 @@ struct CerrLogger {
   {
     auto t = std::time(nullptr);
     auto tm = *std::gmtime(&t);
-    std::cerr << std::put_time(&tm, "%F %T") << ": " << in << std::endl;
+    std::cerr << std::put_time(&tm, "%F %TZ") << " | " << LINX_FORWARD(in) << std::endl;
   }
 };
 
@@ -26,11 +26,14 @@ template <typename TLogger = void>
 class PipelineContext {
 public:
 
-  PipelineContext(TLogger* logger = nullptr) : m_logger(logger) {}
+  PipelineContext(const std::string& label, TLogger* logger = nullptr) : m_logger(logger)
+  {
+    log(std::string("Pipeline start: ") + label);
+  }
 
   void log(auto content)
   {
-    if (m_logger) {
+    if constexpr (not std::is_same_v<TLogger, void>) {
       *m_logger << content;
     }
   }
@@ -49,7 +52,7 @@ public:
   using value_type = typename TState::value_type;
   using element_type = typename std::remove_cvref_t<value_type>;
 
-  Pipeline(TContext context, TState state) : m_context(context), m_state(state)
+  Pipeline(TContext context, TState state) : m_context(LINX_MOVE(context)), m_state(LINX_MOVE(state))
   {
     m_context.log(label(m_state));
   }
@@ -86,15 +89,15 @@ Pipeline<PipelineContext<TLogger>, TState> operator|(PipelineContext<TLogger> co
   return {LINX_MOVE(context), LINX_MOVE(state)};
 }
 
-PipelineContext<> start()
+PipelineContext<> start(const std::string& label)
 {
-  return PipelineContext<>();
+  return PipelineContext<>(label);
 }
 
 template <typename TLogger>
-auto start(TLogger& logger)
+auto start(const std::string& label, TLogger& logger)
 {
-  return PipelineContext<TLogger>(&logger);
+  return PipelineContext<TLogger>(label, &logger);
 }
 
 } // namespace Linx
