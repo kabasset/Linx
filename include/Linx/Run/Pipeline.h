@@ -13,28 +13,50 @@
 
 namespace Linx {
 
-template <typename TLogger = void>
-class PipelineContext {
+template <typename TLogger>
+class StartPipeline {
 public:
 
-  PipelineContext(const std::string& label, TLogger* logger = nullptr) : m_logger(logger)
+  StartPipeline(const std::string& label, TLogger& logger = nullptr) : m_label(label), m_logger(logger)
   {
     log(std::string("Pipeline start: ") + label);
   }
 
+  const std::string& label() const
+  {
+    return m_label;
+  }
+
   void log(auto content)
   {
-    if constexpr (not std::is_same_v<TLogger, void>) {
-      *m_logger << content;
-    }
+    m_logger << content;
   }
 
 private:
 
-  TLogger* m_logger;
+  std::string m_label;
+  TLogger& m_logger;
 };
 
-struct Stop {};
+template <>
+class StartPipeline<void> {
+public:
+
+  StartPipeline(const std::string& label) : m_label(label) {}
+
+  const std::string& label() const
+  {
+    return m_label;
+  }
+
+  void log(auto) {}
+
+private:
+
+  std::string m_label;
+};
+
+struct StopPipeline {};
 
 template <typename TContext, typename TState>
 class Pipeline {
@@ -63,7 +85,7 @@ public:
     return Linx::Pipeline(LINX_MOVE(m_context), LINX_MOVE(state));
   }
 
-  auto operator|(Stop) &&
+  auto operator|(StopPipeline) &&
   {
     return LINX_MOVE(m_state);
   }
@@ -75,20 +97,9 @@ private:
 };
 
 template <typename TLogger, typename TState>
-Pipeline<PipelineContext<TLogger>, TState> operator|(PipelineContext<TLogger> context, TState state)
+Pipeline<StartPipeline<TLogger>, TState> operator|(StartPipeline<TLogger> context, TState state)
 {
   return {LINX_MOVE(context), LINX_MOVE(state)};
-}
-
-PipelineContext<> start(const std::string& label)
-{
-  return PipelineContext<>(label);
-}
-
-template <typename TLogger>
-auto start(const std::string& label, TLogger& logger)
-{
-  return PipelineContext<TLogger>(label, &logger);
 }
 
 } // namespace Linx

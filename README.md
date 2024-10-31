@@ -113,13 +113,13 @@ as well as the `&` operator to combine data.
 Logging and timing tools can be plugged into the pipeline.
 
 ```cpp
-auto timer = Linx::Timer();
+auto timer = Linx::TimerLogger();
 
-Linx::start(timer) // Start a pipeline with embedded timer
+Linx::StartPipeline(timer) // Start a pipeline with embedded timer
     | Linx::read(science_path, dark_path) // Read two images
-    | Linx::Subtract() // Subtract them
+    | Linx::apply(Linx::Subtract()) // Subtract them
     & Linx::read(flat_path) // Read another image
-    | Linx::Divide() // Divide
+    | Linx::apply(Linx::Divide()) // Divide
     | Linx::write(calibrated_path); // Write image
 
 for (const auto& step : timer) {

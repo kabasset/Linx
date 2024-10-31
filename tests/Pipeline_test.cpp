@@ -72,13 +72,13 @@ BOOST_AUTO_TEST_CASE(api_test)
   auto width = 10;
   auto height = 3;
   auto timer = Linx::TimerLogger();
-  auto out = Linx::start("(1 + 1) * 3", timer) // init
+  auto out = Linx::StartPipeline("(1 + 2) * 3", timer) // init
       | Linx::Constant(1) | Linx::Box({0, 0}, {width, height}) // input
-      | Linx::apply(Linx::Add(1), Linx::Multiply(3)) // pixelwise operations
-      | Linx::Stop(); // output
+      | Linx::apply(Linx::Add(2), Linx::Multiply(3)) // pixelwise operations
+      | Linx::StopPipeline(); // output
   timer.logger() << "Done.";
   BOOST_TEST((out.shape() == Linx::Position({width, height})));
-  BOOST_TEST(out.contains_only(6));
+  BOOST_TEST(out.contains_only(9));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
