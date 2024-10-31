@@ -19,7 +19,7 @@ public:
 
   StartPipeline(const std::string& label, TLogger& logger = nullptr) : m_label(label), m_logger(logger)
   {
-    log(std::string("Pipeline start: ") + label);
+    log(std::string("Start pipeline: ") + label);
   }
 
   const std::string& label() const
@@ -76,11 +76,18 @@ public:
     return Linx::Pipeline(LINX_MOVE(m_context), LINX_FORWARD(step)(LINX_MOVE(m_state)));
   }
 
+  template <typename T>
+  auto operator|(Span<T> span) &&
+  {
+    auto state = Sequence<element_type, -1>("Sequence", span.size()).copy_from(m_state); // FIXME make -1 the default
+    // FIXME offset
+    return Linx::Pipeline(LINX_MOVE(m_context), LINX_MOVE(state));
+  }
+
   template <Index N>
   auto operator|(Box<N> box) &&
   {
-    auto label = compose_label("FIXME", box.start(), box.stop());
-    auto state = Image<element_type, N>(label, box.shape()).copy_from(m_state);
+    auto state = Image<element_type, N>("Image", box.shape()).copy_from(m_state);
     // FIXME offset
     return Linx::Pipeline(LINX_MOVE(m_context), LINX_MOVE(state));
   }

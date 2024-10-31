@@ -67,16 +67,35 @@ auto apply(TFunc0 f0, TFuncs... fs)
 
 LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
-BOOST_AUTO_TEST_CASE(api_test)
+BOOST_AUTO_TEST_CASE(sequence_api_test)
+{
+  auto size = 10;
+  auto logger = Linx::TimerLogger();
+  auto out = Linx::StartPipeline("(1 + 2) * 3", logger) // init
+      | Linx::Constant(1) | Linx::Slice(0, size) // input
+      | Linx::apply(Linx::Add(2), Linx::Multiply(3)) // pixelwise operations
+      | Linx::StopPipeline(); // output
+  std::cout << out << std::endl;
+  for (const auto& kv : logger.timer()) {
+    std::cout << kv.first << " - " << kv.second << "ms" << std::endl;
+  }
+  BOOST_TEST((out.ssize() == size));
+  BOOST_TEST(out.contains_only(9));
+}
+
+BOOST_AUTO_TEST_CASE(image_api_test)
 {
   auto width = 10;
   auto height = 3;
-  auto timer = Linx::TimerLogger();
-  auto out = Linx::StartPipeline("(1 + 2) * 3", timer) // init
+  auto logger = Linx::TimerLogger();
+  auto out = Linx::StartPipeline("(1 + 2) * 3", logger) // init
       | Linx::Constant(1) | Linx::Box({0, 0}, {width, height}) // input
       | Linx::apply(Linx::Add(2), Linx::Multiply(3)) // pixelwise operations
       | Linx::StopPipeline(); // output
-  timer.logger() << "Done.";
+  logger.logger() << "Done.";
+  for (const auto& kv : logger.timer()) {
+    std::cout << kv.first << " - " << kv.second << "ms" << std::endl;
+  }
   BOOST_TEST((out.shape() == Linx::Position({width, height})));
   BOOST_TEST(out.contains_only(9));
 }
