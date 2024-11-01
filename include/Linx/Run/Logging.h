@@ -68,7 +68,7 @@ public:
       m_logger(label, LINX_FORWARD(args)..., m_timer.back().count());
     } else {
       m_timer.start();
-      m_logger(label);
+      m_logger(label, LINX_FORWARD(args)..., "");
     }
   }
 

@@ -76,6 +76,8 @@ decltype(auto) compose(auto f0, auto... fs)
   };
 }
 
+namespace Pipeline {
+
 template <typename... TFuncs>
 struct Apply {
   Apply(TFuncs... fs) : m_func(compose(fs...)) {}
@@ -93,7 +95,11 @@ struct Apply {
   decltype(compose(std::declval<TFuncs>()...)) m_func;
 };
 
+} // namespace Pipeline
+
 } // namespace Linx
+
+namespace P = Linx::Pipeline;
 
 LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
@@ -101,10 +107,10 @@ BOOST_AUTO_TEST_CASE(sequence_api_test)
 {
   auto size = 10;
   auto logger = Linx::TimerLogger();
-  auto out = Linx::StartPipeline("(1 + 2) * 3", logger) // init
+  auto out = P::Start("(1 + 2) * 3", logger) // init
       | Linx::Constant(1) | Linx::Slice(0, size) // input
-      | Linx::Apply(Linx::Add(2), Linx::Multiply(3)) // pixelwise operations
-      | Linx::StopPipeline(); // output
+      | P::Apply(Linx::Add(2), Linx::Multiply(3)) // pixelwise operations
+      | P::Stop(); // output
   std::cout << out << std::endl;
   for (const auto& kv : logger.timer()) {
     std::cout << kv.first << " - " << kv.second << "ms" << std::endl;
@@ -118,11 +124,10 @@ BOOST_AUTO_TEST_CASE(image_api_test)
   auto width = 10;
   auto height = 3;
   auto logger = Linx::TimerLogger();
-  auto out = Linx::StartPipeline("(1 + 2) * 3", logger) // init
+  auto out = P::Start("(1 + 2) * 3", logger) // init
       | Linx::Constant(1) | Linx::Box({0, 0}, {width, height}) // input
-      | Linx::Apply(Linx::Add(2), Linx::Multiply(3)) // pixelwise operations
-      | Linx::StopPipeline(); // output
-  logger.logger()("Done.");
+      | P::Apply(Linx::Add(2), Linx::Multiply(3)) // pixelwise operations
+      | P::Stop(); // output
   for (const auto& kv : logger.timer()) {
     std::cout << kv.first << " - " << kv.second << "ms" << std::endl;
   }
