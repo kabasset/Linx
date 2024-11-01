@@ -15,7 +15,7 @@ namespace Linx {
 namespace Pipeline {
 
 /**
- * @brief Pipeline start context.
+ * @brief Pipeline starting context.
  */
 template <typename TLogger>
 class Start {
@@ -64,11 +64,6 @@ private:
 };
 
 /**
- * @brief Pipeline stop event.
- */
-struct Stop {};
-
-/**
  * @brief Pipeline update event.
  */
 template <typename TContext, typename TTask, typename TState>
@@ -87,20 +82,39 @@ public:
     }
   }
 
+  template <std::size_t I>
+  const auto& get() const&
+  {
+    return m_state; // FIXME get<I>(m_states)
+  }
+
+  template <std::size_t I>
+  auto& get() &
+  {
+    return m_state; // FIXME get<I>(m_states)
+  }
+
+  template <std::size_t I>
+  const auto& get() const&&
+  {
+    return LINX_MOVE(m_state); // FIXME get<I>(m_states)
+  }
+
+  template <std::size_t I>
+  auto get() &&
+  {
+    return LINX_MOVE(m_state); // FIXME get<I>(m_states)
+  }
+
   auto operator|(auto&& task) &&
   {
     return Pipeline::Update(LINX_MOVE(m_context), LINX_FORWARD(task), LINX_MOVE(m_state));
   }
 
-  auto operator|(Stop) &&
-  {
-    return LINX_MOVE(m_state);
-  }
-
 private:
 
   TContext m_context;
-  decltype(std::declval<TTask>()(std::declval<TState>())) m_state;
+  std::remove_cvref_t<decltype(std::declval<TTask>()(std::declval<TState>()))> m_state;
 };
 
 template <typename TLogger, typename TState>
@@ -174,5 +188,23 @@ auto operator|(AnyUpdate auto&& pipeline, Box<N>&& box)
 
 } // namespace Pipeline
 } // namespace Linx
+
+namespace std {
+
+/**
+ * @brief Enable structured bindings.
+ */
+template <typename TContext, typename TTask, typename TState>
+struct tuple_size<Linx::Pipeline::Update<TContext, TTask, TState>> : std::integral_constant<std::size_t, 1> {};
+
+/**
+ * @brief Enable structured bindings.
+ */
+template <std::size_t I, typename TContext, typename TTask, typename TState>
+struct tuple_element<I, Linx::Pipeline::Update<TContext, TTask, TState>> {
+  using type = TState;
+};
+
+} // namespace std
 
 #endif
