@@ -14,6 +14,9 @@
 namespace Linx {
 namespace Pipeline {
 
+/**
+ * @brief Pipeline start context.
+ */
 template <typename TLogger>
 class Start {
 public:
@@ -39,6 +42,9 @@ private:
   TLogger& m_logger;
 };
 
+/**
+ * @brief No-logger specialization.
+ */
 template <>
 class Start<void> {
 public:
@@ -57,42 +63,33 @@ private:
   std::string m_label;
 };
 
+/**
+ * @brief Pipeline stop event.
+ */
 struct Stop {};
 
-template <typename TContext, typename TState>
+/**
+ * @brief Pipeline update event.
+ */
+template <typename TContext, typename TTask, typename TState>
 class Update {
 public:
 
   using value_type = typename TState::value_type;
   using element_type = typename std::remove_cvref_t<value_type>;
 
-  Update(TContext context, TState state) : m_context(LINX_MOVE(context)), m_state(LINX_MOVE(state))
+  Update(TContext context, TTask task, TState state) : m_context(LINX_MOVE(context)), m_state(task(LINX_MOVE(state)))
   {
-    m_context.log(label(m_state)); // FIXME label the transform
+    if constexpr (std::is_same_v<TTask, Forward>) {
+      m_context.log(label(state));
+    } else {
+      m_context.log(label(task));
+    }
   }
 
-  template <typename T>
-  auto operator|(T&& step) &&
+  auto operator|(auto&& task) &&
   {
-    return Pipeline::Update(LINX_MOVE(m_context), LINX_FORWARD(step)(LINX_MOVE(m_state)));
-  }
-
-  template <typename T>
-  auto operator|(Span<T> span) &&
-  {
-    auto label = compose_label("Sequence", m_state);
-    auto state = Sequence<element_type, -1>(label, span.size()).copy_from(m_state); // FIXME make -1 the default
-    // FIXME offset
-    return Pipeline::Update(LINX_MOVE(m_context), LINX_MOVE(state));
-  }
-
-  template <Index N>
-  auto operator|(Box<N> box) &&
-  {
-    auto label = compose_label("Image", m_state);
-    auto state = Image<element_type, N>(label, box.shape()).copy_from(m_state);
-    // FIXME offset
-    return Pipeline::Update(LINX_MOVE(m_context), LINX_MOVE(state));
+    return Pipeline::Update(LINX_MOVE(m_context), LINX_FORWARD(task), LINX_MOVE(m_state));
   }
 
   auto operator|(Stop) &&
@@ -103,13 +100,76 @@ public:
 private:
 
   TContext m_context;
-  TState m_state;
+  decltype(std::declval<TTask>()(std::declval<TState>())) m_state;
 };
 
 template <typename TLogger, typename TState>
-Update<Start<TLogger>, TState> operator|(Start<TLogger> context, TState state)
+auto operator|(Start<TLogger> context, TState state)
 {
-  return {LINX_MOVE(context), LINX_MOVE(state)};
+  return Update(LINX_MOVE(context), Forward(), LINX_MOVE(state));
+}
+
+template <typename TDomain>
+class RestrictSequence {
+public:
+
+  RestrictSequence(TDomain domain) : m_domain(LINX_MOVE(domain)) {}
+
+  std::string label() const
+  {
+    return "Set domain";
+  }
+
+  template <typename TIn>
+  auto operator()(const TIn& in) const
+  {
+    using T = std::remove_cvref_t<typename TIn::value_type>;
+    return Sequence<T, -1>(label(), m_domain.size()).copy_from(in); // FIXME make -1 the default
+    // FIXME offset
+  }
+
+private:
+
+  TDomain m_domain;
+};
+
+template <typename TDomain>
+class RestrictImage {
+public:
+
+  RestrictImage(TDomain domain) : m_domain(LINX_MOVE(domain)) {}
+
+  std::string label() const
+  {
+    return "Set domain";
+  }
+
+  template <typename TIn>
+  auto operator()(const TIn& in) const
+  {
+    using T = std::remove_cvref_t<typename TIn::value_type>;
+    return Image<T, TDomain::n>(label(), m_domain.shape()).copy_from(in);
+    // FIXME offset
+  }
+
+private:
+
+  TDomain m_domain;
+};
+
+template <typename T>
+concept AnyUpdate = is_specialization<Update, T>;
+
+template <typename T>
+auto operator|(AnyUpdate auto&& pipeline, Span<T>&& span)
+{
+  return LINX_MOVE(pipeline) | RestrictSequence(LINX_FORWARD(span));
+}
+
+template <Index N>
+auto operator|(AnyUpdate auto&& pipeline, Box<N>&& box)
+{
+  return LINX_MOVE(pipeline) | RestrictImage(LINX_FORWARD(box));
 }
 
 } // namespace Pipeline

@@ -84,7 +84,7 @@ struct Apply {
 
   std::string label() const
   {
-    return "Apply";
+    return "Apply pointwise function";
   }
 
   decltype(auto) operator()(auto&& in0, auto&&... ins)
