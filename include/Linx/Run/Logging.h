@@ -17,18 +17,19 @@ namespace Linx {
  * @brief A simplistic logger which prefixes messages with the GMT date-time.
  */
 struct CerrLogger {
-  constexpr void operator<<(auto&& in) const
+  constexpr void operator()(auto&&... args) const
   {
     auto t = std::time(nullptr);
     auto tm = *std::gmtime(&t);
-    std::cerr << std::put_time(&tm, "%F %TZ") << " | " << LINX_FORWARD(in) << std::endl;
+    std::cerr << std::put_time(&tm, "%F %TZ");
+    ((std::cerr << " | " << LINX_FORWARD(args)), ...) << std::endl;
   }
 };
 
 /**
  * @brief A logger which suffixes messages with the time elapsed between two messages.
  */
-template <typename TLogger = CerrLogger> // FIXME add TUnit with GCC 12, see below
+template <typename TLogger = CerrLogger> // FIXME add TUnit with GCC 12 support for unit ostream
 class TimerLogger {
 public:
 
@@ -60,16 +61,14 @@ public:
   /**
    * @brief Call `start()` if not already running, or `split()` otherwise and print the split time.
    */
-  void operator<<(const std::string& label)
+  void operator()(const std::string& label, auto&&... args)
   {
     if (m_timer.is_running()) {
       m_timer.split(label);
-      std::ostringstream os;
-      os << label << " [" << m_timer.back().count() << "ms]"; // FIXME just back() to get the unit deduced, since GCC 12
-      m_logger << os.str();
+      m_logger(label, LINX_FORWARD(args)..., m_timer.back().count());
     } else {
       m_timer.start();
-      m_logger << label;
+      m_logger(label);
     }
   }
 

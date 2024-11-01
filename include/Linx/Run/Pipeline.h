@@ -27,9 +27,9 @@ public:
     return m_label;
   }
 
-  void log(auto content)
+  void log(auto&&... args)
   {
-    m_logger << content;
+    m_logger(LINX_FORWARD(args)...);
   }
 
 private:
@@ -49,7 +49,7 @@ public:
     return m_label;
   }
 
-  void log(auto) {}
+  void log(auto&&...) {}
 
 private:
 

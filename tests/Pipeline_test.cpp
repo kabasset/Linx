@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(image_api_test)
       | Linx::Constant(1) | Linx::Box({0, 0}, {width, height}) // input
       | Linx::Apply(Linx::Add(2), Linx::Multiply(3)) // pixelwise operations
       | Linx::StopPipeline(); // output
-  logger.logger() << "Done.";
+  logger.logger()("Done.");
   for (const auto& kv : logger.timer()) {
     std::cout << kv.first << " - " << kv.second << "ms" << std::endl;
   }
