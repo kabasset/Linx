@@ -117,13 +117,10 @@ public:
   template <typename TTask>
   auto operator|(TTask&& task) &&
   {
-    std::string message;
-    if constexpr (std::is_same_v<TTask, Forward>) {
-      message = "Input"; // FIXME avoid Forward?
-    } else {
-      message = label(task);
-    }
-    return Pipeline::State(LINX_MOVE(m_context), message, LINX_FORWARD(task)(std::get<0>(m_values))); // FIXME get<Is>
+    return Pipeline::State(
+        LINX_MOVE(m_context),
+        label(task),
+        LINX_FORWARD(task)(std::get<0>(m_values))); // FIXME get<Is>
   }
 
 private:
@@ -133,10 +130,10 @@ private:
   bool m_stopped = false;
 };
 
-template <typename TLogger, typename... TValues>
-auto operator|(Start<TLogger> context, TValues&&... values)
+template <typename TLogger, typename TValue>
+auto operator|(Start<TLogger> context, TValue&& value)
 {
-  return State(LINX_MOVE(context), "Start", LINX_FORWARD(values)...);
+  return State(LINX_MOVE(context), "Start", LINX_FORWARD(value));
 }
 
 template <typename TDomain>
