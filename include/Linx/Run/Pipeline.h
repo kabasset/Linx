@@ -21,10 +21,7 @@ template <typename TLogger>
 class Start {
 public:
 
-  Start(const std::string& label, TLogger& logger = nullptr) : m_label(label), m_logger(logger)
-  {
-    log("Start pipeline");
-  }
+  Start(const std::string& label, TLogger& logger = nullptr) : m_label(label), m_logger(logger) {}
 
   const std::string& label() const
   {
@@ -39,7 +36,7 @@ public:
 private:
 
   std::string m_label;
-  TLogger& m_logger;
+  TLogger& m_logger; // FIXME enable owned logger
 };
 
 /**
@@ -66,61 +63,80 @@ private:
 /**
  * @brief Pipeline update event.
  */
-template <typename TContext, typename TTask, typename TState>
-class Update {
+template <typename TContext, typename... TValues>
+class State {
 public:
 
-  using value_type = typename TState::value_type;
-  using element_type = typename std::remove_cvref_t<value_type>;
+  State(TContext context, const std::string& message, TValues... values) :
+      State(LINX_MOVE(context), message, std::make_tuple(LINX_MOVE(values)...))
+  {}
 
-  Update(TContext context, TTask task, TState state) : m_context(LINX_MOVE(context)), m_state(task(LINX_MOVE(state)))
+  State(TContext context, const std::string& message, std::tuple<TValues...> values) :
+      m_context(LINX_MOVE(context)), m_values(LINX_MOVE(values))
   {
-    if constexpr (std::is_same_v<TTask, Forward>) {
-      m_context.log(label(state));
-    } else {
-      m_context.log(label(task));
-    }
+    m_context.log(message);
   }
+
+  State(const State&) = default;
+  State(State&&) = default;
+  State& operator=(const State&) = default;
+  State& operator=(State&&) = default;
 
   template <std::size_t I>
   const auto& get() const&
   {
-    return m_state; // FIXME get<I>(m_states)
+    return std::get<I>(m_values);
   }
 
   template <std::size_t I>
   auto& get() &
   {
-    return m_state; // FIXME get<I>(m_states)
+    return std::get<I>(m_values);
   }
 
   template <std::size_t I>
   const auto& get() const&&
   {
-    return LINX_MOVE(m_state); // FIXME get<I>(m_states)
+    if (not m_stopped) {
+      m_context.log("Stop");
+      m_stopped = true;
+    }
+    return LINX_MOVE(std::get<I>(m_values));
   }
 
   template <std::size_t I>
   auto get() &&
   {
-    return LINX_MOVE(m_state); // FIXME get<I>(m_states)
+    if (not m_stopped) {
+      m_context.log("Stop");
+      m_stopped = true;
+    }
+    return LINX_MOVE(std::get<I>(m_values));
   }
 
-  auto operator|(auto&& task) &&
+  template <typename TTask>
+  auto operator|(TTask&& task) &&
   {
-    return Pipeline::Update(LINX_MOVE(m_context), LINX_FORWARD(task), LINX_MOVE(m_state));
+    std::string message;
+    if constexpr (std::is_same_v<TTask, Forward>) {
+      message = "Input"; // FIXME avoid Forward?
+    } else {
+      message = label(task);
+    }
+    return Pipeline::State(LINX_MOVE(m_context), message, LINX_FORWARD(task)(std::get<0>(m_values))); // FIXME get<Is>
   }
 
 private:
 
   TContext m_context;
-  std::remove_cvref_t<decltype(std::declval<TTask>()(std::declval<TState>()))> m_state;
+  std::tuple<TValues...> m_values;
+  bool m_stopped = false;
 };
 
-template <typename TLogger, typename TState>
-auto operator|(Start<TLogger> context, TState state)
+template <typename TLogger, typename... TValues>
+auto operator|(Start<TLogger> context, TValues&&... values)
 {
-  return Update(LINX_MOVE(context), Forward(), LINX_MOVE(state));
+  return State(LINX_MOVE(context), "Start", LINX_FORWARD(values)...);
 }
 
 template <typename TDomain>
@@ -172,18 +188,18 @@ private:
 };
 
 template <typename T>
-concept AnyUpdate = is_specialization<Update, T>;
+concept AnyState = is_specialization<State, T>;
 
 template <typename T>
-auto operator|(AnyUpdate auto&& pipeline, Span<T>&& span)
+auto operator|(AnyState auto&& pipeline, Span<T>&& span)
 {
-  return LINX_MOVE(pipeline) | RestrictSequence(LINX_FORWARD(span));
+  return LINX_FORWARD(pipeline) | RestrictSequence(LINX_FORWARD(span));
 }
 
 template <Index N>
-auto operator|(AnyUpdate auto&& pipeline, Box<N>&& box)
+auto operator|(AnyState auto&& pipeline, Box<N>&& box)
 {
-  return LINX_MOVE(pipeline) | RestrictImage(LINX_FORWARD(box));
+  return LINX_FORWARD(pipeline) | RestrictImage(LINX_FORWARD(box));
 }
 
 } // namespace Pipeline
@@ -194,15 +210,16 @@ namespace std {
 /**
  * @brief Enable structured bindings.
  */
-template <typename TContext, typename TTask, typename TState>
-struct tuple_size<Linx::Pipeline::Update<TContext, TTask, TState>> : std::integral_constant<std::size_t, 1> {};
+template <typename TContext, typename... TValues>
+struct tuple_size<Linx::Pipeline::State<TContext, TValues...>> :
+    std::integral_constant<std::size_t, sizeof...(TValues)> {};
 
 /**
  * @brief Enable structured bindings.
  */
-template <std::size_t I, typename TContext, typename TTask, typename TState>
-struct tuple_element<I, Linx::Pipeline::Update<TContext, TTask, TState>> {
-  using type = TState;
+template <std::size_t I, typename TContext, typename... TValues>
+struct tuple_element<I, Linx::Pipeline::State<TContext, TValues...>> {
+  using type = std::tuple_element_t<I, std::tuple<TValues...>>;
 };
 
 } // namespace std
