@@ -115,15 +115,20 @@ public:
   }
 
   template <typename TTask>
-  auto operator|(TTask&& task) &&
+  auto operator|(TTask task) &&
   {
-    return Pipeline::State(
-        LINX_MOVE(m_context),
-        label(task),
-        LINX_FORWARD(task)(std::get<0>(m_values))); // FIXME get<Is>
+    auto task_label = label(task);
+    auto out = eval(LINX_MOVE(task), LINX_MOVE(m_values), std::make_index_sequence<sizeof...(TValues)>());
+    return Pipeline::State(LINX_MOVE(m_context), task_label, out);
   }
 
 private:
+
+  template <std::integral auto... Is, typename TTask>
+  static decltype(auto) eval(TTask task, auto values, std::index_sequence<Is...>)
+  {
+    return LINX_MOVE(task)(std::get<Is>(values)...);
+  }
 
   TContext m_context;
   std::tuple<TValues...> m_values;
@@ -153,6 +158,12 @@ public:
     using T = std::remove_cvref_t<typename TIn::value_type>;
     return Sequence<T, -1>(label(), m_domain.size()).copy_from(in); // FIXME make -1 the default
     // FIXME offset
+  }
+
+  template <typename... TIns>
+  auto operator()(const TIns&... ins) const
+  {
+    return std::tuple(operator()(ins)...); // FIXME to State?
   }
 
 private:

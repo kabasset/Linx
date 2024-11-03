@@ -63,17 +63,16 @@ auto apply(TFunc0 f0, TFuncs... fs)
   };
 }
 
-decltype(auto) compose(auto&& f)
-{
-  return LINX_FORWARD(f);
-}
-
 decltype(auto) compose(auto f0, auto... fs)
 {
-  return KOKKOS_LAMBDA(auto&&... args)
-  {
-    return compose(fs...)(f0(args...));
-  };
+  if constexpr (sizeof...(fs) == 0) {
+    return f0;
+  } else {
+    return KOKKOS_LAMBDA(auto&&... args)
+    {
+      return compose(fs...)(f0(args...));
+    };
+  }
 }
 
 namespace Pipeline {
@@ -109,12 +108,8 @@ BOOST_AUTO_TEST_CASE(sequence_api_test)
   auto logger = Linx::TimerLogger();
   auto [out] = P::Start("(1 + 2) * 3", logger) // init
       | Linx::Constant(1) | Linx::Slice(0, size) // input
-      | P::Apply(Linx::Add(2), Linx::Multiply(3)) // pixelwise operations
-      ;
-  std::cout << out << std::endl;
-  for (const auto& kv : logger.timer()) {
-    std::cout << kv.first << " - " << kv.second << "ms" << std::endl;
-  }
+      | P::Apply(Linx::Add(2), Linx::Multiply(3)); // pixelwise operations
+  logger("Done");
   BOOST_TEST((out.ssize() == size));
   BOOST_TEST(out.contains_only(9));
 }
@@ -126,13 +121,21 @@ BOOST_AUTO_TEST_CASE(image_api_test)
   auto logger = Linx::TimerLogger();
   auto [out] = P::Start("(1 + 2) * 3", logger) // init
       | Linx::Constant(1) | Linx::Box({0, 0}, {width, height}) // input
-      | P::Apply(Linx::Add(2), Linx::Multiply(3)) // pixelwise operations
-      ;
-  for (const auto& kv : logger.timer()) {
-    std::cout << kv.first << " - " << kv.second << "ms" << std::endl;
-  }
+      | P::Apply(Linx::Add(2), Linx::Multiply(3)); // pixelwise operations
+  logger("Done");
   BOOST_TEST((out.shape() == Linx::Position({width, height})));
   BOOST_TEST(out.contains_only(9));
+}
+
+BOOST_AUTO_TEST_CASE(diadic_test)
+{
+  auto size = 100;
+  auto logger = Linx::TimerLogger();
+  auto [out] = P::Start("1 + 2", logger) // init
+      | std::tuple(Linx::Constant(1), Linx::Constant(2)) | Linx::Slice(0, size) // inputs
+      | P::Apply(Linx::Add()); // merge
+  logger("Done");
+  BOOST_TEST(out.contains_only(3));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
