@@ -106,27 +106,6 @@ auto fourier = Linx::Image("DFT", image.shape());
 Linx::dft_to(image, fourier); // Fills fourier
 ```
 
-**Pipeline**
-
-Transforms can be combined through a so-called pipeline, using the pipe operator `|` à-la Unix,
-as well as the `&` operator to combine data.
-Logging and timing tools can be plugged into the pipeline.
-
-```cpp
-auto timer = Linx::TimerLogger();
-
-Linx::StartPipeline(timer) // Start a pipeline with embedded timer
-    | Linx::read(science_path, dark_path) // Read two images
-    | Linx::apply(Linx::Subtract()) // Subtract them
-    & Linx::read(flat_path) // Read another image
-    | Linx::apply(Linx::Divide()) // Divide
-    | Linx::write(calibrated_path); // Write image
-
-for (const auto& step : timer) {
-    std::cout << step << ": " << timer[step] << std::endl;
-}
-```
-
 **Regional transforms**
 
 There are two ways to work on subsets of elements:
@@ -145,6 +124,27 @@ auto region = Linx::Box(...);
 auto patch = Linx::patch(image, region);
 patch.exp(); // Modifies image elements inside region
 ```
+
+**Pipeline**
+
+Transforms can be combined through a so-called pipeline, using the pipe operator `|` à-la Unix.
+Logging and timing tools can be plugged into the pipeline.
+
+```cpp
+namespace P = Linx::Pipeline;
+
+auto timer = Linx::TimerLogger();
+
+auto [calibrated] = P::Run("Calibration", timer) // Start a pipeline with embedded timer
+    | P::InputFile(darks_path, flats_path) // Input two images
+    | P::Batch(Linx::Along<-1>(Linx::Mean())) // Average along the last axis
+    | P::OutputFile(mdark_path, mflat_path) // Save intermediate images
+    | P::Input(light_path) // Input another image
+    | P::Apply([](auto l, auto d, auto f) { return (l - d) / f; }) // Apply some pixelwise function
+    | P::OutputFile(calibrated_path);
+```
+
+While running this pipeline, logs are produced, which include the elapsed time of each step.
 
 **Labels**
 
