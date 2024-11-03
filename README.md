@@ -135,13 +135,14 @@ namespace P = Linx::Pipeline;
 
 auto timer = Linx::TimerLogger();
 
-auto [calibrated] = P::Run("Calibration", timer) // Start a pipeline with embedded timer
-    | P::InputFile(darks_path, flats_path) // Input two images
+auto [out] = P::Run("Calibration and deconvolution", timer) // Start a pipeline with embedded timer
+    | P::InputFile(darks_path, flats_path) // Read two images
     | P::Batch(Linx::Along<-1>(Linx::Mean())) // Average along the last axis
     | P::OutputFile(mdark_path, mflat_path) // Save intermediate images
-    | P::Input(light_path) // Input another image
+    | P::InputFile(light_path) // Read another image
     | P::Apply([](auto l, auto d, auto f) { return (l - d) / f; }) // Apply some pixelwise function
-    | P::OutputFile(calibrated_path);
+    | P::OutputFile(calibrated_path) // Save calibrated image
+    | Linx::Deconvolve(psf); // Filter
 ```
 
 While running this pipeline, logs are produced, which include the elapsed time of each step.
