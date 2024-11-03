@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(sequence_api_test)
 {
   auto size = 10;
   auto logger = Linx::TimerLogger();
-  auto [out] = P::Start("(1 + 2) * 3", logger) // init
+  auto [out] = P::Run("(1 + 2) * 3", logger) // init
       | Linx::Constant(1) | Linx::Slice(0, size) // input
       | P::Apply(Linx::Add(2), Linx::Multiply(3)); // pixelwise operations
   logger("Done");
@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE(image_api_test)
   auto width = 10;
   auto height = 3;
   auto logger = Linx::TimerLogger();
-  auto [out] = P::Start("(1 + 2) * 3", logger) // init
+  auto [out] = P::Run("(1 + 2) * 3", logger) // init
       | Linx::Constant(1) | Linx::Box({0, 0}, {width, height}) // input
       | P::Apply(Linx::Add(2), Linx::Multiply(3)); // pixelwise operations
   logger("Done");
@@ -131,8 +131,8 @@ BOOST_AUTO_TEST_CASE(diadic_test)
 {
   auto size = 100;
   auto logger = Linx::TimerLogger();
-  auto [out] = P::Start("1 + 2", logger) // init
-      | std::tuple(Linx::Constant(1), Linx::Constant(2)) | Linx::Slice(0, size) // inputs
+  auto [out] = P::Run("1 + 2", logger) // init
+      | Linx::Constant(1) | P::Input(Linx::Constant(2)) | Linx::Slice(0, size) // inputs
       | P::Apply(Linx::Add()); // merge
   logger("Done");
   BOOST_TEST(out.contains_only(3));
