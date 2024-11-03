@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(diadic_test)
   auto size = 100;
   auto logger = Linx::TimerLogger();
   auto [out] = P::Run("1 + 2", logger) // init
-      | Linx::Constant(1) | P::Input(Linx::Constant(2)) | Linx::Slice(0, size) // inputs
+      | P::Input(Linx::Constant(1), Linx::Constant(2)) | Linx::Slice(0, size) // inputs
       | P::Apply(Linx::Add()); // merge
   logger("Done");
   BOOST_TEST(out.contains_only(3));

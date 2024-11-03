@@ -172,9 +172,9 @@ public:
 private:
 
   template <std::integral auto... Is, typename TTask>
-  static decltype(auto) eval(TTask task, auto values, std::index_sequence<Is...>)
+  static decltype(auto) eval(TTask task, auto&& values, std::index_sequence<Is...>)
   {
-    return LINX_MOVE(task)(std::get<Is>(values)...);
+    return LINX_MOVE(task)(std::get<Is>(LINX_FORWARD(values))...);
   }
 
   TContext m_context;
@@ -186,6 +186,12 @@ template <typename TLogger, typename TValue>
 auto operator|(Run<TLogger> context, TValue&& value)
 {
   return State(LINX_MOVE(context), "Start", LINX_FORWARD(value));
+}
+
+template <typename TLogger, typename... TValues>
+auto operator|(Run<TLogger> context, Input<TValues...>&& values)
+{
+  return State(LINX_MOVE(context), "Start") | LINX_FORWARD(values);
 }
 
 template <typename TDomain>
