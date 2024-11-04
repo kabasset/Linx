@@ -7,96 +7,10 @@
 #include "Linx/Base/Random.h"
 #include "Linx/Data/Image.h"
 #include "Linx/Run/Logging.h"
-#include "Linx/Run/Pipeline.h"
+#include "Linx/Run/PipelineTasks.h"
 #include "Linx/Run/ProgramContext.h"
 
 #include <boost/test/unit_test.hpp>
-
-namespace Linx { // FIXME
-
-template <typename T>
-const auto& as_readonly(const Constant<T>& c)
-{
-  return c;
-}
-
-template <typename T>
-auto& operator<<(std::ostream& os, const Constant<T>& c)
-{
-  os << compose_label("Constant", c());
-  return os;
-}
-
-auto generate(const std::string& label, const auto& func, std::integral auto... shape) // FIXME to Image
-{
-  using T = std::remove_cvref_t<decltype(func())>;
-  return Image<T, sizeof...(shape)>(label, shape...).generate("generate", func); // FIXME uninitialized
-}
-
-template <typename TArg, typename TFunc>
-auto compose_functions(TArg&& arg, TFunc f)
-{
-  return LINX_MOVE(f)(LINX_FORWARD(arg));
-}
-
-template <typename TArg, typename TFunc0, typename... TFuncs>
-auto compose_functions(TArg&& arg, TFunc0 f0, TFuncs... fs)
-{
-  return compose_functions(LINX_FORWARD(f0(arg)), LINX_MOVE(fs)...);
-}
-
-template <typename TFunc>
-auto apply(TFunc func)
-{
-  return [=](const auto& in) {
-    return in.apply("apply", func);
-  };
-}
-
-template <typename TFunc0, typename... TFuncs>
-auto apply(TFunc0 f0, TFuncs... fs)
-{
-  return [=](const auto& in) {
-    return in.apply(
-        "apply",
-        KOKKOS_LAMBDA(const auto& e) { return compose_functions(e, f0, fs...); });
-  };
-}
-
-decltype(auto) compose(auto f0, auto... fs)
-{
-  if constexpr (sizeof...(fs) == 0) {
-    return f0;
-  } else {
-    return KOKKOS_LAMBDA(auto&&... args)
-    {
-      return compose(fs...)(f0(args...));
-    };
-  }
-}
-
-namespace Pipeline {
-
-template <typename... TFuncs>
-struct Apply {
-  Apply(TFuncs... fs) : m_func(compose(fs...)) {}
-
-  std::string label() const
-  {
-    return "Apply pointwise function";
-  }
-
-  decltype(auto) operator()(auto&& in0, auto&&... ins)
-  {
-    return in0.apply(label(), m_func, LINX_FORWARD(ins)...);
-  }
-
-  decltype(compose(std::declval<TFuncs>()...)) m_func;
-};
-
-} // namespace Pipeline
-
-} // namespace Linx
 
 namespace P = Linx::Pipeline;
 

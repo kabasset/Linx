@@ -108,7 +108,7 @@ private:
 };
 
 /**
- * @brief Pipeline update event.
+ * @brief Pipeline state.
  */
 template <typename TContext, typename... TValues>
 class State {
@@ -182,86 +182,26 @@ private:
   bool m_stopped = false;
 };
 
+/**
+ * @brief Create a pipeline state from a context and input value.
+ */
 template <typename TLogger, typename TValue>
 auto operator|(Run<TLogger> context, TValue&& value)
 {
   return State(LINX_MOVE(context), "Start", LINX_FORWARD(value));
 }
 
+/**
+ * @brief Create a pipeline state from a context and input values.
+ */
 template <typename TLogger, typename... TValues>
 auto operator|(Run<TLogger> context, Input<TValues...>&& values)
 {
   return State(LINX_MOVE(context), "Start") | LINX_FORWARD(values);
 }
 
-template <typename TDomain>
-class RestrictSequence {
-public:
-
-  RestrictSequence(TDomain domain) : m_domain(LINX_MOVE(domain)) {}
-
-  std::string label() const
-  {
-    return "Set domain";
-  }
-
-  template <typename TIn>
-  auto operator()(const TIn& in) const
-  {
-    using T = std::remove_cvref_t<typename TIn::value_type>;
-    return Sequence<T, -1>(label(), m_domain.size()).copy_from(in); // FIXME make -1 the default
-    // FIXME offset
-  }
-
-  template <typename... TIns>
-  auto operator()(const TIns&... ins) const
-  {
-    return std::tuple(operator()(ins)...); // FIXME to State?
-  }
-
-private:
-
-  TDomain m_domain;
-};
-
-template <typename TDomain>
-class RestrictImage {
-public:
-
-  RestrictImage(TDomain domain) : m_domain(LINX_MOVE(domain)) {}
-
-  std::string label() const
-  {
-    return "Set domain";
-  }
-
-  template <typename TIn>
-  auto operator()(const TIn& in) const
-  {
-    using T = std::remove_cvref_t<typename TIn::value_type>;
-    return Image<T, TDomain::n>(label(), m_domain.shape()).copy_from(in);
-    // FIXME offset
-  }
-
-private:
-
-  TDomain m_domain;
-};
-
 template <typename T>
 concept AnyState = is_specialization<State, T>;
-
-template <typename T>
-auto operator|(AnyState auto&& pipeline, Span<T>&& span)
-{
-  return LINX_FORWARD(pipeline) | RestrictSequence(LINX_FORWARD(span));
-}
-
-template <Index N>
-auto operator|(AnyState auto&& pipeline, Box<N>&& box)
-{
-  return LINX_FORWARD(pipeline) | RestrictImage(LINX_FORWARD(box));
-}
 
 } // namespace Pipeline
 } // namespace Linx

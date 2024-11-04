@@ -15,6 +15,11 @@ namespace Linx {
  * @brief Functor which forwards its argument.
  */
 struct Forward {
+  std::string label() const
+  {
+    return "Forward";
+  }
+
   KOKKOS_INLINE_FUNCTION constexpr decltype(auto) operator()(auto&& value) const
   {
     return LINX_FORWARD(value);
@@ -36,6 +41,14 @@ struct Constant {
   explicit Constant(T v) : value {LINX_MOVE(v)} {}
 
   /**
+   * @brief Label.
+   */
+  std::string label() const
+  {
+    return compose_label("Constant", value);
+  }
+
+  /**
    * @brief Reference to the value.
    */
   KOKKOS_INLINE_FUNCTION constexpr const value_type& operator()(auto&&...) const
@@ -43,6 +56,12 @@ struct Constant {
     return value;
   }
 };
+
+template <typename T>
+const auto& as_readonly(const Constant<T>& c) // FIXME generic?
+{
+  return c;
+}
 
 #define LINX_DEFINE_BINARY_OPERATOR(Func, out) \
   template <typename TLhs = Forward, typename TRhs = Forward> \
@@ -160,9 +179,27 @@ struct can_accept_impl<TFunc, std::index_sequence<Is...>, decltype(std::declval<
 } // namespace Impl
 
 template <typename T, int N, typename TFunc>
-constexpr bool is_nadic()
+constexpr bool is_nadic() // FIXME use T
 {
   return Impl::can_accept_impl<TFunc, std::make_index_sequence<N>>::value;
+}
+
+/**
+ * @brief Functional composition.
+ * 
+ * This function returns a function such that:
+ * `compose_function(f, g, h)(args...)` returns `h(g(f(args...)))`.
+ */
+decltype(auto) compose_functions(auto f0, auto... fs)
+{
+  if constexpr (sizeof...(fs) == 0) {
+    return f0;
+  } else {
+    return KOKKOS_LAMBDA(auto&&... args)
+    {
+      return compose_functions(fs...)(f0(args...));
+    };
+  }
 }
 
 } // namespace Linx
