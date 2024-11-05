@@ -11,8 +11,12 @@
 namespace Linx {
 namespace Pipeline {
 
+namespace Impl {
+
 /**
  * @brief Task to restrict the domain of a sequence.
+ * 
+ * Prefer using the pipe operator on `domain` directly
  */
 template <typename TDomain>
 class RestrictSequence {
@@ -71,13 +75,15 @@ private:
   TDomain m_domain;
 };
 
+} // namespace Impl
+
 /**
  * @brief Set the pipeline domain.
  */
 template <typename T>
 auto operator|(AnyState auto&& pipeline, Span<T>&& span)
 {
-  return LINX_FORWARD(pipeline) | RestrictSequence(LINX_FORWARD(span));
+  return LINX_FORWARD(pipeline) | Impl::RestrictSequence(LINX_FORWARD(span));
 }
 
 /**
@@ -86,11 +92,14 @@ auto operator|(AnyState auto&& pipeline, Span<T>&& span)
 template <Index N>
 auto operator|(AnyState auto&& pipeline, Box<N>&& box)
 {
-  return LINX_FORWARD(pipeline) | RestrictImage(LINX_FORWARD(box));
+  return LINX_FORWARD(pipeline) | Impl::RestrictImage(LINX_FORWARD(box));
 }
 
 /**
  * @brief Apply pointwise functions.
+ * 
+ * When the functor is fed with several funtions, they are applied in order,
+ * i.e. conceptually `Apply(f, g, h)(args...)` performs `h(g(f(args...)))`.
  */
 template <typename... TFuncs>
 struct Apply {
