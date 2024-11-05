@@ -26,14 +26,28 @@ namespace Linx {
  * \code
  * namespace P = Linx::Pipeline;
  * 
- * auto [out_0, out_1, ... , out_l] = P::Run("Pipeline name", logger) | P::Input(in_0, in_1, ... in_m)
- *     | task_0 | task_1 | ... | task_n;
+ * auto [out_0, out_1, ... , out_l] = P::Run("Pipeline name", logger) // Start pipeline
+ *     | P::Input(in_0, in_1, ... , in_m) // Add inputs
+ *     | task_0 | task_1 | ... | task_n; // Pipe tasks
  * \endcode
  * 
  * Tasks can act on one, some or all inputs at once, and return one or several outputs.
  * 
- * The pipe operator is a mere wrapper: if the pipeline i-th state is composed of values `value_0, value_1, ... , value_n`,
- * then `state_i | task_i` produces a state consisting of values `task_i(value_0, value_1, ... , value_n)`.
+ * The pipe operator is a mere wrapper (similar to Unix' `|` or Elixir's `|>`):
+ * if the pipeline i-th state is composed of values `value_0, value_1, ... , value_n`,
+ * then `state_i | task_i` produces a (possibly multivalued) state `task_i(value_0, value_1, ... , value_n)`.
+ * 
+ * The above example corresponds to the following pseudo-code:
+ * 
+ * \code
+ * tmp[0] = in
+ * for i in [0, n]:
+ *   tmp[i] = task[i](tmp[i-1])
+ *   log task[i] parameters and elapsed time
+ * out = tmp[n]
+ * \endcode
+ * 
+ * where input, output and temporary states may be multivalued.
  */
 namespace Pipeline {
 
