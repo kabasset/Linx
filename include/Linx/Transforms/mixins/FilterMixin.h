@@ -29,20 +29,20 @@ public:
    * @param index The current index
    * @param args Arguments forwarded to the offsets sequence constructor
    */
-  KOKKOS_INLINE_FUNCTION explicit OffsetBasedIterator(T* data, std::size_t index, auto&&... args) :
+  KOKKOS_INLINE_FUNCTION explicit OffsetBasedIterator(T* data, std::size_t index, const auto& offsets) :
       m_data(data),
       m_index(index),
-      m_offsets(LINX_FORWARD(args)...)
+      m_offsets(offsets)
   {}
 
-  KOKKOS_INLINE_FUNCTION static OffsetBasedIterator begin(T* data, auto&&... args)
+  KOKKOS_INLINE_FUNCTION static OffsetBasedIterator begin(T* data, const auto& offsets)
   {
-    return OffsetBasedIterator(data, 0, LINX_FORWARD(args)...);
+    return OffsetBasedIterator(data, 0, offsets);
   }
 
   KOKKOS_INLINE_FUNCTION OffsetBasedIterator end() const
   {
-    return OffsetBasedIterator(m_data, m_offsets.size());
+    return OffsetBasedIterator(m_data, m_offsets.size(), m_offsets);
   }
 
   KOKKOS_INLINE_FUNCTION reference operator[](int i) const
@@ -131,7 +131,7 @@ private:
 
   T* m_data;
   std::size_t m_index; // FIXME iterator on offsets?
-  Sequence<std::ptrdiff_t, -1> m_offsets; // FIXME -1 by default
+  const Sequence<std::ptrdiff_t, -1>& m_offsets; // FIXME -1 by default
 };
 
 /**
@@ -216,7 +216,7 @@ public:
     Linx::copy_to(offsets_on_host, m_offsets); // FIXME offsets_on_host.copy_to(m_offsets)
   }
 
-  const auto& footprint() const
+  KOKKOS_INLINE_FUNCTION const auto& footprint() const
   {
     return m_footprint;
   }
@@ -226,7 +226,7 @@ public:
     return Box(m_in.domain().start() - m_footprint.start(), m_in.domain().stop() - m_footprint.stop() + 1);
   }
 
-  auto operator()(std::integral auto... is) const
+  KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
   {
     const typename TIn::value_type* data = &this->m_in(is...);
     auto begin = OffsetBasedIterator<const typename TIn::value_type>(data, 0, m_offsets);
