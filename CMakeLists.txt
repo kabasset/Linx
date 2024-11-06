@@ -54,6 +54,9 @@ endif(DOXYGEN_FOUND)
 
 # Executables
 
+add_executable(LinCosmicX src/LinCosmicX.cpp)
+target_link_libraries(LinCosmicX Linx)
+
 add_executable(KokkosBenchmarkConvolution src/KokkosBenchmarkConvolution.cpp)
 target_link_libraries(KokkosBenchmarkConvolution Linx)
 
