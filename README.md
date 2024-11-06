@@ -1,10 +1,10 @@
-# KokkosTest
+# Project overview
 
-Writing a few lines of code to learn on Kokkos...
+<br/>![Linx logo](doc/diagrams/logo_square.svg)
 
 ## License
 
-[Apache-2.0](LICENSE)
+The Linx library is licensed under [Apache-2.0](LICENSE.txt).
 
 ## Build
 
@@ -16,11 +16,11 @@ git clone https://github.com/kokkos/kokkos.git
 
 mkdir <kokkos_build_dir>
 cd <kokkos_build_dir>
-cmake <kokkos_clone_dir>/kokkos -DCMAKE_CXX_COMPILER=g++ -DCMAKE_INSTALL_PREFIX=<kokkos_install_dir>
+cmake <kokkos_clone_dir>/kokkos -DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_COMPILER=<kokkos_clone_dir>/bin/nvcc_wrapper -DCMAKE_INSTALL_PREFIX=<kokkos_install_dir> [-DKokkos_ENABLE_SERIAL=ON] [-DKokkos_ENABLE_OPENMP=ON] [-DKokkos_ENABLE_CUDA=ON -DKokkos_ENABLE_CUDA_CONSTEXPR=ON]
 make install
 ```
 
-Build the tests:
+Build the Linx library and tests:
 
 ```sh
 mkdir build

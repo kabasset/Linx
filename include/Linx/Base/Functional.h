@@ -1,5 +1,5 @@
 // SPDX-FileCopyrightText: Copyright (C) 2024, Antoine Basset
-// SPDX-PackageSourceInfo: https://github.com/kabasset/KokkosTest
+// SPDX-PackageSourceInfo: https://github.com/kabasset/Linx
 // SPDX-License-Identifier: Apache-2.0
 
 #ifndef LINX_BASE_FUNCTIONAL_H
