@@ -12,6 +12,63 @@
 
 namespace Linx {
 
+/**
+ * @brief Filtering task mixin.
+ * 
+ * With:
+ * 
+ * \code
+ * class Convolve : public WeightedFilterMixin;
+ * class Erode : public FilterMixin;
+ * using Opening = Erode * Dilate
+ * using Laplacian<0, 1> = Laplacian<0> + Laplacian<1>;
+ * \endcode
+ * 
+ * Possible usage:
+ * 
+ * \code
+ * auto cropped = Linx::Convolve(kernel)(in);
+ * auto [cropped] = P::Run("convolution") | in | Linx::Convolve(kernel);
+ * auto extrapolated = Linx::Convolve(kernel).pad(0)(in);
+ * auto extrapolated = Linx::Convolve(kernel)(Linx::Pad(0)(in));
+ * auto extrapolated = Linx::Convolve(kernel)(Linx::NearestNeighborExtrapolation()(in));
+ * auto extrapolated = Linx::Convolve(kernel)(Linx::NearestNeighborExtrapolation()(in));
+ * auto [extrapolated] = P::Run("convolution") | in | Linx::Pad(0) | Linx::Convolve(kernel);
+ * auto [extrapolated] = P::Run("convolution") | in | Linx::Convolve(kernel).pad(0);
+ * auto [extrapolated] = P::Run("convolution") | in | Linx::NearestNeighborExtrapolation() | Linx::Convolve(kernel);
+ * 
+ * auto cropped = Linx::Erode(radius)(in);
+ * auto [cropped] = P::Run("erosion") | in | Linx::Erode(radius);
+ * auto extrapolated = Linx::Erode(radius)(Linx::Pad()(in)); // Deduce padding
+ * auto [extrapolated] = P::Run("erosion") | in | Linx::WithExtrapolation() | Linx::Erode(radius);
+ * 
+ * auto cropped = Linx::Erode(radius) * Linx::Dilate(radius) * in;
+ * auto [cropped] = P::Run("opening") | in | Linx::Erode(radius) * Linx::Dilate(radius);
+ * auto extrapolated = Linx::Erode(radius) * Linx::Dilate(radius) * Linx::Pad() * in;
+ * auto [extrapolated] = P::Run("opening") | in | Linx::Pad() | Linx::Erode(radius) * Linx::Dilate(radius);
+ * auto [extrapolated] = P::Run("opening") | in | Linx::Pad(Linx::Erode(radius) * Linx::Dilate(radius));
+ * auto [extrapolated] = P::Run("opening") | in | Linx::Erode(radius).pad() * Linx::Dilate(radius).pad();
+ * \endcode
+ */
+template <typename TFootprint, typename TPolicy, typename TDerived>
+class FilterMixin {
+public:
+
+  FilterMixin(TFootprint&& footprint, TPolicy&& policy) :
+      m_footprint(LINX_FORWARD(footprint)), m_policy(LINX_FORWARD(policy))
+  {}
+
+  auto operator()(const auto& in)
+  {
+    return Filtered(LINX_CRTP_CONST_DERIVED, in);
+  }
+
+private:
+
+  TFootprint m_footprint; ///< The footprint
+  TPolicy m_policy; ///< The border policy
+};
+
 template <typename TIn, typename TDerived>
 class MorphologyFilterMixin { // FIXME simply FilterMixin?
 public:
