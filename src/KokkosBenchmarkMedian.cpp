@@ -35,10 +35,10 @@ public:
         m_neighbors(this->m_offsets.size())
     {}
 
-    KOKKOS_INLINE_FUNCTION auto reduce(auto begin, auto end) const
+    KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
       auto array = m_neighbors.array();
-      std::copy(LINX_MOVE(begin), LINX_MOVE(end), array.data());
+      std::copy(neighbors.begin(), neighbors.end(), array.data());
       return median(array);
     }
 

@@ -13,7 +13,7 @@
 namespace Linx {
 
 template <typename T>
-class OffsetBasedIterator {
+class OffsetBasedPatch {
 public:
 
   using iterator_category = std::random_access_iterator_tag;
@@ -29,20 +29,22 @@ public:
    * @param index The current index
    * @param args Arguments forwarded to the offsets sequence constructor
    */
-  KOKKOS_INLINE_FUNCTION explicit OffsetBasedIterator(T* data, std::size_t index, const auto& offsets) :
+  KOKKOS_INLINE_FUNCTION explicit OffsetBasedPatch(T* data, const auto& offsets) :
       m_data(data),
-      m_index(index),
-      m_offsets(offsets)
+      m_offsets(offsets),
+      m_index(m_offsets.size())
   {}
 
-  KOKKOS_INLINE_FUNCTION static OffsetBasedIterator begin(T* data, const auto& offsets)
+  KOKKOS_INLINE_FUNCTION OffsetBasedPatch begin() const
   {
-    return OffsetBasedIterator(data, 0, offsets);
+    auto out = *this;
+    out.m_index = 0;
+    return out;
   }
 
-  KOKKOS_INLINE_FUNCTION OffsetBasedIterator end() const
+  KOKKOS_INLINE_FUNCTION const OffsetBasedPatch& end() const
   {
-    return OffsetBasedIterator(m_data, m_offsets.size(), m_offsets);
+    return *this;
   }
 
   KOKKOS_INLINE_FUNCTION reference operator[](int i) const
@@ -60,78 +62,78 @@ public:
     return m_data + m_offsets[m_index];
   }
 
-  KOKKOS_INLINE_FUNCTION OffsetBasedIterator& operator++()
+  KOKKOS_INLINE_FUNCTION OffsetBasedPatch& operator++()
   {
     ++m_index;
     return *this;
   }
 
-  KOKKOS_INLINE_FUNCTION OffsetBasedIterator operator++(int)
+  KOKKOS_INLINE_FUNCTION OffsetBasedPatch operator++(int)
   {
     auto out = *this;
     ++(*this);
     return out;
   }
 
-  KOKKOS_INLINE_FUNCTION OffsetBasedIterator& operator+=(int i)
+  KOKKOS_INLINE_FUNCTION OffsetBasedPatch& operator+=(int i)
   {
     m_index += i;
     return *this;
   }
 
-  KOKKOS_INLINE_FUNCTION OffsetBasedIterator operator+(int i) const
+  KOKKOS_INLINE_FUNCTION OffsetBasedPatch operator+(int i) const
   {
     auto out = *this;
     out.m_index += i;
     return out;
   }
 
-  KOKKOS_INLINE_FUNCTION OffsetBasedIterator& operator--()
+  KOKKOS_INLINE_FUNCTION OffsetBasedPatch& operator--()
   {
     --m_index;
     return *this;
   }
 
-  KOKKOS_INLINE_FUNCTION OffsetBasedIterator operator--(int)
+  KOKKOS_INLINE_FUNCTION OffsetBasedPatch operator--(int)
   {
     auto out = *this;
     --(*this);
     return out;
   }
 
-  KOKKOS_INLINE_FUNCTION OffsetBasedIterator& operator-=(int i)
+  KOKKOS_INLINE_FUNCTION OffsetBasedPatch& operator-=(int i)
   {
     m_index -= i;
     return *this;
   }
 
-  KOKKOS_INLINE_FUNCTION OffsetBasedIterator operator-(int i) const
+  KOKKOS_INLINE_FUNCTION OffsetBasedPatch operator-(int i) const
   {
     auto out = *this;
     out.m_index -= i;
     return out;
   }
 
-  KOKKOS_INLINE_FUNCTION difference_type operator-(const OffsetBasedIterator& rhs) const
+  KOKKOS_INLINE_FUNCTION difference_type operator-(const OffsetBasedPatch& rhs) const
   {
     return m_index - rhs.m_index;
   }
 
-  KOKKOS_INLINE_FUNCTION bool operator==(const OffsetBasedIterator& rhs) const
+  KOKKOS_INLINE_FUNCTION bool operator==(const OffsetBasedPatch& rhs) const
   {
     return m_index == rhs.m_index;
   }
 
-  KOKKOS_INLINE_FUNCTION bool operator!=(const OffsetBasedIterator& rhs) const
+  KOKKOS_INLINE_FUNCTION bool operator!=(const OffsetBasedPatch& rhs) const
   {
     return m_index != rhs.m_index;
   }
 
 private:
 
-  T* m_data;
-  std::size_t m_index; // FIXME iterator on offsets?
-  const Sequence<std::ptrdiff_t, -1>& m_offsets; // FIXME -1 by default
+  T* m_data; ///< The reference data
+  const Sequence<std::ptrdiff_t, -1>& m_offsets; ///< The address offsets // FIXME -1 by default
+  std::size_t m_index; ///< The current index // FIXME iterator on offsets?
 };
 
 /**
@@ -228,9 +230,7 @@ public:
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
   {
-    auto begin = OffsetBasedIterator(&this->m_in(is...), 0, m_offsets);
-    auto end = begin.end();
-    return LINX_CRTP_CONST_DERIVED.reduce(LINX_MOVE(begin), LINX_MOVE(end));
+    return LINX_CRTP_CONST_DERIVED.reduce(OffsetBasedPatch(&this->m_in(is...), m_offsets));
   }
 
   void copy_to(const auto& out) const
@@ -263,9 +263,9 @@ public:
   struct Apply : public ApplySpatialFilterMixin<TFootprint, TIn, Apply<TIn>> {
     using ApplySpatialFilterMixin<TFootprint, TIn, Apply>::ApplySpatialFilterMixin;
 
-    KOKKOS_INLINE_FUNCTION auto reduce(auto begin, auto end) const
+    KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      return std::reduce(LINX_MOVE(begin), LINX_MOVE(end));
+      return std::reduce(neighbors.begin(), neighbors.end());
     }
   };
 };
