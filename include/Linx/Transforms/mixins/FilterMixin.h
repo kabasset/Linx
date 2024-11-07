@@ -228,8 +228,7 @@ public:
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
   {
-    const typename TIn::value_type* data = &this->m_in(is...);
-    auto begin = OffsetBasedIterator<const typename TIn::value_type>(data, 0, m_offsets);
+    auto begin = OffsetBasedIterator(&this->m_in(is...), 0, m_offsets);
     auto end = begin.end();
     return LINX_CRTP_CONST_DERIVED.reduce(LINX_MOVE(begin), LINX_MOVE(end));
   }
