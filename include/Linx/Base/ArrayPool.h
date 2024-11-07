@@ -5,7 +5,14 @@
 #ifndef LINX_BASE_ARRAYPOOL_H
 #define LINX_BASE_ARRAYPOOL_H
 
-#include <Kokkos_Random.hpp> // Random_UniqueIndex::get_state_idx
+#ifndef KOKKOS_IMPL_PUBLIC_INCLUDE
+#define KOKKOS_IMPL_PUBLIC_INCLUDE
+#include "Kokkos_UniqueToken.hpp"
+#undef KOKKOS_IMPL_PUBLIC_INCLUDE
+#else
+#include "Kokkos_UniqueToken.hpp"
+#endif
+
 #include <cstddef> // size_t
 #include <type_traits> // remove_cvref
 
@@ -20,7 +27,8 @@ class ArrayPool {
 
 private:
 
-  using device_type = typename TSpace::device_type; ///< The device type
+  using execution_space = TSpace; ///< The execution space
+  using device_type = typename execution_space::device_type; ///< The device type
 
 public:
 
@@ -39,7 +47,9 @@ public:
      * @brief Constructor (acquires memory).
      */
     KOKKOS_INLINE_FUNCTION Array(const ArrayPool& pool) :
-        m_pool(pool), m_index(m_pool.get_state()), m_data(&m_pool.m_memory(m_index, 0)),
+        m_pool(pool),
+        m_index(m_pool.acquire()),
+        m_data(&m_pool.m_memory(m_index, 0)),
         m_size(m_pool.m_memory.extent(1))
     {}
 
@@ -48,7 +58,7 @@ public:
      */
     KOKKOS_INLINE_FUNCTION ~Array()
     {
-      m_pool.free_state(m_index);
+      m_pool.release(m_index);
     }
 
     /**
@@ -87,7 +97,7 @@ public:
    * @brief Constructor.
    * @param size The size of each array
    */
-  ArrayPool(std::size_t size) : m_locks("locks", TSpace().concurrency(), 1), m_memory("memory", m_locks.size(), size) {}
+  ArrayPool(std::size_t size) : m_tokens(), m_memory("memory", m_tokens.size(), size) {}
 
   /**
    * @brief Get one of the arrays. 
@@ -102,22 +112,22 @@ private:
   /**
    * @brief Acquire an array and get its index.
    */
-  KOKKOS_INLINE_FUNCTION Index get_state() const
+  KOKKOS_INLINE_FUNCTION auto acquire() const
   {
-    return Kokkos::Impl::Random_UniqueIndex<device_type>::get_state_idx(m_locks);
+    return m_tokens.acquire();
   }
 
   /**
    * @brief Release an array.
    */
-  KOKKOS_INLINE_FUNCTION void free_state(Index i) const
+  KOKKOS_INLINE_FUNCTION void release(auto i) const
   {
-    m_locks(i, 0) = 0;
+    m_tokens.release(i);
   }
 
 private:
 
-  Kokkos::View<int**, device_type> m_locks; ///< The lock record
+  Kokkos::Experimental::UniqueToken<execution_space> m_tokens; ///< The thread tokens
   Kokkos::View<T**, device_type> m_memory; ///< The actual memory
 };
 
