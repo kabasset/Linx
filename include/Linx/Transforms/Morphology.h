@@ -16,87 +16,73 @@
 
 namespace Linx {
 
-template <typename TStrel, typename TIn, typename TParity = Forward>
-class Erosion : public MorphologyFilterMixin<TIn, Erosion<TStrel, TIn, TParity>> {
+/**
+ * @brief Binary erosion.
+ */
+template <typename TFootprint>
+class Erosion : public SpatialFilterMixin<TFootprint, Erosion<TFootprint>> {
 public:
 
-  using value_type = bool;
-  using element_type = bool;
-
-  Erosion(const TStrel& strel, const TIn& in) : MorphologyFilterMixin<TIn, Erosion>(strel, in) {}
-
-  // TODO Erosion(std::integral auto radius, const TIn& in)
+  Erosion(TFootprint footprint) : SpatialFilterMixin<TFootprint, Erosion>(LINX_MOVE(footprint)) {}
 
   std::string label() const
   {
     return "Erosion";
   }
 
-  KOKKOS_INLINE_FUNCTION auto operator()(const std::integral auto&... is) const
-  {
-    auto in_ptr = &this->m_in(is...);
-    for (std::size_t i = 0; i < this->m_offsets.size(); ++i) {
-      if (not in_ptr[this->m_offsets[i]]) {
-        return false;
-      }
+  template <typename TIn>
+  class Apply : public ApplySpatialFilterMixin<TFootprint, TIn, Apply<TIn>> {
+  public:
+
+    using value_type = typename TIn::value_type;
+    using element_type = std::remove_cvref_t<value_type>;
+
+    Apply(TFootprint footprint, TIn in) :
+        ApplySpatialFilterMixin<TFootprint, TIn, Apply>(LINX_MOVE(footprint), LINX_MOVE(in))
+    {}
+
+    KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
+    {
+      return std::all_of(neighbors.begin(), neighbors.end(), [](auto e) {
+        return bool(e);
+      });
     }
-    return true;
-  }
+  };
 };
 
-template <typename TStrel, typename TIn, typename TParity = Forward>
-class Dilation : public MorphologyFilterMixin<TIn, Dilation<TStrel, TIn, TParity>> {
+/**
+ * @brief Binary dilation.
+ */
+template <typename TFootprint>
+class Dilation : public SpatialFilterMixin<TFootprint, Dilation<TFootprint>> {
 public:
 
-  using value_type = bool;
-  using element_type = bool;
-
-  Dilation(const TStrel& strel, const TIn& in) : MorphologyFilterMixin<TIn, Dilation>(strel, in) {}
-
-  // TODO Dilation(std::integral auto radius, const TIn& in)
+  Dilation(TFootprint footprint) : SpatialFilterMixin<TFootprint, Dilation>(LINX_MOVE(footprint)) {}
 
   std::string label() const
   {
     return "Dilation";
   }
 
-  KOKKOS_INLINE_FUNCTION auto operator()(const std::integral auto&... is) const
-  {
-    auto in_ptr = &this->m_in(is...);
-    for (std::size_t i = 0; i < this->m_offsets.size(); ++i) {
-      if (in_ptr[this->m_offsets[i]]) {
-        return true;
-      }
+  template <typename TIn>
+  class Apply : public ApplySpatialFilterMixin<TFootprint, TIn, Apply<TIn>> {
+  public:
+
+    using value_type = typename TIn::value_type;
+    using element_type = std::remove_cvref_t<value_type>;
+
+    Apply(TFootprint footprint, TIn in) :
+        ApplySpatialFilterMixin<TFootprint, TIn, Apply>(LINX_MOVE(footprint), LINX_MOVE(in))
+    {}
+
+    KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
+    {
+      return std::any_of(neighbors.begin(), neighbors.end(), [](auto e) {
+        return bool(e);
+      });
     }
-    return false;
-  }
+  };
 };
-
-template <typename TIn>
-auto erode(const std::string& label, Index radius, const TIn& in)
-{
-  constexpr auto N = TIn::n;
-  const auto rank = in.rank();
-  auto strel = Box(Position<N>(Constant(-radius), rank), Position<N>(Constant(radius + 1), rank));
-
-  auto bbox = +strel; // FIXME box(strel)
-  TIn out(label, in.shape() - bbox.shape() + 1);
-  out.copy_from(Erosion(strel - bbox.start(), in));
-  return out;
-}
-
-template <typename TIn>
-auto dilate(const std::string& label, Index radius, const TIn& in)
-{
-  constexpr auto N = TIn::n;
-  const auto rank = in.rank();
-  auto strel = Box(Position<N>(Constant(-radius), rank), Position<N>(Constant(radius + 1), rank));
-
-  auto bbox = +strel; // FIXME box(strel)
-  TIn out(label, in.shape() - bbox.shape() + 1);
-  out.copy_from(Dilation(strel - bbox.start(), in));
-  return out;
-}
 
 } // namespace Linx
 
