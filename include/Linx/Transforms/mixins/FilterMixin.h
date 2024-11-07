@@ -32,13 +32,13 @@ public:
   KOKKOS_INLINE_FUNCTION explicit OffsetBasedPatch(T* data, const auto& offsets) :
       m_data(data),
       m_offsets(offsets),
-      m_index(m_offsets.size())
+      m_it(m_offsets.data() + m_offsets.size()) // Enable returning *this in end(), saves an instantiation
   {}
 
   KOKKOS_INLINE_FUNCTION OffsetBasedPatch begin() const
   {
     auto out = *this;
-    out.m_index = 0;
+    out.m_it = m_offsets.data();
     return out;
   }
 
@@ -54,17 +54,17 @@ public:
 
   KOKKOS_INLINE_FUNCTION reference operator*() const
   {
-    return m_data[m_offsets[m_index]];
+    return m_data[*m_it];
   }
 
   KOKKOS_INLINE_FUNCTION pointer operator->() const
   {
-    return m_data + m_offsets[m_index];
+    return m_data + *m_it;
   }
 
   KOKKOS_INLINE_FUNCTION OffsetBasedPatch& operator++()
   {
-    ++m_index;
+    ++m_it;
     return *this;
   }
 
@@ -77,20 +77,20 @@ public:
 
   KOKKOS_INLINE_FUNCTION OffsetBasedPatch& operator+=(int i)
   {
-    m_index += i;
+    m_it += i;
     return *this;
   }
 
   KOKKOS_INLINE_FUNCTION OffsetBasedPatch operator+(int i) const
   {
     auto out = *this;
-    out.m_index += i;
+    out.m_it += i;
     return out;
   }
 
   KOKKOS_INLINE_FUNCTION OffsetBasedPatch& operator--()
   {
-    --m_index;
+    --m_it;
     return *this;
   }
 
@@ -103,37 +103,37 @@ public:
 
   KOKKOS_INLINE_FUNCTION OffsetBasedPatch& operator-=(int i)
   {
-    m_index -= i;
+    m_it -= i;
     return *this;
   }
 
   KOKKOS_INLINE_FUNCTION OffsetBasedPatch operator-(int i) const
   {
     auto out = *this;
-    out.m_index -= i;
+    out.m_it -= i;
     return out;
   }
 
   KOKKOS_INLINE_FUNCTION difference_type operator-(const OffsetBasedPatch& rhs) const
   {
-    return m_index - rhs.m_index;
+    return m_it - rhs.m_it;
   }
 
   KOKKOS_INLINE_FUNCTION bool operator==(const OffsetBasedPatch& rhs) const
   {
-    return m_index == rhs.m_index;
+    return m_it == rhs.m_it;
   }
 
   KOKKOS_INLINE_FUNCTION bool operator!=(const OffsetBasedPatch& rhs) const
   {
-    return m_index != rhs.m_index;
+    return m_it != rhs.m_it;
   }
 
 private:
 
   T* m_data; ///< The reference data
   const Sequence<std::ptrdiff_t, -1>& m_offsets; ///< The address offsets // FIXME -1 by default
-  std::size_t m_index; ///< The current index // FIXME iterator on offsets?
+  const std::ptrdiff_t* m_it; ///< The current offset iterator
 };
 
 /**
