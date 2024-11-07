@@ -231,7 +231,7 @@ public:
     const typename TIn::value_type* data = &this->m_in(is...);
     auto begin = OffsetBasedIterator<const typename TIn::value_type>(data, 0, m_offsets);
     auto end = begin.end();
-    return LINX_CRTP_CONST_DERIVED.reduce(begin, end);
+    return LINX_CRTP_CONST_DERIVED.reduce(LINX_MOVE(begin), LINX_MOVE(end)));
   }
 
   void copy_to(const auto& out) const
@@ -242,7 +242,7 @@ public:
         KOKKOS_LAMBDA(auto... is) { out(is...) = (*this)(is...); }); // FIXME make generic
   }
 
-private:
+protected:
 
   TFootprint m_footprint; ///< The footprint
   Sequence<std::ptrdiff_t, -1> m_offsets; ///< The footprint offsets in the input

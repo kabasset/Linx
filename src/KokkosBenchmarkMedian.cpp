@@ -9,6 +9,48 @@
 #include <Kokkos_Core.hpp>
 #include <Kokkos_Timer.hpp>
 
+namespace Linx {
+namespace Test {
+
+template <typename TFootprint>
+class MedianFilter : public SpatialFilterMixin<TFootprint, MedianFilter<TFootprint>> {
+public:
+
+  MedianFilter(TFootprint footprint) : SpatialFilterMixin<TFootprint, MedianFilter>(LINX_MOVE(footprint)) {}
+
+  std::string label() const
+  {
+    return "MedianFilter";
+  }
+
+  template <typename TIn>
+  class Apply : public ApplySpatialFilterMixin<TFootprint, TIn, Apply<TIn>> {
+  public:
+
+    using value_type = typename TIn::value_type;
+    using element_type = std::remove_cvref_t<value_type>;
+
+    Apply(TFootprint footprint, TIn in) :
+        ApplySpatialFilterMixin<TFootprint, TIn, Apply>(LINX_MOVE(footprint), LINX_MOVE(in)),
+        m_neighbors(this->m_offsets.size())
+    {}
+
+    KOKKOS_INLINE_FUNCTION auto reduce(auto begin, auto end) const
+    {
+      auto array = m_neighbors.array();
+      std::copy(LINX_MOVE(begin), LINX_MOVE(end), array.data());
+      return median(array);
+    }
+
+  private:
+
+    ArrayPool<element_type> m_neighbors; // FIXME TSpace
+  };
+};
+
+} // namespace Test
+} // namespace Linx
+
 void print_2d(const auto& image)
 {
   auto name = image.label();
@@ -51,7 +93,7 @@ int main(int argc, char const* argv[])
   if (kernel_parity) {
     Linx::median_filter_to(kernel, image, output); // Parity tag is inferred from kernel
   } else {
-    output.copy_from(Linx::MedianFilter(kernel, image)); // Unknown parity
+    (Linx::Test::MedianFilter(kernel)(image)).copy_to(output); // Unknown parity
   }
   Kokkos::fence();
   const auto elapsed = timer.seconds();
