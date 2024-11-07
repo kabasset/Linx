@@ -13,6 +13,18 @@
 
 namespace P = Linx::Pipeline;
 
+void print_2d(const auto& image)
+{
+  auto name = image.label();
+  auto width = image.shape()[0];
+  auto height = image.shape()[1];
+  std::cout << name << ":" << std::endl;
+  std::cout << "  " << width << " x " << height << std::endl;
+
+  const auto& on_host = Linx::on_host(image);
+  std::cout << "  [" << on_host(0, 0) << ", ... , " << on_host(width - 1, height - 1) << "]" << std::endl;
+}
+
 Linx::Box<2> strel(Linx::Index radius)
 {
   return {{-radius, -radius}, {radius + 1, radius + 1}};
@@ -90,7 +102,10 @@ int main(int argc, char const* argv[])
   auto inmask = Linx::Image<bool, 2>("mask", image_diameter, image_diameter)
                     .generate("random mask", Linx::UniformRng<int>({0, 2}));
 
+  print_2d(indat);
+  print_2d(inmask);
   auto out = lacosmicx(indat, inmask);
+  print_2d(out);
 
   return 0;
 }
