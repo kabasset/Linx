@@ -231,7 +231,7 @@ public:
     const typename TIn::value_type* data = &this->m_in(is...);
     auto begin = OffsetBasedIterator<const typename TIn::value_type>(data, 0, m_offsets);
     auto end = begin.end();
-    return LINX_CRTP_CONST_DERIVED.reduce(LINX_MOVE(begin), LINX_MOVE(end)));
+    return LINX_CRTP_CONST_DERIVED.reduce(LINX_MOVE(begin), LINX_MOVE(end));
   }
 
   void copy_to(const auto& out) const
