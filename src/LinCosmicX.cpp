@@ -35,7 +35,7 @@ struct Updatemask {
 
   std::string label() const
   {
-    return "update mask";
+    return "Updatemask";
   }
 
   auto operator()(const auto& data, const auto& mask) const
@@ -57,6 +57,26 @@ struct Updatemask {
     Linx::Dilation(strel(2)).transform(satpixels, grow_satpixels);
     grow_mask *= grow_satpixels;
     return std::make_tuple(data, grow_mask);
+  }
+};
+
+struct Backgroundlevel {
+  std::string label() const
+  {
+    return "Backgroundlevel";
+  }
+
+  auto operator()(const auto& data, const auto& mask) const
+  {
+    std::vector<float> gooddata;
+    Linx::for_each<Kokkos::Serial>("Backgroundlevel", mask.domain(), [&](int i, int j) {
+      if (not mask(i, j)) {
+        gooddata.push_back(data(i, j));
+      }
+    });
+    auto it = gooddata.begin() + gooddata.size() / 2;
+    std::ranges::nth_element(gooddata.begin(), it, gooddata.end());
+    return std::make_tuple(data, mask, *it);
   }
 };
 
@@ -85,12 +105,14 @@ auto lacosmicx(
   print_2d(inmask);
 
   Linx::TimerLogger logger;
-  auto [mask, cleanarr] = P::Run("cleanarr", logger) // Startup
+  auto [mask, cleanarr, backgroundlevel] = P::Run("cleanarr", logger) // Startup
       | P::Input(indat) | P::Apply(Linx::Add(pssl), Linx::Multiply(gain)) // Scale input data
-      | P::Input(inmask) | Updatemask(satlevel); // Update mask
+      | P::Input(inmask) | Updatemask(satlevel) // Update mask
+      | Backgroundlevel(); // Compute background
 
   print_2d(mask);
   print_2d(cleanarr);
+  std::cout << backgroundlevel << std::endl;
 
   return cleanarr; // FIXME
 }
