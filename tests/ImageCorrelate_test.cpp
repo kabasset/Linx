@@ -18,12 +18,11 @@ BOOST_AUTO_TEST_CASE(crop_to_test)
   using Image = Linx::Image<int, 2>;
   Image a("a", width, height);
   Image k("k", kernel, kernel);
-  Image b("b", width - kernel + 1, height - kernel + 1);
   a.fill(1);
   k.fill(1);
   Kokkos::fence();
 
-  correlate_to(a, k, b);
+  auto b = Linx::Correlation(k)(a);
 
   const auto& b_on_host = Linx::on_host(b);
   for (int j = 0; j < height - kernel; ++j) {
@@ -45,7 +44,7 @@ BOOST_AUTO_TEST_CASE(crop_test)
   k.fill(1);
   Kokkos::fence();
 
-  auto b = correlate("mean", a, k);
+  auto b = Linx::Correlation(k)(a);
 
   const auto& b_on_host = Linx::on_host(b);
   for (int j = 0; j < height - kernel; ++j) {

@@ -24,12 +24,16 @@ BOOST_AUTO_TEST_CASE(crop_test)
   auto min_1 = Linx::Erosion(strel)(one);
   auto max_1 = Linx::Dilation(strel)(one);
 
+  const auto& min_0_on_host = Linx::on_host(min_0);
+  const auto& max_0_on_host = Linx::on_host(max_0);
+  const auto& min_1_on_host = Linx::on_host(min_1);
+  const auto& max_1_on_host = Linx::on_host(max_1);
   for (int j = radius; j < height - radius; ++j) {
     for (int i = radius; i < width - radius; ++i) {
-      BOOST_TEST(min_0(i, j) == false); // FIXME on_host
-      BOOST_TEST(max_0(i, j) == false);
-      BOOST_TEST(min_1(i, j) == true);
-      BOOST_TEST(max_1(i, j) == true);
+      BOOST_TEST(min_0_on_host(i, j) == false);
+      BOOST_TEST(max_0_on_host(i, j) == false);
+      BOOST_TEST(min_1_on_host(i, j) == true);
+      BOOST_TEST(max_1_on_host(i, j) == true);
     }
   }
 }

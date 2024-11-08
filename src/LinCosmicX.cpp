@@ -43,7 +43,7 @@ struct Updatemask {
   auto operator()(const auto& data) const
   {
     auto satpixels = Linx::Image<bool, 2>(data.shape());
-    auto median5 = Linx::SumFilter(strel(2))(data); // FIXME MedianFilter
+    auto median5 = Linx::MedianFilter(strel(2)).lazy(data);
     Linx::for_each(
         label(),
         median5.domain(),
@@ -53,9 +53,10 @@ struct Updatemask {
           }
         });
     auto grow_mask = +mask;
-    Linx::SumFilter(strel(1))(mask).copy_to(grow_mask); // FIXME Dilation
+    Linx::Dilation(strel(1)).transform(mask, grow_mask);
+    // FIXME auto grow_mask = Dilation::with_border_copy(mask)?
     auto grow_satpixels = +satpixels;
-    Linx::SumFilter(strel(2))(satpixels).copy_to(grow_satpixels); // FIXME Dilation
+    Linx::Dilation(strel(2)).transform(satpixels, grow_satpixels);
     grow_mask *= grow_satpixels;
     return grow_mask;
   }

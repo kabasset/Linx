@@ -31,15 +31,12 @@ public:
   }
 
   template <typename TIn>
-  class Apply : public ApplySpatialFilterMixin<TFootprint, TIn, Apply<TIn>> {
+  class Apply : public ApplySpatialFilterMixin<Erosion, TIn, Apply<TIn>> {
   public:
 
-    using value_type = typename TIn::value_type;
-    using element_type = std::remove_cvref_t<value_type>;
+    using value_type = bool;
 
-    Apply(TFootprint footprint, TIn in) :
-        ApplySpatialFilterMixin<TFootprint, TIn, Apply>(LINX_MOVE(footprint), LINX_MOVE(in))
-    {}
+    using ApplySpatialFilterMixin<Erosion, TIn, Apply>::ApplySpatialFilterMixin;
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
@@ -65,15 +62,12 @@ public:
   }
 
   template <typename TIn>
-  class Apply : public ApplySpatialFilterMixin<TFootprint, TIn, Apply<TIn>> {
+  class Apply : public ApplySpatialFilterMixin<Dilation, TIn, Apply<TIn>> {
   public:
 
-    using value_type = typename TIn::value_type;
-    using element_type = std::remove_cvref_t<value_type>;
+    using value_type = bool;
 
-    Apply(TFootprint footprint, TIn in) :
-        ApplySpatialFilterMixin<TFootprint, TIn, Apply>(LINX_MOVE(footprint), LINX_MOVE(in))
-    {}
+    using ApplySpatialFilterMixin<Dilation, TIn, Apply>::ApplySpatialFilterMixin;
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {

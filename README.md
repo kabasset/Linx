@@ -101,7 +101,7 @@ Function suffixed with `_to` fill an existing container instead:
 ```cpp
 auto image = Linx::Image(...);
 auto kernel = Linx::Image(...);
-auto filtered = Linx::correlate("filter", image, kernel); // Creates a new instance
+auto filtered = Linx::Correlation(kernel)(image); // Creates a new instance
 auto fourier = Linx::Image("DFT", image.shape());
 Linx::dft_to(image, fourier); // Fills fourier
 ```

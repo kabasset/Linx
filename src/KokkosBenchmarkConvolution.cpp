@@ -16,7 +16,7 @@ void print_2d(const auto& image)
   auto height = image.shape()[1];
   std::cout << name << ":" << std::endl;
   std::cout << "  " << width << " x " << height << std::endl;
-  
+
   const auto& on_host = Linx::on_host(image);
   std::cout << "  [" << on_host(0, 0) << ", ... , " << on_host(width - 1, height - 1) << "]" << std::endl;
 }
@@ -47,7 +47,7 @@ int main(int argc, char const* argv[])
 
   std::cout << "Filtering..." << std::endl;
   Kokkos::Timer timer;
-  const auto output = Linx::correlate("output", image, kernel);
+  const auto output = Linx::Correlation(kernel)(image);
   Kokkos::fence();
   const auto elapsed = timer.seconds();
 

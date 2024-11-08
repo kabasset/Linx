@@ -35,6 +35,21 @@ public:
       m_it(m_offsets.data() + m_offsets.size()) // Enable returning *this in end(), saves an instantiation
   {}
 
+  KOKKOS_INLINE_FUNCTION OffsetBasedPatch(const OffsetBasedPatch& rhs) :
+      m_data(rhs.m_data),
+      m_offsets(rhs.m_offsets),
+      m_it(rhs.m_it)
+  {}
+
+  KOKKOS_INLINE_FUNCTION OffsetBasedPatch& operator=(const OffsetBasedPatch& rhs)
+  {
+    // m_data = rhs.m_data;
+    // m_offsets = rhs.m_offsets; // Cannot copy const ref
+    // FIXME weird semantics => replace m_offsets, m_it with m_begin, m_end?
+    m_it = rhs.m_it;
+    return *this;
+  }
+
   KOKKOS_INLINE_FUNCTION OffsetBasedPatch begin() const
   {
     auto out = *this;
@@ -174,18 +189,64 @@ private:
  * auto [extrapolated] = P::Run("opening") | in | Linx::Erode(radius).pad() * Linx::Dilate(radius).pad();
  * \endcode
  */
-template <typename TFootprint, typename TDerived>
-class SpatialFilterMixin {
+template <typename TDerived>
+class FilterMixin {
 public:
 
-  SpatialFilterMixin(TFootprint footprint) : m_footprint(LINX_MOVE(footprint)) {}
+  /**
+   * @brief Lazy evaluator.
+   * 
+   * No computation is performed immediately.
+   * The returned object can then evaluate the filter at chosen positions.
+   * This is especially useful to filter only a few points of the input.
+   */
+  template <typename TIn>
+  auto lazy(const TIn& in) const
+  {
+    return typename TDerived::Apply<TIn>(LINX_CRTP_CONST_DERIVED, in);
+  }
 
+  /**
+   * @brief Filter an image without extrapolation.
+   * 
+   * The output image has the same shape as the input image.
+   * The borders of the output image are default-initialized.
+   */
   template <typename TIn>
   auto operator()(const TIn& in) const
   {
-    return typename TDerived::Apply<TIn>(m_footprint, in);
+    TIn out(compose_label(LINX_CRTP_CONST_DERIVED.label(), in), in.shape());
+    transform(in, out);
+    return out;
   }
 
+  /**
+   * @brief Filter an image without extrapolation.
+   * 
+   * All the positions of the filtering domain are evaluated.
+   */
+  template <typename TIn, typename TOut>
+  void transform(const TIn& in, const TOut& out) const
+  {
+    lazy(in).copy_to(out);
+  }
+};
+
+/**
+ * @brief Footprint-defined filter mixin.
+ */
+template <typename TFootprint, typename TDerived>
+class SpatialFilterMixin : public FilterMixin<TDerived> {
+public:
+
+  /**
+   * @brief Constructor.
+   */
+  SpatialFilterMixin(TFootprint footprint) : m_footprint(LINX_MOVE(footprint)) {}
+
+  /**
+   * @brief Spatial footprint.
+   */
   const auto& footprint() const
   {
     return m_footprint;
@@ -196,13 +257,16 @@ private:
   TFootprint m_footprint; ///< The footprint
 };
 
-template <typename TFootprint, typename TIn, typename TDerived>
+/**
+ * @brief The helper class returned by `SpatialFilterMixin::lazy()`.
+ */
+template <typename TFilter, typename TIn, typename TDerived>
 class ApplySpatialFilterMixin {
 public:
 
-  ApplySpatialFilterMixin(TFootprint footprint, const TIn& in) :
-      m_footprint(LINX_MOVE(footprint)),
-      m_offsets("offsets", m_footprint.size()),
+  ApplySpatialFilterMixin(const TFilter& filter, const TIn& in) :
+      m_filter(filter),
+      m_offsets("offsets", m_filter.footprint().size()),
       m_in(as_readonly(in))
   {
     auto offsets_on_host = on_host(m_offsets);
@@ -210,7 +274,7 @@ public:
     auto front = &m_in.front();
     for_each<Kokkos::Serial>(
         "compute_offsets()", // FIXME analytic through strides?
-        m_footprint,
+        footprint(),
         KOKKOS_LAMBDA(std::integral auto... is) {
           offsets_on_host[*index] = &m_in(is...) - front;
           ++(*index);
@@ -220,12 +284,12 @@ public:
 
   KOKKOS_INLINE_FUNCTION const auto& footprint() const
   {
-    return m_footprint;
+    return m_filter.footprint();
   }
 
   auto domain() const
   {
-    return Box(m_in.domain().start() - m_footprint.start(), m_in.domain().stop() - m_footprint.stop() + 1);
+    return Box(m_in.domain().start() - footprint().start(), m_in.domain().stop() - footprint().stop() + 1);
   }
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
@@ -243,99 +307,99 @@ public:
 
 protected:
 
-  TFootprint m_footprint; ///< The footprint
+  const TFilter& m_filter; ///< The filter
   Sequence<std::ptrdiff_t, -1> m_offsets; ///< The footprint offsets in the input
   decltype(as_readonly(std::declval<TIn>())) m_in; ///< The input
 };
 
-template <typename TFootprint>
-class SumFilter : public SpatialFilterMixin<TFootprint, SumFilter<TFootprint>> {
+/**
+ * @brief Kernel-defined filter mixin.
+ */
+template <typename TKernel, typename TDerived>
+class WeightedFilterMixin : public FilterMixin<TDerived> {
 public:
 
-  SumFilter(TFootprint footprint) : SpatialFilterMixin<TFootprint, SumFilter>(LINX_MOVE(footprint)) {}
+  using value_type = typename TKernel::value_type;
 
-  std::string label() const
+  WeightedFilterMixin(TKernel kernel) : m_kernel(LINX_MOVE(kernel)) {}
+
+  auto footprint() const
   {
-    return "SumFilter";
+    return m_kernel.domain();
   }
 
-  template <typename TIn>
-  struct Apply : public ApplySpatialFilterMixin<TFootprint, TIn, Apply<TIn>> {
-    using ApplySpatialFilterMixin<TFootprint, TIn, Apply>::ApplySpatialFilterMixin;
+  const auto& kernel() const
+  {
+    return m_kernel;
+  }
 
-    KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
-    {
-      return std::reduce(neighbors.begin(), neighbors.end());
-    }
-  };
+  // FIXME normalize()
+
+private:
+
+  TKernel m_kernel; ///< The kernel
 };
 
-template <typename TIn, typename TDerived>
-class MorphologyFilterMixin { // FIXME simply FilterMixin?
+/**
+ * @brief The helper class returned by `WeightedFilterMixin::lazy()`.
+ */
+template <typename TFilter, typename TIn, typename TDerived>
+class ApplyWeightedFilterMixin {
 public:
 
-  MorphologyFilterMixin(const auto& strel, const TIn& in) :
-      MorphologyFilterMixin(Sequence<std::ptrdiff_t, -1>("offsets", strel.size()), in)
+  using value_type = typename TFilter::value_type;
+
+  ApplyWeightedFilterMixin(const TFilter& filter, const TIn& in) :
+      m_filter(filter),
+      m_offsets("offsets", m_filter.footprint().size()),
+      m_weights("weights", m_offsets.size()),
+      m_in(as_readonly(in))
   {
     auto offsets_on_host = on_host(m_offsets);
-    auto index = std::make_shared<Index>(0);
-    auto front = &m_in.front();
-    for_each<Kokkos::Serial>(
-        "compute_offsets()", // FIXME analytic through strides?
-        strel,
-        KOKKOS_LAMBDA(std::integral auto... is) {
-          offsets_on_host[*index] = &m_in(is...) - front;
-          ++(*index);
-        });
-    copy_to(offsets_on_host, m_offsets); // FIXME offsets_on_host.copy_to(m_offsets)
-  }
-
-protected:
-
-  MorphologyFilterMixin(const Sequence<std::ptrdiff_t, -1>& offsets, const TIn& in) :
-      m_offsets(offsets),
-      m_in(as_readonly(in))
-  {}
-
-  Sequence<std::ptrdiff_t, -1> m_offsets;
-  decltype(as_readonly(std::declval<TIn>())) m_in;
-};
-
-template <typename TIn, typename TDerived>
-const TDerived& as_readonly(const MorphologyFilterMixin<TIn, TDerived>& in)
-{
-  return static_cast<const TDerived&>(in);
-}
-
-template <typename TKernel, typename TIn, typename TDerived>
-class WeightedFilterMixin : public MorphologyFilterMixin<TIn, TDerived> {
-public:
-
-  WeightedFilterMixin(const auto& kernel, const auto& in) :
-      MorphologyFilterMixin<TIn, TDerived>(Sequence<std::ptrdiff_t, -1>("offsets", kernel.size()), in),
-      m_weights("weights", kernel.size())
-  {
-    // FIXME delegate m_offsets computation to Morphology?
-
-    auto offsets_on_host = on_host(this->m_offsets);
     auto weights_on_host = on_host(m_weights);
     auto index = std::make_shared<Index>(0);
-    auto front = &this->m_in.front();
+    auto data = &m_in.front();
     for_each<Kokkos::Serial>(
-        "compute_offsets()",
-        kernel.domain(),
+        "compute offsets",
+        m_filter.footprint(),
         KOKKOS_LAMBDA(std::integral auto... is) {
-          offsets_on_host[*index] = &this->m_in(is...) - front;
-          weights_on_host[*index] = kernel(is...);
+          offsets_on_host[*index] = &m_in(is...) - data;
+          weights_on_host[*index] = m_filter.kernel()(is...);
           ++(*index);
         });
-    copy_to(offsets_on_host, this->m_offsets); // FIXME offsets_on_host.copy_to(m_offsets)
-    copy_to(weights_on_host, m_weights); // FIXME
+    Linx::copy_to(offsets_on_host, m_offsets); // FIXME offsets_on_host.copy_to(m_offsets)
+    Linx::copy_to(weights_on_host, m_weights); // FIXME
+  }
+
+  KOKKOS_INLINE_FUNCTION auto footprint() const
+  {
+    return m_filter.footprint();
+  }
+
+  auto domain() const
+  {
+    return Box(m_in.domain().start() - footprint().start(), m_in.domain().stop() - footprint().stop() + 1);
+  }
+
+  KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
+  {
+    return LINX_CRTP_CONST_DERIVED.reduce(OffsetBasedPatch(&this->m_in(is...), m_offsets));
+  }
+
+  void copy_to(const auto& out) const
+  {
+    for_each(
+        "copy_to",
+        domain(),
+        KOKKOS_LAMBDA(auto... is) { out(is...) = (*this)(is...); }); // FIXME make generic
   }
 
 protected:
 
-  Sequence<typename TKernel::element_type, -1> m_weights;
+  const TFilter& m_filter; ///< The footprint
+  Sequence<std::ptrdiff_t, -1> m_offsets; ///< The footprint offsets in the input
+  Sequence<value_type, -1> m_weights; ///< The weights in the same order
+  decltype(as_readonly(std::declval<TIn>())) m_in; ///< The input
 };
 
 } // namespace Linx
