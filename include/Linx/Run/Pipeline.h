@@ -104,7 +104,7 @@ template <typename... TValues> // TODO add insertion index, 0 by default
 class Input {
 public:
 
-  Input(TValues&&... values) : m_values(LINX_FORWARD(values)...) {}
+  Input(TValues... values) : m_values(LINX_MOVE(values)...) {}
 
   std::string label() const
   {
@@ -113,7 +113,7 @@ public:
 
   auto operator()(auto&&... values) &&
   {
-    return std::tuple_cat(LINX_MOVE(m_values), std::make_tuple(LINX_FORWARD(values)...));
+    return std::tuple_cat(std::make_tuple(LINX_FORWARD(values)...), LINX_MOVE(m_values));
   }
 
 private:
@@ -133,7 +133,8 @@ public:
   {}
 
   State(TContext context, const std::string& message, std::tuple<TValues...> values) :
-      m_context(LINX_MOVE(context)), m_values(LINX_MOVE(values))
+      m_context(LINX_MOVE(context)),
+      m_values(LINX_MOVE(values))
   {
     m_context.log(message);
   }

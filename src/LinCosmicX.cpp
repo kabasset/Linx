@@ -30,9 +30,7 @@ Linx::Box<2> strel(Linx::Index radius)
   return {{-radius, -radius}, {radius + 1, radius + 1}};
 }
 
-template <typename TMask>
 struct Updatemask {
-  const TMask& mask;
   double satlevel;
 
   std::string label() const
@@ -40,7 +38,7 @@ struct Updatemask {
     return "update mask";
   }
 
-  auto operator()(const auto& data) const
+  auto operator()(const auto& data, const auto& mask) const
   {
     auto satpixels = Linx::Image<bool, 2>(data.shape());
     auto median5 = Linx::MedianFilter(strel(2)).lazy(data);
@@ -52,13 +50,13 @@ struct Updatemask {
             satpixels(i, j) = (median5(i, j) > (satlevel / 10));
           }
         });
-    auto grow_mask = +mask;
+    auto grow_mask = mask.copy_as("grow_mask");
     Linx::Dilation(strel(1)).transform(mask, grow_mask);
     // FIXME auto grow_mask = Dilation::with_border_copy(mask)?
     auto grow_satpixels = +satpixels;
     Linx::Dilation(strel(2)).transform(satpixels, grow_satpixels);
     grow_mask *= grow_satpixels;
-    return grow_mask;
+    return std::make_tuple(data, grow_mask);
   }
 };
 
@@ -83,9 +81,17 @@ auto lacosmicx(
     double psfbeta = 4.765,
     bool verbose = false)
 {
+  print_2d(indat);
+  print_2d(inmask);
+
   Linx::TimerLogger logger;
-  auto [cleanarr] = P::Run("cleanarr", logger) | indat.copy_as("cleanarr") // Startup
-      | P::Apply(Linx::Add(pssl), Linx::Multiply(gain)) | Updatemask(inmask, satlevel);
+  auto [mask, cleanarr] = P::Run("cleanarr", logger) // Startup
+      | P::Input(indat) | P::Apply(Linx::Add(pssl), Linx::Multiply(gain)) // Scale input data
+      | P::Input(inmask) | Updatemask(satlevel); // Update mask
+
+  print_2d(mask);
+  print_2d(cleanarr);
+
   return cleanarr; // FIXME
 }
 
@@ -103,10 +109,7 @@ int main(int argc, char const* argv[])
   auto inmask = Linx::Image<bool, 2>("mask", image_diameter, image_diameter)
                     .generate("random mask", Linx::UniformRng<int>({0, 2}));
 
-  print_2d(indat);
-  print_2d(inmask);
   auto out = lacosmicx(indat, inmask);
-  print_2d(out);
 
   return 0;
 }
