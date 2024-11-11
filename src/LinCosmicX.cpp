@@ -69,7 +69,7 @@ struct Backgroundlevel {
   auto operator()(const auto& data, const auto& mask) const
   {
     std::vector<float> gooddata;
-    Linx::for_each<Kokkos::Serial>("Backgroundlevel", mask.domain(), [&](int i, int j) {
+    Linx::for_each<Kokkos::Serial>(label(), mask.domain(), [&](int i, int j) {
       if (not mask(i, j)) {
         gooddata.push_back(data(i, j));
       }
@@ -81,7 +81,7 @@ struct Backgroundlevel {
 };
 
 auto lacosmicx(
-    const auto& indat,
+    const auto& indata,
     const auto& inmask,
     double sigclip = 4.5,
     double sigfrac = 0.3,
@@ -101,20 +101,24 @@ auto lacosmicx(
     double psfbeta = 4.765,
     bool verbose = false)
 {
-  print_2d(indat);
-  print_2d(inmask);
-
   Linx::TimerLogger logger;
-  auto [mask, cleanarr, backgroundlevel] = P::Run("cleanarr", logger) // Startup
-      | P::Input(indat) | P::Apply(Linx::Add(pssl), Linx::Multiply(gain)) // Scale input data
-      | P::Input(inmask) | Updatemask(satlevel) // Update mask
-      | Backgroundlevel(); // Compute background
+  auto [cleanarr, mask, backgroundlevel] = P::Run("Setup", logger) // Start pipeline
+      | P::Input(+indata) | P::Apply(Linx::Add(pssl), Linx::Multiply(gain)) // Copy and scale input data
+      | P::Input(inmask) | Updatemask(satlevel) // Detect saturated stars
+      | Backgroundlevel(); // Compute default background level
 
-  print_2d(mask);
-  print_2d(cleanarr);
-  std::cout << backgroundlevel << std::endl;
+  // FIXME compute psfk if needs be
 
-  return cleanarr; // FIXME
+  auto crmask = Linx::Image<char, 2>("crmask", indata.shape());
+
+  const auto sigcliplow = sigfrac * sigclip;
+
+  for (Linx::Index i = 1; i <= niter; ++i) {
+    auto label = "Iteration " + std::to_string(i) + " / " + std::to_string(niter);
+    P::Run(label, logger) | P::Input(cleanarr, crmask, mask);
+  }
+
+  return std::make_tuple(cleanarr, crmask); // FIXME
 }
 
 int main(int argc, char const* argv[])
@@ -126,12 +130,18 @@ int main(int argc, char const* argv[])
   const auto image_diameter = context.as<int>("image");
   const auto kernel_diameter = context.as<int>("kernel");
 
-  auto indat = Linx::Image<double, 2>("data", image_diameter, image_diameter)
-                   .generate("random noise", Linx::GaussianRng<double>(0, 1));
-  auto inmask = Linx::Image<bool, 2>("mask", image_diameter, image_diameter)
-                    .generate("random mask", Linx::UniformRng<int>({0, 2}));
+  auto data = Linx::Image<double, 2>("data", image_diameter, image_diameter)
+                  .generate("random noise", Linx::GaussianRng<double>(0, 1));
+  auto mask = Linx::Image<bool, 2>("mask", image_diameter, image_diameter)
+                  .generate("random mask", Linx::UniformRng<int>({0, 2}));
 
-  auto out = lacosmicx(indat, inmask);
+  print_2d(data);
+  print_2d(mask);
+
+  auto [cleanarr, crmask] = lacosmicx(data, mask);
+
+  print_2d(cleanarr);
+  print_2d(crmask);
 
   return 0;
 }
