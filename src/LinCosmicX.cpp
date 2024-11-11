@@ -116,11 +116,24 @@ auto lacosmicx(
 
   for (Linx::Index i = 1; i <= niter; ++i) {
     auto label = "Iteration " + std::to_string(i) + " / " + std::to_string(niter);
+
     auto [s] = P::Run(label, logger) // Start
         | cleanarr | Linx::Upsample(2) /*| Linx::Laplacian<0, 1>(1)*/ | P::Apply(Linx::Max(0.)) // FIXME element_type(0)
         | Linx::Downsample(2);
 
-    print_2d(s); // FIXME rm
+    auto [m5] = P::Run(label, logger) | cleanarr | Linx::MedianFilter(strel(2));
+
+    auto [noise] = P::Run(label, logger) | +m5 | P::Apply([=](auto e) {
+                     return std::sqrt(std::max(e, 0.00001) + readnoise * readnoise);
+                   });
+
+    auto [sp] = P::Run(label, logger) //
+        | s | Linx::MedianFilter(strel(2)) //
+        | P::Input(s, noise) | P::Apply([=](auto m_i, auto s_i, auto n_i) {
+                  return (m_i - s_i) / (2. * n_i);
+                });
+
+    print_2d(sp); // FIXME rm
   }
 
   return std::make_tuple(cleanarr, crmask); // FIXME
