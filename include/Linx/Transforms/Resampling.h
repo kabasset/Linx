@@ -203,6 +203,136 @@ private:
   }
 };
 
+class Upsample {
+public:
+
+  Upsample(Index factor) : m_factor(factor) {}
+
+  std::string label() const
+  {
+    return "Upsample";
+  }
+
+  template <typename TIn>
+  auto operator()(const TIn& in) const
+  {
+    auto apply = lazy(in);
+    TIn out(compose_label(label(), in), apply.domain().shape()); // Differs from FilterMixin
+    apply.copy_to(out);
+    return out;
+  }
+
+  template <typename TIn, typename TOut>
+  void transform(const TIn& in, const TOut& out) const
+  {
+    lazy(in).copy_to(out);
+  }
+
+  auto lazy(const auto& in) const
+  {
+    return Apply(m_factor, in);
+  }
+
+  template <typename TIn>
+  class Apply {
+  public:
+
+    Apply(Index factor, const TIn& in) : m_factor(factor), m_in(in) {}
+
+    auto domain() const
+    {
+      return m_in.domain() * m_factor; // Differs from FilterMixin
+    }
+
+    auto operator()(std::integral auto... is) const
+    {
+      return m_in(is * m_factor...);
+    }
+
+    void copy_to(const auto& out) const
+    {
+      for_each(
+          "copy_to",
+          domain(),
+          KOKKOS_LAMBDA(auto... is) { out(is...) = (*this)(is...); }); // FIXME make generic
+    }
+
+  private:
+
+    Index m_factor;
+    const TIn& m_in;
+  };
+
+private:
+
+  Index m_factor;
+};
+
+class Downsample { // FIXME avoid duplication
+public:
+
+  Downsample(Index factor) : m_factor(factor) {}
+
+  std::string label() const
+  {
+    return "Downsample";
+  }
+
+  template <typename TIn>
+  auto operator()(const TIn& in) const
+  {
+    auto apply = lazy(in);
+    TIn out(compose_label(label(), in), apply.domain().shape());
+    apply.copy_to(out);
+    return out;
+  }
+
+  template <typename TIn, typename TOut>
+  void transform(const TIn& in, const TOut& out) const
+  {
+    lazy(in).copy_to(out);
+  }
+
+  auto lazy(const auto& in) const
+  {
+    return Apply(m_factor, in);
+  }
+
+  template <typename TIn>
+  class Apply {
+  public:
+
+    Apply(Index factor, const TIn& in) : m_factor(factor), m_in(in) {}
+
+    auto domain() const
+    {
+      return m_in.domain() / m_factor;
+    }
+
+    auto operator()(std::integral auto... is) const
+    {
+      return m_in(is / m_factor...);
+    }
+
+    void copy_to(const auto& out) const
+    {
+      for_each(
+          "copy_to",
+          domain(),
+          KOKKOS_LAMBDA(auto... is) { out(is...) = (*this)(is...); }); // FIXME make generic
+    }
+
+  private:
+
+    Index m_factor;
+    const TIn& m_in;
+  };
+
+private:
+
+  Index m_factor;
+};
+
 } // namespace Linx
 
 #endif

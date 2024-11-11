@@ -10,6 +10,7 @@
 #include "Linx/Transforms/Correlation.h"
 #include "Linx/Transforms/Morphology.h"
 #include "Linx/Transforms/RankFiltering.h"
+#include "Linx/Transforms/Resampling.h"
 
 namespace P = Linx::Pipeline;
 
@@ -115,7 +116,11 @@ auto lacosmicx(
 
   for (Linx::Index i = 1; i <= niter; ++i) {
     auto label = "Iteration " + std::to_string(i) + " / " + std::to_string(niter);
-    P::Run(label, logger) | P::Input(cleanarr, crmask, mask);
+    auto [s] = P::Run(label, logger) // Start
+        | cleanarr | Linx::Upsample(2) /*| Linx::Laplacian<0, 1>(1)*/ | P::Apply(Linx::Max(0.)) // FIXME element_type(0)
+        | Linx::Downsample(2);
+
+    print_2d(s); // FIXME rm
   }
 
   return std::make_tuple(cleanarr, crmask); // FIXME
