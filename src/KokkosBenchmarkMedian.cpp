@@ -29,7 +29,6 @@ int main(int argc, char const* argv[])
   context.parse();
   const auto image_diameter = context.as<int>("image");
   const auto kernel_diameter = context.as<int>("kernel");
-  const auto output_diameter = image_diameter - kernel_diameter + 1;
 
   std::cout << "Generating input and kernel..." << std::endl;
   const auto image = Linx::Image<float, 2>("input", image_diameter, image_diameter);
