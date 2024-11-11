@@ -130,7 +130,8 @@ public:
    * @copydoc GBox()
    */
   GBox(GPosition<size_type, n> start, Shape<size_type, n> shape) :
-      m_start(LINX_MOVE(start)), m_stop(shape.value + m_start)
+      m_start(LINX_MOVE(start)),
+      m_stop(shape.value + m_start)
   {}
 
   /**
@@ -396,6 +397,26 @@ public:
   }
 
   /**
+   * @brief Multiply each coordinate.
+   */
+  GBox operator*=(size_type scalar)
+  {
+    m_start *= scalar;
+    m_stop *= scalar;
+    return *this;
+  }
+
+  /**
+   * @brief Divide each coordinate.
+   */
+  GBox operator/=(size_type scalar)
+  {
+    m_start /= scalar;
+    m_stop /= scalar;
+    return *this;
+  }
+
+  /**
    * @brief Equality.
    */
   template <typename U, int M>
@@ -464,6 +485,28 @@ GBox<T, N> operator-(GBox<T, N> lhs, const auto& rhs)
 {
   auto out = +lhs;
   out -= rhs;
+  return out;
+}
+
+/**
+ * @relatesalso GBox
+ */
+template <typename T, int N>
+GBox<T, N> operator*(const GBox<T, N>& lhs, const auto& rhs)
+{
+  auto out = +lhs;
+  out *= rhs;
+  return out;
+}
+
+/**
+ * @relatesalso GBox
+ */
+template <typename T, int N>
+GBox<T, N> operator/(GBox<T, N> lhs, const auto& rhs)
+{
+  auto out = +lhs;
+  out /= rhs;
   return out;
 }
 
