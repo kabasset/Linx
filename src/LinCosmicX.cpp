@@ -41,7 +41,7 @@ struct Updatemask {
 
   auto operator()(const auto& data, const auto& mask) const
   {
-    auto satpixels = Linx::Image<bool, 2>(data.shape());
+    auto satpixels = Linx::Image<bool, 2>("satpixels", data.shape());
     auto median5 = Linx::MedianFilter(strel(2)).lazy(data);
     Linx::for_each(
         label(),
@@ -104,7 +104,7 @@ auto lacosmicx(
 {
   Linx::TimerLogger logger;
   auto [cleanarr, mask, backgroundlevel] = P::Run("Setup", logger) // Start pipeline
-      | P::Input(+indata) | P::Apply(Linx::Add(pssl), Linx::Multiply(gain)) // Copy and scale input data
+      | P::Input(indata) | P::Apply(Linx::Add(pssl), Linx::Multiply(gain)) // Copy and scale input data
       | P::Input(inmask) | Updatemask(satlevel) // Detect saturated stars
       | Backgroundlevel(); // Compute default background level
 

@@ -282,7 +282,7 @@ public:
     Linx::copy_to(offsets_on_host, m_offsets); // FIXME offsets_on_host.copy_to(m_offsets)
   }
 
-  KOKKOS_INLINE_FUNCTION const auto& footprint() const
+  KOKKOS_INLINE_FUNCTION auto footprint() const
   {
     return m_filter.footprint();
   }
@@ -307,7 +307,7 @@ public:
 
 protected:
 
-  const TFilter& m_filter; ///< The filter
+  TFilter m_filter; ///< The filter
   Sequence<std::ptrdiff_t, -1> m_offsets; ///< The footprint offsets in the input
   decltype(as_readonly(std::declval<TIn>())) m_in; ///< The input
 };
@@ -396,7 +396,7 @@ public:
 
 protected:
 
-  const TFilter& m_filter; ///< The footprint
+  TFilter m_filter; ///< The filter
   Sequence<std::ptrdiff_t, -1> m_offsets; ///< The footprint offsets in the input
   Sequence<value_type, -1> m_weights; ///< The weights in the same order
   decltype(as_readonly(std::declval<TIn>())) m_in; ///< The input

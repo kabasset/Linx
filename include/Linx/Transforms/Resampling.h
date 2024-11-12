@@ -217,7 +217,7 @@ public:
   auto operator()(const TIn& in) const
   {
     auto apply = lazy(in);
-    TIn out(compose_label(label(), in), apply.domain().shape()); // Differs from FilterMixin
+    TIn out(compose_label(label(), in), in.shape() * 2); // Differs from FilterMixin
     apply.copy_to(out);
     return out;
   }
@@ -246,7 +246,7 @@ public:
 
     auto operator()(std::integral auto... is) const
     {
-      return m_in(is * m_factor...);
+      return m_in(is / m_factor...);
     }
 
     void copy_to(const auto& out) const
@@ -260,7 +260,7 @@ public:
   private:
 
     Index m_factor;
-    const TIn& m_in;
+    TIn m_in;
   };
 
 private:
@@ -311,7 +311,7 @@ public:
 
     auto operator()(std::integral auto... is) const
     {
-      return m_in(is / m_factor...);
+      return m_in(is * m_factor...);
     }
 
     void copy_to(const auto& out) const
@@ -325,7 +325,7 @@ public:
   private:
 
     Index m_factor;
-    const TIn& m_in;
+    TIn m_in;
   };
 
 private:
