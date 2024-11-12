@@ -118,6 +118,23 @@ struct Apply {
   decltype(compose_functions(std::declval<TFuncs>()...)) m_func;
 };
 
+template <typename... TFuncs>
+struct Generate {
+  Generate(TFuncs... fs) : m_func(compose_functions(fs...)) {}
+
+  std::string label() const
+  {
+    return "Apply pointwise function";
+  }
+
+  auto operator()(auto&& in0, auto&&... ins)
+  {
+    return (+in0).apply(label(), m_func, LINX_FORWARD(ins)...);
+  }
+
+  decltype(compose_functions(std::declval<TFuncs>()...)) m_func;
+};
+
 } // namespace Pipeline
 } // namespace Linx
 

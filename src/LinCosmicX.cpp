@@ -101,8 +101,9 @@ auto lacosmicx(
     bool verbose = false)
 {
   Linx::TimerLogger logger;
+
   auto [cleanarr, mask, backgroundlevel] = P::Run("Setup", logger) // Start pipeline
-      | P::Input(indata) | P::Apply(Linx::Add(pssl), Linx::Multiply(gain)) // Copy and scale input data
+      | P::Input(indata) | P::Generate(Linx::Add(pssl), Linx::Multiply(gain)) // Copy and scale input data
       | P::Input(inmask) | Updatemask(satlevel) // Detect saturated stars
       | Backgroundlevel(); // Compute default background level
 
@@ -121,7 +122,7 @@ auto lacosmicx(
 
     auto [m5] = run | cleanarr | Linx::MedianFilter(strel(2));
 
-    auto [noise] = run | +m5 | P::Apply([=](auto e) {
+    auto [noise] = run | m5 | P::Generate([=](auto e) {
                      return std::sqrt(std::max(e, 0.00001) + readnoise * readnoise);
                    });
 
@@ -130,8 +131,6 @@ auto lacosmicx(
         | P::Input(s, noise) | P::Apply([=](auto m_i, auto s_i, auto n_i) {
                   return (m_i - s_i) / (2. * n_i);
                 });
-
-    print_2d(sp); // FIXME rm
   }
 
   return std::make_tuple(cleanarr, crmask); // FIXME
