@@ -115,19 +115,19 @@ auto lacosmicx(
   const auto sigcliplow = sigfrac * sigclip;
 
   for (Linx::Index i = 1; i <= niter; ++i) {
-    auto label = "Iteration " + std::to_string(i) + " / " + std::to_string(niter);
+    auto run = P::Run("Iteration " + std::to_string(i) + " / " + std::to_string(niter), logger);
 
-    auto [s] = P::Run(label, logger) // Start
+    auto [s] = run // Start
         | cleanarr | Linx::Upsample(2) /*| Linx::Laplacian<0, 1>(1)*/ | P::Apply(Linx::Max(0.)) // FIXME element_type(0)
         | Linx::Downsample(2);
 
-    auto [m5] = P::Run(label, logger) | cleanarr | Linx::MedianFilter(strel(2));
+    auto [m5] = run | cleanarr | Linx::MedianFilter(strel(2));
 
-    auto [noise] = P::Run(label, logger) | +m5 | P::Apply([=](auto e) {
+    auto [noise] = run | +m5 | P::Apply([=](auto e) {
                      return std::sqrt(std::max(e, 0.00001) + readnoise * readnoise);
                    });
 
-    auto [sp] = P::Run(label, logger) //
+    auto [sp] = run //
         | s | Linx::MedianFilter(strel(2)) //
         | P::Input(s, noise) | P::Apply([=](auto m_i, auto s_i, auto n_i) {
                   return (m_i - s_i) / (2. * n_i);
