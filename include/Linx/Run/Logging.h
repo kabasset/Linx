@@ -65,10 +65,10 @@ public:
   {
     if (m_timer.is_running()) {
       m_timer.split(label);
-      m_logger(label, LINX_FORWARD(args)..., m_timer.back().count());
+      m_logger(label, LINX_FORWARD(args)..., m_timer.back().count(), m_timer.total().count());
     } else {
       m_timer.start();
-      m_logger(label, LINX_FORWARD(args)..., "");
+      m_logger(label, LINX_FORWARD(args)..., 0, 0);
     }
   }
 

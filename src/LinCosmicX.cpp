@@ -75,9 +75,7 @@ struct Backgroundlevel {
         gooddata.push_back(data(i, j));
       }
     });
-    auto it = gooddata.begin() + gooddata.size() / 2;
-    std::ranges::nth_element(gooddata.begin(), it, gooddata.end());
-    return std::make_tuple(data, mask, *it);
+    return std::make_tuple(data, mask, Linx::StdSort::nth(gooddata, gooddata.size() / 2));
   }
 };
 
