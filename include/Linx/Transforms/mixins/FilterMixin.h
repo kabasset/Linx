@@ -275,14 +275,14 @@ public:
     for_each<Kokkos::Serial>(
         "compute_offsets()", // FIXME analytic through strides?
         footprint(),
-        KOKKOS_LAMBDA(std::integral auto... is) {
+        [=](std::integral auto... is) {
           offsets_on_host[*index] = &m_in(is...) - front;
           ++(*index);
         });
     Linx::copy_to(offsets_on_host, m_offsets); // FIXME offsets_on_host.copy_to(m_offsets)
   }
 
-  KOKKOS_INLINE_FUNCTION auto footprint() const
+  auto footprint() const
   {
     return m_filter.footprint();
   }
@@ -340,6 +340,17 @@ private:
   TKernel m_kernel; ///< The kernel
 };
 
+namespace Impl {
+
+template <typename TIn, typename TOut>
+struct Copy { // FIXME to Functional.h?
+  TIn m_in;
+  TOut m_out;
+  KOKKOS_INLINE_FUNCTION void operator()(std::integral auto... is) const { m_out(is...) = m_in(is...); }
+};
+
+}
+
 /**
  * @brief The helper class returned by `WeightedFilterMixin::lazy()`.
  */
@@ -362,7 +373,7 @@ public:
     for_each<Kokkos::Serial>(
         "compute offsets",
         m_filter.footprint(),
-        KOKKOS_LAMBDA(std::integral auto... is) {
+        [=](std::integral auto... is) {
           offsets_on_host[*index] = &m_in(is...) - data;
           weights_on_host[*index] = m_filter.kernel()(is...);
           ++(*index);
@@ -371,7 +382,7 @@ public:
     Linx::copy_to(weights_on_host, m_weights); // FIXME
   }
 
-  KOKKOS_INLINE_FUNCTION auto footprint() const
+  auto footprint() const
   {
     return m_filter.footprint();
   }
@@ -383,15 +394,17 @@ public:
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
   {
-    return LINX_CRTP_CONST_DERIVED.reduce(OffsetBasedPatch(&this->m_in(is...), m_offsets));
+    return LINX_CRTP_CONST_DERIVED.reduce(OffsetBasedPatch(&m_in(is...), m_offsets));
   }
 
-  void copy_to(const auto& out) const
+  template <typename TOut>
+  void copy_to(TOut& out) const
   {
+    Impl::Copy<const ApplyWeightedFilterMixin&, TOut&> copy{*this, out};
     for_each(
         "copy_to",
         domain(),
-        KOKKOS_LAMBDA(auto... is) { out(is...) = (*this)(is...); }); // FIXME make generic
+        copy); // FIXME make generic
   }
 
 protected:
