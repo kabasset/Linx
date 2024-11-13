@@ -57,7 +57,7 @@ struct Updatemask {
     auto grow_satpixels = +satpixels;
     Linx::Dilation(strel(2)).transform(satpixels, grow_satpixels);
     grow_mask *= grow_satpixels;
-    return std::make_tuple(data, grow_mask);
+    return grow_mask;
   }
 };
 
@@ -75,7 +75,7 @@ struct Backgroundlevel {
         gooddata.push_back(data(i, j));
       }
     });
-    return std::make_tuple(data, mask, Linx::StdSort::nth(gooddata, gooddata.size() / 2));
+    return Linx::StdSort::nth(gooddata, gooddata.size() / 2);
   }
 };
 
@@ -96,44 +96,60 @@ auto lacosmicx(
     const std::string& psfmodel = "gauss",
     double psffwhm = 2.5,
     Linx::Index psfsize = 7,
-    std::nullptr_t psfk = nullptr, // FIXME
+    Linx::Image<float, 2> psfk = Linx::Image<float, 2>(), // FIXME
     double psfbeta = 4.765,
     bool verbose = false)
 {
   Linx::TimerLogger logger;
 
-  auto [cleanarr, mask, backgroundlevel] = P::Run("Setup", logger) // Start pipeline
-      | P::Input(indata) | P::Generate(Linx::Add(pssl), Linx::Multiply(gain)) // Copy and scale input data
-      | P::Input(inmask) | Updatemask(satlevel) // Detect saturated stars
-      | Backgroundlevel(); // Compute default background level
-
-  // FIXME compute psfk if needs be
-
-  auto crmask = Linx::Image<char, 2>("crmask", indata.shape());
+  auto [cleanarr] = P::Run("Scale to electrons", logger) | indata | P::Generate(Linx::Add(pssl), Linx::Multiply(gain));
+  auto [mask] = P::Run("Find saturated stars", logger) | P::Input(indata, inmask) | Updatemask(satlevel);
+  auto [backgroundlevel] = P::Run("Get background level", logger) | P::Input(cleanarr, mask) | Backgroundlevel();
 
   const auto sigcliplow = sigfrac * sigclip;
+  auto crmask = Linx::Image<char, 2>("crmask", indata.shape());
 
   for (Linx::Index i = 1; i <= niter; ++i) {
-    auto run = P::Run("Iteration " + std::to_string(i) + " / " + std::to_string(niter), logger);
+    logger("Iteration " + std::to_string(i) + " / " + std::to_string(niter));
 
-    auto [s] = run // Start
-        | cleanarr | Linx::Upsample(2) /*| Linx::Laplacian<0, 1>(1)*/ | P::Apply(Linx::Max(0.)) // FIXME element_type(0)
-        | Linx::Downsample(2);
+    auto [noise] = P::Run("Compute noise", logger) | cleanarr | Linx::MedianFilter(strel(2))
+        | P::Generate([=](auto e) { return std::sqrt(std::max(e, 0.00001) + readnoise * readnoise); });
 
-    auto [m5] = run | cleanarr | Linx::MedianFilter(strel(2));
+    // FIXME keep m5
 
-    auto [noise] = run | m5 | P::Generate([=](auto e) {
-                     return std::sqrt(std::max(e, 0.00001) + readnoise * readnoise);
-                   });
+    auto [s] = P::Run("Compute S", logger) | cleanarr
+        | Linx::Upsample(2) /*| Linx::Laplacian<0, 1>(1)*/ | P::Apply(Linx::Max(0.)) // FIXME element_type(0)
+        | Linx::SumFilter(Linx::Box<2>({0, 0}, {2, 2})) // FIXME Lazy SumFilter // FIXME MeanFilter
+        | Linx::Downsample(2) | P::Input(noise) | P::Apply(Linx::Divide(), Linx::Divide(2));
 
-    auto [sp] = run //
-        | s | Linx::MedianFilter(strel(2)) //
-        | P::Input(s, noise) | P::Apply([=](auto m_i, auto s_i, auto n_i) {
-                  return (m_i - s_i) / (2. * n_i);
-                });
+    auto [sp] = P::Run("Compute S'", logger) | s | Linx::MedianFilter(strel(2)) | P::Input(s)
+        | P::Apply([=](auto m_i, auto s_i) { return s_i - m_i; });
+
+    auto [f_tmp] = P::Run("Compute fine structure", logger) | cleanarr | Linx::Correlation(psfk); // FIXME avoid tmp?
+    auto [f] = P::Run("Compute fine structure", logger) | f_tmp | Linx::MedianFilter(strel(3)) | P::Input(f_tmp, noise)
+        | P::Apply([=](auto m_i, auto f_i, auto n_i) { return std::max(0.01, (f_i - m_i) / n_i); });
+
+    auto [cosmics] = P::Run("Find candidate cosmic rays", logger) | P::Input(mask, sp, f)
+        | P::Apply([=](auto m_i, auto sp_i, auto f_i) {
+                       return (not m_i) && (sp_i > sigclip) && (sp_i / f_i > objlim);
+                     })
+        | Linx::Dilation(strel(1)) | P::Input(mask, sp)
+        | P::Apply([=](auto c_i, auto m_i, auto sp_i) { return c_i && (not m_i) && (sp_i > sigclip); })
+        | Linx::Dilation(strel(1)) | P::Input(mask, sp)
+        | P::Apply([=](auto c_i, auto m_i, auto sp_i) { return c_i && (not m_i) && (sp_i) > sigcliplow; });
+
+    auto numcr = Linx::sum(cosmics);
+    logger(std::to_string(numcr) + " cosmic pixels found");
+    if (numcr == 0) {
+      break;
+    }
+
+    P::Run("Update crmask", logger) | P::Input(crmask, cosmics) | P::Apply(Linx::Or());
+
+    // FIXME clean
   }
 
-  return std::make_tuple(cleanarr, crmask); // FIXME
+  return std::make_tuple(cleanarr, crmask);
 }
 
 int main(int argc, char const* argv[])
