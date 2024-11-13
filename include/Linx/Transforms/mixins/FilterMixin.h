@@ -18,7 +18,10 @@ template <typename TIn, typename TOut>
 struct Copy { // FIXME to Functional.h?
   TIn m_in;
   TOut m_out;
-  KOKKOS_INLINE_FUNCTION void operator()(std::integral auto... is) const { m_out(is...) = m_in(is...); }
+  KOKKOS_INLINE_FUNCTION void operator()(std::integral auto... is) const
+  {
+    m_out(is...) = m_in(is...);
+  }
 };
 
 } // namespace Impl
@@ -311,11 +314,7 @@ public:
   template <typename TOut>
   void copy_to(TOut& out) const
   {
-    Impl::Copy copy {*this, out};
-    for_each(
-        "copy_to",
-        domain(),
-        copy); // FIXME make generic
+    for_each("copy_to", domain(), Impl::Copy<const ApplySpatialFilterMixin&, TOut&>(*this, out)); // FIXME make generic
   }
 
 protected:
@@ -372,14 +371,11 @@ public:
     auto weights_on_host = on_host(m_weights);
     auto index = std::make_shared<Index>(0);
     auto data = &m_in.front();
-    for_each<Kokkos::Serial>(
-        "compute offsets",
-        m_filter.footprint(),
-        [&](std::integral auto... is) {
-          offsets_on_host[*index] = &m_in(is...) - data;
-          weights_on_host[*index] = m_filter.kernel()(is...);
-          ++(*index);
-        });
+    for_each<Kokkos::Serial>("compute offsets", m_filter.footprint(), [&](std::integral auto... is) {
+      offsets_on_host[*index] = &m_in(is...) - data;
+      weights_on_host[*index] = m_filter.kernel()(is...);
+      ++(*index);
+    });
     Linx::copy_to(offsets_on_host, m_offsets); // FIXME offsets_on_host.copy_to(m_offsets)
     Linx::copy_to(weights_on_host, m_weights); // FIXME
   }
@@ -402,11 +398,7 @@ public:
   template <typename TOut>
   void copy_to(TOut& out) const
   {
-    Impl::Copy<const ApplyWeightedFilterMixin&, TOut&> copy{*this, out};
-    for_each(
-        "copy_to",
-        domain(),
-        copy); // FIXME make generic
+    for_each("copy_to", domain(), Impl::Copy<const ApplyWeightedFilterMixin&, TOut&>(*this, out)); // FIXME make generic
   }
 
 protected:
