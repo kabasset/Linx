@@ -252,7 +252,7 @@ public:
     template <typename TOut>
     void copy_to(TOut& out) const
     {
-      for_each("copy_to", domain(), Copy<const Upsample&, TOut&>(*this, out)); // FIXME make generic
+      for_each("copy_to", domain(), Copy<const Apply&, TOut&>(*this, out)); // FIXME make generic
     }
 
   private:
@@ -316,7 +316,7 @@ public:
     template <typename TOut>
     void copy_to(TOut& out) const
     {
-      for_each("copy_to", domain(), Copy<const Downsample&, TOut&>(*this, out)); // FIXME make generic
+      for_each("copy_to", domain(), Copy<const Apply&, TOut&>(*this, out)); // FIXME make generic
     }
 
   private:
