@@ -195,9 +195,10 @@ decltype(auto) compose_functions(auto f0, auto... fs)
   if constexpr (sizeof...(fs) == 0) {
     return f0;
   } else {
+    auto f = compose_functions(fs...);
     return KOKKOS_LAMBDA(auto&&... args)
     {
-      return compose_functions(fs...)(f0(args...));
+      return f(f0(args...));
     };
   }
 }
