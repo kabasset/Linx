@@ -204,7 +204,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION reference front() const
   {
-    return operator[](Position<n>(rank()));
+    return m_container.access(0, 0, 0, 0, 0, 0, 0, 0); // FIXME not scalable if max rank goes >8 some day
   }
 
   /**

@@ -88,7 +88,12 @@ public:
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      return std::inner_product(neighbors.begin(), neighbors.end(), this->m_weights.begin(), value_type {});
+      element_type out;
+      auto wit = this->m_weights.begin();
+      for (auto nit = neighbors.begin(); nit != neighbors.end(); ++nit, ++wit) {
+        out += *nit * *wit;
+      }
+      return out;
     }
   };
 };
