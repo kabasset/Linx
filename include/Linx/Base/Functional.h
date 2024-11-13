@@ -184,23 +184,44 @@ constexpr bool is_nadic() // FIXME use T
   return Impl::can_accept_impl<TFunc, std::make_index_sequence<N>>::value;
 }
 
+namespace Impl {
+
+template <typename... TFuncs>
+struct Compose;
+
+template <typename TFunc>
+struct Compose<TFunc> {
+  TFunc m_f;
+  KOKKOS_INLINE_FUNCTION Compose(TFunc f) : m_f(f) {}
+  KOKKOS_INLINE_FUNCTION auto operator()(auto&&... args)
+  {
+    return m_f(LINX_FORWARD(args)...);
+  }
+};
+
+template <typename TFunc0, typename... TFuncs>
+struct Compose<TFunc0, TFuncs...> {
+  TFunc0 m_f0;
+  Compose<TFuncs...> m_fs;
+  Compose(TFunc0 f0, TFuncs... fs) : m_f0(f0), m_fs(fs...) {};
+  KOKKOS_INLINE_FUNCTION auto operator()(auto&&... args)
+  {
+    return m_fs(m_f0(LINX_FORWARD(args)...));
+  }
+};
+
+} // namespace Impl
+
 /**
  * @brief Functional composition.
  * 
  * This function returns a function such that:
  * `compose_function(f, g, h)(args...)` returns `h(g(f(args...)))`.
  */
-decltype(auto) compose_functions(auto f0, auto... fs)
+template <typename TFunc0, typename... TFuncs>
+auto compose_functions(TFunc0 f0, TFuncs... fs)
 {
-  if constexpr (sizeof...(fs) == 0) {
-    return f0;
-  } else {
-    auto f = compose_functions(fs...);
-    return KOKKOS_LAMBDA(auto&&... args)
-    {
-      return f(f0(args...));
-    };
-  }
+  return Impl::Compose(f0, fs...);
 }
 
 } // namespace Linx
