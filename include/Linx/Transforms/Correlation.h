@@ -88,7 +88,7 @@ public:
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      element_type out;
+      element_type out {};
       auto wit = this->m_weights.begin();
       for (auto nit = neighbors.begin(); nit != neighbors.end(); ++nit, ++wit) {
         out += *nit * *wit;
