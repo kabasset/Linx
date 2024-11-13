@@ -12,6 +12,17 @@
 
 namespace Linx {
 
+namespace Impl {
+
+template <typename TIn, typename TOut>
+struct Copy { // FIXME to Functional.h?
+  TIn m_in;
+  TOut m_out;
+  KOKKOS_INLINE_FUNCTION void operator()(std::integral auto... is) const { m_out(is...) = m_in(is...); }
+};
+
+} // namespace Impl
+
 template <typename T>
 class OffsetBasedPatch {
 public:
@@ -275,7 +286,7 @@ public:
     for_each<Kokkos::Serial>(
         "compute_offsets()", // FIXME analytic through strides?
         footprint(),
-        [=](std::integral auto... is) {
+        [&](std::integral auto... is) {
           offsets_on_host[*index] = &m_in(is...) - front;
           ++(*index);
         });
@@ -297,12 +308,14 @@ public:
     return LINX_CRTP_CONST_DERIVED.reduce(OffsetBasedPatch(&this->m_in(is...), m_offsets));
   }
 
-  void copy_to(const auto& out) const
+  template <typename TOut>
+  void copy_to(TOut& out) const
   {
+    Impl::Copy copy {*this, out};
     for_each(
         "copy_to",
         domain(),
-        KOKKOS_LAMBDA(auto... is) { out(is...) = (*this)(is...); }); // FIXME make generic
+        copy); // FIXME make generic
   }
 
 protected:
@@ -340,17 +353,6 @@ private:
   TKernel m_kernel; ///< The kernel
 };
 
-namespace Impl {
-
-template <typename TIn, typename TOut>
-struct Copy { // FIXME to Functional.h?
-  TIn m_in;
-  TOut m_out;
-  KOKKOS_INLINE_FUNCTION void operator()(std::integral auto... is) const { m_out(is...) = m_in(is...); }
-};
-
-}
-
 /**
  * @brief The helper class returned by `WeightedFilterMixin::lazy()`.
  */
@@ -373,7 +375,7 @@ public:
     for_each<Kokkos::Serial>(
         "compute offsets",
         m_filter.footprint(),
-        [=](std::integral auto... is) {
+        [&](std::integral auto... is) {
           offsets_on_host[*index] = &m_in(is...) - data;
           weights_on_host[*index] = m_filter.kernel()(is...);
           ++(*index);
