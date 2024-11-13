@@ -27,6 +27,19 @@ struct Forward {
 };
 
 /**
+ * @brief Element-wise copy. 
+ */
+template <typename TIn, typename TOut>
+struct Copy {
+  TIn m_in; // FIXME private
+  TOut m_out;
+  KOKKOS_INLINE_FUNCTION void operator()(std::integral auto... is) const
+  {
+    m_out(is...) = m_in(is...);
+  }
+};
+
+/**
  * @brief Functor which always returns the same value.
  */
 template <typename T>

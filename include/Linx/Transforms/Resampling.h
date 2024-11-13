@@ -249,12 +249,10 @@ public:
       return m_in(is / m_factor...);
     }
 
-    void copy_to(const auto& out) const
+    template <typename TOut>
+    void copy_to(TOut& out) const
     {
-      for_each(
-          "copy_to",
-          domain(),
-          KOKKOS_LAMBDA(auto... is) { out(is...) = (*this)(is...); }); // FIXME make generic
+      for_each("copy_to", domain(), Copy<const Upsample&, TOut&>(*this, out)); // FIXME make generic
     }
 
   private:
@@ -268,6 +266,7 @@ private:
   Index m_factor;
 };
 
+// FIXME template <typename TAlgo = void>
 class Downsample { // FIXME avoid duplication
 public:
 
@@ -314,12 +313,10 @@ public:
       return m_in(is * m_factor...);
     }
 
-    void copy_to(const auto& out) const
+    template <typename TOut>
+    void copy_to(TOut& out) const
     {
-      for_each(
-          "copy_to",
-          domain(),
-          KOKKOS_LAMBDA(auto... is) { out(is...) = (*this)(is...); }); // FIXME make generic
+      for_each("copy_to", domain(), Copy<const Downsample&, TOut&>(*this, out)); // FIXME make generic
     }
 
   private:

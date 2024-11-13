@@ -12,20 +12,6 @@
 
 namespace Linx {
 
-namespace Impl {
-
-template <typename TIn, typename TOut>
-struct Copy { // FIXME to Functional.h?
-  TIn m_in;
-  TOut m_out;
-  KOKKOS_INLINE_FUNCTION void operator()(std::integral auto... is) const
-  {
-    m_out(is...) = m_in(is...);
-  }
-};
-
-} // namespace Impl
-
 template <typename T>
 class OffsetBasedPatch {
 public:
@@ -314,7 +300,7 @@ public:
   template <typename TOut>
   void copy_to(TOut& out) const
   {
-    for_each("copy_to", domain(), Impl::Copy<const ApplySpatialFilterMixin&, TOut&>(*this, out)); // FIXME make generic
+    for_each("copy_to", domain(), Copy<const ApplySpatialFilterMixin&, TOut&>(*this, out)); // FIXME make generic
   }
 
 protected:
@@ -398,7 +384,7 @@ public:
   template <typename TOut>
   void copy_to(TOut& out) const
   {
-    for_each("copy_to", domain(), Impl::Copy<const ApplyWeightedFilterMixin&, TOut&>(*this, out)); // FIXME make generic
+    for_each("copy_to", domain(), Copy<const ApplyWeightedFilterMixin&, TOut&>(*this, out)); // FIXME make generic
   }
 
 protected:
