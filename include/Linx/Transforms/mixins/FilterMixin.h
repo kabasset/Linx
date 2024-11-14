@@ -264,6 +264,8 @@ template <typename TFilter, typename TIn, typename TDerived>
 class ApplySpatialFilterMixin {
 public:
 
+  using execution_space = typename TIn::execution_space;
+
   ApplySpatialFilterMixin(const TFilter& filter, const TIn& in) :
       m_filter(filter),
       m_offsets("offsets", m_filter.footprint().size()),
@@ -271,12 +273,11 @@ public:
   {
     auto offsets_on_host = on_host(m_offsets);
     auto index = std::make_shared<Index>(0); // Required for copying into for_each
-    auto front = &m_in.front();
     for_each<Kokkos::Serial>(
         "compute_offsets()", // FIXME analytic through strides?
         footprint(),
         [&](std::integral auto... is) {
-          offsets_on_host[*index] = &m_in(is...) - front;
+          offsets_on_host[*index] = m_in.offset(is...);
           ++(*index);
         });
     Linx::copy_to(offsets_on_host, m_offsets); // FIXME offsets_on_host.copy_to(m_offsets)
@@ -300,7 +301,10 @@ public:
   template <typename TOut>
   void copy_to(TOut& out) const
   {
-    for_each("copy_to", domain(), Copy<const ApplySpatialFilterMixin&, TOut&>(*this, out)); // FIXME make generic
+    for_each<execution_space>(
+        "copy_to",
+        domain(),
+        Copy<const ApplySpatialFilterMixin&, TOut&>(*this, out)); // FIXME make generic
   }
 
 protected:
@@ -346,6 +350,7 @@ class ApplyWeightedFilterMixin {
 public:
 
   using value_type = typename TFilter::value_type;
+  using execution_space = typename TIn::execution_space;
 
   ApplyWeightedFilterMixin(const TFilter& filter, const TIn& in) :
       m_filter(filter),
@@ -356,9 +361,8 @@ public:
     auto offsets_on_host = on_host(m_offsets);
     auto weights_on_host = on_host(m_weights);
     auto index = std::make_shared<Index>(0);
-    auto data = &m_in.front();
     for_each<Kokkos::Serial>("compute offsets", m_filter.footprint(), [&](std::integral auto... is) {
-      offsets_on_host[*index] = &m_in(is...) - data;
+      offsets_on_host[*index] = m_in.offset(is...);
       weights_on_host[*index] = m_filter.kernel()(is...);
       ++(*index);
     });
@@ -384,7 +388,10 @@ public:
   template <typename TOut>
   void copy_to(TOut& out) const
   {
-    for_each("copy_to", domain(), Copy<const ApplyWeightedFilterMixin&, TOut&>(*this, out)); // FIXME make generic
+    for_each<execution_space>(
+        "copy_to",
+        domain(),
+        Copy<const ApplyWeightedFilterMixin&, TOut&>(*this, out)); // FIXME make generic
   }
 
 protected:
