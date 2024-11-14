@@ -360,14 +360,15 @@ public:
   {
     auto offsets_on_host = on_host(m_offsets);
     auto weights_on_host = on_host(m_weights);
+    auto kernel_on_host = on_host(m_filter.kernel());
     auto index = std::make_shared<Index>(0);
     for_each<Kokkos::Serial>("compute offsets", m_filter.footprint(), [&](std::integral auto... is) {
       offsets_on_host[*index] = m_in.offset(is...);
-      weights_on_host[*index] = m_filter.kernel()(is...);
+      weights_on_host[*index] = kernel_on_host(is...);
       ++(*index);
     });
-    Linx::copy_to(offsets_on_host, m_offsets); // FIXME offsets_on_host.copy_to(m_offsets)
-    Linx::copy_to(weights_on_host, m_weights); // FIXME
+    Kokkos::deep_copy(offsets_on_host.container(), m_offsets.container());
+    Kokkos::deep_copy(weights_on_host.container(), m_weights.container());
   }
 
   auto footprint() const
