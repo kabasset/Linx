@@ -188,6 +188,16 @@ public:
   }
 
   /**
+   * @brief Memory striding.
+   */
+  Position<n> strides() const
+  {
+    std::vector<Index> longer(rank() + 1);
+    m_container.stride(longer.data());
+    return Position<n>("strides", longer.data(), longer.data() + rank());
+  }
+
+  /**
    * @brief Underlying container.
    */
   KOKKOS_INLINE_FUNCTION const Container& container() const
@@ -205,6 +215,14 @@ public:
   KOKKOS_INLINE_FUNCTION reference front() const
   {
     return m_container.access(0, 0, 0, 0, 0, 0, 0, 0); // FIXME not scalable if max rank goes >8 some day
+  }
+
+  /**
+   * @brief Address offset between the first element and the element at given indices.
+   */
+  KOKKOS_INLINE_FUNCTION difference_type offset(std::integral auto... indices) const
+  {
+    return offset_impl(forward_as_tuple(indices...), std::make_index_sequence<sizeof...(indices)>());
   }
 
   /**
@@ -291,6 +309,15 @@ private:
   Image(Wrap<U*> data, const TShape& shape, std::index_sequence<Is...>) :
       Image(data, get_or<Is>(shape, KOKKOS_INVALID_INDEX)...)
   {}
+
+  /**
+   * @brief Helper method to unroll indices.
+   */
+  template <std::size_t... Is>
+  KOKKOS_INLINE_FUNCTION difference_type offset_impl(const auto& indices, std::index_sequence<Is...>) const
+  {
+    return ((get<Is>(indices) * m_container.stride(Is)) + ...);
+  }
 
   /**
    * @brief Helper accessor to unroll position.
