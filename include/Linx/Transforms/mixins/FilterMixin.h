@@ -26,45 +26,54 @@ public:
    * @brief Constructor.
    * 
    * @param data The reference data pointer
-   * @param index The current index
-   * @param args Arguments forwarded to the offsets sequence constructor
+   * @param offsets The sequence of address offsets
    */
   KOKKOS_INLINE_FUNCTION explicit OffsetBasedPatch(T* data, const auto& offsets) :
       m_data(data),
-      m_offsets(offsets),
-      m_it(m_offsets.data() + m_offsets.size()) // Enable returning *this in end(), saves an instantiation
+      m_begin(offsets.data()),
+      m_end(m_begin + offsets.size()),
+      m_it(m_begin)
   {}
 
   KOKKOS_INLINE_FUNCTION OffsetBasedPatch(const OffsetBasedPatch& rhs) :
       m_data(rhs.m_data),
-      m_offsets(rhs.m_offsets),
+      m_begin(rhs.m_begin),
+      m_end(rhs.m_end),
       m_it(rhs.m_it)
   {}
 
   KOKKOS_INLINE_FUNCTION OffsetBasedPatch& operator=(const OffsetBasedPatch& rhs)
   {
-    // m_data = rhs.m_data;
-    // m_offsets = rhs.m_offsets; // Cannot copy const ref
-    // FIXME weird semantics => replace m_offsets, m_it with m_begin, m_end?
+    m_data = rhs.m_data;
+    m_begin = rhs.m_begin;
+    m_end = rhs.m_end;
     m_it = rhs.m_it;
     return *this;
+  }
+  
+  KOKKOS_INLINE_FUNCTION void reset(T* data)
+  {
+    m_data = data;
+    m_it = m_begin;
   }
 
   KOKKOS_INLINE_FUNCTION OffsetBasedPatch begin() const
   {
     auto out = *this;
-    out.m_it = m_offsets.data();
+    out.m_it = m_begin;
     return out;
   }
 
-  KOKKOS_INLINE_FUNCTION const OffsetBasedPatch& end() const
+  KOKKOS_INLINE_FUNCTION OffsetBasedPatch end() const
   {
-    return *this;
+    auto out = *this;
+    out.m_it = m_end;
+    return out;
   }
 
   KOKKOS_INLINE_FUNCTION reference operator[](int i) const
   {
-    return m_data[m_offsets[i]];
+    return m_data[m_begin[i]];
   }
 
   KOKKOS_INLINE_FUNCTION reference operator*() const
@@ -147,7 +156,8 @@ public:
 private:
 
   T* m_data; ///< The reference data
-  const Sequence<std::ptrdiff_t, -1>& m_offsets; ///< The address offsets // FIXME -1 by default
+  const std::ptrdiff_t* const m_begin; ///< The begin offset iterator
+  const std::ptrdiff_t* const m_end; ///< The end offset iterator
   const std::ptrdiff_t* m_it; ///< The current offset iterator
 };
 
@@ -264,6 +274,7 @@ template <typename TFilter, typename TIn, typename TDerived>
 class ApplySpatialFilterMixin {
 public:
 
+  // value_type does not necessarily come from TIn
   using execution_space = typename TIn::execution_space;
 
   ApplySpatialFilterMixin(const TFilter& filter, const TIn& in) :
@@ -295,7 +306,7 @@ public:
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
   {
-    return LINX_CRTP_CONST_DERIVED.reduce(OffsetBasedPatch(&this->m_in(is...), m_offsets));
+    return LINX_CRTP_CONST_DERIVED.reduce(OffsetBasedPatch(&this->m_in(is...), m_offsets)); // FIXME pool of patches?
   }
 
   template <typename TOut>
@@ -335,7 +346,14 @@ public:
     return m_kernel;
   }
 
-  // FIXME normalize()
+  /**
+   * @brief Divide the kernel values by the kernel sum.
+   */
+  TDerived& normalize()
+  {
+    m_kernel /= sum(m_kernel);
+    return LINX_CRTP_CONST_DERIVED;
+  }
 
 private:
 
