@@ -311,7 +311,7 @@ public:
   template <typename TOut>
   void copy_to(TOut& out) const
   {
-    for_each<execution_space>("copy_to", domain(), Copy(*this, out));
+    for_each<execution_space>("copy_to", domain(), Copy(LINX_CRTP_CONST_DERIVED, out));
   }
 
 protected:
@@ -403,7 +403,7 @@ public:
   template <typename TOut>
   void copy_to(TOut& out) const
   {
-    for_each<execution_space>("copy_to", domain(), Copy(*this, out));
+    for_each<execution_space>("copy_to", domain(), Copy(LINX_CRTP_CONST_DERIVED, out));
   }
 
 protected:
