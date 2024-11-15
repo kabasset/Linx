@@ -5,7 +5,6 @@
 #ifndef LINX_TRANSFORMS_FILTERMIXIN_H
 #define LINX_TRANSFORMS_FILTERMIXIN_H
 
-#include "Linx/Base/ArrayPool.h"
 #include "Linx/Data/Sequence.h"
 
 #include <string>
@@ -50,7 +49,7 @@ public:
     m_it = rhs.m_it;
     return *this;
   }
-  
+
   KOKKOS_INLINE_FUNCTION void reset(T* data)
   {
     m_data = data;
@@ -156,8 +155,8 @@ public:
 private:
 
   T* m_data; ///< The reference data
-  const std::ptrdiff_t* const m_begin; ///< The begin offset iterator
-  const std::ptrdiff_t* const m_end; ///< The end offset iterator
+  const std::ptrdiff_t* m_begin; ///< The begin offset iterator
+  const std::ptrdiff_t* m_end; ///< The end offset iterator
   const std::ptrdiff_t* m_it; ///< The current offset iterator
 };
 
@@ -312,10 +311,7 @@ public:
   template <typename TOut>
   void copy_to(TOut& out) const
   {
-    for_each<execution_space>(
-        "copy_to",
-        domain(),
-        Copy(*this, out));
+    for_each<execution_space>("copy_to", domain(), Copy(*this, out));
   }
 
 protected:
@@ -407,10 +403,7 @@ public:
   template <typename TOut>
   void copy_to(TOut& out) const
   {
-    for_each<execution_space>(
-        "copy_to",
-        domain(),
-        Copy(*this, out));
+    for_each<execution_space>("copy_to", domain(), Copy(*this, out));
   }
 
 protected:
