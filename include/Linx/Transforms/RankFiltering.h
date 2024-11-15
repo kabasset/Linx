@@ -42,7 +42,9 @@ public:
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
       auto array = m_neighbors.array();
-      std::copy(neighbors.begin(), neighbors.end(), array.data());
+      for (std::size_t i = 0; i < std::size(array); ++i) {
+        array[i] = neighbors[i];
+      }
       return median(array);
     }
 

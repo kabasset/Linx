@@ -46,12 +46,7 @@ public:
     /**
      * @brief Constructor (acquires memory).
      */
-    KOKKOS_INLINE_FUNCTION Array(const ArrayPool& pool) :
-        m_pool(pool),
-        m_index(m_pool.acquire()),
-        m_data(&m_pool.m_memory(m_index, 0)),
-        m_size(m_pool.m_memory.extent(1))
-    {}
+    KOKKOS_INLINE_FUNCTION Array(const ArrayPool& pool) : m_pool(pool), m_index(pool.acquire()) {}
 
     /**
      * @brief Destructor (releases memory).
@@ -66,15 +61,7 @@ public:
      */
     KOKKOS_INLINE_FUNCTION std::size_t size() const
     {
-      return m_size;
-    }
-
-    /**
-     * @brief Pointer to the data. 
-     */
-    KOKKOS_INLINE_FUNCTION pointer data()
-    {
-      return m_data;
+      return m_pool.m_memory.extent(1);
     }
 
     /**
@@ -82,15 +69,13 @@ public:
      */
     KOKKOS_INLINE_FUNCTION reference operator[](Index i)
     {
-      return m_data[i];
+      return m_pool.m_memory(m_index, i);
     }
 
   private:
 
     const ArrayPool& m_pool; ///< Parent pool
-    Index m_index; ///< In-pool index
-    T* m_data; ///< Data pointer
-    std::size_t m_size; ///< Array size
+    int m_index; ///< In-pool index
   };
 
   /**
