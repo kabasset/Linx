@@ -291,7 +291,7 @@ public:
           offsets_on_host[*index] = m_in.offset(is...);
           ++(*index);
         });
-    Linx::copy_to(offsets_on_host, m_offsets); // FIXME offsets_on_host.copy_to(m_offsets)
+    Kokkos::deep_copy(offsets_on_host.container(), m_offsets.container());
   }
 
   auto footprint() const
