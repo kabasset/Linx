@@ -6,7 +6,6 @@
 #define LINX_TRANSFORMS_MORPHOLOGY_H
 
 #include "Linx/Base/Algorithm.h"
-#include "Linx/Base/ArrayPool.h"
 #include "Linx/Data/Image.h"
 #include "Linx/Data/Sequence.h"
 #include "Linx/Transforms/mixins/FilterMixin.h"
@@ -40,9 +39,7 @@ public:
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      return std::all_of(neighbors.begin(), neighbors.end(), [](auto e) {
-        return bool(e);
-      });
+      return std::all_of(neighbors.begin(), neighbors.end(), [](auto e) { return bool(e); });
     }
   };
 };
@@ -71,9 +68,7 @@ public:
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      return std::any_of(neighbors.begin(), neighbors.end(), [](auto e) {
-        return bool(e);
-      });
+      return std::any_of(neighbors.begin(), neighbors.end(), [](auto e) { return bool(e); });
     }
   };
 };
