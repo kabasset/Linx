@@ -315,7 +315,7 @@ public:
     for_each<execution_space>(
         "copy_to",
         domain(),
-        Copy<const ApplySpatialFilterMixin&, TOut&>(*this, out)); // FIXME make generic
+        Copy(*this, out));
   }
 
 protected:
@@ -410,7 +410,7 @@ public:
     for_each<execution_space>(
         "copy_to",
         domain(),
-        Copy<const ApplyWeightedFilterMixin&, TOut&>(*this, out)); // FIXME make generic
+        Copy(*this, out));
   }
 
 protected:
