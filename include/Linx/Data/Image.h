@@ -247,7 +247,7 @@ public:
    * @brief Get a crop of the image.
    */
   template <typename U, int M>
-  KOKKOS_INLINE_FUNCTION auto operator[](const GBox<U, M>& region) const
+  auto operator[](const GBox<U, M>& region) const // not __device__ because of `region & domain()`
   {
     const auto& crop = region & domain();
     using Container = decltype(slice_all(crop, std::make_index_sequence<M>()));
@@ -277,7 +277,7 @@ public:
    * @see patch()
    */
   template <typename U, SliceType... Types>
-  KOKKOS_INLINE_FUNCTION auto operator[](const Slice<U, Types...>& region) const
+  auto operator[](const Slice<U, Types...>& region) const // not __device__ because of `region & domain()`
   {
     const auto& crop = region & domain(); // Resolve Kokkos::ALL to drop offsets with subview
     if constexpr (sizeof...(Types) == 1) {
