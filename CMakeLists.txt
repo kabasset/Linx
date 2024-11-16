@@ -113,6 +113,10 @@ add_executable(ImageMorphology_test tests/ImageMorphology_test.cpp)
 target_link_libraries(ImageMorphology_test Linx ${Boost_LIBRARIES})
 add_test(ImageMorphology_test ImageMorphology_test)
 
+add_executable(ImageOrdering_test tests/ImageOrdering_test.cpp)
+target_link_libraries(ImageOrdering_test Linx ${Boost_LIBRARIES})
+add_test(ImageOrdering_test ImageOrdering_test)
+
 add_executable(ImagePixelwise_test tests/ImagePixelwise_test.cpp)
 target_link_libraries(ImagePixelwise_test Linx ${Boost_LIBRARIES})
 add_test(ImagePixelwise_test ImagePixelwise_test)
