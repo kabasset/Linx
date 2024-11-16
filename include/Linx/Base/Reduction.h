@@ -55,11 +55,15 @@ public:
   using result_view_type = Kokkos::View<value_type, TSpace>;
 
   KOKKOS_INLINE_FUNCTION Reducer(value_type& value, const TFunc& func, const T& identity) :
-      m_view(&value), m_func(func), m_identity(identity)
+      m_view(&value),
+      m_func(func),
+      m_identity(identity)
   {}
 
   KOKKOS_INLINE_FUNCTION Reducer(const result_view_type& view, const TFunc& func, const T& identity) :
-      m_view(view), m_func(func), m_identity(identity)
+      m_view(view),
+      m_func(func),
+      m_identity(identity)
   {}
 
   KOKKOS_INLINE_FUNCTION void join(value_type& dst, const value_type& src) const
@@ -103,7 +107,8 @@ public:
    * @brief Constructor.
    */
   KOKKOS_INLINE_FUNCTION ProjectionReducer(const TProj& projection, const TRed& reducer) :
-      m_projection(projection), m_reducer(reducer)
+      m_projection(projection),
+      m_reducer(reducer)
   {}
 
   /**

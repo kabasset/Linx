@@ -177,7 +177,8 @@ public:
    * @brief Constructor.
    */
   UniformRng(UniformDistribution<T> distribution, Index seed = -1) :
-      m_distribution(LINX_MOVE(distribution)), m_pool(seed)
+      m_distribution(LINX_MOVE(distribution)),
+      m_pool(seed)
   {}
 
   std::string label() const
@@ -288,7 +289,8 @@ public:
    * @brief Constructor.
    */
   GaussianRng(GaussianDistribution<T> distribution, Index seed = -1) :
-      m_distribution(LINX_MOVE(distribution)), m_pool(seed)
+      m_distribution(LINX_MOVE(distribution)),
+      m_pool(seed)
   {}
 
   std::string label() const

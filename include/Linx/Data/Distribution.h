@@ -19,7 +19,10 @@ struct HistogramBinFinder {
   int m_bin_count;
 
   HistogramBinFinder(TIn in, TBins bins, TOut out) :
-      m_in(LINX_MOVE(in)), m_bins(LINX_MOVE(bins)), m_out(LINX_MOVE(out)), m_bin_count(m_out.size())
+      m_in(LINX_MOVE(in)),
+      m_bins(LINX_MOVE(bins)),
+      m_out(LINX_MOVE(out)),
+      m_bin_count(m_out.size())
   {}
 
   KOKKOS_INLINE_FUNCTION void operator()(auto... is) const

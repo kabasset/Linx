@@ -12,14 +12,7 @@ LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 BOOST_AUTO_TEST_CASE(apply_last_first_test)
 {
-  auto out = Linx::apply_last_first(
-      [](int head, auto...) {
-        return head;
-      },
-      1,
-      2,
-      3,
-      4);
+  auto out = Linx::apply_last_first([](int head, auto...) { return head; }, 1, 2, 3, 4);
   BOOST_TEST(out == 4);
 
   auto tail_size = Linx::apply_last_first(

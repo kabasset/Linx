@@ -82,7 +82,8 @@ class Tuple<T0, Ts...> {
 public:
 
   KOKKOS_INLINE_FUNCTION Tuple(auto&& arg0, auto&&... args) :
-      m_head {LINX_FORWARD(arg0)}, m_tail {LINX_FORWARD(args)...}
+      m_head {LINX_FORWARD(arg0)},
+      m_tail {LINX_FORWARD(args)...}
   {}
 
   static constexpr std::size_t size()

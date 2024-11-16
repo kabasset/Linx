@@ -33,9 +33,7 @@ concept DataContainer = requires(const T data)
   data.data(); // FIXME pointer
   data.container(); // FIXME const T::Container&, compatible with deep_copy
   data(int(0)); // FIXME according to n?
-  data.generate_with_side_effects(std::string(), []() {
-    return typename T::value_type {};
-  });
+  data.generate_with_side_effects(std::string(), []() { return typename T::value_type {}; });
 };
 
 } // namespace Linx

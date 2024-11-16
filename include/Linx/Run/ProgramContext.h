@@ -85,7 +85,10 @@ private:
      * @brief Constructor.
      */
     explicit Help(const std::string& description) :
-        m_desc(description), m_usage(" [options]"), m_positionals(), m_nameds()
+        m_desc(description),
+        m_usage(" [options]"),
+        m_positionals(),
+        m_nameds()
     {}
 
     /**
@@ -270,8 +273,13 @@ public:
       const char* argv[] = nullptr,
       const std::string& help = "help,h") :
       m_argc(argc),
-      m_argv(argv), m_named("Options", 120), m_add(m_named.add_options()), m_positional(), m_variables(),
-      m_desc(description), m_help(help)
+      m_argv(argv),
+      m_named("Options", 120),
+      m_add(m_named.add_options()),
+      m_positional(),
+      m_variables(),
+      m_desc(description),
+      m_help(help)
   {
     if (m_argc) {
       // FIXME remove --help

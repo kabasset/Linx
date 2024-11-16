@@ -103,7 +103,8 @@ public:
    * Prefer creating slices using the `operator()` syntax.
    */
   KOKKOS_INLINE_FUNCTION Slice(Slice<T, Types...> fronts, Slice<T, TypeN> back) :
-      m_fronts(LINX_MOVE(fronts)), m_back(LINX_MOVE(back))
+      m_fronts(LINX_MOVE(fronts)),
+      m_back(LINX_MOVE(back))
   {}
 
   /**

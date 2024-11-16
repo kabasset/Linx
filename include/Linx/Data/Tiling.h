@@ -51,9 +51,7 @@ std::vector<Profile<I, TIn>> profiles(const TIn& in)
   Linx::for_each<Kokkos::Serial>(
       "profiles",
       Box<n> {Position<n> {}, shape}, // FIXME handle potential offset
-      [&](auto... is) {
-        out(is...).shift(is...);
-      }); // This is serial for now, no KOKKOS_LAMBDA needed
+      [&](auto... is) { out(is...).shift(is...); }); // This is serial for now, no KOKKOS_LAMBDA needed
   return vec; // FIXME return out somehow?
 }
 

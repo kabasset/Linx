@@ -30,7 +30,9 @@ public:
    * @param message Error message
    */
   explicit Exception(const std::string& prefix, const std::string& message) :
-      std::exception(), m_prefix(prefix), m_message(m_prefix + ": " + message)
+      std::exception(),
+      m_prefix(prefix),
+      m_message(m_prefix + ": " + message)
   {}
 
   /**
@@ -133,8 +135,8 @@ public:
       // FIXME swap value and bounds
       Exception(
           "Out of bounds",
-          name + " " + std::to_string(value) + " not in " + Lower + std::to_string(bounds[0]) + ", " +
-              std::to_string(bounds[1]) + Upper)
+          name + " " + std::to_string(value) + " not in " + Lower + std::to_string(bounds[0]) + ", "
+              + std::to_string(bounds[1]) + Upper)
   {}
 
   /**
