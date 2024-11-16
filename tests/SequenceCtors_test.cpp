@@ -59,7 +59,7 @@ LINX_QUICK_TEST_CASE_TEMPLATE(static_singleton_list_test)
   check_ctor<1>(Linx::Position({1}), "", 1);
   check_ctor<1>(Linx::Sequence({1}), "", 1);
   check_ctor(Linx::Sequence<T, 1> {1}, "", 1);
-  check_ctor(Linx::Sequence<T, 1>("s", {1}), "s", 1);
+  check_ctor<1>(Linx::Sequence("s", {T(1)}), "s", 1);
 }
 
 LINX_QUICK_TEST_CASE_TEMPLATE(static_singleton_one_test)
@@ -103,7 +103,7 @@ LINX_QUICK_TEST_CASE_TEMPLATE(static_multiple_list_test)
   check_ctor<3>(Linx::Position({1, 1, 1}), "", 3);
   check_ctor<3>(Linx::Sequence({1, 1, 1}), "", 3);
   check_ctor(Linx::Sequence<T, 3> {1, 1, 1}, "", 3);
-  check_ctor(Linx::Sequence<T, 3>("s", {1, 1, 1}), "s", 3);
+  check_ctor<3>(Linx::Sequence("s", {T(1), T(1), T(1)}), "s", 3);
 }
 
 LINX_TEST_CASE_TEMPLATE(dynamic_multiple_fill_test)
@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(sequence_of_strings_test)
   auto singleton = Linx::Sequence<std::string, 1>("singleton", "a");
   BOOST_TEST(singleton.size() == 1);
   BOOST_TEST(singleton.contains_only("a"));
-  auto seq = Linx::Sequence<std::string>("sequence", {"a", "a", "a"});
+  auto seq = Linx::Sequence("sequence", {std::string("a"), std::string("a"), std::string("a")});
   BOOST_TEST(seq.n == 3);
   BOOST_TEST(seq.size() == 3);
   BOOST_TEST(seq.contains_only("a"));

@@ -267,6 +267,12 @@ private:
 template <typename T, int N, typename TContainer = typename DefaultContainer<T, N>::Sequence>
 Sequence(T (&&)[N]) -> Sequence<T, N, TContainer>;
 
+template <typename T, int N, typename TContainer = typename DefaultContainer<T, N>::Sequence>
+Sequence(const std::string&, T (&&)[N]) -> Sequence<T, N, TContainer>;
+
+template <typename T, int N, typename TContainer = typename DefaultContainer<T, N>::Sequence>
+Sequence(const char*, T (&&)[N]) -> Sequence<T, N, TContainer>;
+
 /**
  * @brief Get the i-th element of an array, or some fallback value if out of bounds.
  */
