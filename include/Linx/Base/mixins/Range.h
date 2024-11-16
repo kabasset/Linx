@@ -71,7 +71,7 @@ struct RangeMixin<true, T, TDerived> {
     auto mirror_data = mirror.data();
     Kokkos::parallel_for(
         Kokkos::RangePolicy<Kokkos::HostSpace::execution_space>(0, container.size()),
-        KOKKOS_LAMBDA(int i) { mirror_data[i] = *std::ranges::next(begin, i); });
+        KOKKOS_LAMBDA(int i) { mirror_data[i] = *std::next(begin, i); });
     Kokkos::deep_copy(container, mirror);
     return LINX_CRTP_CONST_DERIVED;
   }
