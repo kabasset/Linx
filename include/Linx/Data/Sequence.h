@@ -27,7 +27,7 @@ namespace Linx {
  * @tparam T The element value type
  * @tparam N The size, or -1 for runtime size
  */
-template <typename T, int N, typename TContainer = typename DefaultContainer<T, N>::Sequence>
+template <typename T, int N = -1, typename TContainer = typename DefaultContainer<T, N>::Sequence>
 class Sequence :
     public DataMixin<T, EuclidArithmetic, Sequence<T, N, TContainer>>,
     public RangeMixin<true, T, Sequence<T, N, TContainer>> {
@@ -343,7 +343,7 @@ auto generate(const std::string& label, const auto& func)
 auto generate(const std::string& label, const auto& func, Index size)
 {
   using T = std::remove_cvref_t<decltype(func())>;
-  return Sequence<T, -1>(label, size).generate("generate", func); // FIXME uninitialized
+  return Sequence<T>(label, size).generate("generate", func); // FIXME uninitialized
 }
 
 template <int M>
@@ -352,6 +352,30 @@ auto resize(const ArrayLike auto& in) // FIXME make_sequence? crop_or_pad? CTor?
   static_assert(M >= 0);
   using T = std::decay_t<decltype(in[0])>;
   Sequence<T, M> out(compose_label("resize", in));
+  copy_to(in, out);
+  return out;
+}
+
+template <typename T, int N>
+using GPosition = Sequence<T, N, typename DefaultContainer<T, N, Kokkos::HostSpace>::Sequence>;
+
+template <int N>
+using Position = GPosition<Index, N>;
+
+template <int M, typename T, int N>
+auto pad(const GPosition<T, N>& in)
+{
+  using U = std::decay_t<T>;
+  GPosition<U, M> out(compose_label("pad", in));
+  copy_to(in, out);
+  return out;
+}
+
+template <int M, typename T, int N>
+auto pad(const GPosition<T, N>& in, const T& value)
+{
+  using U = std::decay_t<T>;
+  GPosition<U, M> out(compose_label("pad", in, value), Constant(value));
   copy_to(in, out);
   return out;
 }

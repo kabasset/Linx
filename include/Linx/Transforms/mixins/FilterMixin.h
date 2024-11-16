@@ -317,7 +317,7 @@ public:
 protected:
 
   TFilter m_filter; ///< The filter
-  Sequence<std::ptrdiff_t, -1> m_offsets; ///< The footprint offsets in the input
+  Sequence<std::ptrdiff_t> m_offsets; ///< The footprint offsets in the input
   decltype(as_readonly(std::declval<TIn>())) m_in; ///< The input
 };
 
@@ -409,8 +409,8 @@ public:
 protected:
 
   TFilter m_filter; ///< The filter
-  Sequence<std::ptrdiff_t, -1> m_offsets; ///< The footprint offsets in the input
-  Sequence<value_type, -1> m_weights; ///< The weights in the same order
+  Sequence<std::ptrdiff_t> m_offsets; ///< The footprint offsets in the input
+  Sequence<value_type> m_weights; ///< The weights in the same order
   decltype(as_readonly(std::declval<TIn>())) m_in; ///< The input
 };
 

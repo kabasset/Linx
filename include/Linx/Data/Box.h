@@ -21,30 +21,6 @@
 namespace Linx {
 
 template <typename T, int N>
-using GPosition = Sequence<T, N, typename DefaultContainer<T, N, Kokkos::HostSpace>::Sequence>;
-
-template <int N>
-using Position = GPosition<Index, N>;
-
-template <int M, typename T, int N>
-auto pad(const GPosition<T, N>& in)
-{
-  using U = std::decay_t<T>;
-  GPosition<U, M> out(compose_label("pad", in));
-  copy_to(in, out);
-  return out;
-}
-
-template <int M, typename T, int N>
-auto pad(const GPosition<T, N>& in, const T& value)
-{
-  using U = std::decay_t<T>;
-  GPosition<U, M> out(compose_label("pad", in, value), Constant(value));
-  copy_to(in, out);
-  return out;
-}
-
-template <typename T, int N>
 struct Shape : StrongType<GPosition<T, N>, struct ShapeTag> { // FIXME const GPosition&?
   using StrongType<GPosition<T, N>, ShapeTag>::StrongType;
 
