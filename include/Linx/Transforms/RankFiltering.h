@@ -73,6 +73,7 @@ public:
   public:
 
     using value_type = typename TIn::value_type;
+    using element_type = std::remove_cvref_t<value_type>;
 
     using ApplySpatialFilterMixin<MinimumFilter, TIn, Apply>::ApplySpatialFilterMixin;
 

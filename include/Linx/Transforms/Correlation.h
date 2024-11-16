@@ -2,7 +2,7 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/Linx
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef LINX_TRANSFORMS_CORRELATION_H
+#ifndef LINX_TRANSFORMS_CORRELATION_H // FIXME rename as LinearFiltering
 #define LINX_TRANSFORMS_CORRELATION_H
 
 #include "Linx/Data/Image.h"
@@ -30,6 +30,9 @@ public:
   class Apply : public ApplySpatialFilterMixin<SumFilter, TIn, Apply<TIn>> {
   public:
 
+    using value_type = typename TIn::value_type;
+    using element_type = std::remove_cvref_t<value_type>;
+
     using ApplySpatialFilterMixin<SumFilter, TIn, Apply>::ApplySpatialFilterMixin;
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
@@ -54,6 +57,9 @@ public:
   class Apply : public ApplySpatialFilterMixin<MeanFilter, TIn, Apply<TIn>> {
   public:
 
+    using value_type = typename TIn::value_type;
+    using element_type = std::remove_cvref_t<value_type>;
+
     using ApplySpatialFilterMixin<MeanFilter, TIn, Apply>::ApplySpatialFilterMixin;
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
@@ -68,11 +74,15 @@ class Correlation : public WeightedFilterMixin<TKernel, Correlation<TKernel>> {
 public:
 
   using value_type = typename TKernel::value_type;
-  using element_type = typename TKernel::value_type;
+  using element_type = std::remove_cvref_t<value_type>;
 
   Correlation(TKernel kernel) : WeightedFilterMixin<TKernel, Correlation>(LINX_MOVE(kernel))
   {
-    // FIXME conjugate if complex
+    if constexpr (is_complex<element_type>()) {
+      kernel.apply(
+          "conjugate",
+          KOKKOS_LAMBDA(auto e) { return Kokkos::conj(e); });
+    }
   }
 
   std::string label() const
