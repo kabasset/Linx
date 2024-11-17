@@ -193,7 +193,7 @@ although with a more limited feature set.
 Here is a quick comparison of ITK, CImg, Linx and NumPy/SciKit for the following use case:
 read an image, dilate it with an L2-ball structuring element, and write the output.
 
-ITK:
+**ITK**
 
 ```cpp
 using T = unsigned char;
@@ -214,7 +214,7 @@ dilateFilter->SetKernel(ball);
 itk::WriteImage(dilateFilter->GetOutput(), output);
 ```
 
-CImg (limited to N <= 3):
+**CImg** (limited to N <= 3)
 
 ```cpp
 using T = unsigned char;
@@ -229,8 +229,7 @@ auto dilated = raw.get_dilate(ball, 0, true);
 dilated.write(output);
 ```
 
-Linx:
-
+**Linx**
 
 ```cpp
 using T = unsigned char;
@@ -249,10 +248,11 @@ or, using the pipelining API:
 ```cpp
 namespace P = Linx::Pipeline;
 
-P::Run() | P::InputFile<T, n>(input) | Linx::Dilation(Linx::Mask<n>::ball<2>(radius)) | P::OutputFile(output);
+auto ball = Linx::Mask<n>::ball<2>(radius);
+P::Run() | P::InputFile<T, n>(input) | Linx::Dilation(ball) | P::OutputFile(output);
 ```
 
-NumPy/SciKit:
+**NumPy/SciKit**
 
 ```python
 raw = np.load(input)
