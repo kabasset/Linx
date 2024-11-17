@@ -172,3 +172,93 @@ assert(b.label() == "sin(a)");
 auto k = Linx::Image("kernel", ...);
 assert(Linx::Convolution(k).label() == "Convolution(kernel)");
 ```
+
+## Alternatives
+
+The following libraries offer features similar to Linx.
+Linx aims at being simpler, less verbose, more extensible, and natively GPU-compatible
+although with a more limited feature set.
+
+* Armadillo
+* Blitz++
+* Boost.MultiArray
+* CImg
+* Eigen
+* ITK, SimpleITK
+* ndarray
+* OpenCV
+* STL's valarray
+* XTensor
+
+Here is a quick comparison of ITK, CImg, Linx and NumPy/SciKit for the following use case:
+read an image, dilate it with an L2-ball structuring element, and write the output.
+
+ITK:
+
+```cpp
+using T = unsigned char;
+static constexpr unsigned int N = 2;
+using Image = itk::Image<T, N>;
+
+auto raw = itk::ReadImage<ImageType>(input);
+
+using StructuringElement = itk::FlatStructuringElement<N>;
+StructuringElement::RadiusType strelRadius;
+strelRadius.Fill(radius);
+StructuringElementType ball = StructuringElement::Ball(strelRadius);
+using GrayscaleDilateImageFilter = itk::GrayscaleDilateImageFilter<Image, Image, StructuringElement>;
+GrayscaleDilateImageFilter::Pointer dilateFilter = GrayscaleDilateImageFilter::New();
+dilateFilter->SetInput(input);
+dilateFilter->SetKernel(ball);
+
+itk::WriteImage(dilateFilter->GetOutput(), output);
+```
+
+CImg (limited to N <= 3):
+
+```cpp
+using T = unsigned char;
+
+auto raw = cimg::CImg<T>().load(input);
+
+cimg::CImg<bool> ball(2 * radius + 1, 2 * radius + 1, 2 * radius + 1, 1, false);
+bool color[1] = {true};
+ball.draw_circle(radius, radius, radius, color);
+auto dilated = raw.get_dilate(ball, 0, true);
+
+dilated.write(output);
+```
+
+Linx:
+
+
+```cpp
+using T = unsigned char;
+static constexpr Linx::Index n = 2;
+
+auto raw = Linx::read<T, n>(input);
+
+auto ball = Linx::Mask<n>::ball<2>(radius);
+auto dilated = Linx::Dilation(ball) * raw;
+
+Linx::write(dilated, output);
+```
+
+or, using the pipelining API:
+
+```cpp
+namespace P = Linx::Pipeline;
+
+P::Run() | P::InputFile<T, n>(input) | Linx::Dilation(Linx::Mask<n>::ball<2>(radius)) | P::OutputFile(output);
+```
+
+NumPy/SciKit:
+
+```python
+raw = np.load(input)
+
+ball = skimage.morphology.disk(radius)
+dilated = skimage.morphology.dilation(raw, ball)
+
+np.save(output, dilated)
+```
