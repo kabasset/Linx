@@ -24,17 +24,15 @@ template <typename TParent, typename TDomain>
 class Patch : public DataMixin<typename TParent::value_type, EuclidArithmetic, Patch<TParent, TDomain>> {
 public:
 
+  static constexpr int n = TDomain::n; ///< The dimension parameter
   using Parent = TParent; ///< The parent, which may be a patch
   using Domain = TDomain; ///< The domain
-  static constexpr int n = Domain::n;
 
   using memory_space = typename Parent::memory_space;
   using execution_space = typename Parent::execution_space;
 
   using value_type = typename Parent::value_type; ///< The value type
   using reference = typename Parent::reference; ///< The reference type
-
-  struct ConstructTag {};
 
   /**
    * @brief Default constructor.

@@ -125,6 +125,10 @@ add_executable(ImageRankFiltering_test tests/ImageRankFiltering_test.cpp)
 target_link_libraries(ImageRankFiltering_test Linx ${Boost_LIBRARIES})
 add_test(ImageRankFiltering_test ImageRankFiltering_test)
 
+add_executable(ImageShift_test tests/ImageShift_test.cpp)
+target_link_libraries(ImageShift_test Linx ${Boost_LIBRARIES})
+add_test(ImageShift_test ImageShift_test)
+
 add_executable(LinearInterpolation_test tests/LinearInterpolation_test.cpp)
 target_link_libraries(LinearInterpolation_test Linx ${Boost_LIBRARIES})
 add_test(LinearInterpolation_test LinearInterpolation_test)
