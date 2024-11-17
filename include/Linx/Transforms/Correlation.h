@@ -108,6 +108,41 @@ public:
   };
 };
 
+template <typename TKernel>
+class Convolution : public WeightedFilterMixin<TKernel, Convolution<TKernel>> {
+public:
+
+  using value_type = typename TKernel::value_type;
+  using element_type = std::remove_cvref_t<value_type>;
+
+  Convolution(TKernel kernel) : WeightedFilterMixin<TKernel, Convolution>(LINX_MOVE(kernel)) {}
+
+  std::string label() const
+  {
+    return "Convolution";
+  }
+
+  template <typename TIn>
+  class Apply : public ApplyWeightedFilterMixin<Convolution, TIn, Apply<TIn>> {
+  public:
+
+    Apply(const Convolution& filter, const TIn& in) : ApplyWeightedFilterMixin<Convolution, TIn, Apply>(filter, in)
+    {
+      this->m_weights.reverse(); // FIXME use rbegin() instead?
+    }
+
+    KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
+    {
+      element_type out {};
+      auto wit = this->m_weights.begin();
+      for (auto nit = neighbors.begin(); nit != neighbors.end(); ++nit, ++wit) {
+        out += *nit * *wit;
+      }
+      return out;
+    }
+  };
+};
+
 } // namespace Linx
 
 #endif
