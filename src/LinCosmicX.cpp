@@ -7,7 +7,7 @@
 #include "Linx/Run/Logging.h"
 #include "Linx/Run/PipelineTasks.h"
 #include "Linx/Run/ProgramContext.h"
-#include "Linx/Transforms/Correlation.h"
+#include "Linx/Transforms/LinearFiltering.h"
 #include "Linx/Transforms/Morphology.h"
 #include "Linx/Transforms/RankFiltering.h"
 #include "Linx/Transforms/Resampling.h"

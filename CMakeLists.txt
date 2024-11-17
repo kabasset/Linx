@@ -101,13 +101,13 @@ add_executable(ImageApply_test tests/ImageApply_test.cpp)
 target_link_libraries(ImageApply_test Linx ${Boost_LIBRARIES})
 add_test(ImageApply_test ImageApply_test)
 
-add_executable(ImageCorrelate_test tests/ImageCorrelate_test.cpp)
-target_link_libraries(ImageCorrelate_test Linx ${Boost_LIBRARIES})
-add_test(ImageCorrelate_test ImageCorrelate_test)
-
 add_executable(ImageCtors_test tests/ImageCtors_test.cpp)
 target_link_libraries(ImageCtors_test Linx ${Boost_LIBRARIES})
 add_test(ImageCtors_test ImageCtors_test)
+
+add_executable(ImageLinearFiltering_test tests/ImageLinearFiltering_test.cpp)
+target_link_libraries(ImageLinearFiltering_test Linx ${Boost_LIBRARIES})
+add_test(ImageLinearFiltering_test ImageLinearFiltering_test)
 
 add_executable(ImageMorphology_test tests/ImageMorphology_test.cpp)
 target_link_libraries(ImageMorphology_test Linx ${Boost_LIBRARIES})

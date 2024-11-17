@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: Copyright (C) 2024, Antoine Basset
 // SPDX-License-Identifier: Apache-2.0
 
-#define BOOST_TEST_MODULE ImageCorrelateTest
+#define BOOST_TEST_MODULE ImageLinearFilteringTest
 
 #include "Linx/Run/ProgramContext.h"
-#include "Linx/Transforms/Correlation.h"
+#include "Linx/Transforms/LinearFiltering.h"
 
 #include <boost/test/unit_test.hpp>
 

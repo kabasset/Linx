@@ -4,7 +4,7 @@
 
 #include "Linx/Data/Image.h"
 #include "Linx/Run/ProgramContext.h"
-#include "Linx/Transforms/Correlation.h"
+#include "Linx/Transforms/LinearFiltering.h"
 
 #include <Kokkos_Core.hpp>
 #include <Kokkos_Timer.hpp>

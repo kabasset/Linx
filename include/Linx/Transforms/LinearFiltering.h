@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/Linx
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef LINX_TRANSFORMS_CORRELATION_H // FIXME rename as LinearFiltering
-#define LINX_TRANSFORMS_CORRELATION_H
+#ifndef LINX_TRANSFORMS_LINEARFILTERING_H
+#define LINX_TRANSFORMS_LINEARFILTERING_H
 
 #include "Linx/Data/Image.h"
 #include "Linx/Data/Sequence.h"
