@@ -32,9 +32,9 @@ make test
 
 ## Design concepts
 
-**Data classes**
+**Data containers**
 
-There are two main data classes: `Sequence` for 1D data, and `Image` for ND data.
+There are two main data containers: `Sequence` for 1D data, and `Image` for ND data.
 Underlying storage is handled by Kokkos by default, and adapts to the target infrastructure.
 There is no ordering or contiguity guaratee.
 In return, execution is automatically parallelized by Kokkos, including on GPU.
@@ -44,7 +44,7 @@ In addition, for interfacing with libraries which require contiguity,
 It is a standard range (providing `begin()` and `end()`) which eases interfacing with the standard library.
 `Image` and `Raster` are also compatible with `std::mdspan`.
 
-Data classes have shared pointer semantics, so that copy is shallow by default.
+Data containers have shared pointer semantics, so that copy is shallow by default.
 Deep copy has to be explicit:
 
 ```cpp
@@ -57,8 +57,8 @@ c *= 2; // Modifies c only
 
 **Pointwise transforms**
 
-Data classes offer a variety of pointwise services which can either modify the data in-place or return new instances or values.
-In-place services are methods, such as `Image::exp()`, while new-instance services are free functions, such as `exp(const Image&)`:
+Data containers offer a variety of pointwise transforms which can either modify the data in-place or return new instances or values.
+In-place transforms are methods, such as `Image::exp()`, while new-instance transforms are free functions, such as `exp(const Image&)`:
 
 ```cpp
 auto a = Linx::Image(...);
@@ -95,15 +95,13 @@ a.generate(
 **Global transforms**
 
 Global transforms such as Fourier transforms and convolutions are also supported.
-They return new instances by default.
-Function suffixed with `_to` fill an existing container instead:
 
 ```cpp
-auto image = Linx::Image(...);
+auto input = Linx::Image(...);
 auto kernel = Linx::Image(...);
-auto filtered = Linx::Correlation(kernel)(image); // Creates a new instance
-auto fourier = Linx::Image("DFT", image.shape());
-Linx::dft_to(image, fourier); // Fills fourier
+auto filtered = Linx::Correlation(kernel)(input); // Creates a new instance
+auto output = Linx::Image(...);
+Linx::Correlation(kernel).transform(input, output); // Fills output
 ```
 
 **Regional transforms**
@@ -112,16 +110,17 @@ There are two ways to work on subsets of elements:
 * by slicing some data classes with `slice()`, which return a view of type `Sequence` or `Image` depending on the input type;
 * by associating a `Region` to a data class with `patch()`, which results in an object of type `Patch`.
 
-Patches are extremely lightweight and can be moved around when the region is a `Window`, i.e. has translation capabilities.
+Slices are created from regions of type either `Slice` or `Box`.
 
+Patches accept any type of region, are extremely lightweight and can be moved around when the region is a `Window`, i.e. has shifting capabilities.
 Typical windows are `Box`, `Mask` or `Path` and can be used to apply filters.
-
-Patches are like data classes and can themselves be transformed pointwise:
+As opposed to slicing, patching results in an object of type `Patch` instead of simply `Sequence` or `Image`.
+Nevertheless, patches are themselves data containers and can be transformed pointwise:
 
 ```cpp
 auto image = Linx::Image(...):
 auto region = Linx::Box(...);
-auto patch = Linx::patch(image, region);
+auto patch = Linx::Patch(image, region);
 patch.exp(); // Modifies image elements inside region
 ```
 
@@ -135,7 +134,7 @@ namespace P = Linx::Pipeline;
 
 auto timer = Linx::TimerLogger();
 
-auto [out] = P::Run("Calibration and deconvolution", timer) // Start a pipeline with embedded timer
+auto [out] = P::Run("Calibration", timer) // Start a pipeline with embedded timer
     | P::InputFile(darks_path, flats_path) // Read two images
     | P::Batch(Linx::Along<-1>(Linx::Mean())) // Average along the last axis
     | P::OutputFile(mdark_path, mflat_path) // Save intermediate images
@@ -146,6 +145,16 @@ auto [out] = P::Run("Calibration and deconvolution", timer) // Start a pipeline 
 ```
 
 While running this pipeline, logs are produced, which include the elapsed time of each step.
+A typical output could be:
+
+```
+Pipeline | Task | Split (ms) | Total (ms)
+--- | --- | --- | ---
+Calibration | InputFile | 1 | 1
+Calibration | Mean | 3 | 4
+Calibration | OutputFile | 1 | 5
+...
+```
 
 **Labels**
 
@@ -153,10 +162,13 @@ Most data classes and services are labeled for logging or debugging purposes, th
 As demonstrated in the snippets above, this also helps documenting the code,
 which is why the parameter is purposedly mandatory most of the time.
 
-Only when natural, labelling is automated, typically when calling simple functions:
+When possible, labelling is automated, typically when calling simple functions:
 
 ```cpp
 auto a = Linx::Image("a", ...);
 auto b = Linx::sin(a);
 assert(b.label() == "sin(a)");
+
+auto k = Linx::Image("kernel", ...);
+assert(Linx::Convolution(k).label() == "Convolution(kernel)");
 ```
