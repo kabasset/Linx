@@ -76,14 +76,7 @@ public:
   using value_type = typename TKernel::value_type;
   using element_type = std::remove_cvref_t<value_type>;
 
-  Correlation(TKernel kernel) : WeightedFilterMixin<TKernel, Correlation>(LINX_MOVE(kernel))
-  {
-    if constexpr (is_complex<element_type>()) {
-      kernel.apply(
-          "conjugate",
-          KOKKOS_LAMBDA(auto e) { return Kokkos::conj(e); });
-    }
-  }
+  Correlation(TKernel kernel) : WeightedFilterMixin<TKernel, Correlation>(LINX_MOVE(kernel)) {}
 
   std::string label() const
   {
@@ -94,7 +87,14 @@ public:
   class Apply : public ApplyWeightedFilterMixin<Correlation, TIn, Apply<TIn>> {
   public:
 
-    using ApplyWeightedFilterMixin<Correlation, TIn, Apply>::ApplyWeightedFilterMixin;
+    Apply(const Correlation& filter, const TIn& in) : ApplyWeightedFilterMixin<Correlation, TIn, Apply>(filter, in)
+    {
+      if constexpr (is_complex<element_type>()) {
+        this->m_weights.apply(
+            "conjugate",
+            KOKKOS_LAMBDA(auto e) { return Kokkos::conj(e); });
+      }
+    }
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {

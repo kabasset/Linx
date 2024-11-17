@@ -29,11 +29,7 @@ BOOST_AUTO_TEST_CASE(correlation_impulse_response_test)
       KOKKOS_LAMBDA(int i, int j) { test(2 - i, 2 - j) = Kokkos::conj(k(i, j)); });
   test -= out;
 
-  const auto& test_on_host = Linx::on_host(test);
-  Linx::for_each<Kokkos::Serial>(
-      "test",
-      test_on_host.domain(),
-      KOKKOS_LAMBDA(int i, int j) { BOOST_TEST(test_on_host(i, j) == 0); });
+  BOOST_TEST(test.contains_only(0));
 }
 
 BOOST_AUTO_TEST_CASE(correlation_unit_response_test)
