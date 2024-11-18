@@ -104,7 +104,7 @@ public:
       }
     }
 
-    KOKKOS_INLINE_FUNCTION element_type reduce(const auto& neighbors) const
+    KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
       element_type out {};
       auto wit = this->m_weights.begin();

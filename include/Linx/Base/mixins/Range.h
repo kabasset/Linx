@@ -124,7 +124,7 @@ struct RangeMixin<true, T, TDerived> {
   const TDerived& reverse() const // TODO to DataMixin
   {
     const auto& derived = LINX_CRTP_CONST_DERIVED;
-    std::reverse(std::ranges::begin(derived), std::ranges::end(derived));
+    Kokkos::Experimental::reverse(typename TDerived::execution_space(), derived.begin(), derived.end());
     return derived;
   }
 
