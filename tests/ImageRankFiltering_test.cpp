@@ -10,40 +10,85 @@
 
 LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
-BOOST_AUTO_TEST_CASE(crop_test)
+BOOST_AUTO_TEST_CASE(min_test)
 {
   const int width = 16;
   const int height = 9;
-  Linx::Image<int, 2> a("a", width, height);
-  a.fill_with_offsets();
+  const auto in = Linx::Image<int, 2>("input", width, height).fill_with_offsets();
+
+  const int start = -1;
+  const int stop = 2;
+  const auto strel = Linx::Box<2>({start, start}, {stop, stop});
+  const auto out = Linx::MinimumFilter(strel)(in);
+  BOOST_TEST(out.extent(0) == width);
+  BOOST_TEST(out.extent(1) == height);
+
+  const auto& in_on_host = Linx::on_host(in);
+  const auto& out_on_host = Linx::on_host(out);
+  for (int j = -start; j <= height - stop; ++j) {
+    for (int i = -start; i <= width - stop; ++i) {
+      std::vector<int> neighbors;
+      for (int l = start; l < stop; ++l) {
+        for (int k = start; k < stop; ++k) {
+          neighbors.push_back(in_on_host(i + k, j + l));
+        }
+      }
+      BOOST_TEST(out_on_host(i, j) == *std::ranges::min_element(neighbors));
+    }
+  }
+}
+
+BOOST_AUTO_TEST_CASE(max_test)
+{
+  const int width = 16;
+  const int height = 9;
+  const auto in = Linx::Image<int, 2>("input", width, height).fill_with_offsets();
+
+  const int start = -1;
+  const int stop = 2;
+  const auto strel = Linx::Box<2>({start, start}, {stop, stop});
+  const auto out = Linx::MaximumFilter(strel)(in);
+  BOOST_TEST(out.extent(0) == width);
+  BOOST_TEST(out.extent(1) == height);
+
+  const auto& in_on_host = Linx::on_host(in);
+  const auto& out_on_host = Linx::on_host(out);
+  for (int j = -start; j <= height - stop; ++j) {
+    for (int i = -start; i <= width - stop; ++i) {
+      std::vector<int> neighbors;
+      for (int l = start; l < stop; ++l) {
+        for (int k = start; k < stop; ++k) {
+          neighbors.push_back(in_on_host(i + k, j + l));
+        }
+      }
+      BOOST_TEST(out_on_host(i, j) == *std::ranges::max_element(neighbors));
+    }
+  }
+}
+
+BOOST_AUTO_TEST_CASE(median_test)
+{
+  const int width = 16;
+  const int height = 9;
+  const auto in = Linx::Image<int, 2>("input", width, height).fill_with_offsets();
 
   const int radius = 1;
   const auto strel = Linx::Box<2>({-radius, -radius}, {radius + 1, radius + 1});
-  auto median = Linx::MedianFilter(strel)(a);
-  auto min = Linx::MinimumFilter(strel)(a);
-  auto max = Linx::MaximumFilter(strel)(a);
-  BOOST_TEST(median.extent(0) == width);
-  BOOST_TEST(median.extent(1) == height);
-  BOOST_TEST(min.extent(0) == width);
-  BOOST_TEST(min.extent(1) == height);
-  BOOST_TEST(max.extent(0) == width);
-  BOOST_TEST(max.extent(1) == height);
+  const auto out = Linx::MedianFilter(strel)(in);
+  BOOST_TEST(out.extent(0) == width);
+  BOOST_TEST(out.extent(1) == height);
 
-  const auto& a_on_host = Linx::on_host(a);
-  const auto& median_on_host = Linx::on_host(median);
-  const auto& min_on_host = Linx::on_host(min);
-  const auto& max_on_host = Linx::on_host(max);
+  const auto& in_on_host = Linx::on_host(in);
+  const auto& out_on_host = Linx::on_host(out);
   for (int j = radius; j < height - radius; ++j) {
     for (int i = radius; i < width - radius; ++i) {
       std::vector<int> neighbors;
       for (int l = -radius; l <= radius; ++l) {
         for (int k = -radius; k <= radius; ++k) {
-          neighbors.push_back(a_on_host(i + k, j + l));
+          neighbors.push_back(in_on_host(i + k, j + l));
         }
       }
-      BOOST_TEST(median_on_host(i, j) == Linx::median(neighbors));
-      BOOST_TEST(min_on_host(i, j) == *std::ranges::min_element(neighbors));
-      BOOST_TEST(max_on_host(i, j) == *std::ranges::max_element(neighbors));
+      BOOST_TEST(out_on_host(i, j) == Linx::median(neighbors));
     }
   }
 }

@@ -69,6 +69,11 @@ public:
     out.m_it = m_end;
     return out;
   }
+  
+  KOKKOS_INLINE_FUNCTION auto size() const
+  {
+    return m_end - m_begin;
+  }
 
   KOKKOS_INLINE_FUNCTION reference operator[](int i) const
   {
@@ -278,24 +283,24 @@ public:
   // value_type does not necessarily come from TIn
   using execution_space = typename TIn::execution_space;
 
-  ApplySpatialFilterMixin(const TFilter& filter, const TIn& in) :
-      m_filter(filter),
+  ApplySpatialFilterMixin(TFilter filter, const TIn& in) :
+      m_filter(LINX_MOVE(filter)),
       m_offsets("offsets", m_filter.footprint().size()),
       m_in(as_readonly(in))
   {
-    auto offsets_on_host = on_host(m_offsets);
-    auto index = std::make_shared<Index>(0); // Required for copying into for_each
+    const auto& offsets_on_host = on_host(m_offsets);
+    auto it = offsets_on_host.begin();
     for_each<Kokkos::Serial>(
         "compute_offsets()",
         footprint(),
         [&](std::integral auto... is) {
-          offsets_on_host[*index] = m_in.offset(is...);
-          ++(*index);
+          *it = m_in.offset(is...);
+          ++it;
         });
     Kokkos::deep_copy(m_offsets.container(), offsets_on_host.container());
   }
 
-  auto footprint() const
+  decltype(auto) footprint() const
   {
     return m_filter.footprint();
   }

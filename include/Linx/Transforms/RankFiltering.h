@@ -79,7 +79,11 @@ public:
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      return *std::min_element(neighbors.begin(), neighbors.end());
+      element_type out = neighbors[0];
+      for (std::size_t i = 1; i < neighbors.size(); ++i) {
+        out = neighbors[i] < out ? neighbors[i] : out;
+      }
+      return out;
     }
   };
 };
@@ -109,7 +113,11 @@ public:
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      return *std::max_element(neighbors.begin(), neighbors.end());
+      element_type out = neighbors[0];
+      for (std::size_t i = 1; i < neighbors.size(); ++i) {
+        out = neighbors[i] > out ? neighbors[i] : out;
+      }
+      return out;
     }
   };
 };
