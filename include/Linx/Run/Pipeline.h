@@ -145,35 +145,9 @@ public:
   State& operator=(State&&) = default;
 
   template <std::size_t I>
-  const auto& get() const&
+  decltype(auto) get()
   {
     return std::get<I>(m_values);
-  }
-
-  template <std::size_t I>
-  auto& get() &
-  {
-    return std::get<I>(m_values);
-  }
-
-  template <std::size_t I>
-  const auto& get() const&&
-  {
-    if (not m_stopped) {
-      m_context.log("Stop");
-      m_stopped = true;
-    }
-    return LINX_MOVE(std::get<I>(m_values));
-  }
-
-  template <std::size_t I>
-  auto get() &&
-  {
-    if (not m_stopped) {
-      m_context.log("Stop");
-      m_stopped = true;
-    }
-    return LINX_MOVE(std::get<I>(m_values));
   }
 
   template <typename TTask>
@@ -181,7 +155,7 @@ public:
   {
     auto task_label = label(task);
     auto out = eval(LINX_MOVE(task), LINX_MOVE(m_values), std::make_index_sequence<sizeof...(TValues)>());
-    return Pipeline::State(LINX_MOVE(m_context), task_label, out);
+    return Pipeline::State(LINX_MOVE(m_context), task_label, out); // FIXME NVCC is confused with CTAD here
   }
 
 private:
