@@ -40,7 +40,7 @@ struct InsertSort {
    * While `std::nth_element()` typically relies on introselect, this function implements insertion-sort,
    * which has higher complexity but should be faster for small arrays, which is typically the case for rank-filtering.
    */
-  static const auto& sort_n(auto& in_out, Index n)
+  KOKKOS_INLINE_FUNCTION static const auto& sort_n(auto& in_out, Index n)
   {
     using T = std::remove_cvref_t<decltype(in_out[0])>;
     T current;
@@ -71,7 +71,7 @@ struct InsertSort {
  * @warning Elements of `in_out` are shuffled (partially sorted).
  */
 template <typename TParity = Forward, typename TAlgo = InsertSort, typename TInOut>
-auto median(TInOut& in_out)
+KOKKOS_INLINE_FUNCTION auto median(TInOut& in_out)
 {
   const auto size = in_out.size();
 
