@@ -18,7 +18,14 @@ void print_2d(const auto& image)
   std::cout << "  " << width << " x " << height << std::endl;
 
   const auto& on_host = Linx::on_host(image);
-  std::cout << "  [" << on_host(0, 0) << ", ... , " << on_host(width - 1, height - 1) << "]" << std::endl;
+  std::cout << "  [" << on_host(0, 0) << ", " << on_host(1, 0) << ", ... , ";
+  std::cout << on_host(width - 2, 0) << ", " << on_host(width - 1, 0) << "]" <<std::endl;
+  std::cout << "  [" << on_host(0, 1) << ", " << on_host(1, 1) << ", ... , ";
+  std::cout << on_host(width - 2, 1) << ", " << on_host(width - 1, 1) << "]" <<std::endl;
+  std::cout << "  [" << on_host(0, height - 2) << ", " << on_host(1, height - 2) << ", ... , ";
+  std::cout << on_host(width - 2, height - 2) << ", " << on_host(width - 1, height - 2) << "]" << std::endl;
+  std::cout << "  [" << on_host(0, height - 1) << ", " << on_host(1, height - 1) << ", ... , ";
+  std::cout << on_host(width - 2, height - 1) << ", " << on_host(width - 1, height - 1) << "]" << std::endl;
 }
 
 int main(int argc, char const* argv[])
