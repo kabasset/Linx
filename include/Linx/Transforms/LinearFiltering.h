@@ -90,13 +90,11 @@ public:
     Apply(const Correlation& filter, const TIn& in) : ApplyWeightedFilterMixin<Correlation, TIn, Apply>(filter, in)
     {
       if constexpr (is_complex<element_type>()) {
-        this->m_weights.apply(
-            "conjugate",
-            KOKKOS_LAMBDA(auto e) { return Kokkos::conj(e); });
+        conjugate_impl();
       }
     }
 
-    KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
+    KOKKOS_INLINE_FUNCTION element_type reduce(const auto& neighbors) const
     {
       element_type out {};
       auto wit = this->m_weights.begin();
@@ -104,6 +102,14 @@ public:
         out += *nit * *wit;
       }
       return out;
+    }
+
+    // Cannot be private
+    // FIXME free function?
+    void conjugate_impl() const {
+      this->m_weights.apply(
+          "conjugate",
+          KOKKOS_LAMBDA(auto e) { return Kokkos::conj(e); });
     }
   };
 };
