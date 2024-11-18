@@ -380,7 +380,7 @@ using Span = Slice<T, SliceType::right_open>;
 template <typename TSpace, std::integral T>
 auto kokkos_execution_policy(const Slice<T, SliceType::right_open>& region)
 {
-  return Kokkos::RangePolicy<TSpace>(region.start(), region.stop());
+  return Kokkos::RangePolicy<TSpace, Kokkos::IndexType<Index>>(region.start(), region.stop());
 }
 
 /**

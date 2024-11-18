@@ -578,7 +578,7 @@ namespace Impl {
 template <typename TSpace, typename T, int N, std::size_t... Is>
 auto kokkos_execution_policy_impl(const GBox<T, N>& domain, std::index_sequence<Is...>)
 {
-  using Policy = Kokkos::MDRangePolicy<TSpace, Kokkos::Rank<N>>;
+  using Policy = Kokkos::MDRangePolicy<TSpace, Kokkos::Rank<N>, Kokkos::IndexType<Index>>;
   using Array = Policy::point_type;
   return Policy(Array {domain.start(Is)...}, Array {domain.stop(Is)...});
 }
@@ -599,7 +599,7 @@ auto kokkos_execution_policy(const GBox<T, N>& domain)
 {
   // FIXME support Properties
   if constexpr (N == 1) {
-    return Kokkos::RangePolicy<TSpace>(domain.start(0), domain.stop(0));
+    return Kokkos::RangePolicy<TSpace, Kokkos::IndexType<Index>>(domain.start(0), domain.stop(0));
   } else {
     return Impl::kokkos_execution_policy_impl<TSpace>(domain, std::make_index_sequence<N>());
   }
