@@ -69,6 +69,16 @@ public:
   };
 };
 
+namespace Impl {
+
+struct Conjugate {
+  KOKKOS_INLINE_FUNCTION auto operator()(const auto& e) const {
+    return Kokkos::conj(e);
+  }
+};
+
+} // namespace Impl
+
 template <typename TKernel>
 class Correlation : public WeightedFilterMixin<TKernel, Correlation<TKernel>> {
 public:
@@ -105,11 +115,10 @@ public:
     }
 
     // Cannot be private
+    // Cannot be the ctor (must take address)
     // FIXME free function?
     void conjugate_impl() const {
-      this->m_weights.apply(
-          "conjugate",
-          KOKKOS_LAMBDA(auto e) { return Kokkos::conj(e); });
+      this->m_weights.apply("conjugate", Impl::Conjugate());
     }
   };
 };
