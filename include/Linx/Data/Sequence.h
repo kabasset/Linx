@@ -369,7 +369,7 @@ template <int N>
 using Position = GPosition<Index, N>;
 
 template <int M, typename T, int N>
-auto pad(const GPosition<T, N>& in)
+auto pad(const GPosition<T, N>& in) // FIXME support Sequence => Rebind<TSequence>::As<T, N>
 {
   using U = std::decay_t<T>;
   GPosition<U, M> out(compose_label("pad", in));

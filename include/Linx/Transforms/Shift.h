@@ -34,17 +34,12 @@ public:
   /**
    * @brief Constructor.
    */
-  Shift() : m_parent(nullptr), m_offset() {}
+  Shift() : m_parent(nullptr), m_offset("offset", {}) {}
 
   /**
    * @copydoc Shift()
    */
-  Shift(const Parent& parent, Position<n> offset) : m_parent(parent), m_offset(LINX_MOVE(offset)) {}
-
-  /**
-   * @copydoc Shift()
-   */
-  Shift(const Parent& parent, std::integral auto... offset) : m_parent(parent), m_offset({offset...}) {}
+  Shift(const Parent& parent, std::integral auto... offset) : m_parent(parent), m_offset("offset", {offset...}) {}
 
   /**
    * @brief The parent.
@@ -57,9 +52,11 @@ public:
   /**
    * @brief The offset. 
    */
-  KOKKOS_INLINE_FUNCTION const Position<n> offset() const
+  Position<n> offset() const
   {
-    return m_offset;
+    Position<n> out("offset", m_offset.size());
+    Kokkos::deep_copy(out.container(), m_offset.container());
+    return out;
   }
 
   /**
@@ -67,7 +64,7 @@ public:
    */
   auto domain() const
   {
-    return m_parent.domain() + m_offset;
+    return m_parent.domain() + offset();
   }
 
   /**
@@ -94,42 +91,6 @@ public:
     return at_impl(forward_as_tuple(is...), std::make_index_sequence<sizeof...(is)>());
   }
 
-  /**
-   * @brief Add a given scalar or vector to the offset.
-   */
-  KOKKOS_INLINE_FUNCTION Shift& operator>>=(const auto& vector)
-  {
-    m_offset += vector;
-    return *this;
-  }
-
-  /**
-   * @brief Add a given scalar or vector from the offset.
-   */
-  KOKKOS_INLINE_FUNCTION Shift& operator<<=(const auto& vector)
-  {
-    m_offset -= vector;
-    return *this;
-  }
-
-  /**
-   * @brief Add a given vector to the offset.
-   */
-  KOKKOS_INLINE_FUNCTION Shift& shift(auto... is)
-  {
-    m_offset.add(is...);
-    return *this;
-  }
-
-  /**
-   * @brief Subtract a given vector from the offset.
-   */
-  KOKKOS_INLINE_FUNCTION Shift& inv_shift(auto... is)
-  {
-    m_offset.subtract(is...);
-    return *this;
-  }
-
 private:
 
   /**
@@ -144,7 +105,7 @@ private:
 private:
 
   Parent m_parent; ///< The parent
-  Position<n> m_offset; ///< The offset
+  Sequence<Index, n> m_offset; ///< The offset
 };
 
 template <typename T>
