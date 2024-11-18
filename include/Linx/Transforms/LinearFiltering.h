@@ -97,7 +97,7 @@ public:
   class Apply : public ApplyWeightedFilterMixin<Correlation, TIn, Apply<TIn>> {
   public:
 
-    Apply(const Correlation& filter, const TIn& in) : ApplyWeightedFilterMixin<Correlation, TIn, Apply>(filter, in)
+    Apply(Correlation filter, const TIn& in) : ApplyWeightedFilterMixin<Correlation, TIn, Apply>(LINX_MOVE(filter), in)
     {
       if constexpr (is_complex<element_type>()) {
         conjugate_impl();
@@ -116,7 +116,7 @@ public:
 
     // Cannot be private
     // Cannot be the ctor (must take address)
-    // FIXME free function?
+    // FIXME free function? Nested Conjugate?
     void conjugate_impl() const {
       this->m_weights.apply("conjugate", Impl::Conjugate());
     }
@@ -141,7 +141,7 @@ public:
   class Apply : public ApplyWeightedFilterMixin<Convolution, TIn, Apply<TIn>> {
   public:
 
-    Apply(const Convolution& filter, const TIn& in) : ApplyWeightedFilterMixin<Convolution, TIn, Apply>(filter, in)
+    Apply(Convolution filter, const TIn& in) : ApplyWeightedFilterMixin<Convolution, TIn, Apply>(LINX_MOVE(filter), in)
     {
       this->m_weights.reverse(); // FIXME use rbegin() instead?
     }

@@ -286,13 +286,13 @@ public:
     auto offsets_on_host = on_host(m_offsets);
     auto index = std::make_shared<Index>(0); // Required for copying into for_each
     for_each<Kokkos::Serial>(
-        "compute_offsets()", // FIXME analytic through strides?
+        "compute_offsets()",
         footprint(),
         [&](std::integral auto... is) {
           offsets_on_host[*index] = m_in.offset(is...);
           ++(*index);
         });
-    Kokkos::deep_copy(offsets_on_host.container(), m_offsets.container());
+    Kokkos::deep_copy(m_offsets.container(), offsets_on_host.container());
   }
 
   auto footprint() const
@@ -368,23 +368,25 @@ public:
   using value_type = typename TFilter::value_type;
   using execution_space = typename TIn::execution_space;
 
-  ApplyWeightedFilterMixin(const TFilter& filter, const TIn& in) :
-      m_filter(filter),
+  ApplyWeightedFilterMixin(TFilter filter, const TIn& in) :
+      m_filter(LINX_MOVE(filter)),
       m_offsets("offsets", m_filter.footprint().size()),
       m_weights("weights", m_offsets.size()),
       m_in(as_readonly(in))
   {
-    auto offsets_on_host = on_host(m_offsets);
-    auto weights_on_host = on_host(m_weights);
-    auto kernel_on_host = on_host(m_filter.kernel());
-    auto index = std::make_shared<Index>(0);
+    const auto& offsets_on_host = on_host(m_offsets);
+    const auto& weights_on_host = on_host(m_weights);
+    const auto& kernel_on_host = on_host(m_filter.kernel());
+    auto oit = offsets_on_host.begin();
+    auto wit = weights_on_host.begin();
     for_each<Kokkos::Serial>("compute offsets", m_filter.footprint(), [&](std::integral auto... is) {
-      offsets_on_host[*index] = m_in.offset(is...);
-      weights_on_host[*index] = kernel_on_host(is...);
-      ++(*index);
+      *oit = m_in.offset(is...);
+      *wit = kernel_on_host(is...);
+      ++oit;
+      ++wit;
     });
-    Kokkos::deep_copy(offsets_on_host.container(), m_offsets.container());
-    Kokkos::deep_copy(weights_on_host.container(), m_weights.container());
+    Kokkos::deep_copy(m_offsets.container(), offsets_on_host.container());
+    Kokkos::deep_copy(m_weights.container(), weights_on_host.container());
   }
 
   auto footprint() const
