@@ -39,7 +39,12 @@ public:
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      return std::all_of(neighbors.begin(), neighbors.end(), [](auto e) { return bool(e); });
+      for (const auto& e : neighbors) {
+        if (not e) {
+          return false;
+        }
+      }
+      return true;
     }
   };
 };
@@ -68,7 +73,12 @@ public:
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      return std::any_of(neighbors.begin(), neighbors.end(), [](auto e) { return bool(e); });
+      for (const auto& e : neighbors) {
+        if (e) {
+          return true;
+        }
+      }
+      return false;
     }
   };
 };
