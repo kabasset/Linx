@@ -244,7 +244,7 @@ public:
       return m_in.domain() * m_factor; // Differs from FilterMixin
     }
 
-    auto operator()(std::integral auto... is) const
+    KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
     {
       return m_in(is / m_factor...);
     }
@@ -308,7 +308,7 @@ public:
       return m_in.domain() / m_factor;
     }
 
-    auto operator()(std::integral auto... is) const
+    KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
     {
       return m_in(is * m_factor...);
     }
