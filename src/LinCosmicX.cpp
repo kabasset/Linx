@@ -39,25 +39,27 @@ struct Updatemask {
     return "Updatemask";
   }
 
-  auto operator()(const auto& data, const auto& mask) const
+  template <typename TData, typename TMask>
+  Linx::Image<bool, 2> operator()(const TData& data, const TMask& mask) const
   {
     auto satpixels = Linx::Image<bool, 2>("satpixels", data.shape());
     auto median5 = Linx::MedianFilter(strel(2)).lazy(data);
+    auto local_satlevel = satlevel; // Prevents capture of *this by KOKKOS_LAMBDA
     Linx::for_each(
         label(),
         median5.domain(),
         KOKKOS_LAMBDA(int i, int j) {
-          if (data(i, j) >= satlevel) {
-            satpixels(i, j) = (median5(i, j) > (satlevel / 10));
+          if (data(i, j) >= local_satlevel) {
+            satpixels(i, j) = (median5(i, j) > (local_satlevel / 10));
           }
         });
-    auto grow_mask = mask.copy_as("grow_mask");
+    auto grow_mask = +mask;
     Linx::Dilation(strel(1)).transform(mask, grow_mask);
     // FIXME auto grow_mask = Dilation::with_border_copy(mask)?
     auto grow_satpixels = +satpixels;
     Linx::Dilation(strel(2)).transform(satpixels, grow_satpixels);
-    grow_mask *= grow_satpixels;
-    return grow_mask;
+    grow_satpixels *= grow_mask;
+    return grow_satpixels;
   }
 };
 
@@ -67,9 +69,9 @@ struct Backgroundlevel {
     return "Backgroundlevel";
   }
 
-  auto operator()(const auto& data, const auto& mask) const
+  float operator()(const auto& data, const auto& mask) const // FIXME double?
   {
-    std::vector<float> gooddata;
+    std::vector<float> gooddata; // FIXME double?
     Linx::for_each<Kokkos::Serial>(label(), mask.domain(), [&](int i, int j) {
       if (not mask(i, j)) {
         gooddata.push_back(data(i, j));
@@ -79,9 +81,10 @@ struct Backgroundlevel {
   }
 };
 
-auto lacosmicx(
-    const auto& indata,
-    const auto& inmask,
+template <typename TData, typename TMask>
+std::tuple<TData, Linx::Image<bool, 2>> lacosmicx(
+    const TData& indata,
+    const TMask& inmask,
     double sigclip = 4.5,
     double sigfrac = 0.3,
     double objlim = 5.0,
@@ -107,7 +110,7 @@ auto lacosmicx(
   auto [backgroundlevel] = P::Run("Get background level", logger) | P::Input(cleanarr, mask) | Backgroundlevel();
 
   const auto sigcliplow = sigfrac * sigclip;
-  auto crmask = Linx::Image<char, 2>("crmask", indata.shape());
+  auto crmask = Linx::Image<bool, 2>("crmask", indata.shape());
 
   for (Linx::Index i = 1; i <= niter; ++i) {
     logger("Iteration " + std::to_string(i) + " / " + std::to_string(niter));
@@ -123,20 +126,20 @@ auto lacosmicx(
         | Linx::Downsample(2) | P::Input(noise) | P::Apply(Linx::Divide(), Linx::Divide(2));
 
     auto [sp] = P::Run("Compute S'", logger) | s | Linx::MedianFilter(strel(2)) | P::Input(s)
-        | P::Apply([=](auto m_i, auto s_i) { return s_i - m_i; });
+        | P::Apply(KOKKOS_LAMBDA(auto m_i, auto s_i) { return s_i - m_i; }); // FIXME negate?
 
     auto [f_tmp] = P::Run("Compute fine structure", logger) | cleanarr | Linx::Correlation(psfk); // FIXME avoid tmp?
     auto [f] = P::Run("Compute fine structure", logger) | f_tmp | Linx::MedianFilter(strel(3)) | P::Input(f_tmp, noise)
-        | P::Apply([=](auto m_i, auto f_i, auto n_i) { return std::max(0.01, (f_i - m_i) / n_i); });
+        | P::Apply(KOKKOS_LAMBDA(auto m_i, auto f_i, auto n_i) { return std::max(0.01, (f_i - m_i) / n_i); });
 
     auto [cosmics] = P::Run("Find candidate cosmic rays", logger) | P::Input(mask, sp, f)
-        | P::Apply([=](auto m_i, auto sp_i, auto f_i) {
+        | P::Apply(KOKKOS_LAMBDA(auto m_i, auto sp_i, auto f_i) {
                        return (not m_i) && (sp_i > sigclip) && (sp_i / f_i > objlim);
                      })
         | Linx::Dilation(strel(1)) | P::Input(mask, sp)
-        | P::Apply([=](auto c_i, auto m_i, auto sp_i) { return c_i && (not m_i) && (sp_i > sigclip); })
+        | P::Apply(KOKKOS_LAMBDA(auto c_i, auto m_i, auto sp_i) { return c_i && (not m_i) && (sp_i > sigclip); })
         | Linx::Dilation(strel(1)) | P::Input(mask, sp)
-        | P::Apply([=](auto c_i, auto m_i, auto sp_i) { return c_i && (not m_i) && (sp_i) > sigcliplow; });
+        | P::Apply(KOKKOS_LAMBDA(auto c_i, auto m_i, auto sp_i) { return c_i && (not m_i) && (sp_i) > sigcliplow; });
 
     auto numcr = Linx::sum(cosmics);
     logger(std::to_string(numcr) + " cosmic pixels found");
