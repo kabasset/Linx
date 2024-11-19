@@ -107,7 +107,7 @@ struct Apply {
 
   std::string label() const
   {
-    return "Apply pointwise function";
+    return "Apply pointwise";
   }
 
   decltype(auto) operator()(auto&& in0, auto&&... ins)
@@ -124,7 +124,7 @@ struct Generate {
 
   std::string label() const
   {
-    return "Apply pointwise function";
+    return "Generate pointwise";
   }
 
   auto operator()(auto&& in0, auto&&... ins)
