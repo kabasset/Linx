@@ -151,14 +151,26 @@ public:
   }
 
   template <typename TTask>
-  auto operator|(TTask task) &&
+  auto operator|(TTask task)
   {
     auto task_label = label(task);
     auto out = eval(LINX_MOVE(task), LINX_MOVE(m_values), std::make_index_sequence<sizeof...(TValues)>());
-    return Pipeline::State(LINX_MOVE(m_context), task_label, out); // FIXME NVCC is confused with CTAD here
+    return make_state(task_label, LINX_MOVE(out)); // NVCC is confused with CTAD, so we need a helper function
   }
 
 private:
+
+  template <typename... Ts>
+  auto make_state(const std::string& label, std::tuple<Ts...>&& values)
+  {
+    return State<TContext, Ts...>(m_context, label, LINX_FORWARD(values));
+  }
+
+  template <typename T>
+  auto make_state(const std::string& label, T&& value)
+  {
+    return State<TContext, T>(m_context, label, LINX_FORWARD(value));
+  }
 
   template <std::integral auto... Is, typename TTask>
   static decltype(auto) eval(TTask task, auto&& values, std::index_sequence<Is...>)
