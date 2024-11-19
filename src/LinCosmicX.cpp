@@ -79,9 +79,11 @@ struct BackgroundLevel {
   float operator()(const auto& data, const auto& mask) const // FIXME double?
   {
     std::vector<float> gooddata; // FIXME double?
+    const auto& data_on_host = Linx::on_host(data);
+    const auto& mask_on_host = Linx::on_host(mask);
     Linx::for_each<Kokkos::Serial>(label(), mask.domain(), [&](int i, int j) {
-      if (not mask(i, j)) {
-        gooddata.push_back(data(i, j));
+      if (not mask_on_host(i, j)) {
+        gooddata.push_back(data_on_host(i, j));
       }
     });
     return Linx::StdSort::nth(gooddata, gooddata.size() / 2);
@@ -136,7 +138,7 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmicx(
     bool verbose = false)
 {
   using T = typename TData::element_type;
-  
+
   Linx::TimerLogger logger;
 
   auto [cleanarr] = P::Run("Scale to electrons", logger) | indata | P::Generate(Linx::Add(pssl), Linx::Multiply(gain));
