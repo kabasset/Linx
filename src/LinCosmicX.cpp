@@ -149,7 +149,8 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmicx(
   auto crmask = Linx::Image<bool, 2>("crmask", indata.shape());
 
   for (Linx::Index i = 1; i <= niter; ++i) {
-    logger("Iteration " + std::to_string(i) + " / " + std::to_string(niter));
+    auto label = "Iteration " + std::to_string(i) + " / " + std::to_string(niter);
+    logger(label, "Start");
 
     auto [noise] = P::Run("Compute noise", logger) | cleanarr | Linx::MedianFilter(strel(2))
         | P::Generate(ScaleNoise(readnoise * readnoise));
@@ -164,7 +165,7 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmicx(
     auto [sp] = P::Run("Compute S'", logger) | s | Linx::MedianFilter(strel(2)) | P::Input(s)
         | P::Apply(Linx::Subtract()); // FIXME negate!
 
-    auto [f_tmp] = P::Run("Compute fine structure", logger) | cleanarr | Linx::Correlation(psfk); // FIXME avoid tmp?
+    auto [f_tmp] = P::Run("Compute fine structure", logger) | cleanarr /*| Linx::Correlation(psfk)*/; // FIXME avoid tmp?
     auto [f] = P::Run("Compute fine structure", logger) | f_tmp | Linx::MedianFilter(strel(3)) //
         | P::Input(f_tmp, noise) | P::Apply(FineStructure<T>());
 
@@ -174,7 +175,7 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmicx(
         | Linx::Dilation(strel(1)) | P::Input(mask, sp) | P::Apply(FindNeighborCandidates(sigcliplow));
 
     auto numcr = Linx::sum(cosmics);
-    logger(std::to_string(numcr) + " cosmic pixels found");
+    logger(label, std::to_string(numcr) + " cosmic pixels found");
     if (numcr == 0) {
       break;
     }
@@ -182,8 +183,10 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmicx(
     P::Run("Update crmask", logger) | P::Input(crmask, cosmics) | P::Apply(Linx::Or());
 
     // FIXME clean
+    logger(label, "Stop");
   }
 
+  logger("Lacosmic", "Stop");
   return std::make_tuple(cleanarr, crmask);
 }
 
