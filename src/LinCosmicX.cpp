@@ -26,6 +26,17 @@ void print_2d(const auto& image)
   std::cout << "  [" << on_host(0, 0) << ", ... , " << on_host(width - 1, height - 1) << "]" << std::endl;
 }
 
+namespace Linx {
+
+struct Negate {
+  KOKKOS_INLINE_FUNCTION auto operator()(const auto& e) const
+  {
+    return -e;
+  }
+};
+
+} // namespace Linx
+
 Linx::Box<2> strel(Linx::Index radius)
 {
   return {{-radius, -radius}, {radius + 1, radius + 1}};
@@ -33,7 +44,8 @@ Linx::Box<2> strel(Linx::Index radius)
 
 struct ScaleNoise {
   double readnoise2;
-  KOKKOS_INLINE_FUNCTION auto operator()(auto e) const {
+  KOKKOS_INLINE_FUNCTION auto operator()(auto e) const
+  {
     return std::sqrt(std::max(e, 0.00001) + readnoise2);
   }
 };
@@ -66,7 +78,7 @@ struct UpdateMask {
     auto grow_satpixels = +satpixels;
     Linx::Dilation(strel(2)).transform(satpixels, grow_satpixels);
     grow_satpixels *= grow_mask;
-    return grow_satpixels;
+    return grow_satpixels; // FIXME return satpixel to save one instantiation
   }
 };
 
@@ -78,7 +90,7 @@ struct BackgroundLevel {
 
   float operator()(const auto& data, const auto& mask) const // FIXME double?
   {
-    std::vector<float> gooddata; // FIXME double?
+    std::vector<float> gooddata; // FIXME double? // FIXME on device?
     const auto& data_on_host = Linx::on_host(data);
     const auto& mask_on_host = Linx::on_host(mask);
     Linx::for_each<Kokkos::Serial>(label(), mask.domain(), [&](int i, int j) {
@@ -92,40 +104,48 @@ struct BackgroundLevel {
 
 template <typename T>
 struct FineStructure {
-  KOKKOS_INLINE_FUNCTION auto operator()(auto m_i, auto f_i, auto n_i) const
+  KOKKOS_INLINE_FUNCTION auto operator()(auto m, auto f, auto n) const
   {
-    return std::max<T>(0.01, (f_i - m_i) / n_i);
+    return std::max<T>(0.01, (f - m) / n);
   }
 };
 
 struct FindCandidates {
   double sigclip;
   double objlim;
-  KOKKOS_INLINE_FUNCTION auto operator()(auto m_i, auto sp_i, auto f_i) const
+  KOKKOS_INLINE_FUNCTION auto operator()(auto m, auto sp, auto f) const
   {
-    return (not m_i) && (sp_i > sigclip) && (sp_i / f_i > objlim);
+    return (not m) && (sp > sigclip) && (sp / f > objlim);
   }
 };
 
 struct FindNeighborCandidates {
   double sigclip;
-  KOKKOS_INLINE_FUNCTION auto operator()(auto c_i, auto m_i, auto sp_i) const
+  KOKKOS_INLINE_FUNCTION auto operator()(auto c, auto m, auto sp) const
   {
-    return c_i && (not m_i) && (sp_i > sigclip);
+    return c && (not m) && (sp > sigclip);
   }
 };
 
+struct DetectionParams {
+  double sigclip = 4.5;
+  double sigfrac = 0.3;
+  double objlim = 5.0;
+};
+
+struct SensorParams {
+  double gain = 1.0;
+  double readnoise = 6.5;
+  double satlevel = 65536.0;
+  double pssl = 0.0;
+};
+
 template <typename TData, typename TMask>
-std::tuple<TData, Linx::Image<bool, 2>> lacosmicx(
+std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
     const TData& indata,
     const TMask& inmask,
-    double sigclip = 4.5,
-    double sigfrac = 0.3,
-    double objlim = 5.0,
-    double gain = 1.0,
-    double readnoise = 6.5,
-    double satlevel = 65536.0,
-    double pssl = 0.0,
+    const DetectionParams& det,
+    const SensorParams& sensor,
     Linx::Index niter = 4,
     bool sepmed = true,
     const std::string& cleantype = "meanmask",
@@ -140,50 +160,52 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmicx(
   using T = typename TData::element_type;
 
   Linx::TimerLogger logger;
+  logger("Lacosmic", "Start");
 
-  auto [cleanarr] = P::Run("Scale to electrons", logger) | indata | P::Generate(Linx::Add(pssl), Linx::Multiply(gain));
-  auto [mask] = P::Run("Find saturated stars", logger) | P::Input(indata, inmask) | UpdateMask(satlevel);
+  auto [cleanarr] = P::Run("Scale to electrons", logger) //
+      | indata | P::Generate(Linx::Add(sensor.pssl), Linx::Multiply(sensor.gain));
+  auto [mask] = P::Run("Find saturated stars", logger) | P::Input(indata, inmask) | UpdateMask(sensor.satlevel);
   auto [backgroundlevel] = P::Run("Get background level", logger) | P::Input(cleanarr, mask) | BackgroundLevel();
 
-  const auto sigcliplow = sigfrac * sigclip;
   auto crmask = Linx::Image<bool, 2>("crmask", indata.shape());
 
   for (Linx::Index i = 1; i <= niter; ++i) {
     auto label = "Iteration " + std::to_string(i) + " / " + std::to_string(niter);
     logger(label, "Start");
 
-    auto [noise] = P::Run("Compute noise", logger) | cleanarr | Linx::MedianFilter(strel(2))
-        | P::Generate(ScaleNoise(readnoise * readnoise));
+    auto [noise] = P::Run("Compute noise", logger) //
+        | cleanarr | Linx::MedianFilter(strel(2)) | P::Generate(ScaleNoise(sensor.readnoise * sensor.readnoise));
 
-    // FIXME keep m5
+    // FIXME keep m5 for cleaning
 
-    auto [s] = P::Run("Compute S", logger) | cleanarr
-        | Linx::Upsample(2) /*| Linx::Laplacian<0, 1>(1)*/ | P::Apply(Linx::Max(T(0)))
-        | Linx::MeanFilter(Linx::Box<2>({0, 0}, {2, 2})) // FIXME Lazy MeanFilter
-        | Linx::Downsample(2) | P::Input(noise) | P::Apply(Linx::Divide(), Linx::Divide(2));
+    auto [s] = P::Run("Compute S", logger) //
+        | cleanarr | Linx::Upsample(2) /*| Linx::Laplacian<0, 1>(1)*/ | P::Apply(Linx::Max(T(0)))
+        | Linx::MeanFilter(Linx::Box<2>({0, 0}, {2, 2})) | Linx::Downsample(2) //
+        | P::Input(noise) | P::Apply(Linx::Divide(), Linx::Divide(2));
 
-    auto [sp] = P::Run("Compute S'", logger) | s | Linx::MedianFilter(strel(2)) | P::Input(s)
-        | P::Apply(Linx::Subtract()); // FIXME negate!
+    auto [sp] = P::Run("Compute S'", logger) //
+        | s | Linx::MedianFilter(strel(2)) | P::Input(s) | P::Apply(Linx::Subtract(), Linx::Negate());
 
-    auto [f_tmp] = P::Run("Compute fine structure", logger) | cleanarr /*| Linx::Correlation(psfk)*/; // FIXME avoid tmp?
+    auto [f_tmp] = P::Run("Compute fine structure", logger) | cleanarr /*| Linx::Correlation(psfk)*/;
+    // FIXME avoid tmp?
     auto [f] = P::Run("Compute fine structure", logger) | f_tmp | Linx::MedianFilter(strel(3)) //
         | P::Input(f_tmp, noise) | P::Apply(FineStructure<T>());
 
-    auto [cosmics] = P::Run("Find candidate cosmic rays", logger) | P::Input(mask, sp, f)
-        | P::Apply(FindCandidates(sigclip, objlim)) //
-        | Linx::Dilation(strel(1)) | P::Input(mask, sp) | P::Apply(FindNeighborCandidates(sigclip)) //
-        | Linx::Dilation(strel(1)) | P::Input(mask, sp) | P::Apply(FindNeighborCandidates(sigcliplow));
+    auto [cosmics] = P::Run("Find candidate cosmic rays", logger) //
+        | P::Input(mask, sp, f) | P::Apply(FindCandidates(det.sigclip, det.objlim)) //
+        | Linx::Dilation(strel(1)) | P::Input(mask, sp) | P::Apply(FindNeighborCandidates(det.sigclip)) //
+        | Linx::Dilation(strel(1)) | P::Input(mask, sp) | P::Apply(FindNeighborCandidates(det.sigclip * det.sigfrac));
 
     auto numcr = Linx::sum(cosmics);
     logger(label, std::to_string(numcr) + " cosmic pixels found");
-    if (numcr == 0) {
-      break;
-    }
+    // if (numcr == 0) {
+    //   logger(label, "Stop");
+    //   break;
+    // }
 
     P::Run("Update crmask", logger) | P::Input(crmask, cosmics) | P::Apply(Linx::Or());
 
     // FIXME clean
-    logger(label, "Stop");
   }
 
   logger("Lacosmic", "Stop");
@@ -193,10 +215,11 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmicx(
 int main(int argc, char const* argv[])
 {
   Linx::ProgramContext context("", argc, argv);
-  context.named("image", "Input length along each axis", 2048);
-  context.named("kernel", "Kernel length along each axis", 5);
+  context.named("image", "Input length along each axis", 4000);
+  context.named("niter", "Kernel length along each axis", 4);
   context.parse();
-  const auto extent = context.as<int>("image");
+  const auto extent = context.as<Linx::Index>("image");
+  const auto niter = context.as<Linx::Index>("niter");
 
   auto data = Linx::Image<double, 2>("data", extent, extent).generate("random data", Linx::GaussianRng<double>(0, 1));
   auto mask = Linx::Image<bool, 2>("mask", extent, extent).generate("random mask", Linx::UniformRng<int>({0, 2}));
@@ -204,7 +227,7 @@ int main(int argc, char const* argv[])
   print_2d(data);
   print_2d(mask);
 
-  auto [cleanarr, crmask] = lacosmicx(data, mask);
+  auto [cleanarr, crmask] = lacosmic(data, mask, DetectionParams {}, SensorParams {}, niter);
 
   print_2d(cleanarr);
   print_2d(crmask);
