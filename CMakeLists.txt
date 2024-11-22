@@ -57,6 +57,9 @@ endif(DOXYGEN_FOUND)
 add_executable(LinCosmicX src/LinCosmicX.cpp)
 target_link_libraries(LinCosmicX Linx)
 
+add_executable(LinxBenchmarkFilters src/LinxBenchmarkFilters.cpp)
+target_link_libraries(LinxBenchmarkFilters Linx)
+
 add_executable(KokkosBenchmarkConvolution src/KokkosBenchmarkConvolution.cpp)
 target_link_libraries(KokkosBenchmarkConvolution Linx)
 
@@ -65,9 +68,6 @@ target_link_libraries(KokkosBenchmarkExp Linx)
 
 add_executable(KokkosBenchmarkIteration src/KokkosBenchmarkIteration.cpp)
 target_link_libraries(KokkosBenchmarkIteration Linx)
-
-add_executable(KokkosBenchmarkMedian src/KokkosBenchmarkMedian.cpp)
-target_link_libraries(KokkosBenchmarkMedian Linx)
 
 # Tests
 

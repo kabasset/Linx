@@ -26,7 +26,7 @@ namespace Linx {
  * The timer can be reset, which means that the list of split times is emptied,
  * and the elapsed time is set to 0 or a given offset.
  */
-template <typename TUnit>
+template <typename TUnit = std::chrono::milliseconds>
 class Timer {
 public:
 
