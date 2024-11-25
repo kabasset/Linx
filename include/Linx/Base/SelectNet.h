@@ -287,7 +287,7 @@ struct SelectNet<25> {
     Impl::sort_swap(in_out[10], in_out[20]);
     Impl::sort_swap(in_out[10], in_out[12]);
 
-    return (in_out[12]);
+    return in_out[12];
   }
 };
 

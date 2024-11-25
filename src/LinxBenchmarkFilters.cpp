@@ -36,6 +36,10 @@ Linx::Image<T, 2> filter(const auto& in, const auto& k, const std::string& name)
     return Linx::Correlation(k)(in);
   } else if (name == "median") {
     return Linx::MedianFilter(k.domain())(in);
+  } else if (name == "median3") {
+    return Linx::MedianFilter<9, Linx::Box<2>>(k.domain())(in);
+  } else if (name == "median5") {
+    return Linx::MedianFilter<25, Linx::Box<2>>(k.domain())(in);
   } else if (name == "min") {
     return Linx::MinimumFilter(k.domain())(in);
   } else {

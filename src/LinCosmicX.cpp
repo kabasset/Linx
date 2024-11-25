@@ -42,6 +42,18 @@ Linx::Box<2> strel(Linx::Index radius)
   return {{-radius, -radius}, {radius + 1, radius + 1}};
 }
 
+namespace Linx {
+
+template <Index... Radii> // FIXME strong type
+auto box_median_filter()
+{
+  static constexpr Index Size = (1 * ... * Radii);
+  return Linx::MedianFilter<Size, Linx::Box<sizeof...(Radii)>>({{-Radii...}, {Radii + 1 ...}});
+  // FIXME return Linx::MedianFilter<Linx::SBox<Radii...>>();
+}
+
+} // namespace Linx
+
 struct ScaleNoise {
   double readnoise2;
   KOKKOS_INLINE_FUNCTION auto operator()(auto e) const
@@ -62,7 +74,7 @@ struct UpdateMask {
   Linx::Image<bool, 2> operator()(const TData& data, const TMask& mask) const
   {
     auto satpixels = Linx::Image<bool, 2>("satpixels", data.shape());
-    auto median5 = Linx::MedianFilter(strel(2)).lazy(data);
+    auto median5 = Linx::box_median_filter<2, 2>().lazy(data);
     auto local_satlevel = satlevel; // Prevents capture of *this by KOKKOS_LAMBDA
     Linx::for_each(
         label(),
@@ -174,7 +186,7 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
     logger(label, "Start");
 
     auto [noise] = P::Run("Compute noise", logger) //
-        | cleanarr | Linx::MedianFilter(strel(2)) | P::Generate(ScaleNoise(sensor.readnoise * sensor.readnoise));
+        | cleanarr | Linx::box_median_filter<2, 2>() | P::Generate(ScaleNoise(sensor.readnoise * sensor.readnoise));
 
     // FIXME keep m5 for cleaning
 
@@ -184,11 +196,11 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
         | P::Input(noise) | P::Apply(Linx::Divide(), Linx::Divide(2));
 
     auto [sp] = P::Run("Compute S'", logger) //
-        | s | Linx::MedianFilter(strel(2)) | P::Input(s) | P::Apply(Linx::Subtract(), Linx::Negate());
+        | s | Linx::box_median_filter<2, 2>() | P::Input(s) | P::Apply(Linx::Subtract(), Linx::Negate());
 
     auto [f_tmp] = P::Run("Compute fine structure", logger) | cleanarr /*| Linx::Correlation(psfk)*/;
     // FIXME avoid tmp?
-    auto [f] = P::Run("Compute fine structure", logger) | f_tmp | Linx::MedianFilter(strel(3)) //
+    auto [f] = P::Run("Compute fine structure", logger) | f_tmp | Linx::box_median_filter<3, 3>() //
         | P::Input(f_tmp, noise) | P::Apply(FineStructure<T>());
 
     auto [cosmics] = P::Run("Find candidate cosmic rays", logger) //
