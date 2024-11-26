@@ -69,10 +69,15 @@ public:
     out.m_it = m_end;
     return out;
   }
-  
-  KOKKOS_INLINE_FUNCTION auto size() const
+
+  KOKKOS_INLINE_FUNCTION auto ssize() const
   {
     return m_end - m_begin;
+  }
+
+  KOKKOS_INLINE_FUNCTION auto size() const
+  {
+    return static_cast<std::size_t>(ssize());
   }
 
   KOKKOS_INLINE_FUNCTION reference operator[](int i) const
@@ -290,13 +295,10 @@ public:
   {
     const auto& offsets_on_host = on_host(m_offsets);
     auto it = offsets_on_host.begin();
-    for_each<Kokkos::Serial>(
-        "compute_offsets()",
-        footprint(),
-        [&](std::integral auto... is) {
-          *it = m_in.offset(is...);
-          ++it;
-        });
+    for_each<Kokkos::Serial>("compute_offsets()", footprint(), [&](std::integral auto... is) {
+      *it = m_in.offset(is...);
+      ++it;
+    });
     Kokkos::deep_copy(m_offsets.container(), offsets_on_host.container());
   }
 
