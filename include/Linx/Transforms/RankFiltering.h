@@ -116,7 +116,7 @@ public:
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
       element_type out = neighbors[0];
-      for (std::size_t i = 1; i < neighbors.size(); ++i) {
+      for (int i = 1; i < neighbors.ssize(); ++i) {
         out = neighbors[i] < out ? neighbors[i] : out;
       }
       return out;
@@ -150,7 +150,7 @@ public:
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
       element_type out = neighbors[0];
-      for (std::size_t i = 1; i < neighbors.size(); ++i) {
+      for (int i = 1; i < neighbors.ssize(); ++i) {
         out = neighbors[i] > out ? neighbors[i] : out;
       }
       return out;
