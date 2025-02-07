@@ -49,7 +49,7 @@ namespace Linx {
  * By default, images may be allocated on device, e.g. GPU.
  * They can be copied to the host with `to_host()`, which is a no-op if the image is already on the host.
  */
-template <typename T, int N, typename TContainer = typename DefaultContainer<T, N>::Image>
+template <typename T, int N, typename TContainer = ImageContainer<T, N>>
 class Image :
     public DataMixin<T, EuclidArithmetic, Image<T, N, TContainer>>,
     public RangeMixin<is_contiguous<TContainer>(), T, Image<T, N, TContainer>> {
@@ -478,7 +478,7 @@ auto end(const Image<T, N, TContainer>& image)
  * Said otherwise, the stride along axis 0 is 1.
  */
 template <typename T, int N = 2>
-using Raster = Image<T, N, typename DefaultContainer<T, N, Kokkos::LayoutLeft, Kokkos::HostSpace>::Image>;
+using Raster = Image<T, N, ImageContainer<T, N, Kokkos::LayoutLeft, Kokkos::HostSpace>>;
 
 } // namespace Linx
 

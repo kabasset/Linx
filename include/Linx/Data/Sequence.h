@@ -27,7 +27,7 @@ namespace Linx {
  * @tparam T The element value type
  * @tparam N The size, or -1 for runtime size
  */
-template <typename T, int N = -1, typename TContainer = typename DefaultContainer<T, N>::Sequence>
+template <typename T, int N = -1, typename TContainer = SequenceContainer<T, N>>
 class Sequence :
     public DataMixin<T, EuclidArithmetic, Sequence<T, N, TContainer>>,
     public RangeMixin<true, T, Sequence<T, N, TContainer>> {
@@ -264,13 +264,13 @@ private:
   Container m_container;
 };
 
-template <typename T, int N, typename TContainer = typename DefaultContainer<T, N>::Sequence>
+template <typename T, int N, typename TContainer = SequenceContainer<T, N>>
 Sequence(T (&&)[N]) -> Sequence<T, N, TContainer>;
 
-template <typename T, int N, typename TContainer = typename DefaultContainer<T, N>::Sequence>
+template <typename T, int N, typename TContainer = SequenceContainer<T, N>>
 Sequence(const std::string&, T (&&)[N]) -> Sequence<T, N, TContainer>;
 
-template <typename T, int N, typename TContainer = typename DefaultContainer<T, N>::Sequence>
+template <typename T, int N, typename TContainer = SequenceContainer<T, N>>
 Sequence(const char*, T (&&)[N]) -> Sequence<T, N, TContainer>;
 
 /**
@@ -329,10 +329,7 @@ template <ArrayLike TIn, ArrayLike TOut>
 void copy_to(const TIn& in, const TOut& out)
 {
   auto domain = Slice(0, std::min<int>(std::size(in), std::size(out)));
-  for_each<typename TIn::execution_space>(
-      "copy_to()",
-      domain,
-      KOKKOS_LAMBDA(int i) { out[i] = in[i]; });
+  for_each<typename TIn::execution_space>("copy_to()", domain, KOKKOS_LAMBDA(int i) { out[i] = in[i]; });
 }
 
 /**
@@ -363,7 +360,7 @@ auto resize(const ArrayLike auto& in) // FIXME make_sequence? crop_or_pad? CTor?
 }
 
 template <typename T, int N>
-using GPosition = Sequence<T, N, typename DefaultContainer<T, N, Kokkos::HostSpace>::Sequence>;
+using GPosition = Sequence<T, N, SequenceContainer<T, N, Kokkos::HostSpace>>;
 
 template <int N>
 using Position = GPosition<Index, N>;

@@ -14,44 +14,59 @@
 namespace Linx {
 
 /**
- * @brief Mapping between type and rank and container classes.
+ * Default sequence container instance.
  */
 template <typename T, int N, typename... TArgs>
-struct DefaultContainer {
-  using Sequence = Kokkos::View<T[N], TArgs...>;
-  // std::max used to help NVCC which doesn't like recursion
-  using Image = Kokkos::View<typename DefaultContainer<T, std::max(0, N - 1)>::Image::data_type*, TArgs...>;
-  // FIXME fall back to Raster for N > 8
-  // FIXME fall back to Raster for N = -1 & dimension > 7
-};
+auto default_sequence_container()
+{
+  if constexpr (N == -1 || N == 0) {
+    return Kokkos::View<T*, TArgs...>();
+  } else {
+    return Kokkos::View<T[N], TArgs...>();
+  }
+}
 
 /**
- * @brief Rank-1 specialization.
+ * Default sequence container type.
  */
-template <typename T, typename... TArgs>
-struct DefaultContainer<T, 1, TArgs...> {
-  using Sequence = Kokkos::View<T[1], TArgs...>;
-  using Image = Kokkos::View<T*, TArgs...>;
-  // FIXME using Index = Kokkos::RangePolicy<TArgs...>::index_type;
-};
+template <typename T, int N, typename... TArgs>
+using SequenceContainer = decltype(default_sequence_container<T, N, TArgs...>());
 
 /**
- * @brief Rank-0 specialization.
+ * Default image container instance.
  */
-template <typename T, typename... TArgs>
-struct DefaultContainer<T, 0, TArgs...> {
-  using Sequence = Kokkos::View<T*, TArgs...>;
-  using Image = Kokkos::View<T*, TArgs...>;
-};
+template <typename T, int N, typename... TArgs>
+auto default_image_container()
+{
+  // We avoid recursion to make NVCC happier
+  if constexpr (N == -1) {
+    return Kokkos::DynRankView<T, TArgs...>();
+  } else if constexpr (N == 0 || N == 1) {
+    return Kokkos::View<T*, TArgs...>();
+  } else if constexpr (N == 2) {
+    return Kokkos::View<T**, TArgs...>();
+  } else if constexpr (N == 3) {
+    return Kokkos::View<T***, TArgs...>();
+  } else if constexpr (N == 4) {
+    return Kokkos::View<T****, TArgs...>();
+  } else if constexpr (N == 5) {
+    return Kokkos::View<T*****, TArgs...>();
+  } else if constexpr (N == 6) {
+    return Kokkos::View<T******, TArgs...>();
+  } else if constexpr (N == 7) {
+    return Kokkos::View<T*******, TArgs...>();
+  } else if constexpr (N == 8) {
+    return Kokkos::View<T********, TArgs...>();
+  }
+  // TODO? fall back to Raster for N > 8
+  // TODO? fall back to Raster for N = -1 & dimension > 7
+}
 
 /**
- * @brief Dynamic rank specialization.
+ * Default image container type.
  */
-template <typename T, typename... TArgs>
-struct DefaultContainer<T, -1, TArgs...> {
-  using Sequence = Kokkos::View<T*, TArgs...>;
-  using Image = Kokkos::DynRankView<T, TArgs...>;
-};
+template <typename T, int N, typename... TArgs>
+using ImageContainer = decltype(default_image_container<T, N, TArgs...>());
 
 /**
  * @brief Traits to rebind containers.

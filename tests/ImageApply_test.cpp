@@ -28,10 +28,7 @@ BOOST_AUTO_TEST_CASE(apply_test)
         b(i, j) = 3;
       });
 
-  a.apply(
-      "eval",
-      KOKKOS_LAMBDA(int ai, int bi) { return ai * ai + bi; },
-      b);
+  a.apply("eval", KOKKOS_LAMBDA(int ai, int bi) { return ai * ai + bi; }, b);
   Kokkos::fence();
 
   const auto& a_on_host = Linx::on_host(a);
@@ -46,8 +43,8 @@ BOOST_AUTO_TEST_CASE(copy_test)
 {
   const int width = 4;
   const int height = 3;
-  using Right = Linx::Image<int, 2, Linx::DefaultContainer<int, 2, Kokkos::LayoutRight>::Image>;
-  using Left = Linx::Image<int, 2, Linx::DefaultContainer<int, 2, Kokkos::LayoutLeft>::Image>;
+  using Right = Linx::Image<int, 2, Linx::ImageContainer<int, 2, Kokkos::LayoutRight>>;
+  using Left = Linx::Image<int, 2, Linx::ImageContainer<int, 2, Kokkos::LayoutLeft>>;
   auto right = Right("right", width, height).fill_with_offsets();
   auto left = Left("left", width, height).copy_from(right);
   Kokkos::fence();

@@ -15,7 +15,7 @@ LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
  * @brief Column-major, device-allocated image.
  */
 template <typename T, int N>
-using Matrix = Linx::Image<T, N, typename Linx::DefaultContainer<T, N, Kokkos::LayoutRight>::Image>;
+using Matrix = Linx::Image<T, N, Linx::ImageContainer<T, N, Kokkos::LayoutRight>>;
 
 BOOST_AUTO_TEST_CASE(min_max_test)
 {
