@@ -5,8 +5,6 @@
 #ifndef LINX_BASE_SELECTNET_H
 #define LINX_BASE_SELECTNET_H
 
-#include "Linx/Base/Algorithm.h" // InsertSort
-
 #include <Kokkos_Swap.hpp>
 #include <numeric> // midpoint
 
@@ -288,24 +286,6 @@ struct SelectNet<25> {
     Impl::sort_swap(in_out[10], in_out[12]);
 
     return in_out[12];
-  }
-};
-
-template <int N>
-struct SelectNet {
-  using Parity = std::conditional_t<(N % 2 == 0), EvenNumber, OddNumber>;
-  KOKKOS_INLINE_FUNCTION static decltype(auto) median(auto& in_out)
-  {
-    return Linx::median<Parity>(in_out);
-  }
-};
-
-template <>
-struct SelectNet<0> {
-  using Parity = Forward;
-  KOKKOS_INLINE_FUNCTION static decltype(auto) median(auto& in_out)
-  {
-    return Linx::median(in_out);
   }
 };
 

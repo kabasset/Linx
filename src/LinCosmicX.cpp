@@ -110,7 +110,7 @@ struct BackgroundLevel {
         gooddata.push_back(data_on_host(i, j));
       }
     });
-    return Linx::StdSort::nth(gooddata, gooddata.size() / 2);
+    return Linx::introselect_n(gooddata, gooddata.size() / 2);
   }
 };
 

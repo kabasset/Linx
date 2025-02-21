@@ -5,7 +5,6 @@
 #ifndef LINX_TRANSFORMS_MORPHOLOGY_H
 #define LINX_TRANSFORMS_MORPHOLOGY_H
 
-#include "Linx/Base/Algorithm.h"
 #include "Linx/Data/Image.h"
 #include "Linx/Data/Sequence.h"
 #include "Linx/Transforms/mixins/FilterMixin.h"

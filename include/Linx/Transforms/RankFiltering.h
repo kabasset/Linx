@@ -5,9 +5,8 @@
 #ifndef LINX_TRANSFORMS_RANKFILTERING_H
 #define LINX_TRANSFORMS_RANKFILTERING_H
 
-#include "Linx/Base/Algorithm.h"
 #include "Linx/Base/ArrayPool.h"
-#include "Linx/Base/SelectNet.h"
+#include "Linx/Base/Median.h"
 #include "Linx/Data/Image.h"
 #include "Linx/Data/Sequence.h"
 #include "Linx/Transforms/mixins/FilterMixin.h"
@@ -44,7 +43,7 @@ public:
       for (std::size_t i = 0; i < std::size(array); ++i) {
         array[i] = neighbors[i];
       }
-      return SelectNet<Size>::median(array); // FIXLE is it any faster than median()???
+      return median<Size>(array);
     }
   };
 };
