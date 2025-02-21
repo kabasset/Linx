@@ -136,6 +136,16 @@ using QuickTestTypes = std::tuple<bool, int, double, Kokkos::complex<float>>; //
 #define LINX_CRTP_CONST_DERIVED static_cast<const TDerived&>(*this)
 
 /**
+ * @brief Pre-C++23 `static_assert(false, message)`
+ */
+#ifndef __NVCC__
+#define LINX_STATIC_ASSERT_FALSE(message) \
+  []<bool DependentFalse = false>() { static_assert(DependentFalse, message); }()
+#else
+#define LINX_STATIC_ASSERT_FALSE(message)
+#endif
+
+/**
  * @brief Get the value type of a container.
  * 
  * If the container is constant, then the type is, too.
@@ -370,9 +380,7 @@ constexpr bool is_base_template_of()
 
 template <typename T>
 concept Labeled = requires(const T obj) // FIXME to Base/concepts
-{
-  obj.label();
-};
+{ obj.label(); };
 
 std::string label(const Labeled auto& in)
 {

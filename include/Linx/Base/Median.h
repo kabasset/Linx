@@ -14,7 +14,10 @@
 
 namespace Linx {
 
-static const auto& introselect_n(auto& in_out, Index n)
+/**
+ * @brief Find the n-th element of an array.
+ */
+static const auto& introselect_n(auto& in_out, std::integral auto n)
 {
   auto begin = &in_out[0];
   auto nth = begin + n;
@@ -23,7 +26,10 @@ static const auto& introselect_n(auto& in_out, Index n)
   return *nth;
 }
 
-static const auto& heapselect_n(auto& in_out, Index n)
+/**
+ * @brief Sort the n first elements of an array.
+ */
+static const auto& heapselect_n(auto& in_out, std::integral auto n)
 {
   auto begin = &in_out[0];
   auto nth = begin + n;
@@ -35,8 +41,9 @@ static const auto& heapselect_n(auto& in_out, Index n)
 /**
  * @brief Sort the n first values of an array.
  * 
- * While `std::nth_element()` typically relies on introselect, this function implements insertion-sort,
- * which has higher complexity but should be faster for small arrays, which is typically the case for rank-filtering.
+ * `std::nth_element()` typically relies on intro-select, and `std::partial_sort()` on heap-select.
+ * Insertion-sort has higher asymptotic complexity but should be faster for small arrays,
+ * which is typically the case for rank-filtering.
  */
 KOKKOS_INLINE_FUNCTION static const auto& insertsort_n(auto& in_out, std::integral auto n)
 {
@@ -63,11 +70,15 @@ KOKKOS_INLINE_FUNCTION auto median(auto& in_out)
 {
   if constexpr (std::is_same_v<TParity, OddNumber>) {
     return insertsort_n(in_out, std::size(in_out) / 2);
-  } else {
+  } else if constexpr (std::is_same_v<TParity, EvenNumber>) {
     const auto& high = insertsort_n(in_out, std::size(in_out) / 2);
     const auto& low = *(&high - 1);
     return std::midpoint(low, high);
+  } else {
+    LINX_STATIC_ASSERT_FALSE("Unsupported parity");
   }
+
+  // FIXME accept integral_constant?
 }
 
 /**
@@ -88,8 +99,10 @@ KOKKOS_INLINE_FUNCTION auto median(auto& in_out)
 template <std::integral auto N>
 KOKKOS_INLINE_FUNCTION auto median(auto& in_out)
 {
-  return SelectNet<N>::median(in_out);
+  return Impl::SelectNet<N>::median(in_out);
 }
+
+namespace Impl {
 
 template <int N>
 struct SelectNet {
@@ -100,6 +113,7 @@ struct SelectNet {
   }
 };
 
+} // namespace Impl
 } // namespace Linx
 
 #endif

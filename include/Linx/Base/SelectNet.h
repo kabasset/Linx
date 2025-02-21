@@ -9,7 +9,6 @@
 #include <numeric> // midpoint
 
 namespace Linx {
-
 namespace Impl {
 
 /**
@@ -21,8 +20,6 @@ KOKKOS_INLINE_FUNCTION void sort_swap(auto& a, auto& b)
     Kokkos::kokkos_swap(a, b);
   }
 }
-
-} // namespace Impl
 
 /**
  * @brief Selection network for fixed size arrays.
@@ -289,6 +286,7 @@ struct SelectNet<25> {
   }
 };
 
+} // namespace Impl
 } // namespace Linx
 
 #endif
