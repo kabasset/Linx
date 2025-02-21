@@ -61,11 +61,10 @@ KOKKOS_INLINE_FUNCTION static const auto& insertsort_n(auto& in_out, std::integr
 template <typename TParity>
 KOKKOS_INLINE_FUNCTION auto median(auto& in_out)
 {
-  const auto size = std::size(in_out);
   if constexpr (std::is_same_v<TParity, OddNumber>) {
     return insertsort_n(in_out, std::size(in_out) / 2);
   } else {
-    const auto& high = insertsort_n(in_out, size / 2 + 1);
+    const auto& high = insertsort_n(in_out, std::size(in_out) / 2);
     const auto& low = *(&high - 1);
     return std::midpoint(low, high);
   }
@@ -76,7 +75,7 @@ KOKKOS_INLINE_FUNCTION auto median(auto& in_out)
  */
 KOKKOS_INLINE_FUNCTION auto median(auto& in_out)
 {
-  if (in_out.size() % 2 == 0) {
+  if (std::size(in_out) % 2 == 0) {
     return median<EvenNumber>(in_out);
   } else {
     return median<OddNumber>(in_out);
