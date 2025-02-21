@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(even_random_test)
   BOOST_TEST(Linx::insertsort_n(a, 1) == 1);
   BOOST_TEST(not std::ranges::is_sorted(a));
   BOOST_TEST(std::ranges::is_sorted_until(a.data(), a.data() + 2));
-  BOOST_TEST(Linx::median(a) == 550);
+  BOOST_TEST(Linx::median(a) == 55);
   BOOST_TEST(std::ranges::is_sorted_until(a.data(), a.data() + 4));
   BOOST_TEST(Linx::insertsort_n(a, 5));
   BOOST_TEST(std::ranges::is_sorted(a));
