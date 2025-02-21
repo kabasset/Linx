@@ -11,21 +11,25 @@ The Linx library is licensed under [Apache-2.0](LICENSE.txt).
 Build Kokkos:
 
 ```sh
-cd <kokkos_clone_dir>
+export KOKKOS_SOURCE_DIR=<kokkos_source_dir>
+export KOKKOS_BUILD_DIR=<kokkos_build_dir>
+export KOKKOS_INSTALL_DIR=<kokkos_install_dir>
+
+cd $KOKKOS_SOURCE_DIR
 git clone https://github.com/kokkos/kokkos.git
 
-mkdir <kokkos_build_dir>
-cd <kokkos_build_dir>
-cmake <kokkos_clone_dir>/kokkos -DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_COMPILER=<kokkos_clone_dir>/bin/nvcc_wrapper -DCMAKE_INSTALL_PREFIX=<kokkos_install_dir> -DKokkos_ENABLE_SERIAL=ON [-DKokkos_ENABLE_OPENMP=ON] [-DKokkos_ENABLE_CUDA=ON -DKokkos_ENABLE_CUDA_CONSTEXPR=ON]
+mkdir $KOKKOS_BUILD_DIR
+cd $KOKKOS_BUILD_DIR
+cmake $KOKKOS_SOURCE_DIR/kokkos -DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_COMPILER=$KOKKOS_SOURCE_DIR/bin/nvcc_wrapper -DCMAKE_INSTALL_PREFIX=$KOKKOS_INSTALL_DIR -DKokkos_ENABLE_SERIAL=ON [-DKokkos_ENABLE_OPENMP=ON] [-DKokkos_ENABLE_CUDA=ON -DKokkos_ENABLE_CUDA_CONSTEXPR=ON]
 make install
 ```
 
-Build the Linx library and tests:
+Build the Linx library and tests, from the Linx source directory:
 
 ```sh
 mkdir build
 cd build
-cmake .. -DCMAKE_PREFIX_PATH=<kokkos_install_dir>
+cmake .. -DCMAKE_PREFIX_PATH=$KOKKOS_INSTALL_DIR
 make
 make test
 ```
