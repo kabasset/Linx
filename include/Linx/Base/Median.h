@@ -17,7 +17,7 @@ namespace Linx {
 /**
  * @brief Find the n-th element of an array.
  */
-static const auto& introselect_n(auto& in_out, std::integral auto n)
+const auto& introselect_n(auto& in_out, std::integral auto n)
 {
   auto begin = &in_out[0];
   auto nth = begin + n;
@@ -29,7 +29,7 @@ static const auto& introselect_n(auto& in_out, std::integral auto n)
 /**
  * @brief Sort the n first elements of an array.
  */
-static const auto& heapselect_n(auto& in_out, std::integral auto n)
+const auto& heapselect_n(auto& in_out, std::integral auto n)
 {
   auto begin = &in_out[0];
   auto nth = begin + n;
@@ -45,7 +45,7 @@ static const auto& heapselect_n(auto& in_out, std::integral auto n)
  * Insertion-sort has higher asymptotic complexity but should be faster for small arrays,
  * which is typically the case for rank-filtering.
  */
-KOKKOS_INLINE_FUNCTION static const auto& insertsort_n(auto& in_out, std::integral auto n)
+KOKKOS_INLINE_FUNCTION const auto& insertsort_n(auto& in_out, std::integral auto n)
 {
   using T = std::remove_cvref_t<decltype(in_out[0])>;
   T current;
@@ -104,6 +104,9 @@ KOKKOS_INLINE_FUNCTION auto median(auto& in_out)
 
 namespace Impl {
 
+/**
+ * @brief Fall back to parity-aware median if select net is not implemented for `N`.
+ */
 template <int N>
 struct SelectNet {
   using Parity = std::conditional_t<(N % 2 == 0), EvenNumber, OddNumber>;
