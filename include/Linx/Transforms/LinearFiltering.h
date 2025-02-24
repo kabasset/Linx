@@ -9,7 +9,6 @@
 #include "Linx/Data/Sequence.h"
 #include "Linx/Transforms/mixins/FilterMixin.h"
 
-#include <Kokkos_StdAlgorithms.hpp>
 #include <concepts>
 #include <string>
 
@@ -37,7 +36,11 @@ public:
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      return std::reduce(neighbors.begin(), neighbors.end());
+      value_type out {};
+      for (const auto& e : neighbors) {
+        out += e;
+      }
+      return out;
     }
   };
 };
@@ -64,7 +67,11 @@ public:
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      return std::reduce(neighbors.begin(), neighbors.end()) / this->m_offsets.size();
+      value_type out {};
+      for (const auto& e : neighbors) {
+        out += e;
+      }
+      return out / this->m_offsets.size();
     }
   };
 };
@@ -72,7 +79,8 @@ public:
 namespace Impl {
 
 struct Conjugate {
-  KOKKOS_INLINE_FUNCTION auto operator()(const auto& e) const {
+  KOKKOS_INLINE_FUNCTION auto operator()(const auto& e) const
+  {
     return Kokkos::conj(e);
   }
 };
@@ -117,7 +125,8 @@ public:
     // Cannot be private
     // Cannot be the ctor (must take address)
     // FIXME free function? Nested Conjugate?
-    void conjugate_impl() const {
+    void conjugate_impl() const
+    {
       this->m_weights.apply("conjugate", Impl::Conjugate());
     }
   };
