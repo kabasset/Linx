@@ -42,14 +42,11 @@ if(DOXYGEN_FOUND)
   configure_file(${DOXYFILE_IN} ${DOXYFILE_OUT} @ONLY) # Interpolate Doxyfile
   file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT_DIR})
 
-  add_custom_command(
-    OUTPUT ${DOXYGEN_INDEX_FILE}
+  add_custom_target(doc ALL
     COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
-    MAIN_DEPENDENCY ${DOXYFILE_OUT} ${DOXYFILE_IN}
-    COMMENT "Generating Doxygen documentation"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Generating API documentation with Doxygen"
     VERBATIM)
-
-  add_custom_target(doc DEPENDS ${DOXYGEN_INDEX_FILE})
 endif(DOXYGEN_FOUND)
 
 # Executables
