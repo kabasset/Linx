@@ -8,7 +8,8 @@ The Linx library is licensed under [Apache-2.0](LICENSE.txt).
 
 ## Build
 
-Build Kokkos:
+Kokkos can be built from sources as follows.
+Note that the serial execution space must be enabled, while OpenMP and Cuda are optional.
 
 ```sh
 export KOKKOS_SOURCE_DIR=<kokkos_source_dir>
@@ -20,11 +21,16 @@ git clone https://github.com/kokkos/kokkos.git
 
 mkdir $KOKKOS_BUILD_DIR
 cd $KOKKOS_BUILD_DIR
-cmake $KOKKOS_SOURCE_DIR/kokkos -DCMAKE_CXX_STANDARD=20 -DCMAKE_CXX_COMPILER=$KOKKOS_SOURCE_DIR/bin/nvcc_wrapper -DCMAKE_INSTALL_PREFIX=$KOKKOS_INSTALL_DIR -DKokkos_ENABLE_SERIAL=ON [-DKokkos_ENABLE_OPENMP=ON] [-DKokkos_ENABLE_CUDA=ON -DKokkos_ENABLE_CUDA_CONSTEXPR=ON]
+cmake $KOKKOS_SOURCE_DIR/kokkos -DCMAKE_CXX_STANDARD=20 \
+  -DCMAKE_CXX_COMPILER=$KOKKOS_SOURCE_DIR/bin/nvcc_wrapper -DCMAKE_INSTALL_PREFIX=$KOKKOS_INSTALL_DIR \
+  -DKokkos_ENABLE_SERIAL=ON \
+  [-DKokkos_ENABLE_OPENMP=ON] \
+  [-DKokkos_ENABLE_CUDA=ON -DKokkos_ENABLE_CUDA_CONSTEXPR=ON]
 make install
 ```
 
-Build the Linx library and tests, from the Linx source directory:
+Assuming the Linx sources have been cloned or downloaded,
+the following commands can be run from the source directory for building, testing and installing the library and executables.
 
 ```sh
 mkdir build
@@ -32,6 +38,7 @@ cd build
 cmake .. -DCMAKE_PREFIX_PATH=$KOKKOS_INSTALL_DIR
 make
 make test
+make install
 ```
 
 ## Design concepts
