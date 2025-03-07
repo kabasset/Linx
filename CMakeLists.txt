@@ -42,7 +42,7 @@ if(DOXYGEN_FOUND)
   configure_file(${DOXYFILE_IN} ${DOXYFILE_OUT} @ONLY) # Interpolate Doxyfile
   file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT_DIR})
 
-  add_custom_target(doc ALL
+  add_custom_target(doc
     COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Generating API documentation with Doxygen"
