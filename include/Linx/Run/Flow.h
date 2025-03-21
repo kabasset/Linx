@@ -153,7 +153,7 @@ public:
   /**
    * Get the i-th value.
    */
-  template <std::size_t I>
+  template <auto I>
   decltype(auto) get()
   {
     return std::get<I>(m_values);
@@ -164,7 +164,7 @@ public:
    */
   auto append(auto&&... values)
   {
-    return make_state("Input", std::tuple_cat(m_values, std::make_tuple(LINX_FORWARD(values)...)));
+    return make_state<Append>("Input", std::forward_as_tuple(values...));
   }
 
   /**
@@ -172,7 +172,7 @@ public:
    */
   auto prepend(auto&&... values)
   {
-    return make_state("Input", std::tuple_cat(std::make_tuple(LINX_FORWARD(values)...), m_values));
+    return make_state<Prepend>("Input", std::forward_as_tuple(values...));
   }
 
   /**
@@ -181,17 +181,18 @@ public:
    * @tparam TPolicy The transition policy (`Overwrite`, `Append` or `Prepend`)
    */
   template <typename TPolicy = Overwrite> // FIXME allow Insert<I>?
-  auto run(auto task) // FIXME variadic
+  auto run(auto&& task) // FIXME variadic
   {
     auto task_label = label(task);
-    auto out = eval(LINX_MOVE(task), LINX_MOVE(m_values), std::make_index_sequence<sizeof...(TValues)>());
-    if constexpr (std::is_same_v<TPolicy, Overwrite>) {
-      return make_state(task_label, LINX_MOVE(out)); // NVCC is confused with CTAD, so we need a helper function
-    } else if constexpr (std::is_same_v<TPolicy, Append>) {
-      return make_state(task_label, std::tuple_cat(out, m_values));
-    } else if constexpr (std::is_same_v<TPolicy, Prepend>) {
-      return make_state(task_label, std::tuple_cat(m_values, out));
-    }
+    auto out = eval(LINX_FORWARD(task), m_values, std::make_index_sequence<sizeof...(TValues)>());
+    return make_state<TPolicy>(task_label, LINX_MOVE(out));
+  }
+
+  template <typename TPolicy = Overwrite>
+  auto run(auto&& task0, auto&&... tasks)
+  {
+    return run<TPolicy>(LINX_FORWARD(task0)).template run<TPolicy>(LINX_FORWARD(tasks)...);
+    //FIXME run<Next<TPolicy>>(tasks...)
   }
 
   /**
@@ -210,21 +211,29 @@ public:
     return run<Prepend>(LINX_FORWARD(tasks)...);
   }
 
-  /**
-   * Run element-wise functions in place.
-   */
+  template <typename TPolicy = Overwrite>
   auto generate(auto... funcs)
   {
-    return run(Pipeline::Generate(LINX_MOVE(funcs)...)); // FIXME simplify implementation
+    return run<TPolicy>(Pipeline::Generate(LINX_MOVE(funcs)...)); // FIXME simplify implementation
+  }
+
+  auto append_generate(auto&&... funcs)
+  {
+    return generate<Append>(LINX_FORWARD(funcs)...);
+  }
+
+  auto prepend_generate(auto&&... funcs)
+  {
+    return generate<Prepend>(LINX_FORWARD(funcs)...);
   }
 
   /**
    * Apply an element-wise functions as a new instance.
    */
   template <typename TPolicy = Overwrite>
-  auto apply(auto... funcs)
+  auto apply(auto&&... funcs)
   {
-    return run(Pipeline::Apply(LINX_MOVE(funcs)...)); // FIXME simplify implementation
+    return run<TPolicy>(Pipeline::Apply(LINX_FORWARD(funcs)...)); // FIXME simplify implementation
   }
 
   /**
@@ -247,9 +256,9 @@ public:
    * Restrict the state domain.
    */
   template <typename T>
-  auto domain(Span<T>&& span)
+  auto domain(const Span<T>& span)
   {
-    return run(Pipeline::Impl::RestrictSequence(LINX_FORWARD(span))); // FIXME simplify implementation
+    return make_state<Overwrite>("Domain", sequences_domain(span, std::make_index_sequence<sizeof...(TValues)>()));
   }
 
   /**
@@ -263,27 +272,57 @@ public:
 
 private:
 
-  template <typename... Ts>
+  template <std::size_t... Is>
+  auto sequences_domain(const auto& span, std::index_sequence<Is...>) const
+  {
+    return std::tuple(sequence_domain(span, std::get<Is>(m_values))...);
+  }
+
+  template <typename TIn>
+  auto sequence_domain(const auto& span, const TIn& in) const
+  {
+    using T = std::remove_cvref_t<typename TIn::value_type>;
+    return Sequence<T, -1>(label(in), span.size()).copy_from(in);
+    // FIXME offset
+  }
+
+private:
+
+  /**
+   * Make a new multivalued state.
+   */
+  template <typename TPolicy, typename... Ts>
   auto make_state(const std::string& label, std::tuple<Ts...>&& values)
   {
-    return Flow<TContext, Ts...>(m_context, label, LINX_FORWARD(values));
+    if constexpr (std::is_same_v<TPolicy, Overwrite>) {
+      return Flow<TContext, Ts...>(m_context, label, LINX_FORWARD(values));
+    } else if constexpr (std::is_same_v<TPolicy, Append>) {
+      return make_state<Overwrite>(label, std::tuple_cat(m_values, LINX_FORWARD(values)));
+    } else if constexpr (std::is_same_v<TPolicy, Prepend>) {
+      return make_state<Overwrite>(label, std::tuple_cat(LINX_FORWARD(values), m_values));
+    }
   }
 
-  template <typename T>
-  auto make_state(const std::string& label, T&& value)
+  /**
+   * Make a new single-valued state.
+   */
+  template <typename TPolicy>
+  auto make_state(const std::string& label, auto&& value)
   {
-    return Flow<TContext, T>(m_context, label, LINX_FORWARD(value));
+    return make_state<TPolicy>(label, std::tuple(LINX_FORWARD(value)));
   }
 
+  /**
+   * Helper method to unroll indices.
+   */
   template <std::integral auto... Is, typename TTask>
-  static decltype(auto) eval(TTask task, auto&& values, std::index_sequence<Is...>)
+  static decltype(auto) eval(TTask&& task, auto&& values, std::index_sequence<Is...>)
   {
-    return LINX_MOVE(task)(std::get<Is>(LINX_FORWARD(values))...);
+    return LINX_FORWARD(task)(std::get<Is>(LINX_FORWARD(values))...);
   }
 
-  TContext m_context;
-  std::tuple<TValues...> m_values;
-  bool m_stopped = false;
+  TContext m_context; ///< The workflow context
+  std::tuple<TValues...> m_values; ///< The state values
 };
 
 template <typename TLogger = void>

@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(sequence_api_test)
           .domain(Linx::Slice(0, size))
           .apply(Linx::Add(2), Linx::Multiply(3));
   logger("Done");
-  BOOST_TEST((out.ssize() == size));
+  BOOST_TEST(out.ssize() == size);
   BOOST_TEST(out.contains_only(9));
 }
 
@@ -61,9 +61,9 @@ BOOST_AUTO_TEST_CASE(diadic_test)
   BOOST_TEST(out.contains_only(3));
 }
 
-BOOST_AUTO_TEST_CASE(apend_test)
+BOOST_AUTO_TEST_CASE(append_test)
 {
-  auto [a, b, c, d] = Linx::Flow("Prepend").append('a', 'b').append('c', 'd');
+  auto [a, b, c, d] = Linx::Flow("Append").append('a', 'b').append('c', 'd');
   BOOST_TEST(a == 'a');
   BOOST_TEST(b == 'b');
   BOOST_TEST(c == 'c');
