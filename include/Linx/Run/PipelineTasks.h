@@ -33,7 +33,7 @@ public:
   auto operator()(const TIn& in) const
   {
     using T = std::remove_cvref_t<typename TIn::value_type>;
-    return Sequence<T>(label(), m_domain.size()).copy_from(in);
+    return Sequence<T, -1>(label(), m_domain.size()).copy_from(in);
     // FIXME offset
   }
 

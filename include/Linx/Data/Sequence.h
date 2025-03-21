@@ -27,7 +27,7 @@ namespace Linx {
  * @tparam T The element value type
  * @tparam N The size, or -1 for runtime size
  */
-template <typename T, int N = -1, typename TContainer = SequenceContainer<T, N>>
+template <typename T, int N, typename TContainer = SequenceContainer<T, N>>
 class Sequence :
     public DataMixin<T, EuclidArithmetic, Sequence<T, N, TContainer>>,
     public RangeMixin<true, T, Sequence<T, N, TContainer>> {
@@ -346,7 +346,7 @@ auto generate(const std::string& label, const auto& func)
 auto generate(const std::string& label, const auto& func, Index size)
 {
   using T = std::remove_cvref_t<decltype(func())>;
-  return Sequence<T>(label, size).generate("generate", func); // FIXME uninitialized
+  return Sequence<T, -1>(label, size).generate("generate", func); // FIXME uninitialized
 }
 
 template <int M>

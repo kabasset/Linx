@@ -38,8 +38,8 @@ LINX_TEST_CASE_TEMPLATE(static_empty_test)
 
 LINX_TEST_CASE_TEMPLATE(dynamic_empty_test)
 {
-  check_ctor<-1>(Linx::Sequence<T>(), "", 0);
-  check_ctor<-1>(Linx::Sequence<T>("s"), "s", 0);
+  check_ctor<-1>(Linx::Sequence<T, -1>(), "", 0);
+  check_ctor<-1>(Linx::Sequence<T, -1>("s"), "s", 0);
 }
 
 LINX_TEST_CASE_TEMPLATE(static_singleton_fill_test)
@@ -70,8 +70,8 @@ LINX_QUICK_TEST_CASE_TEMPLATE(static_singleton_one_test)
 
 LINX_TEST_CASE_TEMPLATE(dynamic_singleton_fill_test)
 {
-  check_ctor<-1>(Linx::Sequence<T>(1).fill(1), "", 1);
-  check_ctor<-1>(Linx::Sequence<T>("s", 1).fill(1), "s", 1);
+  check_ctor<-1>(Linx::Sequence<T, -1>(1).fill(1), "", 1);
+  check_ctor<-1>(Linx::Sequence<T, -1>("s", 1).fill(1), "s", 1);
 }
 
 LINX_QUICK_TEST_CASE_TEMPLATE(dynamic_singleton_list_test)
@@ -108,8 +108,8 @@ LINX_QUICK_TEST_CASE_TEMPLATE(static_multiple_list_test)
 
 LINX_TEST_CASE_TEMPLATE(dynamic_multiple_fill_test)
 {
-  check_ctor<-1>(Linx::Sequence<T>(3).fill(1), "", 3);
-  check_ctor<-1>(Linx::Sequence<T>("s", 3).fill(1), "s", 3);
+  check_ctor<-1>(Linx::Sequence<T, -1>(3).fill(1), "", 3);
+  check_ctor<-1>(Linx::Sequence<T, -1>("s", 3).fill(1), "s", 3);
 }
 
 LINX_QUICK_TEST_CASE_TEMPLATE(dynamic_multiple_list_test)
@@ -120,7 +120,7 @@ LINX_QUICK_TEST_CASE_TEMPLATE(dynamic_multiple_list_test)
 
 BOOST_AUTO_TEST_CASE(sequence_of_strings_test)
 {
-  auto empty = Linx::Sequence<std::string>("empty");
+  auto empty = Linx::Sequence<std::string, -1>("empty");
   BOOST_TEST(empty.size() == 0);
   auto singleton = Linx::Sequence<std::string, 1>("singleton", "a");
   BOOST_TEST(singleton.size() == 1);
