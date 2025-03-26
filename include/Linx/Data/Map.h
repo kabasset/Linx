@@ -16,11 +16,66 @@
 
 namespace Linx {
 
+template <int N>
+class Path {
+public:
+
+  static constexpr int n = N;
+  using size_type = std::size_t;
+
+  Path(const std::string& label, std::integral auto size) : m_label(label), m_path(size) {}
+
+  size_type size() const
+  {
+    return m_path.size();
+  }
+
+  auto ssize() const
+  {
+    return static_cast<std::make_signed_t<size_type>>(size());
+  }
+
+  decltype(auto) operator[](auto i) const
+  {
+    return m_path[i];
+  }
+
+  decltype(auto) operator[](auto i)
+  {
+    return m_path[i];
+  }
+
+  auto begin() const
+  {
+    return m_path.begin();
+  }
+
+  auto begin()
+  {
+    return m_path.begin();
+  }
+
+  auto end() const
+  {
+    return m_path.end();
+  }
+
+  auto end()
+  {
+    return m_path.end();
+  }
+
+private:
+
+  std::string m_label;
+  std::vector<Position<N>> m_path; // FIXME Kokkos::View?
+};
+
 /**
  * @brief Mapping from positions to values.
  */
 template <typename T, int N>
-class Map : DataMixin<T, void, Map<T, N>>, RangeMixin<true, T, Map<T, N>> { // FIXME arithmetic
+class Map : DataMixin<T, void, Map<T, N>>, RangeMixin<true, T, Map<T, N>> { // FIXME arithmetic // FIXME GMap?
 public:
 
   using value_type = T;
@@ -35,7 +90,7 @@ public:
   Map(const std::string& label = "") : m_label(label), m_map() {}
 
   /**
-   * @brief The map label.
+   * @brief Map label.
    */
   KOKKOS_INLINE_FUNCTION const std::string& label() const
   {
@@ -43,7 +98,17 @@ public:
   }
 
   /**
-   * @brief The domain size.
+   * @brief Domain rank.
+   * 
+   * @warning The rank is undefined if the domain is empty.
+   */
+  KOKKOS_INLINE_FUNCTION auto rank() const
+  {
+    return begin()->rank();
+  }
+
+  /**
+   * @brief Domain size.
    */
   KOKKOS_INLINE_FUNCTION size_type size() const
   {
@@ -51,7 +116,7 @@ public:
   }
 
   /**
-   * @brief The domain size.
+   * @brief Domain size.
    */
   KOKKOS_INLINE_FUNCTION auto ssize() const
   {
@@ -59,11 +124,11 @@ public:
   }
 
   /**
-   * @brief Get the sequence of positions in the map (shallow copy).
+   * @brief Sequence of positions in the map (shallow copy).
    */
   auto domain() const
   {
-    auto out = Sequence<Position<N>, -1>(compose_label("domain", m_label), size());
+    auto out = Path<N>(compose_label("domain", m_label), ssize());
     auto it = out.begin();
     for (auto kv : m_map) {
       *it = kv.first;
@@ -73,11 +138,11 @@ public:
   }
 
   /**
-   * @brief Get the sequence of values in the map.
+   * @brief Sequence of values in the map.
    */
   auto values() const
   {
-    auto out = Sequence<T, -1>(compose_label("values", m_label), size());
+    auto out = GPosition<T, -1>(compose_label("values", m_label), size()); // FIXME Sequence
     auto it = out.begin();
     for (auto kv : m_map) {
       *it = kv.second;
@@ -105,9 +170,14 @@ public:
   /**
    * @brief Access the element at given position.
    */
-  reference operator()(std::integral auto... is) const // FIXME KOKKOS_INLINE_FUNCTION
+  KOKKOS_INLINE_FUNCTION reference operator()(std::integral auto... is) const
   {
-    return operator[]({is...}); // FIXME no assignment, implement loop
+    for (auto& pair : m_map) {
+      if (pair.first.equal(is...)) {
+        return const_cast<reference>(pair.second); // Mutable element
+      }
+    }
+    throw std::out_of_range("FIXME"); // FIXME message
   }
 
   /**
@@ -120,7 +190,7 @@ public:
         return const_cast<reference>(pair.second); // Mutable element
       }
     }
-    throw std::out_of_range(p.label());
+    throw std::out_of_range(p.label()); // FIXME p to string
   }
 
   /**
@@ -141,15 +211,50 @@ private:
   std::vector<std::pair<Position<N>, T>> m_map; ///< The position-value pairs
 };
 
-/**
- * @brief Perform a shallow copy of a sequence, as a readonly sequence.
- * 
- * If the input sequence is aleady readonly, then this is a no-op.
- */
 template <typename T, int N>
 KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Map<T, N>& in)
 {
-  return in; // FIXME
+  return in; // FIXME const value_type
+}
+
+template <typename T, int N>
+KOKKOS_INLINE_FUNCTION decltype(auto) on_host(const Map<T, N>& in)
+{
+  return in; // FIXME can `in` be on device?
+}
+
+/**
+ * @brief Get the bounding box of a sequence of positions.
+ */
+template <int N>
+auto box(const Path<N>& in)
+{
+  auto it = in.begin();
+  auto out = Box(*it, *it);
+  for (++it; it != in.end(); ++it) {
+    const auto& p = *it;
+    for (std::size_t i = 0; i < p.size(); ++i) {
+      auto& fi = out.start(i);
+      auto& bi = out.stop(i);
+      auto pi = p[i];
+      fi = std::min(fi, pi);
+      bi = std::max(bi, pi);
+    }
+  }
+  return out;
+}
+
+/**
+ * @brief Apply a function to each element of the domain.
+ * @tparam TSpace The execution space
+ */
+template <typename TSpace = Kokkos::DefaultExecutionSpace, int N>
+void for_each(const std::string& label, const Path<N>& region, auto func)
+{
+  for_each<TSpace>(
+      label,
+      Slice(0L, region.ssize()), // FIXME accept different types
+      KOKKOS_LAMBDA(std::integral auto i) { func(region[i][0], region[i][1]); }); // FIXME n-dim
 }
 
 } // namespace Linx

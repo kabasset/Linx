@@ -44,7 +44,15 @@ struct RangeMixin {};
 template <typename T, typename TDerived>
 struct RangeMixin<true, T, TDerived> {
   /**
-   * @brief Copie values.
+   * @brief Test equality with values.
+   */
+  KOKKOS_INLINE_FUNCTION bool equal(std::convertible_to<T> auto... values) const
+  {
+    return equal_impl(forward_as_tuple(values...), std::make_index_sequence<sizeof...(values)>());
+  }
+
+  /**
+   * @brief Copy values.
    */
   KOKKOS_INLINE_FUNCTION const TDerived& assign(std::convertible_to<T> auto... values) const
   {
@@ -129,6 +137,13 @@ struct RangeMixin<true, T, TDerived> {
   }
 
   /// @cond
+
+  template <std::size_t... Is>
+  KOKKOS_INLINE_FUNCTION bool equal_impl(const auto& values, std::index_sequence<Is...>) const
+  {
+    const auto& container = LINX_CRTP_CONST_DERIVED.container();
+    return ((container(Is) == get<Is>(values)) && ...);
+  }
 
   /**
    * @brief Helper function for unfolding pack.
