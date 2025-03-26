@@ -416,7 +416,7 @@ private:
   value_type m_stop; ///< The stop bound
 };
 
-GBox()->GBox<int, 0>;
+GBox() -> GBox<int, 0>;
 
 template <typename T, int N>
 GBox(T (&&)[N]) -> GBox<T, N>;
@@ -541,6 +541,17 @@ auto box_impl(const TSlice& slice, std::index_sequence<Is...>)
 }
 
 } // namespace Impl
+
+/**
+ * @brief Get the bounding box of a box.
+ * 
+ * This function is provided for compatibility, it merely forwards its input.
+ */
+template <typename T, int N>
+const GBox<T, N>& box(const GBox<T, N>& in)
+{
+  return in;
+}
 
 /**
  * @brief Get the bounding box of a slice.
