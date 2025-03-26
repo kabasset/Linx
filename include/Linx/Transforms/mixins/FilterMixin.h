@@ -309,7 +309,8 @@ public:
 
   auto domain() const
   {
-    return Box(m_in.domain().start() - footprint().start(), m_in.domain().stop() - footprint().stop() + 1);
+    auto bbox = box(footprint());
+    return Box(m_in.domain().start() - bbox.start(), m_in.domain().stop() - bbox.stop() + 1);
   }
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
@@ -403,7 +404,8 @@ public:
 
   auto domain() const
   {
-    return Box(m_in.domain().start() - footprint().start(), m_in.domain().stop() - footprint().stop() + 1);
+    auto bbox = box(footprint());
+    return Box(m_in.domain().start() - bbox.start(), m_in.domain().stop() - bbox.stop() + 1);
   }
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const

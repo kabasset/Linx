@@ -6,6 +6,7 @@
 #define LINX_TRANSFORMS_LINEARFILTERING_H
 
 #include "Linx/Data/Image.h"
+#include "Linx/Data/Map.h"
 #include "Linx/Data/Sequence.h"
 #include "Linx/Transforms/mixins/FilterMixin.h"
 
@@ -166,6 +167,35 @@ public:
     }
   };
 };
+
+/**
+ * @brief Non-isotropic, separable Laplacian filter.
+ * 
+ * The kernel is a sum of kernels of the form `{s, -2 * s, s}`.
+ * For example, by default (`s = 1`), the 2D kernel is:
+ * ```
+ *  0  1  0
+ *  1 -2  1
+ *  0  1  0
+ * ```
+ * 
+ * The filter is implemented as a correlation, such that conjugation is involved when the kernel is complex-valued.
+ */
+template <std::integral auto... Is, typename T>
+auto separable_laplacian(T s = T(1))
+{
+  static constexpr auto N = std::max({Is...});
+  auto kernel = Map<T, N>();
+  for (auto i : {Is...}) {
+    auto p = Position<N>();
+    kernel[p] += -2 * s;
+    p[i] = -1;
+    kernel[p] = s;
+    p[i] = 1;
+    kernel[p] = s;
+  }
+  return Correlation(LINX_MOVE(kernel));
+}
 
 } // namespace Linx
 

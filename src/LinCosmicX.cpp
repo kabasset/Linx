@@ -191,7 +191,7 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
     auto [sp] =
         Linx::Flow("Compute S'", logger)
             .append(data)
-            .run(Linx::Upsample(2) /*, Linx::Laplacian<0, 1>()*/)
+            .run(Linx::Upsample(2), Linx::separable_laplacian<0, 1>(-1.))
             .apply(Linx::Max(T(0)))
             .run(Linx::MeanFilter(Linx::Box<2>({0, 0}, {2, 2})), Linx::Downsample(2))
             .append(noise)
