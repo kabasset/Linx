@@ -8,7 +8,7 @@ project(
   DESCRIPTION "Cross-platform ND image library")
 
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug)
+  set(CMAKE_BUILD_TYPE Release)
 endif()
 
 set(CMAKE_CXX_STANDARD 20)
@@ -137,6 +137,10 @@ add_test(ImageShift_test ImageShift_test)
 add_executable(LinearInterpolation_test tests/LinearInterpolation_test.cpp)
 target_link_libraries(LinearInterpolation_test Linx ${Boost_LIBRARIES})
 add_test(LinearInterpolation_test LinearInterpolation_test)
+
+add_executable(Map_test tests/Map_test.cpp)
+target_link_libraries(Map_test Linx ${Boost_LIBRARIES})
+add_test(Map_test Map_test)
 
 add_executable(Packs_test tests/Packs_test.cpp)
 target_link_libraries(Packs_test Linx ${Boost_LIBRARIES})
