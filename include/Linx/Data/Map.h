@@ -8,6 +8,7 @@
 #include "Linx/Base/Types.h"
 #include "Linx/Base/mixins/Data.h"
 #include "Linx/Base/mixins/Range.h"
+#include "Linx/Data/Image.h" // for ExpandPath
 #include "Linx/Data/Sequence.h"
 
 #include <concepts>
@@ -25,12 +26,22 @@ public:
 
   Path(const std::string& label, std::integral auto size) : m_label(label), m_path(size) {}
 
-  size_type size() const
+  KOKKOS_INLINE_FUNCTION std::string label() const
+  {
+    return m_label;
+  }
+
+  KOKKOS_INLINE_FUNCTION int rank() const
+  {
+    return m_path.begin()->ssize();
+  }
+
+  KOKKOS_INLINE_FUNCTION size_type size() const
   {
     return m_path.size();
   }
 
-  auto ssize() const
+  KOKKOS_INLINE_FUNCTION auto ssize() const
   {
     return static_cast<std::make_signed_t<size_type>>(size());
   }
@@ -43,6 +54,16 @@ public:
   decltype(auto) operator[](auto i)
   {
     return m_path[i];
+  }
+
+  decltype(auto) operator()(auto i, auto j) const
+  {
+    return m_path[i][j];
+  }
+
+  decltype(auto) operator()(auto i, auto j)
+  {
+    return m_path[i][j];
   }
 
   auto begin() const
@@ -68,8 +89,14 @@ public:
 private:
 
   std::string m_label;
-  std::vector<Position<N>> m_path; // FIXME Kokkos::View?
+  std::vector<Position<N>> m_path; // Resizable, converted to Image in for_each()
 };
+
+template <int N>
+KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Path<N>& in)
+{
+  return in; // FIXME const value_type
+}
 
 /**
  * @brief Mapping from positions to values.
@@ -238,11 +265,35 @@ auto box(const Path<N>& in)
       auto& bi = out.stop(i);
       auto pi = p[i];
       fi = std::min(fi, pi);
-      bi = std::max(bi, pi);
+      bi = std::max(bi, pi + 1);
     }
   }
   return out;
 }
+
+template <int N, typename TFunc> // FIXME support -1?
+struct ExpandPath {
+  ExpandPath(const Path<N>& path, TFunc func) : m_view("Path", path.size(), path.rank()), m_func(LINX_MOVE(func))
+  {
+    const auto& h = on_host(m_view);
+    h.copy_from(path);
+    Kokkos::deep_copy(m_view.container(), h.container()); // FIXME as method? in copy_from/to()?
+  }
+
+  KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto i) const
+  {
+    return apply_impl(i, std::make_index_sequence<N>());
+  }
+
+  template <std::size_t... Is>
+  KOKKOS_INLINE_FUNCTION auto apply_impl(auto i, std::index_sequence<Is...>) const
+  {
+    return m_func(m_view(i, Is)...);
+  }
+
+  Image<int, 2> m_view;
+  TFunc m_func;
+};
 
 /**
  * @brief Apply a function to each element of the domain.
@@ -253,8 +304,8 @@ void for_each(const std::string& label, const Path<N>& region, auto func)
 {
   for_each<TSpace>(
       label,
-      Slice(0L, region.ssize()), // FIXME accept different types
-      KOKKOS_LAMBDA(std::integral auto i) { func(region[i][0], region[i][1]); }); // FIXME n-dim
+      Slice(0L, region.ssize()), // FIXME accept different types in Slice
+      ExpandPath(region, func));
 }
 
 } // namespace Linx

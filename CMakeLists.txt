@@ -134,6 +134,10 @@ add_executable(ImageShift_test tests/ImageShift_test.cpp)
 target_link_libraries(ImageShift_test Linx ${Boost_LIBRARIES})
 add_test(ImageShift_test ImageShift_test)
 
+add_executable(Laplacian_test tests/Laplacian_test.cpp)
+target_link_libraries(Laplacian_test Linx ${Boost_LIBRARIES})
+add_test(Laplacian_test Laplacian_test)
+
 add_executable(LinearInterpolation_test tests/LinearInterpolation_test.cpp)
 target_link_libraries(LinearInterpolation_test Linx ${Boost_LIBRARIES})
 add_test(LinearInterpolation_test LinearInterpolation_test)

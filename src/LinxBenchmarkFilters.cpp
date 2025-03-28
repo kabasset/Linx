@@ -42,6 +42,8 @@ Linx::Image<T, 2> filter(const auto& in, const auto& k, const std::string& name)
     return Linx::MedianFilter<25, Linx::Box<2>>(k.domain())(in);
   } else if (name == "min") {
     return Linx::MinimumFilter(k.domain())(in);
+  } else if (name == "laplacian") {
+    return Linx::separable_laplacian<0, 1>()(in);
   } else {
     throw std::runtime_error(name); // FIXME Linx::UnknownCase
   }

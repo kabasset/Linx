@@ -181,10 +181,10 @@ public:
  * 
  * The filter is implemented as a correlation, such that conjugation is involved when the kernel is complex-valued.
  */
-template <std::integral auto... Is, typename T>
+template <std::integral auto... Is, typename T = int> // FIXME T = Forward
 auto separable_laplacian(T s = T(1))
 {
-  static constexpr auto N = std::max({Is...});
+  static constexpr auto N = std::max({Is...}) + 1;
   auto kernel = Map<T, N>();
   for (auto i : {Is...}) {
     auto p = Position<N>();
