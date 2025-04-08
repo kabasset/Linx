@@ -136,7 +136,11 @@ public:
   /**
    * @brief Constructor.
    */
-  Map(const std::string& label = "") : out_of_range(), m_label(label), m_map() {}
+  Map(const std::string& label = "") :
+      out_of_range(),
+      m_label(label),
+      m_map(new std::vector<Kokkos::pair<Position<N>, T>>())
+  {}
 
   /**
    * @brief Map label.
@@ -161,7 +165,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION size_type size() const
   {
-    return m_map.size();
+    return m_map->size();
   }
 
   /**
@@ -179,7 +183,7 @@ public:
   {
     auto out = Path<N>(compose_label("domain", m_label), ssize());
     auto it = out.begin();
-    for (auto kv : m_map) {
+    for (auto kv : *m_map) {
       it->assign(kv.first.begin());
       ++it;
     }
@@ -193,7 +197,7 @@ public:
   {
     auto out = GPosition<T, -1>(compose_label("values", m_label), size()); // FIXME Sequence?
     auto it = out.begin();
-    for (auto kv : m_map) {
+    for (auto kv : *m_map) {
       *it = kv.second;
       ++it;
     }
@@ -205,7 +209,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION decltype(auto) begin() const
   {
-    return m_map.begin();
+    return m_map->begin();
   }
 
   /**
@@ -213,7 +217,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION decltype(auto) end() const
   {
-    return m_map.end();
+    return m_map->end();
   }
 
   /**
@@ -221,7 +225,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION reference at(std::integral auto... is) const
   {
-    for (auto& pair : m_map) {
+    for (auto& pair : *m_map) {
       if (pair.first.equal(is...)) {
         return const_cast<reference>(pair.second); // Mutable element
       }
@@ -244,7 +248,7 @@ public:
   {
     auto ptr = &at(is...);
     if (ptr == &out_of_range) {
-      return m_map.emplace_back(Position<N> {is...}, T()).second;
+      return m_map->emplace_back(Position<N> {is...}, T()).second;
     }
     return *ptr;
   }
@@ -254,7 +258,7 @@ public:
    */
   reference at(const Position<N>& p) const
   {
-    for (auto& pair : m_map) {
+    for (auto& pair : *m_map) {
       if (pair.first == p) {
         return const_cast<reference>(pair.second); // Mutable element
       }
@@ -277,7 +281,7 @@ public:
   {
     auto ptr = &(const_cast<const Map&>(*this)[p]);
     if (ptr == &out_of_range) {
-      return m_map.emplace_back(+p, T()).second;
+      return m_map->emplace_back(+p, T()).second;
     }
     return *ptr;
   }
@@ -289,7 +293,7 @@ public:
 private:
 
   std::string m_label; ///< The label
-  std::vector<Kokkos::pair<Position<N>, T>> m_map; ///< The position-value pairs
+  std::shared_ptr<std::vector<Kokkos::pair<Position<N>, T>>> m_map; ///< The position-value pairs
 };
 
 template <typename T, int N>
