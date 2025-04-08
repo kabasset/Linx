@@ -11,85 +11,107 @@
 #include "Linx/Data/Image.h" // for ExpandPath
 #include "Linx/Data/Sequence.h"
 
+#include <Kokkos_Pair.hpp>
 #include <concepts>
 #include <string>
 #include <unordered_map>
 
 namespace Linx {
 
+/**
+ * @brief A sequence of positions.
+ */
 template <int N>
 class Path {
 public:
 
   static constexpr int n = N;
   using size_type = std::size_t;
+  using value_type = const Position<N>;
+  using reference = value_type&;
+  using const_reference = const value_type&;
 
+  /**
+   * @brief Constructor.
+   */
   Path(const std::string& label, std::integral auto size) : m_label(label), m_path(size) {}
 
+  /**
+   * @brief Path label.
+   */
   KOKKOS_INLINE_FUNCTION std::string label() const
   {
     return m_label;
   }
 
+  /**
+   * @brief Rank of the positions.
+   */
   KOKKOS_INLINE_FUNCTION int rank() const
   {
     return m_path.begin()->ssize();
   }
 
+  /**
+   * @brief Number of positions.
+   */
   KOKKOS_INLINE_FUNCTION size_type size() const
   {
     return m_path.size();
   }
 
+  /**
+   * @brief Number of positions.
+   */
   KOKKOS_INLINE_FUNCTION auto ssize() const
   {
     return static_cast<std::make_signed_t<size_type>>(size());
   }
 
-  decltype(auto) operator[](auto i) const
+  /**
+   * @brief Access the i-th position.
+   */
+  KOKKOS_INLINE_FUNCTION reference operator[](auto i) const
   {
     return m_path[i];
   }
 
-  decltype(auto) operator[](auto i)
+  /**
+   * @brief Access the i-th position.
+   */
+  KOKKOS_INLINE_FUNCTION reference operator()(auto i) const
   {
     return m_path[i];
   }
 
-  decltype(auto) operator()(auto i, auto j) const
+  /**
+   * @brief Access the j-th element of the i-th position.
+   */
+  KOKKOS_INLINE_FUNCTION decltype(auto) operator()(auto i, auto j) const
   {
     return m_path[i][j];
   }
 
-  decltype(auto) operator()(auto i, auto j)
-  {
-    return m_path[i][j];
-  }
-
+  /**
+   * @brief Iterator to the beginning.
+   */
   auto begin() const
   {
     return m_path.begin();
   }
 
-  auto begin()
-  {
-    return m_path.begin();
-  }
-
+  /**
+   * @brief Iterator to the end.
+   */
   auto end() const
-  {
-    return m_path.end();
-  }
-
-  auto end()
   {
     return m_path.end();
   }
 
 private:
 
-  std::string m_label;
-  std::vector<Position<N>> m_path; // Resizable, converted to Image in for_each()
+  std::string m_label; ///< Label
+  std::vector<Position<N>> m_path; ///< Non resizable vector of positions, converted to Image in for_each()
 };
 
 template <int N>
@@ -114,7 +136,7 @@ public:
   /**
    * @brief Constructor.
    */
-  Map(const std::string& label = "") : m_label(label), m_map() {}
+  Map(const std::string& label = "") : out_of_range(), m_label(label), m_map() {}
 
   /**
    * @brief Map label.
@@ -151,25 +173,25 @@ public:
   }
 
   /**
-   * @brief Sequence of positions in the map (shallow copy).
+   * @brief Sequence of positions in the map (deep copy).
    */
   auto domain() const
   {
     auto out = Path<N>(compose_label("domain", m_label), ssize());
     auto it = out.begin();
     for (auto kv : m_map) {
-      *it = kv.first;
+      it->assign(kv.first.begin());
       ++it;
     }
     return out;
   }
 
   /**
-   * @brief Sequence of values in the map.
+   * @brief Sequence of values in the map (deep copy).
    */
   auto values() const
   {
-    auto out = GPosition<T, -1>(compose_label("values", m_label), size()); // FIXME Sequence
+    auto out = GPosition<T, -1>(compose_label("values", m_label), size()); // FIXME Sequence?
     auto it = out.begin();
     for (auto kv : m_map) {
       *it = kv.second;
@@ -181,7 +203,7 @@ public:
   /**
    * @brief Position-value pair iterator to the beginnig.
    */
-  KOKKOS_INLINE_FUNCTION auto begin() const
+  KOKKOS_INLINE_FUNCTION decltype(auto) begin() const
   {
     return m_map.begin();
   }
@@ -189,53 +211,85 @@ public:
   /**
    * @brief Position-value pair iterator to the end.
    */
-  KOKKOS_INLINE_FUNCTION auto end() const
+  KOKKOS_INLINE_FUNCTION decltype(auto) end() const
   {
     return m_map.end();
   }
 
   /**
-   * @brief Access the element at given position.
+   * @brief Access the element at given indices.
    */
-  KOKKOS_INLINE_FUNCTION reference operator()(std::integral auto... is) const
+  KOKKOS_INLINE_FUNCTION reference at(std::integral auto... is) const
   {
     for (auto& pair : m_map) {
       if (pair.first.equal(is...)) {
         return const_cast<reference>(pair.second); // Mutable element
       }
     }
-    throw std::out_of_range("FIXME"); // FIXME message
+    return const_cast<reference>(out_of_range);
+  }
+
+  /**
+   * @brief Access the element at given indices.
+   */
+  KOKKOS_INLINE_FUNCTION reference operator()(std::integral auto... is) const
+  {
+    return at(is...);
+  }
+
+  /**
+   * @brief Access the element at given indices if it exists or insert it otherwise.
+   */
+  reference operator()(std::integral auto... is)
+  {
+    auto ptr = &at(is...);
+    if (ptr == &out_of_range) {
+      return m_map.emplace_back(Position<N> {is...}, T()).second;
+    }
+    return *ptr;
   }
 
   /**
    * @brief Access the element at given position.
    */
-  KOKKOS_INLINE_FUNCTION reference operator[](const Position<N>& p) const
+  reference at(const Position<N>& p) const
   {
     for (auto& pair : m_map) {
       if (pair.first == p) {
         return const_cast<reference>(pair.second); // Mutable element
       }
     }
-    throw std::out_of_range(p.label()); // FIXME p to string
+    return const_cast<reference>(out_of_range);
   }
 
   /**
-   * @brief Access the element at given position if it exists or insert it.
+   * @brief Access the element at given position.
+   */
+  reference operator[](const Position<N>& p) const
+  {
+    return at(p);
+  }
+
+  /**
+   * @brief Access the element at given position if it exists or insert it otherwise.
    */
   reference operator[](const Position<N>& p)
   {
-    try {
-      return const_cast<const Map&>(*this)[p];
-    } catch (std::out_of_range&) {
+    auto ptr = &(const_cast<const Map&>(*this)[p]);
+    if (ptr == &out_of_range) {
       return m_map.emplace_back(+p, T()).second;
     }
+    return *ptr;
   }
+
+public:
+
+  value_type out_of_range; ///< Value returned when position is out of range
 
 private:
 
   std::string m_label; ///< The label
-  std::vector<std::pair<Position<N>, T>> m_map; ///< The position-value pairs
+  std::vector<Kokkos::pair<Position<N>, T>> m_map; ///< The position-value pairs
 };
 
 template <typename T, int N>
@@ -261,11 +315,11 @@ auto box(const Path<N>& in)
   for (++it; it != in.end(); ++it) {
     const auto& p = *it;
     for (std::size_t i = 0; i < p.size(); ++i) {
-      auto& fi = out.start(i);
-      auto& bi = out.stop(i);
-      auto pi = p[i];
-      fi = std::min(fi, pi);
-      bi = std::max(bi, pi + 1);
+      auto& start_i = out.start(i);
+      auto& stop_i = out.stop(i);
+      auto p_i = p[i];
+      start_i = std::min(start_i, p_i);
+      stop_i = std::max(stop_i, p_i + 1);
     }
   }
   return out;

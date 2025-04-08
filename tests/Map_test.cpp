@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(laplacian_kernel_test)
   BOOST_TEST(ckernel(0, 0, -1) == 1);
   BOOST_TEST(ckernel(0, 0, 1) == 1);
   BOOST_TEST(ckernel(0, 0, 0) == -2 * N);
-  BOOST_CHECK_THROW(ckernel(-1, -1, -1), std::out_of_range);
+  BOOST_TEST(ckernel.at(-1, -1, -1) == ckernel.out_of_range);
 }
 
 BOOST_AUTO_TEST_CASE(map_iteration_test)
@@ -49,9 +49,12 @@ BOOST_AUTO_TEST_CASE(map_iteration_test)
   }
   BOOST_TEST(kernel.size() == 3);
   BOOST_TEST(kernel.values().contains_only(1));
-  for_each<Kokkos::Serial>("inc", kernel.domain(), [&](int i, int j) { // FIXME KOKKOS_LAMBDA => shallow copy
-    kernel(i, j) += 1;
-  });
+  for_each<Kokkos::Serial>(
+      "inc",
+      kernel.domain(),
+      KOKKOS_LAMBDA(int i, int j) { // FIXME KOKKOS_LAMBDA => shallow copy
+        kernel(i, j) += 1;
+      });
   BOOST_TEST(kernel.values().contains_only(2));
 }
 
