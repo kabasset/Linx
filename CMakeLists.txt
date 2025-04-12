@@ -20,7 +20,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 # Dependencies
 
 find_package(Boost COMPONENTS unit_test_framework program_options REQUIRED)
-find_package(Kokkos REQUIRED)
+find_package(Kokkos 4.4.01 REQUIRED CONFIG) # SequentialHostInit >= 4.4.01
 
 # Library
 

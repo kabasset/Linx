@@ -110,8 +110,8 @@ public:
 
 private:
 
-  std::string m_label; ///< Label
-  std::vector<Position<N>> m_path; ///< Non resizable vector of positions, converted to Image in for_each()
+  std::string m_label; ///< The label
+  std::vector<Position<N>> m_path; ///< The positions, converted to Image in for_each()
 };
 
 template <int N>
@@ -122,6 +122,12 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Path<N>& in)
 
 /**
  * @brief Mapping from positions to values.
+ * 
+ * As opposed to an image, map is a resizable container, whose memory is always on host.
+ * Trying to access an element out of the map domain returns a reference to the default value `out_of_bounds`,
+ * such that a map is naturally extrapolated, with using this constant value.
+ * 
+ * Copy is shallow by default.
  */
 template <typename T, int N>
 class Map : DataMixin<T, void, Map<T, N>>, RangeMixin<true, T, Map<T, N>> { // FIXME arithmetic // FIXME GMap?
@@ -135,19 +141,21 @@ public:
 
   /**
    * @brief Constructor.
+   * @param label The map label
+   * @param out The value returned when out-of-domain elements are accessed
    */
-  Map(const std::string& label = "") :
-      out_of_range(),
-      m_label(label),
-      m_map(new std::vector<Kokkos::pair<Position<N>, T>>())
+  Map(const std::string& label = "", const T& out = T()) :
+      out_of_range(out),
+      m_map_view(Kokkos::view_alloc(label, Kokkos::SequentialHostInit)),
+      m_map(*m_map_view.data())
   {}
 
   /**
    * @brief Map label.
    */
-  KOKKOS_INLINE_FUNCTION const std::string& label() const
+  std::string label() const
   {
-    return m_label;
+    return m_map_view.label();
   }
 
   /**
@@ -165,7 +173,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION size_type size() const
   {
-    return m_map->size();
+    return m_map.size();
   }
 
   /**
@@ -181,10 +189,13 @@ public:
    */
   auto domain() const
   {
-    auto out = Path<N>(compose_label("domain", m_label), ssize());
+    auto out = Path<N>(compose_label("domain", label()), ssize());
     auto it = out.begin();
-    for (auto kv : *m_map) {
-      it->assign(kv.first.begin());
+    for (auto kv : m_map) {
+      for (int i = 0; i < it->ssize(); ++i) {
+        (*it)[i] = kv.first[i];
+      }
+      // it->assign(kv.first.begin());
       ++it;
     }
     return out;
@@ -195,9 +206,9 @@ public:
    */
   auto values() const
   {
-    auto out = GPosition<T, -1>(compose_label("values", m_label), size()); // FIXME Sequence?
+    auto out = GPosition<T, -1>(compose_label("values", label()), size()); // FIXME Sequence?
     auto it = out.begin();
-    for (auto kv : *m_map) {
+    for (auto kv : m_map) {
       *it = kv.second;
       ++it;
     }
@@ -209,7 +220,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION decltype(auto) begin() const
   {
-    return m_map->begin();
+    return m_map.begin();
   }
 
   /**
@@ -217,7 +228,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION decltype(auto) end() const
   {
-    return m_map->end();
+    return m_map.end();
   }
 
   /**
@@ -225,7 +236,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION reference at(std::integral auto... is) const
   {
-    for (auto& pair : *m_map) {
+    for (auto& pair : m_map) {
       if (pair.first.equal(is...)) {
         return const_cast<reference>(pair.second); // Mutable element
       }
@@ -248,7 +259,7 @@ public:
   {
     auto ptr = &at(is...);
     if (ptr == &out_of_range) {
-      return m_map->emplace_back(Position<N> {is...}, T()).second;
+      return m_map.emplace_back(Position<N> {is...}, T()).second;
     }
     return *ptr;
   }
@@ -258,7 +269,7 @@ public:
    */
   reference at(const Position<N>& p) const
   {
-    for (auto& pair : *m_map) {
+    for (auto& pair : m_map) {
       if (pair.first == p) {
         return const_cast<reference>(pair.second); // Mutable element
       }
@@ -281,7 +292,7 @@ public:
   {
     auto ptr = &(const_cast<const Map&>(*this)[p]);
     if (ptr == &out_of_range) {
-      return m_map->emplace_back(+p, T()).second;
+      return m_map.emplace_back(+p, T()).second;
     }
     return *ptr;
   }
@@ -292,8 +303,10 @@ public:
 
 private:
 
-  std::string m_label; ///< The label
-  std::shared_ptr<std::vector<Kokkos::pair<Position<N>, T>>> m_map; ///< The position-value pairs
+  using Container = std::vector<Kokkos::pair<Position<N>, T>>;
+
+  Kokkos::View<Container, Kokkos::HostSpace> m_map_view; ///< Shared memory management
+  Container& m_map; ///< The position-value pairs
 };
 
 template <typename T, int N>
@@ -305,7 +318,7 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Map<T, N>& in)
 template <typename T, int N>
 KOKKOS_INLINE_FUNCTION decltype(auto) on_host(const Map<T, N>& in)
 {
-  return in; // FIXME can `in` be on device?
+  return in; // `in` cannot be on device
 }
 
 /**
@@ -329,7 +342,7 @@ auto box(const Path<N>& in)
   return out;
 }
 
-template <int N, typename TFunc> // FIXME support -1?
+template <typename TSpace, int N, typename TFunc> // FIXME support -1?
 struct ExpandPath {
   ExpandPath(const Path<N>& path, TFunc func) : m_view("Path", path.size(), path.rank()), m_func(LINX_MOVE(func))
   {
@@ -349,7 +362,7 @@ struct ExpandPath {
     return m_func(m_view(i, Is)...);
   }
 
-  Image<int, 2> m_view;
+  Image<int, 2, ImageContainer<int, 2, TSpace>> m_view;
   TFunc m_func;
 };
 
@@ -357,13 +370,13 @@ struct ExpandPath {
  * @brief Apply a function to each element of the domain.
  * @tparam TSpace The execution space
  */
-template <typename TSpace = Kokkos::DefaultExecutionSpace, int N>
-void for_each(const std::string& label, const Path<N>& region, auto func)
+template <typename TSpace = Kokkos::DefaultExecutionSpace, int N, typename TFunc>
+void for_each(const std::string& label, Path<N> region, TFunc func)
 {
   for_each<TSpace>(
       label,
       Slice(0L, region.ssize()), // FIXME accept different types in Slice
-      ExpandPath(region, func));
+      ExpandPath<TSpace, N, TFunc>(region, func));
 }
 
 } // namespace Linx

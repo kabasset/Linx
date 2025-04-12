@@ -44,12 +44,12 @@ BOOST_AUTO_TEST_CASE(map_iteration_test)
   using T = int;
   auto kernel = Linx::Map<T, N>();
   for (auto i : {0, 1, 2}) {
-    auto p = Linx::Position<N>({i, i});
+    auto p = Linx::Position<N>({i, 2 * i});
     kernel[p] = 1;
   }
   BOOST_TEST(kernel.size() == 3);
   BOOST_TEST(kernel.values().contains_only(1));
-  for_each<Kokkos::Serial>("inc", kernel.domain(), KOKKOS_LAMBDA(int i, int j) { kernel(i, j) += 1; });
+  for_each("inc", kernel.domain(), KOKKOS_LAMBDA(int i, int j) { kernel(i, j) += 1; });
   BOOST_TEST(kernel.values().contains_only(2));
 }
 
