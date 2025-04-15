@@ -38,6 +38,15 @@ BOOST_AUTO_TEST_CASE(laplacian_kernel_test)
   BOOST_TEST(ckernel.at(-1, -1, -1) == ckernel.out_of_range);
 }
 
+template <typename T, int N>
+struct Inc {
+  Linx::Map<T, N> map;
+  KOKKOS_INLINE_FUNCTION void operator()(int i, int j) const
+  {
+    map(i, j) += 1;
+  }
+};
+
 BOOST_AUTO_TEST_CASE(map_iteration_test)
 {
   static constexpr auto N = 2;
@@ -49,7 +58,7 @@ BOOST_AUTO_TEST_CASE(map_iteration_test)
   }
   BOOST_TEST(kernel.size() == 3);
   BOOST_TEST(kernel.values().contains_only(1));
-  for_each("inc", kernel.domain(), KOKKOS_LAMBDA(int i, int j) { kernel(i, j) += 1; });
+  Linx::for_each<Kokkos::Serial>("inc", kernel.domain(), Inc<T, N>(kernel));
   BOOST_TEST(kernel.values().contains_only(2));
 }
 
