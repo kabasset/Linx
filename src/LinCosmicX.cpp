@@ -69,12 +69,12 @@ struct ScaleNoise {
   }
 };
 
-struct UpdateMask {
+struct FindSaturatedStars {
   double satlevel;
 
   std::string label() const
   {
-    return "UpdateMask";
+    return "FindSaturatedStars";
   }
 
   template <typename TData, typename TMask>
@@ -181,7 +181,7 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
   logger("Lacosmic", "Start");
 
   Linx::Flow("Scale to electrons", logger).append(data).apply(Linx::Add(sensor.pssl), Linx::Multiply(sensor.gain));
-  Linx::Flow("Find saturated stars", logger).append(mask, data).run(UpdateMask(sensor.satlevel));
+  Linx::Flow("Find saturated stars", logger).append(mask, data).run(FindSaturatedStars(sensor.satlevel));
   auto [backgroundlevel] = Linx::Flow("Compute background level", logger).append(data, mask).run(BackgroundLevel());
 
   auto crmask = Linx::Image<bool, 2>("crmask", data.shape());
@@ -190,8 +190,9 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
     logger(label, "Start");
 
     auto [m5] = Linx::Flow("Compute m5", logger).append(data).run(Linx::box_median_filter<2, 2>());
+
     auto [noise] = Linx::Flow("Compute noise map", logger)
-                       .append(m5.copy_as("noise"))
+                       .append(m5.copy_as("noise")) // FIXME copy only used for cleantype = median
                        .apply(Linx::Max(T(0.00001)), Linx::Add(sensor.readnoise * sensor.readnoise), Linx::Sqrt());
 
     auto [sp] =
@@ -232,6 +233,8 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
       logger(label, "No cosmic pixel found");
       // break; // FIXME
     }
+
+    // FIXME Clean data
   }
 
   logger("Lacosmic", "Stop");
@@ -249,6 +252,7 @@ int main(int argc, char const* argv[])
 
   auto data = Linx::Image<double, 2>("data", extent, extent).generate("random data", Linx::GaussianRng<double>(0, 1));
   auto mask = Linx::Image<bool, 2>("mask", extent, extent).generate("random mask", Linx::UniformRng<int>({0, 2}));
+  // FIXME init psfk
 
   print_2d(data);
   print_2d(mask);
