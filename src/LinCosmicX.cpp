@@ -26,12 +26,19 @@ void print_2d(const auto& image)
   std::cout << "  [" << on_host(0, 0) << ", ... , " << on_host(width - 1, height - 1) << "]" << std::endl;
 }
 
-namespace Linx {
+namespace Linx { // FIXME to Functional.h
 
 struct Negate {
   KOKKOS_INLINE_FUNCTION auto operator()(const auto& e) const
   {
     return -e;
+  }
+};
+
+struct Sqrt {
+  KOKKOS_INLINE_FUNCTION auto operator()(const auto& e) const
+  {
+    return Kokkos::sqrt(e);
   }
 };
 
@@ -164,7 +171,7 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
     const std::string& psfmodel = "gauss",
     double psffwhm = 2.5,
     Linx::Index psfsize = 7,
-    Linx::Image<float, 2> psfk = Linx::Image<float, 2>(), // FIXME
+    Linx::Image<float, 2> psfk = Linx::Image<float, 2>("PSF", 1, 1).fill(1), // FIXME
     double psfbeta = 4.765,
     bool verbose = false)
 {
@@ -182,11 +189,10 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
     auto label = "Iteration " + std::to_string(i) + " / " + std::to_string(niter);
     logger(label, "Start");
 
-    auto [/*m5,*/ noise] = Linx::Flow("Compute noise map", logger).append(data);
-    //.run(Linx::box_median_filter<2, 2>());
-    // .apply(ScaleNoise(sensor.readnoise * sensor.readnoise));
-    // FIXME .apply(Linx::Max(T(0.00001)), Linx::Add(sensor.readnoise * sensor.readnoise), Linx::Sqrt());
-    print_2d(noise);
+    auto [m5] = Linx::Flow("Compute m5", logger).append(data).run(Linx::box_median_filter<2, 2>());
+    auto [noise] = Linx::Flow("Compute noise map", logger)
+                       .append(m5.copy_as("noise"))
+                       .apply(Linx::Max(T(0.00001)), Linx::Add(sensor.readnoise * sensor.readnoise), Linx::Sqrt());
 
     auto [sp] =
         Linx::Flow("Compute S'", logger)
@@ -219,15 +225,13 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
             .apply(FindNeighborCandidates(det.sigclip * det.sigfrac));
 
     auto numcr = Linx::sum(cosmics);
-    logger(label, std::to_string(numcr) + " cosmic pixels found");
-    // if (numcr == 0) {
-    //   logger(label, "Stop");
-    //   break;
-    // }
-
-    P::Run("Update crmask", logger) | P::Input(crmask, cosmics) | P::Apply(Linx::Or());
-
-    // FIXME clean
+    if (numcr > 0) {
+      Linx::Flow("Update crmask", logger).append(crmask, cosmics).apply(Linx::Or());
+      logger(label, std::to_string(numcr) + " cosmic pixels found");
+    } else {
+      logger(label, "No cosmic pixel found");
+      // break; // FIXME
+    }
   }
 
   logger("Lacosmic", "Stop");
