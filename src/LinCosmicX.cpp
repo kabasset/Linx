@@ -4,6 +4,7 @@
 
 #include "Linx/Base/Random.h"
 #include "Linx/Data/Image.h"
+#include "Linx/Io/Fits.h"
 #include "Linx/Run/Flow.h"
 #include "Linx/Run/Logging.h"
 #include "Linx/Run/ProgramContext.h"
@@ -12,7 +13,7 @@
 #include "Linx/Transforms/RankFiltering.h"
 #include "Linx/Transforms/Resampling.h"
 
-namespace P = Linx::Pipeline;
+namespace P = Linx::Pipeline; // FIXME rm
 
 void print_2d(const auto& image)
 {
@@ -24,6 +25,10 @@ void print_2d(const auto& image)
 
   const auto& on_host = Linx::on_host(image);
   std::cout << "  [" << on_host(0, 0) << ", ... , " << on_host(width - 1, height - 1) << "]" << std::endl;
+
+  auto filename = name + ".fits";
+  Linx::Fits fits(filename);
+  fits.write(image, 'w');
 }
 
 namespace Linx { // FIXME to Functional.h
