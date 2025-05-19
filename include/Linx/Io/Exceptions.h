@@ -11,6 +11,18 @@
 
 namespace Linx {
 
+/**
+ * @brief File access modes.
+ */
+enum class FileMode : char {
+  Read = 'r', ///< Read an existing file, may throw `FileNotFound`
+  Edit = 'e', ///< Edit an existing file, may throw `FileNotFound`
+  Create = 'x', ///< Create a new file, may throw `PathAlreadyExists`
+  Overwrite = 'w', ///< Overwrite an existing file, or create a new file
+  Write = 'a', ///< Edit an existing file, or create a new file
+  Temporary = 't' ///< Create a new file, destroy it after use, may throw `PathAlreadyExists`
+};
+
 class FileNotFound : public Exception {
 public:
 
@@ -29,6 +41,20 @@ public:
   {
     if (not std::filesystem::is_regular_file(path)) {
       throw FileNotFound(path);
+    }
+  }
+
+  /**
+   * @brief Throw if access mode expects a file, which is not found.
+   */
+  static void may_throw(const std::filesystem::path& path, FileMode mode)
+  {
+    switch (mode) {
+      case FileMode::Read:
+      case FileMode::Edit:
+        may_throw(path);
+      default:
+        return;
     }
   }
 };
@@ -54,6 +80,20 @@ public:
   {
     if (std::filesystem::exists(path)) {
       throw PathAlreadyExists(path);
+    }
+  }
+
+  /**
+   * @brief Throw if access mode expects path does not exist, while it does.
+   */
+  static void may_throw(const std::filesystem::path& path, FileMode mode)
+  {
+    switch (mode) {
+      case FileMode::Create:
+      case FileMode::Temporary:
+        may_throw(path);
+      default:
+        return;
     }
   }
 };

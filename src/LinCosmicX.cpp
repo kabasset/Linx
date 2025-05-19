@@ -27,8 +27,7 @@ void print_2d(const auto& image)
   std::cout << "  [" << on_host(0, 0) << ", ... , " << on_host(width - 1, height - 1) << "]" << std::endl;
 
   auto filename = name + ".fits";
-  Linx::Fits fits(filename);
-  fits.write(image, 'w');
+  Linx::Fits(filename, 'w').write(image);
 }
 
 namespace Linx { // FIXME to Functional.h

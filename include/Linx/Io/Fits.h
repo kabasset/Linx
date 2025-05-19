@@ -17,6 +17,43 @@
 namespace Linx {
 
 /**
+ * @brief CFITSIO-thrown error.
+ */
+class CfitsioError : public Exception {
+public:
+
+  /**
+     * @brief Constructor.
+     */
+  CfitsioError(const std::string& context, fitsfile* fptr, int status) : Exception(context)
+  {
+    float version = 0;
+    fits_get_version(&version);
+    append("CFITSIO v" + std::to_string(version));
+
+    char text[FLEN_ERRMSG];
+    text[0] = '\0';
+    fits_get_errstatus(status, text);
+    append("Error " + std::to_string(status) + ": " + text);
+
+    char message[80];
+    while (fits_read_errmsg(message) != 0) {
+      append(message);
+    };
+  }
+
+  /**
+   * @brief Throw if `status` is not nul.
+   */
+  static void may_throw(const std::string& context, fitsfile* fptr, int status)
+  {
+    if (status != 0) {
+      throw CfitsioError(context, fptr, status);
+    }
+  }
+};
+
+/**
  * @brief FITS file reader/writer.
  * 
  * This is a simple handler able to read or write an image HDU.
@@ -27,50 +64,82 @@ class Fits {
 public:
 
   /**
-   * @brief FITS-specific error.
+   * @brief Constructor.
    */
-  class Error : public Exception {
-  public:
+  Fits(const std::filesystem::path& path, FileMode mode = FileMode::Create) : m_path(path), m_mode(mode), m_fptr()
+  {
+    FileNotFound::may_throw(m_path, m_mode);
+    PathAlreadyExists::may_throw(m_path, m_mode);
 
-    /**
-     * @brief Constructor.
-     */
-    Error(const std::string& context, const std::filesystem::path& path, int status) : Exception(context, path)
-    {
-      float version = 0;
-      fits_get_version(&version);
-      append("CFITSIO v" + std::to_string(version));
-
-      char text[FLEN_ERRMSG];
-      text[0] = '\0';
-      fits_get_errstatus(status, text);
-      append("Error " + std::to_string(status) + ": " + text);
-
-      char message[80];
-      while (fits_read_errmsg(message) != 0) {
-        append(message);
-      };
+    int status = 0;
+    std::string overwrited_path = "!";
+    switch (mode) {
+      case FileMode::Read:
+        fits_open_file(&m_fptr, m_path.c_str(), READONLY, &status);
+        break;
+      case FileMode::Edit:
+        fits_open_file(&m_fptr, m_path.c_str(), READWRITE, &status);
+        break;
+      case FileMode::Create:
+      case FileMode::Temporary:
+        fits_create_file(&m_fptr, m_path.c_str(), &status);
+        break;
+      case FileMode::Overwrite:
+        overwrited_path += m_path;
+        fits_create_file(&m_fptr, overwrited_path.c_str(), &status);
+        break;
+      case FileMode::Write:
+        if (std::filesystem::is_regular_file(m_path)) {
+          fits_open_file(&m_fptr, m_path.c_str(), READWRITE, &status);
+        } else {
+          fits_create_file(&m_fptr, m_path.c_str(), &status);
+        }
+        break;
     }
-
-    static void may_throw(const std::string& context, const std::filesystem::path& path, int status)
-    {
-      if (status != 0) {
-        throw Error(context, path, status);
-      }
-    }
-  };
+    CfitsioError::may_throw("Cannot open file", m_fptr, status);
+  }
 
   /**
    * @brief Constructor.
    */
-  Fits(const std::filesystem::path& path) : m_path(path) {}
+  Fits(const std::filesystem::path& path, char mode) : Fits(path, FileMode(mode)) {}
+
+  /**
+   * @brief Destructor.
+   * 
+   * This simply calls `close()` while discarding potential exceptions.
+   */
+  ~Fits()
+  {
+    try {
+      close();
+    } catch (...) {
+    }
+  }
+
+  /**
+   * @brief Close the file.
+   * 
+   * Destroy the file if the mode is `Temporary`.
+   */
+  void close()
+  {
+    int status = 0;
+    if (m_mode == FileMode::Temporary) {
+      fits_delete_file(m_fptr, &status);
+    } else {
+      fits_close_file(m_fptr, &status);
+    }
+    m_fptr = nullptr;
+    CfitsioError::may_throw("Cannot close file", m_fptr, status);
+  }
 
   /**
    * @brief Get the file path.
    */
   const std::filesystem::path& path() const
   {
-    return m_path;
+    return m_path; // FIXME from m_fptr
   }
 
   /**
@@ -79,33 +148,18 @@ public:
   template <typename T, int N>
   Image<T, N> read(Index hdu = 0)
   {
-    FileNotFound::may_throw(m_path);
+    std::stringstream label;
+    label << m_path.stem() << '[' << hdu << ']';
     int status = 0;
-    fitsfile* fptr;
     int naxis = 0;
-    fits_open_file(&fptr, m_path.c_str(), READONLY, &status);
-    if (status != 0) {
-      throw WrongFileFormat("Cannot read file", m_path);
-    }
-    fits_movabs_hdu(fptr, hdu + 1, nullptr, &status);
-    fits_get_img_dim(fptr, &naxis, &status);
-    Position<N> shape(naxis);
-    fits_get_img_size(fptr, naxis, shape.data(), &status);
-    Raster<T, N> out(shape);
-    fits_read_img(
-        fptr,
-        typecode<T>(),
-        1,
-        out.size(),
-        nullptr,
-        out.data(),
-        nullptr,
-        &status); // FIXME to device directly?
-    fits_close_file(fptr, &status);
-    if (status != 0) {
-      throw Error("Cannot read file", m_path, status);
-    }
-    return Image<T, N>(label, shape).copy(out); // FIXME optimize
+    fits_movabs_hdu(m_fptr, hdu + 1, nullptr, &status);
+    fits_get_img_dim(m_fptr, &naxis, &status);
+    Position<N> shape("shape", naxis);
+    fits_get_img_size(m_fptr, naxis, shape.data(), &status);
+    Raster<T, N> out("raster", shape);
+    fits_read_img(m_fptr, typecode<T>(), 1, out.size(), nullptr, out.data(), nullptr, &status);
+    CfitsioError::may_throw("Cannot read HDU", m_fptr, status);
+    return Image<T, N>(label.str(), shape).copy(out); // FIXME optimize
   }
 
   /**
@@ -114,43 +168,18 @@ public:
    * @param mode `x` to create a new file, `w` to create or overwrite, `a` to append an HDU
    */
   template <typename TImage>
-  void write(TImage in, char mode = 'x')
+  void write(TImage in)
   {
     int status = 0;
-    fitsfile* fptr;
-    std::string path = "!"; // For overwriting
-    switch (mode) {
-      case 'x':
-        PathAlreadyExists::may_throw(m_path);
-        fits_create_file(&fptr, m_path.c_str(), &status);
-        break;
-      case 'w':
-        path += m_path;
-        fits_create_file(&fptr, path.c_str(), &status);
-        break;
-      case 'a':
-        FileNotFound::may_throw(m_path);
-        fits_open_file(&fptr, m_path.c_str(), READWRITE, &status);
-        break;
-      default:
-        throw Exception("Unknown write mode", std::string(1, mode));
-    }
-    if (status != 0) {
-      throw WrongFileFormat("Cannot write file", m_path);
-    }
     std::vector<long> shape(in.rank());
     for (int i = 0; i < in.rank(); ++i) {
       shape[i] = in.extent(i);
     }
-    fits_create_img(fptr, image_typecode<typename TImage::element_type>(), in.rank(), shape.data(), &status);
+    fits_create_img(m_fptr, image_typecode<typename TImage::element_type>(), in.rank(), shape.data(), &status);
     if (in.size() > 0) {
-      write_pixels(fptr, in, Position<-1>("first", in.rank()));
+      write_pixels(m_fptr, in, Position<-1>("first", in.rank()));
     }
-    fits_close_file(fptr, &status);
-    if (status != 0) {
-      throw Error("Cannot write file", m_path, status);
-    }
-    fptr = nullptr;
+    CfitsioError::may_throw("Cannot write HDU", m_fptr, status);
   }
 
   /**
@@ -174,21 +203,21 @@ public:
    * @param start The position of the first pixel in the file
    */
   template <typename TIn, typename TStart>
-  void write_pixels(fitsfile* fptr, const TIn& in, const TStart& start)
+  void write_pixels(fitsfile* m_fptr, const TIn& in, const TStart& start)
   {
     using T = typename TIn::element_type;
     static constexpr auto n = TIn::n;
     const auto& h = on_host(in);
     const auto raster = Raster<T, n>(compose_label("raster", in.label()), in.shape()).copy_from(h);
-    write_pixels(fptr, raster, start);
+    write_pixels(m_fptr, raster, start);
   }
 
   template <typename T, int N, typename TStart>
-  void write_pixels(fitsfile* fptr, const Raster<T, N>& in, const TStart& start)
+  void write_pixels(fitsfile* m_fptr, const Raster<T, N>& in, const TStart& start)
   {
     int status = 0;
-    fits_write_img(fptr, typecode<T>(), 1, in.size(), in.data(), &status);
-    Error::may_throw("Cannot write pixels", m_path, status);
+    fits_write_img(m_fptr, typecode<T>(), 1, in.size(), in.data(), &status);
+    CfitsioError::may_throw("Cannot write pixels", m_fptr, status);
   }
 
 private:
@@ -266,6 +295,8 @@ private:
 private:
 
   std::filesystem::path m_path;
+  FileMode m_mode;
+  fitsfile* m_fptr;
 };
 
 } // namespace Linx
