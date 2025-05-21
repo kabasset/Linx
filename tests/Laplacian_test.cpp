@@ -20,17 +20,19 @@ BOOST_AUTO_TEST_CASE(box_test)
 
 BOOST_AUTO_TEST_CASE(impulse_test)
 {
-  const auto in = Linx::Image<int, 3>("in", 5, 5, 5);
-  in(2, 2, 2) = 1;
-  const auto out = Linx::separable_laplacian<0, 1, 2>(-1)(in);
-  const auto expected = Linx::Image<int, 3>("exp", 5, 5, 5);
-  expected(2, 2, 1) = -1;
-  expected(2, 1, 2) = -1;
-  expected(1, 2, 2) = -1;
-  expected(2, 2, 2) = 6;
-  expected(3, 2, 2) = -1;
-  expected(2, 3, 2) = -1;
-  expected(2, 2, 3) = -1;
+  const auto in_h = Linx::Raster<int, 3>("in", 5, 5, 5);
+  in_h(2, 2, 2) = 1;
+  const auto out = Linx::separable_laplacian<0, 1, 2>(-1)(Linx::on_space(in_h));
+  static_assert(std::is_same_v<decltype(out)::execution_space, Kokkos::DefaultExecutionSpace>);
+  const auto expected_h = Linx::Raster<int, 3>("exp", 5, 5, 5);
+  expected_h(2, 2, 1) = -1;
+  expected_h(2, 1, 2) = -1;
+  expected_h(1, 2, 2) = -1;
+  expected_h(2, 2, 2) = 6;
+  expected_h(3, 2, 2) = -1;
+  expected_h(2, 3, 2) = -1;
+  expected_h(2, 2, 3) = -1;
+  auto expected = Linx::on_space(expected_h);
   BOOST_TEST((out == expected));
 }
 
