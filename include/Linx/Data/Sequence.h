@@ -325,8 +325,11 @@ auto on_host(const Sequence<T, N, TContainer>& seq)
   return Sequence<T, N, Container>(LINX_MOVE(container));
 }
 
+/**
+ * @brief Copy as many elements as possible from `in` to `out`.
+ */
 template <ArrayLike TIn, ArrayLike TOut>
-void copy_to(const TIn& in, const TOut& out)
+void copy_to(const TIn& in, const TOut& out) // FIXME replace with/update DataMixin::copy_from/to
 {
   auto domain = Slice(0, std::min<int>(std::size(in), std::size(out)));
   for_each<typename TIn::execution_space>("copy_to()", domain, KOKKOS_LAMBDA(int i) { out[i] = in[i]; });
