@@ -436,14 +436,14 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Image<T, N, TContainer>& i
 template <typename T, int N, typename TContainer>
 decltype(auto) on_host(const Image<T, N, TContainer>& image)
 {
-  return on_space<Kokkos::HostSpace>(image);
+  return on_device<Kokkos::HostSpace>(image);
 }
 
 /**
  * @brief Copy the data to a given memory space if not already accessible from it.
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace::memory_space, typename T, int N, typename TContainer>
-decltype(auto) on_space(const Image<T, N, TContainer>& image)
+decltype(auto) on_device(const Image<T, N, TContainer>& image)
 {
   if constexpr (Kokkos::SpaceAccessibility<TSpace, typename TContainer::memory_space>::accessible) {
     return image;
