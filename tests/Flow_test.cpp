@@ -39,12 +39,7 @@ BOOST_AUTO_TEST_CASE(image_api_test)
           .domain(Linx::Box({0, 0}, {width, height}))
           .apply(Linx::Add(2), Linx::Multiply(3));
   logger("Done");
-  auto shape = Linx::Position({width, height});
-  BOOST_TEST(shape.n == 2);
-  BOOST_TEST(out.n == 2);
-  BOOST_TEST(out.shape()[0] == width);
-  BOOST_TEST(out.shape()[1] == height);
-  // BOOST_TEST((out.shape() == shape));
+  BOOST_TEST(out.shape().equal(width, height));
   BOOST_TEST(out.contains_only(9));
 }
 
