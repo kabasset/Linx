@@ -159,13 +159,12 @@ public:
     Raster<T, N> out("raster", shape);
     fits_read_img(m_fptr, typecode<T>(), 1, out.size(), nullptr, out.data(), nullptr, &status);
     CfitsioError::may_throw("Cannot read HDU", m_fptr, status);
-    return Image<T, N>(label.str(), shape).copy(out); // FIXME optimize
+    return Image<T, N>(label.str(), shape).copy_from(out); // FIXME optimize
   }
 
   /**
-   * @brief Write an image as a new FITS file.
-   * @param raster The raster to be written
-   * @param mode `x` to create a new file, `w` to create or overwrite, `a` to append an HDU
+   * @brief Write an image.
+   * @param in The image to be written
    */
   template <typename TImage>
   void write(TImage in)
