@@ -231,7 +231,6 @@ auto reduce(const std::string& label, const TMonoid& monoid, const TIn& in)
       in.domain(),
       as_readonly(in),
       Reducer(value, monoid, identity_element<T>(monoid)));
-  Kokkos::fence();
   return value;
 }
 
@@ -287,7 +286,6 @@ auto map_reduce_with_side_effects_impl(
   using Reducer = Impl::Reducer<T, TMonoid, Kokkos::HostSpace>;
   T value = identity_element<T>(monoid);
   kokkos_reduce<Space>(label, in0.domain(), Projection(map, ins), Reducer(value, monoid, identity_element<T>(monoid)));
-  Kokkos::fence();
   return value;
 }
 
