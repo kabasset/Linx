@@ -23,6 +23,9 @@ enum class FileMode : char {
   Temporary = 't' ///< Create a new file, destroy it after use, may throw `PathAlreadyExists`
 };
 
+/**
+ * @brief Exception thrown if the file at specified path does not exist.
+ */
 class FileNotFound : public Exception {
 public:
 
@@ -74,7 +77,7 @@ public:
   }
 
   /**
-   * @brief Throw if a given path is not a file.
+   * @brief Throw if a given path already exists.
    */
   static void may_throw(const std::filesystem::path& path)
   {
@@ -104,6 +107,9 @@ public:
 class WrongFileFormat : public Exception {
 public:
 
+  /**
+   * @brief Constructor.
+   */
   WrongFileFormat(const std::string& message, const std::filesystem::path& path) :
       Exception("File format error", message)
   {
