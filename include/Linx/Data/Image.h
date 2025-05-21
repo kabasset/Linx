@@ -363,7 +363,7 @@ private:
    * @brief Slice along each axis.
    */
   template <typename TSlice, std::size_t... Is>
-  KOKKOS_INLINE_FUNCTION auto slice_all(const TSlice& slice, std::index_sequence<Is...>) const
+  auto slice_all(const TSlice& slice, std::index_sequence<Is...>) const
   {
     return Kokkos::subview(m_container, get<Is>(slice).kokkos_slice()...);
   }
@@ -372,7 +372,7 @@ private:
    * @brief Slice along the last axis.
    */
   template <typename TSlice, std::size_t... Is>
-  KOKKOS_INLINE_FUNCTION auto slice_last(std::index_sequence<Is...>, const TSlice& slice) const
+  auto slice_last(std::index_sequence<Is...>, const TSlice& slice) const
   {
     using Prepend = std::array<Kokkos::ALL_t, sizeof...(Is)>;
     return Kokkos::subview(m_container, (typename std::tuple_element<Is, Prepend>::type {})..., slice.kokkos_slice());
@@ -416,7 +416,7 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Image<T, N, TContainer>&
     return in;
   } else {
     using Out = Image<const T, N, typename Rebind<TContainer>::AsReadonly>;
-    return Out(Linx::Forward {}, in.container());
+    return Out(Forward {}, in.container());
   }
 }
 
@@ -427,7 +427,7 @@ template <typename T, int N, typename TContainer>
 KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Image<T, N, TContainer>& in)
 {
   using Out = Image<T, N, typename Rebind<TContainer>::AsAtomic>;
-  return Out(Linx::Forward {}, in.container());
+  return Out(Forward {}, in.container());
 }
 
 /**
@@ -436,11 +436,21 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Image<T, N, TContainer>& i
 template <typename T, int N, typename TContainer>
 decltype(auto) on_host(const Image<T, N, TContainer>& image)
 {
-  // FIXME early return if already on host
-  auto container = Kokkos::create_mirror_view(image.container());
-  Kokkos::deep_copy(container, image.container());
-  using Container = typename std::decay_t<decltype(container)>;
-  return Image<T, N, Container>(Forward(), LINX_MOVE(container));
+  return on_space<Kokkos::HostSpace>(image);
+}
+
+/**
+ * @brief Copy the data to a given memory space if not already accessible from it.
+ */
+template <typename TSpace = Kokkos::DefaultExecutionSpace::memory_space, typename T, int N, typename TContainer>
+decltype(auto) on_space(const Image<T, N, TContainer>& image)
+{
+  if constexpr (Kokkos::SpaceAccessibility<TSpace, typename TContainer::memory_space>::accessible) {
+    return image;
+  } else {
+    auto container = Kokkos::create_mirror_view_and_copy(TSpace(), image.container());
+    return Image<T, N, decltype(container)>(Forward {}, LINX_MOVE(container));
+  }
 }
 
 /**
