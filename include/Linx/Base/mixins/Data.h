@@ -62,13 +62,16 @@ struct DataMixin : public ArithmeticMixin<TArithmetic, T, TDerived>, public Math
   /// @{
   /// @group_properties
 
+  /**
+   * @brief Label.
+   */
   decltype(auto) label() const
   {
     return LINX_CRTP_CONST_DERIVED.container().label();
   }
 
   /**
-   * @brief Container size. 
+   * @brief Container size.
    */
   KOKKOS_INLINE_FUNCTION auto size() const
   {
@@ -91,6 +94,9 @@ struct DataMixin : public ArithmeticMixin<TArithmetic, T, TDerived>, public Math
     return LINX_CRTP_CONST_DERIVED.container().data();
   }
 
+  /**
+   * @brief Pointer to the read-only raw data.
+   */
   KOKKOS_INLINE_FUNCTION const T* cdata() const
   {
     return const_cast<const T*>(data());
@@ -142,7 +148,17 @@ struct DataMixin : public ArithmeticMixin<TArithmetic, T, TDerived>, public Math
    */
   const TDerived& copy_from(const auto& container) const
   {
+    // FIXME use Kokkos::deep_copy wherever possible
     return generate(compose_label("copy", container), Forward(), container);
+  }
+
+  /**
+   * @brief Copy the values to another container.
+   */
+  const TDerived& copy_to(const auto& container) const
+  {
+    // FIXME use Kokkos::deep_copy wherever possible
+    return apply(compose_label("copy", *this), Forward(), container, *this);
   }
 
   /**
