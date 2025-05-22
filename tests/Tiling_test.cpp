@@ -9,21 +9,32 @@
 
 #include <boost/test/unit_test.hpp>
 
+namespace Linx { // FIXME to Patch.h
+
+template <typename TParent, typename TDomain>
+decltype(auto) on_host(const Patch<TParent, TDomain>& in)
+{
+  // Decay the const reference returned by on_host()
+  using Parent = std::decay_t<decltype(on_host(in.parent()))>;
+  return Patch<Parent, TDomain>(on_host(in.parent()), in.domain());
+}
+
+} // namespace Linx
+
 LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 BOOST_AUTO_TEST_CASE(rows_test)
 {
   auto image = Linx::Image<int, 3>("image", 16, 9, 4);
-  Linx::for_each<Kokkos::DefaultHostExecutionSpace>(
-      "fill",
-      image.domain(),
-      KOKKOS_LAMBDA(auto i, auto j, auto k) { image(i, j, k) = i; });
+  Linx::for_each("fill", image.domain(), KOKKOS_LAMBDA(int i, int j, int k) { image(i, j, k) = i; });
   Linx::Position<16> sum;
   for (const auto& row : Linx::rows(image)) {
     BOOST_TEST(row.size() == image.extent(0));
     BOOST_TEST(row.size() == sum.size());
+    // For testing purposes, better use on_host(image) to avoid copies
+    const auto& row_h = Linx::on_host(row);
     for (int i = 0; i < row.size(); ++i) {
-      sum[i] += row.local(i);
+      sum[i] += row_h.local(i);
     }
   }
   for (std::size_t i = 0; i < sum.size(); ++i) {
@@ -34,16 +45,15 @@ BOOST_AUTO_TEST_CASE(rows_test)
 BOOST_AUTO_TEST_CASE(profiles_test)
 {
   auto image = Linx::Image<int, 3>("image", 16, 9, 4);
-  Linx::for_each<Kokkos::DefaultHostExecutionSpace>(
-      "fill",
-      image.domain(),
-      KOKKOS_LAMBDA(auto i, auto j, auto k) { image(i, j, k) = j; });
+  Linx::for_each("fill", image.domain(), KOKKOS_LAMBDA(int i, int j, int k) { image(i, j, k) = j; });
   Linx::Position<9> sum;
   for (const auto& column : Linx::profiles<1>(image)) {
     BOOST_TEST(column.size() == image.extent(1));
     BOOST_TEST(column.size() == sum.size());
+    // For testing purposes, better use on_host(image) to avoid copies
+    const auto& column_h = Linx::on_host(column);
     for (int i = 0; i < column.size(); ++i) {
-      sum[i] += column.local(i);
+      sum[i] += column_h.local(i);
     }
   }
   for (std::size_t i = 0; i < sum.size(); ++i) {
