@@ -98,13 +98,13 @@ public:
    * The arguments are forwarded to the domain,
    * such that the method returns `parent[domain(args...)]`.
    */
-  reference local(auto&&... args) const
+  reference local(auto&&... args) const // FIXME as KOKKOS_INLINE_FUNCTION
   {
     return m_parent[m_domain(LINX_FORWARD(args)...)];
   }
 
   /**
-   * @brief Translate the patch by a given vector.
+   * @brief Shift the patch by a given vector.
    */
   KOKKOS_INLINE_FUNCTION Patch& operator>>=(const auto& vector)
   {
@@ -113,7 +113,7 @@ public:
   }
 
   /**
-   * @brief Translate the patch by the opposite of a given vector.
+   * @brief Shift the patch by the opposite of a given vector.
    */
   KOKKOS_INLINE_FUNCTION Patch& operator<<=(const auto& vector)
   {
@@ -121,12 +121,18 @@ public:
     return *this;
   }
 
+  /**
+   * @brief Shift the patch by given indices.
+   */
   KOKKOS_INLINE_FUNCTION Patch& shift(auto... is)
   {
     m_domain.add(is...);
     return *this;
   }
 
+  /**
+   * @brief Shift the patch by the opposite of given indices.
+   */
   KOKKOS_INLINE_FUNCTION Patch& ishift(auto... is)
   {
     m_domain.subtract(is...);
@@ -194,6 +200,24 @@ template <typename TParent, typename TDomain, typename U>
 auto patch(const Patch<TParent, TDomain>& in, const GBox<U, TParent::n>& domain)
 {
   return Patch<TParent, TDomain>(root(in), domain & in.domain());
+}
+
+/**
+ * @brief Copy a patch to a given memory space if not already accessible from that space.
+ */
+template <typename TSpace, typename TParent, typename TDomain>
+decltype(auto) on_device(const Patch<TParent, TDomain>& in)
+{
+  return Patch(on_device<TSpace>(in.parent()), in.domain());
+}
+
+/**
+ * @brief Copy a patch to host if not already accessible from that space.
+ */
+template <typename TParent, typename TDomain>
+decltype(auto) on_host(const Patch<TParent, TDomain>& in)
+{
+  return on_device<Kokkos::HostSpace>(in);
 }
 
 // FIXME Mask-based patch

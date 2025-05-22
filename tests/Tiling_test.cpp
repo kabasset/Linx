@@ -9,18 +9,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-namespace Linx { // FIXME to Patch.h
-
-template <typename TParent, typename TDomain>
-decltype(auto) on_host(const Patch<TParent, TDomain>& in)
-{
-  // Decay the const reference returned by on_host()
-  using Parent = std::decay_t<decltype(on_host(in.parent()))>;
-  return Patch<Parent, TDomain>(on_host(in.parent()), in.domain());
-}
-
-} // namespace Linx
-
 LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 BOOST_AUTO_TEST_CASE(rows_test)
