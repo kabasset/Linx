@@ -3,18 +3,13 @@
 \defgroup arrays 1D, ND arrays
 \brief Classes and services for handling 1D and ND arrays.
 
-\defgroup regions Regions
+\defgroup regions Regions, slices, patches
 \brief Classes and services for handling regions.
 
-\defgroup slices Slices and patches
-\ingroup regions
-\brief Classes and services for restricting array domains.
-
-\defgroup transforms Regional and global transforms
-\brief Signal transforms.
+\defgroup pixelwise Pixelwise operations
+\brief Operations on individual elements.
 
 \defgroup filtering Filtering
-\ingroup transforms
 \brief Linear and non-linear filtering.
 
 */

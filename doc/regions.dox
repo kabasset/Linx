@@ -1,0 +1,46 @@
+/**
+
+\addtogroup regions
+
+\section regions-intro Introduction
+
+\section regions-slicing Slices and patches
+
+Images and sequences feature slicing and patching capabilities that allow for efficient manipulation of subregions.
+Slices are used to create subregion views as instances of `Image` or `Sequence`.
+Therefore, slices have have a strided memory and their domains are necessarily regular, i.e., 1D intervals or ND axis-aligned boxes.
+Slices are created with a syntax analogous to Python's slicing:
+
+- `Slice()` means to select all elements along a dimension;
+- `Slice(index)` selects a single index;
+- `Slice(start, stop, step)` selects elements from index `start` to index `stop - 1`.
+
+Such constructs can be combined to create multi-dimensional slices.
+
+```cpp
+// Keep x from 1 to 3, all y's, and z = 5
+// The output slice is a 2D Image
+auto slice = image[Linx::Slice(1, 4)()(5)];
+assert(slice.n == 2);
+assert(slice.domain() == Linx::Box<2>({0, 0}, {3, image.extent(1)}));
+assert(slice.data() == image.data());
+```
+
+In contrast to slices, no assumptions are made on the memory layout of patches, therefore they support domains of any kind.
+`Patch` is an extremely lightweight class that simply holds a domain and a pointer to the parent data.
+
+```cpp
+auto patch = Linx::where(image, any_domain);
+assert(patch.domain() == any_domain);
+assert(patch.parent() == image);
+assert(patch.data() == image.data());
+```
+
+Still, simple domains like boxes or slices can be used to create patches as well:
+
+```cpp
+auto patch = Linx::where(image, Linx::Slice(1, 4)()(5));
+assert(patch.n == 3);
+```
+
+*/

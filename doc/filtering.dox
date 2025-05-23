@@ -1,0 +1,13 @@
+/**
+
+\addtogroup filtering
+
+\section filtering-intro Introduction
+
+\section filtering-linear Linear filtering
+
+\section filtering-morphology Morphological operations
+
+\section filtering-dft Discrete Fourier Transforms (DFT)
+
+*/
