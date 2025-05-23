@@ -21,6 +21,7 @@
 namespace Linx {
 
 /**
+ * @ingroup arrays
  * @brief ND image.
  * 
  * @tparam T Element type

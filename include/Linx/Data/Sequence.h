@@ -22,6 +22,7 @@
 namespace Linx {
 
 /**
+ * @ingroup arrays
  * @brief Non-resizable 1D container with Euclid arithmetics and element-wise functions.
  * 
  * @tparam T The element value type

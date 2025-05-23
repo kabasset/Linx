@@ -1,0 +1,150 @@
+/**
+
+\addtogroup arrays
+
+\tableofcontents
+
+\section arrays-intro Introduction
+
+Linx provides classes and services for handling one-dimensional (1D) and multi-dimensional (ND) arrays.
+1D arrays are implemented by the `Sequence` class template, while ND arrays are implemented by the `Image` class template.
+Both implement pixelwise operations and are compatible with global transforms such as filtering and Fourier transforms,
+and both feature slicing capabilities for enabling regional operations and transforms.
+
+Template parameters of these classes include the data type of the elements, the dimension or rank of the array,
+and the underlying data container type.
+The default data container type is generally a `Kokkos::View`, but other types can be used if needed.
+
+```cpp
+template <typename T, int N, typename TContainer = ImageContainer<T, N>>
+class Image;
+
+template <typename T, typename TContainer = SequenceContainer<T>>
+class Sequence;
+```
+
+\section array-memory Memory management
+
+The semantics of `Sequence` and `Image` are similar to those of `std::shared_ptr`:
+memory is managed automatically, and can be shared between multiple objects without copying the underlying data.
+Copy constructor and copy assignment operator perform shallow copy.
+Memory is released when the last reference to the data is destroyed.
+
+The memory layout (alignment, padding and element storage order) depends on the underlying machine architecture and the underlying data container type.
+By default, `Kokkos::View` uses a machine-dependent layout, but this can be changed by specifying a different layout policy.
+For example, `Raster` uses a contiguous, row-major ordered layout, which is compatible with most legacy libraries.
+
+The container can be accessed through the `container()` method in order to interface with other Kokkos-based libraries.
+It is also possible to obtain a pointer to the raw data using the `data()` method, which is useful for interoperability with other libraries.
+
+\section array-datatypes Data types
+
+Both `Sequence` and `Image` support numerical data types, including integers, floating-point numbers, and complex numbers, as well as strings.
+Custom data types can also be used, with constraints inherited from the underlying data container type, such as `Kokkos::View`.
+Typically, it is not possible by default to use non-POD types.
+
+\section array-sequence-rank Sequence rank
+
+For sequences, the term "rank" refers to the number of elements in the sequence.
+
+There are two kinds of ranks for sequences:
+
+- Static: the rank is known at compile time and is specified as template parameter `N`;
+- Dynamic: the rank is not known at compile time and is specified at construction, with template parameter `N` set to `-1`.
+
+Static-rank sequences ressemble standard arrays and are more efficient than dynamic-rank sequences,
+while dynamic-rank sequences ressemble non-resizable standard vectors.
+
+```cpp
+auto static_rank_sequence = Linx::Sequence<int, 3>();
+assert(static_rank_sequence.n == 3);
+assert(static_rank_sequence.size() == 3);
+
+auto dynamic_rank_sequence = Linx::Sequence<int, -1>(3);
+assert(dynamic_rank_sequence.n == -1);
+assert(dynamic_rank_sequence.size() == 3);
+```
+
+\section array-image-rank Image rank
+
+For images, the term "rank" refers to the number of axes in the image.
+The rank can be set statically or dynamically (with `N = -1`), similar to sequences,
+but the number of elements is generally specified for each axis in the constructor.
+
+```cpp
+auto static_rank_image = Linx::Image<int, 3>(10, 20, 30);
+assert(static_rank_image.n == 3);
+assert(static_rank_image.rank() == 3);
+assert(static_rank_image.shape() == Linx::Position({10, 20, 30}));
+assert(static_rank_image.size() == 10 * 20 * 30);
+assert(static_rank_image.extent(0) == 10);
+assert(static_rank_image.extent(1) == 20);
+assert(static_rank_image.extent(2) == 30);
+
+auto dynamic_rank_image = Linx::Image<int, -1>(10, 20, 30);
+assert(dynamic_rank_image.n == -1);
+assert(dynamic_rank_image.rank() == 3);
+assert(static_rank_image.size() == 10 * 20 * 30);
+assert(static_rank_image.shape() == Linx::Position<-1>({10, 20, 30}));
+assert(static_rank_image.extent(0) == 10);
+assert(static_rank_image.extent(1) == 20);
+assert(static_rank_image.extent(2) == 30);
+```
+
+The maximum rank of an image is determined by the underlying data container type, which is 8 for `Kokkos::View` and 7 for `Kokkos::DynRankView`.
+However, many services offered by Kokkos are limited to views with up to 6 dimensions.
+The Linx library itself supports arbitrary ranks.
+
+0-dimensional images are supported.
+As opposed to tensor libraries, they are not treated as scalars, but as empty containers.
+
+```cpp
+auto null_image = Linx::Image<int, 0>();
+assert(null_image.n == 0);
+assert(null_image.rank() == 0);
+assert(null_image.size() == 0);
+assert(null_image.empty());
+assert(null_image.shape() == Linx::Position({}));
+assert(null_image.data() == nullptr);
+```
+
+\section array-access Element access
+
+Both `Sequence` and `Image` classes provide access to their elements through indexing operators.
+For example, `sequence[i]` accesses the i-th element of a `Sequence`,
+and `image(i, j)` accesses the element at position (i, j) in an `Image`.
+
+`Sequence`s are always iterable, while `Image`s are iterable only if the underlying data is contiguous in memory.
+
+\section array-slicing Slices and patches
+
+Images and sequences feature slicing and patching capabilities that allow for efficient manipulation of subregions.
+Slices are used to create subregion views as instances of `Image` or `Sequence`.
+Therefore, slices have have a strided memory and their domains are necessarily regular, i.e., 1D intervals or ND axis-aligned boxes.
+Slices are created with a syntax analogous to Python's slicing:
+
+- `Slice()` means to select all elements along a dimension;
+- `Slice(index)` selects a single index;
+- `Slice(start, stop, step)` selects elements from index `start` to index `stop - 1`.
+
+Such constructs can be combined to create multi-dimensional slices.
+
+```cpp
+// Keep x from 1 to 3, all y's, and z = 5
+// The output slice is a 2D Image
+auto slice = image[Linx::Slice(1, 4)()(5)];
+```
+
+By contrast, no assumptions are made on the memory layout of patches, therefore they support domains of any kind.
+`Patch` is an extremely lightweight class that simply holds a domain and a pointer to the parent data.
+
+```cpp
+auto patch = Linx::where(image, weird_domain);
+```
+
+\section array-operations Operations
+
+Images and sequences support a variety of operations, including arithmetic operations, element-wise functions, and reduction operations.
+These operations can be performed on entire arrays or on specific subregions defined by slices or patches.
+
+*/
