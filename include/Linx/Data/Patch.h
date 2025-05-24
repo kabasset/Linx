@@ -179,25 +179,25 @@ KOKKOS_INLINE_FUNCTION const auto& root(const AnyImage auto& image)
  * @see slice()
  */
 template <typename T, int N, typename TContainer, typename U, SliceType... TSlices>
-auto patch(const Image<T, N, TContainer>& in, const Slice<U, TSlices...>& domain)
+auto where(const Image<T, N, TContainer>& in, const Slice<U, TSlices...>& domain)
 {
-  return patch(in, box(domain & in.domain()));
+  return where(in, box(domain & in.domain()));
 }
 
 /**
- * @copydoc patch()
+ * @copydoc where()
  */
 template <typename T, int N, typename TContainer, typename U>
-auto patch(const Image<T, N, TContainer>& in, const GBox<U, N>& domain)
+auto where(const Image<T, N, TContainer>& in, const GBox<U, N>& domain)
 {
   return Patch<Image<T, N, TContainer>, GBox<U, N>>(in, domain & in.domain());
 }
 
 /**
- * @copydoc patch()
+ * @copydoc where()
  */
 template <typename TParent, typename TDomain, typename U>
-auto patch(const Patch<TParent, TDomain>& in, const GBox<U, TParent::n>& domain)
+auto where(const Patch<TParent, TDomain>& in, const GBox<U, TParent::n>& domain)
 {
   return Patch<TParent, TDomain>(root(in), domain & in.domain());
 }

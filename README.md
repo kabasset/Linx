@@ -119,7 +119,7 @@ Linx::Correlation(kernel).transform(input, output); // Fills output
 
 There are two ways to work on subsets of elements:
 * by slicing some data classes with `slice()`, which return a view of type `Sequence` or `Image` depending on the input type;
-* by associating a `Region` to a data class with `patch()`, which results in an object of type `Patch`.
+* by associating a `Region` to a data class with `where()`, which results in an object of type `Patch`.
 
 Slices are created from regions of type either `Slice` or `Box`.
 
