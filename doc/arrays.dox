@@ -113,5 +113,6 @@ For example, `sequence[i]` accesses the i-th element of a `Sequence`,
 and `image(i, j)` accesses the element at position (i, j) in an `Image`.
 
 `Sequence`s are always iterable, while `Image`s are iterable only if the underlying data is contiguous in memory.
+Typically, this is the case for `Raster`.
 
 */

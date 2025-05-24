@@ -1,15 +1,15 @@
 /**
 
 \defgroup arrays 1D, ND arrays
-\brief Classes and services for handling 1D and ND arrays.
+\brief Sequences, images, rasters, etc.
 
 \defgroup regions Regions, slices, patches
-\brief Classes and services for handling regions.
+\brief Boxes, slices, patches, etc.
 
 \defgroup pixelwise Pixelwise operations
-\brief Operations on individual elements.
+\brief Arithmetics, math functions, ranges, etc.
 
 \defgroup filtering Filtering
-\brief Linear and non-linear filtering.
+\brief Convolution, morphology, rank filtering, etc.
 
 */
