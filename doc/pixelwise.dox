@@ -10,7 +10,52 @@ These operations can be performed on entire arrays or on specific subregions def
 
 \section pixelwise-arithmetic Arithmetic operations
 
+Arithmetic operations are provided to the data classes by the `ArithmeticMixin` base class.
+Depending on the type of element, `ArithmeticMixin` implements either Boolean or Euclid-space arithmetics.
+
 \section pixelwise-functions Element-wise functions
+
+Many mathematical functions are implemented in the parent class `MathFunctionsMixin`.
+Class methods act on the elements in place, while free functions create new instances:
+
+```cpp
+auto a = Linx::Image(...);
+a.exp(); // Modify `a` elements
+auto b = Linx::exp(a); // Create `b`, do not modify `a`
+```
+
+When the functions expect parameters, scalars or containers of compatible shapes are accepted:
+
+```cpp
+a.pow(b);
+a.pow(2);
+auto c = Linx::pow(a, b);
+auto d = Linx::pow(a, 2);
+```
+
+Custom functions can also be provided, either to `generate()` or `apply()`.
+They take as input the function to be applied (e.g. free function, functor or lambda)
+and an arbitrary number of inputs (can be 0).
+
+For example, to compute `a * k + b`, do:
+
+```cpp
+a.apply(KOKKOS_LAMBDA(a_i, b_i) { return a_i * k * b_i}, b);
+a.run(Linx::Multiply(k), Linx::Add(b));
+```
+
+This is equivalent but much faster than doing simply:
+
+```cpp
+a = a * k + b;
+```
+
+because intermediate variable `tmp = a * k` is not instanciated.
+This is all the more true for formulae with more operations.
+
+This can be seen as an equivalent to NumPy's, XTensor's or Eigen's lazy evaluations, yet with arbitrary functions.
+
+For application of `generate()` and `apply()` to random noise, see \ref random.
 
 \section pixelwise-reduction Reduction operations
 
