@@ -8,10 +8,20 @@ Data classes (images, sequences, patches) support a variety of operations,
 including arithmetic operations, element-wise functions, and reduction operations.
 These operations can be performed on entire arrays or on specific regions defined by slices or patches.
 
+Operations which take several arguments (e.g. arithmetic operators or `Linx::pow()`)
+can accept containers of compatible shapes and scalars.
+
 \section pixelwise-arithmetic Arithmetic operations
 
-Arithmetic operations are provided to the data classes by the `ArithmeticMixin` base class.
-Depending on the type of element, `ArithmeticMixin` implements either Boolean or Euclid-space arithmetics.
+Arithmetic operations are provided to the data classes by one of the various mixins.
+Depending on the type of element, `Image` and `Sequence` implement either Boolean arithmetics (`BooleanArithmeticMixin`)
+or Euclid-space arithmetics (`EuclidArithmeticMixin`).
+The former implement logical operators  -- `!`, `||`, `&=`, etc. --,
+whereas the latter implement arithmetic operators -- `-`, `+`, `*=`, etc.
+Patches inherit the arithmetics from their parent.
+
+Unary operator `+` has a special meaning for images and sequences:
+it returns a deep copy of the object.
 
 \section pixelwise-functions Element-wise functions
 
@@ -20,8 +30,9 @@ Class methods act on the elements in place, while free functions create new inst
 
 ```cpp
 auto a = Linx::Image(...);
-a.exp(); // Modify `a` elements
+a.exp(); // Modify `a` elements in place
 auto b = Linx::exp(a); // Create `b`, do not modify `a`
+auto c = +a; // Deep copy `a`
 ```
 
 When the functions expect parameters, scalars or containers of compatible shapes are accepted:
@@ -50,12 +61,25 @@ This is equivalent but much faster than doing simply:
 a = a * k + b;
 ```
 
-because intermediate variable `tmp = a * k` is not instanciated.
+because intermediate variable `tmp = a * k` is not allocated.
 This is all the more true for formulae with more operations.
 
 This can be seen as an equivalent to NumPy's, XTensor's or Eigen's lazy evaluations, yet with arbitrary functions.
 
-For application of `generate()` and `apply()` to random noise, see \ref random.
+\section pixelwise-random Random noise generation
+
+Pixelwise services are compatible with random noise generation.
+For example, to generate a field of uniform random noise in the range [0, 1), do:
+
+```cpp
+a.generate(Linx::UniformRng(0., 1.));
+```
+
+To add some Gaussian noise with mean 0 and standard deviation 1, simply write:
+
+```cpp
+a += Linx::GaussianRng(0., 1.);
+```
 
 \section pixelwise-reduction Reduction operations
 
