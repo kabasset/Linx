@@ -51,14 +51,27 @@ private:
 } // namespace Impl
 
 /**
+ * @brief Default `DataMixin` arithmetic tag.
+ * 
+ * Uses `BooleanArithmetic` if the element type is `bool`, otherwise uses `EuclidArithmetic`.
+ */
+template <typename T, typename TDerived>
+using DataArithmeticMixin = std::conditional_t<
+    std::is_same_v<std::remove_cvref_t<T>, bool>,
+    BooleanArithmeticMixin<T, TDerived>,
+    EuclidArithmeticMixin<T, TDerived>>;
+
+/**
  * @brief Data container mixin.
  * 
  * @tparam T The value type
  * @tparam TArithmetic The arithmetic tag
  * @tparam TDerived The derived class
  */
-template <typename T, typename TArithmetic, typename TDerived>
-struct DataMixin : public ArithmeticMixin<TArithmetic, T, TDerived>, public MathFunctionsMixin<T, TDerived> {
+template <typename T, typename TArithmeticMixin, typename TDerived>
+struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerived> {
+  using Arithmetic = TArithmeticMixin;
+
   /// @{
   /// @group_properties
 

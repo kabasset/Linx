@@ -168,7 +168,7 @@ private:
  * \endcode
  */
 template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
-class UniformRng : public ArithmeticMixin<void, const T, UniformRng<T, TSpace>> {
+class UniformRng : public CopyArithmeticMixin<const T, UniformRng<T, TSpace>> {
 public:
 
   using value_type = const T;
@@ -280,7 +280,7 @@ private:
  * @brief Gaussian random number generator.
  */
 template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
-class GaussianRng : public ArithmeticMixin<void, const T, GaussianRng<T, TSpace>> {
+class GaussianRng : public CopyArithmeticMixin<const T, GaussianRng<T, TSpace>> {
 public:
 
   using value_type = const T;
@@ -388,7 +388,7 @@ private:
  * @brief Poisson random number generator.
  */
 template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
-class PoissonRng : public ArithmeticMixin<void, const T, PoissonRng<T, TSpace>> {
+class PoissonRng : public CopyArithmeticMixin<const T, PoissonRng<T, TSpace>> {
 public:
 
   using value_type = const T;
@@ -488,7 +488,8 @@ private:
 };
 
 template <typename T>
-const T& as_readonly(const T& in) requires(std::is_const_v<typename T::value_type>) // FIXME to functional
+const T& as_readonly(const T& in)
+  requires(std::is_const_v<typename T::value_type>) // FIXME to functional
 {
   return in;
 }

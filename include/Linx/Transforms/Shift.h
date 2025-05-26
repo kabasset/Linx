@@ -18,7 +18,7 @@ namespace Linx {
  * @brief A shifted view of an image.
  */
 template <typename TParent>
-class Shift : public DataMixin<typename TParent::value_type, EuclidArithmetic, Shift<TParent>> {
+class Shift : public DataMixin<typename TParent::value_type, typename TParent::Arithmetic, Shift<TParent>> {
 public:
 
   static constexpr int n = TParent::Domain::n; ///< The dimension parameter

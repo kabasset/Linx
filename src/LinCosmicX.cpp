@@ -30,14 +30,7 @@ void print_2d(const auto& image)
   Linx::Fits(filename, 'w').write(image);
 }
 
-namespace Linx { // FIXME to Functional.h
-
-struct Negate {
-  KOKKOS_INLINE_FUNCTION auto operator()(const auto& e) const
-  {
-    return -e;
-  }
-};
+namespace Linx { // FIXME to Math.h
 
 struct Sqrt {
   KOKKOS_INLINE_FUNCTION auto operator()(const auto& e) const
@@ -99,7 +92,7 @@ struct FindSaturatedStars {
     Linx::Dilation(strel(1)).transform(mask, grow_mask);
     // FIXME auto grow_mask = Dilation::with_border_copy(mask)?
     Linx::Dilation(strel(2)).transform(satpixels, mask);
-    mask *= grow_mask;
+    mask &= grow_mask;
     return mask;
   }
 };

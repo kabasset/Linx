@@ -30,7 +30,7 @@ namespace Linx {
  */
 template <typename T, int N, typename TContainer = SequenceContainer<T, N>>
 class Sequence :
-    public DataMixin<T, EuclidArithmetic, Sequence<T, N, TContainer>>,
+    public DataMixin<T, DataArithmeticMixin<T, Sequence<T, N, TContainer>>, Sequence<T, N, TContainer>>,
     public RangeMixin<true, T, Sequence<T, N, TContainer>> {
 public:
 

@@ -21,7 +21,7 @@ namespace Linx {
  * As opposed to an image slice, an image patch always has the same rank as the image, and its domain is the input domain.
  */
 template <typename TParent, typename TDomain>
-class Patch : public DataMixin<typename TParent::value_type, EuclidArithmetic, Patch<TParent, TDomain>> {
+class Patch : public DataMixin<typename TParent::value_type, typename TParent::Arithmetic, Patch<TParent, TDomain>> {
 public:
 
   static constexpr int n = TDomain::n; ///< The dimension parameter

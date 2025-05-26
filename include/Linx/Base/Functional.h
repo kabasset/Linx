@@ -40,6 +40,36 @@ struct Copy {
 };
 
 /**
+ * @brief Logical not.
+ */
+struct Not {
+  std::string label() const
+  {
+    return "Not";
+  }
+
+  KOKKOS_INLINE_FUNCTION constexpr bool operator()(const auto& value) const
+  {
+    return not value;
+  }
+};
+
+/**
+ * @brief Negation.
+ */
+struct Negate {
+  std::string label() const
+  {
+    return "Negate";
+  }
+
+  KOKKOS_INLINE_FUNCTION auto operator()(const auto& e) const
+  {
+    return -e;
+  }
+};
+
+/**
  * @brief Functor which always returns the same value.
  */
 template <typename T>
@@ -108,7 +138,7 @@ const auto& as_readonly(const Constant<T>& c) // FIXME generic?
     } \
   }; \
 \
-  Func()->Func<Forward, Forward>; \
+  Func() -> Func<Forward, Forward>; \
   template <typename T> \
   Func(T) -> Func<Forward, T>;
 
@@ -130,6 +160,7 @@ LINX_DEFINE_BINARY_OPERATOR(Equal, (lhs == rhs))
 LINX_DEFINE_BINARY_OPERATOR(NotEqual, (lhs != rhs))
 LINX_DEFINE_MONOID(And, (lhs && rhs), true)
 LINX_DEFINE_MONOID(Or, (lhs || rhs), false)
+LINX_DEFINE_BINARY_OPERATOR(Xor, (!lhs != !rhs))
 LINX_DEFINE_MONOID(Min, std::min(lhs, rhs), std::numeric_limits<T>::max())
 LINX_DEFINE_MONOID(Max, std::max(lhs, rhs), std::numeric_limits<T>::lowest())
 

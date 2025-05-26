@@ -4,9 +4,9 @@
 
 \section pixelwise-intro Introduction
 
-Data classes (images, sequences, slices, patches) support a variety of operations,
+Data classes (images, sequences, patches) support a variety of operations,
 including arithmetic operations, element-wise functions, and reduction operations.
-These operations can be performed on entire arrays or on specific subregions defined by slices or patches.
+These operations can be performed on entire arrays or on specific regions defined by slices or patches.
 
 \section pixelwise-arithmetic Arithmetic operations
 

@@ -52,7 +52,7 @@ namespace Linx {
  */
 template <typename T, int N, typename TContainer = ImageContainer<T, N>>
 class Image :
-    public DataMixin<T, EuclidArithmetic, Image<T, N, TContainer>>,
+    public DataMixin<T, DataArithmeticMixin<T, Image<T, N, TContainer>>, Image<T, N, TContainer>>,
     public RangeMixin<is_contiguous<TContainer>(), T, Image<T, N, TContainer>> {
 public:
 
@@ -60,7 +60,6 @@ public:
   using Container = TContainer; ///< The underlying container type
   using Shape = Position<N>; ///< The shape type
   using Domain = Box<N>; ///< The domain type
-  using Super = DataMixin<T, EuclidArithmetic, Image<T, N, TContainer>>; ///< The parent class
 
   using memory_space = typename Container::memory_space;
   using execution_space = typename Container::execution_space;

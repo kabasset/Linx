@@ -130,7 +130,9 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Path<N>& in)
  * Copy is shallow by default.
  */
 template <typename T, int N>
-class Map : DataMixin<T, void, Map<T, N>>, RangeMixin<true, T, Map<T, N>> { // FIXME arithmetic // FIXME GMap?
+class Map :
+    DataMixin<T, CopyArithmeticMixin<T, Map<T, N>>, Map<T, N>>,
+    RangeMixin<true, T, Map<T, N>> { // FIXME arithmetic // FIXME GMap?
 public:
 
   using value_type = T;

@@ -15,7 +15,7 @@
 namespace Linx {
 
 #define LINX_SCALAR_OPERATOR_INPLACE(op, Func) \
-  const TDerived& operator op##=(const T& rhs) const \
+  const TDerived& operator op##=(const T & rhs) const \
   { \
     return LINX_CRTP_CONST_DERIVED.apply(compose_label(#op, LINX_CRTP_CONST_DERIVED, rhs), Func(rhs)); \
   }
@@ -33,8 +33,8 @@ namespace Linx {
   LINX_SCALAR_OPERATOR_NEWINSTANCE(op)
 
 #define LINX_VECTOR_OPERATOR_INPLACE(op, Func) \
-  template <typename USpecs, typename U, typename UDerived> \
-  const TDerived& operator op##=(const ArithmeticMixin<USpecs, U, UDerived>& rhs) const \
+  template <typename U, typename UDerived> \
+  const TDerived& operator op##=(const CopyArithmeticMixin<U, UDerived>& rhs) const \
   { \
     const auto& derived_rhs = static_cast<const UDerived&>(rhs); \
     return LINX_CRTP_CONST_DERIVED \
@@ -42,8 +42,8 @@ namespace Linx {
   }
 
 #define LINX_VECTOR_OPERATOR_NEWINSTANCE(op) \
-  template <typename USpecs, typename U, typename UDerived> \
-  friend TDerived operator op(const TDerived& lhs, const ArithmeticMixin<USpecs, U, UDerived>& rhs) \
+  template <typename U, typename UDerived> \
+  friend TDerived operator op(const TDerived& lhs, const CopyArithmeticMixin<U, UDerived>& rhs) \
   { \
     const auto& derived_rhs = static_cast<const UDerived&>(rhs); \
     TDerived out = lhs.copy_as(compose_label(#op, lhs, derived_rhs)); \
@@ -60,42 +60,15 @@ namespace Linx {
   LINX_VECTOR_OPERATOR(op, Func)
 
 /**
- * @ingroup concepts
- * @requirements{VectorArithmetic}
- * @brief Vector space arithmetic requirements.
- * 
- * Implements vector space arithmetic operators
- * (uppercase letters are for vectors, lowercase letters are for scalars):
- * - Vector-additive: V += U, W = V + U, V -= U, W = V - U;
- * - Scalar-additive: V += a, V = U + a, V = a + U, V -= a, V = U + a, V = a - U, V++, ++V, V--, --V;
- * - Scalar-multiplicative: V *= a, V = U * a, V = a * U, V /= a, V = U / a.
- */
-class VectorArithmetic;
-
-/**
- * @ingroup concepts
- * @requirements{EuclidArithmetic}
- * @brief Euclidean ring arithmetic requirements.
- * 
- * Adds the following operators to `VectorArithmetic`:
- * - Vector-multiplicative: V *= U, W = U * V, V /= U, W = V / U;
- * - Scalar-modable: V %= a, V = U % a;
- * - Vector-modable: V %= U, W = V % U;
- */
-class EuclidArithmetic;
-
-/**
  * @ingroup pixelwise
- * @ingroup mixins
  * @brief Mixin to provide arithmetics operators to a container.
- * @tparam TSpecs The operators specifications, can be `void`
  * @tparam TDerived The container which inherits this class
- * 
- * @tspecialization{VectorArithmetic}
- * @tspecialization{EuclidArithmetic}
  */
-template <typename TSpecs, typename T, typename TDerived>
-struct ArithmeticMixin {
+template <typename T, typename TDerived>
+struct CopyArithmeticMixin {
+  /**
+   * @brief Deep copy with a new label.
+   */
   TDerived copy_as(const std::string& label) const
   {
     TDerived out(label, LINX_CRTP_CONST_DERIVED.shape());
@@ -104,35 +77,61 @@ struct ArithmeticMixin {
   }
 
   /**
-   * @brief Copy.
+   * @brief Deep copy.
    */
   TDerived operator+() const
   {
     // FIXME if container use_count() <= 1, return this to optimize out temporary objects
     return copy_as(compose_label("copy", LINX_CRTP_CONST_DERIVED));
   }
+};
 
+/**
+ * @ingroup pixelwise
+ * @brief Boolean arithmetic mixin.
+ * 
+ * Implements boolean arithmetic operators:
+ * - V |= U, W = V | U, V &= U, W = V & U, V = !U;
+ * - V |= a, W = V | a, V &= a, W = V & a.
+ */
+template <typename T, typename TDerived>
+struct BooleanArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
+  /**
+   * @brief Compute the opposite.
+   */
+  TDerived operator not() const
+  {
+    TDerived res = copy_as(compose_label("not", LINX_CRTP_CONST_DERIVED));
+    res.apply("!", Not());
+    return res;
+  }
+
+  LINX_OPERATOR(|, Or) // FIXME use || and |=
+  LINX_OPERATOR(&, And) // FIXME use && and &=
+};
+
+/**
+ * @ingroup pixelwise
+ * @brief Vector space arithmetic mixin.
+ * 
+ * Implements vector space arithmetic operators
+ * (uppercase letters are for vectors, lowercase letters are for scalars):
+ * - Vector-additive: V += U, W = V + U, V -= U, W = V - U;
+ * - Scalar-additive: V += a, V = U + a, V = a + U, V -= a, V = U + a, V = a - U, V++, ++V, V--, --V;
+ * - Scalar-multiplicative: V *= a, V = U * a, V = a * U, V /= a, V = U / a.
+ */
+template <typename T, typename TDerived>
+struct VectorArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
   /**
    * @brief Compute the opposite.
    */
   TDerived operator-() const
   {
     TDerived res = copy_as(compose_label("negate", LINX_CRTP_CONST_DERIVED));
-    res.apply("-", std::negate());
+    res.apply("-", Negate());
     return res;
   }
-};
 
-/// @cond
-
-/**
- * @ingroup pixelwise
- * @ingroup mixins
- * @brief `VectorArithmetic` specialization.
- * @satisfies{VectorArithmetic}
- */
-template <typename T, typename TDerived>
-struct ArithmeticMixin<VectorArithmetic, T, TDerived> : ArithmeticMixin<void, T, TDerived> {
   /// @{
   /// @group_modifiers
 
@@ -167,12 +166,25 @@ struct ArithmeticMixin<VectorArithmetic, T, TDerived> : ArithmeticMixin<void, T,
 
 /**
  * @ingroup pixelwise
- * @ingroup mixins
- * @brief `EuclidArithmetic` specialization.
- * @satisfies{EuclidArithmetic}
+ * @brief Euclidean ring arithmetic mixin.
+ * 
+ * Adds the following operators to `VectorArithmeticMixin`:
+ * - Vector-multiplicative: V *= U, W = U * V, V /= U, W = V / U;
+ * - Scalar-modable: V %= a, V = U % a;
+ * - Vector-modable: V %= U, W = V % U;
  */
 template <typename T, typename TDerived>
-struct ArithmeticMixin<EuclidArithmetic, T, TDerived> : ArithmeticMixin<void, T, TDerived> {
+struct EuclidArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
+  /**
+   * @brief Compute the opposite.
+   */
+  TDerived operator-() const
+  {
+    TDerived res = copy_as(compose_label("negate", LINX_CRTP_CONST_DERIVED));
+    res.apply("-", Negate());
+    return res;
+  }
+
   /// @{
   /// @group_modifiers
 
