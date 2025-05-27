@@ -1,3 +1,5 @@
+namespace Linx {
+
 /**
 
 \addtogroup pixelwise
@@ -8,34 +10,28 @@ Data classes (images, sequences, patches) support a variety of operations,
 including arithmetic operations, element-wise functions, and reduction operations.
 These operations can be performed on entire arrays or on specific regions defined by slices or patches.
 
-Operations which take several arguments (e.g. arithmetic operators or `Linx::pow()`)
-can accept containers of compatible shapes and scalars.
+\section pixelwise-operations Arithmetic and mathematical operations
 
-\section pixelwise-arithmetic Arithmetic operations
-
-Arithmetic operations are provided to the data classes by one of the various mixins.
-Depending on the type of element, `Image` and `Sequence` implement either Boolean arithmetics (`BooleanArithmeticMixin`)
-or Euclid-space arithmetics (`EuclidArithmeticMixin`).
-The former implement logical operators  -- `!`, `||`, `&=`, etc. --,
-whereas the latter implement arithmetic operators -- `-`, `+`, `*=`, etc.
-Patches inherit the arithmetics from their parent.
-
-Unary operator `+` has a special meaning for images and sequences:
+Operations are provided to the data classes by various mixins.
+With elements of type `bool`, `Image` and `Sequence` implement Boolean arithmetics
+by inheriting from `BooleanArithmeticMixin`, which provides logical operators such as `!`, `||`, and `&=`.
+For other types, they inherit from `EuclidArithmeticMixin`, which provides Euclid-space arithmetic operators such as  `-`, `+`, and `*=`.
+In both cases, unary operator `+` has a special meaning:
 it returns a deep copy of the object.
 
-\section pixelwise-functions Element-wise functions
+Patches inherit the arithmetics from their parent.
 
 Many mathematical functions are implemented in the parent class `MathFunctionsMixin`.
 Class methods act on the elements in place, while free functions create new instances:
 
 ```cpp
-auto a = Linx::Image(...);
+auto a = Linx::Image("label", shape);
 a.exp(); // Modify `a` elements in place
 auto b = Linx::exp(a); // Create `b`, do not modify `a`
 auto c = +a; // Deep copy `a`
 ```
 
-When the functions expect parameters, scalars or containers of compatible shapes are accepted:
+When the operators or functions expect parameters, scalars or containers of compatible shapes are accepted:
 
 ```cpp
 a.pow(b);
@@ -48,11 +44,13 @@ Custom functions can also be provided, either to `generate()` or `apply()`.
 They take as input the function to be applied (e.g. free function, functor or lambda)
 and an arbitrary number of inputs (can be 0).
 
-For example, to compute `a * k + b`, do:
+For example, to compute `a * k + b`, with `k` some scalar, do:
 
 ```cpp
-a.apply(KOKKOS_LAMBDA(a_i, b_i) { return a_i * k * b_i}, b);
-a.run(Linx::Multiply(k), Linx::Add(b));
+a.apply(
+    "a * k + b",
+    KOKKOS_LAMBDA(a_i, b_i) { return a_i * k * b_i; },
+    b);
 ```
 
 This is equivalent but much faster than doing simply:
@@ -66,13 +64,49 @@ This is all the more true for formulae with more operations.
 
 This can be seen as an equivalent to NumPy's, XTensor's or Eigen's lazy evaluations, yet with arbitrary functions.
 
-\section pixelwise-random Random noise generation
-
-Pixelwise services are compatible with random noise generation.
-For example, to generate a field of uniform random noise in the range [0, 1), do:
+Method `generate()` is similar to `apply()` but the functor it calls does not take as parameter the array it is called from,
+that is, the following lines are strictly equivalent:
 
 ```cpp
-a.generate(Linx::UniformRng(0., 1.));
+a.apply("a += b", Linx::Add(), b);
+a.generate("a = a + b", Linx::Add(), a, b);
+```
+
+\section pixelwise-ranges Ranges
+
+When the memory layout is made explicitely contiguous at compile time, e.g. for sequences, 1D images or rasters,
+range operations are provided by `RangeMixin`.
+This is useful when element ordering matters,
+for example for generating sequences with operations like `range()`, `linspace()`,
+or for iterating thanks to compatibility with standard C++ ranges, through `begin()` and `end()` functions.
+
+```cpp
+auto a = Linx::Sequence<float, 1000>("sine").linspace(0, 2 * std::numbers::pi);
+for (auto& e : a) {
+  e = Kokkos::sin(e);
+}
+```
+
+The above snippet could be written more concisely and efficiently by using the `apply` method:
+
+```cpp
+auto a = Linx::Sequence<float, 1000>("sine").linspace(0, 2 * std::numbers::pi).apply("Sin", Linx::Sin());
+```
+
+or even more efficiently with a single pass:
+
+```cpp
+auto b = Linx::generate<float, 1000>("sine", Linx::Multiply(2 * std::numbers::pi / 1000), Linx::Sin());
+```
+
+\section pixelwise-random Random noise generation
+
+Pixelwise services are compatible with random noise generators.
+For example, to generate an array of iid. uniform random noise in the range [0, 1), do:
+
+```cpp
+a.generate(Linx::UniformRng(0., 1.)); // In place
+auto b = Linx::generate<100>("noise", Linx::UniformRng(0., 1.)); // New instance
 ```
 
 To add some Gaussian noise with mean 0 and standard deviation 1, simply write:
@@ -84,3 +118,5 @@ a += Linx::GaussianRng(0., 1.);
 \section pixelwise-reduction Reduction operations
 
 */
+
+}
