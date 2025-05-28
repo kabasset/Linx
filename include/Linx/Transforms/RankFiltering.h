@@ -16,6 +16,10 @@
 
 namespace Linx {
 
+/**
+ * @ingroup filtering
+ * @brief Median filter.
+ */
 template <int Size, typename TFootprint>
 class MedianFilter : public SpatialFilterMixin<TFootprint, MedianFilter<Size, TFootprint>> {
 public:
@@ -48,6 +52,10 @@ public:
   };
 };
 
+/**
+ * @ingroup filtering
+ * @brief Median filter with a dynamic footprint size.
+ */
 template <typename TFootprint>
 class MedianFilter<0, TFootprint> : public SpatialFilterMixin<TFootprint, MedianFilter<0, TFootprint>> {
 public:
@@ -90,6 +98,7 @@ template <typename T>
 MedianFilter(const T&) -> MedianFilter<0, T>;
 
 /**
+ * @ingroup filtering
  * @brief Minimum filter, aka. grayscale erosion.
  */
 template <typename TFootprint>
@@ -124,6 +133,7 @@ public:
 };
 
 /**
+ * @ingroup filtering
  * @brief Maximum filter, aka. grayscale erosion.
  */
 template <typename TFootprint>

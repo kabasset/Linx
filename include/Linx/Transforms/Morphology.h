@@ -15,6 +15,7 @@
 namespace Linx {
 
 /**
+ * @ingroup filtering
  * @brief Binary erosion.
  */
 template <typename TFootprint>
@@ -49,6 +50,7 @@ public:
 };
 
 /**
+ * @ingroup filtering
  * @brief Binary dilation.
  */
 template <typename TFootprint>

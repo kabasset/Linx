@@ -15,6 +15,10 @@
 
 namespace Linx {
 
+/**
+ * @ingroup filtering
+ * @brief A spatial filter which computes the sum of the elements in the footprint.
+ */
 template <typename TFootprint>
 struct SumFilter : public SpatialFilterMixin<TFootprint, SumFilter<TFootprint>> {
 public:
@@ -46,6 +50,10 @@ public:
   };
 };
 
+/**
+ * @ingroup filtering
+ * @brief A spatial filter that computes the mean of the elements in the footprint.
+ */
 template <typename TFootprint>
 class MeanFilter : public SpatialFilterMixin<TFootprint, MeanFilter<TFootprint>> {
 public:
@@ -88,6 +96,16 @@ struct Conjugate {
 
 } // namespace Impl
 
+/**
+ * @ingroup filtering
+ * @brief A correlation filter.
+ * 
+ * A correlation filter is a linear filter that applies a weighted sum of the input elements to produce an output element.
+ * The weights are given by the kernel, which can be sparse (e.g. using a `Map`).
+ * If the element type is complex, the kernel is conjugated before applying the filter.
+ * 
+ * @see `Convolution`
+ */
 template <typename TKernel>
 class Correlation : public WeightedFilterMixin<TKernel, Correlation<TKernel>> {
 public:
@@ -133,6 +151,12 @@ public:
   };
 };
 
+/**
+ * @ingroup filtering
+ * @brief Convolution filter class.
+ * 
+ * @see `Correlation`
+ */
 template <typename TKernel>
 class Convolution : public WeightedFilterMixin<TKernel, Convolution<TKernel>> {
 public:
@@ -169,6 +193,7 @@ public:
 };
 
 /**
+ * @ingroup filtering
  * @brief Non-isotropic, separable Laplacian filter.
  * 
  * The kernel is a sum of kernels of the form `{s, -2 * s, s}`.
