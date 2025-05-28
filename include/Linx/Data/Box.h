@@ -40,6 +40,7 @@ template <typename T, int N>
 Shape(const GPosition<T, N>&) -> Shape<T, N>;
 
 /**
+ * @ingroup regions
  * @relatesalso Window
  * @brief An ND bounding box, defined by its start (inclusive) and stop (exclusive) bounds.
  * 
@@ -498,6 +499,7 @@ GBox<T, N> operator&(GBox<T, N> lhs, const GBox<U, M>& rhs)
 }
 
 /**
+ * @relatesalso GBox
  * @brief Get the 1D slice along the i-th axis.
  */
 template <int I, typename T, int N>
@@ -543,6 +545,7 @@ auto box_impl(const TSlice& slice, std::index_sequence<Is...>)
 } // namespace Impl
 
 /**
+ * @relatesalso GBox
  * @brief Get the bounding box of a box.
  * 
  * This function is provided for compatibility, it merely forwards its input.
@@ -554,6 +557,7 @@ const GBox<T, N>& box(const GBox<T, N>& in)
 }
 
 /**
+ * @relatesalso Slice
  * @brief Get the bounding box of a slice.
  * 
  * @warning Unbounded slices are not supported, and singleton slices must be integral.
@@ -566,6 +570,8 @@ GBox<T, sizeof...(Types)> box(const Slice<T, Types...>& slice)
 }
 
 /**
+ * @relatesalso Slice
+ * @relatesalso GBox
  * @brief Make a slice clamped by a box.
  */
 template <typename T, typename U, int N, SliceType... Types>
@@ -576,6 +582,8 @@ auto operator&(const Slice<T, Types...>& slice, const GBox<U, N>& box)
 }
 
 /**
+ * @relatesalso Slice
+ * @relatesalso GBox
  * @brief Make a 1D slice clamped by a box.
  */
 template <typename T, SliceType Type, typename U, int N>
@@ -597,6 +605,7 @@ auto kokkos_execution_policy_impl(const GBox<T, N>& domain, std::index_sequence<
 } // namespace Impl
 
 /**
+ * @ingroup regions
  * @brief Shortcut for indexing.
  */
 template <int N>
@@ -617,6 +626,7 @@ auto kokkos_execution_policy(const GBox<T, N>& domain)
 }
 
 /**
+ * @ingroup regions
  * @brief Apply a function to each position of a region.
  * 
  * @param label Some label for debugging

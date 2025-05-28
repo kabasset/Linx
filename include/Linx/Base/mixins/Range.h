@@ -36,6 +36,7 @@ template <bool IsContiguous, typename T, typename TDerived>
 struct RangeMixin {};
 
 /**
+ * @ingroup pixelwise
  * @ingroup mixins
  * @brief Base class to provide range operations.
  * @tparam T The value type

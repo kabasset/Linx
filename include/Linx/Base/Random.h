@@ -97,6 +97,7 @@ private:
 };
 
 /**
+ * @ingroup random
  * @brief Uniform probability distribution.
  */
 template <typename T>
@@ -161,6 +162,7 @@ private:
 };
 
 /**
+ * @ingroup random
  * @brief Uniform random number generator.
  * 
  * \code
@@ -221,6 +223,7 @@ template <typename T>
 UniformRng(const Span<T>&, Index) -> UniformRng<T>;
 
 /**
+ * @ingroup random
  * @brief Gaussian probability distribution.
  * 
  * \code
@@ -277,6 +280,7 @@ private:
 };
 
 /**
+ * @ingroup random
  * @brief Gaussian random number generator.
  */
 template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
@@ -343,6 +347,7 @@ template <typename T>
 GaussianRng(T (&&)[2], Index) -> GaussianRng<T>;
 
 /**
+ * @ingroup random
  * @brief Poisson probability distribution.
  */
 template <typename T>
@@ -385,6 +390,7 @@ private:
 };
 
 /**
+ * @ingroup random
  * @brief Poisson random number generator.
  */
 template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
@@ -435,6 +441,7 @@ private:
 };
 
 /**
+ * @ingroup random
  * @brief Poisson noise generator.
  * 
  * As opposed to many implementation, this generator draws only once to generate one value,

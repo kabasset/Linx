@@ -1,3 +1,5 @@
+namespace Linx {
+
 /**
 
 \addtogroup arrays
@@ -116,3 +118,5 @@ and `image(i, j)` accesses the element at position (i, j) in an `Image`.
 Typically, this is the case for `Raster`.
 
 */
+
+}

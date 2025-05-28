@@ -9,6 +9,12 @@
 \defgroup pixelwise Pixelwise operations
 \brief Arithmetics, math functions, ranges, etc.
 
+\defgroup reduction Reduction operations
+\brief Sum, min, map-reduce, etc.
+
+\defgroup random Random number generation
+\brief Random distributions, sampling, arithmetics, etc.
+
 \defgroup filtering Filtering
 \brief Convolution, morphology, rank filtering, etc.
 

@@ -19,6 +19,7 @@
 namespace Linx {
 
 /**
+ * @ingroup regions
  * @brief A sequence of positions.
  */
 template <int N>
@@ -114,6 +115,9 @@ private:
   std::vector<Position<N>> m_path; ///< The positions, converted to Image in for_each()
 };
 
+/**
+ * @relatesalso Path
+ */
 template <int N>
 KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Path<N>& in)
 {
@@ -121,6 +125,7 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Path<N>& in)
 }
 
 /**
+ * @ingroup regions
  * @brief Mapping from positions to values.
  * 
  * As opposed to an image, map is a resizable container, whose memory is always on host.
@@ -324,6 +329,7 @@ KOKKOS_INLINE_FUNCTION decltype(auto) on_host(const Map<T, N>& in)
 }
 
 /**
+ * @relatesalso Path
  * @brief Get the bounding box of a sequence of positions.
  */
 template <int N>
@@ -369,6 +375,8 @@ struct ExpandPath {
 };
 
 /**
+ * @ingroup regions
+ * @relatesalso Path
  * @brief Apply a function to each element of the domain.
  * @tparam TSpace The execution space
  */

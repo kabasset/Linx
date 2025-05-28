@@ -211,6 +211,7 @@ void kokkos_reduce(const std::string& label, const TRegion& region, const TProj&
 }
 
 /**
+ * @ingroup reduction
  * @brief Compute a reduction.
  * 
  * @param label A label for debugging
@@ -235,6 +236,7 @@ auto reduce(const std::string& label, const TMonoid& monoid, const TIn& in)
 }
 
 /**
+ * @ingroup reduction
  * @brief Compute a reduction with mapping.
  * 
  * @param label A label for debugging
@@ -305,12 +307,20 @@ auto map_reduce_with_side_effects(const std::string& label, const TMap& map, con
       std::make_index_sequence<sizeof...(TIns)>());
 }
 
+/**
+ * @ingroup reduction
+ * @brief Minimun value of a data container.
+ */
 template <typename TIn>
 typename TIn::element_type min(const TIn& in)
 {
   return reduce("min", Min(), in);
 }
 
+/**
+ * @ingroup reduction
+ * @brief Maximum value of a data container.
+ */
 template <typename TIn>
 typename TIn::element_type max(const TIn& in)
 {
@@ -318,6 +328,7 @@ typename TIn::element_type max(const TIn& in)
 }
 
 /**
+ * @ingroup reduction
  * @brief Compute the sum of all elements of a data container.
  */
 template <typename TIn>
@@ -327,6 +338,7 @@ typename TIn::element_type sum(const TIn& in) // FIXME limit to DataMixins
 }
 
 /**
+ * @ingroup reduction
  * @brief Compute the product of all elements of a data container.
  */
 template <typename TIn>
@@ -336,6 +348,7 @@ typename TIn::element_type product(const TIn& in) // FIXME limit to DataMixins
 }
 
 /**
+ * @ingroup reduction
  * @brief Compute the dot product of two data containers.
  */
 template <typename TLhs, typename TRhs>
@@ -345,6 +358,7 @@ typename TLhs::element_type dot(const TLhs& lhs, const TRhs& rhs)
 }
 
 /**
+ * @ingroup reduction
  * @brief Compute the Lp-norm of a vector raised to the power p.
  * @tparam P The power
  */
@@ -355,6 +369,7 @@ typename TIn::element_type norm(const TIn& in)
 }
 
 /**
+ * @ingroup reduction
  * @brief Compute the absolute Lp-distance between two vectors raised to the power p.
  * @tparam P The power
  */

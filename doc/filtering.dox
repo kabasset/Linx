@@ -1,3 +1,5 @@
+namespace Linx {
+
 /**
 
 \addtogroup filtering
@@ -11,3 +13,5 @@
 \section filtering-dft Discrete Fourier Transforms (DFT)
 
 */
+
+}

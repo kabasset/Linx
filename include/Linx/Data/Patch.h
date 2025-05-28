@@ -15,6 +15,7 @@
 namespace Linx {
 
 /**
+ * @ingroup regions
  * @brief An image patch.
  * 
  * A patch is a restriction of an image to some domain.

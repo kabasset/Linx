@@ -12,6 +12,10 @@
 
 namespace Linx {
 
+/**
+ * @ingroup regions
+ * @brief Axis-aligned line.
+ */
 template <typename T, int I, int N>
 class GLine {
 public:
@@ -100,6 +104,9 @@ private:
   size_type m_step;
 };
 
+/**
+ * @ingroup regions
+ */
 template <typename T, int I, int N>
 using Line = GLine<Index, I, N>;
 

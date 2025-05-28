@@ -99,24 +99,6 @@ or even more efficiently with a single pass:
 auto b = Linx::generate<float, 1000>("sine", Linx::Multiply(2 * std::numbers::pi / 1000), Linx::Sin());
 ```
 
-\section pixelwise-random Random noise generation
-
-Pixelwise services are compatible with random noise generators.
-For example, to generate an array of iid. uniform random noise in the range [0, 1), do:
-
-```cpp
-a.generate(Linx::UniformRng(0., 1.)); // In place
-auto b = Linx::generate<100>("noise", Linx::UniformRng(0., 1.)); // New instance
-```
-
-To add some Gaussian noise with mean 0 and standard deviation 1, simply write:
-
-```cpp
-a += Linx::GaussianRng(0., 1.);
-```
-
-\section pixelwise-reduction Reduction operations
-
 */
 
 }

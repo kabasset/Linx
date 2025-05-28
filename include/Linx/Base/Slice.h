@@ -35,7 +35,7 @@ class Slice;
 /// @endcond
 
 template <typename T = Index> // Required by some compilers such as ICX
-Slice()->Slice<T, SliceType::unbounded>;
+Slice() -> Slice<T, SliceType::unbounded>;
 
 template <typename T>
 Slice(const T&) -> Slice<T, SliceType::singleton>;
@@ -81,6 +81,7 @@ KOKKOS_INLINE_FUNCTION auto slice_emplace(Slice<T, Types...> slice, auto... args
 }
 
 /**
+ * @ingroup regions
  * @brief ND slice.
  * 
  * Slices are built iteratively by calling `operator()`.
@@ -170,6 +171,7 @@ private:
 };
 
 /**
+ * @ingroup regions
  * @brief 1D unbounded specialization.
  */
 template <typename T>
@@ -210,6 +212,7 @@ public:
 };
 
 /**
+ * @ingroup regions
  * @brief 1D singleton specialization.
  */
 template <typename T>
@@ -259,6 +262,7 @@ private:
 };
 
 /**
+ * @ingroup regions
  * @brief 1D span specialization.
  */
 template <typename T>
@@ -325,6 +329,7 @@ private:
 };
 
 /**
+ * @ingroup regions
  * @brief 1D span specialization.
  */
 template <typename T>
@@ -369,6 +374,7 @@ private:
 };
 
 /**
+ * @ingroup regions
  * @brief Shortcut for right-open slice.
  */
 template <typename T>
@@ -384,6 +390,7 @@ auto kokkos_execution_policy(const Slice<T, SliceType::right_open>& region)
 }
 
 /**
+ * @ingroup regions
  * @brief Apply a function to each element of the domain.
  * @tparam TSpace The execution space
  */
@@ -394,6 +401,7 @@ void for_each(const std::string& label, const Slice<T, SliceType::right_open>& r
 }
 
 /**
+ * @relatesalso Slice
  * @brief Make a 1D slice clamped between bounds.
  */
 template <typename T>
@@ -403,6 +411,7 @@ Slice<T, SliceType::right_open> clamp(const Slice<T, SliceType::unbounded>&, aut
 }
 
 /**
+ * @relatesalso Slice
  * @brief Make a 1D slice clamped between bounds.
  */
 template <typename T>
@@ -413,6 +422,7 @@ const Slice<T, SliceType::singleton>& clamp(const Slice<T, SliceType::singleton>
 }
 
 /**
+ * @relatesalso Slice
  * @brief Make a 1D slice clamped between bounds.
  */
 template <typename T>

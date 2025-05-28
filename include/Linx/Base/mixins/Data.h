@@ -51,6 +51,7 @@ private:
 } // namespace Impl
 
 /**
+ * @ingroup pixelwise
  * @brief Default `DataMixin` arithmetic tag.
  * 
  * Uses `BooleanArithmetic` if the element type is `bool`, otherwise uses `EuclidArithmetic`.
@@ -62,6 +63,7 @@ using DataArithmeticMixin = std::conditional_t<
     EuclidArithmeticMixin<T, TDerived>>;
 
 /**
+ * @ingroup pixelwise
  * @brief Data container mixin.
  * 
  * @tparam T The value type

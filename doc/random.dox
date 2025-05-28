@@ -1,0 +1,45 @@
+namespace Linx {
+
+/**
+
+\addtogroup random
+
+\section random-intro Introduction
+
+Random number generation is essential for simulations, stochastic algorithms, and data augmentation.
+Linx provides a suite of random number generators that can be used to produce pseudo-random numbers and arrays,
+according to various statistical distributions.
+Compatibility with pixelwise operations simplifies the integration of randomness into existing workflows.
+
+\section random-sampling Random number generation
+
+Random number generators are provided to sample random values according to different distributions.
+Generators offer a call operator which returns a pseudo-random value:
+
+```cpp
+auto rng = Linx::UniformRng(0., 1.);
+auto r = rng(); // Sample a random float in the range [0, 1)
+```
+
+All generators are listed at the bottom of this page.
+
+\section random-generation Random noise generation
+
+Generators' call operator is a variadic method which discards its input parameter(s).
+This seamingly weird behavior allows to use them seamlessly with pixelwise services.
+For example, to generate an array of iid. uniform random noise in the range [0, 1), do:
+
+```cpp
+a.generate(Linx::UniformRng(0., 1.)); // In place
+auto b = Linx::generate<float, 100>("noise", Linx::UniformRng(0., 1.)); // New instance
+```
+
+To add some Gaussian noise with mean 0 and standard deviation 1, simply write:
+
+```cpp
+a += Linx::GaussianRng(0., 1.);
+```
+
+*/
+
+}

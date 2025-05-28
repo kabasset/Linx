@@ -1,3 +1,5 @@
+namespace Linx {
+
 /**
 
 \addtogroup regions
@@ -44,3 +46,5 @@ assert(patch.n == 3);
 ```
 
 */
+
+}
