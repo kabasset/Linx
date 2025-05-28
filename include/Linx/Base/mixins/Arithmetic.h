@@ -15,49 +15,49 @@
 namespace Linx {
 
 #define LINX_SCALAR_OPERATOR_INPLACE(op, Func) \
-  const TDerived& operator op##=(const T & rhs) const \
+  const TDerived& operator op(const T & rhs) const \
   { \
     return LINX_CRTP_CONST_DERIVED.apply(compose_label(#op, LINX_CRTP_CONST_DERIVED, rhs), Func(rhs)); \
   }
 
-#define LINX_SCALAR_OPERATOR_NEWINSTANCE(op) \
+#define LINX_SCALAR_OPERATOR_NEWINSTANCE(op, op_in) \
   friend TDerived operator op(const TDerived& lhs, const T& rhs) \
   { \
     TDerived out = lhs.copy_as(compose_label(#op, lhs, rhs)); \
-    out op## = rhs; \
+    out op_in rhs; \
     return out; \
   }
 
-#define LINX_SCALAR_OPERATOR(op, Func) \
-  LINX_SCALAR_OPERATOR_INPLACE(op, Func) \
-  LINX_SCALAR_OPERATOR_NEWINSTANCE(op)
+#define LINX_SCALAR_OPERATOR(op_in, op_new, Func) \
+  LINX_SCALAR_OPERATOR_INPLACE(op_in, Func) \
+  LINX_SCALAR_OPERATOR_NEWINSTANCE(op_new, op_in)
 
 #define LINX_VECTOR_OPERATOR_INPLACE(op, Func) \
   template <typename U, typename UDerived> \
-  const TDerived& operator op##=(const CopyArithmeticMixin<U, UDerived>& rhs) const \
+  const TDerived& operator op(const CopyArithmeticMixin<U, UDerived>& rhs) const \
   { \
     const auto& derived_rhs = static_cast<const UDerived&>(rhs); \
     return LINX_CRTP_CONST_DERIVED \
         .apply(compose_label(#op, LINX_CRTP_CONST_DERIVED, derived_rhs), Func(), derived_rhs); \
   }
 
-#define LINX_VECTOR_OPERATOR_NEWINSTANCE(op) \
+#define LINX_VECTOR_OPERATOR_NEWINSTANCE(op, op_in) \
   template <typename U, typename UDerived> \
   friend TDerived operator op(const TDerived& lhs, const CopyArithmeticMixin<U, UDerived>& rhs) \
   { \
     const auto& derived_rhs = static_cast<const UDerived&>(rhs); \
     TDerived out = lhs.copy_as(compose_label(#op, lhs, derived_rhs)); \
-    out op## = derived_rhs; \
+    out op_in derived_rhs; \
     return out; \
   }
 
-#define LINX_VECTOR_OPERATOR(op, Func) \
-  LINX_VECTOR_OPERATOR_INPLACE(op, Func) \
-  LINX_VECTOR_OPERATOR_NEWINSTANCE(op)
+#define LINX_VECTOR_OPERATOR(op_in, op_new, Func) \
+  LINX_VECTOR_OPERATOR_INPLACE(op_in, Func) \
+  LINX_VECTOR_OPERATOR_NEWINSTANCE(op_new, op_in)
 
-#define LINX_OPERATOR(op, Func) \
-  LINX_SCALAR_OPERATOR(op, Func) \
-  LINX_VECTOR_OPERATOR(op, Func)
+#define LINX_OPERATOR(op_in, op_new, Func) \
+  LINX_SCALAR_OPERATOR(op_in, op_new, Func) \
+  LINX_VECTOR_OPERATOR(op_in, op_new, Func)
 
 /**
  * @ingroup pixelwise
@@ -91,8 +91,8 @@ struct CopyArithmeticMixin {
  * @brief Boolean arithmetic mixin.
  * 
  * Implements boolean arithmetic operators:
- * - V |= U, W = V | U, V &= U, W = V & U, V = !U;
- * - V |= a, W = V | a, V &= a, W = V & a.
+ * - V |= U, W = V || U, V &= U, W = V && U, V = !U;
+ * - V |= a, W = V || a, V &= a, W = V && a.
  */
 template <typename T, typename TDerived>
 struct BooleanArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
@@ -106,8 +106,8 @@ struct BooleanArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
     return res;
   }
 
-  LINX_OPERATOR(|, Or) // FIXME use || and |=
-  LINX_OPERATOR(&, And) // FIXME use && and &=
+  LINX_OPERATOR(|=, ||, Or)
+  LINX_OPERATOR(&=, &&, And)
 };
 
 /**
@@ -135,15 +135,15 @@ struct VectorArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
   /// @{
   /// @group_modifiers
 
-  LINX_OPERATOR(+, Add)
+  LINX_OPERATOR(+=, +, Add)
 
-  LINX_OPERATOR(-, Subtract)
+  LINX_OPERATOR(-=, -, Subtract)
 
-  LINX_SCALAR_OPERATOR(*, Multiply)
+  LINX_SCALAR_OPERATOR(*=, *, Multiply)
 
-  LINX_SCALAR_OPERATOR(/, Divide)
+  LINX_SCALAR_OPERATOR(/=, /, Divide)
 
-  LINX_SCALAR_OPERATOR(%, Modulus)
+  LINX_SCALAR_OPERATOR(%=, %, Modulus)
 
   /**
    * @brief ++V
@@ -188,15 +188,15 @@ struct EuclidArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
   /// @{
   /// @group_modifiers
 
-  LINX_OPERATOR(+, Add)
+  LINX_OPERATOR(+=, +, Add)
 
-  LINX_OPERATOR(-, Subtract)
+  LINX_OPERATOR(-=, -, Subtract)
 
-  LINX_OPERATOR(*, Multiply)
+  LINX_OPERATOR(*=, *, Multiply)
 
-  LINX_OPERATOR(/, Divide)
+  LINX_OPERATOR(/=, /, Divide)
 
-  LINX_OPERATOR(%, Modulus)
+  LINX_OPERATOR(%=, %, Modulus)
 
   /**
    * @brief ++V
