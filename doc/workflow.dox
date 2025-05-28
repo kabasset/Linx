@@ -1,0 +1,48 @@
+namespace Linx {
+
+/**
+
+\addtogroup workflow
+
+\section workflow-intro Introduction
+
+Signal and image processing workflows often involve complex sequences or graphs of operations,
+often refered to as pipelines or DAGs (Directed Acyclic Graphs) of operations.
+Each operation in the pipeline can be a simple or compoud steps.
+Often, one would like to wrap the workflow steps with logging or profiling capabilities.
+Linx implements `Flow`, a class for chaining and wrapping operations.
+The class also helps getting rid of intermediate, temporary variables.
+
+\section workflow-pipeline Pipelines
+
+A workflow is initialized by passing a label and optional step wrapper to the `Flow` constructor, like a logger or profiler.
+Then, operations are performed by specifying inputs and transforms.
+Outputs are obtained through structured bindings.
+
+Pipelines are the simplest workflows:
+They merely chain operations together without any branching.
+The following example pipeline is initialized with some timer, then performs a median filter followed by series of pixelwise operations:
+
+```cpp
+Linx::TimerLogger logger;
+auto [out] = Linx::Flow("Compute noise map", logger)
+    .append(in)
+    .run(Linx::MedianFilter(strel))
+    .apply(Linx::Max(0.), Linx::Add(noise * noise), Linx::Sqrt());
+```
+
+Executing this workflow will log the time taken for each step, e.g.:
+
+```
+2025-05-28 15:36:00Z | Compute noise map | Input | 0 | 486
+2025-05-28 15:36:00Z | Compute noise map | MedianFilter | 15 | 501
+2025-05-28 15:36:01Z | Compute noise map | Apply pointwise | 3 | 504
+```
+
+\section workflow-states Multi-state workflows
+
+Multi-state workflows allow for more complex operations than pipelines.
+
+*/
+
+}

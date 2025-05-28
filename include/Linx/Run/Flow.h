@@ -82,6 +82,7 @@ private:
 };
 
 /**
+ * @ingroup workflow
  * @brief Workflow state.
  * 
  * A workflow is a sequence of tasks which produce possibly multivalued states.

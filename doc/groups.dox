@@ -18,4 +18,10 @@
 \defgroup filtering Filtering
 \brief Convolution, morphology, rank filtering, etc.
 
+\defgroup workflow Pipelines, workflows
+\brief Flow API, logger, timer, etc.
+
+\defgroup io Input/output
+\brief FITS I/O
+
 */
