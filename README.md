@@ -2,14 +2,27 @@
 
 <br/>![Linx logo](doc/diagrams/logo_square.svg)
 
+## Introduction
+
+Linx stands for cross-platform, extensible ND image laboratory.
+This is a template-heavy library made for handling multi-dimensional data and associated signal processing.
+By default, memory is allocated on available acceleration devices (typically GPU's)
+and transfers between the host and devices should be minimal.
+Using templates opens the library for extension, in order to maximize compatibility with established libraries
+and enable implementing additional features in user code with zero performance cost.
+Internally, we also rely heavily on metaprogramming to enable as many compile-time optimizations as we can.
+The library comes with utilities for building processing workflows, and a few demonstration executables.
+
 ## License
 
 The Linx library is licensed under [Apache-2.0](LICENSE.txt).
 
 ## Build
 
-Kokkos can be built from sources as follows.
-Note that the serial execution space must be enabled, while OpenMP and Cuda are optional.
+Linx relies on C++20 features.
+It depends on Kokkos and CFITSIO.
+While CFITSIO binaries are available, Kokkos has to be built from sources for performance.
+Kokkos' serial execution space is mandatory, while OpenMP and Cuda backends are optional.
 
 ```sh
 export KOKKOS_SOURCE_DIR=<kokkos_source_dir>
@@ -47,10 +60,10 @@ make install
 
 There are two main data containers: `Sequence` for 1D data, and `Image` for ND data.
 Underlying storage is handled by Kokkos by default, and adapts to the target infrastructure.
-There is no ordering or contiguity guaratee.
+There is generally no memory ordering or contiguity guarantee for `Image` objects.
 In return, execution is automatically parallelized by Kokkos, including on GPU.
 
-In addition, for interfacing with libraries which require contiguity,
+For interfacing with libraries which require contiguity,
 `Raster` is a row-major ordered alternative to `Image` allocated on the host.
 It is a standard range (providing `begin()` and `end()`) which eases interfacing with the standard library.
 `Image` and `Raster` are also compatible with `std::mdspan`.
@@ -133,38 +146,6 @@ auto image = Linx::Image(...):
 auto region = Linx::Box(...);
 auto patch = Linx::Patch(image, region);
 patch.exp(); // Modifies image elements inside region
-```
-
-**Pipeline**
-
-Transforms can be combined through a so-called pipeline, using the pipe operator `|` à-la Unix.
-Logging and timing tools can be plugged into the pipeline.
-
-```cpp
-namespace P = Linx::Pipeline;
-
-auto timer = Linx::TimerLogger();
-
-auto [out] = P::Run("Calibration", timer) // Start a pipeline with embedded timer
-    | P::InputFile(darks_path, flats_path) // Read two images
-    | P::Batch(Linx::Along<-1>(Linx::Mean())) // Average along the last axis
-    | P::OutputFile(mdark_path, mflat_path) // Save intermediate images
-    | P::InputFile(light_path) // Read another image
-    | P::Apply([](auto l, auto d, auto f) { return (l - d) / f; }) // Apply some pixelwise function
-    | P::OutputFile(calibrated_path) // Save calibrated image
-    | Linx::Deconvolve(psf); // Filter
-```
-
-While running this pipeline, logs are produced, which include the elapsed time of each step.
-A typical output could be:
-
-```
-Pipeline | Task | Split (ms) | Total (ms)
---- | --- | --- | ---
-Calibration | InputFile | 1 | 1
-Calibration | Mean | 3 | 4
-Calibration | OutputFile | 1 | 5
-...
 ```
 
 **Labels**
@@ -252,15 +233,6 @@ auto ball = Linx::Mask<n>::ball<2>(radius);
 auto dilated = Linx::Dilation(ball) * raw;
 
 Linx::write(dilated, output);
-```
-
-or, using the pipelining API:
-
-```cpp
-namespace P = Linx::Pipeline;
-
-auto ball = Linx::Mask<n>::ball<2>(radius);
-P::Run() | P::InputFile<T, n>(input) | Linx::Dilation(ball) | P::OutputFile(output);
 ```
 
 **NumPy/SciKit**
