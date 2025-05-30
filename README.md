@@ -15,7 +15,7 @@ The library comes with utilities for building processing workflows, and a few de
 
 ## License
 
-The Linx library is licensed under [Apache-2.0](LICENSE.txt).
+Linx is licensed under [Apache-2.0](LICENSE.txt).
 
 ## Build
 
@@ -112,7 +112,7 @@ auto b = Linx::Image(...);
 auto c = Linx::Image(...);
 a.generate(
     "geometric mean",
-    KOKKOS_LAMBDA(auto b_i, auto c_i) { return std::sqrt(b_i * c_i); },
+    KOKKOS_LAMBDA(auto b_i, auto c_i) { return Kokkos::sqrt(b_i * c_i); },
     b, c);
 ```
 
@@ -121,22 +121,22 @@ a.generate(
 Global transforms such as Fourier transforms and convolutions are also supported.
 
 ```cpp
-auto input = Linx::Image(...);
-auto kernel = Linx::Image(...);
-auto filtered = Linx::Correlation(kernel)(input); // Creates a new instance
-auto output = Linx::Image(...);
-Linx::Correlation(kernel).transform(input, output); // Fills output
+auto a = Linx::Image(...);
+auto k = Linx::Image(...);
+auto b = Linx::Correlation(k)(a); // Creates a new instance
+auto c = Linx::Image(...);
+Linx::Correlation(k).transform(a, c); // Fills c
 ```
 
 **Regional transforms**
 
 There are two ways to work on subsets of elements:
-* by slicing some data classes with `slice()`, which return a view of type `Sequence` or `Image` depending on the input type;
-* by associating a `Region` to a data class with `where()`, which results in an object of type `Patch`.
+* by slicing some data classes with operator `[]`, which returns a view of type `Sequence` or `Image` depending on the input type;
+* by associating a region to a data class with `where()`, which results in an object of type `Patch`.
 
 Slices are created from regions of type either `Slice` or `Box`.
 
-Patches accept any type of region, are extremely lightweight and can be moved around when the region is a `Window`, i.e. has shifting capabilities.
+Patches accept any type of region, are extremely lightweight and can be moved around when the region is a window, i.e. has shifting capabilities.
 Typical windows are `Box`, `Mask` or `Path` and can be used to apply filters.
 As opposed to slicing, patching results in an object of type `Patch` instead of simply `Sequence` or `Image`.
 Nevertheless, patches are themselves data containers and can be transformed pointwise:
@@ -144,7 +144,8 @@ Nevertheless, patches are themselves data containers and can be transformed poin
 ```cpp
 auto image = Linx::Image(...):
 auto region = Linx::Box(...);
-auto patch = Linx::Patch(image, region);
+auto slice = image[region];
+auto patch = Linx::where(image, region);
 patch.exp(); // Modifies image elements inside region
 ```
 
@@ -195,10 +196,11 @@ using Image = itk::Image<T, N>;
 auto raw = itk::ReadImage<ImageType>(input);
 
 using StructuringElement = itk::FlatStructuringElement<N>;
+using GrayscaleDilateImageFilter = itk::GrayscaleDilateImageFilter<Image, Image, StructuringElement>;
+
 StructuringElement::RadiusType strelRadius;
 strelRadius.Fill(radius);
 StructuringElementType ball = StructuringElement::Ball(strelRadius);
-using GrayscaleDilateImageFilter = itk::GrayscaleDilateImageFilter<Image, Image, StructuringElement>;
 GrayscaleDilateImageFilter::Pointer dilateFilter = GrayscaleDilateImageFilter::New();
 dilateFilter->SetInput(input);
 dilateFilter->SetKernel(ball);
