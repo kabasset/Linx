@@ -15,11 +15,12 @@ BOOST_AUTO_TEST_CASE(sequence_test)
 {
   const auto a = Linx::Position({-1, 0, 1});
   const auto interpolated = Linx::Interpolation(a, Linx::Linear());
-  BOOST_TEST(interpolated(0.0) == -1);
-  BOOST_TEST(interpolated(0.5) == -0.5);
-  BOOST_TEST(interpolated(1.0) == 0);
-  BOOST_TEST(interpolated(1.25) == 0.25);
-  BOOST_TEST(interpolated(2.0) == 1);
+  const auto& interpolated_h = Linx::on_host(interpolated);
+  BOOST_TEST(interpolated_h(0.0) == -1);
+  BOOST_TEST(interpolated_h(0.5) == -0.5);
+  BOOST_TEST(interpolated_h(1.0) == 0);
+  BOOST_TEST(interpolated_h(1.25) == 0.25);
+  BOOST_TEST(interpolated_h(2.0) == 1);
 }
 
 BOOST_AUTO_TEST_CASE(image_2d_test)
@@ -32,11 +33,12 @@ BOOST_AUTO_TEST_CASE(image_2d_test)
   a(0, 2) = 1;
   a(1, 2) = 10;
   const auto interpolated = Linx::Interpolation(a, Linx::Linear());
-  BOOST_TEST(interpolated(0.0, 0.0) == -1);
-  BOOST_TEST(interpolated(0.5, 0.5) == -2.75);
-  BOOST_TEST(interpolated(0.5, 1.0) == 0);
-  BOOST_TEST(interpolated(0.5, 1.25) == 1.375);
-  BOOST_TEST(interpolated(1.0, 2.0) == 10);
+  const auto& interpolated_h = Linx::on_host(interpolated);
+  BOOST_TEST(interpolated_h(0.0, 0.0) == -1);
+  BOOST_TEST(interpolated_h(0.5, 0.5) == -2.75);
+  BOOST_TEST(interpolated_h(0.5, 1.0) == 0);
+  BOOST_TEST(interpolated_h(0.5, 1.25) == 1.375);
+  BOOST_TEST(interpolated_h(1.0, 2.0) == 10);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

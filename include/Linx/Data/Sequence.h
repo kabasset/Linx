@@ -317,13 +317,23 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Sequence<T, N, TContainer>
  * @brief Copy the data to host if on device.
  */
 template <typename T, int N, typename TContainer>
-auto on_host(const Sequence<T, N, TContainer>& seq)
+decltype(auto) on_host(const Sequence<T, N, TContainer>& in)
 {
-  // FIXME early return if already on host
-  auto container = Kokkos::create_mirror_view(seq.container());
-  Kokkos::deep_copy(container, seq.container());
-  using Container = typename std::decay_t<decltype(container)>;
-  return Sequence<T, N, Container>(LINX_MOVE(container));
+  return on_device<Kokkos::HostSpace>(in);
+}
+
+/**
+ * @brief Copy the data to a given memory space if not already accessible from it.
+ */
+template <typename TSpace = Kokkos::DefaultExecutionSpace::memory_space, typename T, int N, typename TContainer>
+decltype(auto) on_device(const Sequence<T, N, TContainer>& in)
+{
+  if constexpr (Kokkos::SpaceAccessibility<TSpace, typename TContainer::memory_space>::accessible) {
+    return in;
+  } else {
+    auto container = Kokkos::create_mirror_view_and_copy(TSpace(), in.container());
+    return Sequence<T, N, decltype(container)>(Forward {}, LINX_MOVE(container));
+  }
 }
 
 /**

@@ -32,6 +32,16 @@ public:
     return compose_label("interpolate", m_parent, m_method);
   }
 
+  KOKKOS_INLINE_FUNCTION const Parent& parent() const
+  {
+    return m_parent;
+  }
+
+  KOKKOS_INLINE_FUNCTION const Method& method() const
+  {
+    return m_method;
+  }
+
   KOKKOS_INLINE_FUNCTION auto operator()(std::floating_point auto... xs) const
   {
     return m_method(m_parent, xs...);
@@ -47,6 +57,18 @@ private:
   Parent m_parent;
   Method m_method;
 };
+
+template <typename TSpace, typename TParent, typename TMethod>
+decltype(auto) on_device(const Interpolation<TParent, TMethod>& in) // FIXME to some ProxyMixin
+{
+  return Interpolation(on_device<TSpace>(in.parent()), in.method());
+}
+
+template <typename TParent, typename TMethod>
+decltype(auto) on_host(const Interpolation<TParent, TMethod>& in) // FIXME to some ProxyMixin
+{
+  return on_device<Kokkos::HostSpace>(in);
+}
 
 /**
  * @ingroup resampling
@@ -66,6 +88,16 @@ public:
     return compose_label("extrapolate", m_parent, m_method);
   }
 
+  KOKKOS_INLINE_FUNCTION const Parent& parent() const
+  {
+    return m_parent;
+  }
+
+  KOKKOS_INLINE_FUNCTION const Method& method() const
+  {
+    return m_method;
+  }
+
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... xs) const
   {
     return m_method(m_parent, xs...);
@@ -76,6 +108,18 @@ private:
   Parent m_parent;
   Method m_method;
 };
+
+template <typename TSpace, typename TParent, typename TMethod>
+decltype(auto) on_device(const Extrapolation<TParent, TMethod>& in) // FIXME to some ProxyMixin
+{
+  return Extrapolation(on_device<TSpace>(in.parent()), in.method());
+}
+
+template <typename TParent, typename TMethod>
+decltype(auto) on_host(const Extrapolation<TParent, TMethod>& in) // FIXME to some ProxyMixin
+{
+  return on_device<Kokkos::HostSpace>(in);
+}
 
 /**
  * @ingroup resampling
@@ -217,7 +261,7 @@ public:
   auto operator()(const TIn& in) const
   {
     auto apply = lazy(in);
-    TIn out(compose_label(label(), in), in.shape() * 2); // Differs from FilterMixin
+    TIn out(compose_label(label(), in), in.shape() * m_factor); // Differs from FilterMixin
     apply.copy_to(out);
     return out;
   }

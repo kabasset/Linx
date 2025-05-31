@@ -434,21 +434,21 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Image<T, N, TContainer>& i
  * @brief Copy the data to host if on device.
  */
 template <typename T, int N, typename TContainer>
-decltype(auto) on_host(const Image<T, N, TContainer>& image)
+decltype(auto) on_host(const Image<T, N, TContainer>& in)
 {
-  return on_device<Kokkos::HostSpace>(image);
+  return on_device<Kokkos::HostSpace>(in);
 }
 
 /**
  * @brief Copy the data to a given memory space if not already accessible from it.
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace::memory_space, typename T, int N, typename TContainer>
-decltype(auto) on_device(const Image<T, N, TContainer>& image)
+decltype(auto) on_device(const Image<T, N, TContainer>& in)
 {
   if constexpr (Kokkos::SpaceAccessibility<TSpace, typename TContainer::memory_space>::accessible) {
-    return image;
+    return in;
   } else {
-    auto container = Kokkos::create_mirror_view_and_copy(TSpace(), image.container());
+    auto container = Kokkos::create_mirror_view_and_copy(TSpace(), in.container());
     return Image<T, N, decltype(container)>(Forward {}, LINX_MOVE(container));
   }
 }
