@@ -74,7 +74,7 @@ public:
 private:
 
   static constexpr int kokkos_max_dyn_rank = (n == -1 ? 7 : n); ///< The max dynamic rank supported by Kokkos
-  // FIXME make public? protected in parent Dimensional?
+  // TODO make public variable, as well as kokkos_max_rank = 8 and kokkos_max_op_rank = 6
 
 public:
 
@@ -104,7 +104,7 @@ public:
    * @copydoc Image()
    */
   template <std::integral TInt, typename UContainer>
-  explicit Image(const Sequence<TInt, n, UContainer>& shape) : Image("", shape) // FIXME use ArrayLike?
+  explicit Image(const Sequence<TInt, n, UContainer>& shape) : Image("", shape) // TODO use ArrayLike?
   {}
 
   /**
@@ -112,8 +112,8 @@ public:
    */
   template <std::integral TInt, typename UContainer>
   explicit Image(const std::string& label, const Sequence<TInt, n, UContainer>& shape) :
-      Image(label, shape, std::make_index_sequence<kokkos_max_dyn_rank>()) // FIXME use ArrayLike?
-  {} // FIXME support N = -1
+      Image(label, shape, std::make_index_sequence<kokkos_max_dyn_rank>()) // TODO use ArrayLike?
+  {}
 
   /**
    * @copydoc Image()
@@ -144,7 +144,7 @@ public:
    */
   template <typename U, std::integral TInt, typename UContainer>
   explicit Image(Wrap<U*> data, const Sequence<TInt, n, UContainer>& shape) :
-      Image(data, shape, std::make_index_sequence<kokkos_max_dyn_rank>()) // FIXME use ArrayLike?
+      Image(data, shape, std::make_index_sequence<kokkos_max_dyn_rank>()) // TODO use ArrayLike?
   {}
 
   /**
@@ -214,7 +214,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION reference front() const
   {
-    return m_container.access(0, 0, 0, 0, 0, 0, 0, 0); // FIXME not scalable if max rank goes >8 some day
+    return m_container.access(0, 0, 0, 0, 0, 0, 0, 0); // TODO not scalable if max rank goes >8 some day
   }
 
   /**
@@ -237,7 +237,7 @@ public:
    * @brief Reference to the element at given position.
    */
   template <std::integral TInt = int, int M = n>
-  KOKKOS_INLINE_FUNCTION reference operator[](const GPosition<TInt, M>& position) const
+  KOKKOS_INLINE_FUNCTION reference operator[](const GPosition<TInt, M>& position) const // FIXME use ArrayLike?
   {
     // FIXME validate M
     return at(position, std::make_index_sequence<kokkos_max_dyn_rank>());
@@ -323,7 +323,7 @@ private:
    * @brief Helper accessor to unroll position.
    */
   template <typename TPosition, std::size_t... Is>
-  KOKKOS_INLINE_FUNCTION reference at(const TPosition& position, std::index_sequence<Is...>) const
+  KOKKOS_INLINE_FUNCTION reference at(const TPosition& position, std::index_sequence<Is...>) const // FIXME at_impl?
   {
     return operator()(get_or<Is>(position, 0)...); // FIXME at()?
   }

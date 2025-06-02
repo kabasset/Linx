@@ -58,8 +58,6 @@ auto default_image_container()
   } else if constexpr (N == 8) {
     return Kokkos::View<T********, TArgs...>();
   }
-  // TODO? fall back to Raster for N > 8
-  // TODO? fall back to Raster for N = -1 & dimension > 7
 }
 
 /**
@@ -89,11 +87,24 @@ struct Rebind<T*> {
  */
 template <typename T, typename... TArgs>
 struct Rebind<Kokkos::View<T, TArgs...>> {
+  template <typename U>
+  using As = Kokkos::View<U, TArgs...>;
   using AsReadonly = Kokkos::View<typename Rebind<T>::AsReadonly, TArgs...>;
   using AsAtomic = Kokkos::View<T, Kokkos::MemoryTraits<Kokkos::Atomic>, TArgs...>;
-  using Offset = Kokkos::Experimental::OffsetView<T, TArgs...>; // FIXME AsKernel?
 };
 
+/**
+ * @brief Create a view with same shape but different data type.
+ */
+template <typename U, typename T, typename... TArgs>
+decltype(auto) same_shape(const std::string& label, const Kokkos::View<T, TArgs...>& in)
+{
+  return Kokkos::View<U, TArgs...>(label, in.layout());
+}
+
+/**
+ * @brief Get a read-only view.
+ */
 template <typename T, typename... TArgs>
 KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::View<T, TArgs...>& in)
 {
@@ -105,6 +116,9 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::View<T, TArgs...
   }
 }
 
+/**
+ * @brief Get an atomic view.
+ */
 template <typename T, typename... TArgs>
 KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Kokkos::View<T, TArgs...>& in)
 {
@@ -120,6 +134,15 @@ struct Rebind<Kokkos::DynRankView<T, TArgs...>> {
   using AsReadonly = Kokkos::DynRankView<typename Rebind<T>::AsReadonly, TArgs...>;
   using AsAtomic = Kokkos::DynRankView<T, Kokkos::MemoryTraits<Kokkos::Atomic>, TArgs...>;
 };
+
+/**
+ * @brief Create a view with same shape but different data type.
+ */
+template <typename U, typename T, typename... TArgs>
+decltype(auto) same_shape(const std::string& label, const Kokkos::DynRankView<T, TArgs...>& in)
+{
+  return Kokkos::DynRankView<U, TArgs...>(label, in.layout());
+}
 
 template <typename T, typename... TArgs>
 KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::DynRankView<T, TArgs...>& in)
@@ -137,6 +160,16 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Kokkos::DynRankView<T, TAr
 {
   using Out = typename Rebind<Kokkos::DynRankView<T, TArgs...>>::AsAtomic;
   return Out(in);
+}
+
+/**
+ * @brief Specialization for standard containers with constant values.
+ */
+template <typename T>
+const T& as_readonly(const T& in)
+  requires(std::is_const_v<typename T::value_type>)
+{
+  return in;
 }
 
 } // namespace Linx

@@ -93,7 +93,7 @@ public:
 
 private:
 
-  TPool m_pool; // FIXME tparam
+  TPool m_pool;
 };
 
 /**
@@ -185,7 +185,7 @@ public:
 
   std::string label() const
   {
-    return "Uniform"; // FIXME parameters
+    return "Uniform"; // TODO parameters
   }
 
   /**
@@ -299,7 +299,7 @@ public:
 
   std::string label() const
   {
-    return "Gaussian"; // FIXME parameters
+    return "Gaussian"; // TODO parameters
   }
 
   /**
@@ -406,7 +406,7 @@ public:
 
   std::string label() const
   {
-    return "Poisson"; // FIXME parameters
+    return "Poisson"; // TODO parameters
   }
 
   /**
@@ -414,14 +414,17 @@ public:
    */
   KOKKOS_INLINE_FUNCTION T operator()(auto&&...) const
   {
-    // For stability, generate u even when in <= 0
-    auto u = m_pool.uniform(0., 1.);
-
-    if (m_lambda <= 0 || u == 0) {
+    if (m_lambda <= 0) {
       return 0;
     }
 
-    // FIXME support complex?
+    auto u = m_pool.uniform(0., 1.);
+
+    if (u == 0) {
+      return 0;
+    }
+
+    // TODO support complex?
     auto p = std::exp(-m_lambda);
     auto cp = 0.0;
     T k {};
@@ -444,8 +447,9 @@ private:
  * @ingroup random
  * @brief Poisson noise generator.
  * 
- * As opposed to many implementation, this generator draws only once to generate one value,
- * and is therefore stable, i.e.:
+ * As opposed to many implementations of Poisson noise generators,
+ * this generator draws only once to generate one value,
+ * which means that the noise is effectively iid.:
  * 
  * \code
  * auto a = Linx::Sequence<int>({1, 10, 100, 1000}).apply(Linx::PoissonNoise(42));
@@ -476,7 +480,7 @@ public:
       return 0;
     }
 
-    // FIXME support complex?
+    // TODO support complex?
     auto p = std::exp(-lambda);
     auto cp = 0.0;
     Index k {};
@@ -493,13 +497,6 @@ private:
 
   RngPool<double, Kokkos::Random_XorShift64_Pool<TSpace>> m_pool; ///< RNG pool
 };
-
-template <typename T>
-const T& as_readonly(const T& in)
-  requires(std::is_const_v<typename T::value_type>) // FIXME to functional
-{
-  return in;
-}
 
 } // namespace Linx
 

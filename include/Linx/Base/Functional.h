@@ -101,7 +101,7 @@ struct Constant {
 };
 
 template <typename T>
-const auto& as_readonly(const Constant<T>& c) // FIXME generic?
+const auto& as_readonly(const Constant<T>& c)
 {
   return c;
 }
@@ -214,18 +214,21 @@ struct IsNan {
 };
 
 namespace Impl {
-template <typename TFunc, typename Is, typename = void>
+template <typename TFunc, typename T, typename Is, typename = void>
 struct can_accept_impl : std::false_type {};
 
-template <typename TFunc, std::size_t... Is>
-struct can_accept_impl<TFunc, std::index_sequence<Is...>, decltype(std::declval<TFunc>()(((void)Is, 0)...), void())> :
-    std::true_type {};
+template <typename TFunc, typename T, std::size_t... Is>
+struct can_accept_impl<
+    TFunc,
+    T,
+    std::index_sequence<Is...>,
+    decltype(std::declval<TFunc>()(((void)Is, T())...), void())> : std::true_type {};
 } // namespace Impl
 
-template <typename T, int N, typename TFunc>
-constexpr bool is_nadic() // FIXME use T
+template <typename TFunc, typename T, int N>
+constexpr bool is_nadic()
 {
-  return Impl::can_accept_impl<TFunc, std::make_index_sequence<N>>::value;
+  return Impl::can_accept_impl<TFunc, T, std::make_index_sequence<N>>::value;
 }
 
 namespace Impl {

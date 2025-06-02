@@ -85,12 +85,6 @@ public:
   /**
    * @copydoc GBox()
    */
-  [[deprecated]] explicit GBox(const ArrayLike auto& stop) : GBox(value_type(std::size(stop)), stop) {}
-  // FIXME GBox(Shape)
-
-  /**
-   * @copydoc GBox()
-   */
   template <typename U>
   GBox(std::initializer_list<U> start, std::initializer_list<U> stop) : GBox(std::size(start))
   {
@@ -239,7 +233,7 @@ public:
   template <typename U, int M>
   GBox& operator&=(const GBox<U, M>& rhs)
   {
-    // FIXME assert rank() == rhs.rank()
+    // FIXME assert rank() == rhs.rank()?
     for (std::size_t i = 0; i < rank(); ++i) {
       m_start[i] = std::max<size_type>(m_start[i], rhs.start(i));
       m_stop[i] = std::min<size_type>(m_stop[i], rhs.stop(i));
@@ -253,7 +247,7 @@ public:
   template <typename U, int M>
   GBox& operator|=(const GBox<U, M>& rhs)
   {
-    // FIXME assert rank() == rhs.rank()
+    // FIXME assert rank() == rhs.rank()?
     for (std::size_t i = 0; i < rank(); ++i) {
       m_start[i] = std::min<size_type>(m_start[i], rhs.start(i));
       m_stop[i] = std::max<size_type>(m_stop[i], rhs.stop(i));
@@ -617,7 +611,7 @@ using Box = GBox<Index, N>;
 template <typename TSpace, typename T, int N>
 auto kokkos_execution_policy(const GBox<T, N>& domain)
 {
-  // FIXME support Properties
+  // TODO support Properties?
   if constexpr (N == 1) {
     return Kokkos::RangePolicy<TSpace, Kokkos::IndexType<Index>>(domain.start(0), domain.stop(0));
   } else {
@@ -640,7 +634,7 @@ void for_each(const std::string& label, const GBox<T, N>& region, TFunc&& func)
 {
 #define LINX_CASE_RANK(n) \
   case n: \
-    if constexpr (is_nadic<int, n, TFunc>()) { \
+    if constexpr (is_nadic<TFunc(), int, n>()) { \
       return Kokkos::parallel_for(label, kokkos_execution_policy<TSpace>(pad<n>(region)), LINX_FORWARD(func)); \
     } else { \
       return; \

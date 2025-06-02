@@ -169,17 +169,12 @@ void kokkos_reduce_impl(
  * The reducer satisfies Kokkos' `ReducerConcept`.
  * The `join()` method of the reducer is used for both intra- and inter-thread reduction.
  */
-template <
-    typename TSpace = Kokkos::DefaultExecutionSpace,
-    typename TRegion,
-    typename TProj,
-    typename TRed> // FIXME restrict to Regions
+template <typename TSpace = Kokkos::DefaultExecutionSpace, typename TRegion, typename TProj, typename TRed>
 void kokkos_reduce(const std::string& label, const TRegion& region, const TProj& projection, const TRed& reducer)
 {
-  // FIXME call parallel_for only
 #define LINX_CASE_RANK(n) \
   case n: \
-    if constexpr (is_nadic<int, n, TProj>()) { \
+    if constexpr (is_nadic<TProj, int, n>()) { \
       return Impl::kokkos_reduce_impl<TSpace>( \
           label, \
           pad<n>(region), \
@@ -332,7 +327,7 @@ typename TIn::element_type max(const TIn& in)
  * @brief Compute the sum of all elements of a data container.
  */
 template <typename TIn>
-typename TIn::element_type sum(const TIn& in) // FIXME limit to DataMixins
+typename TIn::element_type sum(const TIn& in) // TODO limit to DataMixins
 {
   return reduce("sum", Add(), in);
 }
@@ -342,7 +337,7 @@ typename TIn::element_type sum(const TIn& in) // FIXME limit to DataMixins
  * @brief Compute the product of all elements of a data container.
  */
 template <typename TIn>
-typename TIn::element_type product(const TIn& in) // FIXME limit to DataMixins
+typename TIn::element_type product(const TIn& in) // TODO limit to DataMixins
 {
   return reduce("product", Multiply(), in);
 }

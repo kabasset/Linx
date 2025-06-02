@@ -379,7 +379,7 @@ constexpr bool is_base_template_of()
 }
 
 template <typename T>
-concept Labeled = requires(const T obj) // FIXME to Base/concepts
+concept Labeled = requires(const T obj) // TODO to Base/concepts
 { obj.label(); };
 
 std::string label(const Labeled auto& in)

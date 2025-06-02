@@ -19,7 +19,7 @@ namespace Linx {
 template <typename T>
 T pi()
 {
-  static const T out = std::acos(T(-1)); // FIXME Use Kokkos' pi
+  static const T out = std::acos(T(-1)); // FIXME Use Kokkos' or std pi
   return out;
 }
 
@@ -39,28 +39,22 @@ struct MathFunctionsMixin {
   /** @brief Apply std::##function##(). */ \
   const TDerived& function() const \
   { \
-    return LINX_CRTP_CONST_DERIVED.apply( \
-        #function, \
-        KOKKOS_LAMBDA(const T& e) { return std::function(e); }); \
+    return LINX_CRTP_CONST_DERIVED.apply(#function, KOKKOS_LAMBDA(const T& e) { return std::function(e); }); \
   }
 
 #define LINX_MATH_BINARY_INPLACE(function) \
   /** @brief Apply std::##function##(). */ \
   const TDerived& function(const TDerived& other) const \
   { \
-    return LINX_CRTP_CONST_DERIVED.apply( \
-        #function, \
-        KOKKOS_LAMBDA(const T& e, const T& f) { return std::function(e, f); }, \
-        other); \
+    return LINX_CRTP_CONST_DERIVED \
+        .apply(#function, KOKKOS_LAMBDA(const T& e, const T& f) { return std::function(e, f); }, other); \
   }
 
 #define LINX_MATH_BINARY_SCALAR_INPLACE(function) \
   /** @brief Apply std::##function##(). */ \
   const TDerived& function(const T& other) const \
   { \
-    return LINX_CRTP_CONST_DERIVED.apply( \
-        #function, \
-        KOKKOS_LAMBDA(const T& e) { return std::function(e, other); }); \
+    return LINX_CRTP_CONST_DERIVED.apply(#function, KOKKOS_LAMBDA(const T& e) { return std::function(e, other); }); \
   }
 
   LINX_MATH_UNARY_INPLACE(abs)

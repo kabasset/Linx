@@ -180,7 +180,7 @@ public:
 
   using size_type = T;
   static constexpr int n = 1;
-  static constexpr SliceType type = SliceType::unbounded; // FIXME type?
+  static constexpr SliceType type = SliceType::unbounded;
 
   KOKKOS_INLINE_FUNCTION Slice() {}
 

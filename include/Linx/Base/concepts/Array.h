@@ -13,15 +13,13 @@ namespace Linx {
  * Array-like classes have a size and integral subscript operator.
  */
 template <typename T>
-concept ArrayLike = requires(const T array)
-{
+concept ArrayLike = requires(const T array) {
   std::size(array);
   array[0];
 };
 
 template <typename T>
-concept DataContainer = requires(const T data)
-{
+concept DataContainer = requires(const T data) {
   typename T::size_type;
   typename T::value_type;
   typename T::pointer;
@@ -33,7 +31,7 @@ concept DataContainer = requires(const T data)
   data.data(); // FIXME pointer
   data.container(); // FIXME const T::Container&, compatible with deep_copy
   data(int(0)); // FIXME according to n?
-  data.generate_with_side_effects(std::string(), []() { return typename T::value_type {}; });
+  data.generate_with_side_effects(std::string(), []() { return typename T::element_type {}; });
 };
 
 } // namespace Linx
