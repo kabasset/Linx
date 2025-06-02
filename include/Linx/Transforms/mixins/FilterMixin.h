@@ -235,8 +235,7 @@ public:
   auto operator()(const TIn& in) const
   {
     using T = std::remove_cvref_t<typename TDerived::Apply<TIn>::value_type>;
-    using Out = Image<T, TIn::n>; // FIXME Rebind<TIn>::As<T>
-    Out out(compose_label(LINX_CRTP_CONST_DERIVED.label(), in), in.shape());
+    auto out = same_layout<T>(compose_label(LINX_CRTP_CONST_DERIVED.label(), in), in);
     transform(in, out);
     return out;
   }

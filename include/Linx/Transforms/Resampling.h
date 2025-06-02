@@ -59,13 +59,13 @@ private:
 };
 
 template <typename TSpace, typename TParent, typename TMethod>
-decltype(auto) on_device(const Interpolation<TParent, TMethod>& in) // FIXME to some ProxyMixin
+decltype(auto) on_device(const Interpolation<TParent, TMethod>& in) // TODO to some ProxyMixin
 {
   return Interpolation(on_device<TSpace>(in.parent()), in.method());
 }
 
 template <typename TParent, typename TMethod>
-decltype(auto) on_host(const Interpolation<TParent, TMethod>& in) // FIXME to some ProxyMixin
+decltype(auto) on_host(const Interpolation<TParent, TMethod>& in) // TODO to some ProxyMixin
 {
   return on_device<Kokkos::HostSpace>(in);
 }
@@ -110,13 +110,13 @@ private:
 };
 
 template <typename TSpace, typename TParent, typename TMethod>
-decltype(auto) on_device(const Extrapolation<TParent, TMethod>& in) // FIXME to some ProxyMixin
+decltype(auto) on_device(const Extrapolation<TParent, TMethod>& in) // TODO to some ProxyMixin
 {
   return Extrapolation(on_device<TSpace>(in.parent()), in.method());
 }
 
 template <typename TParent, typename TMethod>
-decltype(auto) on_host(const Extrapolation<TParent, TMethod>& in) // FIXME to some ProxyMixin
+decltype(auto) on_host(const Extrapolation<TParent, TMethod>& in) // TODO to some ProxyMixin
 {
   return on_device<Kokkos::HostSpace>(in);
 }
@@ -172,7 +172,7 @@ private:
     auto unsigned_modulo = [](auto lhs, auto rhs) {
       auto out = lhs % rhs;
       return out < 0 ? out + rhs : out;
-    }; // FIXME functor?
+    }; // TODO functor?
     return in(unsigned_modulo(get<Is>(is), in.extent(Is))...);
   }
 };
@@ -247,6 +247,10 @@ private:
   }
 };
 
+/**
+ * @brief Grow the size of an array by a given factor.
+ */
+// FIXME template <typename TMethod = Forward>
 class Upsample {
 public:
 
@@ -290,13 +294,14 @@ public:
 
     KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
     {
+      // FIXME if constexpr (std::is_same_v<TMethod, Forward>)
       return m_in(is / m_factor...);
     }
 
     template <typename TOut>
     void copy_to(TOut& out) const
     {
-      for_each("copy_to", domain(), Copy(*this, out)); // FIXME make generic
+      for_each("copy_to", domain(), Copy(*this, out)); // TODO make generic
     }
 
   private:
@@ -310,7 +315,10 @@ private:
   Index m_factor;
 };
 
-// FIXME template <typename TAlgo = void>
+/**
+ * @brief Shrink the size of an array by a given factor.
+ */
+// FIXME template <typename TMethod = Forward>
 class Downsample { // FIXME avoid duplication
 public:
 
@@ -349,6 +357,7 @@ public:
 
     auto domain() const
     {
+      // FIXME if constexpr (std::is_same_v<TMethod, Forward>)
       return m_in.domain() / m_factor;
     }
 
@@ -360,7 +369,7 @@ public:
     template <typename TOut>
     void copy_to(TOut& out) const
     {
-      for_each("copy_to", domain(), Copy(*this, out)); // FIXME make generic
+      for_each("copy_to", domain(), Copy(*this, out)); // TODO make generic
     }
 
   private:

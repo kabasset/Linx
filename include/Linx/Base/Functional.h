@@ -74,9 +74,9 @@ struct Negate {
  */
 template <typename T>
 struct Constant {
-  using value_type = T; ///< The value type
+  using value_type = const T; ///< The value type
 
-  T value; ///< The value
+  const T value; ///< The value
 
   /**
    * @brief Constructor.
@@ -99,12 +99,6 @@ struct Constant {
     return value;
   }
 };
-
-template <typename T>
-const auto& as_readonly(const Constant<T>& c)
-{
-  return c;
-}
 
 #define LINX_DEFINE_BINARY_OPERATOR(Func, out) \
   template <typename TLhs = Forward, typename TRhs = Forward> \
