@@ -34,14 +34,14 @@ public:
   class Apply : public ApplySpatialFilterMixin<SumFilter, TIn, Apply<TIn>> {
   public:
 
-    using value_type = typename TIn::value_type;
+    using value_type = const typename TIn::value_type;
     using element_type = std::remove_cvref_t<value_type>;
 
     using ApplySpatialFilterMixin<SumFilter, TIn, Apply>::ApplySpatialFilterMixin;
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      value_type out {};
+      element_type out {};
       for (const auto& e : neighbors) {
         out += e;
       }
@@ -69,14 +69,14 @@ public:
   class Apply : public ApplySpatialFilterMixin<MeanFilter, TIn, Apply<TIn>> {
   public:
 
-    using value_type = typename TIn::value_type;
+    using value_type = const typename TIn::value_type;
     using element_type = std::remove_cvref_t<value_type>;
 
     using ApplySpatialFilterMixin<MeanFilter, TIn, Apply>::ApplySpatialFilterMixin;
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      value_type out {};
+      element_type out {};
       for (const auto& e : neighbors) {
         out += e;
       }
@@ -110,7 +110,7 @@ template <typename TKernel>
 class Correlation : public WeightedFilterMixin<TKernel, Correlation<TKernel>> {
 public:
 
-  using value_type = typename TKernel::value_type;
+  using value_type = const typename TKernel::value_type;
   using element_type = std::remove_cvref_t<value_type>;
 
   Correlation(TKernel kernel) : WeightedFilterMixin<TKernel, Correlation>(LINX_MOVE(kernel)) {}
@@ -161,7 +161,7 @@ template <typename TKernel>
 class Convolution : public WeightedFilterMixin<TKernel, Convolution<TKernel>> {
 public:
 
-  using value_type = typename TKernel::value_type;
+  using value_type = const typename TKernel::value_type;
   using element_type = std::remove_cvref_t<value_type>;
 
   Convolution(TKernel kernel) : WeightedFilterMixin<TKernel, Convolution>(LINX_MOVE(kernel)) {}

@@ -162,9 +162,9 @@ KOKKOS_INLINE_FUNCTION const auto& root(const AnyPatch auto& patch)
  * @relatesalso Patch
  * @brief Identity for compatibility with `Patch`.
  */
-KOKKOS_INLINE_FUNCTION const auto& root(const AnyImage auto& image)
+KOKKOS_INLINE_FUNCTION const auto& root(const auto& in)
 {
-  return image;
+  return in;
 }
 
 /**

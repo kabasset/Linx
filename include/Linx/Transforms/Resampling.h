@@ -80,8 +80,12 @@ public:
 
   using Parent = TParent;
   using Method = TMethod;
+  using memory_space = TParent::memory_space;
+  using execution_space = TParent::execution_space;
 
   Extrapolation(Parent parent, Method method) : m_parent(LINX_MOVE(parent)), m_method(LINX_MOVE(method)) {}
+
+  Extrapolation(Parent parent, auto&&... args) : m_parent(LINX_MOVE(parent)), m_method {LINX_FORWARD(args)...} {}
 
   std::string label() const
   {
@@ -109,6 +113,12 @@ private:
   Method m_method;
 };
 
+template <typename TParent, typename TMethod>
+auto as_readonly(const Extrapolation<TParent, TMethod>& in)
+{
+  return Extrapolation(as_readonly(in.parent()), in.method());
+}
+
 template <typename TSpace, typename TParent, typename TMethod>
 decltype(auto) on_device(const Extrapolation<TParent, TMethod>& in) // TODO to some ProxyMixin
 {
@@ -120,6 +130,29 @@ decltype(auto) on_host(const Extrapolation<TParent, TMethod>& in) // TODO to som
 {
   return on_device<Kokkos::HostSpace>(in);
 }
+
+template <typename T>
+struct Pad {
+  using value_type = T;
+
+  std::string label() const
+  {
+    return "Pad";
+  }
+
+  /* KOKKOS_INLINE_FUNCTION */ const auto& operator()(const auto& in, std::integral auto... is) const
+  {
+    if (in.domain().contains(is...)) { // FIXME don't instantiate domain()
+      return in(is...);
+    } else {
+      return m_value;
+    }
+  }
+  value_type m_value;
+};
+
+template <typename TParent, std::convertible_to<typename TParent::element_type> T>
+Extrapolation(TParent, const T&) -> Extrapolation<TParent, Pad<T>>;
 
 /**
  * @ingroup resampling
@@ -148,6 +181,7 @@ private:
   KOKKOS_INLINE_FUNCTION const auto& extrapolate(const TIn& in, TTuple is, std::index_sequence<Is...>)
   {
     return in(clamp(get<Is>(is), 0, in.extent(Is) - 1)...);
+    // FIXME root(in)(clamp(get<Is>(is) - in.start(Is), 0, root(in).extent(Is)-1)...);
   }
 };
 
@@ -174,6 +208,7 @@ private:
       return out < 0 ? out + rhs : out;
     }; // TODO functor?
     return in(unsigned_modulo(get<Is>(is), in.extent(Is))...);
+    // FIXME support patches and offsets
   }
 };
 

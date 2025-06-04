@@ -12,8 +12,7 @@
 #include "Linx/Transforms/Morphology.h"
 #include "Linx/Transforms/RankFiltering.h"
 #include "Linx/Transforms/Resampling.h"
-
-namespace P = Linx::Pipeline; // FIXME rm
+#include "Linx/Transforms/Shift.h" // FIXME rm
 
 void print_2d(const auto& image)
 {
@@ -56,15 +55,85 @@ auto box_median_filter()
   // FIXME return Linx::MedianFilter<Linx::SBox<Radii...>>();
 }
 
-} // namespace Linx
+template <typename T>
+struct IsOffset : std::false_type {};
+template <typename T>
+struct IsOffset<Shift<T>> : std::true_type {}; // FIXME rename as Offset?
+// FIXME IsOffset<Patch<T, Box/Slice>> : std::true_type {};
 
-struct ScaleNoise {
-  double readnoise2;
-  KOKKOS_INLINE_FUNCTION auto operator()(auto e) const
-  {
-    return std::sqrt(std::max(e, 0.00001) + readnoise2);
+template <typename T>
+constexpr bool is_offset()
+{
+  return IsOffset<T>::value;
+}
+
+/**
+ * @brief Align a contiguous-domain 1D data container along an axis, reshaping it into an ND image.
+ * @tparam I The axis to align the array along
+ * @tparam N The rank of the output image (-1 is not supported)
+ * 
+ * The input can be a sequence or a 1D image, possibly offset.
+ * The output is an image or an offset image.
+ */
+template <Index I, Index N = I + 1, typename TIn>
+auto along(const TIn& in)
+{
+  const auto& r = root(in);
+  auto shape = Position<N>("shape").fill(1);
+  shape[I] = r.size();
+  Image<typename TIn::element_type, N> out(r.label(), shape);
+  for (Index i = 0; i < in.ssize(); ++i) {
+    auto p = Position<N>("p");
+    p[I] = i;
+    out[p] = r[i];
   }
-};
+  if constexpr (not is_offset<TIn>()) {
+    return out;
+  } else {
+    auto offset = Position<N>("offset");
+    offset[I] = in.domain().start(0);
+    return Shift(out, offset);
+  }
+}
+
+/**
+ * @brief Create a 1D sampled Gaussian kernel.
+ * 
+ * Example 2D Gaussian filtering of an image with 0-padding:
+ * 
+ * ```cpp
+ * auto sigma = 3.0;
+ * auto kernel = Linx::sampled_gaussian_kernel(sigma, 3 * sigma);
+ * auto filter = Linx::convolution_along<0, 1>(kernel);
+ * auto out = filter.pad(0)(in);
+ * ```
+ */
+template <typename T>
+Shift<Sequence<T, -1>> sampled_gaussian_kernel(const T& sigma, Index radius)
+{
+  auto kernel = Shift(Sequence<T, -1>("gaussian kernel", 2 * radius + 1), -radius);
+  const auto norm = std::numbers::inv_sqrtpi / sigma;
+  const auto factor = -0.5 / (sigma * sigma);
+  for_each<Kokkos::Serial>(
+      "Gaussian kernel",
+      kernel.domain(),
+      KOKKOS_LAMBDA(int i) { return norm * std::exp(i * i * factor); });
+  return kernel;
+}
+
+template <Index I, Index N = I + 1> // FIXME rm N, support non matching ranks in FilterMixin
+auto convolution_along(auto&& kernel)
+{
+  return Convolution(along<I, N>(LINX_FORWARD(kernel)));
+}
+
+template <Index I, Index N = I + 1>
+auto correlation_along(auto&& kernel)
+{
+  return Correlation(along<I, N>(LINX_FORWARD(kernel)));
+}
+
+} // namespace Linx
 
 struct FindSaturatedStars {
   double satlevel;
@@ -88,7 +157,7 @@ struct FindSaturatedStars {
             satpixels(i, j) = (median5(i, j) > (local_satlevel / 10));
           }
         });
-    auto grow_mask = +mask;
+    auto grow_mask = +mask; // Copy the borders
     Linx::Dilation(strel(1)).transform(mask, grow_mask);
     // FIXME auto grow_mask = Dilation::with_border_copy(mask)?
     Linx::Dilation(strel(2)).transform(satpixels, mask);
@@ -119,7 +188,7 @@ struct BackgroundLevel {
 
 template <typename T>
 struct FineStructure {
-  KOKKOS_INLINE_FUNCTION auto operator()(auto m, auto f, auto n) const
+  KOKKOS_INLINE_FUNCTION auto operator()(auto f, auto m, auto n) const
   {
     return std::max<T>(0.01, (f - m) / n);
   }
@@ -168,7 +237,7 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
     const std::string& psfmodel = "gauss",
     double psffwhm = 2.5,
     Linx::Index psfsize = 7,
-    Linx::Image<float, 2> psfk = Linx::Image<float, 2>("PSF", 1, 1).fill(1), // FIXME
+    // Linx::Image<float, 2> psfk = Linx::Image<float, 2>("PSF", 1, 1).fill(1), // FIXME
     double psfbeta = 4.765,
     bool verbose = false)
 {
@@ -182,6 +251,8 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
   auto [backgroundlevel] = Linx::Flow("Compute background level", logger).append(data, mask).run(BackgroundLevel());
 
   auto crmask = Linx::Image<bool, 2>("crmask", data.shape());
+  auto psfk = Linx::sampled_gaussian_kernel(psffwhm * 2 * std::sqrt(2 * std::log(2)), psfsize);
+
   for (Linx::Index i = 1; i <= niter; ++i) {
     auto label = "Iteration " + std::to_string(i) + " / " + std::to_string(niter);
     logger(label, "Start");
@@ -206,9 +277,9 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
     auto [f] =
         Linx::Flow("Compute fine structure", logger)
             .append(data)
-            .run(Linx::Correlation(psfk))
-            .append_run(Linx::box_median_filter<3, 3>())
-            .append(noise)
+            .run(Linx::convolution_along<0, 2>(psfk).pad(T()), Linx::convolution_along<1, 2>(psfk).pad(T()))
+            // FIXME convolution_along<0, 1>(psfk).pad(0)
+            .append(data, noise)
             .apply(FineStructure<T>());
 
     auto [cosmics] =

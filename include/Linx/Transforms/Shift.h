@@ -29,7 +29,9 @@ public:
   using execution_space = typename Parent::execution_space;
 
   using value_type = typename Parent::value_type; ///< The value type
+  using element_type = std::remove_cv_t<value_type>; ///< The element typ
   using reference = typename Parent::reference; ///< The reference type
+  using difference_type = std::ptrdiff_t; ///< The index difference type
 
   /**
    * @brief Constructor.
@@ -42,6 +44,14 @@ public:
   Shift(const Parent& parent, std::integral auto... offset) : m_parent(parent), m_offset("offset", {offset...}) {}
 
   /**
+   * @copydoc Shift()
+   */
+  Shift(const Parent& parent, Position<n> offset) : m_parent(parent), m_offset("offset", offset.size())
+  {
+    Kokkos::deep_copy(m_offset.container(), offset.container());
+  }
+
+  /**
    * @brief The parent.
    */
   KOKKOS_INLINE_FUNCTION const Parent& parent() const
@@ -50,9 +60,9 @@ public:
   }
 
   /**
-   * @brief The offset. 
+   * @brief The offset.
    */
-  Position<n> offset() const
+  Position<n> offset() const // FIXME rename as start() or origin()
   {
     Position<n> out("offset", m_offset.size());
     Kokkos::deep_copy(out.container(), m_offset.container());
@@ -64,7 +74,7 @@ public:
    */
   auto domain() const
   {
-    return m_parent.domain() + offset();
+    return box(m_parent.domain()) + offset(); // FIXME rm box() by implementing Slice::operator+
   }
 
   /**
@@ -84,6 +94,14 @@ public:
   }
 
   /**
+   * @brief Address offset between the first element and the element at given indices.
+   */
+  KOKKOS_INLINE_FUNCTION difference_type offset(std::integral auto... indices) const // FIXME what is the reference?
+  {
+    return offset_impl(forward_as_tuple(indices...), std::make_index_sequence<sizeof...(indices)>());
+  }
+
+  /**
    * @brief Forward to parent's `operator()` after shifting.
    */
   KOKKOS_INLINE_FUNCTION reference operator()(std::integral auto... is) const
@@ -92,6 +110,15 @@ public:
   }
 
 private:
+
+  /**
+   * @brief Helper method to unroll indices.
+   */
+  template <std::size_t... Is>
+  KOKKOS_INLINE_FUNCTION difference_type offset_impl(const auto& indices, std::index_sequence<Is...>) const
+  {
+    return ((get<Is>(indices) * m_parent.stride(Is)) + ...); // FIXME take offset into account
+  }
 
   /**
    * @brief Helper method to unroll indices.
@@ -118,6 +145,24 @@ concept AnyShift = is_specialization<Shift, T>;
 KOKKOS_INLINE_FUNCTION const auto& root(const AnyShift auto& shift)
 {
   return root(shift.parent());
+}
+
+template <typename TParent>
+auto as_readonly(const Shift<TParent>& in)
+{
+  return Shift(as_readonly(in.parent()), in.offset());
+}
+
+template <typename TSpace, typename TParent>
+decltype(auto) on_device(const Shift<TParent>& in)
+{
+  return Patch(on_device<TSpace>(in.parent()), in.offset());
+}
+
+template <typename TParent>
+decltype(auto) on_host(const Shift<TParent>& in)
+{
+  return on_device<Kokkos::HostSpace>(in);
 }
 
 } // namespace Linx

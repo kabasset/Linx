@@ -187,6 +187,11 @@ public:
     return domain(m_container);
   }
 
+  KOKKOS_INLINE_FUNCTION auto stride(std::integral auto i) const
+  {
+    return m_container.stride(i);
+  }
+
   /**
    * @brief Memory striding.
    */

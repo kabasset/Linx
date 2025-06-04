@@ -6,6 +6,8 @@
 #define LINX_TRANSFORMS_FILTERMIXIN_H
 
 #include "Linx/Data/Sequence.h"
+#include "Linx/Transforms/Resampling.h"
+#include "Linx/Transforms/Shift.h"
 
 #include <string>
 
@@ -170,6 +172,60 @@ private:
   const std::ptrdiff_t* m_it; ///< The current offset iterator
 };
 
+template <typename TParent, typename TMethod>
+class ExtrapolatedFilter {
+public:
+
+  using Parent = TParent;
+  using Method = TMethod;
+
+  ExtrapolatedFilter(Parent parent, Method method) : m_parent(parent), m_method(LINX_MOVE(method)) {}
+
+  std::string label() const
+  {
+    return compose_label("extrapolate", m_parent, m_method);
+  }
+
+  KOKKOS_INLINE_FUNCTION const Parent& parent() const
+  {
+    return m_parent;
+  }
+
+  KOKKOS_INLINE_FUNCTION const Method& method() const
+  {
+    return m_method;
+  }
+
+  template <typename TIn>
+  auto lazy(const TIn& in) const
+  {
+    auto bbox = box(in.domain()) + m_parent.footprint(); // FIXME not available in general
+    auto extrapolated = Shift(TIn("extrapolated", bbox.shape()), bbox.start());
+    extrapolated.copy_from(Extrapolation(in, m_method)); // TODO optimize
+    return m_parent.lazy(extrapolated);
+  }
+
+  template <typename TIn>
+  auto operator()(const TIn& in) const
+  {
+    using T = std::remove_cvref_t<typename TParent::Apply<TIn>::value_type>;
+    auto out = same_layout<T>(compose_label(m_parent.label(), in), in);
+    transform(in, out);
+    return out;
+  }
+
+  template <typename TIn, typename TOut>
+  void transform(const TIn& in, const TOut& out) const
+  {
+    out.copy_from(lazy(in)); // Use out's domain instead of in's
+  }
+
+private:
+
+  Parent m_parent;
+  Method m_method;
+};
+
 /**
  * @brief Filtering task mixin.
  * 
@@ -250,6 +306,11 @@ public:
   {
     lazy(in).copy_to(out);
   }
+
+  auto pad(const auto& value) const
+  {
+    return ExtrapolatedFilter(LINX_CRTP_CONST_DERIVED, Pad(value));
+  }
 };
 
 /**
@@ -301,6 +362,11 @@ public:
     Kokkos::deep_copy(m_offsets.container(), offsets_on_host.container());
   }
 
+  std::string label() const
+  {
+    return m_filter.label();
+  }
+
   decltype(auto) footprint() const
   {
     return m_filter.footprint();
@@ -337,7 +403,7 @@ template <typename TKernel, typename TDerived>
 class WeightedFilterMixin : public FilterMixin<TDerived> {
 public:
 
-  using value_type = typename TKernel::value_type;
+  using value_type = const typename TKernel::value_type;
 
   WeightedFilterMixin(TKernel kernel) : m_kernel(LINX_MOVE(kernel)) {}
 
@@ -373,6 +439,7 @@ class ApplyWeightedFilterMixin {
 public:
 
   using value_type = typename TFilter::value_type;
+  using element_type = std::remove_cvref_t<value_type>;
   using execution_space = typename TIn::execution_space;
 
   ApplyWeightedFilterMixin(TFilter filter, const TIn& in) :
@@ -394,6 +461,11 @@ public:
     });
     Kokkos::deep_copy(m_offsets.container(), offsets_on_host.container());
     Kokkos::deep_copy(m_weights.container(), weights_on_host.container());
+  }
+
+  std::string label() const
+  {
+    return m_filter.label();
   }
 
   auto footprint() const
@@ -422,7 +494,7 @@ protected:
 
   TFilter m_filter; ///< The filter
   Sequence<std::ptrdiff_t, -1> m_offsets; ///< The footprint offsets in the input
-  Sequence<value_type, -1> m_weights; ///< The weights in the same order
+  Sequence<element_type, -1> m_weights; ///< The weights in the same order
   decltype(as_readonly(std::declval<TIn>())) m_in; ///< The input
 };
 
