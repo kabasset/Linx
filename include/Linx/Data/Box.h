@@ -364,6 +364,7 @@ public:
    */
   GBox operator-() const
   {
+    // FIXME swap bounds?
     return {-m_start, -m_stop};
   }
 
@@ -372,6 +373,7 @@ public:
    */
   GBox operator*=(size_type scalar)
   {
+    // FIXME handle negative scalar?
     m_start *= scalar;
     m_stop *= scalar;
     return *this;
@@ -382,6 +384,7 @@ public:
    */
   GBox operator/=(size_type scalar)
   {
+    // FIXME handle negative scalar?
     m_start /= scalar;
     m_stop /= scalar;
     return *this;
@@ -452,7 +455,7 @@ GBox<T, N> operator+(const GBox<T, N>& lhs, const auto& rhs)
  * @relatesalso GBox
  */
 template <typename T, int N>
-GBox<T, N> operator-(GBox<T, N> lhs, const auto& rhs)
+GBox<T, N> operator-(const GBox<T, N>& lhs, const auto& rhs)
 {
   auto out = +lhs;
   out -= rhs;
@@ -474,7 +477,7 @@ GBox<T, N> operator*(const GBox<T, N>& lhs, const auto& rhs)
  * @relatesalso GBox
  */
 template <typename T, int N>
-GBox<T, N> operator/(GBox<T, N> lhs, const auto& rhs)
+GBox<T, N> operator/(const GBox<T, N>& lhs, const auto& rhs)
 {
   auto out = +lhs;
   out /= rhs;
@@ -485,12 +488,67 @@ GBox<T, N> operator/(GBox<T, N> lhs, const auto& rhs)
  * @relatesalso GBox
  */
 template <typename T, int N, typename U, int M>
-GBox<T, N> operator&(GBox<T, N> lhs, const GBox<U, M>& rhs)
+GBox<T, N> operator&(const GBox<T, N>& lhs, const GBox<U, M>& rhs)
 {
   auto out = +lhs;
   out &= rhs;
   return out;
 }
+
+/**
+ * @relatesalso GBox
+ */
+template <typename T, int N, typename U, int M>
+GBox<T, N> operator|(const GBox<T, N>& lhs, const GBox<U, M>& rhs)
+{
+  auto out = +lhs;
+  out &= rhs;
+  return out;
+}
+
+/**
+ * @relatesalso GBox
+ * @brief Compute the set difference of two boxes.
+ * 
+ * The result is a sequence of boxes, the union of which is the difference.
+ * It can be iterated with `for_each()`.
+ */
+template <typename T, int N, typename U, int M>
+std::vector<GBox<T, N>> operator%(const GBox<T, N>& lhs, const GBox<U, M>& rhs)
+{
+  // FIXME m_fronts = {box} if m_inner.size() <= 0
+  auto inter = lhs & rhs;
+  if (inter.size() == 0) {
+    return std::vector(+lhs);
+  }
+  const auto rank = inter.rank();
+  auto out = std::vector<GBox<T, N>>();
+  out.reserve(rank * 2);
+  for (Index i = 0; i < rank; ++i) {
+    const auto f = margin.start(i);
+    if (f < 0) {
+      auto before = inter;
+      before.m_stop[i] = inter.m_start[i];
+      before.m_start[i] = inter.m_start[i] += f;
+      if (before.size() > 0) {
+        out.push_back(std::move(before)); // TODO push_front?
+      }
+    }
+
+    const auto b = margin.stop(i);
+    if (b > 1) {
+      auto after = inter;
+      after.m_start[i] = inter.m_stop[i];
+      after.m_stop[i] = inter.m_stop[i] += b;
+      if (after.size() > 0) {
+        out.push_back(std::move(after));
+      }
+    }
+  }
+  return out;
+}
+
+// FIXME for_each(std::vector<GBox<T, N>>)
 
 /**
  * @relatesalso GBox
