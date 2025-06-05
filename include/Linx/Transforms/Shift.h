@@ -136,6 +136,18 @@ private:
 };
 
 template <typename T>
+struct IsOffset : std::false_type {};
+template <typename T>
+struct IsOffset<Shift<T>> : std::true_type {}; // FIXME rename as Offset?
+// FIXME IsOffset<Patch<T, Box/Slice>> : std::true_type {};
+
+template <typename T>
+constexpr bool is_offset()
+{
+  return IsOffset<T>::value;
+}
+
+template <typename T>
 concept AnyShift = is_specialization<Shift, T>;
 
 /**
@@ -156,13 +168,44 @@ auto as_readonly(const Shift<TParent>& in)
 template <typename TSpace, typename TParent>
 decltype(auto) on_device(const Shift<TParent>& in)
 {
-  return Patch(on_device<TSpace>(in.parent()), in.offset());
+  return Shift(on_device<TSpace>(in.parent()), in.offset());
 }
 
 template <typename TParent>
 decltype(auto) on_host(const Shift<TParent>& in)
 {
   return on_device<Kokkos::HostSpace>(in);
+}
+
+/**
+ * @brief Align a contiguous-domain 1D data container along an axis, reshaping it into an ND image.
+ * @tparam I The axis to align the array along
+ * @tparam N The rank of the output image (-1 is not supported)
+ * 
+ * The input can be a sequence or a 1D image, possibly offset.
+ * The output is an image or an offset image.
+ */
+template <Index I, Index N = I + 1, typename TIn>
+auto along(const TIn& in)
+{
+  const auto& r = root(in);
+  auto shape = Position<N>("shape").fill(1);
+  shape[I] = r.size();
+  Image<typename TIn::element_type, N> out(r.label(), shape); // FIXME on_device<TIn::execution_space>
+  const auto& out_on_host = on_host(out);
+  for (Index i = 0; i < in.ssize(); ++i) {
+    auto p = Position<N>("p");
+    p[I] = i;
+    out_on_host[p] = r[i];
+  }
+  Kokkos::deep_copy(out.container(), out_on_host.container());
+  if constexpr (not is_offset<TIn>()) {
+    return out;
+  } else {
+    auto offset = Position<N>("offset");
+    offset[I] = in.domain().start(0);
+    return Shift(out, offset);
+  }
 }
 
 } // namespace Linx

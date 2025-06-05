@@ -222,6 +222,40 @@ auto separable_laplacian(T s = T(1))
   return Correlation(LINX_MOVE(kernel));
 }
 
+/**
+ * @brief Create a 1D sampled Gaussian kernel.
+ * 
+ * Example 2D Gaussian filtering of an image with 0-padding:
+ * 
+ * ```cpp
+ * auto sigma = 3.0;
+ * auto kernel = Linx::sampled_gaussian_kernel(sigma, 3 * sigma);
+ * auto filter = Linx::convolution_along<0, 1>(kernel);
+ * auto out = filter.pad(0)(in);
+ * ```
+ */
+template <typename T>
+Shift<Sequence<T, -1>> sampled_gaussian_kernel(const T& sigma, Index radius)
+{
+  auto kernel = Shift(Sequence<T, -1>("gaussian kernel", 2 * radius + 1), -radius);
+  const auto norm = std::numbers::inv_sqrtpi / sigma;
+  const auto factor = -0.5 / (sigma * sigma);
+  for_each("Gaussian kernel", kernel.domain(), KOKKOS_LAMBDA(int i) { kernel(i) = norm * std::exp(i * i * factor); });
+  return kernel;
+}
+
+template <Index I, Index N = I + 1> // FIXME rm N, support non matching ranks in FilterMixin
+auto convolution_along(auto&& kernel)
+{
+  return Convolution(along<I, N>(LINX_FORWARD(kernel)));
+}
+
+template <Index I, Index N = I + 1>
+auto correlation_along(auto&& kernel)
+{
+  return Correlation(along<I, N>(on_host(LINX_FORWARD(kernel))));
+}
+
 } // namespace Linx
 
 #endif

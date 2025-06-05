@@ -100,6 +100,10 @@ add_executable(Flow_test tests/Flow_test.cpp)
 target_link_libraries(Flow_test Linx ${Boost_LIBRARIES})
 add_test(Flow_test Flow_test)
 
+add_executable(GaussianFilter_test tests/GaussianFilter_test.cpp)
+target_link_libraries(GaussianFilter_test Linx ${Boost_LIBRARIES})
+add_test(GaussianFilter_test GaussianFilter_test)
+
 add_executable(Histogram_test tests/Histogram_test.cpp)
 target_link_libraries(Histogram_test Linx ${Boost_LIBRARIES})
 add_test(Histogram_test Histogram_test)
@@ -136,9 +140,9 @@ add_executable(ImageShift_test tests/ImageShift_test.cpp)
 target_link_libraries(ImageShift_test Linx ${Boost_LIBRARIES})
 add_test(ImageShift_test ImageShift_test)
 
-add_executable(Laplacian_test tests/Laplacian_test.cpp)
-target_link_libraries(Laplacian_test Linx ${Boost_LIBRARIES})
-add_test(Laplacian_test Laplacian_test)
+add_executable(LaplacianFilter_test tests/LaplacianFilter_test.cpp)
+target_link_libraries(LaplacianFilter_test Linx ${Boost_LIBRARIES})
+add_test(LaplacianFilter_test LaplacianFilter_test)
 
 add_executable(LinearInterpolation_test tests/LinearInterpolation_test.cpp)
 target_link_libraries(LinearInterpolation_test Linx ${Boost_LIBRARIES})
