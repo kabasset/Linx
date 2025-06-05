@@ -104,6 +104,11 @@ public:
     return m_parent[m_domain(LINX_FORWARD(args)...)];
   }
 
+  KOKKOS_INLINE_FUNCTION auto offset(std::integral auto... is) const
+  {
+    return m_parent.offset(is...);
+  }
+
   /**
    * @brief Shift the patch by a given vector.
    */
@@ -201,6 +206,12 @@ template <typename TParent, typename TDomain, typename U>
 auto where(const Patch<TParent, TDomain>& in, const GBox<U, TParent::n>& domain)
 {
   return Patch<TParent, TDomain>(root(in), domain & in.domain());
+}
+
+template <typename TParent, typename TDomain>
+decltype(auto) as_readonly(const Patch<TParent, TDomain>& in)
+{
+  return Patch(as_readonly(in.parent()), in.domain());
 }
 
 /**

@@ -202,7 +202,7 @@ public:
     auto bbox = box(in.domain()) + m_parent.footprint(); // FIXME not available in general
     auto extrapolated = Shift(TIn("extrapolated", bbox.shape()), bbox.start());
     extrapolated.copy_from(Extrapolation(in, m_method)); // TODO optimize
-    return m_parent.lazy(extrapolated);
+    return m_parent.lazy(Patch(extrapolated, in.domain()));
   }
 
   template <typename TIn>

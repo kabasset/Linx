@@ -152,6 +152,7 @@ BoxUnion<GBox<T, N>> set_difference(const GBox<T, N>& lhs, const auto& rhs)
  * The left-hand side box is assumed to be non-empty.
  * The output is a union of boxes representing
  * the elements contained in the left-hand side box and/or in the right-hand side box.
+ * The left-hand side box is one of the boxes in the output.
  */
 template <typename T, int N>
 BoxUnion<GBox<T, N>> operator|(const GBox<T, N>& lhs, const auto& rhs)

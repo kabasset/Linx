@@ -19,11 +19,8 @@ void print_2d(const auto& image)
   auto name = image.label();
   auto width = image.shape()[0];
   auto height = image.shape()[1];
-  std::cout << name << ":" << std::endl;
-  std::cout << "  " << width << " x " << height << std::endl;
 
   const auto& on_host = Linx::on_host(image);
-  std::cout << "  [" << on_host(0, 0) << ", ... , " << on_host(width - 1, height - 1) << "]" << std::endl;
 
   auto filename = name + ".fits";
   Linx::Fits(filename, 'w').write(image);
@@ -114,10 +111,7 @@ Shift<Sequence<T, -1>> sampled_gaussian_kernel(const T& sigma, Index radius)
   auto kernel = Shift(Sequence<T, -1>("gaussian kernel", 2 * radius + 1), -radius);
   const auto norm = std::numbers::inv_sqrtpi / sigma;
   const auto factor = -0.5 / (sigma * sigma);
-  for_each<Kokkos::Serial>(
-      "Gaussian kernel",
-      kernel.domain(),
-      KOKKOS_LAMBDA(int i) { return norm * std::exp(i * i * factor); });
+  for_each("Gaussian kernel", kernel.domain(), KOKKOS_LAMBDA(int i) { return norm * std::exp(i * i * factor); });
   return kernel;
 }
 
@@ -130,7 +124,7 @@ auto convolution_along(auto&& kernel)
 template <Index I, Index N = I + 1>
 auto correlation_along(auto&& kernel)
 {
-  return Correlation(along<I, N>(LINX_FORWARD(kernel)));
+  return Correlation(along<I, N>(on_host(LINX_FORWARD(kernel))));
 }
 
 } // namespace Linx
