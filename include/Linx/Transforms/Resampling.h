@@ -132,22 +132,34 @@ decltype(auto) on_host(const Extrapolation<TParent, TMethod>& in) // TODO to som
 }
 
 template <typename T>
-struct Pad {
+class Pad {
+public:
+
   using value_type = T;
+
+  Pad(value_type value) : m_value(value) {}
 
   std::string label() const
   {
     return "Pad";
   }
 
-  /* KOKKOS_INLINE_FUNCTION */ const auto& operator()(const auto& in, std::integral auto... is) const
+  KOKKOS_INLINE_FUNCTION const auto& operator()(const auto& in, std::integral auto... is) const
   {
-    if (in.domain().contains(is...)) { // FIXME don't instantiate domain()
-      return in(is...);
-    } else {
-      return m_value;
-    }
+    return extrapolate(in, forward_as_tuple(is...), std::make_index_sequence<sizeof...(is)>());
   }
+
+private:
+
+  template <typename TIn, typename TTuple, std::size_t... Is>
+  KOKKOS_INLINE_FUNCTION const auto& extrapolate(const TIn& in, TTuple is, std::index_sequence<Is...>) const
+  {
+    return ((get<Is>(is) >= 0 && get<Is>(is) < in.extent(Is)) && ...) ? in(get<Is>(is)...) : m_value;
+    // FIXME rely on TIn::domain_contains(is...)
+  }
+
+private:
+
   value_type m_value;
 };
 

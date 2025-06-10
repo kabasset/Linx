@@ -5,6 +5,7 @@
 #ifndef LINX_TRANSFORMS_FILTERMIXIN_H
 #define LINX_TRANSFORMS_FILTERMIXIN_H
 
+#include "Linx/Data/Patch.h"
 #include "Linx/Data/Sequence.h"
 #include "Linx/Transforms/Resampling.h"
 #include "Linx/Transforms/Shift.h"
@@ -199,7 +200,7 @@ public:
   template <typename TIn>
   auto lazy(const TIn& in) const
   {
-    auto bbox = box(in.domain()) + m_parent.footprint(); // FIXME not available in general
+    auto bbox = box(in.domain()) + m_parent.footprint(); // FIXME + or - ?
     auto extrapolated = Shift(TIn("extrapolated", bbox.shape()), bbox.start());
     extrapolated.copy_from(Extrapolation(in, m_method)); // TODO optimize
     return m_parent.lazy(Patch(extrapolated, in.domain()));
@@ -235,33 +236,6 @@ private:
  * class Convolve : public WeightedFilterMixin;
  * class Erode : public FilterMixin;
  * using Opening = Erode * Dilate
- * using Laplacian<0, 1> = Laplacian<0> + Laplacian<1>;
- * \endcode
- * 
- * Possible usage:
- * 
- * \code
- * auto cropped = Linx::Convolve(kernel)(in);
- * auto [cropped] = P::Run("convolution") | in | Linx::Convolve(kernel);
- * auto extrapolated = Linx::Convolve(kernel).pad(0)(in);
- * auto extrapolated = Linx::Convolve(kernel)(Linx::Pad(0)(in));
- * auto extrapolated = Linx::Convolve(kernel)(Linx::NearestNeighborExtrapolation()(in));
- * auto extrapolated = Linx::Convolve(kernel)(Linx::NearestNeighborExtrapolation()(in));
- * auto [extrapolated] = P::Run("convolution") | in | Linx::Pad(0) | Linx::Convolve(kernel);
- * auto [extrapolated] = P::Run("convolution") | in | Linx::Convolve(kernel).pad(0);
- * auto [extrapolated] = P::Run("convolution") | in | Linx::NearestNeighborExtrapolation() | Linx::Convolve(kernel);
- * 
- * auto cropped = Linx::Erode(radius)(in);
- * auto [cropped] = P::Run("erosion") | in | Linx::Erode(radius);
- * auto extrapolated = Linx::Erode(radius)(Linx::Pad()(in)); // Deduce padding
- * auto [extrapolated] = P::Run("erosion") | in | Linx::WithExtrapolation() | Linx::Erode(radius);
- * 
- * auto cropped = Linx::Erode(radius) * Linx::Dilate(radius) * in;
- * auto [cropped] = P::Run("opening") | in | Linx::Erode(radius) * Linx::Dilate(radius);
- * auto extrapolated = Linx::Erode(radius) * Linx::Dilate(radius) * Linx::Pad() * in;
- * auto [extrapolated] = P::Run("opening") | in | Linx::Pad() | Linx::Erode(radius) * Linx::Dilate(radius);
- * auto [extrapolated] = P::Run("opening") | in | Linx::Pad(Linx::Erode(radius) * Linx::Dilate(radius));
- * auto [extrapolated] = P::Run("opening") | in | Linx::Erode(radius).pad() * Linx::Dilate(radius).pad();
  * \endcode
  */
 template <typename TDerived>
