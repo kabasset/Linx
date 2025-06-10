@@ -36,19 +36,19 @@ public:
   /**
    * @brief Constructor.
    */
-  Shift() : m_parent(nullptr), m_offset("offset", {}) {}
+  Shift() : m_parent(nullptr), m_offset {} {}
 
   /**
    * @copydoc Shift()
    */
-  Shift(const Parent& parent, std::integral auto... offset) : m_parent(parent), m_offset("offset", {offset...}) {}
+  Shift(const Parent& parent, std::integral auto... offset) : m_parent(parent), m_offset {offset...} {}
 
   /**
    * @copydoc Shift()
    */
-  Shift(const Parent& parent, Position<n> offset) : m_parent(parent), m_offset("offset", offset.size())
+  Shift(const Parent& parent, Position<n> offset) : m_parent(parent), m_offset {}
   {
-    Kokkos::deep_copy(m_offset.container(), offset.container());
+    std::ranges::copy(offset, m_offset.data());
   }
 
   /**
@@ -62,11 +62,13 @@ public:
   /**
    * @brief The offset.
    */
-  Position<n> offset() const // FIXME rename as start() or origin()
+  Position<n> offset() const
+  // FIXME conflicts with offset(is...)
+  // FIXME rename as vector()?
+  // Not start() or origin() because parent is not necessarily starting at 0
   {
-    Position<n> out("offset", m_offset.size());
-    Kokkos::deep_copy(out.container(), m_offset.container());
-    return out;
+    return Position<n>("offset", m_offset.data(), m_offset.data() + m_offset.size());
+    // FIXME implement Sequence::rank() -> 1 and replace m_offset.size() with m_parent.rank()
   }
 
   /**
@@ -97,6 +99,7 @@ public:
    * @brief Address offset between the first element and the element at given indices.
    */
   KOKKOS_INLINE_FUNCTION difference_type offset(std::integral auto... indices) const // FIXME what is the reference?
+  // FIXME rename as data_offset?
   {
     return offset_impl(forward_as_tuple(indices...), std::make_index_sequence<sizeof...(indices)>());
   }
@@ -117,7 +120,7 @@ private:
   template <std::size_t... Is>
   KOKKOS_INLINE_FUNCTION difference_type offset_impl(const auto& indices, std::index_sequence<Is...>) const
   {
-    return ((get<Is>(indices) * m_parent.stride(Is)) + ...); // FIXME take offset into account
+    return ((get<Is>(indices) * m_parent.stride(Is)) + ...); // FIXME take offset into account?
   }
 
   /**
@@ -131,8 +134,11 @@ private:
 
 private:
 
+  static constexpr int kokkos_max_dyn_rank = 7;
+  static constexpr int max_rank = (n == -1 ? kokkos_max_dyn_rank : n);
+
   Parent m_parent; ///< The parent
-  Sequence<Index, n> m_offset; ///< The offset
+  Kokkos::Array<Index, max_rank> m_offset; ///< The offset
 };
 
 template <typename T>
