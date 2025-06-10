@@ -21,8 +21,8 @@ BOOST_AUTO_TEST_CASE(positive_offset_test)
   auto test = Linx::Image<int, 2>("test", in.shape());
   Linx::for_each(
       "test",
-      in.domain(),
-      KOKKOS_LAMBDA(int i, int j) { test(i, j) = shift(i - 2, j - 1) - in(i, j); });
+      shift.domain(),
+      KOKKOS_LAMBDA(int i, int j) { test(i - 2, j - 1) = shift(i, j) - in(i - 2, j - 1); });
   BOOST_TEST(Linx::norm<0>(test) == 0);
 }
 

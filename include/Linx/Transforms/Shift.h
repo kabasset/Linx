@@ -126,7 +126,7 @@ private:
   template <std::size_t... Is>
   KOKKOS_INLINE_FUNCTION reference at_impl(const auto& indices, std::index_sequence<Is...>) const
   {
-    return m_parent((get<Is>(indices) + m_offset[Is])...);
+    return m_parent((get<Is>(indices) - m_offset[Is])...);
   }
 
 private:
