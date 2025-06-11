@@ -172,6 +172,14 @@ public:
   {}
 
   /**
+   * @brief The rank is always 1.
+   */
+  static constexpr auto rank()
+  {
+    return 1;
+  }
+
+  /**
    * @brief Container span.
    */
   KOKKOS_INLINE_FUNCTION Domain domain() const
@@ -184,7 +192,15 @@ public:
    */
   KOKKOS_INLINE_FUNCTION size_type shape() const
   {
-    return this->size(); // FIXME Sequence<size_type, 1>(size()) ?
+    return this->size(); // FIXME Sequence<size_type, 1>("shape", {size()})
+  }
+
+  /**
+   * @brief The stride is always 1.
+   */
+  static constexpr auto stride(std::integral auto = 0)
+  {
+    return 1;
   }
 
   /**

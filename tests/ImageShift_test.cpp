@@ -28,15 +28,14 @@ BOOST_AUTO_TEST_CASE(positive_offset_test)
 
 BOOST_AUTO_TEST_CASE(negative_offset_distance_test)
 {
-  auto in = Linx::Image<int, 1>("in", 4).fill_with_distance_from_data();
-  auto shift = Linx::Shift(in, -2);
+  auto in = Linx::Position<4>("in", 4).fill_with_distance_from_data();
+  auto shift = Linx::Shift(in, -2); // FIXME domain should be a Slice
   BOOST_TEST(shift.distance_from_origin(0) == 0);
   const auto offset = &shift(0) - &in(0);
   BOOST_TEST(offset == 2);
-  Linx::for_each<Kokkos::Serial>(
-      "test",
-      shift.domain(),
-      KOKKOS_LAMBDA(int i) { BOOST_TEST(shift.distance_from_origin(i) == i); });
+  for (int i = shift.domain().start()[0]; i < shift.domain().stop()[0]; ++i) {
+    BOOST_TEST(shift.distance_from_origin(i) == i);
+  };
 }
 
 BOOST_AUTO_TEST_SUITE_END()
