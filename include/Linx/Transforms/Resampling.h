@@ -311,6 +311,7 @@ public:
   template <typename TIn>
   auto operator()(const TIn& in) const
   {
+    // FIXME in.shape() not compatible for Sequence
     auto apply = lazy(in);
     TIn out(compose_label(label(), in), in.shape() * m_factor); // Differs from FilterMixin
     apply.copy_to(out);

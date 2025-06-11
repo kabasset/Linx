@@ -190,9 +190,17 @@ public:
   /**
    * @brief Container size, for compatibility with `DataContainer`.
    */
-  KOKKOS_INLINE_FUNCTION size_type shape() const
+  Sequence<size_type, 1> shape() const
   {
-    return this->size(); // FIXME Sequence<size_type, 1>("shape", {size()})
+    return Sequence<size_type, 1>("shape", m_container.size());
+  }
+
+  /**
+   * @brief The extent along the first axis (the size), for compatibility.
+   */
+  KOKKOS_INLINE_FUNCTION void extent(std::integral auto = 0)
+  {
+    return this->size();
   }
 
   /**
@@ -350,6 +358,14 @@ decltype(auto) on_device(const Sequence<T, N, TContainer>& in)
     auto container = Kokkos::create_mirror_view_and_copy(TSpace(), in.container());
     return Sequence<T, N, decltype(container)>(Forward {}, LINX_MOVE(container));
   }
+}
+
+template <typename U = void, typename T, int N, typename TContainer>
+auto same_layout(const std::string& label, const Sequence<T, N, TContainer>& in)
+{
+  return Sequence<typename Rebind<T>::As<U>, N, typename Rebind<TContainer>::As<U>>(
+      Forward(),
+      same_layout<U>(label, in.container()));
 }
 
 /**

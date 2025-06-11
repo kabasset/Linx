@@ -14,8 +14,8 @@ using T = std::int32_t;
 void print_2d(const auto& image)
 {
   auto name = image.label();
-  auto width = image.shape()[0];
-  auto height = image.shape()[1];
+  auto width = image.extent(0);
+  auto height = image.extent(1);
   std::cout << name << ":" << std::endl;
   std::cout << "  " << width << " x " << height << std::endl;
 

@@ -72,7 +72,7 @@ using ImageContainer = decltype(default_image_container<T, N, TArgs...>());
 template <typename T>
 struct Rebind {
   template <typename U>
-  using As = U;
+  using As = std::conditional_t<std::is_same_v<U, void>, T, U>;
   using AsReadonly = const T;
 };
 
@@ -100,7 +100,7 @@ struct Rebind<Kokkos::View<TData, TArgs...>> {
 /**
  * @brief Create a view with same shape but different data type.
  */
-template <typename U, typename TData, typename... TArgs>
+template <typename U = void, typename TData, typename... TArgs>
 decltype(auto) same_layout(const std::string& label, const Kokkos::View<TData, TArgs...>& in)
 {
   return Kokkos::View<typename Rebind<TData>::As<U>, TArgs...>(label, in.layout());
@@ -144,7 +144,7 @@ struct Rebind<Kokkos::DynRankView<TData, TArgs...>> {
 /**
  * @brief Create a view with same shape but different data type.
  */
-template <typename U, typename TData, typename... TArgs>
+template <typename U = void, typename TData, typename... TArgs>
 decltype(auto) same_layout(const std::string& label, const Kokkos::DynRankView<TData, TArgs...>& in)
 {
   return Kokkos::DynRankView<typename Rebind<TData>::As<U>, TArgs...>(label, in.layout());

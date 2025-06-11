@@ -17,8 +17,8 @@
 void print_2d(const auto& image)
 {
   auto name = image.label();
-  auto width = image.shape()[0];
-  auto height = image.shape()[1];
+  auto width = image.extent(0);
+  auto height = image.extent(1);
 
   const auto& on_host = Linx::on_host(image);
 

@@ -458,10 +458,12 @@ decltype(auto) on_device(const Image<T, N, TContainer>& in)
   }
 }
 
-template <typename U, typename T, int N, typename TContainer>
+template <typename U = void, typename T, int N, typename TContainer>
 auto same_layout(const std::string& label, const Image<T, N, TContainer>& in)
 {
-  return Image<U, N, typename Rebind<TContainer>::As<U>>(Forward(), same_layout<U>(label, in.container()));
+  return Image<typename Rebind<T>::As<U>, N, typename Rebind<TContainer>::As<U>>(
+      Forward(),
+      same_layout<U>(label, in.container()));
 }
 
 /**
