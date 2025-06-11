@@ -63,9 +63,6 @@ public:
    * @brief The offset.
    */
   Position<n> offset() const
-  // FIXME conflicts with offset(is...)
-  // FIXME rename as vector()?
-  // Not start() or origin() because parent is not necessarily starting at 0
   {
     return Position<n>("offset", m_offset.data(), m_offset.data() + m_offset.size());
     // FIXME implement Sequence::rank() -> 1 and replace m_offset.size() with m_parent.rank()
@@ -96,12 +93,15 @@ public:
   }
 
   /**
-   * @brief Address offset between the first element and the element at given indices.
+   * @brief Address offset between the origin element and the element at given indices.
+   * 
+   * By definition, `shift.distance_from_origin(0, 0, ...)` is 0,
+   * while `shift.parent().distance_from_origin(0, 0, ...)` is generally not 0,
+   * since the origin is shifted.
    */
-  KOKKOS_INLINE_FUNCTION difference_type offset(std::integral auto... indices) const // FIXME what is the reference?
-  // FIXME rename as data_offset?
+  KOKKOS_INLINE_FUNCTION difference_type distance_from_origin(std::integral auto... indices) const
   {
-    return offset_impl(forward_as_tuple(indices...), std::make_index_sequence<sizeof...(indices)>());
+    return distance_impl(forward_as_tuple(indices...), std::make_index_sequence<sizeof...(indices)>());
   }
 
   /**
@@ -118,9 +118,9 @@ private:
    * @brief Helper method to unroll indices.
    */
   template <std::size_t... Is>
-  KOKKOS_INLINE_FUNCTION difference_type offset_impl(const auto& indices, std::index_sequence<Is...>) const
+  KOKKOS_INLINE_FUNCTION difference_type distance_impl(const auto& indices, std::index_sequence<Is...>) const
   {
-    return ((get<Is>(indices) * m_parent.stride(Is)) + ...); // FIXME take offset into account?
+    return ((get<Is>(indices) * m_parent.stride(Is)) + ...);
   }
 
   /**

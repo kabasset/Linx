@@ -223,11 +223,11 @@ public:
   }
 
   /**
-   * @brief Address offset between the first element and the element at given indices.
+   * @brief Address offset between the origin element (with indices 0) and the element at given indices.
    */
-  KOKKOS_INLINE_FUNCTION difference_type offset(std::integral auto... indices) const
+  KOKKOS_INLINE_FUNCTION difference_type distance_from_origin(std::integral auto... indices) const
   {
-    return offset_impl(forward_as_tuple(indices...), std::make_index_sequence<sizeof...(indices)>());
+    return distance_impl(forward_as_tuple(indices...), std::make_index_sequence<sizeof...(indices)>());
   }
 
   /**
@@ -319,7 +319,7 @@ private:
    * @brief Helper method to unroll indices.
    */
   template <std::size_t... Is>
-  KOKKOS_INLINE_FUNCTION difference_type offset_impl(const auto& indices, std::index_sequence<Is...>) const
+  KOKKOS_INLINE_FUNCTION difference_type distance_impl(const auto& indices, std::index_sequence<Is...>) const
   {
     return ((get<Is>(indices) * m_container.stride(Is)) + ...);
   }

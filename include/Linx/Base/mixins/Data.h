@@ -147,12 +147,12 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    * }
    * \endcode
    */
-  const TDerived& fill_with_offsets() const
+  const TDerived& fill_with_distance_from_data() const
   {
     const auto& derived = LINX_CRTP_CONST_DERIVED;
     using Space = typename TDerived::execution_space;
     for_each<Space>(
-        "fill_with_offsets()",
+        "fill_with_distance_from_data()",
         derived.domain(),
         Impl::OffsetFiller<typename TDerived::Container>(derived.container(), derived.data()));
     return derived;

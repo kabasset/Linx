@@ -104,9 +104,9 @@ public:
     return m_parent[m_domain(LINX_FORWARD(args)...)];
   }
 
-  KOKKOS_INLINE_FUNCTION auto offset(std::integral auto... is) const
+  KOKKOS_INLINE_FUNCTION auto distance_from_origin(std::integral auto... is) const
   {
-    return m_parent.offset(is...);
+    return m_parent.distance_from_origin(is...);
   }
 
   /**

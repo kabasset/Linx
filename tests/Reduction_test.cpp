@@ -17,10 +17,7 @@ BOOST_AUTO_TEST_CASE(sum_min_max_test)
   const int height = 3;
   Linx::Image<int, 2> a("a", width, height);
 
-  Linx::for_each(
-      "range",
-      a.domain(),
-      KOKKOS_LAMBDA(int i, int j) { a(i, j) = i + j * width; });
+  Linx::for_each("range", a.domain(), KOKKOS_LAMBDA(int i, int j) { a(i, j) = i + j * width; });
 
   auto sum = Linx::sum(a);
   auto min = Linx::min(a);
@@ -33,7 +30,7 @@ BOOST_AUTO_TEST_CASE(sum_min_max_test)
 
 void test_norm(const auto& in)
 {
-  in.fill_with_offsets();
+  in.fill_with_distance_from_data();
 
   std::vector<int> expected(3); // FIXME map_reduce to view
 

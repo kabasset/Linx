@@ -13,7 +13,7 @@ LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 BOOST_AUTO_TEST_CASE(positive_offset_test)
 {
-  auto in = Linx::Image<int, 2>("in", 4, 3).fill_with_offsets();
+  auto in = Linx::Image<int, 2>("in", 4, 3).fill_with_distance_from_data();
   auto shift = Linx::Shift(in, 2, 1);
   BOOST_TEST((shift.offset() == Linx::Position<2>({2, 1}))); // FIXME <2> should be deduced
   BOOST_TEST((shift.domain() == in.domain() + shift.offset()));
@@ -24,6 +24,19 @@ BOOST_AUTO_TEST_CASE(positive_offset_test)
       shift.domain(),
       KOKKOS_LAMBDA(int i, int j) { test(i - 2, j - 1) = shift(i, j) - in(i - 2, j - 1); });
   BOOST_TEST(Linx::norm<0>(test) == 0);
+}
+
+BOOST_AUTO_TEST_CASE(negative_offset_distance_test)
+{
+  auto in = Linx::Image<int, 1>("in", 4).fill_with_distance_from_data();
+  auto shift = Linx::Shift(in, -2);
+  BOOST_TEST(shift.distance_from_origin(0) == 0);
+  const auto offset = &shift(0) - &in(0);
+  BOOST_TEST(offset == 2);
+  Linx::for_each<Kokkos::Serial>(
+      "test",
+      shift.domain(),
+      KOKKOS_LAMBDA(int i) { BOOST_TEST(shift.distance_from_origin(i) == i); });
 }
 
 BOOST_AUTO_TEST_SUITE_END()

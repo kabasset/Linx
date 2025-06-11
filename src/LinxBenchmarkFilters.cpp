@@ -63,8 +63,8 @@ int main(int argc, char const* argv[])
   const auto iter_count = context.as<int>("iter");
 
   std::cout << "Generating input and kernel..." << std::endl;
-  const auto in = Linx::Image<T, 2>("input", in_extent, in_extent).fill_with_offsets();
-  const auto k = Linx::Image<T, 2>("kernel", k_extent, k_extent).fill_with_offsets();
+  const auto in = Linx::Image<T, 2>("input", in_extent, in_extent).fill_with_distance_from_data();
+  const auto k = Linx::Image<T, 2>("kernel", k_extent, k_extent).fill_with_distance_from_data();
   print_2d(in);
   print_2d(k);
   Kokkos::fence();
