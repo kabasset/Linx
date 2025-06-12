@@ -29,22 +29,42 @@ BOOST_AUTO_TEST_CASE(kernel_test)
   BOOST_TEST(Linx::sum(k) >= 0.999);
 }
 
-BOOST_AUTO_TEST_CASE(impulse_test)
+BOOST_AUTO_TEST_CASE(position_impulse_test)
+{
+  const float sigma = 1;
+  constexpr int radius = 3;
+  auto k = Linx::on_host(Linx::sampled_gaussian_kernel(sigma, radius));
+  auto conv = Linx::Convolution(k);
+  auto in = Linx::Position<2 * radius + 1>("in");
+  in[radius] = 1;
+  auto out = conv(in);
+  BOOST_TEST(out.size() == in.size());
+  for (int i = 0; i < in.ssize(); ++i) {
+    if (i == radius) {
+      BOOST_TEST(in(i) == 1);
+      BOOST_TEST(out(i) == k(0));
+    } else {
+      BOOST_TEST(out(i) == 0);
+    }
+  }
+}
+
+BOOST_AUTO_TEST_CASE(raster_impulse_test)
 {
   const float sigma = 1;
   const int radius = 5;
   auto k = Linx::on_host(Linx::sampled_gaussian_kernel(sigma, radius));
   auto conv = Linx::Convolution(k);
-  auto in = Linx::Raster<float>("in", 2 * radius + 1, 1); // FIXME auto in = Linx::Position<5>("in");
-  in(radius, 0) = 1; // FIXME in[radius] = 1;
+  auto in = Linx::Raster<float>("in", 2 * radius + 1, 1);
+  in(radius, 0) = 1;
   auto out = conv(in);
   BOOST_TEST(out.size() == in.size());
   for (int i = 0; i < in.ssize(); ++i) {
     if (i == radius) {
-      BOOST_TEST(in(i, 0) == 1); // FIXME rm 0
-      BOOST_TEST(out(i, 0) == k(0)); // FIXME rm 0
+      BOOST_TEST(in(i, 0) == 1);
+      BOOST_TEST(out(i, 0) == k(0));
     } else {
-      BOOST_TEST(out(i, 0) == 0); // FIXME rm 0
+      BOOST_TEST(out(i, 0) == 0);
     }
   }
 }

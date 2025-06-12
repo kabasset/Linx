@@ -87,6 +87,16 @@ struct Rebind<T*> {
 };
 
 /**
+ * @brief Array specialization.
+ */
+template <typename T, std::size_t N>
+struct Rebind<T[N]> {
+  template <typename U>
+  using As = typename Rebind<T>::As<U>[N];
+  using AsReadonly = typename Rebind<T>::AsReadonly[N];
+};
+
+/**
  * @brief `View` specialization.
  */
 template <typename TData, typename... TArgs>

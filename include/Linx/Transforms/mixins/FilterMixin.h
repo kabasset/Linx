@@ -200,7 +200,7 @@ public:
   template <typename TIn>
   auto lazy(const TIn& in) const
   {
-    auto bbox = box(in.domain()) + m_parent.footprint(); // FIXME + or - ?
+    auto bbox = box(in.domain()) + m_parent.footprint(); // FIXME test
     auto extrapolated = Shift(TIn("extrapolated", bbox.shape()), bbox.start());
     extrapolated.copy_from(Extrapolation(in, m_method)); // TODO optimize
     return m_parent.lazy(Patch(extrapolated, in.domain()));
@@ -348,8 +348,9 @@ public:
 
   auto domain() const
   {
-    auto bbox = box(footprint());
-    return Box(m_in.domain().start() - bbox.start(), m_in.domain().stop() - pad<TIn::n>(bbox.stop() - 1, -1));
+    auto in_box = box(m_in.domain());
+    auto footprint_box = box(footprint());
+    return Box(in_box.start() - footprint_box.start(), in_box.stop() - pad<TIn::n>(footprint_box.stop() - 1, -1));
   }
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
@@ -450,8 +451,9 @@ public:
 
   auto domain() const
   {
-    auto bbox = box(footprint());
-    return Box(m_in.domain().start() - bbox.start(), m_in.domain().stop() - pad<TIn::n>(bbox.stop() - 1, -1));
+    auto in_box = box(m_in.domain());
+    auto footprint_box = box(footprint());
+    return Box(in_box.start() - footprint_box.start(), in_box.stop() - pad<TIn::n>(footprint_box.stop() - 1, -1));
   }
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
