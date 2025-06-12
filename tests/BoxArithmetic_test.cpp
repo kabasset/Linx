@@ -17,10 +17,10 @@ BOOST_AUTO_TEST_CASE(position_position_additive_test)
   Linx::Position<2> delta("delta", {-1, 1});
 
   auto plus = in + delta;
-  BOOST_TEST((plus == Linx::Position<2> {-1, 2})); // FIXME == {-1, 2}
+  BOOST_TEST((plus == Linx::Position<2> {-1, 2}));
 
   auto minus = in - delta;
-  BOOST_TEST((minus == Linx::Position<2> {1, 0})); // FIXME == {1, 0}
+  BOOST_TEST((minus == Linx::Position<2> {1, 0}));
 }
 
 BOOST_AUTO_TEST_CASE(scalar_additive_test)
