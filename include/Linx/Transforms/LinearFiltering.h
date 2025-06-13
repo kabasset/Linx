@@ -161,7 +161,7 @@ template <typename TKernel>
 class Convolution : public WeightedFilterMixin<TKernel, Convolution<TKernel>> {
 public:
 
-  using value_type = const typename TKernel::value_type;
+  using value_type = const typename TKernel::value_type; // FIXME deduce from reduce()
   using element_type = std::remove_cvref_t<value_type>;
 
   Convolution(TKernel kernel) : WeightedFilterMixin<TKernel, Convolution>(LINX_MOVE(kernel)) {}
@@ -177,7 +177,7 @@ public:
 
     Apply(Convolution filter, const TIn& in) : ApplyWeightedFilterMixin<Convolution, TIn, Apply>(LINX_MOVE(filter), in)
     {
-      this->m_weights.reverse(); // FIXME use rbegin() instead?
+      this->m_weights.reverse(); // TODO use rbegin() in reduce instead?
     }
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
@@ -195,12 +195,13 @@ public:
 /**
  * @ingroup filtering
  * @brief Non-isotropic, separable Laplacian filter.
+ * @param s A scale factor
  * 
  * The kernel is a sum of kernels of the form `{s, -2 * s, s}`.
  * For example, by default (`s = 1`), the 2D kernel is:
  * ```
  *  0  1  0
- *  1 -2  1
+ *  1 -4  1
  *  0  1  0
  * ```
  * 
@@ -247,13 +248,13 @@ Shift<Sequence<T, -1>> sampled_gaussian_kernel(const T& sigma, Index radius)
 template <Index I, Index N = I + 1> // FIXME rm N, support non matching ranks in FilterMixin
 auto convolution_along(auto&& kernel)
 {
-  return Convolution(along<I, N>(LINX_FORWARD(kernel)));
+  return Convolution(along<I, N>(on_host(LINX_FORWARD(kernel)))); // FIXME on_host() in WeightedFilterMixin
 }
 
-template <Index I, Index N = I + 1>
+template <Index I, Index N = I + 1> // FIXME rm N, support non matching ranks in FilterMixin
 auto correlation_along(auto&& kernel)
 {
-  return Correlation(along<I, N>(on_host(LINX_FORWARD(kernel))));
+  return Correlation(along<I, N>(on_host(LINX_FORWARD(kernel)))); // FIXME on_host() in WeightedFilterMixin
 }
 
 } // namespace Linx
