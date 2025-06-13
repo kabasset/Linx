@@ -350,7 +350,9 @@ public:
   {
     auto in_box = box(m_in.domain());
     auto footprint_box = box(footprint());
-    return Box(in_box.start() - footprint_box.start(), in_box.stop() - pad<TIn::n>(footprint_box.stop() - 1, -1));
+    return Box(
+        in_box.start() - pad<TIn::n>(footprint_box.start()),
+        in_box.stop() - pad<TIn::n>(footprint_box.stop() - 1));
   }
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
@@ -449,11 +451,13 @@ public:
     return m_filter.footprint();
   }
 
-  auto domain() const
+  auto domain() const // FIXME to FilterMixin::operator()
   {
     auto in_box = box(m_in.domain());
     auto footprint_box = box(footprint());
-    return Box(in_box.start() - footprint_box.start(), in_box.stop() - pad<TIn::n>(footprint_box.stop() - 1, -1));
+    return Box(
+        in_box.start() - pad<TIn::n>(footprint_box.start()),
+        in_box.stop() - pad<TIn::n>(footprint_box.stop() - 1));
   }
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
@@ -470,9 +474,12 @@ public:
 
 protected:
 
+  template <typename T>
+  using Vector = Sequence<T, -1, SequenceContainer<T, -1, execution_space>>;
+
   TFilter m_filter; ///< The filter
-  Sequence<std::ptrdiff_t, -1> m_offsets; ///< The footprint offsets in the input
-  Sequence<element_type, -1> m_weights; ///< The weights in the same order
+  Vector<std::ptrdiff_t> m_offsets; ///< The footprint offsets in the input
+  Vector<element_type> m_weights; ///< The weights in the same order
   decltype(as_readonly(std::declval<TIn>())) m_in; ///< The input
 };
 
