@@ -279,7 +279,7 @@ public:
    * auto subcube = cube[Slice(1, 4)]; // Cube at z = 1..4
    * \endcode
    * 
-   * @see where()
+   * @see `Patch`
    */
   template <typename U, SliceType... Types>
   auto operator[](const Slice<U, Types...>& region) const // not __device__ because of `region & domain()`

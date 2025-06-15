@@ -132,7 +132,7 @@ Linx::Correlation(k).transform(a, c); // Fills c
 
 There are two ways to work on subsets of elements:
 * by slicing some data classes with operator `[]`, which returns a view of type `Sequence` or `Image` depending on the input type;
-* by associating a region to a data class with `where()`, which results in an object of type `Patch`.
+* by associating a region to a data class as an object of type `Patch`.
 
 Slices are created from regions of type either `Slice` or `Box`.
 
@@ -145,7 +145,7 @@ Nevertheless, patches are themselves data containers and can be transformed poin
 auto image = Linx::Image(...):
 auto region = Linx::Box(...);
 auto slice = image[region];
-auto patch = Linx::where(image, region);
+auto patch = Linx::Patch(image, region);
 patch.exp(); // Modifies image elements inside region
 ```
 

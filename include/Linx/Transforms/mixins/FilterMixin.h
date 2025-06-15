@@ -203,7 +203,7 @@ public:
     auto domain = bbox(in.domain()) + m_parent.footprint(); // FIXME test
     auto extrapolated = Shift(TIn("extrapolated", domain.shape()), domain.start());
     extrapolated.copy_from(Extrapolation(in, m_method)); // TODO optimize
-    return m_parent.lazy(Patch(extrapolated, in.domain()));
+    return m_parent.lazy(Patch(Forward(), extrapolated, in.domain()));
   }
 
   template <typename TIn>

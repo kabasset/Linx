@@ -42,8 +42,24 @@ public:
 
   /**
    * @brief Constructor.
+   * 
+   * The patch parent will be `root(in)` and its domain `region & in.domain()`.
+   * This ensures that the patch refers directly to the root data container,
+   * and that the patch domain is completely inside the root data container domain.
+   * 
+   * There is another, `Forward`-tagged constructor, which bypasses those transforms.
    */
-  Patch(const Parent& parent, Domain region) : m_parent(parent), m_domain(LINX_MOVE(region)) {}
+  template <typename UParent, typename UDomain>
+  Patch(const UParent& in, const UDomain& region) : m_parent(root(in)), m_domain(region & in.domain())
+  {}
+
+  /**
+   * @brief Forwarding constructor.
+   * 
+   * The parent and domain are unaltered, which may result in a patch of patch,
+   * and a domain which spans outside of the parent domain.
+   */
+  Patch(Forward, const Parent& parent, Domain domain) : m_parent(parent), m_domain(LINX_MOVE(domain)) {}
 
   /**
    * @brief The parent.
@@ -172,41 +188,20 @@ KOKKOS_INLINE_FUNCTION const auto& root(const auto& in)
   return in;
 }
 
-/**
- * @relatesalso Image
- * @relatesalso Patch
- * @brief Make a patch of an image.
- * 
- * @param in The input container
- * @param domain The patch domain
- * 
- * If the domain is larger than the image domain, then their intersection is used.
- * 
- * @see slice()
- */
-template <typename T, int N, typename TContainer, typename U, SliceType... TSlices>
-auto where(const Image<T, N, TContainer>& in, const Slice<U, TSlices...>& domain)
-{
-  return where(in, bbox(domain & in.domain()));
-}
+namespace Impl {
 
-/**
- * @copydoc where()
- */
-template <typename T, int N, typename TContainer, typename U>
-auto where(const Image<T, N, TContainer>& in, const GBox<U, N>& domain)
-{
-  return Patch<Image<T, N, TContainer>, GBox<U, N>>(in, domain & in.domain());
-}
+template <typename TIn, typename TDomain>
+struct PatchTraits {
+  using Parent = std::remove_cvref_t<decltype(root(std::declval<TIn>()))>;
+  using Domain = std::remove_cvref_t<decltype(std::declval<TDomain>() & std::declval<TIn>().domain())>;
+  using Type = Patch<Parent, Domain>;
+};
 
-/**
- * @copydoc where()
- */
-template <typename TParent, typename TDomain, typename U>
-auto where(const Patch<TParent, TDomain>& in, const GBox<U, TParent::n>& domain)
-{
-  return Patch<TParent, TDomain>(root(in), domain & in.domain());
-}
+} // namespace Impl
+
+template <typename TIn, typename TDomain>
+Patch(const TIn&, const TDomain&)
+    -> Patch<typename Impl::PatchTraits<TIn, TDomain>::Parent, typename Impl::PatchTraits<TIn, TDomain>::Domain>;
 
 template <typename TParent, typename TDomain>
 decltype(auto) as_readonly(const Patch<TParent, TDomain>& in)

@@ -57,6 +57,19 @@ public:
     return out;
   }
 
+  /**
+   * @brief Clamp the line into a bounding box.
+   */
+  template <typename U, int M>
+  GLine& operator&=(const GBox<U, M>& rhs)
+  {
+    // FIXME assert rank() == rhs.rank()?
+    // FIXME handle empty intersection
+    m_start[axis] = std::max<size_type>(m_start[axis], rhs.start(axis));
+    m_stop = std::min<size_type>(m_stop, rhs.stop(axis));
+    return *this;
+  }
+
   KOKKOS_INLINE_FUNCTION GLine& add(auto... values)
   {
     add_impl(forward_as_tuple(values...), std::make_index_sequence<sizeof...(values)>());
@@ -99,7 +112,7 @@ private:
     m_stop -= get<axis>(values);
   }
 
-  value_type m_start;
+  value_type m_start; // FIXME enable shallow copy?
   size_type m_stop;
   size_type m_step;
 };
@@ -109,6 +122,17 @@ private:
  */
 template <typename T, int I, int N>
 using Line = GLine<Index, I, N>;
+
+/**
+ * @relatesalso GLine
+ */
+template <typename T, int I, int N, typename U, int M>
+GLine<T, I, N> operator&(const GLine<T, I, N>& lhs, const GBox<U, M>& rhs)
+{
+  auto out = lhs;
+  out &= rhs;
+  return out;
+}
 
 } // namespace Linx
 

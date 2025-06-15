@@ -32,7 +32,7 @@ In contrast to slices, no assumptions are made on the memory layout of patches, 
 `Patch` is an extremely lightweight class that simply holds a domain and a pointer to the parent data.
 
 ```cpp
-auto patch = Linx::where(image, any_domain);
+auto patch = Linx::Patch(image, any_domain);
 assert(patch.domain() == any_domain);
 assert(patch.parent() == image);
 assert(patch.data() == image.data());
@@ -41,7 +41,7 @@ assert(patch.data() == image.data());
 Still, simple domains like boxes or slices can be used to create patches as well:
 
 ```cpp
-auto patch = Linx::where(image, Linx::Slice(1, 4)()(5));
+auto patch = Linx::Patch(image, Linx::Slice(1, 4)()(5));
 assert(patch.n == 3);
 ```
 
