@@ -206,7 +206,7 @@ Patch(const TIn&, const TDomain&)
 template <typename TParent, typename TDomain>
 decltype(auto) as_readonly(const Patch<TParent, TDomain>& in)
 {
-  return Patch(as_readonly(in.parent()), in.domain());
+  return Patch(Forward(), as_readonly(in.parent()), in.domain());
 }
 
 /**
@@ -215,7 +215,7 @@ decltype(auto) as_readonly(const Patch<TParent, TDomain>& in)
 template <typename TSpace, typename TParent, typename TDomain>
 decltype(auto) on_device(const Patch<TParent, TDomain>& in)
 {
-  return Patch(on_device<TSpace>(in.parent()), in.domain());
+  return Patch(Forward(), on_device<TSpace>(in.parent()), in.domain());
 }
 
 /**
