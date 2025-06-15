@@ -73,7 +73,7 @@ public:
    */
   auto domain() const
   {
-    return box(m_parent.domain()) + offset(); // FIXME rm box() by implementing Slice::operator+
+    return bbox(m_parent.domain()) + offset(); // FIXME rm bbox() by implementing Slice::operator+
   }
 
   /**

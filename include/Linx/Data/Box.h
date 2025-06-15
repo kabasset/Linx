@@ -545,10 +545,10 @@ auto box_impl(const TSlice& slice, std::index_sequence<Is...>)
  * @relatesalso GBox
  * @brief Get the bounding box of a box.
  * 
- * This function is provided for compatibility, it merely forwards its input.
+ * This function is a no-op, it merely forwards its input.
  */
 template <typename T, int N>
-const GBox<T, N>& box(const GBox<T, N>& in)
+const GBox<T, N>& bbox(const GBox<T, N>& in)
 {
   return in;
 }
@@ -560,7 +560,7 @@ const GBox<T, N>& box(const GBox<T, N>& in)
  * @warning Unbounded slices are not supported, and singleton slices must be integral.
  */
 template <typename T, SliceType... Types>
-GBox<T, sizeof...(Types)> box(const Slice<T, Types...>& slice)
+GBox<T, sizeof...(Types)> bbox(const Slice<T, Types...>& slice)
 {
   static constexpr int n = sizeof...(Types);
   return Impl::box_impl(slice, std::make_index_sequence<n>());

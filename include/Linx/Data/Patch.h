@@ -187,7 +187,7 @@ KOKKOS_INLINE_FUNCTION const auto& root(const auto& in)
 template <typename T, int N, typename TContainer, typename U, SliceType... TSlices>
 auto where(const Image<T, N, TContainer>& in, const Slice<U, TSlices...>& domain)
 {
-  return where(in, box(domain & in.domain()));
+  return where(in, bbox(domain & in.domain()));
 }
 
 /**

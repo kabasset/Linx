@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE(box_test)
   Linx::Index start = 3;
   Linx::Index stop = 14;
   auto slice = Linx::Slice(index)(start, stop);
-  auto box = Linx::box(slice);
+  auto box = Linx::bbox(slice);
   BOOST_TEST(box.start(0) == index);
   BOOST_TEST(box.start(1) == start);
   BOOST_TEST(box.stop(0) == index + 1);
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(clamp_test)
 {
   auto slice = Linx::Slice(10)()(3, 14);
   auto box = Linx::Box({1, 2, 3, 4}, {11, 12, 13, 14});
-  auto clamped = Linx::box(slice & box);
+  auto clamped = Linx::bbox(slice & box);
 
   BOOST_TEST(clamped.n == 3);
   BOOST_TEST(clamped.start(0) == 10);

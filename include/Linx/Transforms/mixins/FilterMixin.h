@@ -200,8 +200,8 @@ public:
   template <typename TIn>
   auto lazy(const TIn& in) const
   {
-    auto bbox = box(in.domain()) + m_parent.footprint(); // FIXME test
-    auto extrapolated = Shift(TIn("extrapolated", bbox.shape()), bbox.start());
+    auto domain = bbox(in.domain()) + m_parent.footprint(); // FIXME test
+    auto extrapolated = Shift(TIn("extrapolated", domain.shape()), domain.start());
     extrapolated.copy_from(Extrapolation(in, m_method)); // TODO optimize
     return m_parent.lazy(Patch(extrapolated, in.domain()));
   }
@@ -348,8 +348,8 @@ public:
 
   auto domain() const
   {
-    auto in_box = box(m_in.domain());
-    auto footprint_box = box(footprint());
+    auto in_box = bbox(m_in.domain());
+    auto footprint_box = bbox(footprint());
     return Box(
         in_box.start() - pad<TIn::n>(footprint_box.start()),
         in_box.stop() - pad<TIn::n>(footprint_box.stop() - 1));
@@ -453,8 +453,8 @@ public:
 
   auto domain() const // FIXME to FilterMixin::operator()
   {
-    auto in_box = box(m_in.domain());
-    auto footprint_box = box(footprint());
+    auto in_box = bbox(m_in.domain());
+    auto footprint_box = bbox(footprint());
     return Box(
         in_box.start() - pad<TIn::n>(footprint_box.start()),
         in_box.stop() - pad<TIn::n>(footprint_box.stop() - 1));

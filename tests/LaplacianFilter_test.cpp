@@ -14,7 +14,7 @@ LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 BOOST_AUTO_TEST_CASE(box_test)
 {
   const auto filter = Linx::separable_laplacian<0, 1>();
-  const auto box = Linx::box(filter.footprint());
+  const auto box = Linx::bbox(filter.footprint());
   BOOST_TEST((box == Linx::Box<2>({-1, -1}, {2, 2})));
 }
 

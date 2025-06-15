@@ -333,7 +333,7 @@ KOKKOS_INLINE_FUNCTION decltype(auto) on_host(const Map<T, N>& in)
  * @brief Get the bounding box of a sequence of positions.
  */
 template <int N>
-auto box(const Path<N>& in)
+auto bbox(const Path<N>& in)
 {
   auto it = in.begin();
   auto out = Box(*it, *it);
