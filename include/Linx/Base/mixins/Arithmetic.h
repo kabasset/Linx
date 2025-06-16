@@ -15,12 +15,14 @@
 namespace Linx {
 
 #define LINX_SCALAR_OPERATOR_INPLACE(op, Func) \
+  /** @brief Apply operator `##op##`. */ \
   const TDerived& operator op(const T & rhs) const \
   { \
     return LINX_CRTP_CONST_DERIVED.apply(compose_label(#op, LINX_CRTP_CONST_DERIVED, rhs), Func(rhs)); \
   }
 
 #define LINX_SCALAR_OPERATOR_NEWINSTANCE(op, op_in) \
+  /** @ingroup pixelwise @brief Apply operator `##op##` (new instance). */ \
   friend TDerived operator op(const TDerived& lhs, const T& rhs) \
   { \
     TDerived out = lhs.copy_as(compose_label(#op, lhs, rhs)); \
@@ -33,6 +35,7 @@ namespace Linx {
   LINX_SCALAR_OPERATOR_NEWINSTANCE(op_new, op_in)
 
 #define LINX_VECTOR_OPERATOR_INPLACE(op, Func) \
+  /** @brief Apply operator `##op##`. */ \
   template <typename U, typename UDerived> \
   const TDerived& operator op(const CopyArithmeticMixin<U, UDerived>& rhs) const \
   { \
@@ -42,6 +45,7 @@ namespace Linx {
   }
 
 #define LINX_VECTOR_OPERATOR_NEWINSTANCE(op, op_in) \
+  /** @ingroup pixelwise @brief Apply operator `##op##` (new instance). */ \
   template <typename U, typename UDerived> \
   friend TDerived operator op(const TDerived& lhs, const CopyArithmeticMixin<U, UDerived>& rhs) \
   { \
@@ -61,8 +65,12 @@ namespace Linx {
 
 /**
  * @ingroup pixelwise
- * @brief Mixin to provide arithmetics operators to a container.
+ * @brief Mixin which provides arithmetic operators to a derived container class.
  * @tparam TDerived The container which inherits this class
+ * 
+ * @see `BooleanArithmeticMixin`
+ * @see `VectorArithmeticMixin`
+ * @see `EuclidArithmeticMixin`
  */
 template <typename T, typename TDerived>
 struct CopyArithmeticMixin {
@@ -81,23 +89,29 @@ struct CopyArithmeticMixin {
    */
   TDerived operator+() const
   {
-    // TODO if container use_count() <= 1, return this to optimize out temporary objects
     return copy_as(compose_label("copy", LINX_CRTP_CONST_DERIVED));
   }
 };
 
 /**
  * @ingroup pixelwise
- * @brief Boolean arithmetic mixin.
+ * @brief @copybrief CopyArithmeticMixin
  * 
- * Implements boolean arithmetic operators:
- * - V |= U, W = V || U, V &= U, W = V && U, V = !U;
- * - V |= a, W = V || a, V &= a, W = V && a.
+ * Implements boolean arithmetic operators
+ * (uppercase letters are for arrays, lowercase letters are for scalars):
+ * - `B = not A`;
+ * - `A |= b`, `C = A || b`;
+ * - `A |= B`, `C = A || B`;
+ * - `A &= b`, `C = A && b`;
+ * - `A &= B`, `C = A && B`.
+ * 
+ * @see `VectorArithmeticMixin`
+ * @see `EuclidArithmeticMixin`
  */
 template <typename T, typename TDerived>
 struct BooleanArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
   /**
-   * @brief Compute the opposite.
+   * @brief Apply operator `not`.
    */
   TDerived operator not() const
   {
@@ -112,18 +126,28 @@ struct BooleanArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
 
 /**
  * @ingroup pixelwise
- * @brief Vector space arithmetic mixin.
+ * @brief @copybrief CopyArithmeticMixin
  * 
  * Implements vector space arithmetic operators
- * (uppercase letters are for vectors, lowercase letters are for scalars):
- * - Vector-additive: V += U, W = V + U, V -= U, W = V - U;
- * - Scalar-additive: V += a, V = U + a, V = a + U, V -= a, V = U + a, V = a - U, V++, ++V, V--, --V;
- * - Scalar-multiplicative: V *= a, V = U * a, V = a * U, V /= a, V = U / a.
+ * (uppercase letters are for arrays, lowercase letters are for scalars):
+ * - `++A`, `B = A++`;
+ * - `A += b`, `C = A + b`;
+ * - `A += B`, `C = A + B`;
+ * - `B = -A`;
+ * - `--A`, `B = A--`;
+ * - `A -= b`, `C = A - b`;
+ * - `A -= B`, `C = A - B`;
+ * - `A *= b`, `C = A * b`;
+ * - `A /= b`, `C = A / b`;
+ * - `A %= b`, `C = A % b`.
+ * 
+ * @see `BooleanArithmeticMixin`
+ * @see `EuclidArithmeticMixin`
  */
 template <typename T, typename TDerived>
 struct VectorArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
   /**
-   * @brief Compute the opposite.
+   * @brief Apply operator `-`.
    */
   TDerived operator-() const
   {
@@ -131,9 +155,6 @@ struct VectorArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
     res.apply("-", Negate());
     return res;
   }
-
-  /// @{
-  /// @group_modifiers
 
   LINX_OPERATOR(+=, +, Add)
 
@@ -146,7 +167,7 @@ struct VectorArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
   LINX_SCALAR_OPERATOR(%=, %, Modulus)
 
   /**
-   * @brief ++V
+   * @brief Apply operator `++`.
    */
   const TDerived& operator++() const
   {
@@ -154,29 +175,61 @@ struct VectorArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
   }
 
   /**
-   * @brief --V
+   * @brief Apply operator `++`.
+   */
+  TDerived operator++(int) const
+  {
+    auto out = +LINX_CRTP_CONST_DERIVED;
+    ++out;
+    return out;
+  }
+
+  /**
+   * @brief Apply operator `--`.
    */
   const TDerived& operator--() const
   {
     return LINX_CRTP_CONST_DERIVED.apply("--", Subtract(1));
   }
 
-  /// @}
+  /**
+   * @brief Apply operator `--`.
+   */
+  TDerived operator--(int) const
+  {
+    auto out = +LINX_CRTP_CONST_DERIVED;
+    --out;
+    return out;
+  }
 };
 
 /**
  * @ingroup pixelwise
- * @brief Euclidean ring arithmetic mixin.
+ * @brief @copybrief CopyArithmeticMixin
  * 
- * Adds the following operators to `VectorArithmeticMixin`:
- * - Vector-multiplicative: V *= U, W = U * V, V /= U, W = V / U;
- * - Scalar-modable: V %= a, V = U % a;
- * - Vector-modable: V %= U, W = V % U;
+ * Implements Euclidean ring arithmetic operators
+ * (uppercase letters are for arrays, lowercase letters are for scalars):
+ * - `++A`, `B = A++`;
+ * - `A += b`, `C = A + b`;
+ * - `A += B`, `C = A + B`;
+ * - `B = -A`;
+ * - `--A`, `B = A--`;
+ * - `A -= b`, `C = A - b`;
+ * - `A -= B`, `C = A - B`;
+ * - `A *= b`, `C = A * b`;
+ * - `A *= B`, `C = A * B`;
+ * - `A /= b`, `C = A / b`;
+ * - `A /= B`, `C = A / B`;
+ * - `A %= b`, `C = A % b`;
+ * - `A %= B`, `C = A % B`.
+ * 
+ * @see `BooleanArithmeticMixin`
+ * @see `VectorArithmeticMixin`
  */
 template <typename T, typename TDerived>
 struct EuclidArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
   /**
-   * @brief Compute the opposite.
+   * @brief Apply operator `-`.
    */
   TDerived operator-() const
   {
@@ -184,9 +237,6 @@ struct EuclidArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
     res.apply("-", Negate());
     return res;
   }
-
-  /// @{
-  /// @group_modifiers
 
   LINX_OPERATOR(+=, +, Add)
 
@@ -199,7 +249,7 @@ struct EuclidArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
   LINX_OPERATOR(%=, %, Modulus)
 
   /**
-   * @brief ++V
+   * @brief Apply operator `++`.
    */
   const TDerived& operator++() const
   {
@@ -207,17 +257,33 @@ struct EuclidArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
   }
 
   /**
-   * @brief --V
+   * @brief Apply operator `++`.
+   */
+  TDerived operator++(int) const
+  {
+    auto out = +LINX_CRTP_CONST_DERIVED;
+    ++out;
+    return out;
+  }
+
+  /**
+   * @brief Apply operator `--`.
    */
   const TDerived& operator--() const
   {
     return LINX_CRTP_CONST_DERIVED.apply("--", Subtract(1));
   }
 
-  /// @}
+  /**
+   * @brief Apply operator `--`.
+   */
+  TDerived operator--(int) const
+  {
+    auto out = +LINX_CRTP_CONST_DERIVED;
+    --out;
+    return out;
+  }
 };
-
-/// @endcond
 
 #undef LINX_SCALAR_OPERATOR_INPLACE
 #undef LINX_SCALAR_OPERATOR_NEWINSTANCE

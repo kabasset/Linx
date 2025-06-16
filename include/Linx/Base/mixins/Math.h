@@ -14,16 +14,6 @@
 namespace Linx {
 
 /**
- * @brief &pi;
- */
-template <typename T>
-T pi()
-{
-  static const T out = std::acos(T(-1)); // FIXME Use Kokkos' or std pi
-  return out;
-}
-
-/**
  * @ingroup pixelwise
  * @ingroup mixins
  * @brief Mixin to provide mathematical operations and transforms to a container.
@@ -36,14 +26,14 @@ T pi()
 template <typename T, typename TDerived>
 struct MathFunctionsMixin {
 #define LINX_MATH_UNARY_INPLACE(function) \
-  /** @brief Apply std::##function##(). */ \
+  /** @brief Apply `std::##function##()` in place. */ \
   const TDerived& function() const \
   { \
     return LINX_CRTP_CONST_DERIVED.apply(#function, KOKKOS_LAMBDA(const T& e) { return std::function(e); }); \
   }
 
 #define LINX_MATH_BINARY_INPLACE(function) \
-  /** @brief Apply std::##function##(). */ \
+  /** @brief Apply `std::##function##()` in place. */ \
   const TDerived& function(const TDerived& other) const \
   { \
     return LINX_CRTP_CONST_DERIVED \
@@ -51,7 +41,7 @@ struct MathFunctionsMixin {
   }
 
 #define LINX_MATH_BINARY_SCALAR_INPLACE(function) \
-  /** @brief Apply std::##function##(). */ \
+  /** @brief Apply `std::##function##()` in place. */ \
   const TDerived& function(const T& other) const \
   { \
     return LINX_CRTP_CONST_DERIVED.apply(#function, KOKKOS_LAMBDA(const T& e) { return std::function(e, other); }); \
@@ -112,7 +102,7 @@ struct MathFunctionsMixin {
 };
 
 #define LINX_MATH_UNARY_NEWINSTANCE(function) \
-  /** @relatesalso MathFunctionsMixin @brief Apply std::##function##() (new instance). */ \
+  /** @relatesalso MathFunctionsMixin @brief Apply `std::##function##()` (new instance). */ \
   template <typename T, typename TDerived> \
   TDerived function(const MathFunctionsMixin<T, TDerived>& in) \
   { \
@@ -123,7 +113,7 @@ struct MathFunctionsMixin {
   }
 
 #define LINX_MATH_BINARY_NEWINSTANCE(function) \
-  /** @relatesalso MathFunctionsMixin @brief Apply std::##function##() (new instance). */ \
+  /** @relatesalso MathFunctionsMixin @brief Apply `std::##function##()` (new instance). */ \
   template <typename T, typename TDerived, typename TOther> \
   TDerived function(const MathFunctionsMixin<T, TDerived>& in, const TOther& other) \
   { \
