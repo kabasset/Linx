@@ -62,7 +62,7 @@ public:
   /**
    * @brief The offset.
    */
-  Position<n> offset() const
+  Position<n> vector() const
   {
     return Position<n>("offset", m_offset.data(), m_offset.data() + m_offset.size());
     // FIXME implement Sequence::rank() -> 1 and replace m_offset.size() with m_parent.rank()
@@ -73,7 +73,7 @@ public:
    */
   auto domain() const
   {
-    return bbox(m_parent.domain()) + offset(); // FIXME rm bbox() by implementing Slice::operator+
+    return bbox(m_parent.domain()) + vector(); // FIXME rm bbox() by implementing Slice::operator+
   }
 
   /**
@@ -92,16 +92,9 @@ public:
     return m_parent.size();
   }
 
-  /**
-   * @brief Address offset between the origin element and the element at given indices.
-   * 
-   * By definition, `shift.distance_from_origin(0, 0, ...)` is 0,
-   * while `shift.parent().distance_from_origin(0, 0, ...)` is generally not 0,
-   * since the origin is shifted.
-   */
-  KOKKOS_INLINE_FUNCTION difference_type distance_from_origin(std::integral auto... indices) const
+  KOKKOS_INLINE_FUNCTION auto stride(std::integral auto i) const
   {
-    return distance_impl(forward_as_tuple(indices...), std::make_index_sequence<sizeof...(indices)>());
+    return m_parent.stride(i);
   }
 
   /**
@@ -113,15 +106,6 @@ public:
   }
 
 private:
-
-  /**
-   * @brief Helper method to unroll indices.
-   */
-  template <std::size_t... Is>
-  KOKKOS_INLINE_FUNCTION difference_type distance_impl(const auto& indices, std::index_sequence<Is...>) const
-  {
-    return ((get<Is>(indices) * m_parent.stride(Is)) + ...);
-  }
 
   /**
    * @brief Helper method to unroll indices.
@@ -148,7 +132,7 @@ struct IsOffset<Shift<T>> : std::true_type {}; // FIXME rename as Offset?
 // FIXME IsOffset<Patch<T, Box/Slice>> : std::true_type {};
 
 template <typename T>
-constexpr bool is_offset()
+constexpr bool is_offset() // FIXME is_shifted()
 {
   return IsOffset<T>::value;
 }
@@ -168,13 +152,13 @@ KOKKOS_INLINE_FUNCTION const auto& root(const AnyShift auto& shift)
 template <typename TParent>
 auto as_readonly(const Shift<TParent>& in)
 {
-  return Shift(as_readonly(in.parent()), in.offset());
+  return Shift(as_readonly(in.parent()), in.vector());
 }
 
 template <typename TSpace, typename TParent>
 decltype(auto) on_device(const Shift<TParent>& in)
 {
-  return Shift(on_device<TSpace>(in.parent()), in.offset());
+  return Shift(on_device<TSpace>(in.parent()), in.vector());
 }
 
 template <typename TParent>

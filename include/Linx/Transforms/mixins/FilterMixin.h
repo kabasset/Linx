@@ -5,6 +5,7 @@
 #ifndef LINX_TRANSFORMS_FILTERMIXIN_H
 #define LINX_TRANSFORMS_FILTERMIXIN_H
 
+#include "Linx/Base/mixins/Strided.h"
 #include "Linx/Data/Patch.h"
 #include "Linx/Data/Sequence.h"
 #include "Linx/Transforms/Resampling.h"
@@ -15,7 +16,7 @@
 namespace Linx {
 
 template <typename T>
-class DistanceBasedRange {
+class OffsetBasedRange {
 public:
 
   using iterator_category = std::random_access_iterator_tag;
@@ -30,21 +31,21 @@ public:
    * @param data The reference data pointer
    * @param offsets The sequence of address offsets
    */
-  KOKKOS_INLINE_FUNCTION explicit DistanceBasedRange(T* data, const auto& offsets) :
+  KOKKOS_INLINE_FUNCTION explicit OffsetBasedRange(T* data, const auto& offsets) :
       m_data(data),
       m_begin(offsets.data()),
       m_end(m_begin + offsets.size()),
       m_it(m_begin)
   {}
 
-  KOKKOS_INLINE_FUNCTION DistanceBasedRange(const DistanceBasedRange& rhs) :
+  KOKKOS_INLINE_FUNCTION OffsetBasedRange(const OffsetBasedRange& rhs) :
       m_data(rhs.m_data),
       m_begin(rhs.m_begin),
       m_end(rhs.m_end),
       m_it(rhs.m_it)
   {}
 
-  KOKKOS_INLINE_FUNCTION DistanceBasedRange& operator=(const DistanceBasedRange& rhs)
+  KOKKOS_INLINE_FUNCTION OffsetBasedRange& operator=(const OffsetBasedRange& rhs)
   {
     m_data = rhs.m_data;
     m_begin = rhs.m_begin;
@@ -59,14 +60,14 @@ public:
     m_it = m_begin;
   }
 
-  KOKKOS_INLINE_FUNCTION DistanceBasedRange begin() const
+  KOKKOS_INLINE_FUNCTION OffsetBasedRange begin() const
   {
     auto out = *this;
     out.m_it = m_begin;
     return out;
   }
 
-  KOKKOS_INLINE_FUNCTION DistanceBasedRange end() const
+  KOKKOS_INLINE_FUNCTION OffsetBasedRange end() const
   {
     auto out = *this;
     out.m_it = m_end;
@@ -98,69 +99,69 @@ public:
     return m_data + *m_it;
   }
 
-  KOKKOS_INLINE_FUNCTION DistanceBasedRange& operator++()
+  KOKKOS_INLINE_FUNCTION OffsetBasedRange& operator++()
   {
     ++m_it;
     return *this;
   }
 
-  KOKKOS_INLINE_FUNCTION DistanceBasedRange operator++(int)
+  KOKKOS_INLINE_FUNCTION OffsetBasedRange operator++(int)
   {
     auto out = *this;
     ++(*this);
     return out;
   }
 
-  KOKKOS_INLINE_FUNCTION DistanceBasedRange& operator+=(int i)
+  KOKKOS_INLINE_FUNCTION OffsetBasedRange& operator+=(int i)
   {
     m_it += i;
     return *this;
   }
 
-  KOKKOS_INLINE_FUNCTION DistanceBasedRange operator+(int i) const
+  KOKKOS_INLINE_FUNCTION OffsetBasedRange operator+(int i) const
   {
     auto out = *this;
     out.m_it += i;
     return out;
   }
 
-  KOKKOS_INLINE_FUNCTION DistanceBasedRange& operator--()
+  KOKKOS_INLINE_FUNCTION OffsetBasedRange& operator--()
   {
     --m_it;
     return *this;
   }
 
-  KOKKOS_INLINE_FUNCTION DistanceBasedRange operator--(int)
+  KOKKOS_INLINE_FUNCTION OffsetBasedRange operator--(int)
   {
     auto out = *this;
     --(*this);
     return out;
   }
 
-  KOKKOS_INLINE_FUNCTION DistanceBasedRange& operator-=(int i)
+  KOKKOS_INLINE_FUNCTION OffsetBasedRange& operator-=(int i)
   {
     m_it -= i;
     return *this;
   }
 
-  KOKKOS_INLINE_FUNCTION DistanceBasedRange operator-(int i) const
+  KOKKOS_INLINE_FUNCTION OffsetBasedRange operator-(int i) const
   {
     auto out = *this;
     out.m_it -= i;
     return out;
   }
 
-  KOKKOS_INLINE_FUNCTION difference_type operator-(const DistanceBasedRange& rhs) const
+  KOKKOS_INLINE_FUNCTION difference_type operator-(const OffsetBasedRange& rhs) const
   {
     return m_it - rhs.m_it;
   }
 
-  KOKKOS_INLINE_FUNCTION bool operator==(const DistanceBasedRange& rhs) const
+  KOKKOS_INLINE_FUNCTION bool operator==(const OffsetBasedRange& rhs) const
   {
     return m_it == rhs.m_it;
   }
 
-  KOKKOS_INLINE_FUNCTION bool operator!=(const DistanceBasedRange& rhs) const
+  KOKKOS_INLINE_FUNCTION bool operator!=(const OffsetBasedRange& rhs) const
   {
     return m_it != rhs.m_it;
   }
@@ -330,7 +331,7 @@ public:
     const auto& offsets_on_host = on_host(m_offsets);
     auto it = offsets_on_host.begin();
     for_each<Kokkos::Serial>("m_offsets", footprint(), [&](std::integral auto... is) {
-      *it = m_in.distance_from_origin(is...);
+      *it = offset_from_origin(m_in, is...);
       ++it;
     });
     Kokkos::deep_copy(m_offsets.container(), offsets_on_host.container());
@@ -357,7 +358,7 @@ public:
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
   {
-    return LINX_CRTP_CONST_DERIVED.reduce(DistanceBasedRange(&this->m_in(is...), m_offsets)); // FIXME pool of patches?
+    return LINX_CRTP_CONST_DERIVED.reduce(OffsetBasedRange(&this->m_in(is...), m_offsets)); // FIXME pool of patches?
   }
 
   template <typename TOut>
@@ -432,7 +433,7 @@ public:
     auto oit = offsets_on_host.begin();
     auto wit = weights_on_host.begin();
     for_each<Kokkos::Serial>("compute offsets", m_filter.footprint(), [&](std::integral auto... is) {
-      *oit = m_in.distance_from_origin(is...);
+      *oit = offset_from_origin(m_in, is...);
       *wit = kernel_on_host(is...);
       ++oit;
       ++wit;
@@ -462,7 +463,7 @@ public:
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
   {
-    return LINX_CRTP_CONST_DERIVED.reduce(DistanceBasedRange(&m_in(is...), m_offsets));
+    return LINX_CRTP_CONST_DERIVED.reduce(OffsetBasedRange(&m_in(is...), m_offsets));
   }
 
   template <typename TOut>

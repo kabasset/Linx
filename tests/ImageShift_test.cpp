@@ -3,6 +3,7 @@
 
 #define BOOST_TEST_MODULE ImageShiftTest
 
+#include "Linx/Base/mixins/Strided.h"
 #include "Linx/Data/Image.h"
 #include "Linx/Run/ProgramContext.h"
 #include "Linx/Transforms/Shift.h"
@@ -13,10 +14,10 @@ LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 BOOST_AUTO_TEST_CASE(positive_offset_test)
 {
-  auto in = Linx::Image<int, 2>("in", 4, 3).fill_with_distance_from_data();
+  auto in = Linx::Image<int, 2>("in", 4, 3).fill_with_offsets_from_data();
   auto shift = Linx::Shift(in, 2, 1);
-  BOOST_TEST((shift.offset() == Linx::Position<2>({2, 1}))); // FIXME <2> should be deduced
-  BOOST_TEST((shift.domain() == in.domain() + shift.offset()));
+  BOOST_TEST((shift.vector() == Linx::Position<2>({2, 1}))); // FIXME <2> should be deduced
+  BOOST_TEST((shift.domain() == in.domain() + shift.vector()));
 
   auto test = Linx::Image<int, 2>("test", in.shape());
   Linx::for_each(
@@ -26,15 +27,15 @@ BOOST_AUTO_TEST_CASE(positive_offset_test)
   BOOST_TEST(Linx::norm<0>(test) == 0);
 }
 
-BOOST_AUTO_TEST_CASE(negative_offset_distance_test)
+BOOST_AUTO_TEST_CASE(negative_shift_offset_test)
 {
-  auto in = Linx::Position<4>("in", 4).fill_with_distance_from_data();
+  auto in = Linx::Position<4>("in", 4).fill_with_offsets_from_data();
   auto shift = Linx::Shift(in, -2); // FIXME domain should be a Slice
-  BOOST_TEST(shift.distance_from_origin(0) == 0);
+  BOOST_TEST(Linx::offset_from_origin(shift, 0) == 0);
   const auto offset = &shift(0) - &in(0);
   BOOST_TEST(offset == 2);
   for (int i = shift.domain().start()[0]; i < shift.domain().stop()[0]; ++i) {
-    BOOST_TEST(shift.distance_from_origin(i) == i);
+    BOOST_TEST(Linx::offset_from_origin(shift, i) == i);
   };
 }
 

@@ -223,14 +223,6 @@ public:
   }
 
   /**
-   * @brief Address offset between the origin element (with indices 0) and the element at given indices.
-   */
-  KOKKOS_INLINE_FUNCTION difference_type distance_from_origin(std::integral auto... indices) const
-  {
-    return distance_impl(forward_as_tuple(indices...), std::make_index_sequence<sizeof...(indices)>());
-  }
-
-  /**
    * @brief Reference to the element at given indices.
    */
   KOKKOS_INLINE_FUNCTION reference operator()(std::integral auto... indices) const
@@ -314,15 +306,6 @@ private:
   Image(Wrap<U*> data, const TShape& shape, std::index_sequence<Is...>) :
       Image(data, get_or<Is>(shape, KOKKOS_INVALID_INDEX)...)
   {}
-
-  /**
-   * @brief Helper method to unroll indices.
-   */
-  template <std::size_t... Is>
-  KOKKOS_INLINE_FUNCTION difference_type distance_impl(const auto& indices, std::index_sequence<Is...>) const
-  {
-    return ((get<Is>(indices) * m_container.stride(Is)) + ...);
-  }
 
   /**
    * @brief Helper accessor to unroll position.

@@ -93,6 +93,11 @@ public:
     return domain().size();
   }
 
+  KOKKOS_INLINE_FUNCTION auto stride(std::integral auto i) const
+  {
+    return m_parent.stride(i);
+  }
+
   /**
    * @brief Forward to parent's `operator[]`.
    */
@@ -118,11 +123,6 @@ public:
   reference local(auto&&... args) const // FIXME as KOKKOS_INLINE_FUNCTION
   {
     return m_parent[m_domain(LINX_FORWARD(args)...)];
-  }
-
-  KOKKOS_INLINE_FUNCTION auto distance_from_origin(std::integral auto... is) const
-  {
-    return m_parent.distance_from_origin(is...);
   }
 
   /**

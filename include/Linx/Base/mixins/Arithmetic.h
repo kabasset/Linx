@@ -15,14 +15,14 @@
 namespace Linx {
 
 #define LINX_SCALAR_OPERATOR_INPLACE(op, Func) \
-  /** @brief Apply operator `##op##`. */ \
+  /** @brief Apply operator `op`. */ \
   const TDerived& operator op(const T & rhs) const \
   { \
     return LINX_CRTP_CONST_DERIVED.apply(compose_label(#op, LINX_CRTP_CONST_DERIVED, rhs), Func(rhs)); \
   }
 
 #define LINX_SCALAR_OPERATOR_NEWINSTANCE(op, op_in) \
-  /** @ingroup pixelwise @brief Apply operator `##op##` (new instance). */ \
+  /** @brief Apply operator `op` (new instance). */ \
   friend TDerived operator op(const TDerived& lhs, const T& rhs) \
   { \
     TDerived out = lhs.copy_as(compose_label(#op, lhs, rhs)); \
@@ -35,7 +35,7 @@ namespace Linx {
   LINX_SCALAR_OPERATOR_NEWINSTANCE(op_new, op_in)
 
 #define LINX_VECTOR_OPERATOR_INPLACE(op, Func) \
-  /** @brief Apply operator `##op##`. */ \
+  /** @brief Apply operator `op`. */ \
   template <typename U, typename UDerived> \
   const TDerived& operator op(const CopyArithmeticMixin<U, UDerived>& rhs) const \
   { \
@@ -45,7 +45,7 @@ namespace Linx {
   }
 
 #define LINX_VECTOR_OPERATOR_NEWINSTANCE(op, op_in) \
-  /** @ingroup pixelwise @brief Apply operator `##op##` (new instance). */ \
+  /** @brief Apply operator `op` (new instance). */ \
   template <typename U, typename UDerived> \
   friend TDerived operator op(const TDerived& lhs, const CopyArithmeticMixin<U, UDerived>& rhs) \
   { \

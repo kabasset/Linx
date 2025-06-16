@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(copy_test)
   const int height = 3;
   using Right = Linx::Image<int, 2, Linx::ImageContainer<int, 2, Kokkos::LayoutRight>>;
   using Left = Linx::Image<int, 2, Linx::ImageContainer<int, 2, Kokkos::LayoutLeft>>;
-  auto right = Right("right", width, height).fill_with_distance_from_data();
+  auto right = Right("right", width, height).fill_with_offsets_from_data();
   auto left = Left("left", width, height).copy_from(right);
   Kokkos::fence();
 

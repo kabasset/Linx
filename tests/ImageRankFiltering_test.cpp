@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE(min_test)
 {
   const int width = 16;
   const int height = 9;
-  const auto in = Linx::Image<int, 2>("input", width, height).fill_with_distance_from_data();
+  const auto in = Linx::Image<int, 2>("input", width, height).fill_with_offsets_from_data();
 
   const int start = -1;
   const int stop = 2;
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(max_test)
 {
   const int width = 16;
   const int height = 9;
-  const auto in = Linx::Image<int, 2>("input", width, height).fill_with_distance_from_data();
+  const auto in = Linx::Image<int, 2>("input", width, height).fill_with_offsets_from_data();
 
   const int start = -1;
   const int stop = 2;
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(median_test)
 {
   const int width = 16;
   const int height = 9;
-  const auto in = Linx::Image<int, 2>("input", width, height).fill_with_distance_from_data();
+  const auto in = Linx::Image<int, 2>("input", width, height).fill_with_offsets_from_data();
 
   const int radius = 1;
   const auto strel = Linx::Box<2>({-radius, -radius}, {radius + 1, radius + 1});

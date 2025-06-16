@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(sum_min_max_test)
 
 void test_norm(const auto& in)
 {
-  in.fill_with_distance_from_data();
+  in.fill_with_offsets_from_data();
 
   std::vector<int> expected(3); // FIXME map_reduce to view
 

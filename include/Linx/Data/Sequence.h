@@ -212,14 +212,6 @@ public:
   }
 
   /**
-   * @brief The distance from the origin to the i-th data is always i.
-   */
-  KOKKOS_INLINE_FUNCTION auto distance_from_origin(std::integral auto i) const
-  {
-    return i;
-  }
-
-  /**
    * @brief Underlying container.
    */
   KOKKOS_INLINE_FUNCTION const Container& container() const
