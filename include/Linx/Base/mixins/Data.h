@@ -90,7 +90,11 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   KOKKOS_INLINE_FUNCTION auto size() const
   {
-    return LINX_CRTP_CONST_DERIVED.container().size();
+    if constexpr (TDerived::n == 0) {
+      return std::size_t(0);
+    } else {
+      return LINX_CRTP_CONST_DERIVED.container().size();
+    }
   }
 
   /**
@@ -106,7 +110,11 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   KOKKOS_INLINE_FUNCTION T* data() const
   {
-    return LINX_CRTP_CONST_DERIVED.container().data();
+    if constexpr (TDerived::n == 0) {
+      return nullptr;
+    } else {
+      return LINX_CRTP_CONST_DERIVED.container().data();
+    }
   }
 
   /**

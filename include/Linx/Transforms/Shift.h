@@ -60,7 +60,7 @@ public:
   }
 
   /**
-   * @brief The offset.
+   * @brief The offset vector.
    */
   Position<n> vector() const
   {
