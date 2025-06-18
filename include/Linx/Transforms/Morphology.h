@@ -30,12 +30,12 @@ public:
   }
 
   template <typename TIn>
-  class Apply : public ApplySpatialFilterMixin<Erosion, TIn, Apply<TIn>> {
+  class Lazy : public LazySpatialFilterMixin<Erosion, TIn, Lazy<TIn>> {
   public:
 
     using value_type = bool;
 
-    using ApplySpatialFilterMixin<Erosion, TIn, Apply>::ApplySpatialFilterMixin;
+    using LazySpatialFilterMixin<Erosion, TIn, Lazy>::LazySpatialFilterMixin;
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
@@ -65,12 +65,12 @@ public:
   }
 
   template <typename TIn>
-  class Apply : public ApplySpatialFilterMixin<Dilation, TIn, Apply<TIn>> {
+  class Lazy : public LazySpatialFilterMixin<Dilation, TIn, Lazy<TIn>> {
   public:
 
     using value_type = bool;
 
-    using ApplySpatialFilterMixin<Dilation, TIn, Apply>::ApplySpatialFilterMixin;
+    using LazySpatialFilterMixin<Dilation, TIn, Lazy>::LazySpatialFilterMixin;
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {

@@ -31,13 +31,13 @@ public:
   }
 
   template <typename TIn>
-  class Apply : public ApplySpatialFilterMixin<SumFilter, TIn, Apply<TIn>> {
+  class Lazy : public LazySpatialFilterMixin<SumFilter, TIn, Lazy<TIn>> {
   public:
 
     using value_type = const typename TIn::value_type;
     using element_type = std::remove_cvref_t<value_type>;
 
-    using ApplySpatialFilterMixin<SumFilter, TIn, Apply>::ApplySpatialFilterMixin;
+    using LazySpatialFilterMixin<SumFilter, TIn, Lazy>::LazySpatialFilterMixin;
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
@@ -66,13 +66,13 @@ public:
   }
 
   template <typename TIn>
-  class Apply : public ApplySpatialFilterMixin<MeanFilter, TIn, Apply<TIn>> {
+  class Lazy : public LazySpatialFilterMixin<MeanFilter, TIn, Lazy<TIn>> {
   public:
 
     using value_type = const typename TIn::value_type;
     using element_type = std::remove_cvref_t<value_type>;
 
-    using ApplySpatialFilterMixin<MeanFilter, TIn, Apply>::ApplySpatialFilterMixin;
+    using LazySpatialFilterMixin<MeanFilter, TIn, Lazy>::LazySpatialFilterMixin;
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
@@ -121,10 +121,10 @@ public:
   }
 
   template <typename TIn>
-  class Apply : public ApplyWeightedFilterMixin<Correlation, TIn, Apply<TIn>> {
+  class Lazy : public LazyWeightedFilterMixin<Correlation, TIn, Lazy<TIn>> {
   public:
 
-    Apply(Correlation filter, const TIn& in) : ApplyWeightedFilterMixin<Correlation, TIn, Apply>(LINX_MOVE(filter), in)
+    Lazy(Correlation filter, const TIn& in) : LazyWeightedFilterMixin<Correlation, TIn, Lazy>(LINX_MOVE(filter), in)
     {
       if constexpr (is_complex<element_type>()) {
         conjugate_impl();
@@ -172,10 +172,10 @@ public:
   }
 
   template <typename TIn>
-  class Apply : public ApplyWeightedFilterMixin<Convolution, TIn, Apply<TIn>> {
+  class Lazy : public LazyWeightedFilterMixin<Convolution, TIn, Lazy<TIn>> {
   public:
 
-    Apply(Convolution filter, const TIn& in) : ApplyWeightedFilterMixin<Convolution, TIn, Apply>(LINX_MOVE(filter), in)
+    Lazy(Convolution filter, const TIn& in) : LazyWeightedFilterMixin<Convolution, TIn, Lazy>(LINX_MOVE(filter), in)
     {
       this->m_weights.reverse(); // TODO use rbegin() in reduce instead?
     }

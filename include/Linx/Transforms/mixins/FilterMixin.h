@@ -210,7 +210,7 @@ public:
   template <typename TIn>
   auto operator()(const TIn& in) const
   {
-    using T = std::remove_cvref_t<typename TParent::Apply<TIn>::value_type>;
+    using T = std::remove_cvref_t<typename TParent::Lazy<TIn>::value_type>;
     auto out = same_layout<T>(compose_label(m_parent.label(), in), in);
     transform(in, out);
     return out;
@@ -253,7 +253,7 @@ public:
   template <typename TIn>
   auto lazy(const TIn& in) const
   {
-    return typename TDerived::Apply<TIn>(LINX_CRTP_CONST_DERIVED, in);
+    return typename TDerived::Lazy<TIn>(LINX_CRTP_CONST_DERIVED, in);
   }
 
   /**
@@ -265,7 +265,7 @@ public:
   template <typename TIn>
   auto operator()(const TIn& in) const
   {
-    using T = std::remove_cvref_t<typename TDerived::Apply<TIn>::value_type>;
+    using T = std::remove_cvref_t<typename TDerived::Lazy<TIn>::value_type>;
     auto out = same_layout<T>(compose_label(LINX_CRTP_CONST_DERIVED.label(), in), in);
     transform(in, out);
     return out;
@@ -317,13 +317,13 @@ private:
  * @brief The helper class returned by `SpatialFilterMixin::lazy()`.
  */
 template <typename TFilter, typename TIn, typename TDerived>
-class ApplySpatialFilterMixin {
+class LazySpatialFilterMixin {
 public:
 
   // value_type does not necessarily come from TIn
   using execution_space = typename TIn::execution_space;
 
-  ApplySpatialFilterMixin(TFilter filter, const TIn& in) :
+  LazySpatialFilterMixin(TFilter filter, const TIn& in) :
       m_filter(LINX_MOVE(filter)),
       m_offsets("offsets", m_filter.footprint().size()),
       m_in(as_readonly(in))
@@ -414,14 +414,14 @@ private:
  * @brief The helper class returned by `WeightedFilterMixin::lazy()`.
  */
 template <typename TFilter, typename TIn, typename TDerived>
-class ApplyWeightedFilterMixin {
+class LazyWeightedFilterMixin {
 public:
 
   using value_type = typename TFilter::value_type;
   using element_type = std::remove_cvref_t<value_type>;
   using execution_space = typename TIn::execution_space;
 
-  ApplyWeightedFilterMixin(TFilter filter, const TIn& in) :
+  LazyWeightedFilterMixin(TFilter filter, const TIn& in) :
       m_filter(LINX_MOVE(filter)),
       m_offsets("offsets", m_filter.footprint().size()),
       m_weights("weights", m_offsets.size()),

@@ -326,14 +326,14 @@ public:
 
   auto lazy(const auto& in) const
   {
-    return Apply(m_factor, in);
+    return Lazy(m_factor, in);
   }
 
   template <typename TIn>
-  class Apply {
+  class Lazy {
   public:
 
-    Apply(Index factor, const TIn& in) : m_factor(factor), m_in(in) {}
+    Lazy(Index factor, const TIn& in) : m_factor(factor), m_in(in) {}
 
     auto domain() const
     {
@@ -394,14 +394,14 @@ public:
 
   auto lazy(const auto& in) const
   {
-    return Apply(m_factor, in);
+    return Lazy(m_factor, in);
   }
 
   template <typename TIn>
-  class Apply {
+  class Lazy {
   public:
 
-    Apply(Index factor, const TIn& in) : m_factor(factor), m_in(in) {}
+    Lazy(Index factor, const TIn& in) : m_factor(factor), m_in(in) {}
 
     auto domain() const
     {
