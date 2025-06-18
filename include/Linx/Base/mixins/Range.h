@@ -113,9 +113,10 @@ struct RangeMixin<true, T, TDerived> {
    * @brief Fill the container with evenly spaced value.
    * @see `range()`
    */
-  const TDerived& linspace(const T& min = Limits<T>::zero(), const T& max = Limits<T>::one()) const
+  const TDerived&
+  linspace(const T& min = Limits<T>::zero(), const T& max = Limits<T>::one()) const // FIXME exclude max?
   {
-    const auto step = (max - min) / (this->size() - 1);
+    const auto step = (max - min) / (LINX_CRTP_CONST_DERIVED.size() - 1);
     return range(min, step);
   }
 

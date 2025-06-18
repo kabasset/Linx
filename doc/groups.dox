@@ -1,5 +1,8 @@
 /**
 
+\defgroup primer A Linx primer
+\brief Hello, world!
+
 \defgroup arrays 1D, ND arrays
 \brief Sequences, images, rasters, etc.
 

@@ -26,17 +26,6 @@ void print_2d(const auto& image)
   Linx::Fits(filename, 'w').write(image);
 }
 
-namespace Linx { // FIXME to Math.h
-
-struct Sqrt {
-  KOKKOS_INLINE_FUNCTION auto operator()(const auto& e) const
-  {
-    return Kokkos::sqrt(e);
-  }
-};
-
-} // namespace Linx
-
 Linx::Box<2> strel(Linx::Index radius)
 {
   return {{-radius, -radius}, {radius + 1, radius + 1}};

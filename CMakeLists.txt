@@ -30,6 +30,11 @@ add_library(Linx INTERFACE)
 target_include_directories(Linx INTERFACE include)
 target_link_libraries(Linx INTERFACE ${Boost_LIBRARIES} Kokkos::kokkos ${CFITSIO_LIBRARY}) #FIXME make CFITSIO optional
 
+# Tests
+
+add_subdirectory(tests)
+add_subdirectory(examples)
+
 # Doc
 
 find_package(Doxygen)
@@ -43,9 +48,6 @@ if(DOXYGEN_FOUND)
 
   configure_file(${DOXYFILE_IN} ${DOXYFILE_OUT} @ONLY) # Interpolate Doxyfile
   file(MAKE_DIRECTORY ${DOXYGEN_OUTPUT_DIR})
-
-  
-  add_subdirectory(examples)
 
   add_custom_target(doc
     COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE_OUT}
@@ -70,7 +72,3 @@ target_link_libraries(KokkosBenchmarkExp Linx)
 
 add_executable(KokkosBenchmarkIteration src/KokkosBenchmarkIteration.cpp)
 target_link_libraries(KokkosBenchmarkIteration Linx)
-
-# Tests
-
-add_subdirectory(tests)

@@ -1,0 +1,68 @@
+namespace Linx {
+
+/**
+
+\addtogroup primer
+
+\section primer-intro Purpose
+
+On one hand, many C++ libraries focus on signal or image processing, like OpenCV or CImg,
+some of which also handle multi-dimensional arrays, like ITK and xTensor.
+On the other hand, Kokkos, Raja, Sycl, and the likes focus on performance portability,
+i.e. the ability to write a single code able to run on a variety of targets, including many-core processors and GPUs.
+Linx aims at bridging the gap between multidimensional image processing and performance portability.
+It relies on Kokkos to enable seamless interfacing with the Kokkos ecosystem.
+
+\see https://kokkos.org/kokkos-core-wiki/programmingguide.html
+
+\section primer-devices Execution and memory spaces
+
+The execution space is the processing unit which executes given instructions.
+Kokkos and Linx rely on two kinds of execution spaces:
+the host is the CPU,
+and the acceleration device -- or simply device -- is typically a GPU.
+
+Generally, execution spaces have dedicated and disjoint memory spaces,
+so that data has to be allocated according to execution spaces.
+You are responsible for choosing the memory space.
+Then, whenver possible, Linx will automatically select the execution space
+according to the memory space of the data to be processed.
+
+\section primer-arrays Multidimensional arrays
+
+Linx provides class templates `Sequence` and `Image` to represent one-dimensional and multidimensional arrays, respectively.
+The memory management is delegated to Kokkos, and therefore the memory layout depends on the execution space.
+By default, the memory space is that of the default execution space, which is the most accelerated device available.
+However, you can specify the memory space explicitly if needed, and on-host aliases are provided for convenience.
+
+Array elements are preferrably accessed with the call operator, which takes as many arguments as the rank of the array.
+However, for performance reasons, it is recommended to use higher-level operations such as `transform()` or `reduce()` whenever possible,
+using some functional programming style where functions to be applied to the elements are passed to the high-level oeprations.
+The following examples illustrate the different levels of abstraction available.
+
+\snippet{trimleft} primer_example.cpp array_access_transform
+
+\section primer-design Design principles
+
+Here are a few principles we apply to design the API.
+Knowing those should help you memoize the interfaces.
+
+For ranges, we follow Dijkstra's convention of using inclusive lower bounds and exclusive upper bounds.
+For example, `Slice(0, 3)` is the sequence of integers 0, 1, and 2,
+and `Box({0, 0}, {3, 2})` contains position (0, 0) but not position (3, 2).
+For this reason, bounds are named start and stop instead of front and back.
+
+As a rule of thumb, we use methods to return properties (like array sizes) or modify elements in place
+and free functions to create new arrays without modifying the original array.
+
+\snippet{trimleft} primer_example.cpp inplace_newinstance
+
+Most classes and services are labeled for logging or debugging purposes, thanks to some `std::string` parameter.
+As demonstrated in the snippets above, this also helps documenting the code.
+When possible, labelling is automated, typically when calling simple functions:
+
+\snippet{trimleft} primer_example.cpp label
+
+*/
+
+}

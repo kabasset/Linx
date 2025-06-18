@@ -166,6 +166,20 @@ LINX_MATH_UNARY_NEWINSTANCE(erfc)
 LINX_MATH_UNARY_NEWINSTANCE(tgamma)
 LINX_MATH_UNARY_NEWINSTANCE(lgamma)
 
+struct Sqrt {
+  KOKKOS_INLINE_FUNCTION auto operator()(const auto& e) const
+  {
+    return Kokkos::sqrt(e);
+  }
+};
+
+struct Cbrt {
+  KOKKOS_INLINE_FUNCTION auto operator()(const auto& e) const
+  {
+    return Kokkos::cbrt(e);
+  }
+};
+
 #undef LINX_MATH_UNARY_NEWINSTANCE
 #undef LINX_MATH_BINARY_NEWINSTANCE
 

@@ -159,7 +159,7 @@ public:
    * @brief Sequence().
    */
   template <typename U>
-  Sequence(const std::string& label, Constant<U> value, int size = std::abs(n)) : Sequence(label, size)
+  [[deprecated]] Sequence(const std::string& label, Constant<U> value, int size = std::abs(n)) : Sequence(label, size)
   {
     this->fill(value.value);
   }
@@ -168,7 +168,7 @@ public:
    * @brief Sequence().
    */
   template <typename U>
-  Sequence(Constant<U> value, int size = std::abs(n)) : Sequence("", value, size)
+  [[deprecated]] Sequence(Constant<U> value, int size = std::abs(n)) : Sequence("", value, size)
   {}
 
   /**
@@ -379,7 +379,10 @@ void copy_to(const TIn& in, const TOut& out) // FIXME replace with/update DataMi
 }
 
 /**
- * @brief Generate a sequence from some generator.
+ * @brief Generate a static-size sequence from some generator.
+ * @tparam N The size
+ * @param label The label
+ * @param func The generator
  */
 template <int N>
 auto generate(const std::string& label, const auto& func)
@@ -389,10 +392,43 @@ auto generate(const std::string& label, const auto& func)
   return Sequence<T, N>(label).generate("generate", func); // FIXME uninitialized
 }
 
+/**
+ * @brief Generate a dynamic-size sequence from some generator.
+ * @param label The label
+ * @param func The generator
+ * @param size The size
+ */
 auto generate(const std::string& label, const auto& func, Index size)
 {
   using T = std::remove_cvref_t<decltype(func())>;
   return Sequence<T, -1>(label, size).generate("generate", func); // FIXME uninitialized
+}
+
+/**
+ * @brief Generate a static-size sequence filled with a single value.
+ */
+template <int N>
+auto fill(const std::string& label, const auto& value)
+{
+  using T = std::remove_cvref_t<decltype(value)>;
+  auto out = Sequence<T, N>(label);
+  if (value != T {}) {
+    out.fill(value);
+  }
+  return out;
+}
+
+/**
+ * @brief Generate a static-size sequence filled with a single value.
+ */
+auto fill(const std::string& label, const auto& value, std::integral auto size)
+{
+  using T = std::remove_cvref_t<decltype(value)>;
+  auto out = Sequence<T, -1>(label, size);
+  if (value != T {}) {
+    out.fill(value);
+  }
+  return out;
 }
 
 template <int M>
