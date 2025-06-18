@@ -6,6 +6,7 @@
 #define LINX_BASE_MIXINS_RANGE_H
 
 #include "Linx/Base/Packs.h"
+#include "Linx/Base/Slice.h"
 #include "Linx/Base/Types.h"
 
 #include <Kokkos_StdAlgorithms.hpp>
@@ -99,6 +100,7 @@ struct RangeMixin<true, T, TDerived> {
     Kokkos::deep_copy(container, mirror);
     return LINX_CRTP_CONST_DERIVED;
   }
+
   /**
    * @brief Fill the container with evenly spaced value.
    * @see `linspace()`
@@ -113,11 +115,11 @@ struct RangeMixin<true, T, TDerived> {
    * @brief Fill the container with evenly spaced value.
    * @see `range()`
    */
-  const TDerived&
-  linspace(const T& min = Limits<T>::zero(), const T& max = Limits<T>::one()) const // FIXME exclude max?
+  const TDerived& linspace(const Span<T>& slice) const
   {
-    const auto step = (max - min) / (LINX_CRTP_CONST_DERIVED.size() - 1);
-    return range(min, step);
+    const auto size = LINX_CRTP_CONST_DERIVED.ssize();
+    const auto step = (slice.stop() - slice.start()) / size;
+    return range(slice.start(), step);
   }
 
   /**

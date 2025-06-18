@@ -431,6 +431,24 @@ auto fill(const std::string& label, const auto& value, std::integral auto size)
   return out;
 }
 
+/**
+ * @brief Generate a static-size sequence filled with evenly spaced values.
+ */
+template <int N, typename T>
+auto linspace(const std::string& label, const Span<T>& bounds)
+{
+  return Linx::Sequence<T, N>(label).linspace(bounds);
+}
+
+/**
+ * @brief Generate a dynamic-size sequence filled with evenly spaced values.
+ */
+template <typename T>
+auto linspace(const std::string& label, const Span<T>& bounds, std::integral auto size)
+{
+  return Linx::Sequence<T, -1>(label, size).linspace(bounds);
+}
+
 template <int M>
 auto resize(const ArrayLike auto& in) // FIXME make_sequence? crop_or_pad? CTor?
 {

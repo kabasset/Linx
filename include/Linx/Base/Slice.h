@@ -40,8 +40,8 @@ Slice() -> Slice<T, SliceType::unbounded>;
 template <typename T>
 Slice(const T&) -> Slice<T, SliceType::singleton>;
 
-template <typename T>
-Slice(const T&, const T&) -> Slice<T, SliceType::right_open>;
+template <typename T, typename U>
+Slice(const T&, const U&) -> Slice<decltype(std::declval<U>() - std::declval<T>()), SliceType::right_open>;
 
 template <typename T, typename U>
 Slice(const T&, const Size<U>&) -> Slice<T, SliceType::right_open>;

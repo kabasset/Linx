@@ -81,7 +81,7 @@ for example for generating sequences with operations like `range()`, `linspace()
 or for iterating thanks to compatibility with standard C++ ranges, through `begin()` and `end()` functions.
 
 ```cpp
-auto a = Linx::Sequence<float, 1000>("sine").linspace(0, 2 * std::numbers::pi);
+auto a = Linx::Sequence<float, 1000>("sine").linspace(Linx::Slice(0, 2 * std::numbers::pi));
 for (auto& e : a) {
   e = Kokkos::sin(e);
 }
@@ -90,7 +90,7 @@ for (auto& e : a) {
 The above snippet could be written more concisely and efficiently by using the `apply` method:
 
 ```cpp
-auto a = Linx::Sequence<float, 1000>("sine").linspace(0, 2 * std::numbers::pi).transform("Sin", Linx::Sin());
+auto a = Linx::linspace<1000>("sine", Linx::Slice(0, 2 * std::numbers::pi)).sin();
 ```
 
 or even more efficiently with a single pass:
