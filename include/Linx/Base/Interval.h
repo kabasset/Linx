@@ -52,7 +52,7 @@ public:
    */
   friend std::ostream& operator<<(std::ostream& os, const Singleton& interval)
   {
-    os << interval.m_value;
+    os << interval.value();
     return os;
   }
 
@@ -306,13 +306,14 @@ struct IntervalTraits<Unbounded> {
 } // namespace Impl
 
 template <typename T>
-concept Interval = Impl::IntervalTraits<T>::is_interval;
+concept Interval = Impl::IntervalTraits<std::remove_cvref_t<T>>::is_interval; // FIXME explicit list?
 
 template <typename T>
-concept BoundedInterval = Interval<T> && Impl::IntervalTraits<T>::is_bounded;
+concept BoundedInterval =
+    Interval<T> && Impl::IntervalTraits<std::remove_cvref_t<T>>::is_bounded; // FIXME detect T::size()
 
 template <typename T>
-concept KokkosSlice = Impl::IntervalTraits<T>::is_kokkos_slice; // FIXME detect(kokkos_slice(T()))
+concept KokkosSlice = Impl::IntervalTraits<std::remove_cvref_t<T>>::is_kokkos_slice; // FIXME detect(kokkos_slice(T()))
 
 /**
  * @brief Make a Kokkos slice from an integral singleton.

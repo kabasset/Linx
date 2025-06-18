@@ -273,19 +273,19 @@ public:
    * 
    * @see `Patch`
    */
-  template <typename U, SliceType... Types>
-  auto operator[](const Slice<U, Types...>& region) const // not __device__ because of `region & domain()`
+  template <typename U, Interval... TIntervals>
+  auto operator[](const Slice<U, TIntervals...>& region) const // not __device__ because of `region & domain()`
   {
     const auto& crop = region & domain(); // Resolve Kokkos::ALL to drop offsets with subview
-    if constexpr (sizeof...(Types) == 1) {
+    if constexpr (sizeof...(TIntervals) == 1) {
       using Container = decltype(slice_last(std::make_index_sequence<n - 1>(), crop));
       return Image<T, Container::rank(), Container>(Forward {}, slice_last(std::make_index_sequence<n - 1>(), crop));
     } else {
-      // FIXME assert sizeoff...(Types) == n?
-      using Container = decltype(slice_all(crop, std::make_index_sequence<sizeof...(Types)>()));
+      // FIXME assert sizeoff...(TIntervals) == n?
+      using Container = decltype(slice_all(crop, std::make_index_sequence<sizeof...(TIntervals)>()));
       return Image<T, Container::rank(), Container>(
           Forward {},
-          slice_all(crop, std::make_index_sequence<sizeof...(Types)>()));
+          slice_all(crop, std::make_index_sequence<sizeof...(TIntervals)>()));
     }
   }
 

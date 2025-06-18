@@ -383,10 +383,7 @@ struct ExpandPath {
 template <typename TSpace = Kokkos::DefaultExecutionSpace, int N, typename TFunc>
 void for_each(const std::string& label, Path<N> region, TFunc func)
 {
-  for_each<TSpace>(
-      label,
-      Slice(0L, region.ssize()), // FIXME accept different types in Slice
-      ExpandPath<TSpace, N, TFunc>(region, func));
+  for_each<TSpace>(label, Slice(0, region.ssize()), ExpandPath<TSpace, N, TFunc>(region, func));
 }
 
 } // namespace Linx
