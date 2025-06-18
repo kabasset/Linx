@@ -146,7 +146,7 @@ public:
     // FIXME free function? Nested Conjugate?
     void conjugate_impl() const
     {
-      this->m_weights.apply("conjugate", Impl::Conjugate());
+      this->m_weights.transform("conjugate", Impl::Conjugate());
     }
   };
 };

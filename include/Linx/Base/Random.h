@@ -452,8 +452,8 @@ private:
  * which means that the noise is effectively iid.:
  * 
  * \code
- * auto a = Linx::Sequence<int>({1, 10, 100, 1000}).apply(Linx::PoissonNoise(42));
- * auto b = Linx::Sequence<int>({1, 10, 0, 1000}).apply(Linx::PoissonNoise(42));
+ * auto a = Linx::Sequence<int>({1, 10, 100, 1000}).transform(Linx::PoissonNoise(42));
+ * auto b = Linx::Sequence<int>({1, 10, 0, 1000}).transform(Linx::PoissonNoise(42));
  * assert(a[0] == b[0]);
  * assert(a[1] == b[1]);
  * assert(a[3] == b[3]); // This fails in many implementations

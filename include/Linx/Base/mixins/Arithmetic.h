@@ -18,7 +18,7 @@ namespace Linx {
   /** @brief Apply operator `op`. */ \
   const TDerived& operator op(const T & rhs) const \
   { \
-    return LINX_CRTP_CONST_DERIVED.apply(compose_label(#op, LINX_CRTP_CONST_DERIVED, rhs), Func(rhs)); \
+    return LINX_CRTP_CONST_DERIVED.transform(compose_label(#op, LINX_CRTP_CONST_DERIVED, rhs), Func(rhs)); \
   }
 
 #define LINX_SCALAR_OPERATOR_NEWINSTANCE(op, op_in) \
@@ -41,7 +41,7 @@ namespace Linx {
   { \
     const auto& derived_rhs = static_cast<const UDerived&>(rhs); \
     return LINX_CRTP_CONST_DERIVED \
-        .apply(compose_label(#op, LINX_CRTP_CONST_DERIVED, derived_rhs), Func(), derived_rhs); \
+        .transform(compose_label(#op, LINX_CRTP_CONST_DERIVED, derived_rhs), Func(), derived_rhs); \
   }
 
 #define LINX_VECTOR_OPERATOR_NEWINSTANCE(op, op_in) \
@@ -116,7 +116,7 @@ struct BooleanArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
   TDerived operator not() const
   {
     TDerived res = copy_as(compose_label("not", LINX_CRTP_CONST_DERIVED));
-    res.apply("!", Not());
+    res.transform("!", Not());
     return res;
   }
 
@@ -152,7 +152,7 @@ struct VectorArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
   TDerived operator-() const
   {
     TDerived res = copy_as(compose_label("negate", LINX_CRTP_CONST_DERIVED));
-    res.apply("-", Negate());
+    res.transform("-", Negate());
     return res;
   }
 
@@ -171,7 +171,7 @@ struct VectorArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
    */
   const TDerived& operator++() const
   {
-    return LINX_CRTP_CONST_DERIVED.apply("++", Add(1));
+    return LINX_CRTP_CONST_DERIVED.transform("++", Add(1));
   }
 
   /**
@@ -189,7 +189,7 @@ struct VectorArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
    */
   const TDerived& operator--() const
   {
-    return LINX_CRTP_CONST_DERIVED.apply("--", Subtract(1));
+    return LINX_CRTP_CONST_DERIVED.transform("--", Subtract(1));
   }
 
   /**
@@ -234,7 +234,7 @@ struct EuclidArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
   TDerived operator-() const
   {
     TDerived res = copy_as(compose_label("negate", LINX_CRTP_CONST_DERIVED));
-    res.apply("-", Negate());
+    res.transform("-", Negate());
     return res;
   }
 
@@ -253,7 +253,7 @@ struct EuclidArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
    */
   const TDerived& operator++() const
   {
-    return LINX_CRTP_CONST_DERIVED.apply("++", Add(1));
+    return LINX_CRTP_CONST_DERIVED.transform("++", Add(1));
   }
 
   /**
@@ -271,7 +271,7 @@ struct EuclidArithmeticMixin : public CopyArithmeticMixin<T, TDerived> {
    */
   const TDerived& operator--() const
   {
-    return LINX_CRTP_CONST_DERIVED.apply("--", Subtract(1));
+    return LINX_CRTP_CONST_DERIVED.transform("--", Subtract(1));
   }
 
   /**

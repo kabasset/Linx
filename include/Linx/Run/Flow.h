@@ -232,7 +232,7 @@ public:
    * Apply an element-wise functions as a new instance.
    */
   template <typename TPolicy = Overwrite>
-  auto apply(auto&&... funcs)
+  auto transform(auto&&... funcs)
   {
     return run<TPolicy>(Pipeline::Apply(LINX_FORWARD(funcs)...)); // FIXME simplify implementation
   }

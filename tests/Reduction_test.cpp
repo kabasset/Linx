@@ -32,11 +32,11 @@ void test_norm(const auto& in)
 {
   in.fill_with_offsets_from_data();
 
-  std::vector<int> expected(3); // FIXME map_reduce to view
+  std::vector<int> expected(3); // FIXME transform_reduce to view
 
-  expected[0] = Linx::map_reduce("norm0", Linx::Abspow<0>(), Linx::Add(), in);
-  expected[1] = Linx::map_reduce("norm1", Linx::Abspow<1>(), Linx::Add(), in);
-  expected[2] = Linx::map_reduce("norm2", Linx::Abspow<2>(), Linx::Add(), in);
+  expected[0] = Linx::transform_reduce("norm0", Linx::Abspow<0>(), Linx::Add(), in);
+  expected[1] = Linx::transform_reduce("norm1", Linx::Abspow<1>(), Linx::Add(), in);
+  expected[2] = Linx::transform_reduce("norm2", Linx::Abspow<2>(), Linx::Add(), in);
 
   BOOST_TEST(Linx::distance<0>(in, in) == 0);
   BOOST_TEST(Linx::distance<1>(in, in) == 0);

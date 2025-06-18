@@ -240,7 +240,7 @@ auto reduce(const std::string& label, const TMonoid& monoid, const TIn& in)
  * @param ins Input data containers
  * 
  * For each position of the input domain, the elements of each input data container are passed to the mapping function
- * before the reduction monoid is applied, i.e., `map_reduce("", map, monoid, a, b, c)` produces:
+ * before the reduction monoid is applied, i.e., `transform_reduce("", map, monoid, a, b, c)` produces:
  * 
  * \code
  * map(a[p0], b[p0], c[p0]) + map(a[p1], b[p1], c[p1]) + ... + map(a[pN], b[pN], c[pN])
@@ -251,15 +251,15 @@ auto reduce(const std::string& label, const TMonoid& monoid, const TIn& in)
  * Typically, the dot product of two containers `a` and `b` can be implemented as:
  * 
  * \code
- * map_reduce("dot", Multiply(), Add(), a, b);
+ * transform_reduce("dot", Multiply(), Add(), a, b);
  * \endcode
  * 
  * @see `reduce()`
  */
 template <typename TMap, typename TMonoid, typename... TIns>
-auto map_reduce(const std::string& label, const TMap& map, const TMonoid& monoid, const TIns&... ins)
+auto transform_reduce(const std::string& label, const TMap& map, const TMonoid& monoid, const TIns&... ins)
 {
-  return map_reduce_with_side_effects(label, map, monoid, as_readonly(ins)...);
+  return transform_reduce_with_side_effects(label, map, monoid, as_readonly(ins)...);
 }
 
 namespace Impl {
@@ -268,7 +268,7 @@ namespace Impl {
  * @brief Helper function to iterate over the pack.
  */
 template <typename TMap, typename TMonoid, typename TIns, std::size_t... Is>
-auto map_reduce_with_side_effects_impl(
+auto transform_reduce_with_side_effects_impl(
     const std::string& label,
     const TMap& map,
     const TMonoid& monoid,
@@ -289,12 +289,16 @@ auto map_reduce_with_side_effects_impl(
 } // namespace Impl
 
 /**
- * @copydoc map_reduce()
+ * @copydoc transform_reduce()
  */
 template <typename TMap, typename TMonoid, typename... TIns>
-auto map_reduce_with_side_effects(const std::string& label, const TMap& map, const TMonoid& monoid, const TIns&... ins)
+auto transform_reduce_with_side_effects(
+    const std::string& label,
+    const TMap& map,
+    const TMonoid& monoid,
+    const TIns&... ins)
 {
-  return Impl::map_reduce_with_side_effects_impl(
+  return Impl::transform_reduce_with_side_effects_impl(
       label,
       map,
       monoid,
@@ -349,7 +353,7 @@ typename TIn::element_type product(const TIn& in) // TODO limit to DataMixins
 template <typename TLhs, typename TRhs>
 typename TLhs::element_type dot(const TLhs& lhs, const TRhs& rhs)
 {
-  return map_reduce("dot", Multiply(), Add(), lhs, rhs);
+  return transform_reduce("dot", Multiply(), Add(), lhs, rhs);
 }
 
 /**
@@ -360,7 +364,7 @@ typename TLhs::element_type dot(const TLhs& lhs, const TRhs& rhs)
 template <int P, typename TIn>
 typename TIn::element_type norm(const TIn& in)
 {
-  return map_reduce("norm", Abspow<P>(), Add(), in);
+  return transform_reduce("norm", Abspow<P>(), Add(), in);
 }
 
 /**
@@ -371,7 +375,7 @@ typename TIn::element_type norm(const TIn& in)
 template <int P, typename TLhs, typename TRhs>
 typename TLhs::element_type distance(const TLhs& lhs, const TRhs& rhs)
 {
-  return map_reduce("distance", Abspow<P>(), Add(), lhs, rhs);
+  return transform_reduce("distance", Abspow<P>(), Add(), lhs, rhs);
 }
 
 } // namespace Linx

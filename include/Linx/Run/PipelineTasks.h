@@ -112,7 +112,7 @@ struct Apply {
 
   decltype(auto) operator()(auto&& in0, auto&&... ins)
   {
-    return in0.apply(label(), m_func, LINX_FORWARD(ins)...);
+    return in0.transform(label(), m_func, LINX_FORWARD(ins)...);
   }
 
   decltype(compose_functions(std::declval<TFuncs>()...)) m_func;
@@ -129,7 +129,7 @@ struct Generate {
 
   auto operator()(auto&& in0, auto&&... ins)
   {
-    return (+in0).apply(label(), m_func, LINX_FORWARD(ins)...);
+    return (+in0).transform(label(), m_func, LINX_FORWARD(ins)...);
   }
 
   decltype(compose_functions(std::declval<TFuncs>()...)) m_func;

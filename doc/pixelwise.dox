@@ -40,14 +40,14 @@ auto c = Linx::pow(a, b);
 auto d = Linx::pow(a, 2);
 ```
 
-Custom functions can also be provided, either to `generate()` or `apply()`.
+Custom functions can also be provided, either to `generate()` or `transform()`.
 They take as input the function to be applied (e.g. free function, functor or lambda)
 and an arbitrary number of inputs (can be 0).
 
 For example, to compute `a * k + b`, with `k` some scalar, do:
 
 ```cpp
-a.apply(
+a.transform(
     "a * k + b",
     KOKKOS_LAMBDA(a_i, b_i) { return a_i * k * b_i; },
     b);
@@ -64,11 +64,11 @@ This is all the more true for formulae with more operations.
 
 This can be seen as an equivalent to NumPy's, XTensor's or Eigen's lazy evaluations, yet with arbitrary functions.
 
-Method `generate()` is similar to `apply()` but the functor it calls does not take as parameter the array it is called from,
+Method `generate()` is similar to `transform()` but the functor it calls does not take as parameter the array it is called from,
 that is, the following lines are strictly equivalent:
 
 ```cpp
-a.apply("a += b", Linx::Add(), b);
+a.transform("a += b", Linx::Add(), b);
 a.generate("a = a + b", Linx::Add(), a, b);
 ```
 
@@ -90,7 +90,7 @@ for (auto& e : a) {
 The above snippet could be written more concisely and efficiently by using the `apply` method:
 
 ```cpp
-auto a = Linx::Sequence<float, 1000>("sine").linspace(0, 2 * std::numbers::pi).apply("Sin", Linx::Sin());
+auto a = Linx::Sequence<float, 1000>("sine").linspace(0, 2 * std::numbers::pi).transform("Sin", Linx::Sin());
 ```
 
 or even more efficiently with a single pass:

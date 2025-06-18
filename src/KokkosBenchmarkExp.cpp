@@ -13,18 +13,13 @@ int main(int argc, const char* argv[])
 
   Linx::Image<float, 2> a("a", side, side);
   Kokkos::Timer timer;
-  for_each(
-      "init",
-      a.domain(),
-      KOKKOS_LAMBDA(int i, int j) { a(i, j) = j - i; });
+  for_each("init", a.domain(), KOKKOS_LAMBDA(int i, int j) { a(i, j) = j - i; });
   Kokkos::fence();
   auto init_time = timer.seconds();
   std::cout << "Init: " << init_time << " s" << std::endl;
 
   timer.reset();
-  a.apply(
-      "exp",
-      KOKKOS_LAMBDA(float a_i) { return std::exp(a_i); });
+  a.transform("exp", KOKKOS_LAMBDA(float a_i) { return std::exp(a_i); });
   Kokkos::fence();
   auto exp_time = timer.seconds();
   std::cout << "Exp: " << exp_time << " s" << std::endl;

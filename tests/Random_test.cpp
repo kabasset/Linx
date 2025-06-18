@@ -59,13 +59,10 @@ BOOST_AUTO_TEST_CASE(poisson_stability_test)
   auto a = Linx::generate<100>("a", Linx::Constant(2));
   auto b = Linx::generate<100>("b", Linx::Constant(2.0));
   auto c = +a;
-  Linx::for_each(
-      "perturbate",
-      c.domain(),
-      KOKKOS_LAMBDA(Linx::Index i) { c[i] = (i % 2) * a[i]; });
-  a.apply("seed 1", Linx::PoissonNoise(1));
-  b.apply("seed 2", Linx::PoissonNoise(2));
-  c.apply("seed 1", Linx::PoissonNoise(1));
+  Linx::for_each("perturbate", c.domain(), KOKKOS_LAMBDA(Linx::Index i) { c[i] = (i % 2) * a[i]; });
+  a.transform("seed 1", Linx::PoissonNoise(1));
+  b.transform("seed 2", Linx::PoissonNoise(2));
+  c.transform("seed 1", Linx::PoissonNoise(1));
   BOOST_TEST((b != a));
   auto diff = Linx::Sequence<int, 100>("diff"); // FIXME norm breaks when T = bool
   Linx::for_each(

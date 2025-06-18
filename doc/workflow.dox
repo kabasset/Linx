@@ -28,7 +28,7 @@ Linx::TimerLogger logger;
 auto [out] = Linx::Flow("Compute noise map", logger)
     .append(in)
     .run(Linx::MedianFilter(strel))
-    .apply(Linx::Max(0.), Linx::Add(noise * noise), Linx::Sqrt());
+    .transform(Linx::Max(0.), Linx::Add(noise * noise), Linx::Sqrt());
 ```
 
 Executing this workflow will log the time taken for each step, e.g.:

@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_CASE(apply_test)
         b(i, j) = 3;
       });
 
-  a.apply("eval", KOKKOS_LAMBDA(int ai, int bi) { return ai * ai + bi; }, b);
+  a.transform("eval", KOKKOS_LAMBDA(int ai, int bi) { return ai * ai + bi; }, b);
   Kokkos::fence();
 
   const auto& a_on_host = Linx::on_host(a);

@@ -22,19 +22,19 @@ auto sum = Linx::sum(a);
 \section reduction-map-reduce Map-reduce
 
 Map-reduce is a programming model that allows you to perform complex data processing tasks in parallel.
-Linx supports map-reduce operations through the `map_reduce()` function.
+Linx supports map-reduce operations through the `transform_reduce()` function.
 For example, to compute the sum of the squares of all elements in an array, use:
 
 ```cpp
-auto norm = Linx::map_reduce("norm", Linx::Abspow<2>(), Linx::Add(), a);
+auto norm = Linx::transform_reduce("norm", Linx::Abspow<2>(), Linx::Add(), a);
 auto norm = Linx::norm<2>(a); // Shortcut for the above
 ```
 
-Multiple inputs can be provided to `map_reduce()`.
+Multiple inputs can be provided to `transform_reduce()`.
 For example, to compute the dot product of two arrays, use:
 
 ```cpp
-auto dot = Linx::map_reduce("dot", Linx::Multiply(), Linx::Add(), a, b);
+auto dot = Linx::transform_reduce("dot", Linx::Multiply(), Linx::Add(), a, b);
 auto dot = Linx::dot(a, b); // Shortcut for the above
 ```
 

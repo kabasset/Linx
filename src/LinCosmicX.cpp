@@ -154,7 +154,7 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
   Linx::TimerLogger logger;
   logger("Lacosmic", "Start");
 
-  Linx::Flow("Scale to electrons", logger).append(data).apply(Linx::Add(sensor.pssl), Linx::Multiply(sensor.gain));
+  Linx::Flow("Scale to electrons", logger).append(data).transform(Linx::Add(sensor.pssl), Linx::Multiply(sensor.gain));
   Linx::Flow("Find saturated stars", logger).append(mask, data).run(FindSaturatedStars(sensor.satlevel));
   auto [backgroundlevel] = Linx::Flow("Compute background level", logger).append(data, mask).run(BackgroundLevel());
 
@@ -169,18 +169,18 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
 
     auto [noise] = Linx::Flow("Compute noise map", logger)
                        .append(m5.copy_as("noise")) // FIXME copy only used for cleantype = median
-                       .apply(Linx::Max(T(0.00001)), Linx::Add(sensor.readnoise * sensor.readnoise), Linx::Sqrt());
+                       .transform(Linx::Max(T(0.00001)), Linx::Add(sensor.readnoise * sensor.readnoise), Linx::Sqrt());
 
     auto [sp] =
         Linx::Flow("Compute S'", logger)
             .append(data)
             .run(Linx::Upsample(2), Linx::separable_laplacian<0, 1>(-1.))
-            .apply(Linx::Max(T(0)))
+            .transform(Linx::Max(T(0)))
             .run(Linx::MeanFilter(Linx::Box<2>({0, 0}, {2, 2})), Linx::Downsample(2))
             .append(noise)
-            .apply(Linx::Divide(), Linx::Divide(2))
+            .transform(Linx::Divide(), Linx::Divide(2))
             .prepend_run(Linx::box_median_filter<2, 2>())
-            .apply(Linx::Subtract(), Linx::Negate());
+            .transform(Linx::Subtract(), Linx::Negate());
 
     auto [f] =
         Linx::Flow("Compute fine structure", logger)
@@ -188,22 +188,22 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
             .run(Linx::convolution_along<0, 2>(psfk).pad(T()), Linx::convolution_along<1, 2>(psfk).pad(T()))
             // FIXME convolution_along<0, 1>(psfk).pad(0)
             .append(data, noise)
-            .apply(FineStructure<T>());
+            .transform(FineStructure<T>());
 
     auto [cosmics] =
         Linx::Flow("Find candidate CRs", logger)
             .append(crmask, sp, f)
-            .apply(FindCandidates(det.sigclip, det.objlim))
+            .transform(FindCandidates(det.sigclip, det.objlim))
             .run(Linx::Dilation(strel(1)))
             .append(crmask, sp)
-            .apply(FindNeighborCandidates(det.sigclip))
+            .transform(FindNeighborCandidates(det.sigclip))
             .run(Linx::Dilation(strel(1)))
             .append(crmask, sp)
-            .apply(FindNeighborCandidates(det.sigclip * det.sigfrac));
+            .transform(FindNeighborCandidates(det.sigclip * det.sigfrac));
 
     auto numcr = Linx::sum(cosmics);
     if (numcr > 0) {
-      Linx::Flow("Update crmask", logger).append(crmask, cosmics).apply(Linx::Or());
+      Linx::Flow("Update crmask", logger).append(crmask, cosmics).transform(Linx::Or());
       logger(label, std::to_string(numcr) + " cosmic pixels found");
     } else {
       logger(label, "No cosmic pixel found");

@@ -74,9 +74,6 @@ template <typename T, typename TArithmeticMixin, typename TDerived>
 struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerived> {
   using Arithmetic = TArithmeticMixin;
 
-  /// @{
-  /// @group_properties
-
   /**
    * @brief Label.
    */
@@ -133,8 +130,6 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
     return size() == 0;
   }
 
-  /// @group_modifiers
-
   /**
    * @brief Fill the container with a single value.
    */
@@ -181,7 +176,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   const TDerived& copy_to(const auto& container) const
   {
     // FIXME use Kokkos::deep_copy wherever possible
-    return apply(compose_label("copy", *this), Forward(), container, *this);
+    return transform(compose_label("copy", *this), Forward(), container, *this);
   }
 
   /**
@@ -198,7 +193,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    * In other words:
    * 
    * \code
-   * container.apply(label, func, a, b);
+   * container.transform(label, func, a, b);
    * \endcode
    * 
    * conceptually performs:
@@ -217,7 +212,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    * 
    * @see `generate()`
    */
-  const TDerived& apply(const std::string& label, auto&& func, const auto&... inputs) const
+  const TDerived& transform(const std::string& label, auto&& func, const auto&... inputs) const
   {
     const auto& derived = as_readonly(LINX_CRTP_CONST_DERIVED);
     return LINX_CRTP_CONST_DERIVED
@@ -245,7 +240,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    * }
    * \endcode
    * 
-   * @see `apply()`
+   * @see `transform()`
    */
   const TDerived& generate(const std::string& label, auto&& func, const auto&... inputs) const
   {
@@ -279,7 +274,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    * In this case, the elements of the optional containers are effectively modified.
    * If the function has no side effect, it is preferrable to use `generate()` instead.
    * 
-   * @see `DataMixin::apply()`
+   * @see `DataMixin::transform()`
    * @see `DataMixin::generate()`
    */
   template <typename TFunc, typename... Ts>
@@ -308,15 +303,13 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
         Generator(LINX_FORWARD(func), LINX_CRTP_CONST_DERIVED, others));
   }
 
-  /// @group_operations
-
   /**
    * @brief Test whether the container contains a given value.
    */
   bool contains(const T& value) const
   {
     const auto& derived = as_readonly(LINX_CRTP_CONST_DERIVED);
-    return map_reduce("contains()", Equal(value), Or(), derived);
+    return transform_reduce("contains()", Equal(value), Or(), derived);
   }
 
   /**
@@ -325,7 +318,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   bool contains_nan() const
   {
     const auto& derived = as_readonly(LINX_CRTP_CONST_DERIVED);
-    return map_reduce("contains_nan()", IsNan(), Or(), derived);
+    return transform_reduce("contains_nan()", IsNan(), Or(), derived);
   }
 
   /**
@@ -336,7 +329,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   bool contains_only(const T& value) const
   {
     const auto& derived = as_readonly(LINX_CRTP_CONST_DERIVED);
-    return map_reduce("contains_only()", Equal(value), And(), derived);
+    return transform_reduce("contains_only()", Equal(value), And(), derived);
   }
 
   /**
@@ -347,7 +340,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
     if (size() != other.size()) {
       return false;
     }
-    return map_reduce("==", Equal(), And(), LINX_CRTP_CONST_DERIVED, other);
+    return transform_reduce("==", Equal(), And(), LINX_CRTP_CONST_DERIVED, other);
   }
 
   /**
@@ -357,9 +350,19 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   {
     return not(*this == other);
   }
-
-  /// @}
 };
+
+template <typename T, typename TArithmeticMixin, typename TDerived>
+TDerived generate(
+    const std::string& label,
+    const auto& func,
+    const DataMixin<T, TArithmeticMixin, TDerived>& in0,
+    const auto&... ins)
+{
+  auto out = +in0;
+  out.transform(label, func, ins...);
+  return out;
+}
 
 } // namespace Linx
 

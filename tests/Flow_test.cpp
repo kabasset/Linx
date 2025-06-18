@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE(sequence_api_test)
       Linx::Flow("(1 + 2) * 3", logger)
           .append(Linx::Constant(1))
           .domain(Linx::Slice(0, size))
-          .apply(Linx::Add(2), Linx::Multiply(3));
+          .transform(Linx::Add(2), Linx::Multiply(3));
   logger("Done");
   BOOST_TEST(out.ssize() == size);
   BOOST_TEST(out.contains_only(9));
@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(image_api_test)
       Linx::Flow("(1 + 2) * 3", logger)
           .append(Linx::Constant(1))
           .domain(Linx::Box({0, 0}, {width, height}))
-          .apply(Linx::Add(2), Linx::Multiply(3));
+          .transform(Linx::Add(2), Linx::Multiply(3));
   logger("Done");
   BOOST_TEST(out.shape().equal(width, height));
   BOOST_TEST(out.contains_only(9));
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(diadic_test)
       Linx::Flow("1 + 2", logger)
           .append(Linx::Constant(1), Linx::Constant(2))
           .domain(Linx::Slice(0, size))
-          .apply(Linx::Add());
+          .transform(Linx::Add());
   logger("Done");
   BOOST_TEST(out.contains_only(3));
 }

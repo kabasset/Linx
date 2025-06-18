@@ -91,7 +91,7 @@ auto a2 = Linx::pow(a, 2); // Creates new instance
 auto norm2 = Linx::norm<2>(a); // Returns a value
 ```
 
-Arbitrarily complex functions can also be applied pointwise with `apply()` or `generate()`:
+Arbitrarily complex functions can also be applied pointwise with `transform()` or `generate()`:
 
 ```cpp
 auto a = Linx::Image(...);
@@ -99,7 +99,7 @@ auto b = Linx::Image(...);
 a.generate(
     "random noise",
     Linx::GaussianRng());
-a.apply(
+a.transform(
     "logistic function",
     KOKKOS_LAMBDA(auto a_i) { return 1. / (1. + std::exp(-a_i)); });
 ```

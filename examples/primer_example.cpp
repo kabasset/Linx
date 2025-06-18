@@ -34,12 +34,12 @@ BOOST_AUTO_TEST_CASE(array_access_transform_test)
   auto manual = Linx::same_layout("sqrt(noise)", normal);
   Linx::for_each("sqrt", normal.domain(), KOKKOS_LAMBDA(int i) { manual(i) = Kokkos::sqrt(normal(i)); });
 
-  auto functional = (+normal).apply("sqrt", Linx::Sqrt()); // FIXME Linx::transform("sqrt", normal, Linx::Sqrt());
+  auto functional = Linx::generate("sqrt", Linx::Sqrt(), normal);
 
-  auto short_sqrt = Linx::sqrt(+normal);
+  auto builtin = Linx::sqrt(+normal);
 
-  ASSERT(manual == short_sqrt);
-  ASSERT(functional == short_sqrt);
+  ASSERT(manual == builtin);
+  ASSERT(functional == builtin);
   //! [array_access_transform]
 }
 
