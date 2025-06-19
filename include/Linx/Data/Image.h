@@ -353,7 +353,7 @@ private:
   template <typename TSlice, std::size_t... Is>
   auto slice_all(const TSlice& slice, std::index_sequence<Is...>) const
   {
-    return Kokkos::subview(m_container, get<Is>(slice).kokkos_slice()...);
+    return Kokkos::subview(m_container, kokkos_slice(get<Is>(slice))...);
   }
 
   /**
@@ -363,7 +363,7 @@ private:
   auto slice_last(std::index_sequence<Is...>, const TSlice& slice) const
   {
     using Prepend = std::array<Kokkos::ALL_t, sizeof...(Is)>;
-    return Kokkos::subview(m_container, (typename std::tuple_element<Is, Prepend>::type {})..., slice.kokkos_slice());
+    return Kokkos::subview(m_container, (typename std::tuple_element<Is, Prepend>::type {})..., kokkos_slice(slice));
   }
 
 private:

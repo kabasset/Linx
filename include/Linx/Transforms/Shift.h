@@ -21,7 +21,7 @@ template <typename TParent>
 class Shift : public DataMixin<typename TParent::value_type, typename TParent::Arithmetic, Shift<TParent>> {
 public:
 
-  static constexpr int n = TParent::Domain::n; ///< The dimension parameter
+  static constexpr int n = TParent::n; ///< The dimension parameter
   using Parent = TParent; ///< The parent
   using Domain = Parent::Domain; ///< The domain
 

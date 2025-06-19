@@ -15,13 +15,13 @@ BOOST_AUTO_TEST_CASE(span_test)
 {
   int start = 3;
   int stop = 14;
-  auto slice = Linx::Slice(start, stop);
-  BOOST_TEST(slice.start() == start);
-  BOOST_TEST(slice.stop() == stop);
-  BOOST_TEST(slice.kokkos_slice().first == start);
-  BOOST_TEST(slice.kokkos_slice().second == stop);
+  auto span = Linx::Span(start, stop);
+  BOOST_TEST(span.start() == start);
+  BOOST_TEST(span.stop() == stop);
+  BOOST_TEST(kokkos_slice(span).first == start);
+  BOOST_TEST(kokkos_slice(span).second == stop);
 
-  auto str = (std::stringstream() << slice).str();
+  auto str = (std::stringstream() << span).str();
   BOOST_TEST(str == std::to_string(start) + ':' + std::to_string(stop));
 }
 

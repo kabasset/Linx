@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(span_from_size_test)
 BOOST_AUTO_TEST_CASE(inf_test)
 {
   Linx::Index start = 42;
-  auto interval = Linx::LowerBound(start);
+  auto interval = Linx::Span(start, nullptr);
   BOOST_TEST(interval.start() == start);
 
   BOOST_TEST(not interval.contains(start - Linx::Limits<Linx::Index>::epsilon()));

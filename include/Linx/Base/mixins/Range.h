@@ -123,6 +123,17 @@ struct RangeMixin<true, T, TDerived> {
   }
 
   /**
+   * @brief Fill the container with evenly spaced value.
+   * @see `range()`
+   */
+  const TDerived& linspace(const Segment<T>& slice) const
+  {
+    const auto size = LINX_CRTP_CONST_DERIVED.ssize() - 1;
+    const auto step = (slice.stop() - slice.finish()) / size;
+    return range(slice.start(), step);
+  }
+
+  /**
    * @brief Reference to the i-th element.
    */
   KOKKOS_INLINE_FUNCTION auto& operator[](std::integral auto i) const

@@ -497,12 +497,12 @@ GBox<T, N> operator&(const GBox<T, N>& lhs, const GBox<U, M>& rhs)
 
 /**
  * @relatesalso GBox
- * @brief Get the 1D slice along the i-th axis.
+ * @brief Get the 1D span along the i-th axis.
  */
 template <int I, typename T, int N>
 Span<T> get(const GBox<T, N>& box)
 {
-  return {box.start(I), box.stop(I)};
+  return Span(box.start(I), box.stop(I));
 }
 
 namespace Impl {
@@ -510,25 +510,25 @@ namespace Impl {
 template <typename T>
 T slice_start_impl(const Singleton<T>& interval)
 {
-  return interval.value();
+  return interval.func().rhs;
 }
 
 template <std::integral T>
 T slice_stop_impl(const Singleton<T>& interval)
 {
-  return interval.value() + 1;
+  return interval.func().rhs + 1;
 }
 
 template <typename T>
 T slice_start_impl(const Span<T>& interval)
 {
-  return interval.start();
+  return interval.func().infimum();
 }
 
 template <typename T>
 T slice_stop_impl(const Span<T>& interval)
 {
-  return interval.stop();
+  return interval.func().supremum();
 }
 
 template <typename TSlice, std::size_t... Is>
@@ -559,10 +559,10 @@ const GBox<T, N>& bbox(const GBox<T, N>& in)
  * 
  * @warning Unbounded slices are not supported, and singleton slices must be integral.
  */
-template <typename T, Interval... TIntervals>
-GBox<T, sizeof...(TIntervals)> bbox(const Slice<T, TIntervals...>& slice)
+template <typename T, typename... TFuncs>
+GBox<T, sizeof...(TFuncs)> bbox(const Slice<T, TFuncs...>& slice)
 {
-  static constexpr int n = sizeof...(TIntervals);
+  static constexpr int n = sizeof...(TFuncs);
   return Impl::box_impl(slice, std::make_index_sequence<n>());
 }
 
@@ -571,22 +571,20 @@ GBox<T, sizeof...(TIntervals)> bbox(const Slice<T, TIntervals...>& slice)
  * @relatesalso GBox
  * @brief Make a slice clamped by a box.
  */
-template <typename T, typename U, int N, Interval... TIntervals>
-auto operator&(const Slice<T, TIntervals...>& slice, const GBox<U, N>& box)
+template <typename T, typename U, int N, typename... TFuncs>
+auto operator&(const Slice<T, TFuncs...>& slice, const GBox<U, N>& box)
 {
-  static constexpr auto last = sizeof...(TIntervals) - 1;
-  return (slice.fronts() & box)(clamp(slice.back(), box.start(last), box.stop(last)));
+  static constexpr auto n = sizeof...(TFuncs);
+  static_assert(n > 1);
+  auto fronts = slice.fronts() & box;
+  auto back = clamp(slice.back(), box.start(n - 1), box.stop(n - 1));
+  return fronts(back);
 }
 
-/**
- * @relatesalso Slice
- * @relatesalso GBox
- * @brief Make a 1D slice clamped by a box.
- */
-template <typename T, Interval TInterval, typename U, int N>
-auto operator&(const Slice<T, TInterval>& slice, const GBox<U, N>& box)
+template <typename T, typename TFunc, typename U, int N>
+auto operator&(const Slice<T, TFunc>& slice, const GBox<U, N>& box)
 {
-  return clamp(get<0>(slice), box.start(0), box.stop(0));
+  return clamp(slice, box.start(0), box.stop(0));
 }
 
 namespace Impl {
