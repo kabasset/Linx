@@ -443,8 +443,6 @@ struct StrongType {
   value_type value; ///< The value
 };
 
-// FIXME Why not dump StrongType completely
-// since this is already a macro?
 #define LINX_STRONG_TYPE(Name) \
   template <typename T> \
   struct Name : public Linx::StrongType<T, struct Name##Tag> { \
@@ -458,6 +456,8 @@ struct StrongType {
   Name(T*) -> Name<T*>; \
   template <typename T> \
   Name(const T*) -> Name<const T*>;
+
+LINX_STRONG_TYPE(Size)
 
 LINX_STRONG_TYPE(Wrap)
 

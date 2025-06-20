@@ -507,36 +507,12 @@ Span<T> get(const GBox<T, N>& box)
 
 namespace Impl {
 
-template <typename T>
-T slice_start_impl(const Singleton<T>& interval)
-{
-  return interval.func().rhs;
-}
-
-template <std::integral T>
-T slice_stop_impl(const Singleton<T>& interval)
-{
-  return interval.func().rhs + 1;
-}
-
-template <typename T>
-T slice_start_impl(const Span<T>& interval)
-{
-  return interval.func().infimum();
-}
-
-template <typename T>
-T slice_stop_impl(const Span<T>& interval)
-{
-  return interval.func().supremum();
-}
-
 template <typename TSlice, std::size_t... Is>
 auto box_impl(const TSlice& slice, std::index_sequence<Is...>)
 {
   using T = typename TSlice::size_type;
   static constexpr int N = sizeof...(Is);
-  return GBox<T, N>({slice_start_impl(get<Is>(slice))...}, {slice_stop_impl(get<Is>(slice))...});
+  return GBox<T, N>({start(get<Is>(slice))...}, {stop(get<Is>(slice))...});
 }
 
 } // namespace Impl
@@ -566,25 +542,32 @@ GBox<T, sizeof...(TFuncs)> bbox(const Slice<T, TFuncs...>& slice)
   return Impl::box_impl(slice, std::make_index_sequence<n>());
 }
 
+namespace Impl {
+
+template <typename T, typename TTuple, std::size_t... Is>
+auto clamp_impl(const auto& slice, const auto& box, std::index_sequence<Is...>)
+{
+  return Slice<T, std::tuple_element_t<Is, TTuple>...>(clamp(get<Is>(slice), box.start(Is), box.stop(Is))...);
+}
+
+} // namespace Impl
+
 /**
  * @relatesalso Slice
  * @relatesalso GBox
- * @brief Make a slice clamped by a box.
+ * @brief Make a slice clamped by a region.
+ * 
+ * The region may be of higher rank than the slice: extra dimensions are ignored.
  */
-template <typename T, typename U, int N, typename... TFuncs>
-auto operator&(const Slice<T, TFuncs...>& slice, const GBox<U, N>& box)
+template <typename T, typename... TFuncs>
+auto operator&(const Slice<T, TFuncs...>& slice, const auto& region) // FIXME requires region.start(i), regions.stop(i)
 {
-  static constexpr auto n = sizeof...(TFuncs);
-  static_assert(n > 1);
-  auto fronts = slice.fronts() & box;
-  auto back = clamp(slice.back(), box.start(n - 1), box.stop(n - 1));
-  return fronts(back);
-}
-
-template <typename T, typename TFunc, typename U, int N>
-auto operator&(const Slice<T, TFunc>& slice, const GBox<U, N>& box)
-{
-  return clamp(slice, box.start(0), box.stop(0));
+  if constexpr (sizeof...(TFuncs) == 1) {
+    return clamp(slice, region.start(0), region.stop(0));
+  } else {
+    using Tuple = std::tuple<std::conditional_t<false, TFuncs, typename Span<T>::Func>...>;
+    return Impl::clamp_impl<T, Tuple>(slice, region, std::make_index_sequence<sizeof...(TFuncs)>());
+  }
 }
 
 namespace Impl {

@@ -100,6 +100,101 @@ struct Constant {
   }
 };
 
+/**
+ * @brief Functor which always returns the same value set at compile time.
+ */
+template <auto Value>
+struct StaticConstant {
+  using value_type = decltype(Value);
+
+  static constexpr value_type value = Value; ///< The static value
+
+  /**
+   * @brief Constructor.
+   */
+  StaticConstant(auto&&...) {}
+
+  /**
+   * @brief Label.
+   */
+  std::string label() const
+  {
+    return compose_label("Constant", value);
+  }
+
+  /**
+   * @brief Static value.
+   */
+  KOKKOS_INLINE_FUNCTION constexpr value_type operator()(auto&&...) const
+  {
+    return value;
+  }
+};
+
+/**
+ * @brief Functor which tests whether a value is between inclusive or exclusive endpoints.
+ */
+template <bool InclusiveInfimum, bool InclusiveSupremum, typename T>
+struct Between {
+  using value_type = T; ///< The value type
+
+  /**
+   * @brief Always-false functor constructor.
+   */
+  Between() : infimum(Limits<T>::max()), supremum(Limits<T>::min()) {}
+
+  /**
+   * @brief Constructor.
+   */
+  Between(const T& inf, const T& sup) : infimum(inf), supremum(sup) {}
+
+  /**
+   * @brief Size-based constructor.
+   */
+  template <typename TSize>
+  Between(const T& inf, const Size<TSize>& size) : infimum(inf), supremum(infimum + size.value)
+  {
+    if constexpr (std::is_integral_v<T>) {
+      supremum += InclusiveInfimum + InclusiveSupremum - 1;
+    }
+  };
+
+  /**
+   * @brief Check whether a value is between the endpoints.
+   */
+  KOKKOS_INLINE_FUNCTION bool operator()(const T& value) const
+  {
+    return greater_than_infimum(value) && less_than_supremum(value);
+  }
+
+  /**
+   * @brief Check whether a value is greater than the infimum.
+   */
+  KOKKOS_INLINE_FUNCTION bool greater_than_infimum(const T& value) const
+  {
+    if constexpr (InclusiveInfimum) {
+      return value >= infimum;
+    } else {
+      return value > infimum;
+    }
+  }
+
+  /**
+   * @brief Check whether a value is less than the supremum.
+   */
+  KOKKOS_INLINE_FUNCTION bool less_than_supremum(const T& value) const
+  {
+    if constexpr (InclusiveSupremum) {
+      return value <= supremum;
+    } else {
+      return value < supremum;
+    }
+  }
+
+  T infimum; ///< The interval infimum
+  T supremum; ///< The interval supremum
+};
+
 #define LINX_DEFINE_BINARY_OPERATOR(Func, out) \
   template <typename TLhs = Forward, typename TRhs = Forward> \
   struct Func; \

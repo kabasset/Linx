@@ -5,352 +5,297 @@
 #ifndef LINX_BASE_INTERVAL_H
 #define LINX_BASE_INTERVAL_H
 
-#include "Linx/Base/Exceptions.h"
+#include "Linx/Base/Functional.h"
 #include "Linx/Base/Types.h"
 
-#include <Kokkos_Core.hpp>
 #include <concepts>
-#include <ostream>
 
 namespace Linx {
 
-LINX_STRONG_TYPE(Size)
+/**
+ * @brief Size of a bounded interval.
+ */
+template <typename T, bool InclusiveInfimum, bool InclusiveSupremum>
+KOKKOS_INLINE_FUNCTION auto interval_size(const Between<InclusiveInfimum, InclusiveSupremum, T>& interval)
+{
+  if constexpr (std::is_integral_v<T>) {
+    return interval.supremum - interval.infimum + InclusiveInfimum + InclusiveSupremum - 1;
+  } else {
+    return interval.supremum - interval.infimum;
+  }
+}
 
 /**
- * @ingroup regions
- * @brief Singleton.
+ * @brief Size of a singleton interval.
  */
 template <typename T>
-class Singleton {
-public:
+static constexpr auto interval_size(const Equal<Forward, T>&)
+{
+  return 1;
+}
 
-  using value_type = T; ///< The value type
+/// @cond
 
-  /**
-   * @brief Constructor.
-   */
-  explicit KOKKOS_INLINE_FUNCTION Singleton(T value) : m_value(value) {}
+template <typename T, typename TFuncN, typename... TFuncs>
+class Slice;
 
-  /**
-   * @brief Single value.
-   */
-  KOKKOS_INLINE_FUNCTION T value() const
-  {
-    return m_value;
-  }
-
-  /**
-   * @brief Check if the interval contains a value.
-   */
-  KOKKOS_INLINE_FUNCTION bool contains(const auto& value) const
-  {
-    return value == m_value;
-  }
-
-  /**
-   * @brief Stream the interval.
-   */
-  friend std::ostream& operator<<(std::ostream& os, const Singleton& interval)
-  {
-    os << interval.value();
-    return os;
-  }
-
-private:
-
-  T m_value; ///< The single value
-};
+/// @endcond
 
 /**
- * @ingroup regions
+ * @brief Unbounded interval.
+ */
+template <typename T>
+using Unbounded = Slice<T, StaticConstant<true>>;
+
+/**
+ * @brief Singleton interval.
+ */
+template <typename T>
+using Singleton = Slice<T, Equal<Forward, T>>;
+
+/**
  * @brief Closed-open interval.
- * 
- * The lower endpoint is inclusive; The upper endpoint is exclusive and may be infinite.
  */
 template <typename T>
-class Span {
-public:
-
-  using value_type = T; ///< The value type
-
-  /**
-   * @brief Empty span constructor.
-   */
-  explicit KOKKOS_INLINE_FUNCTION Span() : m_start {}, m_stop {} {}
-
-  /**
-   * @brief Constructor.
-   */
-  explicit KOKKOS_INLINE_FUNCTION Span(const T& start, const T& stop) : m_start(start), m_stop(stop) {}
-
-  /**
-   * @brief Infinite span constructor.
-   */
-  explicit KOKKOS_INLINE_FUNCTION Span(const T& start, std::nullptr_t) :
-      m_start(start),
-      m_stop(Linx::Limits<value_type>::max())
-  {}
-
-  /**
-   * @brief Size-based constructor.
-   */
-  template <typename U>
-  explicit KOKKOS_INLINE_FUNCTION Span(const T& start, const Size<U>& size) :
-      m_start(start),
-      m_stop(m_start + size.value)
-  {}
-
-  /**
-   * @brief Start endpoint (inclusive).
-   */
-  KOKKOS_INLINE_FUNCTION T start() const
-  {
-    return m_start;
-  }
-
-  /**
-   * @brief Stop endpoint (exclusive).
-   */
-  KOKKOS_INLINE_FUNCTION T stop() const
-  {
-    return m_stop;
-  }
-
-  /**
-   * @brief Interval size.
-   */
-  KOKKOS_INLINE_FUNCTION T size() const
-  {
-    return m_stop - m_start;
-  }
-
-  /**
-   * @brief Check if the interval contains a value.
-   */
-  KOKKOS_INLINE_FUNCTION bool contains(const T& value) const
-  {
-    return value >= m_start && value < m_stop;
-  }
-
-  /**
-   * @brief Stream the interval.
-   */
-  friend std::ostream& operator<<(std::ostream& os, const Span& interval)
-  {
-    os << interval.m_start << ':' << interval.m_stop;
-    return os;
-  }
-
-private:
-
-  T m_start; ///< Start endpoint (inclusive)
-  T m_stop; ///< Stop endpoint (exclusive)
-};
-
-template <typename T0, typename T1>
-Span(T0, T1) -> Span<decltype(std::declval<T1>() - std::declval<T0>())>;
+using Span = Slice<T, Between<true, false, T>>;
 
 /**
- * @ingroup regions
  * @brief Closed interval.
  */
 template <typename T>
-class Segment {
+using Segment = Slice<T, Between<true, true, T>>;
+
+/**
+ * @brief Deduction guide for unbounded slices.
+ */
+template <typename T = Index>
+Slice()->Unbounded<T>;
+
+/**
+ * @brief Single value deduction guide for singletons.
+ */
+template <typename T>
+Slice(const T&)->Singleton<T>;
+
+/**
+ * @brief Start and stop deduction guide for spans.
+ */
+template <typename T0, typename T1>
+Slice(const T0&, const T1&)->Span<decltype(T1() - T0())>;
+
+/**
+ * @brief Start and size deduction guide for spans.
+ */
+template <typename T, typename TSize>
+Slice(const T&, const Size<TSize>&)->Span<T>;
+
+/**
+ * @brief 1D interval.
+ * @tparam TFunc The predicate defining the interval
+ */
+template <typename T, typename TFunc>
+class Slice<T, TFunc> {
 public:
 
-  using value_type = T; ///< The value type
+  using size_type = T; ///< The index and size type
+  using Func = TFunc; ///< The predicate defining the interval
 
   /**
-   * @brief Constructor.
+   * @brief Forwarding constructor.
    */
-  explicit KOKKOS_INLINE_FUNCTION Segment(const T& start, const T& finish) : m_start(start), m_finish(finish) {}
+  Slice(auto&&... args) : m_func(LINX_FORWARD(args)...) {} // FIXME among others, this is a copy ctor and a move ctor
 
   /**
-   * @brief Size-based constructor.
+   * @brief Emplace another interval in a new axis.
    */
-  template <typename U>
-  explicit KOKKOS_INLINE_FUNCTION Segment(const T& start, const Size<U>& size) :
-      m_start(start),
-      m_finish(m_start + size.value - std::is_integral_v<T>)
-  {}
-
-  /**
-   * @brief Start endpoint (inclusive).
-   */
-  KOKKOS_INLINE_FUNCTION T start() const
+  auto operator()(auto&&... args) const
   {
-    return m_start;
+    return Linx::Slice(Forward(), *this, Linx::Slice(LINX_FORWARD(args)...));
   }
 
   /**
-   * @brief Finish endpoint (inclusive).
+   * @brief The region rank, always 1.
    */
-  KOKKOS_INLINE_FUNCTION T finish() const
+  static constexpr int rank()
   {
-    return m_finish;
+    return 1;
+  }
+
+  KOKKOS_INLINE_FUNCTION auto size() const
+  {
+    return interval_size(m_func);
   }
 
   /**
-   * @brief Interval size.
+   * @brief Predicate defining the interval.
    */
-  KOKKOS_INLINE_FUNCTION T size() const
+  KOKKOS_INLINE_FUNCTION const Func& func() const // FIXME better name?
   {
-    return m_finish - m_start + std::is_integral_v<T>;
+    return m_func;
   }
 
   /**
-   * @brief Check if the interval contains a value.
+   * @brief Check if the slice contains a given value.
    */
-  KOKKOS_INLINE_FUNCTION bool contains(const T& value) const
+  KOKKOS_INLINE_FUNCTION bool contains(const auto& value) const
   {
-    return value >= m_start && value <= m_finish;
+    return m_func(value);
   }
 
 private:
 
-  T m_start;
-  T m_finish;
+  Func m_func; ///< The predicate defining the interval
 };
 
-template <typename T0, typename T1>
-Segment(T0, T1) -> Segment<decltype(std::declval<T1>() - std::declval<T0>())>;
+/**
+ * @relatesalso Slice
+ * @brief Start index of a singleton.
+ */
+template <std::integral T>
+KOKKOS_INLINE_FUNCTION auto start(const Singleton<T>& slice)
+{
+  return slice.func().rhs;
+}
 
 /**
- * @ingroup regions
- * @brief Unbounded interval.
+ * @relatesalso Slice
+ * @brief Stop index of a singleton.
  */
-class Unbounded {
-public:
+template <std::integral T>
+KOKKOS_INLINE_FUNCTION auto stop(const Singleton<T>& slice)
+{
+  return slice.func().rhs + 1;
+}
 
-  /**
-   * @brief Check if the interval contains a value. Always true.
-   */
-  static constexpr bool contains(auto&&...)
-  {
-    return true;
+/**
+ * @relatesalso Slice
+ * @brief Start index of a span.
+ */
+template <std::integral T>
+KOKKOS_INLINE_FUNCTION auto start(const Span<T>& slice)
+{
+  return slice.func().infimum;
+}
+
+/**
+ * @relatesalso Slice
+ * @brief Stop index of a span.
+ */
+template <std::integral T>
+KOKKOS_INLINE_FUNCTION auto stop(const Span<T>& slice)
+{
+  return slice.func().supremum;
+}
+
+/**
+ * @relatesalso Slice
+ * @brief Start index of a segment.
+ */
+template <std::integral T>
+KOKKOS_INLINE_FUNCTION auto start(const Segment<T>& slice)
+{
+  return slice.func().infimum;
+}
+
+/**
+ * @relatesalso Slice
+ * @brief Stop index of a segment.
+ */
+template <std::integral T>
+KOKKOS_INLINE_FUNCTION auto stop(const Segment<T>& slice)
+{
+  return slice.func().supremum + 1;
+}
+
+/**
+ * @relatesalso Slice
+ * @brief Make a 1D slice clamped between bounds.
+ */
+template <typename T>
+Span<T> clamp(const Unbounded<T>&, const auto& start, const auto& stop)
+{
+  return Span<T>(start, stop);
+}
+
+/**
+ * @relatesalso Slice
+ * @brief Make a 1D slice clamped between bounds.
+ */
+template <typename T>
+Span<T> clamp(const Singleton<T>& interval, const auto& start, const auto& stop)
+{
+  const auto value = interval.func().rhs;
+  if (Span<T>(start, stop).contains(value)) {
+    return Span<T>(value, value + 1);
   }
-
-  /**
-   * @brief Stream the interval.
-   */
-  friend std::ostream& operator<<(std::ostream& os, const Unbounded&)
-  {
-    os << ':';
-    return os;
-  }
-};
-
-namespace Impl {
-
-template <typename T>
-struct SliceTraits {
-  static constexpr bool is_sliceable = false;
-};
-
-template <std::integral T>
-struct SliceTraits<Singleton<T>> {
-  static constexpr bool is_sliceable = true;
-  static constexpr bool is_kokkos_sliceable = true;
-};
-
-template <std::integral T>
-struct SliceTraits<Span<T>> {
-  static constexpr bool is_sliceable = true;
-  static constexpr bool is_kokkos_sliceable = true;
-};
-
-template <std::integral T>
-struct SliceTraits<Segment<T>> {
-  static constexpr bool is_sliceable = true;
-  static constexpr bool is_kokkos_sliceable = true;
-};
-
-template <>
-struct SliceTraits<Unbounded> {
-  static constexpr bool is_sliceable = true;
-  static constexpr bool is_kokkos_sliceable = true;
-};
-
-} // namespace Impl
-
-template <typename T>
-concept Interval = Impl::SliceTraits<std::remove_cvref_t<T>>::is_sliceable; // FIXME explicit list?
-
-template <typename T>
-concept KokkosSliceable =
-    Impl::SliceTraits<std::remove_cvref_t<T>>::is_kokkos_sliceable; // FIXME detect(kokkos_slice(T()))
-
-/**
- * @brief Make a Kokkos slice from an integral singleton.
- */
-template <std::integral T>
-KOKKOS_INLINE_FUNCTION auto kokkos_slice(const Singleton<T>& interval)
-{
-  return interval.value();
+  return Span<T>(); // Empty
 }
 
 /**
- * @brief Make a Kokkos slice from an integral span.
+ * @relatesalso Slice
+ * @brief Make a 1D slice clamped between bounds.
  */
-template <std::integral T>
-KOKKOS_INLINE_FUNCTION auto kokkos_slice(const Span<T>& interval)
+template <typename T>
+Span<T> clamp(const Span<T>& interval, std::convertible_to<T> auto start, std::convertible_to<T> auto stop)
 {
-  return Kokkos::pair(interval.start(), interval.stop());
+  return Span<T>(std::max<T>(interval.func().infimum, start), std::min<T>(interval.func().supremum, stop));
 }
 
 /**
- * @brief Make a Kokkos slice from an integral segment.
+ * @brief Kokkos slicing argument of an unbounded interval.
  */
-template <std::integral T>
-KOKKOS_INLINE_FUNCTION auto kokkos_slice(const Segment<T>& interval)
-{
-  return Kokkos::pair(interval.start(), interval.finish() + 1);
-}
-
-/**
- * @brief Make an unbounded Kokkos slice.
- */
-KOKKOS_INLINE_FUNCTION auto kokkos_slice(const Unbounded&)
+template <typename T>
+KOKKOS_INLINE_FUNCTION auto kokkos_slice(const Unbounded<T>&)
 {
   return Kokkos::ALL;
 }
 
 /**
- * @brief Get the Kokkos execution policy of a span.
+ * @brief Kokkos slicing argument of a singleton.
  */
-template <typename TSpace, std::integral T>
-auto kokkos_execution_policy(const Singleton<T>& interval)
+template <typename T>
+KOKKOS_INLINE_FUNCTION auto kokkos_slice(const Singleton<T>& interval)
 {
-  return Kokkos::RangePolicy<TSpace, Kokkos::IndexType<Index>>(interval.value(), interval.value() + 1);
+  return interval.func().rhs;
 }
 
 /**
- * @brief Get the Kokkos execution policy of a span.
+ * @brief Kokkos slicing argument of a span.
  */
-template <typename TSpace, std::integral T>
-auto kokkos_execution_policy(const Span<T>& interval)
+template <typename T>
+KOKKOS_INLINE_FUNCTION auto kokkos_slice(const Span<T>& interval)
 {
-  return Kokkos::RangePolicy<TSpace, Kokkos::IndexType<Index>>(interval.start(), interval.stop());
+  return Kokkos::pair(interval.func().infimum, interval.func().supremum);
 }
 
 /**
- * @brief Get the Kokkos execution policy of a span.
+ * @brief Stream insertion for an unbounded interval.
  */
-template <typename TSpace, std::integral T>
-auto kokkos_execution_policy(const Segment<T>& interval)
+template <std::integral T>
+std::ostream& operator<<(std::ostream& os, const Unbounded<T>&)
 {
-  return Kokkos::RangePolicy<TSpace, Kokkos::IndexType<Index>>(interval.start(), interval.finish() + 1);
+  os << ':';
+  return os;
 }
 
 /**
- * @ingroup regions
- * @brief Apply a function to each element of the domain.
- * @tparam TSpace The execution space
+ * @brief Stream insertion for a span.
  */
-template <typename TSpace = Kokkos::DefaultExecutionSpace>
-void for_each(const std::string& label, const KokkosSliceable auto& interval, auto&& func)
+template <std::integral T>
+std::ostream& operator<<(std::ostream& os, const Span<T>& interval)
 {
-  Kokkos::parallel_for(label, kokkos_execution_policy<TSpace>(interval), LINX_FORWARD(func));
+  os << interval.func().infimum << ':' << interval.func().supremum;
+  return os;
+}
+
+/**
+ * @brief Stream insertion for a singleton.
+ */
+template <std::integral T>
+std::ostream& operator<<(std::ostream& os, const Singleton<T>& interval)
+{
+  os << interval.func().rhs;
+  return os;
 }
 
 } // namespace Linx
