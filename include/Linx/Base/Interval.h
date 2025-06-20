@@ -99,6 +99,7 @@ public:
 
   using size_type = T; ///< The index and size type
   using Func = TFunc; ///< The predicate defining the interval
+  static constexpr auto n = 1; ///< The region rank
 
   /**
    * @brief Forwarding constructor.

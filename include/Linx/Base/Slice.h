@@ -144,6 +144,15 @@ private:
 };
 
 /**
+ * @brief Get the Kokkos execution policy of a slice.
+ */
+template <typename TSpace, std::integral T, typename TFunc>
+auto kokkos_execution_policy(const Slice<T, TFunc>& region) // FIXME requires start(region), stop(region)
+{
+  return Kokkos::RangePolicy<TSpace, Kokkos::IndexType<Index>>(start(region), stop(region));
+}
+
+/**
  * @ingroup regions
  * @brief Apply a function to each element of the domain.
  * @tparam TSpace The execution space

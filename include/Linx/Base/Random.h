@@ -119,7 +119,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION T start() const
   {
-    return m_span.start();
+    return Linx::start(m_span);
   }
 
   /**
@@ -127,7 +127,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION T stop() const
   {
-    return m_span.stop();
+    return Linx::stop(m_span);
   }
 
   /**
@@ -135,8 +135,9 @@ public:
    */
   KOKKOS_INLINE_FUNCTION double pdf(auto x) const
   {
-    const auto& a = m_span.start();
-    const auto& b = m_span.stop();
+    // FIXME handle integral types
+    const auto& a = start();
+    const auto& b = stop();
     return m_span.contains(x) ? 1. / (b - a) : 0.;
   }
 
@@ -145,14 +146,15 @@ public:
    */
   KOKKOS_INLINE_FUNCTION double cdf(auto x) const
   {
-    if (x <= m_span.start()) {
+    // FIXME handle integral types
+    if (x <= start()) {
       return 0.;
     }
-    if (x >= m_span.stop()) {
+    if (x >= stop()) {
       return 1.;
     }
-    const auto& a = m_span.start();
-    const auto& b = m_span.stop();
+    const auto& a = start();
+    const auto& b = stop();
     return double(x - a) / (b - a);
   }
 
