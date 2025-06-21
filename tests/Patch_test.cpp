@@ -15,7 +15,7 @@ BOOST_AUTO_TEST_CASE(span_test)
 {
   int start = 3;
   int stop = 14;
-  auto span = Linx::Span(start, stop);
+  auto span = Linx::Slice(start, stop);
   BOOST_TEST(span.start() == start);
   BOOST_TEST(span.stop() == stop);
   BOOST_TEST(kokkos_slice(span).first == start);

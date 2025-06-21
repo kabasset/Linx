@@ -105,7 +105,8 @@ struct RangeMixin<true, T, TDerived> {
    * @brief Fill the container with evenly spaced value.
    * @see `linspace()`
    */
-  const TDerived& range(const T& min = Limits<T>::zero(), const T& step = Limits<T>::one()) const
+  template <typename T0 = T, typename T1 = T0>
+  const TDerived& range(const T0& min = Limits<T0>::zero(), const T1& step = Limits<T1>::one()) const
   {
     range_impl(min, step);
     return LINX_CRTP_CONST_DERIVED;
@@ -115,22 +116,24 @@ struct RangeMixin<true, T, TDerived> {
    * @brief Fill the container with evenly spaced value.
    * @see `range()`
    */
-  const TDerived& linspace(const Span<T>& slice) const
+  template <typename T0>
+  const TDerived& linspace(const Span<T0>& slice) const
   {
     const auto size = LINX_CRTP_CONST_DERIVED.ssize();
-    const auto step = (slice.stop() - slice.start()) / size;
-    return range(slice.start(), step);
+    const auto step = (slice.func().supremum - slice.func().infimum) / size;
+    return range(slice.func().infimum, step);
   }
 
   /**
    * @brief Fill the container with evenly spaced value.
    * @see `range()`
    */
-  const TDerived& linspace(const Segment<T>& slice) const
+  template <typename T0>
+  const TDerived& linspace(const Segment<T0>& slice) const
   {
     const auto size = LINX_CRTP_CONST_DERIVED.ssize() - 1;
-    const auto step = (slice.stop() - slice.finish()) / size;
-    return range(slice.start(), step);
+    const auto step = (slice.func().supremum - slice.func().infimum) / size;
+    return range(slice.func().infimum, step);
   }
 
   /**

@@ -119,7 +119,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION T start() const
   {
-    return Linx::start(m_span);
+    return m_span.start();
   }
 
   /**
@@ -127,7 +127,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION T stop() const
   {
-    return Linx::stop(m_span);
+    return m_span.stop();
   }
 
   /**

@@ -217,7 +217,7 @@ public:
    * `&front()` is a pointer to the first element.
    * Therefore, `data()` can be less than `&front()`, e.g. for alignment purposes.
    */
-  KOKKOS_INLINE_FUNCTION reference front() const
+  KOKKOS_INLINE_FUNCTION reference front() const // FIXME rename as origin()
   {
     return m_container.access(0, 0, 0, 0, 0, 0, 0, 0); // TODO not scalable if max rank goes >8 some day
   }

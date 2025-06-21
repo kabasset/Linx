@@ -64,19 +64,11 @@ private:
 public:
 
   /**
-   * @brief Axis-by-axis constructor.
-   * 
-   * Prefer creating slices using the `operator()` syntax.
-   */
-  Slice(const Slice<T, TFuncs>&... fronts, const Slice<T, TFuncN>& back) : m_fronts(fronts...), m_back(back) {}
-
-  /**
    * @brief Extend the slice.
    */
   auto operator()(auto&&... args) const
   {
     return Linx::Slice(Forward(), *this, Linx::Slice(LINX_FORWARD(args)...));
-    // return Impl::slice_emplace(*this, LINX_FORWARD(args)...);
   }
 
   /**
@@ -95,6 +87,30 @@ public:
   KOKKOS_INLINE_FUNCTION auto size() const
   {
     return m_fronts.size() * m_back.size();
+  }
+
+  /**
+   * @brief Get the start index along i-th axis.
+   */
+  KOKKOS_INLINE_FUNCTION auto start(std::integral auto i) const
+  {
+    if (i == n - 1) {
+      return m_back.start();
+    } else {
+      return m_fronts.start(i);
+    }
+  }
+
+  /**
+   * @brief Get the stop index along i-th axis.
+   */
+  KOKKOS_INLINE_FUNCTION auto stop(std::integral auto i) const
+  {
+    if (i == n - 1) {
+      return m_back.stop();
+    } else {
+      return m_fronts.stop(i);
+    }
   }
 
   /**
@@ -149,7 +165,7 @@ private:
 template <typename TSpace, std::integral T, typename TFunc>
 auto kokkos_execution_policy(const Slice<T, TFunc>& region) // FIXME requires start(region), stop(region)
 {
-  return Kokkos::RangePolicy<TSpace, Kokkos::IndexType<Index>>(start(region), stop(region));
+  return Kokkos::RangePolicy<TSpace, Kokkos::IndexType<Index>>(region.start(), region.stop());
 }
 
 /**

@@ -45,8 +45,8 @@ BOOST_AUTO_TEST_CASE(singleton_test)
   Linx::Index index = 10;
   auto interval = Linx::Slice(index);
   BOOST_TEST(interval.size() == 1);
-  BOOST_TEST(Linx::start(interval) == index);
-  BOOST_TEST(Linx::stop(interval) == index + 1);
+  BOOST_TEST(interval.start() == index);
+  BOOST_TEST(interval.stop() == index + 1);
   BOOST_TEST(kokkos_slice(interval) == index);
 
   BOOST_TEST(not interval.contains(index - Linx::Limits<Linx::Index>::epsilon()));
@@ -64,8 +64,8 @@ BOOST_AUTO_TEST_CASE(span_test)
   Linx::Index size = stop - start;
   auto interval = Linx::Slice(start, stop);
   BOOST_TEST(interval.size() == size);
-  BOOST_TEST(Linx::start(interval) == start);
-  BOOST_TEST(Linx::stop(interval) == stop);
+  BOOST_TEST(interval.start() == start);
+  BOOST_TEST(interval.stop() == stop);
   BOOST_TEST(kokkos_slice(interval).first == start);
   BOOST_TEST(kokkos_slice(interval).second == stop);
 
@@ -85,8 +85,8 @@ BOOST_AUTO_TEST_CASE(span_from_size_test)
   Linx::Index size = stop - start;
   auto interval = Linx::Slice(start, Linx::Size(size));
   BOOST_TEST(interval.size() == size);
-  BOOST_TEST(Linx::start(interval) == start);
-  BOOST_TEST(Linx::stop(interval) == stop);
+  BOOST_TEST(interval.start() == start);
+  BOOST_TEST(interval.stop() == stop);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

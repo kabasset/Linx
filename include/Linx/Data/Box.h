@@ -512,7 +512,7 @@ auto box_impl(const TSlice& slice, std::index_sequence<Is...>)
 {
   using T = typename TSlice::size_type;
   static constexpr int N = sizeof...(Is);
-  return GBox<T, N>({start(get<Is>(slice))...}, {stop(get<Is>(slice))...});
+  return GBox<T, N>({get<Is>(slice).start()...}, {get<Is>(slice).stop()...});
 }
 
 } // namespace Impl
@@ -542,16 +542,6 @@ GBox<T, sizeof...(TFuncs)> bbox(const Slice<T, TFuncs...>& slice)
   return Impl::box_impl(slice, std::make_index_sequence<n>());
 }
 
-namespace Impl {
-
-template <typename T, typename TTuple, std::size_t... Is>
-auto clamp_impl(const auto& slice, const auto& box, std::index_sequence<Is...>)
-{
-  return Slice<T, std::tuple_element_t<Is, TTuple>...>(clamp(get<Is>(slice), box.start(Is), box.stop(Is))...);
-}
-
-} // namespace Impl
-
 /**
  * @relatesalso Slice
  * @relatesalso GBox
@@ -562,11 +552,11 @@ auto clamp_impl(const auto& slice, const auto& box, std::index_sequence<Is...>)
 template <typename T, typename... TFuncs>
 auto operator&(const Slice<T, TFuncs...>& slice, const auto& region) // FIXME requires region.start(i), regions.stop(i)
 {
-  if constexpr (sizeof...(TFuncs) == 1) {
+  static constexpr auto last = sizeof...(TFuncs) - 1;
+  if constexpr (last == 0) {
     return clamp(slice, region.start(0), region.stop(0));
   } else {
-    using Tuple = std::tuple<std::conditional_t<false, TFuncs, typename Span<T>::Func>...>;
-    return Impl::clamp_impl<T, Tuple>(slice, region, std::make_index_sequence<sizeof...(TFuncs)>());
+    return (slice.fronts() & region)(clamp(slice.back(), region.start(last), region.stop(last)));
   }
 }
 
