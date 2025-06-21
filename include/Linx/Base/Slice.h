@@ -126,12 +126,12 @@ public:
     }
   }
 
-  [[deprecated]] KOKKOS_INLINE_FUNCTION const auto& fronts() const
+  KOKKOS_INLINE_FUNCTION const auto& fronts() const // FIXME prev()?
   {
     return m_fronts;
   }
 
-  [[deprecated]] KOKKOS_INLINE_FUNCTION const auto& back() const
+  KOKKOS_INLINE_FUNCTION const auto& back() const // FIXME last()?
   {
     return m_back;
   }

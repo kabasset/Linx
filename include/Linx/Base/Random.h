@@ -117,17 +117,17 @@ public:
   /**
    * @brief Lower bound (inclusive).
    */
-  KOKKOS_INLINE_FUNCTION T start() const
+  KOKKOS_INLINE_FUNCTION T start() const // FIXME minimum
   {
-    return m_span.start();
+    return m_span.func().infimum;
   }
 
   /**
    * @brief Upper bound (exclusive).
    */
-  KOKKOS_INLINE_FUNCTION T stop() const
+  KOKKOS_INLINE_FUNCTION T stop() const // FIXME rename as supremum
   {
-    return m_span.stop();
+    return m_span.func().supremum;
   }
 
   /**
