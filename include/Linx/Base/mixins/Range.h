@@ -120,8 +120,8 @@ struct RangeMixin<true, T, TDerived> {
   const TDerived& linspace(const Span<T0>& slice) const
   {
     const auto size = LINX_CRTP_CONST_DERIVED.ssize();
-    const auto step = (slice.func().supremum - slice.func().infimum) / size;
-    return range(slice.func().infimum, step);
+    const auto step = (slice.pred().supremum - slice.pred().infimum) / size;
+    return range(slice.pred().infimum, step);
   }
 
   /**
@@ -132,8 +132,8 @@ struct RangeMixin<true, T, TDerived> {
   const TDerived& linspace(const Segment<T0>& slice) const
   {
     const auto size = LINX_CRTP_CONST_DERIVED.ssize() - 1;
-    const auto step = (slice.func().supremum - slice.func().infimum) / size;
-    return range(slice.func().infimum, step);
+    const auto step = (slice.pred().supremum - slice.pred().infimum) / size;
+    return range(slice.pred().infimum, step);
   }
 
   /**

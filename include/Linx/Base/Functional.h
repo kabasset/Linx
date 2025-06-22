@@ -81,7 +81,7 @@ struct Constant {
   /**
    * @brief Constructor.
    */
-  explicit Constant(T v) : value {LINX_MOVE(v)} {}
+  KOKKOS_INLINE_FUNCTION explicit Constant(T v) : value {LINX_MOVE(v)} {}
 
   /**
    * @brief Label.
@@ -112,7 +112,7 @@ struct StaticConstant {
   /**
    * @brief Constructor.
    */
-  StaticConstant(auto&&...) {}
+  KOKKOS_INLINE_FUNCTION StaticConstant(auto&&...) {}
 
   /**
    * @brief Label.
@@ -141,18 +141,18 @@ struct Between {
   /**
    * @brief Always-false functor constructor.
    */
-  Between() : infimum(Limits<T>::max()), supremum(Limits<T>::min()) {}
+  KOKKOS_INLINE_FUNCTION Between() : infimum(Limits<T>::max()), supremum(Limits<T>::min()) {} // FIXME rm
 
   /**
    * @brief Constructor.
    */
-  Between(const T& inf, const T& sup) : infimum(inf), supremum(sup) {}
+  KOKKOS_INLINE_FUNCTION Between(const T& inf, const T& sup) : infimum(inf), supremum(sup) {}
 
   /**
    * @brief Size-based constructor.
    */
   template <typename TSize>
-  Between(const T& inf, const Size<TSize>& size) : infimum(inf), supremum(infimum + size.value)
+  KOKKOS_INLINE_FUNCTION Between(const T& inf, const Size<TSize>& size) : infimum(inf), supremum(infimum + size.value)
   {
     if constexpr (std::is_integral_v<T>) {
       supremum += InclusiveInfimum + InclusiveSupremum - 1;
@@ -202,7 +202,7 @@ struct Between {
   template <typename TRhs> \
   struct Func<Forward, TRhs> { \
     TRhs rhs; \
-    Func(TRhs value) : rhs {value} {} \
+    KOKKOS_INLINE_FUNCTION Func(TRhs value) : rhs {value} {} \
     KOKKOS_INLINE_FUNCTION auto operator()(const auto& lhs) const \
     { \
       return out; \
@@ -212,7 +212,7 @@ struct Between {
   template <typename TLhs> \
   struct Func<TLhs, Forward> { \
     TLhs lhs; \
-    Func(TLhs value) : lhs {value} {} \
+    KOKKOS_INLINE_FUNCTION Func(TLhs value) : lhs {value} {} \
     KOKKOS_INLINE_FUNCTION auto operator()(const auto& rhs) const \
     { \
       return out; \
@@ -339,7 +339,7 @@ template <typename TFunc0, typename... TFuncs>
 struct Compose<TFunc0, TFuncs...> {
   TFunc0 m_f0;
   Compose<TFuncs...> m_fs;
-  Compose(TFunc0 f0, TFuncs... fs) : m_f0(f0), m_fs(fs...) {};
+  KOKKOS_INLINE_FUNCTION Compose(TFunc0 f0, TFuncs... fs) : m_f0(f0), m_fs(fs...) {};
   KOKKOS_INLINE_FUNCTION auto operator()(auto&&... args) const
   {
     return m_fs(m_f0(LINX_FORWARD(args)...));

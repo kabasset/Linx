@@ -119,7 +119,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION T start() const // FIXME minimum
   {
-    return m_span.func().infimum;
+    return m_span.pred().infimum;
   }
 
   /**
@@ -127,7 +127,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION T stop() const // FIXME rename as supremum
   {
-    return m_span.func().supremum;
+    return m_span.pred().supremum;
   }
 
   /**

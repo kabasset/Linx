@@ -73,7 +73,7 @@ KOKKOS_INLINE_FUNCTION auto interval_stop(const Equal<Forward, T>& interval)
 
 /// @cond
 
-template <typename T, typename TFuncN, typename... TFuncs>
+template <typename T, typename TPredN, typename... TPreds>
 class Slice;
 
 /// @endcond
@@ -83,7 +83,7 @@ namespace Impl {
 /**
  * @brief Helper function to benefit from CTAD on NVCC.
  */
-auto slice_emplace(const auto& slice, auto&&... args)
+KOKKOS_INLINE_FUNCTION auto slice_emplace(const auto& slice, auto&&... args)
 {
   return Slice(Forward(), slice, Slice(LINX_FORWARD(args)...));
 }
@@ -148,36 +148,31 @@ Slice(const T&, const Size<TSize>&)->Span<T>;
 
 /**
  * @brief 1D interval.
- * @tparam TFunc The predicate defining the interval
+ * @tparam TPred The predicate defining the interval
  */
-template <typename T, typename TFunc>
-class Slice<T, TFunc> {
+template <typename T, typename TPred>
+class Slice<T, TPred> {
 public:
 
   using size_type = T; ///< The index and size type
-  using Func = TFunc; ///< The predicate defining the interval
+  using Pred = TPred; ///< The predicate defining the interval
   static constexpr auto n = 1; ///< The region rank
-
-  // Copy and move ctors are needed because of the forwarding ctor below.
-  LINX_DEFAULT_COPYABLE(Slice);
-  LINX_DEFAULT_MOVABLE(Slice);
-  ~Slice() = default;
 
   /**
    * @brief Forwarding constructor.
    */
-  Slice(auto&&... args) : m_func(LINX_FORWARD(args)...) {}
+  KOKKOS_INLINE_FUNCTION Slice(auto&&... args) : m_pred(LINX_FORWARD(args)...) {}
 
   /**
    * @brief Emplace another interval in a new axis.
    */
-  auto operator()(auto&&... args) const
+  KOKKOS_INLINE_FUNCTION auto operator()(auto&&... args) const
   {
     return Impl::slice_emplace(*this, LINX_FORWARD(args)...);
   }
 
   /**
-   * @brief The region rank, always 1.
+   * @brief Region rank, always 1.
    */
   static constexpr int rank()
   {
@@ -185,41 +180,41 @@ public:
   }
 
   /**
-   * @brief The interval size, if bounded.
+   * @brief Interval size, if bounded.
    * 
-   * The function is ill-formed if `interval_size(func())` is not defined.
+   * The function is ill-formed if `interval_size(pred())` is not defined.
    */
   KOKKOS_INLINE_FUNCTION auto size() const
   {
-    return interval_size(m_func);
+    return interval_size(m_pred);
   }
 
   /**
    * @brief Start index, if it exists.
    * 
-   * The function is ill-formed if `interval_start(func())` is not defined.
+   * The function is ill-formed if `interval_start(pred())` is not defined.
    */
   KOKKOS_INLINE_FUNCTION auto start() const
   {
-    return interval_start(m_func);
+    return interval_start(m_pred);
   }
 
   /**
    * @brief Stop index, if it exists.
    * 
-   * The function is ill-formed if `interval_stop(func())` is not defined.
+   * The function is ill-formed if `interval_stop(pred())` is not defined.
    */
   KOKKOS_INLINE_FUNCTION auto stop() const
   {
-    return interval_stop(m_func);
+    return interval_stop(m_pred);
   }
 
   /**
    * @brief Predicate defining the interval.
    */
-  KOKKOS_INLINE_FUNCTION const Func& func() const // FIXME better name?
+  KOKKOS_INLINE_FUNCTION const Pred& pred() const // FIXME better name?
   {
-    return m_func;
+    return m_pred;
   }
 
   /**
@@ -227,12 +222,12 @@ public:
    */
   KOKKOS_INLINE_FUNCTION bool contains(const auto& value) const
   {
-    return m_func(value);
+    return m_pred(value);
   }
 
 private:
 
-  Func m_func; ///< The predicate defining the interval
+  Pred m_pred; ///< The predicate defining the interval
 };
 
 /**
@@ -240,7 +235,7 @@ private:
  * @brief Make an interval clamped between bounds.
  */
 template <std::integral T>
-Span<T> clamp(const Unbounded<T>&, const auto& start, const auto& stop)
+KOKKOS_INLINE_FUNCTION Span<T> clamp(const Unbounded<T>&, const auto& start, const auto& stop)
 {
   return Span<T>(start, stop);
 }
@@ -250,7 +245,7 @@ Span<T> clamp(const Unbounded<T>&, const auto& start, const auto& stop)
  * @brief Make an interval clamped between bounds.
  */
 template <std::integral T>
-Singleton<T> clamp(const Singleton<T>& interval, const auto& start, const auto& stop)
+KOKKOS_INLINE_FUNCTION Singleton<T> clamp(const Singleton<T>& interval, const auto& start, const auto& stop)
 {
   // FIXME OutOfBounds<Span<T>>::may_throw("singleton", interval.start(), Slice(start, stop));
   OutOfBounds<'[', ')'>::may_throw("singleton", interval.start(), {start, stop});
@@ -263,9 +258,9 @@ Singleton<T> clamp(const Singleton<T>& interval, const auto& start, const auto& 
  * @brief Make an interval clamped between bounds.
  */
 template <std::integral T>
-Span<T> clamp(const Span<T>& interval, std::convertible_to<T> auto start, std::convertible_to<T> auto stop)
+KOKKOS_INLINE_FUNCTION Span<T> clamp(const Span<T>& interval, const auto& start, const auto& stop)
 {
-  return Span<T>(std::max<T>(interval.func().infimum, start), std::min<T>(interval.func().supremum, stop));
+  return Span<T>(std::max<T>(interval.pred().infimum, start), std::min<T>(interval.pred().supremum, stop));
 }
 
 /**

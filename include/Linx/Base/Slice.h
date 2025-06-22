@@ -18,10 +18,10 @@ namespace Linx {
 /**
  * @brief Get the interval along i-th axis.
  */
-template <int I, typename T, typename... TFuncs>
-KOKKOS_INLINE_FUNCTION constexpr auto& get(const Slice<T, TFuncs...>& slice) // FIXME in std:: ?
+template <int I, typename T, typename... TPreds>
+KOKKOS_INLINE_FUNCTION constexpr auto& get(const Slice<T, TPreds...>& slice) // FIXME in std:: ?
 {
-  if constexpr (sizeof...(TFuncs) == 1) {
+  if constexpr (sizeof...(TPreds) == 1) {
     return slice;
   } else {
     return slice.template get<I>();
@@ -40,29 +40,25 @@ KOKKOS_INLINE_FUNCTION constexpr auto& get(const Slice<T, TFuncs...>& slice) // 
  * - slices can be unbounded;
  * - slices are defined axis-by-axis while boxes are defined by two ND positions.
  */
-template <typename T, typename TFuncN, typename... TFuncs>
+template <typename T, typename TPredN, typename... TPreds>
 class Slice {
-  friend class Slice<T, TFuncs...>;
-
 public:
 
   using size_type = T; ///< The index and size type
-  static constexpr int n = sizeof...(TFuncs) + 1; ///< The rank
+  static constexpr int n = sizeof...(TPreds) + 1; ///< The rank
 
   /**
    * @brief Extending constructor.
-   * 
-   * Callable only by a slice of rank n-1.
    */
-  Slice(Forward, Slice<T, TFuncs...> fronts, Slice<T, TFuncN> back) :
-      m_fronts(LINX_MOVE(fronts)),
-      m_back(LINX_MOVE(back))
+  KOKKOS_INLINE_FUNCTION Slice(Forward, Slice<T, TPreds...> lower, Slice<T, TPredN> last) :
+      m_lower(LINX_MOVE(lower)),
+      m_last(LINX_MOVE(last))
   {}
 
   /**
    * @brief Extend the slice by emplacing an interval.
    */
-  auto operator()(auto&&... args) const
+  KOKKOS_INLINE_FUNCTION auto operator()(auto&&... args) const
   {
     return Impl::slice_emplace(*this, LINX_FORWARD(args)...);
   }
@@ -82,60 +78,60 @@ public:
    */
   KOKKOS_INLINE_FUNCTION auto size() const
   {
-    return m_fronts.size() * m_back.size();
+    return m_lower.size() * m_last.size();
   }
 
   /**
-   * @brief Get the start index along i-th axis.
+   * @brief Start index along i-th axis.
    */
   KOKKOS_INLINE_FUNCTION auto start(std::integral auto i) const
   {
     if (i == n - 1) {
-      return m_back.start();
+      return m_last.start();
     } else {
-      return m_fronts.start(i);
+      return m_lower.start(i);
     }
   }
 
   /**
-   * @brief Get the stop index along i-th axis.
+   * @brief Stop index along i-th axis.
    */
   KOKKOS_INLINE_FUNCTION auto stop(std::integral auto i) const
   {
     if (i == n - 1) {
-      return m_back.stop();
+      return m_last.stop();
     } else {
-      return m_fronts.stop(i);
+      return m_lower.stop(i);
     }
   }
 
   /**
-   * @brief Get the interval along i-th axis.
+   * @brief Interval along i-th axis.
    */
   template <int I>
   KOKKOS_INLINE_FUNCTION constexpr auto& get() const
   {
     if constexpr (I == n - 1) {
-      return m_back;
+      return m_last;
     } else {
-      return Linx::get<I>(m_fronts);
+      return Linx::get<I>(m_lower);
     }
   }
 
   /**
-   * @brief The slice of immediately lower rank.
+   * @brief Slice of immediately lower rank.
    */
-  KOKKOS_INLINE_FUNCTION const auto& fronts() const // FIXME lower()
+  KOKKOS_INLINE_FUNCTION const auto& lower() const
   {
-    return m_fronts;
+    return m_lower;
   }
 
   /**
-   * @brief The interval along last axis.
+   * @brief Interval along last axis.
    */
-  KOKKOS_INLINE_FUNCTION const auto& back() const // FIXME last()
+  KOKKOS_INLINE_FUNCTION const auto& last() const
   {
-    return m_back;
+    return m_last;
   }
 
   /**
@@ -151,24 +147,21 @@ public:
    */
   friend std::ostream& operator<<(std::ostream& os, const Slice& slice)
   {
-    os << slice.m_fronts << ", " << slice.m_back;
+    os << slice.m_lower << ", " << slice.m_last;
     return os;
   }
 
 private:
 
-  Slice<T, TFuncs...> m_fronts; ///< The front slices
-  Slice<T, TFuncN> m_back; ///< The back slice
+  Slice<T, TPreds...> m_lower; ///< The lower-rank slice
+  Slice<T, TPredN> m_last; ///< The last slice
 };
-
-template <typename T0, typename T1, typename TFuncN, typename... TFuncs>
-Slice(const Forward&, const Slice<T0, TFuncs...>&, const Slice<T1, TFuncN>&) -> Slice<T0, TFuncN, TFuncs...>;
 
 /**
  * @brief Get the Kokkos execution policy of a slice.
  */
-template <typename TSpace, std::integral T, typename TFunc>
-auto kokkos_execution_policy(const Slice<T, TFunc>& region) // FIXME requires start(region), stop(region)
+template <typename TSpace, std::integral T, typename TPred>
+auto kokkos_execution_policy(const Slice<T, TPred>& region) // FIXME requires start(region), stop(region)
 {
   return Kokkos::RangePolicy<TSpace, Kokkos::IndexType<Index>>(region.start(), region.stop());
 }
