@@ -556,7 +556,7 @@ auto operator&(const Slice<T, TFuncs...>& slice, const auto& region) // FIXME re
   if constexpr (last == 0) {
     return clamp(slice, region.start(0), region.stop(0));
   } else {
-    return (slice.fronts() & region)(clamp(slice.back(), region.start(last), region.stop(last)));
+    return Slice(Forward(), slice.fronts() & region, clamp(slice.back(), region.start(last), region.stop(last)));
   }
 }
 

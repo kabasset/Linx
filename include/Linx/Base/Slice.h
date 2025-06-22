@@ -32,7 +32,7 @@ KOKKOS_INLINE_FUNCTION constexpr auto& get(const Slice<T, TFuncs...>& slice) // 
  * @ingroup regions
  * @brief ND slice.
  * 
- * A slice is an ND sequence made of intervals along successive axes.
+ * A slice is an ND region made of intervals along successive axes.
  * Slices are built iteratively by calling `operator()`.
  * For example, Python's `[:, 10, 3:14]` writes `Slice()(10)(3, 14)`.
  * 
@@ -49,8 +49,6 @@ public:
   using size_type = T; ///< The index and size type
   static constexpr int n = sizeof...(TFuncs) + 1; ///< The rank
 
-private:
-
   /**
    * @brief Extending constructor.
    * 
@@ -61,14 +59,12 @@ private:
       m_back(LINX_MOVE(back))
   {}
 
-public:
-
   /**
-   * @brief Extend the slice.
+   * @brief Extend the slice by emplacing an interval.
    */
   auto operator()(auto&&... args) const
   {
-    return Linx::Slice(Forward(), *this, Linx::Slice(LINX_FORWARD(args)...));
+    return Impl::slice_emplace(*this, LINX_FORWARD(args)...);
   }
 
   /**
@@ -126,12 +122,18 @@ public:
     }
   }
 
-  KOKKOS_INLINE_FUNCTION const auto& fronts() const // FIXME prev()?
+  /**
+   * @brief The slice of immediately lower rank.
+   */
+  KOKKOS_INLINE_FUNCTION const auto& fronts() const // FIXME lower()
   {
     return m_fronts;
   }
 
-  KOKKOS_INLINE_FUNCTION const auto& back() const // FIXME last()?
+  /**
+   * @brief The interval along last axis.
+   */
+  KOKKOS_INLINE_FUNCTION const auto& back() const // FIXME last()
   {
     return m_back;
   }
@@ -158,6 +160,9 @@ private:
   Slice<T, TFuncs...> m_fronts; ///< The front slices
   Slice<T, TFuncN> m_back; ///< The back slice
 };
+
+template <typename T0, typename T1, typename TFuncN, typename... TFuncs>
+Slice(const Forward&, const Slice<T0, TFuncs...>&, const Slice<T1, TFuncN>&) -> Slice<T0, TFuncN, TFuncs...>;
 
 /**
  * @brief Get the Kokkos execution policy of a slice.

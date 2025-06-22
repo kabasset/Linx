@@ -78,6 +78,18 @@ class Slice;
 
 /// @endcond
 
+namespace Impl {
+
+/**
+ * @brief Helper function to benefit from CTAD on NVCC.
+ */
+auto slice_emplace(const auto& slice, auto&&... args)
+{
+  return Slice(Forward(), slice, Slice(LINX_FORWARD(args)...));
+}
+
+} // namespace Impl
+
 /**
  * @brief Unbounded interval.
  */
@@ -161,7 +173,7 @@ public:
    */
   auto operator()(auto&&... args) const
   {
-    return Linx::Slice(Forward(), *this, Linx::Slice(LINX_FORWARD(args)...));
+    return Impl::slice_emplace(*this, LINX_FORWARD(args)...);
   }
 
   /**
