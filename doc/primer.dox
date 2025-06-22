@@ -35,6 +35,8 @@ The memory management is delegated to Kokkos, and therefore the memory layout de
 By default, the memory space is that of the default execution space, which is the most accelerated device available.
 However, you can specify the memory space explicitly if needed, and on-host aliases are provided for convenience.
 
+\snippet{trimleft} primer_example.cpp basics
+
 Array elements are preferrably accessed with the call operator, which takes as many arguments as the rank of the array.
 However, for performance reasons, it is recommended to use higher-level operations such as `transform()` or `reduce()` whenever possible,
 using some functional programming style where functions to be applied to the elements are passed to the high-level oeprations.
