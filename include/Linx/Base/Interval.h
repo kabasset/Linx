@@ -147,7 +147,7 @@ template <typename T, typename TSize>
 Slice(const T&, const Size<TSize>&)->Span<T>;
 
 /**
- * @brief 1D interval.
+ * @brief Interval (slice of rank 1).
  * @tparam TPred The predicate defining the interval
  */
 template <typename T, typename TPred>
@@ -231,6 +231,39 @@ private:
 };
 
 /**
+ * @brief Exception thrown if a value lies out of given bounds.
+ * 
+ * @tparam TSlice The interval type
+ */
+template <typename TSlice>
+class OutOfBounds : public Exception {
+public:
+
+  OutOfBounds(const std::string& name, auto value, const TSlice& bounds) :
+      Exception("Out of bounds", name + " " + std::to_string(value) + " not in ")
+  {
+    std::stringstream ss;
+    ss << bounds;
+    append(ss.str());
+  }
+
+  /**
+   * @brief Constructor.
+   */
+  OutOfBounds(const std::string& name, auto value, const auto&... args) : OutOfBounds(name, value, TSlice(args...)) {}
+
+  /**
+   * @brief Throw if a value lies out of given bounds.
+   */
+  static void may_throw(const std::string& name, auto value, auto&&... args)
+  {
+    if (not TSlice(LINX_FORWARD(args)...).contains(value)) {
+      throw OutOfBounds(name, value, LINX_FORWARD(args)...);
+    }
+  }
+};
+
+/**
  * @relatesalso Slice
  * @brief Make an interval clamped between bounds.
  */
@@ -247,9 +280,8 @@ KOKKOS_INLINE_FUNCTION Span<T> clamp(const Unbounded<T>&, const auto& start, con
 template <std::integral T>
 KOKKOS_INLINE_FUNCTION Singleton<T> clamp(const Singleton<T>& interval, const auto& start, const auto& stop)
 {
-  // FIXME OutOfBounds<Span<T>>::may_throw("singleton", interval.start(), Slice(start, stop));
-  OutOfBounds<'[', ')'>::may_throw("singleton", interval.start(), {start, stop});
-  // Return an interval, not a span, to ensure slicing with a singleton reduces rank
+  OutOfBounds<Span<T>>::may_throw("singleton", interval.start(), start, stop);
+  // Always return a singleton, not a span, to ensure slicing with a singleton reduces rank
   return interval;
 }
 

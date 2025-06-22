@@ -6,9 +6,9 @@
 #define LINX_BASE_REDUCTION_H
 
 #include "Linx/Base/Containers.h"
-#include "Linx/Base/Exceptions.h"
 #include "Linx/Base/Functional.h"
 #include "Linx/Base/Packs.h"
+#include "Linx/Base/Slice.h" // OutOfBounds
 #include "Linx/Base/Types.h"
 #include "Linx/Base/mixins/Data.h"
 
@@ -196,7 +196,7 @@ void kokkos_reduce(const std::string& label, const TRegion& region, const TProj&
         LINX_CASE_RANK(5)
         LINX_CASE_RANK(6)
       default:
-        throw Linx::OutOfBounds<'[', ']'>("Dynamic rank", region.rank(), {0, 6});
+        throw Linx::OutOfBounds("Dynamic rank", region.rank(), Segment<int>(0, 6));
     }
   } else {
     Impl::kokkos_reduce_impl<TSpace>(label, region, projection, reducer, std::make_index_sequence<TRegion::n>());

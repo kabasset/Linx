@@ -625,7 +625,7 @@ void for_each(const std::string& label, const GBox<T, N>& region, TFunc&& func)
         LINX_CASE_RANK(5)
         LINX_CASE_RANK(6)
       default:
-        throw Linx::OutOfBounds<'[', ']'>("Dynamic rank", region.rank(), {0, 6});
+        throw Linx::OutOfBounds("Dynamic rank", region.rank(), Segment<int>(0, 6));
     }
   } else {
     Kokkos::parallel_for(label, kokkos_execution_policy<TSpace>(region), LINX_FORWARD(func));

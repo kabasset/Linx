@@ -112,59 +112,6 @@ public:
   }
 };
 
-/**
- * @brief Exception thrown if a value lies out of given bounds.
- * 
- * @tparam Lower The type of lower bound (either `'['` or `'('`)
- * @tparam Upper The type of the upper bound (either `']'` or `')'`)
- * 
- * Example usage:
- * 
- * \code
- * OutOfBounds<'[', ')'>::may_throw("index", i, {0, size});
- * \endcode
- */
-template <char Lower, char Upper> // FIXME assert possible values
-class OutOfBounds : public Exception {
-public:
-
-  /**
-   * @brief Constructor.
-   */
-  OutOfBounds(const std::string& name, auto value, const auto(&bounds)[2]) :
-      // FIXME swap value and bounds
-      Exception(
-          "Out of bounds",
-          name + " " + std::to_string(value) + " not in " + Lower + std::to_string(bounds[0]) + ", "
-              + std::to_string(bounds[1]) + Upper)
-  {}
-
-  /**
-   * @brief Throw if a value lies out of given bounds.
-   */
-  static void may_throw(const std::string& name, auto value, const auto(&bounds)[2]) // FIXME swap value and bounds
-  {
-    if constexpr (Lower == '[') {
-      if (value < bounds[0]) {
-        throw OutOfBounds(name, value, bounds);
-      }
-    } else {
-      if (value <= bounds[0]) {
-        throw OutOfBounds(name, value, bounds);
-      }
-    }
-    if constexpr (Upper == ']') {
-      if (value > bounds[1]) {
-        throw OutOfBounds(name, value, bounds);
-      }
-    } else {
-      if (value >= bounds[1]) {
-        throw OutOfBounds(name, value, bounds);
-      }
-    }
-  }
-};
-
 } // namespace Linx
 
 #endif
