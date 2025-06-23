@@ -441,12 +441,81 @@ decltype(auto) on_device(const Image<T, N, TContainer>& in)
   }
 }
 
+/**
+ * @brief Create an image with the same memory layout as another image.
+ * @tparam U The type of the elements in the new image (defaults to the type of the elements in the input image)
+ */
 template <typename U = void, typename T, int N, typename TContainer>
 auto same_layout(const std::string& label, const Image<T, N, TContainer>& in)
 {
   return Image<typename Rebind<T>::As<U>, N, typename Rebind<TContainer>::As<U>>(
       Forward(),
       same_layout<U>(label, in.container()));
+}
+
+/**
+ * @brief Contiguous image on host with row-major ordering.
+ * 
+ * This specialization is mostly provided for interfacing with legacy code.
+ * Row-major ordering means that the elements are contiguous along the first index,
+ * which is conventionally considered to be the index along a row:
+ * 
+ * \code
+ * Raster<int, 2> raster(shape);
+ * assert(&raster(x, y) + 1 == &raster(x + 1, y));
+ * \endcode
+ * 
+ * Said otherwise, the stride along axis 0 is 1.
+ */
+template <typename T, int N = 2>
+using Raster = Image<T, N, ImageContainer<T, N, Kokkos::LayoutLeft, Kokkos::HostSpace>>;
+
+/**
+ * @brief Create a 1D image made of a single row.
+ */
+template <typename T>
+auto rowwise(const std::string& label, std::initializer_list<T> row)
+{
+  auto out = Image<T, 1>(label, row.size());
+  auto sequence = GPosition<T, -1>("sequence", row);
+  Kokkos::deep_copy(out.container(), sequence.container());
+  return out;
+}
+
+/**
+ * @brief Create a 2D image from a collection of rows.
+ */
+template <typename T>
+auto rowwise(const std::string& label, std::initializer_list<std::initializer_list<T>> rows)
+{
+  auto out = Image<T, 2>(label, rows.size(), rows.begin()->size());
+  auto raster = Raster<T, 2>("raster", out.shape());
+  auto data = raster.data();
+  for (const auto& row : rows) {
+    std::copy(row.begin(), row.end(), data);
+    data += raster.stride(1);
+  }
+  Kokkos::deep_copy(out.container(), raster.container());
+  return out;
+}
+
+/**
+ * @brief Create a 3D image from a collection of rows.
+ */
+template <typename T>
+auto rowwise(const std::string& label, std::initializer_list<std::initializer_list<std::initializer_list<T>>> rows)
+{
+  auto out = Image<T, 3>(label, rows.size(), rows.begin()->size(), rows.begin()->begin()->size());
+  auto raster = Raster<T, 3>("raster", out.shape());
+  auto data = raster.data();
+  for (const auto& slice : rows) {
+    for (const auto& row : slice) {
+      std::copy(row.begin(), row.end(), data);
+      data += raster.stride(1);
+    }
+  }
+  Kokkos::deep_copy(out.container(), raster.container());
+  return out;
 }
 
 /**
@@ -468,23 +537,6 @@ auto end(const Image<T, N, TContainer>& image)
 {
   return begin(image) + image.size();
 }
-
-/**
- * @brief Contiguous image on host with row-major ordering.
- * 
- * This specialization is mostly provided for interfacing with legacy code.
- * Row-major ordering means that the elements are contiguous along the first index,
- * which is conventionally considered to be the index along a row:
- * 
- * \code
- * Raster<int, 2> raster(shape);
- * assert(&raster(x, y) + 1 == &raster(x + 1, y));
- * \endcode
- * 
- * Said otherwise, the stride along axis 0 is 1.
- */
-template <typename T, int N = 2>
-using Raster = Image<T, N, ImageContainer<T, N, Kokkos::LayoutLeft, Kokkos::HostSpace>>;
 
 } // namespace Linx
 
