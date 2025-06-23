@@ -79,39 +79,42 @@ BOOST_AUTO_TEST_CASE(image_null_rank_test)
   //! [image_null_rank]
 }
 
-BOOST_AUTO_TEST_CASE(creation_test)
+BOOST_AUTO_TEST_CASE(rowwise_test)
 {
-  //! [creation]
+  //! [rowwise]
   auto a = Linx::rowwise("1D", {1.0, 2.0});
   auto b = Linx::rowwise("2D", {{'a', 'b'}, {'c', 'd'}});
   auto c = Linx::rowwise("3D", {{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}});
-  //! [creation]
+  //! [rowwise]
 
   static_assert(std::is_same_v<decltype(a)::element_type, double>);
-  BOOST_TEST(a.n == 1);
-  BOOST_TEST(a.size() == 2);
+  ASSERT(a.n == 1);
+  ASSERT(a.label() == "1D");
+  ASSERT(a.size() == 2);
   const auto& a_on_host = Linx::on_host(a);
   ASSERT(a_on_host(0) == 1);
   ASSERT(a_on_host(1) == 2);
 
   static_assert(std::is_same_v<decltype(b)::element_type, char>);
-  BOOST_TEST(b.n == 2);
-  BOOST_TEST(b.size() == 4);
+  ASSERT(b.n == 2);
+  ASSERT(b.label() == "2D");
+  ASSERT(b.size() == 4);
   const auto& b_on_host = Linx::on_host(b);
   for (int j = 0; j < 2; ++j) {
     for (int i = 0; i < 2; ++i) {
-      BOOST_TEST(b_on_host(i, j) == char('a' + 2 * j + i));
+      ASSERT(b_on_host(i, j) == char('a' + 2 * j + i));
     }
   }
 
   static_assert(std::is_same_v<decltype(c)::element_type, int>);
-  BOOST_TEST(c.n == 3);
-  BOOST_TEST(c.size() == 8);
+  ASSERT(c.n == 3);
+  ASSERT(c.label() == "3D");
+  ASSERT(c.size() == 8);
   const auto& c_on_host = Linx::on_host(c);
   for (int k = 0; k < 2; ++k) {
     for (int j = 0; j < 2; ++j) {
       for (int i = 0; i < 2; ++i) {
-        BOOST_TEST(c_on_host(i, j, k) == 1 + 4 * k + 2 * j + i);
+        ASSERT(c_on_host(i, j, k) == 1 + 4 * k + 2 * j + i);
       }
     }
   }

@@ -78,6 +78,12 @@ As opposed to tensor libraries, they are not treated as scalars, but as empty co
 
 \snippet{trimleft} arrays_example.cpp image_null_rank
 
+\section arrays-creation Array creation
+
+Image of up to 3 dimensions can be created from initializer lists representing rows using function `rowwise()`.
+
+\snippet{trimleft} arrays_example.cpp rowwise
+
 \section arrays-access Element access
 
 Both `Sequence` and `Image` classes provide access to their elements through indexing operators.
