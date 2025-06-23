@@ -27,4 +27,7 @@
 \defgroup io Input/output
 \brief FITS I/O
 
+\defgroup design Design principles
+\brief Memory management, performance, extensibility
+
 */

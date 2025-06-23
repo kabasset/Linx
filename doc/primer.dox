@@ -7,11 +7,15 @@ namespace Linx {
 \section primer-intro Purpose
 
 On one hand, many C++ libraries focus on signal or image processing, like OpenCV or CImg,
-some of which also handle multi-dimensional arrays, like ITK and xTensor.
+some of which also handle multi-dimensional arrays, like ITK and XTensor.
 On the other hand, Kokkos, Raja, Sycl, and the likes focus on performance portability,
-i.e. the ability to write a single code able to run on a variety of targets, including many-core processors and GPUs.
+but do not provide high-level interfaces for signal or image processing.
 Linx aims at bridging the gap between multidimensional image processing and performance portability.
-It relies on Kokkos to enable seamless interfacing with the Kokkos ecosystem.
+It relies on Kokkos to enable seamless interfacing with the Kokkos ecosystem,
+and can be used in conjunction with other libraries like the stardard library or CImg.
+
+Linx also comes with utilities for building processing workflows,
+and a few demonstration and benchmarking executables.
 
 \see https://kokkos.org/kokkos-core-wiki/programmingguide.html
 
@@ -19,12 +23,16 @@ It relies on Kokkos to enable seamless interfacing with the Kokkos ecosystem.
 
 The execution space is the processing unit which executes given instructions.
 Kokkos and Linx rely on two kinds of execution spaces:
-the host is the CPU,
-and the acceleration device -- or simply device -- is typically a GPU.
+the host spaces are the ones supplied by the (generally multicore) CPU,
+and device spaces are the ones supplied by the acceleration device, is typically a GPU.
+The simplest execution space is `Serial`, which executes instructions sequentially on the host.
+The `OpenMP` execution space uses multiple threads on the host, and the `Cuda` execution space uses the GPU.
+By default, Linx uses the most accelerated device available, but you can specify the execution space explicitly if needed.
 
 Generally, execution spaces have dedicated and disjoint memory spaces,
 so that data has to be allocated according to execution spaces.
-You are responsible for choosing the memory space.
+The memory space is chosen at construction of the data classes.
+By default, Linx choses the fastest space available.
 Then, whenver possible, Linx will automatically select the execution space
 according to the memory space of the data to be processed.
 
@@ -32,14 +40,15 @@ according to the memory space of the data to be processed.
 
 Linx provides class templates `Sequence` and `Image` to represent one-dimensional and multidimensional arrays, respectively.
 The memory management is delegated to Kokkos, and therefore the memory layout depends on the execution space.
-By default, the memory space is that of the default execution space, which is the most accelerated device available.
+As aforementioned, by default, the memory space is that of the default execution space.
 However, you can specify the memory space explicitly if needed, and on-host aliases are provided for convenience.
 
 \snippet{trimleft} primer_example.cpp basics
 
-Array elements are preferrably accessed with the call operator, which takes as many arguments as the rank of the array.
+Array elements can be accessed with the call operator, which takes as many arguments as the rank of the array.
 However, for performance reasons, it is recommended to use higher-level operations such as `transform()` or `reduce()` whenever possible,
 using some functional programming style where functions to be applied to the elements are passed to the high-level oeprations.
+Most common use cases also have builtin functions.
 The following examples illustrate the different levels of abstraction available.
 
 \snippet{trimleft} primer_example.cpp array_access_transform

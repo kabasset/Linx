@@ -4,14 +4,10 @@
 
 ## Introduction
 
-Linx stands for cross-platform, extensible ND image laboratory.
-This is a template-heavy library made for handling multi-dimensional data and associated signal processing.
-By default, memory is allocated on available acceleration devices (typically GPU's)
-and transfers between the host and devices should be minimal.
-Using templates opens the library for extension, in order to maximize compatibility with established libraries
-and enable implementing additional features in user code with zero performance cost.
-Internally, we also rely heavily on metaprogramming to enable as many compile-time optimizations as we can.
-The library comes with utilities for building processing workflows, and a few demonstration executables.
+Linx is a package for parallel multidimensional signal and image processing.
+It focuses on performance portability, i.e. the ability to write a single code able to perform efficiently on a variety of targets, including many-core processors and GPUs.
+Built on top of Kokkos, Linx provides a higher-level interface for writing parallel processing workflows,
+using arithmetic operations, linear and non-linear filtering, random number generation, and more.
 
 ## License
 
@@ -22,7 +18,8 @@ Linx is licensed under [Apache-2.0](LICENSE.txt).
 Linx relies on C++20 features.
 It depends on Kokkos and CFITSIO.
 While CFITSIO binaries are available, Kokkos has to be built from sources for performance.
-Kokkos' serial execution space is mandatory, while OpenMP and Cuda backends are optional.
+Kokkos' `Serial` execution space is mandatory, while `OpenMP` and `Cuda` backends are optional.
+Other backends have not been tested.
 
 ```sh
 export KOKKOS_SOURCE_DIR=<kokkos_source_dir>
@@ -54,11 +51,11 @@ make test
 make install
 ```
 
-## Design concepts
+## API overview
 
 **Data containers**
 
-There are two main data containers: `Sequence` for 1D data, and `Image` for ND data.
+There are two main data containers: `Sequence` for 1D arrays, and `Image` for ND arrays.
 Underlying storage is handled by Kokkos by default, and adapts to the target infrastructure.
 There is generally no memory ordering or contiguity guarantee for `Image` objects.
 In return, execution is automatically parallelized by Kokkos, including on GPU.
@@ -137,7 +134,7 @@ There are two ways to work on subsets of elements:
 Slices are created from regions of type either `Slice` or `Box`.
 
 Patches accept any type of region, are extremely lightweight and can be moved around when the region is a window, i.e. has shifting capabilities.
-Typical windows are `Box`, `Mask` or `Path` and can be used to apply filters.
+Typical windows are `Box`, `Mask` or `Path` and can be used to perform operations locally.
 As opposed to slicing, patching results in an object of type `Patch` instead of simply `Sequence` or `Image`.
 Nevertheless, patches are themselves data containers and can be transformed pointwise:
 
@@ -189,20 +186,18 @@ read an image, dilate it with an L2-ball structuring element, and write the outp
 **ITK**
 
 ```cpp
-using T = unsigned char;
-static constexpr unsigned int N = 2;
-using Image = itk::Image<T, N>;
+using Image = itk::Image<int, 2>;
 
-auto raw = itk::ReadImage<ImageType>(input);
+auto raw = itk::ReadImage<Image>(filename);
 
-using StructuringElement = itk::FlatStructuringElement<N>;
+using StructuringElement = itk::FlatStructuringElement<2>;
 using GrayscaleDilateImageFilter = itk::GrayscaleDilateImageFilter<Image, Image, StructuringElement>;
 
 StructuringElement::RadiusType strelRadius;
 strelRadius.Fill(radius);
 StructuringElementType ball = StructuringElement::Ball(strelRadius);
 GrayscaleDilateImageFilter::Pointer dilateFilter = GrayscaleDilateImageFilter::New();
-dilateFilter->SetInput(input);
+dilateFilter->SetInput(raw);
 dilateFilter->SetKernel(ball);
 
 itk::WriteImage(dilateFilter->GetOutput(), output);
@@ -211,9 +206,7 @@ itk::WriteImage(dilateFilter->GetOutput(), output);
 **CImg** (limited to N <= 3)
 
 ```cpp
-using T = unsigned char;
-
-auto raw = cimg::CImg<T>().load(input);
+auto raw = cimg::CImg<int>().load(filename);
 
 cimg::CImg<bool> ball(2 * radius + 1, 2 * radius + 1, 2 * radius + 1, 1, false);
 bool color[1] = {true};
@@ -226,13 +219,10 @@ dilated.write(output);
 **Linx**
 
 ```cpp
-using T = unsigned char;
-static constexpr Linx::Index n = 2;
+auto raw = Linx::read<int, 2>(filename);
 
-auto raw = Linx::read<T, n>(input);
-
-auto ball = Linx::Mask<n>::ball<2>(radius);
-auto dilated = Linx::Dilation(ball) * raw;
+auto ball = Linx::Mask<2>::ball(radius);
+auto dilated = Linx::Dilation(ball).pad(0)(raw);
 
 Linx::write(dilated, output);
 ```
@@ -240,7 +230,7 @@ Linx::write(dilated, output);
 **NumPy/SciKit**
 
 ```python
-raw = np.load(input)
+raw = np.load(filename)
 
 ball = skimage.morphology.disk(radius)
 dilated = skimage.morphology.dilation(raw, ball)

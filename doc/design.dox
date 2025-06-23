@@ -1,0 +1,31 @@
+namespace Linx {
+
+/**
+
+\addtogroup design
+
+\section design-memory Memory management
+
+By default, memory is allocated on available acceleration devices (typically GPU's)
+in order to minimize the costly transfers between the host and acceleration devices.
+
+\section design-efficiency Performance and efficiency
+
+Efficiency is the branch of performance which focuses on minimizing resource wastage.
+This includes minimizing data movement and using available cores fully.
+
+Wherever possible, we have designed Linx following Zero Cost Abstraction principles
+(e.g. compile-time polymorphism or inlining- and compiler-friendly code),
+ensuring that abstractions do not introduce any runtime overhead.
+To this end, the library makes heavy use of template and metaprogramming techniques.
+Most notably, interfaces are implemented as mixins instead of abstract classes.
+
+\section design-extensibility Extensibility
+
+We refer to Linx as a laboratory instead of a library because it is design for extensibility.
+Using templates opens the library for extension, in order to maximize compatibility with established libraries
+and enable implementing additional features in user code without any performance cost.
+
+*/
+
+}

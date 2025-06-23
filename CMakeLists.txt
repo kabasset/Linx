@@ -5,7 +5,7 @@ project(
   Linx
   VERSION 1.0
   LANGUAGES CXX
-  DESCRIPTION "Cross-platform ND image library")
+  DESCRIPTION "Extensible, cross-platform ND image laboratory")
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
