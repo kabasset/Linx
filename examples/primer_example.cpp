@@ -54,14 +54,14 @@ BOOST_AUTO_TEST_CASE(inplace_newinstance_test)
 BOOST_AUTO_TEST_CASE(array_access_transform_test)
 {
   //! [array_access_transform]
-  auto in = Linx::generate<10>("noise", Linx::PoissonRng(20.));
+  auto a = Linx::generate<10>("noise", Linx::PoissonRng(20.));
 
-  auto manual = Linx::same_layout("sqrt(noise)", in);
-  Linx::for_each("sqrt", in.domain(), KOKKOS_LAMBDA(int i) { manual(i) = Kokkos::sqrt(in(i)); });
+  auto manual = Linx::same_layout("sqrt(noise)", a);
+  Linx::for_each("sqrt", a.domain(), KOKKOS_LAMBDA(int i) { manual(i) = Kokkos::sqrt(a(i)); });
 
-  auto functional = Linx::generate("sqrt", Linx::Sqrt(), in);
+  auto functional = Linx::generate("sqrt", Linx::Sqrt(), a);
 
-  auto builtin = Linx::sqrt(in);
+  auto builtin = Linx::sqrt(a);
 
   ASSERT(manual == builtin);
   ASSERT(functional == builtin);
