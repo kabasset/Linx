@@ -83,12 +83,24 @@ BOOST_AUTO_TEST_CASE(rowwise_test)
 BOOST_AUTO_TEST_CASE(wrap_test)
 {
   //! [wrap]
+  auto v = std::vector {1, 2, 3, 4, 5, 6};
+  auto a = Linx::Raster<int, 2>(Linx::Wrap(v.data()), 3, 2);
+  a.pow(2);
+
+  ASSERT(a(2, 0) == 9);
+  ASSERT(v[2] == 9);
   //! [wrap]
 }
 
 BOOST_AUTO_TEST_CASE(copy_test)
 {
   //! [copy]
+  auto v = std::vector {1, 2, 3, 4, 5, 6};
+  auto a = Linx::Position<-1>("copy", v);
+  a.pow(2);
+
+  ASSERT(a(2) == 9);
+  ASSERT(v[2] == 3);
   //! [copy]
 }
 
