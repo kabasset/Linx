@@ -6,6 +6,10 @@
 \defgroup arrays 1D, ND arrays
 \brief Sequences, images, rasters, etc.
 
+\defgroup creation Array creation
+\ingroup arrays
+\brief From C arrays, constant, generators, etc.
+
 \defgroup regions Regions, slices, patches
 \brief Boxes, slices, patches, etc.
 

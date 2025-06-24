@@ -1,0 +1,61 @@
+namespace Linx {
+
+/**
+
+\addtogroup creation
+
+\section creation-intro Introduction
+
+There are many ways to create arrays:
+
+- From default values;
+- Row by row, from C arrays;
+- By wrapping a pointer;
+- By copying a range or another array;
+- Through builtin functions like `fill()` and `linspace()`;
+- Through generators with `generate()`;
+- As the result of a transfrom: arithmetic operation, mathematical function, filter...
+
+
+\section creation-default Default
+
+Basic `Sequence` and `Image` constructors default-initialize the elements.
+
+\snippet{trimleft} creation_example.cpp default
+
+\section creation-rowwise From C arrays
+
+Image of up to 3 dimensions can be created from brace-enclosed lists or C arrays representing rows using function `rowwise()`.
+The data type can be deduced or provided.
+
+\snippet{trimleft} creation_example.cpp rowwise
+
+\section creation-wrap Pointer wrapping
+
+`Sequence` and `Image` can serve as adaptors for C pointers, in which case they do not manage memory:
+no allocation or deallocation is performed.
+This is useful to enable signal or image processing for arbitrary containers.
+
+\snippet{trimleft} creation_example.cpp wrap
+
+\section creation-copy Range copy
+
+TODO
+
+\snippet{trimleft} creation_example.cpp copy
+
+\section creation-builtins Builtin functions
+
+TODO
+
+\snippet{trimleft} creation_example.cpp builtins
+
+\section creation-generators Generators
+
+TODO
+
+\snippet{trimleft} creation_example.cpp generators
+
+*/
+
+}
