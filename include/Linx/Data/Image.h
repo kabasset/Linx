@@ -473,28 +473,24 @@ using Raster = Image<T, N, ImageContainer<T, N, Kokkos::LayoutLeft, Kokkos::Host
 /**
  * @brief Create a 1D image made of a single row.
  */
-template <typename T>
-auto rowwise(const std::string& label, std::initializer_list<T> row)
+template <typename T, int N>
+auto rowwise(const std::string& label, T (&&row)[N])
 {
-  auto out = Image<T, 1>(label, row.size());
-  auto sequence = GPosition<T, -1>("sequence", row);
-  Kokkos::deep_copy(out.container(), sequence.container());
+  auto raster = Raster<T, 1>(Wrap(row), N);
+  auto out = Image<T, 1>(label, N);
+  Kokkos::deep_copy(out.container(), raster.container());
   return out;
 }
 
 /**
  * @brief Create a 2D image from a collection of rows.
  */
-template <typename T>
-auto rowwise(const std::string& label, std::initializer_list<std::initializer_list<T>> rows)
+template <typename T, int N0, int N1>
+auto rowwise(const std::string& label, T (&&rows)[N1][N0])
 {
-  auto out = Image<T, 2>(label, rows.size(), rows.begin()->size());
-  auto raster = Raster<T, 2>("raster", out.shape());
-  auto data = raster.data();
-  for (const auto& row : rows) {
-    std::copy(row.begin(), row.end(), data);
-    data += raster.stride(1);
-  }
+  T* data = *rows;
+  auto raster = Raster<T, 2>(Wrap(data), N0, N1);
+  auto out = Image<T, 2>(label, N0, N1);
   Kokkos::deep_copy(out.container(), raster.container());
   return out;
 }
@@ -502,18 +498,12 @@ auto rowwise(const std::string& label, std::initializer_list<std::initializer_li
 /**
  * @brief Create a 3D image from a collection of rows.
  */
-template <typename T>
-auto rowwise(const std::string& label, std::initializer_list<std::initializer_list<std::initializer_list<T>>> rows)
+template <typename T, int N0, int N1, int N2>
+auto rowwise(const std::string& label, T (&&rows)[N2][N1][N0])
 {
-  auto out = Image<T, 3>(label, rows.size(), rows.begin()->size(), rows.begin()->begin()->size());
-  auto raster = Raster<T, 3>("raster", out.shape());
-  auto data = raster.data();
-  for (const auto& slice : rows) {
-    for (const auto& row : slice) {
-      std::copy(row.begin(), row.end(), data);
-      data += raster.stride(1);
-    }
-  }
+  T* data = **rows;
+  auto raster = Raster<T, 3>(Wrap(data), N0, N1, N2);
+  auto out = Image<T, 3>(label, N0, N1, N2);
   Kokkos::deep_copy(out.container(), raster.container());
   return out;
 }
