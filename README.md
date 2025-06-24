@@ -21,31 +21,35 @@ While CFITSIO binaries are available, Kokkos has to be built from sources for pe
 Kokkos' `Serial` execution space is mandatory, while `OpenMP` and `Cuda` backends are optional.
 Other backends have not been tested.
 
+The following lines will clone and install Kokkos and Linx in given directories.
+
 ```sh
-export KOKKOS_SOURCE_DIR=<kokkos_source_dir>
-export KOKKOS_BUILD_DIR=<kokkos_build_dir>
+export CLONE_DIR=<clone_dir>
 export KOKKOS_INSTALL_DIR=<kokkos_install_dir>
+export LINX_INSTALL_DIR=<linx_install_dir>
 
-cd $KOKKOS_SOURCE_DIR
+cd $CLONE_DIR
 git clone https://github.com/kokkos/kokkos.git
+cd kokkos
+export KOKKOS_SOURCE_DIR=$PWD
 
-mkdir $KOKKOS_BUILD_DIR
-cd $KOKKOS_BUILD_DIR
-cmake $KOKKOS_SOURCE_DIR/kokkos -DCMAKE_CXX_STANDARD=20 \
-  -DCMAKE_CXX_COMPILER=$KOKKOS_SOURCE_DIR/bin/nvcc_wrapper -DCMAKE_INSTALL_PREFIX=$KOKKOS_INSTALL_DIR \
-  -DKokkos_ENABLE_SERIAL=ON \
-  [-DKokkos_ENABLE_OPENMP=ON] \
-  [-DKokkos_ENABLE_CUDA=ON -DKokkos_ENABLE_CUDA_CONSTEXPR=ON]
-make install
-```
-
-Assuming the Linx sources have been cloned or downloaded,
-the following commands can be run from the source directory for building, testing and installing the library and executables.
-
-```sh
 mkdir build
 cd build
-cmake .. -DCMAKE_PREFIX_PATH=$KOKKOS_INSTALL_DIR
+cmake $KOKKOS_SOURCE_DIR -DCMAKE_CXX_STANDARD=20 \
+  -DCMAKE_INSTALL_PREFIX=$KOKKOS_INSTALL_DIR \
+  -DKokkos_ENABLE_SERIAL=ON \
+  [-DKokkos_ENABLE_OPENMP=ON] \
+  [-DKokkos_ENABLE_CUDA=ON -DKokkos_ENABLE_CUDA_CONSTEXPR=ON -DCMAKE_CXX_COMPILER=$KOKKOS_SOURCE_DIR/bin/nvcc_wrapper]
+make install
+
+cd $CLONE_DIR
+git clone https://github.com/kabasset/Linx.git
+cd Linx
+export LINX_SOURCE_DIR=$PWD
+
+mkdir build
+cd build
+cmake .. -DKokkos_ROOT=$KOKKOS_INSTALL_DIR -DCMAKE_INSTALL_PREFIX=$LINX_INSTALL_DIR
 make
 make test
 make install
