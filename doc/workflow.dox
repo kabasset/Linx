@@ -23,7 +23,7 @@ Pipelines are the simplest workflows:
 They merely chain operations together without any branching.
 The following example pipeline is initialized with some timer, then performs a median filter followed by series of pixelwise operations:
 
-```cpp
+```
 Linx::TimerLogger logger;
 auto [out] = Linx::Flow("Compute noise map", logger)
     .append(in)

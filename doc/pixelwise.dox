@@ -24,7 +24,7 @@ Patches inherit the arithmetics from their parent.
 Many mathematical functions are implemented in the parent class `MathFunctionsMixin`.
 Class methods act on the elements in place, while free functions create new instances:
 
-```cpp
+```
 auto a = Linx::Image("label", shape);
 a.exp(); // Modify `a` elements in place
 auto b = Linx::exp(a); // Create `b`, do not modify `a`
@@ -33,7 +33,7 @@ auto c = +a; // Deep copy `a`
 
 When the operators or functions expect parameters, scalars or containers of compatible shapes are accepted:
 
-```cpp
+```
 a.pow(b);
 a.pow(2);
 auto c = Linx::pow(a, b);
@@ -46,7 +46,7 @@ and an arbitrary number of inputs (can be 0).
 
 For example, to compute `a * k + b`, with `k` some scalar, do:
 
-```cpp
+```
 a.transform(
     "a * k + b",
     KOKKOS_LAMBDA(a_i, b_i) { return a_i * k * b_i; },
@@ -55,7 +55,7 @@ a.transform(
 
 This is equivalent but much faster than doing simply:
 
-```cpp
+```
 a = a * k + b;
 ```
 
@@ -67,7 +67,7 @@ This can be seen as an equivalent to NumPy's, XTensor's or Eigen's lazy evaluati
 Method `generate()` is similar to `transform()` but the functor it calls does not take as parameter the array it is called from,
 that is, the following lines are strictly equivalent:
 
-```cpp
+```
 a.transform("a += b", Linx::Add(), b);
 a.generate("a = a + b", Linx::Add(), a, b);
 ```
@@ -80,7 +80,7 @@ This is useful when element ordering matters,
 for example for generating sequences with operations like `range()`, `linspace()`,
 or for iterating thanks to compatibility with standard C++ ranges, through `begin()` and `end()` functions.
 
-```cpp
+```
 auto a = Linx::Sequence<float, 1000>("sine").linspace(Linx::Slice(0, 2 * std::numbers::pi));
 for (auto& e : a) {
   e = Kokkos::sin(e);
@@ -89,13 +89,13 @@ for (auto& e : a) {
 
 The above snippet could be written more concisely and efficiently by using the `apply` method:
 
-```cpp
+```
 auto a = Linx::linspace<1000>("sine", Linx::Slice(0, 2 * std::numbers::pi)).sin();
 ```
 
 or even more efficiently with a single pass:
 
-```cpp
+```
 auto b = Linx::generate<float, 1000>("sine", Linx::Multiply(2 * std::numbers::pi / 1000), Linx::Sin());
 ```
 

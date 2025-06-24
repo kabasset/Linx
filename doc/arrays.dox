@@ -16,7 +16,7 @@ Such operations encompass element-wise arithmetic or mathematical functions, red
 as well as global transforms such as filtering and Fourier transforms.
 Slicing and domain restriction enable operations over arbitrary regions.
 
-```cpp
+```
 template <typename T, int N, typename TContainer = ImageContainer<T, N>>
 class Image;
 

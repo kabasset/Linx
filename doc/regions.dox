@@ -19,7 +19,7 @@ Slices are created with a syntax analogous to Python's slicing:
 
 Such constructs can be combined to create multi-dimensional slices.
 
-```cpp
+```
 // Keep x from 1 to 3, all y's, and z = 5
 // The output slice is a 2D Image
 auto slice = image[Linx::Slice(1, 4)()(5)];
@@ -31,7 +31,7 @@ assert(slice.data() == image.data());
 In contrast to slices, no assumptions are made on the memory layout of patches, therefore they support domains of any kind.
 `Patch` is an extremely lightweight class that simply holds a domain and a pointer to the parent data.
 
-```cpp
+```
 auto patch = Linx::Patch(image, any_domain);
 assert(patch.domain() == any_domain);
 assert(patch.parent() == image);
@@ -40,7 +40,7 @@ assert(patch.data() == image.data());
 
 Still, simple domains like boxes or slices can be used to create patches as well:
 
-```cpp
+```
 auto patch = Linx::Patch(image, Linx::Slice(1, 4)()(5));
 assert(patch.n == 3);
 ```

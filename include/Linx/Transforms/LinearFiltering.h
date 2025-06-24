@@ -228,7 +228,7 @@ auto separable_laplacian(T s = T(1))
  * 
  * Example 2D Gaussian filtering of an image with 0-padding:
  * 
- * ```cpp
+ * ```
  * auto sigma = 3.0;
  * auto kernel = Linx::sampled_gaussian_kernel(sigma, 3 * sigma);
  * auto filter = Linx::convolution_along<0, 1>(kernel);
@@ -241,7 +241,10 @@ Shift<Sequence<T, -1>> sampled_gaussian_kernel(const T& sigma, Index radius)
   auto kernel = Shift(Sequence<T, -1>("gaussian kernel", 2 * radius + 1), -radius);
   const auto norm = std::numbers::inv_sqrtpi * std::numbers::sqrt2 * 0.5 / sigma;
   const auto factor = -0.5 / (sigma * sigma);
-  for_each("Gaussian kernel", kernel.domain(), KOKKOS_LAMBDA(int i) { kernel(i) = norm * std::exp(i * i * factor); });
+  for_each(
+      "Gaussian kernel",
+      kernel.domain(),
+      KOKKOS_LAMBDA(int i) { kernel(i) = norm * std::exp(i * i * factor); });
   return kernel;
 }
 
