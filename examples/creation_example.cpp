@@ -33,19 +33,21 @@ BOOST_AUTO_TEST_CASE(default_test)
 BOOST_AUTO_TEST_CASE(resize_test)
 {
   //! [resize]
-  auto a = Linx::resize<3>("cropped static-size brace-enclosed", {1, 2, 3, 4});
-  auto b = Linx::resize(5, "padded dynamic-size brace-enclosed", {1, 2, 3, 4});
-  auto c = Linx::Sequence("static-size constructor", {1, 2, 3, 4});
+  auto a = Linx::Sequence("deduced static-size", {1, 2, 3, 4});
+  auto b = Linx::resize<5>("padded, static-size", {1, 2, 3, 4});
+  auto c = Linx::resize(3, "cropped, dynamic-size", {1, 2, 3, 4});
+  auto d = Linx::resize<4, Kokkos::HostSpace>("static-size, on host", {1, 2, 3, 4});
   //! [resize]
 
-  ASSERT(a.n == 3);
-  ASSERT(b.n == -1);
-  ASSERT(b.size() == 5);
-  ASSERT(c.n == 4);
+  ASSERT(a.n == 4);
+  ASSERT(b.n == 5);
+  ASSERT(c.n == -1);
+  ASSERT(c.size() == 3);
+  ASSERT(d.n == 4);
 
   const auto& a_on_host = Linx::on_host(a);
-  ASSERT(a_on_host[0] == 1);
-  ASSERT(a_on_host[2] == 3);
+  ASSERT(a_on_host.front() == 1);
+  ASSERT(a_on_host.back() == 4);
 
   const auto& b_on_host = Linx::on_host(b);
   ASSERT(b_on_host[0] == 1);
@@ -53,8 +55,11 @@ BOOST_AUTO_TEST_CASE(resize_test)
   ASSERT(b_on_host[4] == 0);
 
   const auto& c_on_host = Linx::on_host(c);
-  ASSERT(c_on_host[0] == 1);
-  ASSERT(c_on_host[3] == 4);
+  ASSERT(c_on_host.front() == 1);
+  ASSERT(c_on_host.back() == 3);
+
+  ASSERT(d.front() == 1);
+  ASSERT(d.back() == 4);
 }
 
 BOOST_AUTO_TEST_CASE(rowwise_test)
@@ -121,18 +126,6 @@ BOOST_AUTO_TEST_CASE(wrap_test)
   ASSERT(a(2, 0) == 9);
   ASSERT(v[2] == 9);
   //! [wrap]
-}
-
-BOOST_AUTO_TEST_CASE(copy_test)
-{
-  //! [copy]
-  auto v = std::vector {1, 2, 3, 4, 5, 6};
-  auto a = Linx::Position<-1>("copy", v);
-  a.pow(2);
-
-  ASSERT(a(2) == 9);
-  ASSERT(v[2] == 3);
-  //! [copy]
 }
 
 BOOST_AUTO_TEST_CASE(builtins_test)

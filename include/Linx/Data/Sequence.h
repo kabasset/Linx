@@ -220,6 +220,34 @@ public:
   }
 
   /**
+   * @brief Access the first element.
+   * 
+   * As opposed to `data()`, which is the pointer to the allocated memory,
+   * `&front()` is a pointer to the first element.
+   * Therefore, `data()` can be less than `&front()`, e.g. for alignment purposes.
+   */
+  KOKKOS_INLINE_FUNCTION reference front() const
+  {
+    return origin();
+  }
+
+  /**
+   * @brief Access the element at position 0.
+   */
+  KOKKOS_INLINE_FUNCTION reference origin() const
+  {
+    return m_container(0);
+  }
+
+  /**
+   * @brief Access the last element.
+   */
+  KOKKOS_INLINE_FUNCTION reference back() const
+  {
+    return m_container(m_container.size() - 1);
+  }
+
+  /**
    * @brief Access the i-th element.
    */
   KOKKOS_INLINE_FUNCTION reference operator[](std::integral auto i) const
