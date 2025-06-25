@@ -48,6 +48,26 @@ private:
   TIns m_ins;
 };
 
+/**
+ * @brief Index-based specialization without input arrays.
+ */
+template <typename TFunc, typename TOut, std::size_t... Is>
+class Generator<TFunc, TOut, void, Is...> {
+public:
+
+  KOKKOS_INLINE_FUNCTION Generator(TFunc, const TOut& out) : m_func(m_func), m_out(out) {}
+
+  KOKKOS_INLINE_FUNCTION void operator()(auto... is) const
+  {
+    m_out(is...) = m_func(is...);
+  }
+
+private:
+
+  TFunc m_func;
+  TOut m_out;
+};
+
 } // namespace Impl
 
 /**
@@ -216,7 +236,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   {
     const auto& derived = as_readonly(LINX_CRTP_CONST_DERIVED);
     return LINX_CRTP_CONST_DERIVED
-        .generate_with_side_effects(label, LINX_FORWARD(func), derived, as_readonly(inputs)...);
+        .generate_with_side_effects(label, LINX_FORWARD(func), derived, try_as_readonly(inputs)...);
   }
 
   /**
@@ -244,7 +264,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   const TDerived& generate(const std::string& label, auto&& func, const auto&... inputs) const
   {
-    return generate_with_side_effects(label, LINX_FORWARD(func), as_readonly(inputs)...);
+    return generate_with_side_effects(label, LINX_FORWARD(func), try_as_readonly(inputs)...);
   }
 
   /**

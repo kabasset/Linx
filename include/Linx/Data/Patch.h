@@ -206,7 +206,7 @@ Patch(const TIn&, const TDomain&)
 template <typename TParent, typename TDomain>
 decltype(auto) as_readonly(const Patch<TParent, TDomain>& in)
 {
-  return Patch(Forward(), as_readonly(in.parent()), in.domain());
+  return Patch(Forward(), try_as_readonly(in.parent()), in.domain());
 }
 
 /**

@@ -326,7 +326,7 @@ public:
   LazySpatialFilterMixin(TFilter filter, const TIn& in) :
       m_filter(LINX_MOVE(filter)),
       m_offsets("offsets", m_filter.footprint().size()),
-      m_in(as_readonly(in))
+      m_in(try_as_readonly(in))
   {
     const auto& offsets_on_host = on_host(m_offsets);
     auto it = offsets_on_host.begin();
@@ -372,7 +372,7 @@ protected:
 
   TFilter m_filter; ///< The filter
   Sequence<std::ptrdiff_t, -1> m_offsets; ///< The footprint offsets in the input
-  decltype(as_readonly(std::declval<TIn>())) m_in; ///< The input
+  decltype(try_as_readonly(std::declval<TIn>())) m_in; ///< The input
 };
 
 /**
@@ -425,7 +425,7 @@ public:
       m_filter(LINX_MOVE(filter)),
       m_offsets("offsets", m_filter.footprint().size()),
       m_weights("weights", m_offsets.size()),
-      m_in(as_readonly(in))
+      m_in(try_as_readonly(in))
   {
     const auto& offsets_on_host = on_host(m_offsets);
     const auto& weights_on_host = on_host(m_weights);
@@ -481,7 +481,7 @@ protected:
   TFilter m_filter; ///< The filter
   Vector<std::ptrdiff_t> m_offsets; ///< The footprint offsets in the input
   Vector<element_type> m_weights; ///< The weights in the same order
-  decltype(as_readonly(std::declval<TIn>())) m_in; ///< The input
+  decltype(try_as_readonly(std::declval<TIn>())) m_in; ///< The input
 };
 
 } // namespace Linx

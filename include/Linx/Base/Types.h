@@ -382,16 +382,37 @@ template <typename T>
 concept Labeled = requires(const T obj) // TODO to Base/concepts
 { obj.label(); };
 
+template <typename T>
+concept Streamable = requires(const T obj) // TODO to Base/concepts
+{ std::stringstream() << obj; };
+
+template <typename T>
+concept StreamLabeled = Streamable<T> && not Labeled<T>;
+
+/**
+ * @brief Label of a labeled object.
+ */
 std::string label(const Labeled auto& in)
 {
   return in.label();
 }
 
-std::string label(const auto& in)
+/**
+ * @brief Label of a streamable object.
+ */
+std::string label(const StreamLabeled auto& in)
 {
   std::stringstream ss;
   ss << in;
   return ss.str();
+}
+
+/**
+ * @brief Fallback label of an unnamed object.
+ */
+std::string label(const auto&)
+{
+  return "<unnamed>";
 }
 
 /**

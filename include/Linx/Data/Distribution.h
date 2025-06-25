@@ -44,7 +44,7 @@ template <typename TIn, typename TBins, typename TOut>
 void histogram_to(const TIn& in, const TBins& bins, TOut& out)
 {
   const auto& atomic_out = as_atomic(out.container());
-  const auto& readonly_in = as_readonly(in);
+  const auto& readonly_in = try_as_readonly(in);
 
   for_each("histogram()", in.domain(), Impl::HistogramBinFinder(readonly_in, bins, atomic_out));
   Kokkos::fence();

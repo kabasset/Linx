@@ -178,14 +178,23 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Kokkos::DynRankView<TData,
   return Out(in);
 }
 
-/**
- * @brief Specialization for standard containers with constant values.
- */
 template <typename T>
-const T& as_readonly(const T& in)
-  requires(std::is_const_v<typename T::value_type>)
+concept ViewableAsReadonly = requires(const T& in) { as_readonly(in); };
+
+template <typename T>
+concept DontApplyReadonly = not ViewableAsReadonly<T> || std::is_const_v<typename T::value>;
+
+template <typename T>
+concept ApplyReadonly = not DontApplyReadonly<T>;
+
+decltype(auto) try_as_readonly(const ApplyReadonly auto& in)
 {
-  return in;
+  return as_readonly(in);
+}
+
+decltype(auto) try_as_readonly(const DontApplyReadonly auto& in)
+{
+  return LINX_FORWARD(in);
 }
 
 } // namespace Linx

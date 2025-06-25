@@ -152,7 +152,7 @@ KOKKOS_INLINE_FUNCTION const auto& root(const AnyShift auto& shift)
 template <typename TParent>
 auto as_readonly(const Shift<TParent>& in)
 {
-  return Shift(as_readonly(in.parent()), in.vector());
+  return Shift(try_as_readonly(in.parent()), in.vector());
 }
 
 template <typename TSpace, typename TParent>

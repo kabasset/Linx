@@ -524,6 +524,21 @@ auto fill(const std::string& label, const T& value, Is... shape)
 }
 
 /**
+ * @ingroup creation
+ * @brief Generate an image.
+ * @param label The label
+ * @param func The generator
+ * @param shape The shape
+ */
+template <typename TSpace = Kokkos::DefaultExecutionSpace>
+auto generate(const std::string& label, const auto& func, std::integral auto... shape)
+{
+  using T = std::remove_cvref_t<decltype(func(shape...))>;
+  static constexpr auto n = sizeof...(shape);
+  return Image<T, n, ImageContainer<T, n, TSpace>>(label, shape...).copy_from(func);
+}
+
+/**
  * @brief Iterator to the beginning of a contiguous image.
  */
 template <typename T, int N, typename TContainer>

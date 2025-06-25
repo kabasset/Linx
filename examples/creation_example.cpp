@@ -4,7 +4,9 @@
 
 #define BOOST_TEST_MODULE CreationExample
 
+#include "Linx/Base/Random.h"
 #include "Linx/Data/Image.h"
+#include "Linx/Data/Sequence.h"
 #include "Linx/Run/ProgramContext.h"
 
 #include <boost/test/unit_test.hpp>
@@ -141,6 +143,16 @@ BOOST_AUTO_TEST_CASE(builtins_test)
 BOOST_AUTO_TEST_CASE(generators_test)
 {
   //! [generators]
+  // Generate from indices
+  auto a = Linx::generate<12>("static sequence of squares", KOKKOS_LAMBDA(auto i) { return i * i; });
+  auto b = Linx::generate("2D image of row-major indices", KOKKOS_LAMBDA(int i, int j) { return i * j; }, 4, 3);
+
+  // Generate random numbers
+  auto c = Linx::generate(12, "dynamic random sequence", Linx::UniformRng(Linx::Slice(0., 1.)));
+  auto d = Linx::generate("2D random image", Linx::GaussianRng({100, 15}, 42), 4, 3);
+
+  // Generate from other arrays
+  auto e = Linx::generate("sum of squares", KOKKOS_LAMBDA(int a_i, double c_i) { return a_i + c_i * c_i; }, a, c);
   //! [generators]
 }
 

@@ -116,7 +116,7 @@ private:
 template <typename TParent, typename TMethod>
 auto as_readonly(const Extrapolation<TParent, TMethod>& in)
 {
-  return Extrapolation(as_readonly(in.parent()), in.method());
+  return Extrapolation(try_as_readonly(in.parent()), in.method());
 }
 
 template <typename TSpace, typename TParent, typename TMethod>
