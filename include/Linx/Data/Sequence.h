@@ -360,14 +360,6 @@ decltype(auto) on_device(const Sequence<T, N, TContainer>& in)
   }
 }
 
-template <typename U = void, typename T, int N, typename TContainer>
-auto same_layout(const std::string& label, const Sequence<T, N, TContainer>& in)
-{
-  return Sequence<typename Rebind<T>::As<U>, N, typename Rebind<TContainer>::As<U>>(
-      Forward(),
-      same_layout<U>(label, in.container()));
-}
-
 /**
  * @brief Copy as many elements as possible from `in` to `out`.
  */
@@ -379,82 +371,146 @@ void copy_to(const TIn& in, const TOut& out) // FIXME replace with/update DataMi
 }
 
 /**
+ * @ingroup creation
+ * @brief Default-initialized sequence with the same memory layout (space, size, stride) as an input sequence.
+ */
+template <typename U = void, typename T, int N, typename TContainer>
+auto same_layout(const std::string& label, const Sequence<T, N, TContainer>& in)
+{
+  return Sequence<typename Rebind<T>::As<U>, N, typename Rebind<TContainer>::As<U>>(
+      Forward(),
+      same_layout<U>(label, in.container()));
+}
+
+/**
+ * @ingroup creation
+ * @brief Static-size sequence filled with a single value.
+ */
+template <int N, typename TSpace = Kokkos::DefaultExecutionSpace>
+auto fill(const std::string& label, const auto& value)
+{
+  using T = std::remove_cvref_t<decltype(value)>;
+  auto out = Sequence<T, N, SequenceContainer<T, N, TSpace>>(label); // FIXME uninitialized
+  if (value != T {}) {
+    out.fill(value);
+  }
+  return out;
+}
+
+/**
+ * @ingroup creation
+ * @brief Dynamic-size sequence filled with a single value.
+ */
+template <typename TSpace = Kokkos::DefaultExecutionSpace>
+auto fill(std::integral auto size, const std::string& label, const auto& value)
+{
+  using T = std::remove_cvref_t<decltype(value)>;
+  auto out = Sequence<T, -1, SequenceContainer<T, -1, TSpace>>(label, size); // FIXME uninitialized
+  if (value != T {}) {
+    out.fill(value);
+  }
+  return out;
+}
+
+/**
+ * @ingroup creation
+ * @brief Static-size sequence of evenly spaced values.
+ */
+template <int N, typename TSpace = Kokkos::DefaultExecutionSpace, typename T>
+auto range(const std::string& label, T start = Limits<T>::zero(), T step = Limits<T>::one())
+{
+  return Linx::Sequence<T, N, SequenceContainer<T, N, TSpace>>(label).range(start, step);
+}
+
+/**
+ * @ingroup creation
+ * @brief Dynamic-size sequence of evenly spaced values.
+ */
+template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T>
+auto range(std::integral auto size, const std::string& label, T start = Limits<T>::zero(), T step = Limits<T>::one())
+{
+  return Linx::Sequence<T, -1, SequenceContainer<T, -1, TSpace>>(label, size).range(start, step);
+}
+
+/**
+ * @ingroup creation
+ * @brief Static-size sequence of evenly spaced values between bounds.
+ */
+template <int N, typename TSpace = Kokkos::DefaultExecutionSpace, typename T>
+auto linspace(const std::string& label, const Span<T>& bounds)
+{
+  return Linx::Sequence<T, N, SequenceContainer<T, N, TSpace>>(label).linspace(bounds); // TODO uninitialized
+}
+
+/**
+ * @ingroup creation
+ * @brief Dynamic-size sequence of evenly spaced values between bounds.
+ */
+template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T>
+auto linspace(std::integral auto size, const std::string& label, const Span<T>& bounds)
+{
+  return Linx::Sequence<T, -1, SequenceContainer<T, -1, TSpace>>(label, size).linspace(bounds); // TODO uninitialized
+}
+
+/**
+ * @ingroup creation
  * @brief Generate a static-size sequence from some generator.
  * @tparam N The size
  * @param label The label
  * @param func The generator
  */
-template <int N>
+template <int N, typename TSpace = Kokkos::DefaultExecutionSpace>
 auto generate(const std::string& label, const auto& func)
 {
   static_assert(N >= 0);
   using T = std::remove_cvref_t<decltype(func())>;
-  return Sequence<T, N>(label).generate("generate", func); // FIXME uninitialized
+  return Sequence<T, N, SequenceContainer<T, N, TSpace>>(label).generate("generate", func); // TODO uninitialized
 }
 
 /**
+ * @ingroup creation
  * @brief Generate a dynamic-size sequence from some generator.
  * @param label The label
  * @param func The generator
  * @param size The size
  */
-auto generate(const std::string& label, const auto& func, Index size)
+template <typename TSpace = Kokkos::DefaultExecutionSpace>
+auto generate(std::integral auto size, const std::string& label, const auto& func)
 {
   using T = std::remove_cvref_t<decltype(func())>;
-  return Sequence<T, -1>(label, size).generate("generate", func); // FIXME uninitialized
+  return Sequence<T, -1, SequenceContainer<T, -1, TSpace>>(label, size)
+      .generate("generate", func); // TODO uninitialized
 }
 
 /**
- * @brief Generate a static-size sequence filled with a single value.
+ * @ingroup creation
+ * @brief Copy an array as a static-size sequence.
+ * 
+ * If the input array is larger than `N`, only the `N` first values are copied.
+ * If it is smaller, the remaining values are default-initialized.
  */
-template <int N>
-auto fill(const std::string& label, const auto& value)
+template <int N, typename TSpace = Kokkos::DefaultExecutionSpace>
+auto resize(const ArrayLike auto& in)
 {
-  using T = std::remove_cvref_t<decltype(value)>;
-  auto out = Sequence<T, N>(label);
-  if (value != T {}) {
-    out.fill(value);
-  }
-  return out;
-}
-
-/**
- * @brief Generate a static-size sequence filled with a single value.
- */
-auto fill(const std::string& label, const auto& value, std::integral auto size)
-{
-  using T = std::remove_cvref_t<decltype(value)>;
-  auto out = Sequence<T, -1>(label, size);
-  if (value != T {}) {
-    out.fill(value);
-  }
-  return out;
-}
-
-/**
- * @brief Generate a static-size sequence filled with evenly spaced values.
- */
-template <int N, typename T>
-auto linspace(const std::string& label, const Span<T>& bounds)
-{
-  return Linx::Sequence<T, N>(label).linspace(bounds);
-}
-
-/**
- * @brief Generate a dynamic-size sequence filled with evenly spaced values.
- */
-template <typename T>
-auto linspace(const std::string& label, const Span<T>& bounds, std::integral auto size)
-{
-  return Linx::Sequence<T, -1>(label, size).linspace(bounds);
-}
-
-template <int M>
-auto resize(const ArrayLike auto& in) // FIXME make_sequence? crop_or_pad? CTor?
-{
-  static_assert(M >= 0);
+  static_assert(N >= 0);
   using T = std::decay_t<decltype(in[0])>;
-  Sequence<T, M> out(compose_label("resize", in));
+  Sequence<T, N, SequenceContainer<T, N, TSpace>> out(compose_label("resize", in));
+  copy_to(in, out);
+  return out;
+}
+
+/**
+ * @ingroup creation
+ * @brief Copy an array as a dynamic-size sequence.
+ * 
+ * If the input array is larger than `size`, only the `size` first values are copied.
+ * If it is smaller, the remaining values are default-initialized.
+ */
+template <typename TSpace = Kokkos::DefaultExecutionSpace>
+auto resize(std::integral auto size, const ArrayLike auto& in)
+{
+  using T = std::decay_t<decltype(in[0])>;
+  Sequence<T, -1, SequenceContainer<T, -1, TSpace>> out(compose_label("resize", in));
   copy_to(in, out);
   return out;
 }
@@ -466,7 +522,7 @@ template <int N>
 using Position = GPosition<Index, N>;
 
 template <int M, typename T, int N>
-auto pad(const GPosition<T, N>& in) // FIXME support Sequence => Rebind<TSequence>::As<T, N>
+auto pad(const GPosition<T, N>& in) // FIXME merge with resize
 {
   using U = std::decay_t<T>;
   GPosition<U, M> out(compose_label("pad", in));

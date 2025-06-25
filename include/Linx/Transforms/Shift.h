@@ -179,7 +179,7 @@ template <Index I, Index N = I + 1, typename TIn>
 auto along(const TIn& in)
 {
   const auto& r = root(in);
-  auto shape = Position<N>("shape").fill(1);
+  auto shape = fill<N, Kokkos::HostSpace>("shape", 1);
   shape[I] = r.size();
   Image<typename TIn::element_type, N> out(r.label(), shape); // FIXME on_device<TIn::execution_space>
   const auto& out_on_host = on_host(out);

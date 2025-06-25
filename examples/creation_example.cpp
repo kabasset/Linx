@@ -17,10 +17,12 @@ BOOST_AUTO_TEST_CASE(default_test)
 {
   //! [default]
   auto a = Linx::Sequence<int, 10>("default sequence");
+
   ASSERT(a.size() == 10);
   ASSERT(a.contains_only(0));
 
   auto b = Linx::Image<int, 2>("default image", 4, 3);
+
   ASSERT(b.size() == 12);
   ASSERT(b.contains_only(0));
   //! [default]
@@ -107,7 +109,33 @@ BOOST_AUTO_TEST_CASE(copy_test)
 BOOST_AUTO_TEST_CASE(builtins_test)
 {
   //! [builtins]
+  // Uniform arrays
+  auto a = Linx::fill<12>("static sequence", 3.14);
+  auto b = Linx::fill(12, "dynamic sequence", 3.14);
+  auto c = Linx::fill("2D image", 3.14, 4, 3);
+
+  // {0, 30, 60, ... , 330}
+  auto d = Linx::range<12>("static sequence", 0, 30);
+  auto e = Linx::range(12, "dynamic sequence", 0, 30);
+  auto f = Linx::linspace<12>("static sequence", Linx::Slice(0, 360));
+  auto g = Linx::linspace(12, "dynamic sequence", Linx::Slice(0, 360));
+  auto h = Linx::linspace<12, Kokkos::HostSpace>("static host sequence", Linx::Slice(0, 360));
   //! [builtins]
+
+  ASSERT(a.size() == 12);
+  ASSERT(a.contains_only(3.14));
+  ASSERT(b.size() == 12);
+  ASSERT(b.contains_only(3.14));
+  ASSERT(c.n == 2);
+  ASSERT(c.size() == 12);
+  ASSERT(c.contains_only(3.14));
+
+  ASSERT(d.size() == 12);
+  ASSERT(e.size() == 12);
+  ASSERT(f.size() == 12);
+  ASSERT(g.size() == 12);
+
+  ASSERT(h.size() == 12);
 }
 
 BOOST_AUTO_TEST_CASE(generators_test)

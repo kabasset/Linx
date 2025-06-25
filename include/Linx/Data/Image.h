@@ -31,24 +31,25 @@ namespace Linx {
  * Copy constructor and copy assignment operator perform shallow copy:
  * 
  * \code
- * auto a = Image<int, 2>("a", 4, 3).fill(1);
+ * auto a = Linx::fill("a", 1.0, 4, 3);
+ * ASSERT(a.contains_only(1));
  * auto b = a;
- * assert(a(0, 0) == 1);
- * b.fill(2);
- * assert(a(0, 0) == 2);
+ * b.fill(2.0);
+ * assert(a.contains_only(2));
  * \endcode
  * 
  * Deep copy is available as `copy_as()` or `operator+`:
  * 
  * \code
- * Image<float, 2> a("A");
+ * auto a = Linx::fill("a", 1.0, 4, 3);
  * auto b = a; // Shallow copy
  * auto c = a.copy_as("C"); // Deep copy labeled "C"
  * auto d = +a; // Deep copy labeled "copy(A)"
  * \endcode
  * 
- * By default, images may be allocated on device, e.g. GPU.
- * They can be copied to the host with `to_host()`, which is a no-op if the image is already on the host.
+ * By default, images are allocated on the fastest available device.
+ * They can be viewed on the host or any device with `on_host()` or `on_device()`,
+ * which are no-ops if the image is already acessible from the specified space.
  */
 template <typename T, int N, typename TContainer = ImageContainer<T, N>>
 class Image :
@@ -471,6 +472,7 @@ template <typename T, int N = 2>
 using Raster = Image<T, N, ImageContainer<T, N, Kokkos::LayoutLeft, Kokkos::HostSpace>>;
 
 /**
+ * @ingroup creation
  * @brief Create a 1D image made of a single row.
  */
 template <typename T, int N>
@@ -483,6 +485,7 @@ auto rowwise(const std::string& label, T (&&row)[N])
 }
 
 /**
+ * @ingroup creation
  * @brief Create a 2D image from a collection of rows.
  */
 template <typename T, int N0, int N1>
@@ -496,6 +499,7 @@ auto rowwise(const std::string& label, T (&&rows)[N1][N0])
 }
 
 /**
+ * @ingroup creation
  * @brief Create a 3D image from a collection of rows.
  */
 template <typename T, int N0, int N1, int N2>
@@ -506,6 +510,17 @@ auto rowwise(const std::string& label, T (&&rows)[N2][N1][N0])
   auto out = Image<T, 3>(label, N0, N1, N2);
   Kokkos::deep_copy(out.container(), raster.container());
   return out;
+}
+
+/**
+ * @ingroup creation
+ * @brief Image filled with a single value.
+ */
+template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T, std::integral... Is>
+auto fill(const std::string& label, const T& value, Is... shape)
+{
+  static constexpr auto n = sizeof...(Is);
+  return Image<T, n, ImageContainer<T, n, TSpace>>(label, shape...).fill(value); // TODO uninitialized
 }
 
 /**
