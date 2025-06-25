@@ -562,7 +562,7 @@ auto resize(std::integral auto size, const std::string& label, const ArrayLike a
 template <int N, typename TSpace = Kokkos::DefaultExecutionSpace, typename T>
 auto resize(const std::string& label, std::initializer_list<T> in)
 {
-  return resize<N, TSpace>(label, Sequence<T, N, SequenceContainer<T, N, TSpace>>(in));
+  return resize<N, TSpace>(label, Sequence<T, -1, SequenceContainer<T, -1, TSpace>>(in));
 }
 
 /**
