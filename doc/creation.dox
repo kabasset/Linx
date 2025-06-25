@@ -24,11 +24,11 @@ Basic `Sequence` and `Image` constructors default-initialize the elements.
 \section creation-rowwise From C arrays and ranges
 
 Sequences can be created from any array-like object, including C arrays, using either the constructor or the `resize()` function.
-The latter accepts a template parameter specifying the memory space of the sequence, defaulting to the host.
+The latter accepts a template parameter specifying the memory space of the sequence, defaulting to the most accelerated device.
 
 \snippet{trimleft} creation_example.cpp resize
 
-Image of up rank up to 3 can be created from brace-enclosed lists or C arrays representing rows using function `rowwise()`.
+Image of rank up to 3 can be created from brace-enclosed lists or C arrays representing rows using function `rowwise()`.
 The data type is either explicit or deduced from the input data type.
 Like `resize()`, `rowwise()` accepts a template parameter specifying the memory space of the image.
 
@@ -40,20 +40,36 @@ Like `resize()`, `rowwise()` accepts a template parameter specifying the memory 
 `Sequence` and `Image` can serve as adaptors for C pointers, in which case they do not manage memory:
 no allocation or deallocation is performed, and the pointer must remain valid throughout the lifetime of the container.
 This is especially useful to enable signal or image processing for arbitrary containers.
+`Raster` is a row-major ordered image with contiguous memory and compatible with the standard ranges concepts.
+As such, it is particularly well suited to interface with the standard library.
 
 \snippet{trimleft} creation_example.cpp wrap
 
 \section creation-builtins Builtin functions
 
-TODO
+Many functions are provided to create sequences and images from few parameters.
 
 \snippet{trimleft} creation_example.cpp builtins
 
 \section creation-generators Generators
 
-TODO
+Arrays can be created from generators (functions, lambda functions or functors) using function `generate()`.
+
+If the generator depends on the position, the dimensions of the arrays have to be specified.
+In this case, the generator is called with the sequence of indices as arguments.
+A special case is the use of random number generators, which are generally return values independent of the indices.
+
+If the generator depends on other arrays, the dimensions are deduced from the first array passed as argument.
+In this case, the generator is called with one element of each array at a time, while looping over the domain of the first array.
+
+Note the use of `KOKKOS_LAMBDA` instead of `[=]` to declare lambdas, to ensure portability.
 
 \snippet{trimleft} creation_example.cpp generators
+
+\section creation-result As the result of an operation
+
+Arrays can also be created as the result of an operation on other arrays.
+These operations are described in \ref pixelwise and \ref filtering.
 
 */
 

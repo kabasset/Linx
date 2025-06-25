@@ -8,7 +8,7 @@
 
 \defgroup creation Array creation
 \ingroup arrays
-\brief From C arrays, constant, generators, etc.
+\brief From C arrays, as mere wrappers, generated, etc.
 
 \defgroup regions Regions, slices, patches
 \brief Boxes, slices, patches, etc.

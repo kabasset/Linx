@@ -18,32 +18,31 @@ LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 BOOST_AUTO_TEST_CASE(default_test)
 {
   //! [default]
-  auto a = Linx::Sequence<int, 10>("default sequence");
+  // Basic constructors
+  auto a = Linx::Sequence<int, 12>("static size, default sequence");
+  auto b = Linx::Sequence<int, -1>("dynamic-size, default sequence", 12);
+  auto c = Linx::Image<int, 2>("default image", 4, 3);
 
-  ASSERT(a.size() == 10);
-  ASSERT(a.contains_only(0));
-
-  auto b = Linx::Image<int, 2>("default image", 4, 3);
-
-  ASSERT(b.size() == 12);
-  ASSERT(b.contains_only(0));
+  ASSERT(a.n == 12 && a.size() == 12 && a.contains_only(0));
+  ASSERT(b.n == -1 && b.size() == 12 && b.contains_only(0));
+  ASSERT(c.n == 2 && c.size() == 12 && c.contains_only(0));
   //! [default]
 }
 
 BOOST_AUTO_TEST_CASE(resize_test)
 {
   //! [resize]
+  // Create sequences from lists
   auto a = Linx::Sequence("deduced static-size", {1, 2, 3, 4});
   auto b = Linx::resize<5>("padded, static-size", {1, 2, 3, 4});
   auto c = Linx::resize(3, "cropped, dynamic-size", {1, 2, 3, 4});
   auto d = Linx::resize<4, Kokkos::HostSpace>("static-size, on host", {1, 2, 3, 4});
-  //! [resize]
 
   ASSERT(a.n == 4);
   ASSERT(b.n == 5);
-  ASSERT(c.n == -1);
-  ASSERT(c.size() == 3);
+  ASSERT(c.n == -1 && c.size() == 3);
   ASSERT(d.n == 4);
+  //! [resize]
 
   const auto& a_on_host = Linx::on_host(a);
   ASSERT(a_on_host.front() == 1);
@@ -52,7 +51,7 @@ BOOST_AUTO_TEST_CASE(resize_test)
   const auto& b_on_host = Linx::on_host(b);
   ASSERT(b_on_host[0] == 1);
   ASSERT(b_on_host[3] == 4);
-  ASSERT(b_on_host[4] == 0);
+  BOOST_TEST(b_on_host[4] == 0);
 
   const auto& c_on_host = Linx::on_host(c);
   ASSERT(c_on_host.front() == 1);
@@ -65,20 +64,14 @@ BOOST_AUTO_TEST_CASE(resize_test)
 BOOST_AUTO_TEST_CASE(rowwise_test)
 {
   //! [rowwise]
+  // Create up-to-3D images row by row
   auto a = Linx::rowwise("1D int", {1, 2, 3, 4});
-
-  ASSERT(a.n == 1);
-  ASSERT(typeid(a.front()) == typeid(int));
-
   auto b = Linx::rowwise("2D char", {{'a', 'b'}, {'c', 'd'}});
-
-  ASSERT(b.n == 2);
-  ASSERT(typeid(b.front()) == typeid(char));
-
   auto c = Linx::rowwise<float>("3D float", {{{1, 2, 3}, {4, 5, 6}}});
 
-  ASSERT(c.n == 3);
-  ASSERT(typeid(c.front()) == typeid(float));
+  ASSERT(a.n == 1 && typeid(a.front()) == typeid(int));
+  ASSERT(b.n == 2 && typeid(b.front()) == typeid(char));
+  ASSERT(c.n == 3 && typeid(c.front()) == typeid(float));
   //! [rowwise]
 
   static_assert(std::is_same_v<decltype(a)::element_type, int>);
@@ -119,12 +112,22 @@ BOOST_AUTO_TEST_CASE(rowwise_test)
 BOOST_AUTO_TEST_CASE(wrap_test)
 {
   //! [wrap]
+  // Wrap a data pointer
   auto v = std::vector {1, 2, 3, 4, 5, 6};
   auto a = Linx::Raster<int, 2>(Linx::Wrap(v.data()), 3, 2);
+
+  // Perform Linx operations
+  a(2, 0) = 7;
   a.pow(2);
 
-  ASSERT(a(2, 0) == 9);
-  ASSERT(v[2] == 9);
+  // Perform std operations
+  std::ranges::sort(begin(a), end(a));
+  for (auto& a_i : a) {
+    ++a_i;
+  }
+
+  ASSERT(v[0] == 2);
+  ASSERT(v[5] == 50);
   //! [wrap]
 }
 
@@ -144,13 +147,9 @@ BOOST_AUTO_TEST_CASE(builtins_test)
   auto h = Linx::linspace<12, Kokkos::HostSpace>("static host sequence", Linx::Slice(0, 360));
   //! [builtins]
 
-  ASSERT(a.size() == 12);
-  ASSERT(a.contains_only(3.14));
-  ASSERT(b.size() == 12);
-  ASSERT(b.contains_only(3.14));
-  ASSERT(c.n == 2);
-  ASSERT(c.size() == 12);
-  ASSERT(c.contains_only(3.14));
+  ASSERT(a.size() == 12 && a.contains_only(3.14));
+  ASSERT(b.size() == 12 && b.contains_only(3.14));
+  ASSERT(c.n == 2 && c.size() == 12 && c.contains_only(3.14));
 
   ASSERT(d.size() == 12);
   ASSERT(e.size() == 12);
@@ -164,15 +163,16 @@ BOOST_AUTO_TEST_CASE(generators_test)
 {
   //! [generators]
   // Generate from indices
-  auto a = Linx::generate<12>("static sequence of squares", KOKKOS_LAMBDA(auto i) { return i * i; });
+  auto a = Linx::generate<12>("static-size sequence of squares", KOKKOS_LAMBDA(auto i) { return i * i; });
   auto b = Linx::generate("2D image of row-major indices", KOKKOS_LAMBDA(int i, int j) { return i * j; }, 4, 3);
 
   // Generate random numbers
-  auto c = Linx::generate(12, "dynamic random sequence", Linx::UniformRng(Linx::Slice(0., 1.)));
-  auto d = Linx::generate("2D random image", Linx::GaussianRng({100, 15}, 42), 4, 3);
+  auto seed = 42;
+  auto c = Linx::generate(12, "dynamic-size random sequence", Linx::UniformRng(Linx::Slice(0., 1.), seed));
+  auto d = Linx::generate("2D random image", Linx::GaussianRng({100, 15}, seed), 4, 3);
 
   // Generate from other arrays
-  auto e = Linx::generate("sum of squares", KOKKOS_LAMBDA(int a_i, double c_i) { return a_i + c_i * c_i; }, a, c);
+  auto e = Linx::generate("deduced size", KOKKOS_LAMBDA(int a_i, double c_i) { return a_i + c_i * c_i; }, a, c);
   //! [generators]
 }
 
