@@ -14,6 +14,7 @@ There are many ways to create arrays:
 - Through builtin functions like `fill()` and `linspace()`;
 - Through generators with `generate()`;
 - As the result of a transfrom: arithmetic operation, mathematical function, filter...
+- As shallow or deep copies, or as slices of other arrays.
 
 \section creation-default Default
 
@@ -53,11 +54,11 @@ Many functions are provided to create sequences and images from few parameters.
 
 \section creation-generators Generators
 
-Arrays can be created from generators (functions, lambda functions or functors) using function `generate()`.
+Arrays can be created from generators (functions, lambdas, or functors) using function `generate()`.
 
 If the generator depends on the position, the dimensions of the arrays have to be specified.
 In this case, the generator is called with the sequence of indices as arguments.
-A special case is the use of random number generators, which are generally return values independent of the indices.
+A special case is the use of random number generators, which generally return values independent of the indices.
 
 If the generator depends on other arrays, the dimensions are deduced from the first array passed as argument.
 In this case, the generator is called with one element of each array at a time, while looping over the domain of the first array.
@@ -70,6 +71,30 @@ Note the use of `KOKKOS_LAMBDA` instead of `[=]` to declare lambdas, to ensure p
 
 Arrays can also be created as the result of an operation on other arrays.
 These operations are described in \ref pixelwise and \ref filtering.
+
+Below is a teaser!
+For more details, refer to the dedicated pages.
+
+\snippet{trimleft} creation_example.cpp result
+
+\see \ref pixelwise
+\see \ref filtering
+
+\section creation-views Shallow and deep copies, slicing
+
+Arrays can be returned by deep or shallow copy.
+Shallow copies are the default behavior in Linx.
+This means that several copies share the same data, and modifying one copy modifies all copies.
+In contrast, deep copy has to be requested explicitely, either with prefix operator `+` or copy methods.
+
+\snippet{trimleft} creation_example.cpp copy
+
+In addition to full-domain copies, `Sequence` and `Image` support slicing,
+another shallow copy mechanism in which only a subset of the original array is returned.
+
+\snippet{trimleft} creation_example.cpp slicing
+
+\see \ref regions
 
 */
 
