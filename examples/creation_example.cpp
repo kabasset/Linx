@@ -30,6 +30,33 @@ BOOST_AUTO_TEST_CASE(default_test)
   //! [default]
 }
 
+BOOST_AUTO_TEST_CASE(resize_test)
+{
+  //! [resize]
+  auto a = Linx::resize<3>("cropped static-size brace-enclosed", {1, 2, 3, 4});
+  auto b = Linx::resize(5, "padded dynamic-size brace-enclosed", {1, 2, 3, 4});
+  auto c = Linx::Sequence("static-size constructor", {1, 2, 3, 4});
+  //! [resize]
+
+  ASSERT(a.n == 3);
+  ASSERT(b.n == -1);
+  ASSERT(b.size() == 5);
+  ASSERT(c.n == 4);
+
+  const auto& a_on_host = Linx::on_host(a);
+  ASSERT(a_on_host[0] == 1);
+  ASSERT(a_on_host[2] == 3);
+
+  const auto& b_on_host = Linx::on_host(b);
+  ASSERT(b_on_host[0] == 1);
+  ASSERT(b_on_host[3] == 4);
+  ASSERT(b_on_host[4] == 0);
+
+  const auto& c_on_host = Linx::on_host(c);
+  ASSERT(c_on_host[0] == 1);
+  ASSERT(c_on_host[3] == 4);
+}
+
 BOOST_AUTO_TEST_CASE(rowwise_test)
 {
   //! [rowwise]

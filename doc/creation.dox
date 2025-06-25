@@ -9,13 +9,12 @@ namespace Linx {
 There are many ways to create arrays:
 
 - From default values;
-- Row by row, from C arrays;
-- By wrapping a pointer;
+- Row by row, from C arrays or ranges;
+- By wrapping a data pointer;
 - By copying a range or another array;
 - Through builtin functions like `fill()` and `linspace()`;
 - Through generators with `generate()`;
 - As the result of a transfrom: arithmetic operation, mathematical function, filter...
-
 
 \section creation-default Default
 
@@ -23,10 +22,15 @@ Basic `Sequence` and `Image` constructors default-initialize the elements.
 
 \snippet{trimleft} creation_example.cpp default
 
-\section creation-rowwise From C arrays
+\section creation-rowwise From C arrays and ranges
 
-Image of up to 3 dimensions can be created from brace-enclosed lists or C arrays representing rows using function `rowwise()`.
-The data type can be deduced or provided.
+Sequences can be created from any array-like object, including C arrays, using either the constructor or the `resize()` function.
+Initialization lists can be used to initialize sequences on the host only.
+
+\snippet{trimleft} creation_example.cpp resize
+
+Image of up rank up to 3 can be created from brace-enclosed lists or C arrays representing rows using function `rowwise()`.
+The data type is either explicit or deduced from the input data type.
 
 \snippet{trimleft} creation_example.cpp rowwise
 

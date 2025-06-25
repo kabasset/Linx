@@ -316,6 +316,15 @@ private:
   Container& m_map; ///< The position-value pairs
 };
 
+/**
+ * @relatesalso Map
+ */
+template <typename T, int N>
+KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Map<T, N>& in)
+{
+  return in; // FIXME const value_type
+}
+
 template <typename T, int N>
 KOKKOS_INLINE_FUNCTION decltype(auto) on_host(const Map<T, N>& in)
 {

@@ -289,6 +289,12 @@ private:
   Container m_container;
 };
 
+template <typename T, int N>
+using GPosition = Sequence<T, N, SequenceContainer<T, N, Kokkos::HostSpace>>;
+
+template <int N>
+using Position = GPosition<Index, N>;
+
 template <typename T, int N, typename TContainer = SequenceContainer<T, N>>
 Sequence(T (&&)[N]) -> Sequence<T, N, TContainer>;
 
@@ -367,7 +373,7 @@ template <ArrayLike TIn, ArrayLike TOut>
 void copy_to(const TIn& in, const TOut& out) // FIXME replace with/update DataMixin::copy_from/to
 {
   auto domain = Slice(0, std::min<int>(std::size(in), std::size(out)));
-  for_each<typename TIn::execution_space>("copy_to()", domain, KOKKOS_LAMBDA(int i) { out[i] = in[i]; });
+  for_each<typename TOut::execution_space>("copy_to()", domain, KOKKOS_LAMBDA(int i) { out[i] = in[i]; });
 }
 
 /**
@@ -493,11 +499,11 @@ auto generate(std::integral auto size, const std::string& label, const auto& fun
  * If it is smaller, the remaining values are default-initialized.
  */
 template <int N, typename TSpace = Kokkos::DefaultExecutionSpace>
-auto resize(const ArrayLike auto& in)
+auto resize(const std::string& label, const ArrayLike auto& in)
 {
   static_assert(N >= 0);
-  using T = std::decay_t<decltype(in[0])>;
-  Sequence<T, N, SequenceContainer<T, N, TSpace>> out(compose_label("resize", in));
+  using T = std::remove_cvref_t<decltype(in[0])>;
+  Sequence<T, N, SequenceContainer<T, N, TSpace>> out(label);
   copy_to(in, out);
   return out;
 }
@@ -510,19 +516,39 @@ auto resize(const ArrayLike auto& in)
  * If it is smaller, the remaining values are default-initialized.
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace>
-auto resize(std::integral auto size, const ArrayLike auto& in)
+auto resize(std::integral auto size, const std::string& label, const ArrayLike auto& in)
 {
-  using T = std::decay_t<decltype(in[0])>;
-  Sequence<T, -1, SequenceContainer<T, -1, TSpace>> out(compose_label("resize", in));
+  using T = std::remove_cvref_t<decltype(in[0])>;
+  Sequence<T, -1, SequenceContainer<T, -1, TSpace>> out(label, size);
   copy_to(in, out);
   return out;
 }
 
-template <typename T, int N>
-using GPosition = Sequence<T, N, SequenceContainer<T, N, Kokkos::HostSpace>>;
+/**
+ * @ingroup creation
+ * @brief Copy a list as a static-size sequence.
+ * 
+ * If the input list is larger than `N`, only the `N` first values are copied.
+ * If it is smaller, the remaining values are default-initialized.
+ */
+template <int N, typename TSpace = Kokkos::DefaultExecutionSpace, typename T>
+auto resize(const std::string& label, std::initializer_list<T> in)
+{
+  return resize<N, TSpace>(label, Sequence<T, N, SequenceContainer<T, N, TSpace>>(in));
+}
 
-template <int N>
-using Position = GPosition<Index, N>;
+/**
+ * @ingroup creation
+ * @brief Copy a list as a dynamic-size sequence.
+ * 
+ * If the input list is larger than `size`, only the `size` first values are copied.
+ * If it is smaller, the remaining values are default-initialized.
+ */
+template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T>
+auto resize(std::integral auto size, const std::string& label, std::initializer_list<T> in)
+{
+  return resize<TSpace>(size, label, Sequence<T, -1, SequenceContainer<T, -1, TSpace>>(in));
+}
 
 template <int M, typename T, int N>
 auto pad(const GPosition<T, N>& in) // FIXME merge with resize
