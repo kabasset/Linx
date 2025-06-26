@@ -77,7 +77,7 @@ a.generate("a = a + b", Linx::Add(), a, b);
 When the memory layout is made explicitely contiguous at compile time, e.g. for sequences, 1D images or rasters,
 range operations are provided by `RangeMixin`.
 This is useful when element ordering matters,
-for example for generating sequences with operations like `range()`, `arithmetic()`,
+for example for generating sequences with progressions like `arithmetic()`, `geometric()`
 or for iterating thanks to compatibility with standard C++ ranges, through `begin()` and `end()` functions.
 
 ```
@@ -87,7 +87,7 @@ for (auto& e : a) {
 }
 ```
 
-The above snippet could be written more concisely and efficiently by using the `apply` method:
+The above snippet could be written more concisely and efficiently by using builtin methods:
 
 ```
 auto a = Linx::arithmetic<1000>("sine", Linx::Slice(0, 2 * std::numbers::pi)).sin();
@@ -96,7 +96,7 @@ auto a = Linx::arithmetic<1000>("sine", Linx::Slice(0, 2 * std::numbers::pi)).si
 or even more efficiently with a single pass:
 
 ```
-auto b = Linx::generate<float, 1000>("sine", Linx::Multiply(2 * std::numbers::pi / 1000), Linx::Sin());
+auto b = Linx::generate<float, 1000>("sine", KOKKOS_LAMBDA(int i) { return Kokkos::sin(2 * std::number::pi * i / 1000); });
 ```
 
 */

@@ -446,26 +446,6 @@ auto fill(std::integral auto size, const std::string& label, const auto& value)
   return out;
 }
 
-/**
- * @ingroup creation
- * @brief Static-size sequence of evenly spaced values.
- */
-template <int N, typename TSpace = Kokkos::DefaultExecutionSpace, typename T>
-auto range(const std::string& label, T start = Limits<T>::zero(), T step = Limits<T>::one())
-{
-  return Linx::Sequence<T, N, SequenceContainer<T, N, TSpace>>(label).range(start, step);
-}
-
-/**
- * @ingroup creation
- * @brief Dynamic-size sequence of evenly spaced values.
- */
-template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T>
-auto range(std::integral auto size, const std::string& label, T start = Limits<T>::zero(), T step = Limits<T>::one())
-{
-  return Linx::Sequence<T, -1, SequenceContainer<T, -1, TSpace>>(label, size).range(start, step);
-}
-
 namespace Impl {
 
 template <typename... TArgs>

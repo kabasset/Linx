@@ -102,38 +102,25 @@ struct RangeMixin<true, T, TDerived> {
   }
 
   /**
-   * @brief Fill the container with evenly spaced value.
-   * @see `arithmetic()`
-   */
-  template <typename T0 = T, typename T1 = T0>
-  const TDerived& range(const T0& min = Limits<T0>::zero(), const T1& step = Limits<T1>::one()) const
-  {
-    range_impl(min, step);
-    return LINX_CRTP_CONST_DERIVED;
-  }
-
-  /**
    * @brief Fill the container with an arithmetic progression.
-   * @see `range()`
    */
   template <typename T0>
   const TDerived& arithmetic(const Span<T0>& slice) const
   {
     const auto size = LINX_CRTP_CONST_DERIVED.ssize();
     const auto step = (slice.pred().supremum - slice.pred().infimum) / size;
-    return range(slice.pred().infimum, step);
+    return arithmetic(slice.pred().infimum, Add(step));
   }
 
   /**
    * @brief Fill the container with an arithmetic progression.
-   * @see `range()`
    */
   template <typename T0>
   const TDerived& arithmetic(const Segment<T0>& slice) const
   {
     const auto size = LINX_CRTP_CONST_DERIVED.ssize() - 1;
     const auto step = (slice.pred().supremum - slice.pred().infimum) / size;
-    return range(slice.pred().infimum, step);
+    return arithmetic(slice.pred().infimum, Add(step));
   }
 
   /**
@@ -143,7 +130,7 @@ struct RangeMixin<true, T, TDerived> {
   const TDerived&
   arithmetic(const T0& start = Limits<T0>::zero(), const Add<Forward, T1>& step = Limits<T1>::one()) const
   {
-    return LINX_CRTP_CONST_DERIVED.copy_from(KOKKOS_LAMBDA(int i) { return start + i * step.rhs; });
+    return generate_flat(KOKKOS_LAMBDA(int i) { return start + i * step.rhs; });
   }
 
   /**
@@ -152,7 +139,7 @@ struct RangeMixin<true, T, TDerived> {
   template <typename T0, typename T1>
   const TDerived& arithmetic(const T0& start, const Subtract<Forward, T1>& step) const
   {
-    return LINX_CRTP_CONST_DERIVED.copy_from(KOKKOS_LAMBDA(int i) { return start - i * step.rhs; });
+    return generate_flat(KOKKOS_LAMBDA(int i) { return start - i * step.rhs; });
   }
 
   /**
@@ -161,7 +148,7 @@ struct RangeMixin<true, T, TDerived> {
   template <typename T0, typename T1>
   const TDerived& geometric(const T0& start, const Multiply<Forward, T1>& step) const
   {
-    return LINX_CRTP_CONST_DERIVED.copy_from(KOKKOS_LAMBDA(int i) { return start * Kokkos::pow(step.rhs, i); });
+    return generate_flat(KOKKOS_LAMBDA(int i) { return start * Kokkos::pow(step.rhs, i); });
   }
 
   /**
@@ -170,7 +157,24 @@ struct RangeMixin<true, T, TDerived> {
   template <typename T0, typename T1>
   const TDerived& geometric(const T0& start, const Divide<Forward, T1>& step) const
   {
-    return LINX_CRTP_CONST_DERIVED.copy_from(KOKKOS_LAMBDA(int i) { return start * Kokkos::pow(step.rhs, -i); });
+    return generate_flat(KOKKOS_LAMBDA(int i) { return start * Kokkos::pow(step.rhs, -i); });
+  }
+
+  /**
+   * @brief Assign each element according to a monadic generator.
+   * 
+   * Conceptually, this function performs:
+   * 
+   * ```
+   * for (int i = 0; i < size(); ++i) {
+   *   (*this)[i] = func(i);
+   * }
+   * ```
+   */
+  const TDerived& generate_flat(auto func) const // FIXME args...
+  {
+    generate_flat_impl(func);
+    return LINX_CRTP_CONST_DERIVED;
   }
 
   /**
@@ -178,7 +182,9 @@ struct RangeMixin<true, T, TDerived> {
    */
   KOKKOS_INLINE_FUNCTION auto& operator[](std::integral auto i) const
   {
-    return *std::ranges::next(std::ranges::begin(LINX_CRTP_CONST_DERIVED), i);
+    // return *std::ranges::next(std::ranges::begin(LINX_CRTP_CONST_DERIVED), i); // device-incompatible
+    auto ptr = &LINX_CRTP_CONST_DERIVED.origin();
+    return ptr[i]; // FIXME not necessarily contiguous => * stride(0)?
   }
 
   /**
@@ -192,6 +198,15 @@ struct RangeMixin<true, T, TDerived> {
   }
 
   /// @cond
+
+  template <typename TFunc>
+  void generate_flat_impl(TFunc func) const // TODO to public API, with args
+  {
+    auto ptr = &LINX_CRTP_CONST_DERIVED.origin();
+    const auto size = LINX_CRTP_CONST_DERIVED.size();
+    using Space = typename TDerived::execution_space;
+    Kokkos::parallel_for("range()", Kokkos::RangePolicy<Space>(0, size), KOKKOS_LAMBDA(int i) { ptr[i] = func(i); });
+  }
 
   template <std::size_t... Is>
   KOKKOS_INLINE_FUNCTION bool equal_impl(const auto& values, std::index_sequence<Is...>) const
@@ -208,20 +223,6 @@ struct RangeMixin<true, T, TDerived> {
   {
     const auto& container = LINX_CRTP_CONST_DERIVED.container(); // FIXME enable on device
     ((container(Is) = get<Is>(values)), ...);
-  }
-
-  /**
-   * @brief Helper method which returns void.
-   */
-  void range_impl(const T& start, const T& step) const
-  { // FIXME make private somehow?
-    const auto size = LINX_CRTP_CONST_DERIVED.size();
-    auto ptr = LINX_CRTP_CONST_DERIVED.data(); // FIXME not necessarily contiguous
-    using Space = typename TDerived::execution_space;
-    Kokkos::parallel_for(
-        "range()",
-        Kokkos::RangePolicy<Space>(0, size),
-        KOKKOS_LAMBDA(int i) { ptr[i] = start + step * i; });
   }
   /// @endcond
 };
