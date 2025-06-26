@@ -466,24 +466,70 @@ auto range(std::integral auto size, const std::string& label, T start = Limits<T
   return Linx::Sequence<T, -1, SequenceContainer<T, -1, TSpace>>(label, size).range(start, step);
 }
 
-/**
- * @ingroup creation
- * @brief Static-size sequence of evenly spaced values between bounds.
- */
-template <int N, typename TSpace = Kokkos::DefaultExecutionSpace, typename T>
-auto linspace(const std::string& label, const Span<T>& bounds)
-{
-  return Linx::Sequence<T, N, SequenceContainer<T, N, TSpace>>(label).linspace(bounds); // TODO uninitialized
-}
+namespace Impl {
+
+template <typename... TArgs>
+struct RangeTraits;
+
+template <typename T, typename TPred>
+struct RangeTraits<Slice<T, TPred>> {
+  using value_type = T;
+};
+
+template <typename TStart, typename TStep>
+struct RangeTraits<TStart, TStep> {
+  using value_type = std::common_type_t<TStart, typename TStep::value_type>;
+};
+
+} // namespace Impl
 
 /**
  * @ingroup creation
- * @brief Dynamic-size sequence of evenly spaced values between bounds.
+ * @brief Static-size arithmetic sequence.
+ * @tparam N The static size
+ * @param size The dynamic size
+ * @param label The sequence label
+ * @param args A slice, or a start value and step of type `Plus` or `Minus`.
  */
-template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T>
-auto linspace(std::integral auto size, const std::string& label, const Span<T>& bounds)
+template <int N, typename TSpace = Kokkos::DefaultExecutionSpace, typename... TArgs>
+auto arithmetic(const std::string& label, TArgs&&... args)
 {
-  return Linx::Sequence<T, -1, SequenceContainer<T, -1, TSpace>>(label, size).linspace(bounds); // TODO uninitialized
+  using T = Impl::RangeTraits<TArgs...>::value_type;
+  return Linx::Sequence<T, N, SequenceContainer<T, N, TSpace>>(label).arithmetic(LINX_FORWARD(args)...);
+}
+
+/**
+ * @copydoc arithmetic()
+ */
+template <typename TSpace = Kokkos::DefaultExecutionSpace, typename... TArgs>
+auto arithmetic(std::integral auto size, const std::string& label, TArgs&&... args)
+{
+  using T = Impl::RangeTraits<TArgs...>::value_type;
+  return Linx::Sequence<T, -1, SequenceContainer<T, -1, TSpace>>(label, size).arithmetic(LINX_FORWARD(args)...);
+}
+
+/**
+ * @ingroup geometric
+ * @brief Static-size geometric sequence.
+ * @param size The dynamic size
+ * @param label The sequence label
+ * @param args A slice, or a start value and step of type `Multiply` or `Divide`.
+ */
+template <int N, typename TSpace = Kokkos::DefaultExecutionSpace, typename... TArgs>
+auto geometric(const std::string& label, TArgs&&... args)
+{
+  using T = Impl::RangeTraits<TArgs...>::value_type;
+  return Linx::Sequence<T, N, SequenceContainer<T, N, TSpace>>(label).geometric(LINX_FORWARD(args)...);
+}
+
+/**
+ * @copydoc geometric()
+ */
+template <typename TSpace = Kokkos::DefaultExecutionSpace, typename... TArgs>
+auto geometric(std::integral auto size, const std::string& label, TArgs&&... args)
+{
+  using T = Impl::RangeTraits<TArgs...>::value_type;
+  return Linx::Sequence<T, -1, SequenceContainer<T, -1, TSpace>>(label, size).geometric(LINX_FORWARD(args)...);
 }
 
 /**

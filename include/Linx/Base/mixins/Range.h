@@ -103,7 +103,7 @@ struct RangeMixin<true, T, TDerived> {
 
   /**
    * @brief Fill the container with evenly spaced value.
-   * @see `linspace()`
+   * @see `arithmetic()`
    */
   template <typename T0 = T, typename T1 = T0>
   const TDerived& range(const T0& min = Limits<T0>::zero(), const T1& step = Limits<T1>::one()) const
@@ -113,11 +113,11 @@ struct RangeMixin<true, T, TDerived> {
   }
 
   /**
-   * @brief Fill the container with evenly spaced value.
+   * @brief Fill the container with an arithmetic progression.
    * @see `range()`
    */
   template <typename T0>
-  const TDerived& linspace(const Span<T0>& slice) const
+  const TDerived& arithmetic(const Span<T0>& slice) const
   {
     const auto size = LINX_CRTP_CONST_DERIVED.ssize();
     const auto step = (slice.pred().supremum - slice.pred().infimum) / size;
@@ -125,15 +125,52 @@ struct RangeMixin<true, T, TDerived> {
   }
 
   /**
-   * @brief Fill the container with evenly spaced value.
+   * @brief Fill the container with an arithmetic progression.
    * @see `range()`
    */
   template <typename T0>
-  const TDerived& linspace(const Segment<T0>& slice) const
+  const TDerived& arithmetic(const Segment<T0>& slice) const
   {
     const auto size = LINX_CRTP_CONST_DERIVED.ssize() - 1;
     const auto step = (slice.pred().supremum - slice.pred().infimum) / size;
     return range(slice.pred().infimum, step);
+  }
+
+  /**
+   * @brief Fill the container with an arithmetic progression.
+   */
+  template <typename T0 = T, typename T1 = T>
+  const TDerived&
+  arithmetic(const T0& start = Limits<T0>::zero(), const Add<Forward, T1>& step = Limits<T1>::one()) const
+  {
+    return LINX_CRTP_CONST_DERIVED.copy_from(KOKKOS_LAMBDA(int i) { return start + i * step.rhs; });
+  }
+
+  /**
+   * @brief Fill the container with an arithmetic progression.
+   */
+  template <typename T0, typename T1>
+  const TDerived& arithmetic(const T0& start, const Subtract<Forward, T1>& step) const
+  {
+    return LINX_CRTP_CONST_DERIVED.copy_from(KOKKOS_LAMBDA(int i) { return start - i * step.rhs; });
+  }
+
+  /**
+   * @brief Fill the container with a geometric progression.
+   */
+  template <typename T0, typename T1>
+  const TDerived& geometric(const T0& start, const Multiply<Forward, T1>& step) const
+  {
+    return LINX_CRTP_CONST_DERIVED.copy_from(KOKKOS_LAMBDA(int i) { return start * Kokkos::pow(step.rhs, i); });
+  }
+
+  /**
+   * @brief Fill the container with a geometric progression.
+   */
+  template <typename T0, typename T1>
+  const TDerived& geometric(const T0& start, const Divide<Forward, T1>& step) const
+  {
+    return LINX_CRTP_CONST_DERIVED.copy_from(KOKKOS_LAMBDA(int i) { return start * Kokkos::pow(step.rhs, -i); });
   }
 
   /**
@@ -159,7 +196,7 @@ struct RangeMixin<true, T, TDerived> {
   template <std::size_t... Is>
   KOKKOS_INLINE_FUNCTION bool equal_impl(const auto& values, std::index_sequence<Is...>) const
   {
-    const auto& container = LINX_CRTP_CONST_DERIVED.container();
+    const auto& container = LINX_CRTP_CONST_DERIVED.container(); // FIXME enable on device
     return ((container(Is) == get<Is>(values)) && ...);
   }
 
@@ -169,22 +206,22 @@ struct RangeMixin<true, T, TDerived> {
   template <std::size_t... Is>
   KOKKOS_INLINE_FUNCTION void assign_impl(const auto& values, std::index_sequence<Is...>) const
   {
-    const auto& container = LINX_CRTP_CONST_DERIVED.container();
+    const auto& container = LINX_CRTP_CONST_DERIVED.container(); // FIXME enable on device
     ((container(Is) = get<Is>(values)), ...);
   }
 
   /**
    * @brief Helper method which returns void.
    */
-  void range_impl(const T& min, const T& step) const
+  void range_impl(const T& start, const T& step) const
   { // FIXME make private somehow?
     const auto size = LINX_CRTP_CONST_DERIVED.size();
-    auto ptr = LINX_CRTP_CONST_DERIVED.data();
+    auto ptr = LINX_CRTP_CONST_DERIVED.data(); // FIXME not necessarily contiguous
     using Space = typename TDerived::execution_space;
     Kokkos::parallel_for(
         "range()",
         Kokkos::RangePolicy<Space>(0, size),
-        KOKKOS_LAMBDA(int i) { ptr[i] = min + step * i; });
+        KOKKOS_LAMBDA(int i) { ptr[i] = start + step * i; });
   }
   /// @endcond
 };

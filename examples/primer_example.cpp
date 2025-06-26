@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(array_access_transform_test)
 BOOST_AUTO_TEST_CASE(label_test)
 {
   //! [label]
-  auto x = Linx::linspace<10>("x", Linx::Slice(0, std::numbers::pi));
+  auto x = Linx::arithmetic<10>("x", Linx::Slice(0, std::numbers::pi));
   auto y = Linx::sin(x);
   auto z = Linx::pow(y, 2);
   ASSERT(y.label() == "sin(x)");

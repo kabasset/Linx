@@ -11,7 +11,7 @@ There are many ways to create arrays:
 - From default values;
 - Row by row, copying C arrays or ranges;
 - By wrapping a data pointer;
-- Through builtin functions like `fill()` and `linspace()`;
+- Through builtin functions like `fill()` and `arithmetic()`;
 - Through generators with `generate()`;
 - As the result of a transfrom: arithmetic operation, mathematical function, filter...
 - As shallow or deep copies, or as slices of other arrays.
@@ -29,7 +29,7 @@ The latter accepts a template parameter specifying the memory space of the seque
 
 \snippet{trimleft} creation_example.cpp resize
 
-Image of rank up to 3 can be created from brace-enclosed lists or C arrays representing rows using function `rowwise()`.
+Images of rank up to 3 can be created from brace-enclosed lists or C arrays representing rows using function `rowwise()`.
 The data type is either explicit or deduced from the input data type.
 Like `resize()`, `rowwise()` accepts a template parameter specifying the memory space of the image.
 

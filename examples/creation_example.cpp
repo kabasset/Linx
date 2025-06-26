@@ -142,9 +142,9 @@ BOOST_AUTO_TEST_CASE(builtins_test)
   // {0, 30, 60, ... , 330}
   auto d = Linx::range<12>("static sequence", 0, 30);
   auto e = Linx::range(12, "dynamic sequence", 0, 30);
-  auto f = Linx::linspace<12>("static sequence", Linx::Slice(0, 360));
-  auto g = Linx::linspace(12, "dynamic sequence", Linx::Slice(0, 360));
-  auto h = Linx::linspace<12, Kokkos::HostSpace>("static host sequence", Linx::Slice(0, 360));
+  auto f = Linx::arithmetic<12>("static sequence", Linx::Slice(0, 360));
+  auto g = Linx::arithmetic(12, "dynamic sequence", Linx::Slice(0, 360));
+  auto h = Linx::arithmetic<12, Kokkos::HostSpace>("static host sequence", Linx::Slice(0, 360));
   //! [builtins]
 
   ASSERT(a.size() == 12 && a.contains_only(3.14));

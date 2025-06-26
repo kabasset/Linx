@@ -105,7 +105,7 @@ struct Constant {
  */
 template <auto Value>
 struct StaticConstant {
-  using value_type = decltype(Value);
+  using value_type = const decltype(Value);
 
   static constexpr value_type value = Value; ///< The static value
 
@@ -136,7 +136,7 @@ struct StaticConstant {
  */
 template <bool InclusiveInfimum, bool InclusiveSupremum, typename T>
 struct Between {
-  using value_type = T; ///< The value type
+  using value_type = const T; ///< The value type
 
   /**
    * @brief Always-false functor constructor.
@@ -201,6 +201,7 @@ struct Between {
 \
   template <typename TRhs> \
   struct Func<Forward, TRhs> { \
+    using value_type = TRhs; \
     TRhs rhs; \
     KOKKOS_INLINE_FUNCTION Func(TRhs value) : rhs {value} {} \
     KOKKOS_INLINE_FUNCTION auto operator()(const auto& lhs) const \
@@ -211,6 +212,7 @@ struct Between {
 \
   template <typename TLhs> \
   struct Func<TLhs, Forward> { \
+    using value_type = TLhs; \
     TLhs lhs; \
     KOKKOS_INLINE_FUNCTION Func(TLhs value) : lhs {value} {} \
     KOKKOS_INLINE_FUNCTION auto operator()(const auto& rhs) const \
