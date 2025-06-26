@@ -176,4 +176,56 @@ BOOST_AUTO_TEST_CASE(generators_test)
   //! [generators]
 }
 
+BOOST_AUTO_TEST_CASE(copy_test)
+{
+  //! [copy]
+  auto a = Linx::fill("a", 'a', 4, 3);
+
+  ASSERT(a.contains_only('a'));
+
+  // Shallow copy
+  auto b = a;
+  ++b;
+
+  ASSERT(b.label() == "a");
+  ASSERT(a.contains_only('b'));
+  ASSERT(b.contains_only('b'));
+
+  // Deep copy
+  auto c = +b;
+  ++c;
+
+  ASSERT(c.label() == "copy(a)");
+  ASSERT(b.contains_only('b'));
+  ASSERT(c.contains_only('c'));
+  //! [copy]
+}
+
+BOOST_AUTO_TEST_CASE(slicing_test)
+{
+  //! [slicing]
+  // 2D image
+  auto a = Linx::fill("a", 1, 4, 4);
+
+  ASSERT(a.rank() == 2);
+  ASSERT(Linx::sum(a) == 16);
+
+  // Hyperplane
+  auto row_0 = a[Linx::Slice(0)];
+  row_0.fill(0);
+
+  ASSERT(row_0.rank() == 1);
+  ASSERT(Linx::sum(row_0) == 0);
+  ASSERT(Linx::sum(a) == 12);
+
+  // Subdomain
+  auto inner = a[Linx::Slice(1, 3)(1, 3)];
+  inner.fill(2);
+
+  ASSERT(inner.rank() == 2);
+  ASSERT(Linx::sum(inner) == 8);
+  ASSERT(Linx::sum(a) == 16);
+  //! [slicing]
+}
+
 BOOST_AUTO_TEST_SUITE_END()

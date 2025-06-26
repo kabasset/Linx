@@ -33,7 +33,6 @@ Images of rank up to 3 can be created from brace-enclosed lists or C arrays repr
 The data type is either explicit or deduced from the input data type.
 Like `resize()`, `rowwise()` accepts a template parameter specifying the memory space of the image.
 
-
 \snippet{trimleft} creation_example.cpp rowwise
 
 \section creation-wrap Pointer wrapping
@@ -51,6 +50,14 @@ As such, it is particularly well suited to interface with the standard library.
 Many functions are provided to create sequences and images from few parameters.
 
 \snippet{trimleft} creation_example.cpp builtins
+
+The various overloads of the functions `arithmetic()` and `geometric()`
+are similar to NumPy's `arange()`, `linspace()`, `logspace()`, and `geomspace()`.
+Their detailed documentation can be found in `RangeMixin` page.
+
+Other builtin creation functions are listed at the bottom of this page.
+
+\see RangeMixin
 
 \section creation-generators Generators
 
@@ -91,6 +98,9 @@ In contrast, deep copy has to be requested explicitely, either with prefix opera
 
 In addition to full-domain copies, `Sequence` and `Image` support slicing,
 another shallow copy mechanism in which only a subset of the original array is returned.
+Slices can be either subarrays of the same rank as the parent array,
+or hyperplanes of it, when only one index is specified.
+More examples are provided in \ref regions.
 
 \snippet{trimleft} creation_example.cpp slicing
 
