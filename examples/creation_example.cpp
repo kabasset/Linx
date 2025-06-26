@@ -176,6 +176,16 @@ BOOST_AUTO_TEST_CASE(generators_test)
   //! [generators]
 }
 
+BOOST_AUTO_TEST_CASE(result_test)
+{
+  //! [result]
+  auto seed = 42;
+  auto a = Linx::generate("noise", Linx::PoissonRng(10., seed), 3, 2);
+  auto b = Linx::sqrt(a);
+  auto c = b + Linx::GaussianRng({0., 3.}, seed);
+  //! [result]
+}
+
 BOOST_AUTO_TEST_CASE(copy_test)
 {
   //! [copy]
