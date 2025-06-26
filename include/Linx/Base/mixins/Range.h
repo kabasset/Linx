@@ -33,9 +33,6 @@ constexpr bool is_contiguous()
   return Impl::IsContiguousLayout<typename TContainer::array_layout>::value;
 }
 
-template <bool IsContiguous, typename T, typename TDerived>
-struct RangeMixin {};
-
 /**
  * @ingroup pixelwise
  * @ingroup mixins
@@ -43,8 +40,8 @@ struct RangeMixin {};
  * @tparam T The value type
  * @tparam TDerived The child class which implements required methods
  */
-template <typename T, typename TDerived>
-struct RangeMixin<true, T, TDerived> {
+template <bool IsContiguous, typename T, typename TDerived>
+struct RangeMixin {
   /**
    * @brief Test equality with values.
    */
@@ -103,17 +100,10 @@ struct RangeMixin<true, T, TDerived> {
 
   /**
    * @brief Fill the container with an arithmetic progression.
-   */
-  template <typename T0>
-  const TDerived& arithmetic(const Span<T0>& slice) const
-  {
-    const auto size = LINX_CRTP_CONST_DERIVED.ssize();
-    const auto step = (slice.pred().supremum - slice.pred().infimum) / size;
-    return arithmetic(slice.pred().infimum, Add(step));
-  }
-
-  /**
-   * @brief Fill the container with an arithmetic progression.
+   * @param slice The closed generation interval
+   * 
+   * The resulting value of `front()` is `slice.start()`,
+   * while that of `back()` is `slice.stop()`.
    */
   template <typename T0>
   const TDerived& arithmetic(const Segment<T0>& slice) const
@@ -125,6 +115,31 @@ struct RangeMixin<true, T, TDerived> {
 
   /**
    * @brief Fill the container with an arithmetic progression.
+   * @param slice The generation interval, supremum of which is excluded
+   * 
+   * The resulting value of `front()` is `slice.start()`,
+   * while that of `back()` is `slice.stop() - step`,
+   * where `step` is the difference between successive generated values.
+   */
+  template <typename T0>
+  const TDerived& arithmetic(const Span<T0>& slice) const
+  {
+    const auto size = LINX_CRTP_CONST_DERIVED.ssize();
+    const auto step = (slice.pred().supremum - slice.pred().infimum) / size;
+    return arithmetic(slice.pred().infimum, Add(step));
+  }
+
+  /**
+   * @brief Fill the container with an arithmetic progression.
+   * @param start The first value to be generated
+   * @param step The difference between two consecutive values
+   * Conceptually, this function performs:
+   * 
+   * ```
+   * for (int i = 0; i < size(); ++i) {
+   *   (*this)[i] = start + i * step;
+   * }
+   * ```
    */
   template <typename T0 = T, typename T1 = T>
   const TDerived&
@@ -135,6 +150,16 @@ struct RangeMixin<true, T, TDerived> {
 
   /**
    * @brief Fill the container with an arithmetic progression.
+   * @param start The first value to be generated
+   * @param step The opposite of the difference between two consecutive values
+   * 
+   * Conceptually, this function performs:
+   * 
+   * ```
+   * for (int i = 0; i < size(); ++i) {
+   *   (*this)[i] = start - i * step;
+   * }
+   * ```
    */
   template <typename T0, typename T1>
   const TDerived& arithmetic(const T0& start, const Subtract<Forward, T1>& step) const
@@ -144,6 +169,16 @@ struct RangeMixin<true, T, TDerived> {
 
   /**
    * @brief Fill the container with a geometric progression.
+   * @param start The first value to be generated
+   * @param step The ratio between two consecutive values
+   * 
+   * Conceptually, this function performs:
+   * 
+   * ```
+   * for (int i = 0; i < size(); ++i) {
+   *   (*this)[i] = start * pow(step, i);
+   * }
+   * ```
    */
   template <typename T0, typename T1>
   const TDerived& geometric(const T0& start, const Multiply<Forward, T1>& step) const
@@ -153,6 +188,16 @@ struct RangeMixin<true, T, TDerived> {
 
   /**
    * @brief Fill the container with a geometric progression.
+   * @param start The first value to be generated
+   * @param step The inverse of the ratio between two consecutive values
+   * 
+   * Conceptually, this function performs:
+   * 
+   * ```
+   * for (int i = 0; i < size(); ++i) {
+   *   (*this)[i] = start * pow(step, -i);
+   * }
+   * ```
    */
   template <typename T0, typename T1>
   const TDerived& geometric(const T0& start, const Divide<Forward, T1>& step) const
@@ -206,6 +251,7 @@ struct RangeMixin<true, T, TDerived> {
     const auto size = LINX_CRTP_CONST_DERIVED.size();
     using Space = typename TDerived::execution_space;
     Kokkos::parallel_for("range()", Kokkos::RangePolicy<Space>(0, size), KOKKOS_LAMBDA(int i) { ptr[i] = func(i); });
+    // FIXME what if stride(0) != 1 ?
   }
 
   template <std::size_t... Is>
@@ -226,6 +272,12 @@ struct RangeMixin<true, T, TDerived> {
   }
   /// @endcond
 };
+
+/**
+ * @brief Disable range operations for incompatible containers.
+ */
+template <typename T, typename TDerived>
+struct RangeMixin<false, T, TDerived> {};
 
 } // namespace Linx
 
