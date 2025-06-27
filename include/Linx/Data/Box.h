@@ -500,7 +500,7 @@ GBox<T, N> operator&(const GBox<T, N>& lhs, const GBox<U, M>& rhs)
  * @brief Get the 1D span along the i-th axis.
  */
 template <int I, typename T, int N>
-Span<T> get(const GBox<T, N>& box)
+Slice<T> get(const GBox<T, N>& box)
 {
   return Slice(box.start(I), box.stop(I));
 }

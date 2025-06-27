@@ -122,7 +122,7 @@ struct RangeMixin {
    * where `step` is the difference between successive generated values.
    */
   template <typename T0>
-  const TDerived& arithmetic(const Span<T0>& slice) const
+  const TDerived& arithmetic(const Slice<T0>& slice) const
   {
     const auto size = LINX_CRTP_CONST_DERIVED.ssize();
     const auto step = (slice.pred().supremum - slice.pred().infimum) / size;

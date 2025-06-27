@@ -107,7 +107,7 @@ public:
   /**
    * @brief Constructor.
    */
-  KOKKOS_INLINE_FUNCTION UniformDistribution(Span<T> span) : m_span(LINX_MOVE(span)) {}
+  KOKKOS_INLINE_FUNCTION UniformDistribution(Slice<T> span) : m_span(LINX_MOVE(span)) {}
 
   /**
    * @brief Constructor.
@@ -160,7 +160,7 @@ public:
 
 private:
 
-  Span<T> m_span; ///< Bounds
+  Slice<T> m_span; ///< Bounds
 };
 
 /**
@@ -216,13 +216,13 @@ template <typename T>
 UniformRng(T (&&)[2]) -> UniformRng<T>;
 
 template <typename T>
-UniformRng(const Span<T>&) -> UniformRng<T>;
+UniformRng(const Slice<T>&) -> UniformRng<T>;
 
 template <typename T>
 UniformRng(T (&&)[2], Index) -> UniformRng<T>;
 
 template <typename T>
-UniformRng(const Span<T>&, Index) -> UniformRng<T>;
+UniformRng(const Slice<T>&, Index) -> UniformRng<T>;
 
 /**
  * @ingroup random

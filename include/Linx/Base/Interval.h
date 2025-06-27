@@ -73,7 +73,7 @@ KOKKOS_INLINE_FUNCTION auto interval_stop(const Equal<Forward, T>& interval)
 
 /// @cond
 
-template <typename T, typename TPredN, typename... TPreds>
+template <typename T, typename TPredN = Between<true, false, T>, typename... TPreds>
 class Slice;
 
 /// @endcond
@@ -105,13 +105,6 @@ template <typename T>
 using Singleton = Slice<T, Equal<Forward, T>>;
 
 /**
- * @brief Closed-open interval.
- */
-template <typename T>
-  requires(std::is_arithmetic_v<T>)
-using Span = Slice<T, Between<true, false, T>>;
-
-/**
  * @brief Closed interval.
  */
 template <typename T>
@@ -137,14 +130,14 @@ Slice(const T&)->Singleton<T>;
  */
 template <typename T0, typename T1>
   requires(std::is_arithmetic_v<T0> && std::is_arithmetic_v<T1>)
-Slice(const T0&, const T1&)->Span<decltype(T1() - T0())>;
+Slice(const T0&, const T1&) -> Slice<decltype(T1() - T0())>;
 
 /**
  * @brief Start and size deduction guide for spans.
  */
 template <typename T, typename TSize>
   requires(std::is_arithmetic_v<T>)
-Slice(const T&, const Size<TSize>&)->Span<T>;
+Slice(const T&, const Size<TSize>&) -> Slice<T>;
 
 /**
  * @brief Interval (slice of rank 1).
@@ -268,9 +261,9 @@ public:
  * @brief Make an interval clamped between bounds.
  */
 template <std::integral T>
-KOKKOS_INLINE_FUNCTION Span<T> clamp(const Unbounded<T>&, const auto& start, const auto& stop)
+KOKKOS_INLINE_FUNCTION Slice<T> clamp(const Unbounded<T>&, const auto& start, const auto& stop)
 {
-  return Span<T>(start, stop);
+  return Slice<T>(start, stop);
 }
 
 /**
@@ -278,9 +271,9 @@ KOKKOS_INLINE_FUNCTION Span<T> clamp(const Unbounded<T>&, const auto& start, con
  * @brief Make an interval clamped between bounds.
  */
 template <std::integral T>
-KOKKOS_INLINE_FUNCTION Singleton<T> clamp(const Singleton<T>& interval, const auto& start, const auto& stop)
+KOKKOS_INLINE_FUNCTION const Singleton<T>& clamp(const Singleton<T>& interval, const auto& start, const auto& stop)
 {
-  OutOfBounds<Span<T>>::may_throw("singleton", interval.start(), start, stop);
+  // OutOfBounds<Slice<T>>::may_throw("singleton", interval.start(), start, stop); // invalid on device
   // Always return a singleton, not a span, to ensure slicing with a singleton reduces rank
   return interval;
 }
@@ -290,9 +283,9 @@ KOKKOS_INLINE_FUNCTION Singleton<T> clamp(const Singleton<T>& interval, const au
  * @brief Make an interval clamped between bounds.
  */
 template <std::integral T>
-KOKKOS_INLINE_FUNCTION Span<T> clamp(const Span<T>& interval, const auto& start, const auto& stop)
+KOKKOS_INLINE_FUNCTION Slice<T> clamp(const Slice<T>& interval, const auto& start, const auto& stop)
 {
-  return Span<T>(std::max<T>(interval.pred().infimum, start), std::min<T>(interval.pred().supremum, stop));
+  return Slice<T>(std::max<T>(interval.pred().infimum, start), std::min<T>(interval.pred().supremum, stop));
 }
 
 /**
@@ -317,7 +310,7 @@ KOKKOS_INLINE_FUNCTION auto kokkos_slice(const Singleton<T>& interval)
  * @brief Kokkos slicing argument of a span.
  */
 template <std::integral T>
-KOKKOS_INLINE_FUNCTION auto kokkos_slice(const Span<T>& interval)
+KOKKOS_INLINE_FUNCTION auto kokkos_slice(const Slice<T>& interval)
 {
   return Kokkos::pair(interval.start(), interval.stop());
 }
@@ -355,7 +348,7 @@ std::ostream& operator<<(std::ostream& os, const Singleton<T>& interval)
  * @brief Stream insertion for a span.
  */
 template <std::integral T>
-std::ostream& operator<<(std::ostream& os, const Span<T>& interval)
+std::ostream& operator<<(std::ostream& os, const Slice<T>& interval)
 {
   os << interval.start() << ':' << interval.stop();
   return os;

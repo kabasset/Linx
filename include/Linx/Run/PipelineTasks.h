@@ -81,7 +81,7 @@ private:
  * @brief Set the pipeline domain.
  */
 template <typename T>
-auto operator|(AnyState auto&& pipeline, Span<T>&& span)
+auto operator|(AnyState auto&& pipeline, Slice<T>&& span)
 {
   return LINX_FORWARD(pipeline) | Impl::RestrictSequence(LINX_FORWARD(span));
 }

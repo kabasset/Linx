@@ -257,7 +257,7 @@ public:
    * Restrict the state domain.
    */
   template <typename T>
-  auto domain(const Span<T>& span)
+  auto domain(const Slice<T>& span)
   {
     return make_state<Overwrite>("Domain", sequences_domain(span, std::make_index_sequence<sizeof...(TValues)>()));
   }

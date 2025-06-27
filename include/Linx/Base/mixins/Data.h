@@ -48,25 +48,25 @@ private:
   TIns m_ins;
 };
 
-/**
- * @brief Index-based specialization without input arrays.
- */
-template <typename TFunc, typename TOut, std::size_t... Is>
-class Generator<TFunc, TOut, void, Is...> {
-public:
+// /**
+//  * @brief Index-based specialization without input arrays.
+//  */
+// template <typename TFunc, typename TOut, std::size_t... Is>
+// class Generator<TFunc, TOut, void, Is...> {
+// public:
 
-  KOKKOS_INLINE_FUNCTION Generator(TFunc, const TOut& out) : m_func(m_func), m_out(out) {}
+//   KOKKOS_INLINE_FUNCTION Generator(TFunc, const TOut& out) : m_func(m_func), m_out(out) {}
 
-  KOKKOS_INLINE_FUNCTION void operator()(auto... is) const
-  {
-    m_out(is...) = m_func(is...);
-  }
+//   KOKKOS_INLINE_FUNCTION void operator()(auto... is) const
+//   {
+//     m_out(is...) = m_func(is...);
+//   }
 
-private:
+// private:
 
-  TFunc m_func;
-  TOut m_out;
-};
+//   TFunc m_func;
+//   TOut m_out;
+// };
 
 } // namespace Impl
 
@@ -155,7 +155,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   const TDerived& fill(const T& value) const
   {
-    Kokkos::deep_copy(LINX_CRTP_CONST_DERIVED.container(), value);
+    Kokkos::deep_copy(LINX_CRTP_CONST_DERIVED.container(), value); // FIXME will fail for patches
     return LINX_CRTP_CONST_DERIVED;
   }
 

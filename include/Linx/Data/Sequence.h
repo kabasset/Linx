@@ -38,7 +38,7 @@ public:
 
   static constexpr int n = N; ///< The size parameter
   using Container = TContainer; ///< The underlying container type
-  using Domain = Span<Index>;
+  using Domain = Slice<Index>; ///< The domain type
 
   using memory_space = typename Container::memory_space;
   using execution_space = typename Container::execution_space;
