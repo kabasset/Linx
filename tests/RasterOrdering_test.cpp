@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(range_test)
 {
   const int width = 16;
   const int height = 9;
-  auto raster = Linx::Raster<int, 2>("range", width, height).arithmetic(1, Linx::Add(2));
+  auto raster = Linx::Raster<int, 2>("range", width, height).arithmetic(1, 2);
   for (int j = 0; j < height; ++j) {
     for (int i = 0; i < width; ++i) {
       BOOST_TEST(raster(i, j) == 1 + 2 * (i + width * j));

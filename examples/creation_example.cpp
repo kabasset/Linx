@@ -140,10 +140,10 @@ BOOST_AUTO_TEST_CASE(builtins_test)
   auto c = Linx::fill("double**", 3.14, 4, 3);
 
   // {0, 30, 60, ... , 330}
-  auto d = Linx::arithmetic<12>("int[12]", 0, Linx::Add(30));
-  auto e = Linx::arithmetic(12, "int*", 0, Linx::Add(30));
-  auto f = Linx::arithmetic<12>("int[12]", Linx::Slice(0, 360));
-  auto g = Linx::arithmetic(12, "int*", Linx::Segment<int>(0, 330));
+  auto d = Linx::arithmetic<12>("0, +30, ...", 0, 30);
+  auto e = Linx::arithmetic(12, "0, +30, ...", 0, 30);
+  auto f = Linx::arithmetic<12>("[0, ... , 360)", Linx::Slice(0, 360));
+  auto g = Linx::arithmetic(12, "[0, ... , 330]", Linx::Segment<int>(0, 330));
   auto h = Linx::arithmetic<12, Kokkos::HostSpace>("on host", Linx::Slice(0, 360));
   //! [builtins]
 

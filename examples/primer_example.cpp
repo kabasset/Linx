@@ -18,7 +18,7 @@ LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 BOOST_AUTO_TEST_CASE(basics_test)
 {
   //! [basics]
-  auto a = Linx::Sequence<int, 42>("sequence on device").arithmetic(14, Linx::Add(3));
+  auto a = Linx::Sequence<int, 42>("sequence on device").arithmetic(14, 3);
   const auto a_on_host = Linx::on_host(a);
   int i = 14;
   for (auto a_i : a_on_host) {

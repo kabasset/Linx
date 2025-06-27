@@ -51,6 +51,7 @@ public:
   using pointer = typename Container::pointer_type; ///< The element pointer type
   using iterator = decltype(Kokkos::Experimental::begin(Container())); ///< The iterator type
   using const_iterator = decltype(Kokkos::Experimental::cbegin(Container())); ///< The constant iterator type
+
   /**
    * @brief Constructor.
    * 
@@ -454,6 +455,11 @@ struct RangeTraits;
 template <typename T, typename TPred>
 struct RangeTraits<Slice<T, TPred>> {
   using value_type = T;
+};
+
+template <typename T0, std::convertible_to<T0> T1>
+struct RangeTraits<T0, T1> {
+  using value_type = std::common_type_t<T0, T1>;
 };
 
 template <typename TStart, typename TStep>

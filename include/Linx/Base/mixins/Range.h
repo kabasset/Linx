@@ -100,17 +100,35 @@ struct RangeMixin {
 
   /**
    * @brief Fill the container with an arithmetic progression.
+   * @param first The first value to be generated
+   * @param difference The common difference
+   * Conceptually, this function performs:
+   * 
+   * ```
+   * for (int i = 0; i < size(); ++i) {
+   *   (*this)[i] = first + i * difference;
+   * }
+   * ```
+   */
+  template <typename T0 = T, typename T1 = T>
+  const TDerived& arithmetic(const T0& first = Limits<T0>::zero(), const T1& difference = Limits<T1>::one()) const
+  {
+    return generate_flat(KOKKOS_LAMBDA(int i) { return first + i * difference; });
+  }
+
+  /**
+   * @brief Fill the container with an arithmetic progression.
    * @param slice The closed generation interval
    * 
    * The resulting value of `front()` is `slice.start()`,
-   * while that of `back()` is `slice.stop()`.
+   * while that of `back()` is `slice.finish()`.
    */
   template <typename T0>
   const TDerived& arithmetic(const Segment<T0>& slice) const
   {
     const auto size = LINX_CRTP_CONST_DERIVED.ssize() - 1;
-    const auto step = (slice.pred().supremum - slice.pred().infimum) / size;
-    return arithmetic(slice.pred().infimum, Add(step));
+    const auto difference = (slice.pred().supremum - slice.pred().infimum) / size;
+    return arithmetic(slice.pred().infimum, difference);
   }
 
   /**
@@ -118,91 +136,34 @@ struct RangeMixin {
    * @param slice The generation interval, supremum of which is excluded
    * 
    * The resulting value of `front()` is `slice.start()`,
-   * while that of `back()` is `slice.stop() - step`,
-   * where `step` is the difference between successive generated values.
+   * while that of `back()` is `slice.stop() - difference`,
+   * where `difference` is the common difference between successive generated values.
    */
   template <typename T0>
   const TDerived& arithmetic(const Slice<T0>& slice) const
   {
     const auto size = LINX_CRTP_CONST_DERIVED.ssize();
-    const auto step = (slice.pred().supremum - slice.pred().infimum) / size;
-    return arithmetic(slice.pred().infimum, Add(step));
-  }
-
-  /**
-   * @brief Fill the container with an arithmetic progression.
-   * @param start The first value to be generated
-   * @param step The difference between two consecutive values
-   * Conceptually, this function performs:
-   * 
-   * ```
-   * for (int i = 0; i < size(); ++i) {
-   *   (*this)[i] = start + i * step;
-   * }
-   * ```
-   */
-  template <typename T0 = T, typename T1 = T>
-  const TDerived&
-  arithmetic(const T0& start = Limits<T0>::zero(), const Add<Forward, T1>& step = Add(Limits<T1>::one())) const
-  {
-    return generate_flat(KOKKOS_LAMBDA(int i) { return start + i * step.rhs; });
-  }
-
-  /**
-   * @brief Fill the container with an arithmetic progression.
-   * @param start The first value to be generated
-   * @param step The opposite of the difference between two consecutive values
-   * 
-   * Conceptually, this function performs:
-   * 
-   * ```
-   * for (int i = 0; i < size(); ++i) {
-   *   (*this)[i] = start - i * step;
-   * }
-   * ```
-   */
-  template <typename T0, typename T1>
-  const TDerived& arithmetic(const T0& start, const Subtract<Forward, T1>& step) const
-  {
-    return generate_flat(KOKKOS_LAMBDA(int i) { return start - i * step.rhs; });
+    const auto difference = (slice.pred().supremum - slice.pred().infimum) / size;
+    return arithmetic(slice.pred().infimum, difference);
   }
 
   /**
    * @brief Fill the container with a geometric progression.
-   * @param start The first value to be generated
-   * @param step The ratio between two consecutive values
+   * @param first The first value to be generated
+   * @param ratio The ratio between two consecutive values
    * 
    * Conceptually, this function performs:
    * 
    * ```
    * for (int i = 0; i < size(); ++i) {
-   *   (*this)[i] = start * pow(step, i);
+   *   (*this)[i] = first * pow(ratio, i);
    * }
    * ```
    */
   template <typename T0, typename T1>
-  const TDerived& geometric(const T0& start, const Multiply<Forward, T1>& step) const
+  const TDerived& geometric(const T0& first, const T1& ratio) const
   {
-    return generate_flat(KOKKOS_LAMBDA(int i) { return start * Kokkos::pow(step.rhs, i); });
-  }
-
-  /**
-   * @brief Fill the container with a geometric progression.
-   * @param start The first value to be generated
-   * @param step The inverse of the ratio between two consecutive values
-   * 
-   * Conceptually, this function performs:
-   * 
-   * ```
-   * for (int i = 0; i < size(); ++i) {
-   *   (*this)[i] = start * pow(step, -i);
-   * }
-   * ```
-   */
-  template <typename T0, typename T1>
-  const TDerived& geometric(const T0& start, const Divide<Forward, T1>& step) const
-  {
-    return generate_flat(KOKKOS_LAMBDA(int i) { return start * Kokkos::pow(step.rhs, -i); });
+    return generate_flat(KOKKOS_LAMBDA(int i) { return first * Kokkos::pow(ratio, i); });
   }
 
   /**
