@@ -519,14 +519,12 @@ auto geometric(std::integral auto size, const std::string& label, TArgs&&... arg
  * @param label The label
  * @param func The generator
  */
-template <int N, typename TSpace = Kokkos::DefaultExecutionSpace>
-auto generate(const std::string& label, const auto& func)
+template <int N, typename TSpace = Kokkos::DefaultExecutionSpace, typename TFunc>
+auto generate(const std::string& label, const TFunc& func)
 {
   static_assert(N >= 0);
   using T = std::remove_cvref_t<decltype(func(0))>;
-  auto out = Sequence<T, N, SequenceContainer<T, N, TSpace>>(label); // TODO uninitialized
-  // for_each<TSpace>("generate", KOKKOS_LAMBDA(int i) { out[i] = func(i); }); // FIXME
-  return out;
+  return Sequence<T, N, SequenceContainer<T, N, TSpace>>(label).copy_from(func); // TODO uninitialized
 }
 
 /**
@@ -536,13 +534,11 @@ auto generate(const std::string& label, const auto& func)
  * @param func The generator
  * @param size The size
  */
-template <typename TSpace = Kokkos::DefaultExecutionSpace>
-auto generate(std::integral auto size, const std::string& label, const auto& func)
+template <typename TSpace = Kokkos::DefaultExecutionSpace, typename TFunc>
+auto generate(std::integral auto size, const std::string& label, const TFunc& func)
 {
   using T = std::remove_cvref_t<decltype(func(0))>;
-  auto out = Sequence<T, -1, SequenceContainer<T, -1, TSpace>>(label, size); // TODO uninitialized
-  // for_each<TSpace>("generate", KOKKOS_LAMBDA(int i) { out[i] = func(i); }); // FIXME
-  return out;
+  return Sequence<T, -1, SequenceContainer<T, -1, TSpace>>(label, size).copy_from(func); // TODO uninitialized
 }
 
 /**
