@@ -11,25 +11,33 @@
 \brief From C arrays, as mere wrappers, generated, etc.
 
 \defgroup regions Regions, slices, patches
+\ingroup arrays
 \brief Boxes, slices, patches, etc.
 
-\defgroup pixelwise Pixelwise operations
-\brief Arithmetics, math functions, ranges, etc.
+\defgroup operations Operations on arrays
+\brief Pixelwise, regionwise, global operations
 
-\defgroup reduction Reduction operations
-\brief Sum, min, map-reduce, etc.
+\defgroup pixelwise Pixelwise operations
+\ingroup operations
+\brief Arithmetics, math functions, aggregations, etc.
 
 \defgroup random Random number generation
+\ingroup operations
 \brief Random distributions, sampling, arithmetics, etc.
 
-\defgroup filtering Filtering
-\brief Convolution, morphology, rank filtering, etc.
+\defgroup reduction Reduction operations
+\ingroup operations
+\brief Sum, min, map-reduce, etc.
 
-\defgroup workflow Pipelines, workflows
-\brief Flow API, logger, timer, etc.
+\defgroup filtering Filtering
+\ingroup operations
+\brief Convolution, morphology, rank filtering, etc.
 
 \defgroup io Input/output
 \brief FITS I/O
+
+\defgroup workflow Pipelines, workflows
+\brief Flow API, logger, timer, etc.
 
 \defgroup design Design principles
 \brief Memory management, performance, extensibility
