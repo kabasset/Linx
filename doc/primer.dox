@@ -17,7 +17,7 @@ and can be used in conjunction with other libraries like the stardard library or
 Linx also comes with utilities for building processing workflows,
 and a few demonstration and benchmarking executables.
 
-\see https://kokkos.org/kokkos-core-wiki/programmingguide.html
+\see <a href="https://kokkos.org/kokkos-core-wiki/programmingguide.html">Kokkos documentation</a>
 
 \section primer-devices Execution and memory spaces
 
@@ -52,6 +52,23 @@ Most common use cases also have builtin functions.
 The following examples illustrate the different levels of abstraction available.
 
 \snippet{trimleft} primer_example.cpp array_access_transform
+
+\section primer-initialization Mandatory program initialization
+
+Programs using the Linx library rely on Kokkos and **must** therefore be "initialized".
+Kokkos initialization handles hardware acquisition and configuration.
+The latter is typically performed using command line arguments prefixed wit `--kokkos-`.
+
+Obviously, initialization can be performed directly with Kokkos' `ScopeGuard`,
+but Linx proposes a more complete `ProgramContext` class,
+which performs initialization and configuration of Kokkos, as well as CLI options parsing.
+It offers support for positional and named options, Boolean flags, and more.
+Usage is extremely straightforward, as demonstrated below.
+
+\snippet{trimleft} primer_example.cpp context
+
+\see \ref cli
+\see <a href="https://kokkos.org/kokkos-core-wiki/ProgrammingGuide/Initialization.html">Kokkos initialization</a>
 
 \section primer-design Design principles
 

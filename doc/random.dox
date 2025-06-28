@@ -9,7 +9,7 @@ namespace Linx {
 Random number generation is essential for simulations, stochastic algorithms, and data augmentation.
 Linx provides a suite of random number generators that can be used to produce pseudo-random numbers and arrays,
 according to various statistical distributions.
-Compatibility with pixelwise operations simplifies the integration of randomness into existing workflows.
+Compatibility with element-wise operations simplifies the integration of randomness into existing workflows.
 
 \section random-sampling Random number generation
 
@@ -26,7 +26,7 @@ All generators are listed at the bottom of this page.
 \section random-generation Random noise generation
 
 Generators' call operator is a variadic method which discards its input parameter(s).
-This seamingly weird behavior allows to use them seamlessly with pixelwise services.
+This seamingly weird behavior allows to use them seamlessly with element-wise services.
 For example, to generate an array of iid. uniform random noise in the range [0, 1), do:
 
 ```

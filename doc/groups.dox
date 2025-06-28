@@ -1,45 +1,58 @@
 /**
 
-\defgroup primer A Linx primer
-\brief Hello, world!
+\defgroup primer The must-read Linx primer!
+\brief Kokkos, execution and memory spaces, initialization.
 
 \defgroup arrays 1D, ND arrays
-\brief Sequences, images, rasters, etc.
+\brief Sequences, images, associated containers.
 
-\defgroup creation Array creation
-\ingroup arrays
-\brief From C arrays, as mere wrappers, generated, etc.
+  \defgroup creation Creating arrays
+  \ingroup arrays
+  \brief From C arrays, as mere wrappers, from functions, etc.
 
-\defgroup regions Regions, slices, patches
-\ingroup arrays
-\brief Boxes, slices, patches, etc.
+  \defgroup io Input/output
+  \ingroup arrays
+  \brief FITS I/O.
+
+  \defgroup access Accessing elements
+  \ingroup arrays
+  \brief Single element access, loops, functional programming.
+
+  \defgroup regions Regional views
+  \ingroup arrays
+  \brief Regions, slicing, and patching.
 
 \defgroup operations Operations on arrays
-\brief Pixelwise, regionwise, global operations
+\brief Element-wise, regional, and global operations
 
-\defgroup pixelwise Pixelwise operations
-\ingroup operations
-\brief Arithmetics, math functions, aggregations, etc.
+  \defgroup pixelwise Element-wise operations
+  \ingroup operations
+  \brief Arithmetics, math functions, aggregations, etc.
 
-\defgroup random Random number generation
-\ingroup operations
-\brief Random distributions, sampling, arithmetics, etc.
+  \defgroup random Random number generation
+  \ingroup operations
+  \brief Random distributions and samplers.
 
-\defgroup reduction Reduction operations
-\ingroup operations
-\brief Sum, min, map-reduce, etc.
+  \defgroup reduction Reduction operations
+  \ingroup operations
+  \brief Sum, dot product, custom transform-reduce, etc.
 
-\defgroup filtering Filtering
-\ingroup operations
-\brief Convolution, morphology, rank filtering, etc.
+  \defgroup filtering Filtering
+  \ingroup operations
+  \brief Convolution, morphology, rank filtering, etc.
 
-\defgroup io Input/output
-\brief FITS I/O
+\defgroup exe Writing programs
+\brief Command line, timers, workflows.
 
-\defgroup workflow Pipelines, workflows
-\brief Flow API, logger, timer, etc.
+  \defgroup cli Program context
+  \ingroup exe
+  \brief Command line options and Kokkos initialization.
+
+  \defgroup workflow Workflows
+  \ingroup exe
+  \brief Flow API, logger, timer, etc.
 
 \defgroup design Design principles
-\brief Memory management, performance, extensibility
+\brief Memory management, performance, extensibility.
 
 */

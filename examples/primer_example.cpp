@@ -13,6 +13,39 @@
 
 #define ASSERT(...) BOOST_TEST((__VA_ARGS__))
 
+namespace Impl {
+
+/*
+int main(int argc, const char* argv[])
+{
+  //! [context]
+  // Initialize Kokkos
+  Linx::ProgramContext context("Some program description", argc, argv);
+  
+  // Declare specific program options
+  context.positional("input", "The input filename");
+  context.positional("output", "The output filename", "/tmp/out.fits");
+  context.named("iter,n", "The Number of iterations", 4);
+  context.flag("verbose,v", "Enable verbose logging");
+  
+  // Parse options
+  context.parse();
+  
+  // Use values
+  const auto input = context["input"];
+  const auto output = context["output"];
+  const auto iter_count = context.as<int>("iter");
+  const auto verbose = context.has("verbose");
+  
+  // Example command line: program in.fits -n6 -v
+  //! [context]
+  
+  return 0;
+}
+*/ // FIXME to dedicated example program
+
+} // namespace Impl
+
 LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 BOOST_AUTO_TEST_CASE(basics_test)
