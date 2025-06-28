@@ -94,6 +94,9 @@ InsertTrailingCommas: Wrapped # Only for JavaScript?
 KeepEmptyLinesAtTheStartOfBlocks: false
 MacroBlockBegin: ''
 MacroBlockEnd: ''
+#Macros:
+#- KOKKOS_LAMBDA=[]
+#- KOKKOS_INLINE_FUNCTION=inline
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
 # NamespaceMacros: '' # error: not a sequence

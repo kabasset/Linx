@@ -109,9 +109,19 @@ BOOST_AUTO_TEST_CASE(label_test)
   auto z = Linx::pow(y, 2);
   ASSERT(y.label() == "sin(x)");
   ASSERT(z.label() == "pow(sin(x), 2)");
-  std::cout << x << std::endl;
-  std::cout << y << std::endl;
   //! [label]
+}
+
+BOOST_AUTO_TEST_CASE(functional_test)
+{
+  //! [functional]
+  auto a = Linx::arithmetic<4>("a");
+  a -= KOKKOS_LAMBDA(int i)
+  {
+    return i;
+  };
+  ASSERT(a.contains_only(0));
+  //! [functional]
 }
 
 BOOST_AUTO_TEST_SUITE_END()

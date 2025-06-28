@@ -34,24 +34,24 @@ namespace Linx {
   LINX_SCALAR_OPERATOR_INPLACE(op_in, Func) \
   LINX_SCALAR_OPERATOR_NEWINSTANCE(op_new, op_in)
 
+template <typename T0, typename T1>
+concept NotConvertibleTo = not std::convertible_to<T0, T1>;
+
 #define LINX_VECTOR_OPERATOR_INPLACE(op, Func) \
   /** @brief Apply operator `op`. */ \
-  template <typename U, typename UDerived> \
-  const TDerived& operator op(const CopyArithmeticMixin<U, UDerived>& rhs) const \
+  template <NotConvertibleTo<T> TRhs> \
+  const TDerived& operator op(const TRhs & rhs) const \
   { \
-    const auto& derived_rhs = static_cast<const UDerived&>(rhs); \
-    return LINX_CRTP_CONST_DERIVED \
-        .transform(compose_label(#op, LINX_CRTP_CONST_DERIVED, derived_rhs), Func(), derived_rhs); \
+    return LINX_CRTP_CONST_DERIVED.transform(compose_label(#op, LINX_CRTP_CONST_DERIVED, rhs), Func(), rhs); \
   }
 
 #define LINX_VECTOR_OPERATOR_NEWINSTANCE(op, op_in) \
   /** @brief Apply operator `op` (new instance). */ \
-  template <typename U, typename UDerived> \
-  friend TDerived operator op(const TDerived& lhs, const CopyArithmeticMixin<U, UDerived>& rhs) \
+  template <NotConvertibleTo<T> TRhs> \
+  friend TDerived operator op(const TDerived& lhs, const TRhs& rhs) \
   { \
-    const auto& derived_rhs = static_cast<const UDerived&>(rhs); \
-    TDerived out = lhs.copy_as(compose_label(#op, lhs, derived_rhs)); \
-    out op_in derived_rhs; \
+    TDerived out = lhs.copy_as(compose_label(#op, lhs, rhs)); \
+    out op_in rhs; \
     return out; \
   }
 

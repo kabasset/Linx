@@ -452,14 +452,24 @@ namespace Impl {
 template <typename... TArgs>
 struct RangeTraits;
 
-template <typename T, typename TPred>
-struct RangeTraits<Slice<T, TPred>> {
+template <>
+struct RangeTraits<> {
+  using value_type = int;
+};
+
+template <typename T>
+struct RangeTraits<T> {
   using value_type = T;
 };
 
 template <typename T0, std::convertible_to<T0> T1>
 struct RangeTraits<T0, T1> {
   using value_type = std::common_type_t<T0, T1>;
+};
+
+template <typename T, typename TPred>
+struct RangeTraits<Slice<T, TPred>> {
+  using value_type = T;
 };
 
 template <typename TStart, typename TStep>
