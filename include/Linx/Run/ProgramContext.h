@@ -238,12 +238,13 @@ private:
 
     void with_implicit(std::string& option, const std::string& default_value, const std::string& implicit_value)
     {
+      with_default(option, default_value);
       option.append("\n      [implicit: " + implicit_value + "]");
     }
 
     void with_implicit(std::string& option, const char* default_value, const char* implicit_value)
     {
-      option.append("\n      [implicit: " + std::string {implicit_value} + "]");
+      with_implicit(option, std::string {default_value}, std::string {implicit_value});
     }
 
     /**
