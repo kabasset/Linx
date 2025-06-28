@@ -212,39 +212,46 @@ private:
      * @brief Add a default value to an option.
      */
     template <typename T>
-    void with_default(std::string& option, T&& value)
+    void with_default(std::string& option, const T& value)
     {
-      if constexpr (std::is_same_v<std::decay_t<T>, char>) {
-        option.append("\n      [default: " + std::string {value} + "]");
-      } else if constexpr (std::is_same_v<std::decay_t<T>, std::string>) {
-        option.append("\n      [default: " + LINX_FORWARD(value) + "]");
-      } else {
-        option.append("\n      [default: " + std::to_string(LINX_FORWARD(value)) + "]");
-      }
+      with_default(option, std::to_string(value));
+    }
+
+    void with_default(std::string& option, const std::string& value)
+    {
+      option.append("\n      [default: " + value + "]");
+    }
+
+    void with_default(std::string& option, const char* value)
+    {
+      with_default(option, std::string {value});
     }
 
     /**
      * @brief Add default and implicit values to an option.
      */
     template <typename T>
-    void with_implicit(std::string& option, T&& default_value, T&& implicit_value)
+    void with_implicit(std::string& option, const T& default_value, const T& implicit_value)
     {
-      with_default(option, default_value);
-      if constexpr (std::is_same_v<std::decay_t<T>, char>) {
-        option.append("\n      [implicit: " + std::string {implicit_value} + "]");
-      } else if constexpr (std::is_same_v<std::decay_t<T>, std::string>) {
-        option.append("\n      [implicit: " + LINX_FORWARD(implicit_value) + "]");
-      } else {
-        option.append("\n      [implicit: " + std::to_string(LINX_FORWARD(implicit_value)) + "]");
-      }
+      with_implicit(option, std::to_string(default_value), std::to_string(implicit_value));
+    }
+
+    void with_implicit(std::string& option, const std::string& default_value, const std::string& implicit_value)
+    {
+      option.append("\n      [implicit: " + implicit_value + "]");
+    }
+
+    void with_implicit(std::string& option, const char* default_value, const char* implicit_value)
+    {
+      option.append("\n      [implicit: " + std::string {implicit_value} + "]");
     }
 
     /**
-     * @brief Append a dot if there is not.
+     * @brief Append a dot if there is no ending punctuation.
      */
     static std::string append_dot(const std::string description)
     {
-      if (description.back() == '.') { // FIXME other punctuation marks
+      if (std::string(".?!,;:").find(description.back()) != std::string::npos) {
         return description;
       }
       return description + '.';
@@ -301,7 +308,7 @@ public:
   /**
    * @brief Declare a positional option.
    */
-  template <typename T>
+  template <typename T = std::string>
   void positional(const std::string& name, const std::string& description)
   {
     positional(name, po::value<T>()->required(), description);
@@ -321,7 +328,7 @@ public:
   /**
    * @brief Declare a named option.
    */
-  template <typename T>
+  template <typename T = std::string>
   void named(const std::string& name, const std::string& description)
   {
     named(name, po::value<T>()->required(), description);
@@ -397,7 +404,16 @@ public:
   }
 
   /**
+   * @brief Get the value of a given string option.
+   */
+  std::string operator[](const std::string& name) const
+  {
+    return as<std::string>(name);
+  }
+
+  /**
    * @brief Get the value of a given option.
+   * @tparam T The option type
    * 
    * Throws if the option is not set.
    */
