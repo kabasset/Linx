@@ -114,13 +114,17 @@ BOOST_AUTO_TEST_CASE(label_test)
 
 BOOST_AUTO_TEST_CASE(functional_test)
 {
+  // FIXME update clang-format to interpret macro KOKKOS_LAMBDA and remove spurious parentheses
   //! [functional]
-  auto a = Linx::arithmetic<4>("a");
-  a -= KOKKOS_LAMBDA(int i)
-  {
-    return i;
-  };
+  auto a = Linx::arithmetic<4>("a"); // {0, 1, 2, 3}
+  a -= (KOKKOS_LAMBDA(int i) { return i; }); // {0, 0, 0, 0}
+
   ASSERT(a.contains_only(0));
+
+  auto b = Linx::fill<4>("b", 2); // {2, 2, 2, 2}
+  b.pow(KOKKOS_LAMBDA(int i) { return i; }); // {1, 2, 4, 8}
+
+  ASSERT(b == Linx::geometric<4>("expected", 1, 2));
   //! [functional]
 }
 

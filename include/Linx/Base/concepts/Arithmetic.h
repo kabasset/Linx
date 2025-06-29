@@ -11,8 +11,7 @@ namespace Linx {
  * @brief Concept for additivity, i.e. addable and subtractable types.
  */
 template <typename T, typename U>
-concept Additive = requires(T lhs, U rhs)
-{
+concept Additive = requires(T lhs, U rhs) {
   ++lhs;
   --lhs;
   lhs++;
@@ -22,6 +21,9 @@ concept Additive = requires(T lhs, U rhs)
   lhs + rhs;
   lhs - rhs;
 };
+
+template <typename T0, typename T1>
+concept NotConvertibleTo = not std::convertible_to<T0, T1>;
 
 } // namespace Linx
 

@@ -7,6 +7,7 @@
 
 #include "Linx/Base/Functional.h"
 #include "Linx/Base/Types.h" // LINX_FORWARD
+#include "Linx/Base/concepts/Arithmetic.h"
 
 #include <Kokkos_Core.hpp>
 #include <functional>
@@ -33,9 +34,6 @@ namespace Linx {
 #define LINX_SCALAR_OPERATOR(op_in, op_new, Func) \
   LINX_SCALAR_OPERATOR_INPLACE(op_in, Func) \
   LINX_SCALAR_OPERATOR_NEWINSTANCE(op_new, op_in)
-
-template <typename T0, typename T1>
-concept NotConvertibleTo = not std::convertible_to<T0, T1>;
 
 #define LINX_VECTOR_OPERATOR_INPLACE(op, Func) \
   /** @brief Apply operator `op`. */ \

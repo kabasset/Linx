@@ -7,6 +7,7 @@
 
 #include "Linx/Base/Functional.h"
 #include "Linx/Base/Types.h"
+#include "Linx/Base/concepts/Arithmetic.h"
 
 #include <Kokkos_Core.hpp>
 #include <cmath>
@@ -25,28 +26,28 @@ namespace Linx {
  */
 template <typename T, typename TDerived>
 struct MathFunctionsMixin {
-#define LINX_MATH_UNARY_INPLACE(function) \
-  /** @brief Apply `std::##function##()` in place. */ \
-  const TDerived& function() const \
+#define LINX_MATH_UNARY_INPLACE(func) \
+  /** @brief Apply `std::##func##()` in place. */ \
+  const TDerived& func() const \
   { \
-    return LINX_CRTP_CONST_DERIVED.transform(#function, KOKKOS_LAMBDA(const T& e) { return std::function(e); }); \
+    return LINX_CRTP_CONST_DERIVED.transform(#func, KOKKOS_LAMBDA(const T& e) { return std::func(e); }); \
   }
 
-#define LINX_MATH_BINARY_INPLACE(function) \
-  /** @brief Apply `std::##function##()` in place. */ \
-  const TDerived& function(const TDerived& other) const \
+#define LINX_MATH_BINARY_INPLACE(func) \
+  /** @brief Apply `std::##func##()` in place. */ \
+  template <NotConvertibleTo<T> TRhs> \
+  const TDerived& func(const TRhs& rhs) const \
   { \
     return LINX_CRTP_CONST_DERIVED \
-        .transform(#function, KOKKOS_LAMBDA(const T& e, const T& f) { return std::function(e, f); }, other); \
+        .transform(#func, KOKKOS_LAMBDA(const T& e, const T& f) { return std::func(e, f); }, rhs); \
   }
 
-#define LINX_MATH_BINARY_SCALAR_INPLACE(function) \
-  /** @brief Apply `std::##function##()` in place. */ \
-  const TDerived& function(const T& other) const \
+#define LINX_MATH_BINARY_SCALAR_INPLACE(func) \
+  /** @brief Apply `std::##func##()` in place. */ \
+  template <std::convertible_to<T> TRhs> \
+  const TDerived& func(const TRhs& rhs) const \
   { \
-    return LINX_CRTP_CONST_DERIVED.transform( \
-        #function, \
-        KOKKOS_LAMBDA(const T& e) { return std::function(e, other); }); \
+    return LINX_CRTP_CONST_DERIVED.transform(#func, KOKKOS_LAMBDA(const T& e) { return std::func(e, rhs); }); \
   }
 
   LINX_MATH_UNARY_INPLACE(abs)
@@ -103,25 +104,25 @@ struct MathFunctionsMixin {
 #undef LINX_MATH_BINARY_INPLACE
 };
 
-#define LINX_MATH_UNARY_NEWINSTANCE(function) \
-  /** @relatesalso MathFunctionsMixin @brief Apply `std::##function##()` (new instance). */ \
+#define LINX_MATH_UNARY_NEWINSTANCE(func) \
+  /** @relatesalso MathFunctionsMixin @brief Apply `std::##func##()` (new instance). */ \
   template <typename T, typename TDerived> \
-  TDerived function(const MathFunctionsMixin<T, TDerived>& in) \
+  TDerived func(const MathFunctionsMixin<T, TDerived>& in) \
   { \
     const auto& derived = static_cast<const TDerived&>(in); \
-    auto out = derived.copy_as(compose_label(#function, derived)); \
-    out.function(); \
+    auto out = derived.copy_as(compose_label(#func, derived)); \
+    out.func(); \
     return out; \
   }
 
-#define LINX_MATH_BINARY_NEWINSTANCE(function) \
-  /** @relatesalso MathFunctionsMixin @brief Apply `std::##function##()` (new instance). */ \
-  template <typename T, typename TDerived, typename TOther> \
-  TDerived function(const MathFunctionsMixin<T, TDerived>& in, const TOther& other) \
+#define LINX_MATH_BINARY_NEWINSTANCE(func) \
+  /** @relatesalso MathFunctionsMixin @brief Apply `std::##func##()` (new instance). */ \
+  template <typename T, typename TDerived, typename TRhs> \
+  TDerived func(const MathFunctionsMixin<T, TDerived>& lhs, const TRhs& rhs) \
   { \
-    const auto& derived = static_cast<const TDerived&>(in); \
-    auto out = derived.copy_as(compose_label(#function, derived, other)); \
-    out.function(other); \
+    const auto& derived = static_cast<const TDerived&>(lhs); \
+    auto out = derived.copy_as(compose_label(#func, derived, rhs)); \
+    out.func(rhs); \
     return out; \
   }
 
