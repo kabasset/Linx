@@ -6,9 +6,25 @@ namespace Linx {
 
 \section pixelwise-intro Introduction
 
-Data classes (images, sequences, patches) support a variety of operations,
+Data classes (sequences, images, patches...) support a variety of operations,
 including arithmetic operations, element-wise functions, and reduction operations.
 These operations can be performed on entire arrays or on specific regions defined by slices or patches.
+
+Element-wise transforms are provided as methods to update elements in-place,
+and as free function to create a new instance, without modifying the original data.
+
+When the operations involve more than one arguments,
+the first one has to be a data class,
+but the other arguments may be scalars or functions of compatible arity,
+i.e. equal to the rank of the first argument.
+Data classes of same rank are themeselves compatible functors and can thus be used.
+
+For example, function `pow()` takes two arguments.
+The second argument is considered a scalar if it is convertible to the element type of the first argument.
+Otherwise, it is considered a function (free function, lambda or functor),
+which must take as many arguments as the data class rank.
+
+\snippet{trimleft} pixelwise_example.cpp intro
 
 \section pixelwise-operations Arithmetic and mathematical operations
 
