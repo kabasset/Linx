@@ -70,6 +70,25 @@ Usage is extremely straightforward, as demonstrated below.
 \see \ref cli
 \see <a href="https://kokkos.org/kokkos-core-wiki/ProgrammingGuide/Initialization.html">Kokkos initialization</a>
 
+\section primer-functional Functional programming
+
+With Linx, it is generally more efficient to avoid loops and adopt a functional programming style.
+Functions are frequently passed as arguments to be applied to array elements, or even as parameters.
+What we call functions are either free functions, lambdas, or functors.
+Following to Kokkos' interfaces specifications,
+free functions must be declared `KOKKOS_FUNCTION` or `KOKKOS_INLINE_FUNCTION` to be usable on device.
+This also applies to the call operators of functors.
+With respect to lambdas, they must capture by value with `KOKKOS_LAMBDA`.
+
+To go further, *Linx' arrays are functions:*
+They take as input indices inside their domain of definition and return element values.
+Therefore, transforms designed to take sequences or images as parameters
+-- such as arithmetic operators or mathematical functions --
+generally accept any kind of functions, too.
+This is particularly useful to avoid allocating temporary memory just to tabulate functions over the array domain.
+
+\snippet{trimleft} primer_example.cpp functional
+
 \section primer-design Design principles
 
 Here are a few principles we apply to design the API.
