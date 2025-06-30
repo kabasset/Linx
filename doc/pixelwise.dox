@@ -24,6 +24,9 @@ The second argument is considered a scalar if it is convertible to the element t
 Otherwise, it is considered a function (free function, lambda or functor),
 which must take as many arguments as the data class rank.
 
+In the case of in-place transforms, the data itself can be found both on right-hand side and left-hand side,
+e.g. `a.pow(a)` is valid.
+
 \snippet{trimleft} pixelwise_example.cpp intro
 
 \section pixelwise-operations Arithmetic and mathematical operations

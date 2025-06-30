@@ -31,9 +31,9 @@ BOOST_AUTO_TEST_CASE(intro_test)
   ASSERT(e == d);
 
   // Modify a in-place
-  a.pow(2);
+  a.pow(a); // {27, 27, 27, 27}
 
-  ASSERT(a == b);
+  ASSERT(a.contains_only(27));
   //! [intro]
 }
 

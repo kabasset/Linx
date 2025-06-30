@@ -8,6 +8,7 @@
 #include "Linx/Data/Image.h"
 #include "Linx/Data/Sequence.h"
 #include "Linx/Run/ProgramContext.h"
+#include "Linx/Transforms/LinearFiltering.h"
 
 #include <boost/test/unit_test.hpp>
 
@@ -189,8 +190,15 @@ BOOST_AUTO_TEST_CASE(result_test)
   //! [result]
   auto seed = 42;
   auto a = Linx::generate("noise", Linx::PoissonRng(10., seed), 3, 2);
+
+  // Math function
   auto b = Linx::sqrt(a);
+
+  // Arithmetics
   auto c = b + Linx::GaussianRng({0., 3.}, seed);
+
+  // Filtering
+  auto d = Linx::separable_laplacian<0, 1>()(a);
   //! [result]
 }
 
@@ -223,26 +231,35 @@ BOOST_AUTO_TEST_CASE(slicing_test)
 {
   //! [slicing]
   // 2D image
-  auto a = Linx::fill("a", 1, 4, 4);
+  auto a = Linx::fill("a", 1, 4, 3);
+  // 1 1 1 1
+  // 1 1 1 1
+  // 1 1 1 1
 
   ASSERT(a.rank() == 2);
-  ASSERT(Linx::sum(a) == 16);
+  ASSERT(Linx::sum(a) == 12);
 
   // Hyperplane
   auto row_0 = a[Linx::Slice(0)];
   row_0.fill(0);
+  // 1 1 1 1
+  // 1 1 1 1
+  // 0 0 0 0
 
   ASSERT(row_0.rank() == 1);
   ASSERT(Linx::sum(row_0) == 0);
-  ASSERT(Linx::sum(a) == 12);
+  ASSERT(Linx::sum(a) == 8);
 
   // Subdomain
-  auto inner = a[Linx::Slice(1, 3)(1, 3)];
+  auto inner = a[Linx::Slice(1, 3)(1, 2)];
   inner.fill(2);
+  // 1 1 1 1
+  // 1 2 2 1
+  // 0 0 0 0
 
   ASSERT(inner.rank() == 2);
-  ASSERT(Linx::sum(inner) == 8);
-  ASSERT(Linx::sum(a) == 16);
+  ASSERT(Linx::sum(inner) == 4);
+  ASSERT(Linx::sum(a) == 10);
   //! [slicing]
 }
 
