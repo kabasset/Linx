@@ -45,21 +45,10 @@ BOOST_AUTO_TEST_CASE(resize_test)
   ASSERT(d.n == 4);
   //! [resize]
 
-  const auto& a_on_host = Linx::on_host(a);
-  ASSERT(a_on_host.front() == 1);
-  ASSERT(a_on_host.back() == 4);
-
-  const auto& b_on_host = Linx::on_host(b);
-  ASSERT(b_on_host[0] == 1);
-  ASSERT(b_on_host[3] == 4);
-  BOOST_TEST(b_on_host[4] == 0);
-
-  const auto& c_on_host = Linx::on_host(c);
-  ASSERT(c_on_host.front() == 1);
-  ASSERT(c_on_host.back() == 3);
-
-  ASSERT(d.front() == 1);
-  ASSERT(d.back() == 4);
+  ASSERT(a.restriction(Linx::Add(1)));
+  ASSERT(b.restriction(KOKKOS_LAMBDA(int i) { return i < 4 ? i + 1 : 0; }));
+  ASSERT(c.restriction(Linx::Add(1)));
+  ASSERT(d.restriction(Linx::Add(1)));
 }
 
 BOOST_AUTO_TEST_CASE(rowwise_test)
@@ -78,23 +67,14 @@ BOOST_AUTO_TEST_CASE(rowwise_test)
   static_assert(std::is_same_v<decltype(a)::element_type, int>);
   ASSERT(a.label() == "1D int");
   ASSERT(a.size() == 4);
-  const auto& a_on_host = Linx::on_host(a);
-  ASSERT(a_on_host(0) == 1);
-  ASSERT(a_on_host(1) == 2);
-  ASSERT(a_on_host(2) == 3);
-  ASSERT(a_on_host(3) == 4);
+  ASSERT(a.restriction(Linx::Add(1)));
 
   static_assert(std::is_same_v<decltype(b)::element_type, char>);
   ASSERT(b.label() == "2D char");
   ASSERT(b.size() == 4);
   ASSERT(b.extent(0) == 2);
   ASSERT(b.extent(1) == 2);
-  const auto& b_on_host = Linx::on_host(b);
-  for (int j = 0; j < 2; ++j) {
-    for (int i = 0; i < 2; ++i) {
-      ASSERT(b_on_host(i, j) == char('a' + 2 * j + i));
-    }
-  }
+  ASSERT(b.restriction(KOKKOS_LAMBDA(int i, int j) { return char('a' + 2 * j + i); }));
 
   static_assert(std::is_same_v<decltype(c)::element_type, float>);
   ASSERT(c.label() == "3D float");
@@ -102,12 +82,7 @@ BOOST_AUTO_TEST_CASE(rowwise_test)
   ASSERT(c.extent(0) == 3);
   ASSERT(c.extent(1) == 2);
   ASSERT(c.extent(2) == 1);
-  const auto& c_on_host = Linx::on_host(c);
-  for (int j = 0; j < 2; ++j) {
-    for (int i = 0; i < 3; ++i) {
-      ASSERT(c_on_host(i, j, 0) == float(1 + 3 * j + i));
-    }
-  }
+  ASSERT(c.restriction(KOKKOS_LAMBDA(int i, int j, int) { return float(1 + 3 * j + i); }));
 }
 
 BOOST_AUTO_TEST_CASE(wrap_test)
@@ -179,10 +154,7 @@ BOOST_AUTO_TEST_CASE(generators_test)
   //! [generators]
 
   ASSERT(a.n == 12);
-  const auto& a_on_host = Linx::on_host(a);
-  for (int i = 0; i < a.n; ++i) {
-    ASSERT(a_on_host(i) == i * i);
-  }
+  ASSERT(a.restriction(Linx::Abspow<2>()));
 }
 
 BOOST_AUTO_TEST_CASE(result_test)

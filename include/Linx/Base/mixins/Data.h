@@ -353,22 +353,33 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   }
 
   /**
-   * @brief Equality.
+   * @brief Equality of values only.
+   * 
+   * No check is performed on the domain,
+   * and `rhs` does not even has to have a domain.
+   * Typically, it can be a lambda function.
+   * 
+   * @see `operator==`
    */
-  bool operator==(const auto& other) const
+  bool restriction(const NotConvertibleTo<T> auto& rhs) const // FIXME rename?
   {
-    if (size() != other.size()) {
-      return false;
-    }
-    return transform_reduce("==", Equal(), And(), LINX_CRTP_CONST_DERIVED, other);
+    return transform_reduce("restriction()", Equal(), And(), LINX_CRTP_CONST_DERIVED, rhs);
+  }
+
+  /**
+   * @brief Equality of domain and values.
+   */
+  bool operator==(const auto& rhs) const
+  {
+    return (LINX_CRTP_CONST_DERIVED.size() == rhs.size()) && restriction(rhs); // FIXME .domain()?
   }
 
   /**
    * @brief Inequality.
    */
-  bool operator!=(const auto& other) const
+  bool operator!=(const auto& rhs) const
   {
-    return not(*this == other);
+    return not(*this == rhs);
   }
 };
 
