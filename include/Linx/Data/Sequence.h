@@ -23,10 +23,16 @@ namespace Linx {
 
 /**
  * @ingroup arrays
- * @brief Non-resizable 1D container with Euclid arithmetics and element-wise functions.
+ * @brief Non-resizable 1D array.
  * 
  * @tparam T The element value type
- * @tparam N The size, or -1 for runtime size
+ * @tparam N The size, or -1 for dynamic size
+ * 
+ * By default, sequences are default-initialized.
+ * 
+ * @see arrays
+ * @see `DataMixin`
+ * @see `RangeMixin`
  */
 template <typename T, int N, typename TContainer = SequenceContainer<T, N>>
 class Sequence :
@@ -34,17 +40,17 @@ class Sequence :
     public RangeMixin<true, T, Sequence<T, N, TContainer>> {
 public:
 
-  // FIXME most aliases and methods to DataMixin
+  // TODO most aliases and methods to DataMixin
 
   static constexpr int n = N; ///< The size parameter
   using Container = TContainer; ///< The underlying container type
   using Domain = Slice<Index>; ///< The domain type
 
-  using memory_space = typename Container::memory_space;
-  using execution_space = typename Container::execution_space;
+  using memory_space = typename Container::memory_space; ///< The memory space
+  using execution_space = typename Container::execution_space; ///< The default execution space
 
-  using value_type = typename Container::value_type; ///< The raw element value type
-  using element_type = std::decay_t<value_type>; ///< The decayed element value type
+  using value_type = typename Container::value_type; ///< The possibly const-qualified element type
+  using element_type = std::remove_cvref_t<value_type>; ///< The element type
   using size_type = typename Container::size_type; ///< The index and size type
   using difference_type = std::ptrdiff_t; ///< The index difference type
   using reference = typename Container::reference_type; ///< The element reference type
@@ -53,27 +59,22 @@ public:
   using const_iterator = decltype(Kokkos::Experimental::cbegin(Container())); ///< The constant iterator type
 
   /**
-   * @brief Constructor.
-   * 
-   * @param label The sequence label
-   * @param size The sequence size
-   * @param values, value The sequence values
-   * @param begin, end Pointer or iterator to the values beginning and end
-   * @param container A compatible container
-   * @param args Arguments forwarded to the container
-   * @param data Some external data to be viewed as a sequence
-   * 
-   * @warning If the size is set at compile time, the size parameter or value count must match it.
+   * @brief Default constructor.
    */
   Sequence() : Sequence("") {}
 
   /**
-   * @copydoc Sequence()
+   * @brief Constructor.
+   * @param label The sequence label
    */
   explicit Sequence(const std::string& label) : Sequence(label, std::max(0, n)) {}
 
   /**
-   * @copydoc Sequence()
+   * @brief Constructor.
+   * @param label The sequence label
+   * @param size The sequence size
+   * 
+   * @warning If the size is static (`n != -1`), the `size` parameter must match it.
    */
   explicit Sequence(const std::string& label, std::integral auto size) : m_container(label)
   {
@@ -85,54 +86,67 @@ public:
   }
 
   /**
-   * @copydoc Sequence()
+   * @brief Constructor.
+   * @param size The sequence size
+   * 
+   * @warning If the size is static (`n != -1`), the `size` parameter must match it.
    */
   explicit Sequence(std::integral auto size) : Sequence("", size) {}
 
   /**
    * @copydoc Sequence()
    */
-  KOKKOS_INLINE_FUNCTION explicit Sequence(const Container& container) : m_container(container) {}
+  [[deprecated]] KOKKOS_INLINE_FUNCTION explicit Sequence(const Container& container) : m_container(container) {}
 
   /**
    * @copydoc Sequence()
    */
-  KOKKOS_INLINE_FUNCTION explicit Sequence(Container&& container) : m_container(LINX_MOVE(container)) {}
-
-  // /**
-  //  * @copydoc Sequence()
-  //  */
-  // Sequence(T (&&values)[N]) : Sequence("", values, values + N) {}
-  // FIXME incompatible with N = -1 => Specialize whole class?
-  // Would be nice to enable type deduction, including for aliases like Position, e.g.
-  // Position p({1, 2, 3}) -> Position<int, 3>
+  [[deprecated]] KOKKOS_INLINE_FUNCTION explicit Sequence(Container&& container) : m_container(LINX_MOVE(container)) {}
 
   /**
-   * @copydoc Sequence()
+   * @brief Constructor.
+   * @param values The sequence values
+   * 
+   * This constructor is not explicit, such that brace-enclosed list may be implicitely converted to sequences.
+   * 
+   * @warning If the size is static (`n != -1`), the value count must match it.
    */
   Sequence(std::initializer_list<value_type> values) : Sequence("", values.begin(), values.end()) {}
 
   /**
-   * @copydoc Sequence()
+   * @brief Constructor.
+   * @param label The sequence label
+   * @param values The sequence values
+   * 
+   * @warning If the size is static (`n != -1`), the value count must match it.
    */
   explicit Sequence(const std::string& label, std::initializer_list<value_type> values) :
       Sequence(label, values.begin(), values.end())
   {}
 
   /**
-   * @copydoc Sequence()
+   * @brief Constructor.
+   * @param label The sequence label
+   * @param values The sequence values
+   * 
+   * @warning If the size is static (`n != -1`), the value count must match it.
    */
   explicit Sequence(const std::string& label, const std::ranges::range auto& values) :
       Sequence(label, std::ranges::begin(values), std::ranges::end(values))
   {}
 
   /**
-   * @copydoc Sequence()
+   * @brief Forwarding constructor.
+   * @param args The parameters forwarded to the container's constructor
    */
   KOKKOS_INLINE_FUNCTION explicit Sequence(Forward, auto&&... args) : m_container(LINX_FORWARD(args)...) {}
 
   /**
-   * @copydoc Sequence()
+   * @brief Constructor.
+   * @param label The sequence label
+   * @param begin, end The sequence values iterators
+   * 
+   * @warning If the size is static (`n != -1`), the value count must match it.
    */
   explicit Sequence(const std::string& label, std::input_iterator auto begin, std::input_iterator auto end) :
       Sequence(label, std::ranges::distance(begin, end))
@@ -141,7 +155,11 @@ public:
   }
 
   /**
-   * @copydoc Sequence()
+   * @brief Constructor.
+   * @param label The sequence label
+   * @param begin, end The sequence values pointers
+   * 
+   * @warning If the size is static (`n != -1`), the value count must match it.
    */
   explicit Sequence(const std::string& label, const value_type* begin, const value_type* end) :
       Sequence(label, end - begin)
@@ -150,14 +168,21 @@ public:
   }
 
   /**
-   * @copydoc Sequence()
+   * @brief Wrapping constructor.
+   * @param data The wrapped data
+   * @param size The sequence size
+   * 
+   * The resulting sequence does not own the data.
+   * It won't manage its memory or ensure it is valid.
+   * 
+   * @warning If the size is static (`n != -1`), the value count must match it.
    */
   KOKKOS_INLINE_FUNCTION explicit Sequence(Wrap<value_type*> data, std::integral auto size) :
       m_container(data.value, size)
   {}
 
   /**
-   * @brief Sequence().
+   * @brief Constant constructor.
    */
   template <typename U>
   [[deprecated]] Sequence(const std::string& label, Constant<U> value, int size = std::abs(n)) : Sequence(label, size)
@@ -166,14 +191,14 @@ public:
   }
 
   /**
-   * @brief Sequence().
+   * @brief Constant constructor.
    */
   template <typename U>
   [[deprecated]] Sequence(Constant<U> value, int size = std::abs(n)) : Sequence("", value, size)
   {}
 
   /**
-   * @brief The rank is always 1.
+   * @brief Array rank: 1.
    */
   static constexpr auto rank()
   {
@@ -181,7 +206,7 @@ public:
   }
 
   /**
-   * @brief Container span.
+   * @brief Array domain: `Slice(0, size())`.
    */
   KOKKOS_INLINE_FUNCTION Domain domain() const
   {
@@ -189,7 +214,7 @@ public:
   }
 
   /**
-   * @brief Container size, for compatibility with `DataContainer`.
+   * @brief Array shape: `{size()}`.
    */
   Sequence<size_type, 1> shape() const
   {
@@ -197,7 +222,7 @@ public:
   }
 
   /**
-   * @brief The extent along the first axis (the size), for compatibility.
+   * @brief Extent along the first (and only) axis: `size()`.
    */
   KOKKOS_INLINE_FUNCTION void extent(std::integral auto = 0)
   {
@@ -205,7 +230,7 @@ public:
   }
 
   /**
-   * @brief The stride is always 1.
+   * @brief Stride along the first (and only) axis: 1.
    */
   static constexpr auto stride(std::integral auto = 0)
   {
@@ -251,15 +276,15 @@ public:
   /**
    * @brief Access the i-th element.
    */
-  KOKKOS_INLINE_FUNCTION reference operator[](std::integral auto i) const
+  KOKKOS_INLINE_FUNCTION reference operator()(std::integral auto i) const
   {
     return m_container(i);
   }
 
   /**
-   * @brief Access the i-th element, for compatibility with `DataContainer`.
+   * @brief Access the i-th element.
    */
-  KOKKOS_INLINE_FUNCTION reference operator()(std::integral auto i) const
+  KOKKOS_INLINE_FUNCTION reference operator[](std::integral auto i) const
   {
     return m_container(i);
   }
@@ -267,7 +292,7 @@ public:
   /**
    * @brief Iterator to the beginning.
    */
-  KOKKOS_INLINE_FUNCTION iterator begin() const
+  KOKKOS_INLINE_FUNCTION iterator begin() const // FIXME in RangeMixin already
   {
     return Kokkos::Experimental::begin(m_container);
   }
@@ -275,7 +300,7 @@ public:
   /**
    * @brief Iterator to the end.
    */
-  KOKKOS_INLINE_FUNCTION iterator end() const
+  KOKKOS_INLINE_FUNCTION iterator end() const // FIXME in RangeMixin already
   {
     return Kokkos::Experimental::end(m_container);
   }
@@ -283,7 +308,7 @@ public:
   /**
    * @brief Constant iterator to the beginning.
    */
-  KOKKOS_INLINE_FUNCTION const_iterator cbegin() const
+  KOKKOS_INLINE_FUNCTION const_iterator cbegin() const // FIXME in RangeMixin already
   {
     return Kokkos::Experimental::cbegin(m_container);
   }
@@ -291,20 +316,22 @@ public:
   /**
    * @brief Constant iterator to the end.
    */
-  KOKKOS_INLINE_FUNCTION const_iterator cend() const
+  KOKKOS_INLINE_FUNCTION const_iterator cend() const // FIXME in RangeMixin already
   {
     return Kokkos::Experimental::cend(m_container);
   }
 
   /**
    * @brief Stream insertion.
+   * 
+   * @warning This may involve a copy on host.
    */
   friend std::ostream& operator<<(std::ostream& os, const Sequence& sequence)
   {
-    auto hosted = on_host(sequence);
-    os << "[" << hosted[0];
-    for (std::size_t i = 1; i < hosted.size(); ++i) {
-      os << ", " << hosted[i];
+    const auto& sequence_on_host = on_host(as_readonly(sequence));
+    os << "[" << sequence_on_host[0];
+    for (std::size_t i = 1; i < sequence_on_host.size(); ++i) {
+      os << ", " << sequence_on_host[i];
     }
     os << "]";
     return os;
@@ -312,15 +339,18 @@ public:
 
 private:
 
-  /**
-   * @brief The Kokkos container.
-   */
-  Container m_container;
+  Container m_container; ///< The Kokkos container.
 };
 
+/**
+ * @brief Sequence on host.
+ */
 template <typename T, int N>
 using GPosition = Sequence<T, N, SequenceContainer<T, N, Kokkos::HostSpace>>;
 
+/**
+ * @brief Integral-valued sequence on host.
+ */
 template <int N>
 using Position = GPosition<Index, N>;
 
@@ -334,7 +364,8 @@ template <typename T, int N, typename TContainer = SequenceContainer<T, N>>
 Sequence(const char*, T (&&)[N]) -> Sequence<T, N, TContainer>;
 
 /**
- * @brief Get the i-th element of an array, or some fallback value if out of bounds.
+ * @relatesalso Sequence
+ * @brief I-th element of an array, or some fallback value if out of bounds.
  */
 template <int I, typename T, int N, typename TContainer, typename U>
 KOKKOS_INLINE_FUNCTION U get_or(const Sequence<T, N, TContainer>& in, U fallback) // FIXME ArrayLike?
@@ -347,6 +378,7 @@ KOKKOS_INLINE_FUNCTION U get_or(const Sequence<T, N, TContainer>& in, U fallback
 }
 
 /**
+ * @relatesalso Sequence
  * @brief Perform a shallow copy of a sequence, as a readonly sequence.
  * 
  * If the input sequence is aleady readonly, then this is a no-op.
@@ -363,6 +395,7 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Sequence<T, N, TContaine
 }
 
 /**
+ * @relatesalso Sequence
  * @brief Perform a shallow copy of a sequence, as an atomic sequence.
  */
 template <typename T, int N, typename TContainer>
@@ -373,6 +406,7 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Sequence<T, N, TContainer>
 }
 
 /**
+ * @relatesalso Sequence
  * @brief Copy the data to host if on device.
  */
 template <typename T, int N, typename TContainer>
@@ -382,6 +416,7 @@ decltype(auto) on_host(const Sequence<T, N, TContainer>& in)
 }
 
 /**
+ * @relatesalso Sequence
  * @brief Copy the data to a given memory space if not already accessible from it.
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace::memory_space, typename T, int N, typename TContainer>
@@ -399,7 +434,7 @@ decltype(auto) on_device(const Sequence<T, N, TContainer>& in)
  * @brief Copy as many elements as possible from `in` to `out`.
  */
 template <ArrayLike TIn, ArrayLike TOut>
-void copy_to(const TIn& in, const TOut& out) // FIXME replace with/update DataMixin::copy_from/to
+void copy_to(const TIn& in, const TOut& out) // FIXME rename as copy_intersection or even rm
 {
   auto domain = Slice(0, std::min<int>(std::size(in), std::size(out)));
   for_each<typename TOut::execution_space>("copy_to()", domain, KOKKOS_LAMBDA(int i) { out[i] = in[i]; });
@@ -483,9 +518,11 @@ struct RangeTraits<TStart, TStep> {
  * @ingroup creation
  * @brief Static-size arithmetic sequence.
  * @tparam N The static size
- * @param size The dynamic size
+ * @tparam TSpace The memory space
  * @param label The sequence label
- * @param args A slice, or a start value and step of type `Plus` or `Minus`.
+ * @param args A slice, or a first value and common difference.
+ * 
+ * @see `RangeMixin::arithmetic()`
  */
 template <int N, typename TSpace = Kokkos::DefaultExecutionSpace, typename... TArgs>
 auto arithmetic(const std::string& label, TArgs&&... args)
@@ -495,7 +532,14 @@ auto arithmetic(const std::string& label, TArgs&&... args)
 }
 
 /**
- * @copydoc arithmetic()
+ * @ingroup creation
+ * @brief Dynamic-size arithmetic sequence.
+ * @tparam TSpace The memory space
+ * @param size The dynamic size
+ * @param label The sequence label
+ * @param args A slice, or a start value and step.
+ * 
+ * @see `RangeMixin::arithmetic()`
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace, typename... TArgs>
 auto arithmetic(std::integral auto size, const std::string& label, TArgs&&... args)
@@ -507,9 +551,12 @@ auto arithmetic(std::integral auto size, const std::string& label, TArgs&&... ar
 /**
  * @ingroup geometric
  * @brief Static-size geometric sequence.
- * @param size The dynamic size
+ * @tparam N The static size
+ * @tparam TSpace The memory space
  * @param label The sequence label
- * @param args A slice, or a start value and step of type `Multiply` or `Divide`.
+ * @param args A slice, or a first value and common ratio.
+ * 
+ * @see `RangeMixin::geometric()`
  */
 template <int N, typename TSpace = Kokkos::DefaultExecutionSpace, typename... TArgs>
 auto geometric(const std::string& label, TArgs&&... args)
@@ -519,7 +566,14 @@ auto geometric(const std::string& label, TArgs&&... args)
 }
 
 /**
- * @copydoc geometric()
+ * @ingroup geometric
+ * @brief Dynamic-size geometric sequence.
+ * @tparam TSpace The memory space
+ * @param size The dynamic size
+ * @param label The sequence label
+ * @param args A slice, or a first value and common ratio.
+ * 
+ * @see `RangeMixin::geometric()`
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace, typename... TArgs>
 auto geometric(std::integral auto size, const std::string& label, TArgs&&... args)
@@ -532,6 +586,7 @@ auto geometric(std::integral auto size, const std::string& label, TArgs&&... arg
  * @ingroup creation
  * @brief Generate a static-size sequence.
  * @tparam N The size
+ * @tparam TSpace The memory space
  * @param label The label
  * @param func The generator
  */
@@ -546,9 +601,10 @@ auto generate(const std::string& label, const TFunc& func)
 /**
  * @ingroup creation
  * @brief Generate a dynamic-size sequence.
+ * @tparam TSpace The memory space
+ * @param size The size
  * @param label The label
  * @param func The generator
- * @param size The size
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace, typename TFunc>
 auto generate(std::integral auto size, const std::string& label, const TFunc& func)
@@ -560,6 +616,10 @@ auto generate(std::integral auto size, const std::string& label, const TFunc& fu
 /**
  * @ingroup creation
  * @brief Copy an array as a static-size sequence.
+ * @tparam N The static size
+ * @tparam TSpace The memory space
+ * @param label The sequence label
+ * @param in The input array
  * 
  * If the input array is larger than `N`, only the `N` first values are copied.
  * If it is smaller, the remaining values are default-initialized.
@@ -577,6 +637,10 @@ auto resize(const std::string& label, const ArrayLike auto& in)
 /**
  * @ingroup creation
  * @brief Copy an array as a dynamic-size sequence.
+ * @tparam TSpace The memory space
+ * @param size The dynamic size
+ * @param label The sequence label
+ * @param in The input array
  * 
  * If the input array is larger than `size`, only the `size` first values are copied.
  * If it is smaller, the remaining values are default-initialized.
@@ -593,6 +657,10 @@ auto resize(std::integral auto size, const std::string& label, const ArrayLike a
 /**
  * @ingroup creation
  * @brief Copy a list as a static-size sequence.
+ * @tparam N The static size
+ * @tparam TSpace The memory space
+ * @param label The sequence label
+ * @param in The input list
  * 
  * If the input list is larger than `N`, only the `N` first values are copied.
  * If it is smaller, the remaining values are default-initialized.
@@ -606,6 +674,10 @@ auto resize(const std::string& label, std::initializer_list<T> in)
 /**
  * @ingroup creation
  * @brief Copy a list as a dynamic-size sequence.
+ * @tparam TSpace The memory space
+ * @param size The dynamic size
+ * @param label The sequence label
+ * @param in The input list
  * 
  * If the input list is larger than `size`, only the `size` first values are copied.
  * If it is smaller, the remaining values are default-initialized.
@@ -617,7 +689,7 @@ auto resize(std::integral auto size, const std::string& label, std::initializer_
 }
 
 template <int M, typename T, int N>
-auto pad(const GPosition<T, N>& in) // FIXME merge with resize
+[[deprecated]] auto pad(const GPosition<T, N>& in) // FIXME merge with resize
 {
   using U = std::decay_t<T>;
   GPosition<U, M> out(compose_label("pad", in));
@@ -626,7 +698,7 @@ auto pad(const GPosition<T, N>& in) // FIXME merge with resize
 }
 
 template <int M, typename T, int N>
-auto pad(const GPosition<T, N>& in, const T& value)
+[[deprecated]] auto pad(const GPosition<T, N>& in, const T& value)
 {
   using U = std::decay_t<T>;
   GPosition<U, M> out(compose_label("pad", in, value), Constant(value));
