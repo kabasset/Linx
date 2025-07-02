@@ -361,9 +361,9 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    * 
    * @see `operator==`
    */
-  bool restriction(const NotConvertibleTo<T> auto& rhs) const // FIXME rename?
+  bool matches(const NotConvertibleTo<T> auto& rhs) const
   {
-    return transform_reduce("restriction()", Equal(), And(), LINX_CRTP_CONST_DERIVED, rhs);
+    return transform_reduce("matches()", Equal(), And(), LINX_CRTP_CONST_DERIVED, rhs);
   }
 
   /**
@@ -371,7 +371,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   bool operator==(const auto& rhs) const
   {
-    return (LINX_CRTP_CONST_DERIVED.size() == rhs.size()) && restriction(rhs); // FIXME .domain()?
+    return (LINX_CRTP_CONST_DERIVED.size() == rhs.size()) && matches(rhs); // FIXME .domain()?
   }
 
   /**

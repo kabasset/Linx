@@ -45,10 +45,10 @@ BOOST_AUTO_TEST_CASE(resize_test)
   ASSERT(d.n == 4);
   //! [resize]
 
-  ASSERT(a.restriction(Linx::Add(1)));
-  ASSERT(b.restriction(KOKKOS_LAMBDA(int i) { return i < 4 ? i + 1 : 0; }));
-  ASSERT(c.restriction(Linx::Add(1)));
-  ASSERT(d.restriction(Linx::Add(1)));
+  ASSERT(a.matches(Linx::Add(1)));
+  ASSERT(b.matches(KOKKOS_LAMBDA(int i) { return i < 4 ? i + 1 : 0; }));
+  ASSERT(c.matches(Linx::Add(1)));
+  ASSERT(d.matches(Linx::Add(1)));
 }
 
 BOOST_AUTO_TEST_CASE(rowwise_test)
@@ -67,14 +67,14 @@ BOOST_AUTO_TEST_CASE(rowwise_test)
   static_assert(std::is_same_v<decltype(a)::element_type, int>);
   ASSERT(a.label() == "1D int");
   ASSERT(a.size() == 4);
-  ASSERT(a.restriction(Linx::Add(1)));
+  ASSERT(a.matches(Linx::Add(1)));
 
   static_assert(std::is_same_v<decltype(b)::element_type, char>);
   ASSERT(b.label() == "2D char");
   ASSERT(b.size() == 4);
   ASSERT(b.extent(0) == 2);
   ASSERT(b.extent(1) == 2);
-  ASSERT(b.restriction(KOKKOS_LAMBDA(int i, int j) { return char('a' + 2 * j + i); }));
+  ASSERT(b.matches(KOKKOS_LAMBDA(int i, int j) { return char('a' + 2 * j + i); }));
 
   static_assert(std::is_same_v<decltype(c)::element_type, float>);
   ASSERT(c.label() == "3D float");
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(rowwise_test)
   ASSERT(c.extent(0) == 3);
   ASSERT(c.extent(1) == 2);
   ASSERT(c.extent(2) == 1);
-  ASSERT(c.restriction(KOKKOS_LAMBDA(int i, int j, int) { return float(1 + 3 * j + i); }));
+  ASSERT(c.matches(KOKKOS_LAMBDA(int i, int j, int) { return float(1 + 3 * j + i); }));
 }
 
 BOOST_AUTO_TEST_CASE(wrap_test)
@@ -154,7 +154,7 @@ BOOST_AUTO_TEST_CASE(generators_test)
   //! [generators]
 
   ASSERT(a.n == 12);
-  ASSERT(a.restriction(Linx::Abspow<2>()));
+  ASSERT(a.matches(Linx::Abspow<2>()));
 }
 
 BOOST_AUTO_TEST_CASE(result_test)
