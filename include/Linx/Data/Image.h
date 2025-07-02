@@ -22,42 +22,31 @@ namespace Linx {
 
 /**
  * @ingroup arrays
- * @brief ND image.
+ * @brief Non-resizable ND array.
  * 
- * @tparam T Element type
- * @tparam N Rank, i.e. number of axes
- * @tparam TContainer Underlying element container
+ * @tparam T The element value type
+ * @tparam N The rank, or -1 for dynamic rank
+ * @tparam TContainer The underlying container type
  * 
- * Copy constructor and copy assignment operator perform shallow copy:
+ * By default, image elements are default-initialized.
+ * Copy constructor and copy assignment operator perform shallow copy.
  * 
- * \code
- * auto a = Linx::fill("a", 1.0, 4, 3);
- * ASSERT(a.contains_only(1));
- * auto b = a;
- * b.fill(2.0);
- * assert(a.contains_only(2));
- * \endcode
- * 
- * Deep copy is available as `copy_as()` or `operator+`:
- * 
- * \code
- * auto a = Linx::fill("a", 1.0, 4, 3);
- * auto b = a; // Shallow copy
- * auto c = a.copy_as("C"); // Deep copy labeled "C"
- * auto d = +a; // Deep copy labeled "copy(A)"
- * \endcode
- * 
- * By default, images are allocated on the fastest available device.
- * They can be viewed on the host or any device with `on_host()` or `on_device()`,
- * which are no-ops if the image is already acessible from the specified space.
+ * @see arrays
+ * @see `DataMixin`
+ * @see `RangeMixin`
  */
 template <typename T, int N, typename TContainer = ImageContainer<T, N>>
 class Image :
     public DataMixin<T, DataArithmeticMixin<T, Image<T, N, TContainer>>, Image<T, N, TContainer>>,
     public RangeMixin<is_contiguous<TContainer>(), T, Image<T, N, TContainer>> {
+private:
+
+  static constexpr int kokkos_max_dyn_rank = (N == -1 ? 7 : N); ///< The max dynamic rank supported by Kokkos
+  // TODO make public variable, as well as kokkos_max_rank = 8 and kokkos_max_op_rank = 6?
+
 public:
 
-  static constexpr int n = N; ///< The dimension parameter
+  static constexpr int n = N; ///< The rank parameter
   using Container = TContainer; ///< The underlying container type
   using Shape = Position<N>; ///< The shape type
   using Domain = Box<N>; ///< The domain type
@@ -65,51 +54,50 @@ public:
   using memory_space = typename Container::memory_space;
   using execution_space = typename Container::execution_space;
 
-  using value_type = typename Container::value_type; ///< The raw value type
-  using element_type = std::decay_t<value_type>; ///< The decayed value type
+  using value_type = typename Container::value_type; ///< The possibly const-qualified element type
+  using element_type = std::remove_cvref_t<value_type>; ///< The element type
   using size_type = typename Container::size_type; ///< The index and size type
   using difference_type = std::ptrdiff_t; ///< The index difference type
   using reference = typename Container::reference_type; ///< The element reference type
   using pointer = typename Container::pointer_type; ///< The element pointer type
 
-private:
-
-  static constexpr int kokkos_max_dyn_rank = (n == -1 ? 7 : n); ///< The max dynamic rank supported by Kokkos
-  // TODO make public variable, as well as kokkos_max_rank = 8 and kokkos_max_op_rank = 6
-
-public:
+  /**
+   * @brief Constructor.
+   * 
+   * @param shape The image extents along each axis
+   * 
+   * @warning If the rank is static (`n != -1`), the extent count must match it.
+   */
+  explicit Image(std::integral auto... shape) : Image("", shape...) {}
 
   /**
    * @brief Constructor.
    * 
    * @param label The image label
-   * @param shape The image shape along each axis
-   * @param container A compatible container
-   * @param args Arguments to be forwarded to the container constructor
-   * @param data Some external data to be viewed as an image
+   * @param shape The image extent along each axis
    * 
-   * \code
-   * Image from_extents("a", width, height);
-   * Image from_shape("b", a.shape());
-   * Image from_pointer(Wrap(a.data()), a.shape());
-   * \endcode
-   */
-  explicit Image(std::integral auto... shape) : Image("", shape...) {}
-
-  /**
-   * @copydoc Image()
+   * @warning If the rank is static (`n != -1`), the extent count must match it.
    */
   explicit Image(const std::string& label, std::integral auto... shape) : m_container(label, shape...) {}
 
   /**
-   * @copydoc Image()
+   * @brief Constructor.
+   * 
+   * @param shape The image extents along each axis
+   * 
+   * @warning If the rank is static (`n != -1`), the shape rank must match it.
    */
   template <std::integral TInt, typename UContainer>
   explicit Image(const Sequence<TInt, n, UContainer>& shape) : Image("", shape) // TODO use ArrayLike?
   {}
 
   /**
-   * @copydoc Image()
+   * @brief Constructor.
+   * 
+   * @param label The image label
+   * @param shape The image extents along each axis
+   * 
+   * @warning If the rank is static (`n != -1`), the shape rank must match it.
    */
   template <std::integral TInt, typename UContainer>
   explicit Image(const std::string& label, const Sequence<TInt, n, UContainer>& shape) :
@@ -119,29 +107,44 @@ public:
   /**
    * @copydoc Image()
    */
-  KOKKOS_INLINE_FUNCTION explicit Image(const Container& container) : m_container(container) {}
+  [[deprecated]] KOKKOS_INLINE_FUNCTION explicit Image(const Container& container) : m_container(container) {}
 
   /**
    * @copydoc Image()
    */
-  KOKKOS_INLINE_FUNCTION explicit Image(Container&& container) : m_container(LINX_FORWARD(container)) {}
+  [[deprecated]] KOKKOS_INLINE_FUNCTION explicit Image(Container&& container) : m_container(LINX_FORWARD(container)) {}
 
   /**
-   * @copydoc Image()
+   * @brief Forwarding constructor.
+   * @param args The parameters forwarded to the container's constructor
    */
   template <typename... TArgs>
   KOKKOS_INLINE_FUNCTION explicit Image(Forward, TArgs&&... args) : m_container(LINX_FORWARD(args)...)
   {}
 
   /**
-   * @copydoc Image()
+   * @brief Wrapping constructor.
+   * @param data The wrapped data
+   * @param shape The image extents along each axis
+   * 
+   * The resulting image does not own the data.
+   * It won't manage its memory or ensure it is valid.
+   * 
+   * @warning If the rank is static (`n != -1`), the extent count must match it.
    */
   template <typename U>
-  explicit Image(Wrap<U*> data, std::integral auto... extents) : m_container(data.value, extents...)
+  explicit Image(Wrap<U*> data, std::integral auto... shape) : m_container(data.value, shape...)
   {}
 
   /**
-   * @copydoc Image()
+   * @brief Wrapping constructor.
+   * @param data The wrapped data
+   * @param shape The image extents along each axis
+   * 
+   * The resulting image does not own the data.
+   * It won't manage its memory or ensure it is valid.
+   * 
+   * @warning If the rank is static (`n != -1`), the shape rank must match it.
    */
   template <typename U, std::integral TInt, typename UContainer>
   explicit Image(Wrap<U*> data, const Sequence<TInt, n, UContainer>& shape) :
@@ -169,7 +172,7 @@ public:
   }
 
   /**
-   * @brief Image shape along all axes. 
+   * @brief Image extents along all axes. 
    */
   Shape shape() const
   {
@@ -246,15 +249,15 @@ public:
   }
 
   /**
-   * @brief Reference to the element at given indices.
+   * @brief Access the element at given position.
    */
-  KOKKOS_INLINE_FUNCTION reference operator()(std::integral auto... indices) const
+  KOKKOS_INLINE_FUNCTION reference operator()(std::integral auto... position) const
   {
-    return m_container(indices...);
+    return m_container(position...);
   }
 
   /**
-   * @brief Reference to the element at given position.
+   * @brief Access the element at given position.
    */
   template <std::integral TInt = int, int M = n>
   KOKKOS_INLINE_FUNCTION reference operator[](const GPosition<TInt, M>& position) const // FIXME use ArrayLike?
@@ -264,7 +267,8 @@ public:
   }
 
   /**
-   * @brief Get a crop of the image.
+   * @brief Slice the image as a shallow copy.
+   * @param region The slicing as a `Box`
    */
   template <typename U, int M>
   auto operator[](const GBox<U, M>& region) const // not __device__ because of `region & domain()`
@@ -275,8 +279,8 @@ public:
   }
 
   /**
-   * @brief Get a slice of the image.
-   * @param region The slicing region as a `Slice` or `Box`
+   * @brief Slice the image as a shallow copy.
+   * @param region The slicing region as a `Slice`
    * 
    * The `Slice` must have either a rank of:
    * - 1, in which case the slicing is performed on the last axis only;
@@ -284,15 +288,8 @@ public:
    * 
    * As opposed to patches:
    * - If the slice contains singletons, the associated axes are droped;
-   * - Coordinates along all axes start at index 0;
-   * - The image can safely be destroyed.
-   * 
-   * \code
-   * auto cube = Image<int, 3>(widht, height, depth);
-   * auto plane = cube[Slice(0)]; // First image plane
-   * auto row = cube[Slice(0)(0)]; // First image row
-   * auto subcube = cube[Slice(1, 4)]; // Cube at z = 1..4
-   * \endcode
+   * - The domain of the resulting image starts at position 0;
+   * - The parent image can safely be destroyed.
    * 
    * @see `Patch`
    */

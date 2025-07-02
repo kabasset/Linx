@@ -27,8 +27,10 @@ namespace Linx {
  * 
  * @tparam T The element value type
  * @tparam N The size, or -1 for dynamic size
+ * @tparam TContainer The underlying container type
  * 
- * By default, sequences are default-initialized.
+ * By default, sequence elements are default-initialized.
+ * Copy constructor and copy assignment operator perform shallow copy.
  * 
  * @see arrays
  * @see `DataMixin`

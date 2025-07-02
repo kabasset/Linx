@@ -35,14 +35,25 @@ The memory layout (alignment, padding and element storage order) depends on the 
 By default, `Kokkos::View` uses a machine-dependent layout, but this can be changed by specifying a different layout policy.
 For example, `Raster` uses a contiguous, row-major ordered layout, which is compatible with most legacy libraries.
 
+Arrays can be viewed on the host or any device with `on_host()` or `on_device()`,
+which are no-ops if the image is already acessible from the specified space.
+
 The container can be accessed through the `container()` method in order to interface with other Kokkos-based libraries.
 It is also possible to obtain a pointer to the raw data using the `data()` method, which is useful for interoperability with other libraries.
 
-\section arrays-datatypes Data types
+\section arrays-types Value types
 
-Both `Sequence` and `Image` support numerical data types, including integers, floating-point numbers, and complex numbers, as well as strings.
+Both `Sequence` and `Image` support numerical value types, including integers, floating-point numbers, and complex numbers, as well as strings.
 Custom data types can also be used, with constraints inherited from the underlying data container type, such as `Kokkos::View`.
 Typically, it is not possible by default to use non-POD types.
+
+The value type can be const-qualified to indicate that the array is read-only.
+Because this may enable low-level optimizations by Kokkos,
+it is recommended to declare arrays as read-only whenever possible,
+at the last moment -- typically in function calls.
+This is achieved with `as_readonly()`.
+
+\snippet{trimleft} arrays_example.cpp types
 
 \section arrays-sequence-size Sequence size
 

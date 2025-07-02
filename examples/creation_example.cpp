@@ -202,36 +202,39 @@ BOOST_AUTO_TEST_CASE(copy_test)
 BOOST_AUTO_TEST_CASE(slicing_test)
 {
   //! [slicing]
-  // 2D image
-  auto a = Linx::fill("a", 1, 4, 3);
-  // 1 1 1 1
-  // 1 1 1 1
-  // 1 1 1 1
+  // 3D image
+  auto cube = Linx::fill("3D", 1, 16, 9, 3);
+  ASSERT(Linx::sum(cube) == 16 * 9 * 3);
 
-  ASSERT(a.rank() == 2);
-  ASSERT(Linx::sum(a) == 12);
+  // First image row
+  auto row = cube[Linx::Slice()(0)(0)]; // FIXME rm ()
+  ASSERT(row.n == 1);
+  ASSERT(Linx::sum(row) == 16);
 
-  // Hyperplane
-  auto row_0 = a[Linx::Slice(0)];
-  row_0.fill(0);
-  // 1 1 1 1
-  // 1 1 1 1
-  // 0 0 0 0
+  // First image column
+  auto column = cube[Linx::Slice(0)()(0)];
+  ASSERT(column.n == 1);
+  ASSERT(Linx::sum(column) == 9);
 
-  ASSERT(row_0.rank() == 1);
-  ASSERT(Linx::sum(row_0) == 0);
-  ASSERT(Linx::sum(a) == 8);
+  // First image plane
+  auto plane = cube[Linx::Slice(0)];
+  ASSERT(plane.n == 2);
+  ASSERT(Linx::sum(plane) == 16 * 9);
 
-  // Subdomain
-  auto inner = a[Linx::Slice(1, 3)(1, 2)];
-  inner.fill(2);
-  // 1 1 1 1
-  // 1 2 2 1
-  // 0 0 0 0
+  // Planes 1 and 2
+  auto section = cube[Linx::Slice(1, 3)];
+  ASSERT(section.n == 3);
+  ASSERT(Linx::sum(section) == 16 * 9 * 2);
 
-  ASSERT(inner.rank() == 2);
-  ASSERT(Linx::sum(inner) == 4);
-  ASSERT(Linx::sum(a) == 10);
+  // Inner cube
+  auto inner_3d = cube[Linx::Slice(1, 15)(1, 8)(1, 2)];
+  ASSERT(inner_3d.n == 3);
+  ASSERT(Linx::sum(inner_3d) == 14 * 7 * 1);
+
+  // Inner plane
+  auto inner_2d = cube[Linx::Slice(1, 15)(1, 8)(1)];
+  ASSERT(inner_2d.n == 2);
+  ASSERT(Linx::sum(inner_2d) == 14 * 7);
   //! [slicing]
 }
 
