@@ -4,31 +4,36 @@ namespace Linx {
 
 \addtogroup reduction
 
-\section reduction-intro Introduction
-
-Reduction operations consist in computing a single value from an array.
-
 \section reduction-single Single-array reductions
 
-Linx provides several basic reduction operations such as sum or min,
-and supports custom reductions using the `reduce()` function.
-The reducer must be a diadic function for which `identity_element(reducer)` is defined.
+Simple reduction operations consist in computing a single value from an collection of elements,
+like their minimum value or sum.
+Linx provides several such operations, and supports custom reductions using the `reduce()` function.
+A reducer is passed as argument, which must be a diadic function for which `identity_element(reducer)` is defined.
 The library comes with many compatible functors, like `Add`, `Multiply` or `Max`.
 See the `identity_element()` overloads at the bottom of this page for a complete list.
-Many builtin reduction functions like `sum()`, `product()` or `max()` are also listed.
+Many builtin reduction functions like `sum()`, `product()` or `max()` are also listed there.
 
 \snippet{trimleft} reduction_example.cpp single
 
-It is also possible to apply a transform to the array elements before reduction.
-The dedicated function `transform_reduce()` takes as input a monadic transform in addition to the reducer.
-Again, builtin functions like `dot()` or `distance()` are available.
+The reduction operation can be performed on any ND-iterable collection,
+like ND arrays or patches.
+
+\snippet{trimleft} reduction_example.cpp patch
+
+It is also possible to apply a transform to each element prior to reduction.
+Transform and reduction are performed in one pass.
+The dedicated function `transform_reduce()` takes as input a monadic transform in addition to the reducer,
+which can be any type of Kokkos-compatible function: free function, lambda or functor.
 
 \snippet{trimleft} reduction_example.cpp transform
 
 \section reduction-multiple Multi-array reductions
 
-Function `transform_reduce()` accepts an arbitrary number of arrays.
-In this case, the transform must take as many arguments as there are arrays.
+Actually, `transform_reduce()` accepts an arbitrary number of input arrays.
+When several of them are passed in, the transform must accept as input as many arguments:
+it will be fed with one element per array.
+Again, builtin functions like `dot()` or `distance()` are available and listed below.
 
 \snippet{trimleft} reduction_example.cpp multiple
 
