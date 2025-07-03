@@ -361,7 +361,7 @@ typename TLhs::element_type dot(const TLhs& lhs, const TRhs& rhs)
  * @brief Compute the Lp-norm of a vector raised to the power p.
  * @tparam P The power
  */
-template <int P, typename TIn>
+template <int P = 2, typename TIn>
 typename TIn::element_type norm(const TIn& in)
 {
   return transform_reduce("norm", Abspow<P>(), Add(), in);
@@ -372,7 +372,7 @@ typename TIn::element_type norm(const TIn& in)
  * @brief Compute the absolute Lp-distance between two vectors raised to the power p.
  * @tparam P The power
  */
-template <int P, typename TLhs, typename TRhs>
+template <int P = 2, typename TLhs, typename TRhs>
 typename TLhs::element_type distance(const TLhs& lhs, const TRhs& rhs)
 {
   return transform_reduce("distance", Abspow<P>(), Add(), lhs, rhs);

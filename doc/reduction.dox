@@ -8,35 +8,27 @@ namespace Linx {
 
 Reduction operations consist in computing a single value from an array.
 
-\section reduction-basic Basic reductions
+\section reduction-single Single-array reductions
 
 Linx provides several basic reduction operations such as sum or min,
-and supports custom reductions using the `reduce()` function. 
-For example, to compute the sum of all elements in an array, use one of:
+and supports custom reductions using the `reduce()` function.
+The reducer type `TRed` must be a diadic function for which `identity_element<TRed>()` is defined.
+The libraries comes with many compatible functors, like `Add`, `Multiply` or `Max`.
+See the `identity_element()` specialization for a complete list.
 
-```	
-auto sum = Linx::reduce("sum", Linx::Add(), a);
-auto sum = Linx::sum(a);
-```
+\snippet{trimleft} reduction_example.cpp single
 
-\section reduction-map-reduce Map-reduce
+It is also possible to apply a transformation to the array elements before reduction.
+The dedicated function `transform_reduce()` takes as input a monadic transform in addition to the reducer.
 
-Map-reduce is a programming model that allows you to perform complex data processing tasks in parallel.
-Linx supports map-reduce operations through the `transform_reduce()` function.
-For example, to compute the sum of the squares of all elements in an array, use:
+\snippet{trimleft} reduction_example.cpp transform
 
-```
-auto norm = Linx::transform_reduce("norm", Linx::Abspow<2>(), Linx::Add(), a);
-auto norm = Linx::norm<2>(a); // Shortcut for the above
-```
+\section reduction-multiple Multi-array reductions
 
-Multiple inputs can be provided to `transform_reduce()`.
-For example, to compute the dot product of two arrays, use:
+Function `transform_reduce()` accepts an arbitrary number of arrays.
+In this case, the transform must take as many arguments as there are arrays.
 
-```
-auto dot = Linx::transform_reduce("dot", Linx::Multiply(), Linx::Add(), a, b);
-auto dot = Linx::dot(a, b); // Shortcut for the above
-```
+\snippet{trimleft} reduction_example.cpp multiple
 
 */
 
