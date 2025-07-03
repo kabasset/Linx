@@ -15,11 +15,13 @@ and supports custom reductions using the `reduce()` function.
 The reducer must be a diadic function for which `identity_element(reducer)` is defined.
 The library comes with many compatible functors, like `Add`, `Multiply` or `Max`.
 See the `identity_element()` overloads at the bottom of this page for a complete list.
+Many builtin reduction functions like `sum()`, `product()` or `max()` are also listed.
 
 \snippet{trimleft} reduction_example.cpp single
 
 It is also possible to apply a transform to the array elements before reduction.
 The dedicated function `transform_reduce()` takes as input a monadic transform in addition to the reducer.
+Again, builtin functions like `dot()` or `distance()` are available.
 
 \snippet{trimleft} reduction_example.cpp transform
 
