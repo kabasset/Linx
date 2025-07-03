@@ -236,6 +236,8 @@ struct Between {
 #define LINX_DEFINE_MONOID(Func, out, identity) \
   LINX_DEFINE_BINARY_OPERATOR(Func, out) \
 \
+  /** @ingroup reduction */ \
+  /** @brief Identity element of a monoid. */ \
   template <typename T, typename TLhs, typename TRhs> \
   KOKKOS_INLINE_FUNCTION auto identity_element(const Func<TLhs, TRhs>&) \
   { \

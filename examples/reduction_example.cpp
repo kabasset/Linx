@@ -4,7 +4,7 @@
 
 #define BOOST_TEST_MODULE ReductionExample
 
-#include "Linx/Data/Image.h"
+#include "Linx/Data/Sequence.h"
 #include "Linx/Run/ProgramContext.h"
 
 #include <boost/test/unit_test.hpp>
@@ -25,6 +25,20 @@ BOOST_AUTO_TEST_CASE(single_test)
   BOOST_TEST(functor == (100 * 99) / 2);
   ASSERT(builtin == functor);
   //! [single]
+}
+
+BOOST_AUTO_TEST_CASE(transform_test)
+{
+  //! [transform]
+  auto a = Linx::geometric<100>("a", 1, -1); // 1, -1, 1, -1, ...
+
+  // L1 norm
+  auto functor = Linx::transform_reduce("norm", KOKKOS_LAMBDA(int i) { return Kokkos::abs(i); }, Linx::Add(), a);
+  auto builtin = Linx::norm<1>(a);
+
+  BOOST_TEST(functor == 100);
+  ASSERT(builtin == functor);
+  //! [transform]
 }
 
 BOOST_AUTO_TEST_CASE(multiple_test)

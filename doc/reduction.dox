@@ -12,13 +12,13 @@ Reduction operations consist in computing a single value from an array.
 
 Linx provides several basic reduction operations such as sum or min,
 and supports custom reductions using the `reduce()` function.
-The reducer type `TRed` must be a diadic function for which `identity_element<TRed>()` is defined.
-The libraries comes with many compatible functors, like `Add`, `Multiply` or `Max`.
-See the `identity_element()` specialization for a complete list.
+The reducer must be a diadic function for which `identity_element(reducer)` is defined.
+The library comes with many compatible functors, like `Add`, `Multiply` or `Max`.
+See the `identity_element()` overloads at the bottom of this page for a complete list.
 
 \snippet{trimleft} reduction_example.cpp single
 
-It is also possible to apply a transformation to the array elements before reduction.
+It is also possible to apply a transform to the array elements before reduction.
 The dedicated function `transform_reduce()` takes as input a monadic transform in addition to the reducer.
 
 \snippet{trimleft} reduction_example.cpp transform
