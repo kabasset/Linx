@@ -16,11 +16,6 @@ Many builtin reduction functions like `sum()`, `product()` or `max()` are also l
 
 \snippet{trimleft} reduction_example.cpp single
 
-The reduction operation can be performed on any ND-iterable collection,
-like ND arrays or patches.
-
-\snippet{trimleft} reduction_example.cpp patch
-
 It is also possible to apply a transform to each element prior to reduction.
 Transform and reduction are performed in one pass.
 The dedicated function `transform_reduce()` takes as input a monadic transform in addition to the reducer,
