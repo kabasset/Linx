@@ -6,30 +6,32 @@ namespace Linx {
 
 \section regions-intro Introduction
 
-\section regions-slicing Slices and patches
+\section regions-slicing Slicing and restriction
 
-Images and sequences feature slicing and patching capabilities that allow for efficient manipulation of subregions.
-Slices are used to create subregion views as instances of `Image` or `Sequence`.
-Therefore, slices have have a strided memory and their domains are necessarily regular, i.e., 1D intervals or ND axis-aligned boxes.
-Slices are created with a syntax analogous to Python's slicing:
+Images and sequences feature slicing and restriction capabilities,
+two distinct mechanisms that allow for efficient manipulation of subregions.
+Both are used to create regional views over the original data structure,
+but they differ in the objects they return
+
+Slicing returns owning views as instances of `Image` or `Sequence`.
+They have a strided memory and their domains are necessarily regular, i.e., 1D intervals or ND axis-aligned boxes.
+The slicing domain is created with a syntax analogous to Python's slicing:
 
 - `Slice()` means to select all elements along a dimension;
 - `Slice(index)` selects a single index;
 - `Slice(start, stop, step)` selects elements from index `start` to index `stop - 1`.
 
-Such constructs can be combined to create multi-dimensional slices.
+Such constructs can be combined through `operator()` to create multi-dimensional slices.
 
-```
-// Keep x from 1 to 3, all y's, and z = 5
-// The output slice is a 2D Image
-auto slice = image[Linx::Slice(1, 4)()(5)];
-assert(slice.n == 2);
-assert(slice.domain() == Linx::Box<2>({0, 0}, {3, image.extent(1)}));
-assert(slice.data() == image.data());
-```
+\snippet{trimleft} creation_example.cpp slicing
 
-In contrast to slices, no assumptions are made on the memory layout of patches, therefore they support domains of any kind.
-`Patch` is an extremely lightweight class that simply holds a domain and a pointer to the parent data.
+In contrast to slices, no assumptions are made on the memory layout of restrictions, therefore they support domains of any kind.
+There are two kinds of restrictions:
+- Patches, explicitely defined by their domain;
+- Selections, defined by a predicate applied to the values of the parent container.
+
+`Patch` and `Selection` are extremely lightweight classes that simply holds a domain or predicate and a pointer to the parent data.
+The latter must remain valid during the lifetime of the restriction.
 
 ```
 auto patch = Linx::Patch(image, any_domain);
@@ -37,6 +39,10 @@ assert(patch.domain() == any_domain);
 assert(patch.parent() == image);
 assert(patch.data() == image.data());
 ```
+
+All the pixelwise operations, including random number generation, can be performed on restrictions.
+
+\snippet{trimleft} regions_example.cpp pixelwise
 
 Still, simple domains like boxes or slices can be used to create patches as well:
 
