@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(image_api_test)
   BOOST_TEST(out.contains_only(9));
 }
 
-BOOST_AUTO_TEST_CASE(diadic_test)
+BOOST_AUTO_TEST_CASE(binary_functor_test)
 {
   auto size = 100;
   auto logger = Linx::TimerLogger();

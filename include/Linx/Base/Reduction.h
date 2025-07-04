@@ -174,7 +174,7 @@ void kokkos_reduce(const std::string& label, const TRegion& region, const TProj&
 {
 #define LINX_CASE_RANK(n) \
   case n: \
-    if constexpr (is_nadic<TProj, int, n>()) { \
+    if constexpr (is_nary<TProj, int, n>()) { \
       return Impl::kokkos_reduce_impl<TSpace>( \
           label, \
           pad<n>(region), \

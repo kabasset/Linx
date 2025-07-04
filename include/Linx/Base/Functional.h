@@ -319,7 +319,7 @@ struct can_accept_impl<
 } // namespace Impl
 
 template <typename TFunc, typename T, int N>
-constexpr bool is_nadic()
+constexpr bool is_nary()
 {
   return Impl::can_accept_impl<TFunc, T, std::make_index_sequence<N>>::value;
 }

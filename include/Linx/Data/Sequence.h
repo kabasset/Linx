@@ -370,7 +370,7 @@ Sequence(const char*, T (&&)[N]) -> Sequence<T, N, TContainer>;
  * @brief I-th element of an array, or some fallback value if out of bounds.
  */
 template <int I, typename T, int N, typename TContainer, typename U>
-KOKKOS_INLINE_FUNCTION U get_or(const Sequence<T, N, TContainer>& in, U fallback) // FIXME ArrayLike?
+KOKKOS_INLINE_FUNCTION U get_or(const Sequence<T, N, TContainer>& in, U fallback) // FIXME LegacyArray?
 {
   if constexpr (N == -1) {
     return (I < std::size(in)) ? static_cast<U>(in[I]) : fallback;
@@ -435,7 +435,7 @@ decltype(auto) on_device(const Sequence<T, N, TContainer>& in)
 /**
  * @brief Copy as many elements as possible from `in` to `out`.
  */
-template <ArrayLike TIn, ArrayLike TOut>
+template <LegacyArray TIn, LegacyArray TOut>
 void copy_to(const TIn& in, const TOut& out) // FIXME rename as copy_intersection or even rm
 {
   auto domain = Slice(0, std::min<int>(std::size(in), std::size(out)));
@@ -627,7 +627,7 @@ auto generate(std::integral auto size, const std::string& label, const TFunc& fu
  * If it is smaller, the remaining values are default-initialized.
  */
 template <int N, typename TSpace = Kokkos::DefaultExecutionSpace>
-auto resize(const std::string& label, const ArrayLike auto& in)
+auto resize(const std::string& label, const LegacyArray auto& in)
 {
   static_assert(N >= 0);
   using T = std::remove_cvref_t<decltype(in[0])>;
@@ -648,7 +648,7 @@ auto resize(const std::string& label, const ArrayLike auto& in)
  * If it is smaller, the remaining values are default-initialized.
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace>
-auto resize(std::integral auto size, const std::string& label, const ArrayLike auto& in)
+auto resize(std::integral auto size, const std::string& label, const LegacyArray auto& in)
 {
   using T = std::remove_cvref_t<decltype(in[0])>;
   Sequence<T, -1, SequenceContainer<T, -1, TSpace>> out(label, size);

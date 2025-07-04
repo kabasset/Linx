@@ -8,31 +8,69 @@
 namespace Linx {
 
 /**
- * @brief Concept for array-like classes.
- * 
- * Array-like classes have a size and integral subscript operator.
+ * @brief An object with a unary integral subscript operator and a size.
+ * @see `std::vector`, `Kokkos::Array`, `Sequence`...
  */
 template <typename T>
-concept ArrayLike = requires(const T array) {
-  std::size(array);
-  array[0];
+concept LegacyArray = requires(const T a) {
+  std::size(a);
+  a[0];
 };
 
+/**
+ * @brief A contiguous data container defined by its size and a pointer to its first element.
+ * @see `Sequence`, `Raster`...
+ */
 template <typename T>
-concept DataContainer = requires(const T data) {
-  typename T::size_type;
-  typename T::value_type;
-  typename T::pointer;
-  typename T::Container;
-  std::size(data);
-  data.shape();
-  data.domain();
-  data.label(); // FIXME convertible to str
-  data.data(); // FIXME pointer
-  data.container(); // FIXME const T::Container&, compatible with deep_copy
-  data(int(0)); // FIXME according to n?
-  data.generate_with_side_effects(std::string(), []() { return typename T::element_type {}; });
+concept SizedData = requires(const T a) {
+  std::size(a);
+  a.data();
 };
+
+/**
+ * @brief A function object which takes N integers as arguments.
+ * @tparam N The rank, aka. arity
+ * 
+ * Special case `N = -1` cannot be processed at compile-time;
+ * Only the presence of a unary call operator on `int` is tested, like for `N = 1`.
+ * 
+ * @see `Image`, `Map`, `Patch`, `GaussianRng`...
+ */
+template <typename T, int N>
+concept IndexedFunc = is_nary<T, int, std::abs(N)>();
+
+/**
+ * @brief An indexed object with a bounded domain.
+ */
+template <typename T, int N>
+concept BoundedFunc = IndexedFunc<T, N> && requires(const T f) {
+  f.size();
+  f.domain();
+};
+
+/**
+ * @brief An indexed object with a stride for each dimension.
+ */
+template <typename T, int N>
+concept StridedFunc = IndexedFunc<T, N> && requires(const T f) { f.stride(0); };
+
+/**
+ * @brief A `BoundedFunc` which is defined over a box-shaped domain.
+ */
+template <typename T, int N>
+concept BoxedFunc = BoundedFunc<T, N> && requires(const T f) {
+  f.extent(0);
+  f.shape(); // FIXME useful?
+};
+
+// /**
+//  * @brief A `BoxedFunc` which manages its memory.
+//  * @see `Sequence` (1D), `Image` (ND).
+//  */
+// template <typename T, int N>
+// concept Array = BoxedFunc<T, N> && requires(const T data) {
+//   data.container(); // FIXME -> Kokkos View-like
+// };
 
 } // namespace Linx
 

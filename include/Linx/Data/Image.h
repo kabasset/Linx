@@ -88,7 +88,7 @@ public:
    * @warning If the rank is static (`n != -1`), the shape rank must match it.
    */
   template <std::integral TInt, typename UContainer>
-  explicit Image(const Sequence<TInt, n, UContainer>& shape) : Image("", shape) // TODO use ArrayLike?
+  explicit Image(const Sequence<TInt, n, UContainer>& shape) : Image("", shape) // TODO use LegacyArray?
   {}
 
   /**
@@ -101,7 +101,7 @@ public:
    */
   template <std::integral TInt, typename UContainer>
   explicit Image(const std::string& label, const Sequence<TInt, n, UContainer>& shape) :
-      Image(label, shape, std::make_index_sequence<kokkos_max_dyn_rank>()) // TODO use ArrayLike?
+      Image(label, shape, std::make_index_sequence<kokkos_max_dyn_rank>()) // TODO use LegacyArray?
   {}
 
   /**
@@ -148,7 +148,7 @@ public:
    */
   template <typename U, std::integral TInt, typename UContainer>
   explicit Image(Wrap<U*> data, const Sequence<TInt, n, UContainer>& shape) :
-      Image(data, shape, std::make_index_sequence<kokkos_max_dyn_rank>()) // TODO use ArrayLike?
+      Image(data, shape, std::make_index_sequence<kokkos_max_dyn_rank>()) // TODO use LegacyArray?
   {}
 
   /**
@@ -260,7 +260,7 @@ public:
    * @brief Access the element at given position.
    */
   template <std::integral TInt = int, int M = n>
-  KOKKOS_INLINE_FUNCTION reference operator[](const GPosition<TInt, M>& position) const // FIXME use ArrayLike?
+  KOKKOS_INLINE_FUNCTION reference operator[](const GPosition<TInt, M>& position) const // FIXME use LegacyArray?
   {
     // FIXME validate M
     return at(position, std::make_index_sequence<kokkos_max_dyn_rank>());

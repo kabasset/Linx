@@ -167,7 +167,7 @@ struct RangeMixin {
   }
 
   /**
-   * @brief Assign each element according to a monadic generator.
+   * @brief Assign each element according to a unary generator.
    * 
    * Conceptually, this function performs:
    * 

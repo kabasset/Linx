@@ -73,7 +73,7 @@ public:
   /**
    * @copydoc GBox()
    */
-  GBox(const ArrayLike auto& start, const ArrayLike auto& stop) : GBox(std::size(start))
+  GBox(const LegacyArray auto& start, const LegacyArray auto& stop) : GBox(std::size(start))
   {
     SizeMismatch::may_throw("bounds", rank(), start, stop);
     for (std::size_t i = 0; i < rank(); ++i) {
@@ -208,7 +208,7 @@ public:
   /**
    * @brief Check whether a position lies inside the box.
    */
-  bool contains(const ArrayLike auto& position) const
+  bool contains(const LegacyArray auto& position) const
   {
     SizeMismatch::may_throw("position", rank(), position);
     for (std::size_t i = 0; i < rank(); ++i) {
@@ -282,7 +282,7 @@ public:
   /**
    * @brief Translate the box by a given vector.
    */
-  GBox& operator+=(const ArrayLike auto& vector)
+  GBox& operator+=(const LegacyArray auto& vector)
   {
     // FIXME allow N=-1
     m_start += pad<n>(vector);
@@ -293,7 +293,7 @@ public:
   /**
    * @brief Translate the box by the opposite of a given vector.
    */
-  GBox& operator-=(const ArrayLike auto& vector)
+  GBox& operator-=(const LegacyArray auto& vector)
   {
     // FIXME allow N=-1
     m_start -= pad<n>(vector);
@@ -608,7 +608,7 @@ void for_each(const std::string& label, const GBox<T, N>& region, TFunc&& func)
 {
 #define LINX_CASE_RANK(n) \
   case n: \
-    if constexpr (is_nadic<TFunc(), int, n>()) { \
+    if constexpr (is_nary<TFunc, int, n>()) { \
       return Kokkos::parallel_for(label, kokkos_execution_policy<TSpace>(pad<n>(region)), LINX_FORWARD(func)); \
     } else { \
       return; \
