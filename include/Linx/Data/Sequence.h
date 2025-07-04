@@ -690,24 +690,6 @@ auto resize(std::integral auto size, const std::string& label, std::initializer_
   return resize<TSpace>(size, label, Sequence<T, -1, SequenceContainer<T, -1, TSpace>>(in));
 }
 
-template <int M, typename T, int N>
-[[deprecated]] auto pad(const GPosition<T, N>& in) // FIXME merge with resize
-{
-  using U = std::decay_t<T>;
-  GPosition<U, M> out(compose_label("pad", in));
-  copy_to(in, out);
-  return out;
-}
-
-template <int M, typename T, int N>
-[[deprecated]] auto pad(const GPosition<T, N>& in, const T& value)
-{
-  using U = std::decay_t<T>;
-  GPosition<U, M> out(compose_label("pad", in, value), Constant(value));
-  copy_to(in, out);
-  return out;
-}
-
 } // namespace Linx
 
 #endif

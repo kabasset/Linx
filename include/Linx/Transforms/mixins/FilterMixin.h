@@ -352,8 +352,8 @@ public:
     auto in_box = bbox(m_in.domain());
     auto footprint_box = bbox(footprint());
     return Box(
-        in_box.start() - pad<TIn::n>(footprint_box.start()),
-        in_box.stop() - pad<TIn::n>(footprint_box.stop() - 1));
+        in_box.start() - resize<TIn::n>("start", footprint_box.start()),
+        in_box.stop() - resize<TIn::n>("stop - 1", footprint_box.stop() - 1)); // TODO support -1
   }
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
@@ -457,8 +457,8 @@ public:
     auto in_box = bbox(m_in.domain());
     auto footprint_box = bbox(footprint());
     return Box(
-        in_box.start() - pad<TIn::n>(footprint_box.start()),
-        in_box.stop() - pad<TIn::n>(footprint_box.stop() - 1));
+        in_box.start() - resize<TIn::n>("start", footprint_box.start()),
+        in_box.stop() - resize<TIn::n>("stop - 1", footprint_box.stop() - 1)); // TODO support -1
   }
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const

@@ -262,8 +262,8 @@ public:
   GBox& operator+=(const GBox<U, M>& margin)
   {
     // FIXME allow N=-1
-    m_start += pad<n>(margin.start());
-    m_stop += pad<n>(margin.stop());
+    m_start += resize<n>("start", margin.start());
+    m_stop += resize<n>("stop", margin.stop());
     return *this;
   }
 
@@ -274,8 +274,8 @@ public:
   GBox& operator-=(const GBox<U, M>& margin)
   {
     // FIXME allow N=-1
-    m_start -= pad<n>(margin.start());
-    m_stop -= pad<n>(margin.stop());
+    m_start -= resize<n>("start", margin.start());
+    m_stop -= resize<n>("stop", margin.stop());
     return *this;
   }
 
@@ -285,8 +285,8 @@ public:
   GBox& operator+=(const LegacyArray auto& vector)
   {
     // FIXME allow N=-1
-    m_start += pad<n>(vector);
-    m_stop += pad<n>(vector);
+    m_start += resize<n>("start", vector);
+    m_stop += resize<n>("stop", vector);
     return *this;
   }
 
@@ -296,8 +296,8 @@ public:
   GBox& operator-=(const LegacyArray auto& vector)
   {
     // FIXME allow N=-1
-    m_start -= pad<n>(vector);
-    m_stop -= pad<n>(vector);
+    m_start -= resize<n>("start", vector);
+    m_stop -= resize<n>("stop", vector);
     return *this;
   }
 
@@ -435,9 +435,9 @@ template <typename T, int N>
 GBox(T (&&)[N], const Shape<T, N>&) -> GBox<T, N>;
 
 template <int M, typename T, int N>
-GBox<T, M> pad(const GBox<T, N>& in)
+GBox<T, M> pad(const GBox<T, N>& in) // FIXME rename as rerank?
 {
-  return GBox<T, M>({pad<M>(in.start()), pad<M>(in.stop())});
+  return GBox<T, M>({resize<M>("start", in.start()), resize<M>("stop", in.stop())});
 }
 
 /**
