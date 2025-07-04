@@ -1,0 +1,52 @@
+namespace Linx {
+
+/**
+
+\addtogroup glossary
+
+@concept LegacyArray
+@brief An object with a monadic integral subscript operator and a size.
+@see `std::vector`, `Kokkos::Array`, `Sequence`...
+
+@concept Mapping
+@brief A function object which takes N integers as arguments.
+@see `Image`, `Patch`, `GaussianRng`...
+
+@concept Array
+@brief A `Mapping` which manages its memory.
+@see `Sequence` (1D), `Image` (ND), `Map` (sparse ND).
+
+@concept Proxy
+@brief A `Mapping` which does not manage its memory.
+
+It relies on a parent ND array instead, while altering some of its behaviors; e.g. `Shift`
+
+@concept Reducer
+@brief An associative and commutative diadic function which has an identity element.
+@see `Min`, `Add`, `Multiply`...
+
+@concept Region
+@brief A finite collection of positions, which can be iterated with `for_each()`.
+@see `Box`, `Line`, `Path`...
+
+@concept Restriction
+@brief A `Proxy` whose domain is a subdomain of its parent's domain.
+@see `Patch`, `Selection`.
+
+@concept SizedData
+@brief A contiguous data container defined by its size and a pointer to its first element.
+@see `Sequence`, `Raster`...
+
+@concept Slicing
+@brief An operation consisting in shallow coping a rectangular subregion of an array, returning a new array.
+
+@concept Strided
+@brief A `Mapping` whose neighboring elements along each axis have a constant distance in memory.
+@see `Sequence`, `Image`, `Shift`...
+
+@concept Window
+@brief A `Region` which can be shifted with `operator-` and `operator+`.
+
+*/
+
+}
