@@ -330,7 +330,7 @@ public:
    */
   friend std::ostream& operator<<(std::ostream& os, const Sequence& sequence)
   {
-    const auto& sequence_on_host = on_host(as_readonly(sequence));
+    const auto& sequence_on_host = on_host(sequence);
     os << "[" << sequence_on_host[0];
     for (std::size_t i = 1; i < sequence_on_host.size(); ++i) {
       os << ", " << sequence_on_host[i];

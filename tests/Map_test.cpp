@@ -4,6 +4,7 @@
 #define BOOST_TEST_MODULE MapTest
 
 #include "Linx/Data/Map.h"
+#include "Linx/Data/Profile.h" // FIXME to dedicated UT suite
 #include "Linx/Run/ProgramContext.h"
 
 #include <boost/test/unit_test.hpp>
@@ -60,6 +61,14 @@ BOOST_AUTO_TEST_CASE(map_iteration_test)
   BOOST_TEST(kernel.values().contains_only(1));
   Linx::for_each<Kokkos::Serial>("inc", kernel.domain(), Inc<T, N>(kernel));
   BOOST_TEST(kernel.values().contains_only(2));
+}
+
+BOOST_AUTO_TEST_CASE(filter_test)
+{
+  auto a = Linx::generate("a", KOKKOS_LAMBDA(int i, int j) { return i + j; }, 4, 3);
+  std::cout << "filter" << std::endl;
+  auto evens = Linx::filter(a, KOKKOS_LAMBDA(int a_i) { return a_i % 2 == 0; });
+  BOOST_TEST(evens.size() == a.size() / 2);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

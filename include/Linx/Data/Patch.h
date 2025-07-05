@@ -49,9 +49,7 @@ public:
    * 
    * There is another, `Forward`-tagged constructor, which bypasses those transforms.
    */
-  template <typename UParent, typename UDomain>
-  Patch(const UParent& in, const UDomain& region) : m_parent(root(in)), m_domain(region & in.domain())
-  {}
+  Patch(const auto& in, const auto& region) : m_parent(root(in)), m_domain(region & in.domain()) {}
 
   /**
    * @brief Forwarding constructor.
@@ -62,7 +60,7 @@ public:
   Patch(Forward, const Parent& parent, Domain domain) : m_parent(parent), m_domain(LINX_MOVE(domain)) {}
 
   /**
-   * @brief The parent.
+   * @brief Parent.
    */
   KOKKOS_INLINE_FUNCTION const Parent& parent() const
   {
@@ -70,7 +68,7 @@ public:
   }
 
   /**
-   * @brief The domain.
+   * @brief Domain.
    */
   KOKKOS_INLINE_FUNCTION const Domain& domain() const
   {
@@ -86,13 +84,16 @@ public:
   }
 
   /**
-   * @brief The domain size.
+   * @brief Domain size.
    */
   KOKKOS_INLINE_FUNCTION auto size() const
   {
     return domain().size();
   }
 
+  /**
+   * @brief Parent stride along given axis.
+   */
   KOKKOS_INLINE_FUNCTION auto stride(std::integral auto i) const
   {
     return m_parent.stride(i);
@@ -115,7 +116,7 @@ public:
   }
 
   /**
-   * @brief Get the element at a given domain-local position.
+   * @brief Reference to the element at a given domain-local position.
    * 
    * The arguments are forwarded to the domain,
    * such that the method returns `parent[domain(args...)]`.
