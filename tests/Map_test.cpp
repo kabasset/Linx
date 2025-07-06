@@ -63,6 +63,23 @@ BOOST_AUTO_TEST_CASE(map_iteration_test)
   BOOST_TEST(kernel.values().contains_only(2));
 }
 
+BOOST_AUTO_TEST_CASE(path_test)
+{
+  auto a = Linx::Raster<int, 2>("a", 4, 3).arithmetic();
+  auto path = Linx::Path<2>("path", a.size());
+  Linx::for_each<Kokkos::Serial>(
+      "evens",
+      a.domain(),
+      KOKKOS_LAMBDA(int i, int j) {
+        if (a(i, j) % 2 == 0) {
+          path.push_back(i, j);
+        }
+      });
+  BOOST_TEST(path.size() == (a.size() + 1) / 2);
+  auto evens = Linx::Profile(a, path);
+  BOOST_TEST(Linx::sum(evens) == evens.size() * (evens.size() - 1));
+}
+
 BOOST_AUTO_TEST_CASE(filter_test)
 {
   auto a = Linx::generate("a", KOKKOS_LAMBDA(int i, int j) { return i + 4 * j; }, 4, 3);

@@ -124,8 +124,8 @@ private:
     ((m_positions(index, Is) = get<Is>(position)), ...);
   }
 
-  Image<size_type, 2> m_positions; ///< The positions
-  Kokkos::View<int> m_size; ///< The size
+  Image<size_type, 2, ImageContainer<size_type, 2, Kokkos::HostSpace>> m_positions; ///< The positions
+  Kokkos::View<int, Kokkos::HostSpace> m_size; ///< The size
 };
 
 /**

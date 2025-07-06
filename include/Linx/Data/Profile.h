@@ -25,6 +25,7 @@ public:
   using value_type = Parent::value_type;
   using element_type = std::remove_cvref_t<value_type>;
   using reference = value_type&;
+  using memory_space = typename TParent::memory_space;
   using execution_space = typename TParent::execution_space;
 
   Profile(const Parent& parent, std::integral auto capacity) :
@@ -92,10 +93,10 @@ public:
 
 private:
 
-  // FIXME use m_parent memory_space
   Parent m_parent; ///< The parent data container
-  Sequence<std::ptrdiff_t, -1> m_offsets; ///< The offsets in the parent
-  Kokkos::View<std::size_t> m_size; ///< The profile size
+  Sequence<std::ptrdiff_t, -1, SequenceContainer<std::ptrdiff_t, -1, memory_space>>
+      m_offsets; ///< The offsets in the parent
+  Kokkos::View<std::size_t, memory_space> m_size; ///< The profile size
 };
 
 namespace Impl {
