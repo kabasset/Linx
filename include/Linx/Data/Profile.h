@@ -27,7 +27,13 @@ public:
   using reference = value_type&;
   using execution_space = typename TParent::execution_space;
 
-  Profile(const Parent& parent, const auto& region) : m_parent(parent), m_offsets("Profile offsets", region.size())
+  Profile(const Parent& parent, std::integral auto capacity) :
+      m_parent(parent),
+      m_offsets("Profile offsets", capacity),
+      m_size("Profile size")
+  {}
+
+  Profile(const Parent& parent, const NotConvertibleTo<std::size_t> auto& region) : Profile(parent, region.size())
   {
     const auto& offsets_on_host = on_host(m_offsets);
     auto it = offsets_on_host.begin();
@@ -36,6 +42,7 @@ public:
       ++it;
     });
     Kokkos::deep_copy(m_offsets.container(), offsets_on_host.container());
+    m_size() = m_offsets.size();
   }
 
   KOKKOS_INLINE_FUNCTION auto rank() const
@@ -45,7 +52,7 @@ public:
 
   KOKKOS_INLINE_FUNCTION auto size() const
   {
-    return m_offsets.size();
+    return m_size();
   }
 
   KOKKOS_INLINE_FUNCTION auto domain() const
@@ -62,11 +69,21 @@ public:
   {
     return m_parent.data()[m_offsets(i)]; // FIXME .origin()?
   }
+  /**
+   * @brief Append a position.
+   */
+  KOKKOS_INLINE_FUNCTION void push_back(std::ptrdiff_t offset) const
+  {
+    auto index = Kokkos::atomic_fetch_add(&m_size(), 1);
+    m_offsets(index) = offset;
+  }
 
 private:
 
+  // FIXME use m_parent memory_space
   Parent m_parent; ///< The parent data container
   Sequence<std::ptrdiff_t, -1> m_offsets; ///< The offsets in the parent
+  Kokkos::View<std::size_t> m_size; ///< The profile size
 };
 
 /**
@@ -76,15 +93,22 @@ private:
 template <Strided TIn, typename TPred>
 auto filter(const TIn& in, TPred pred)
 {
-  const auto& in_on_host = on_host(in);
-  auto raster = Raster<bool, TIn::n>("raster", in.shape()).generate("pred", pred, in_on_host);
-  auto path = Path<TIn::n>("Path", sum(raster));
-  for_each<Kokkos::Serial>("filter", raster.domain(), [&](auto... position) {
-    if (raster(position...)) {
-      path.push_back(position...);
-    }
-  });
-  return Profile(in, path);
+  auto size = transform_reduce(
+      "filter size",
+      KOKKOS_LAMBDA(const typename TIn::value_type& e) { return pred(e) ? 1 : 0; },
+      Add(),
+      in); // FIXME in.count_if(pred)
+  auto out = Profile<TIn>(in, size);
+  for_each<typename TIn::execution_space>(
+      "filter",
+      in.domain(),
+      KOKKOS_LAMBDA(auto... position) {
+        const auto* ptr = &in(position...);
+        if (pred(*ptr)) {
+          out.push_back(ptr - in.data());
+        }
+      });
+  return out;
 }
 
 } // namespace Linx
