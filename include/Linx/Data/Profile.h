@@ -6,6 +6,7 @@
 #define LINX_DATA_PROFILE_H
 
 #include "Linx/Base/mixins/Data.h"
+#include "Linx/Base/mixins/Strided.h"
 
 #include <concepts>
 #include <string>
@@ -15,7 +16,7 @@ namespace Linx {
 /**
  * @brief A mapping between a sequence of 1D indices and a sequence of array elements along a path.
  */
-template <typename TParent>
+template <Strided TParent>
 class Profile : public DataMixin<typename TParent::value_type, typename TParent::Arithmetic, Profile<TParent>> {
 public:
 
@@ -26,16 +27,25 @@ public:
   using reference = value_type&;
   using execution_space = typename TParent::execution_space;
 
-  Profile(TParent parent, std::size_t capacity) : m_parent(parent), m_path("Profile path", capacity) {}
+  Profile(const Parent& parent, const auto& region) : m_parent(parent), m_offsets("Profile offsets", region.size())
+  {
+    const auto& offsets_on_host = on_host(m_offsets);
+    auto it = offsets_on_host.begin();
+    for_each<Kokkos::Serial>("Profile", region, [&](std::integral auto... position) {
+      *it = offset_from_origin(m_parent, position...);
+      ++it;
+    });
+    Kokkos::deep_copy(m_offsets.container(), offsets_on_host.container());
+  }
 
   KOKKOS_INLINE_FUNCTION auto rank() const
   {
-    return m_path.rank();
+    return m_parent.rank();
   }
 
   KOKKOS_INLINE_FUNCTION auto size() const
   {
-    return m_path.size();
+    return m_offsets.size();
   }
 
   KOKKOS_INLINE_FUNCTION auto domain() const
@@ -43,56 +53,38 @@ public:
     return Slice(0, size());
   }
 
-  KOKKOS_INLINE_FUNCTION const auto& path() const
-  {
-    return m_path;
-  }
-
   KOKKOS_INLINE_FUNCTION reference operator()(std::integral auto i) const
   {
-    return at_impl(i, std::make_index_sequence<n>());
+    return m_parent.data()[m_offsets(i)]; // FIXME .origin()?
   }
 
   KOKKOS_INLINE_FUNCTION reference operator[](std::integral auto i) const
   {
-    return at_impl(i, std::make_index_sequence<n>());
-  }
-
-  KOKKOS_INLINE_FUNCTION void push_back(std::integral auto... position) const
-  {
-    m_path.push_back(position...); // FIXME push_back?
+    return m_parent.data()[m_offsets(i)]; // FIXME .origin()?
   }
 
 private:
 
-  template <std::size_t... Is>
-  KOKKOS_INLINE_FUNCTION decltype(auto) at_impl(auto i, std::index_sequence<Is...>) const
-  {
-    return m_parent(m_path(i, Is)...);
-  }
-
-private:
-
-  Parent m_parent;
-  Path<n> m_path;
+  Parent m_parent; ///< The parent data container
+  Sequence<std::ptrdiff_t, -1> m_offsets; ///< The offsets in the parent
 };
 
 /**
  * @relatesalso Profile
  * @brief Select the positions where some predicate over an input container's elements holds.
  */
-template <typename TIn, typename TPred>
+template <Strided TIn, typename TPred>
 auto filter(const TIn& in, TPred pred)
 {
   const auto& in_on_host = on_host(in);
   auto raster = Raster<bool, TIn::n>("raster", in.shape()).generate("pred", pred, in_on_host);
-  auto out = Profile(in, sum(raster));
-  for_each<Kokkos::Serial>("filter", in.domain(), [&](auto... position) {
-    if (pred(in(position...))) {
-      out.push_back(position...);
+  auto path = Path<TIn::n>("Path", sum(raster));
+  for_each<Kokkos::Serial>("filter", raster.domain(), [&](auto... position) {
+    if (raster(position...)) {
+      path.push_back(position...);
     }
   });
-  return out;
+  return Profile(in, path);
 }
 
 } // namespace Linx
