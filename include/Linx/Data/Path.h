@@ -46,7 +46,7 @@ public:
   /**
    * @brief Path label.
    */
-  KOKKOS_INLINE_FUNCTION std::string label() const
+  decltype(auto) label() const
   {
     return m_positions.label();
   }

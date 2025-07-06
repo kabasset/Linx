@@ -35,14 +35,15 @@ public:
 
   Profile(const Parent& parent, const NotConvertibleTo<std::size_t> auto& region) : Profile(parent, region.size())
   {
-    const auto& offsets_on_host = on_host(m_offsets);
-    auto it = offsets_on_host.begin();
-    for_each<Kokkos::Serial>("Profile", region, [&](std::integral auto... position) {
-      *it = offset_from_origin(m_parent, position...);
-      ++it;
-    });
-    Kokkos::deep_copy(m_offsets.container(), offsets_on_host.container());
-    m_size() = m_offsets.size();
+    assign(region);
+  }
+
+  void assign(const auto& region) const
+  {
+    for_each<execution_space>(
+        "Profile",
+        region,
+        KOKKOS_CLASS_LAMBDA(std::integral auto... position) { emplace_back(position...); });
   }
 
   KOKKOS_INLINE_FUNCTION auto rank() const
@@ -50,12 +51,12 @@ public:
     return m_parent.rank();
   }
 
-  KOKKOS_INLINE_FUNCTION auto size() const
+  auto size() const
   {
-    return m_size();
+    return Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), m_size)();
   }
 
-  KOKKOS_INLINE_FUNCTION auto domain() const
+  auto domain() const
   {
     return Slice(0, size());
   }
@@ -69,13 +70,24 @@ public:
   {
     return m_parent.data()[m_offsets(i)]; // FIXME .origin()?
   }
+
   /**
-   * @brief Append a position.
+   * @brief Append an offset.
    */
   KOKKOS_INLINE_FUNCTION void push_back(std::ptrdiff_t offset) const
   {
     auto index = Kokkos::atomic_fetch_add(&m_size(), 1);
     m_offsets(index) = offset;
+  }
+
+  /**
+   * @brief Append and get the offset of a position.
+   */
+  KOKKOS_INLINE_FUNCTION std::ptrdiff_t emplace_back(std::integral auto... position) const
+  {
+    auto out = offset_from_origin(m_parent, position...);
+    push_back(out);
+    return out;
   }
 
 private:
@@ -86,12 +98,30 @@ private:
   Kokkos::View<std::size_t> m_size; ///< The profile size
 };
 
+namespace Impl {
+
+template <typename TIn, typename TPred>
+struct FilterOffsets {
+  TIn m_in;
+  TPred m_pred;
+  Profile<TIn> m_out;
+  KOKKOS_INLINE_FUNCTION void operator()(auto... position) const
+  {
+    const auto* ptr = &m_in(position...);
+    if (m_pred(*ptr)) {
+      m_out.push_back(ptr - m_in.data());
+    }
+  }
+};
+
+} // namespace Impl
+
 /**
  * @relatesalso Profile
  * @brief Select the positions where some predicate over an input container's elements holds.
  */
 template <Strided TIn, typename TPred>
-auto filter(const TIn& in, TPred pred)
+Profile<TIn> filter(const TIn& in, TPred pred)
 {
   auto size = transform_reduce(
       "filter size",
@@ -99,15 +129,7 @@ auto filter(const TIn& in, TPred pred)
       Add(),
       in); // FIXME in.count_if(pred)
   auto out = Profile<TIn>(in, size);
-  for_each<typename TIn::execution_space>(
-      "filter",
-      in.domain(),
-      KOKKOS_LAMBDA(auto... position) {
-        const auto* ptr = &in(position...);
-        if (pred(*ptr)) {
-          out.push_back(ptr - in.data());
-        }
-      });
+  for_each<typename TIn::execution_space>("filter", in.domain(), Impl::FilterOffsets<TIn, TPred> {in, pred, out});
   return out;
 }
 
