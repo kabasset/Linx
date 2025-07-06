@@ -24,6 +24,7 @@ public:
   using value_type = Parent::value_type;
   using element_type = std::remove_cvref_t<value_type>;
   using reference = value_type&;
+  using execution_space = typename TParent::execution_space;
 
   Profile(TParent parent, std::size_t capacity) : m_parent(parent), m_path("Profile path", capacity) {}
 
@@ -65,10 +66,9 @@ public:
 private:
 
   template <std::size_t... Is>
-  KOKKOS_INLINE_FUNCTION auto at_impl(auto i, std::index_sequence<Is...>) const
+  KOKKOS_INLINE_FUNCTION decltype(auto) at_impl(auto i, std::index_sequence<Is...>) const
   {
-    const auto& p = m_path[i];
-    return m_parent(p[Is]...);
+    return m_parent(m_path(i, Is)...);
   }
 
 private:

@@ -65,10 +65,10 @@ BOOST_AUTO_TEST_CASE(map_iteration_test)
 
 BOOST_AUTO_TEST_CASE(filter_test)
 {
-  auto a = Linx::generate("a", KOKKOS_LAMBDA(int i, int j) { return i + j; }, 4, 3);
-  std::cout << "filter" << std::endl;
+  auto a = Linx::generate("a", KOKKOS_LAMBDA(int i, int j) { return i + 4 * j; }, 4, 3);
   auto evens = Linx::filter(a, KOKKOS_LAMBDA(int a_i) { return a_i % 2 == 0; });
-  BOOST_TEST(evens.size() == a.size() / 2);
+  BOOST_TEST(evens.size() == (a.size() + 1) / 2);
+  BOOST_TEST(Linx::sum(evens) == evens.size() * (evens.size() - 1));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
