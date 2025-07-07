@@ -13,8 +13,12 @@
 
 namespace Linx {
 
+static constexpr int kokkos_max_rank = 8; ///< Maximum rank of a `Kokkos::View`
+static constexpr int kokkos_max_dyn_rank = 7; ///< Maximum rank of a `Kokkos::DynRankView`
+static constexpr int kokkos_max_op_rank = 6; ///< Maximum rank of most Kokkos operations
+
 /**
- * Default sequence container instance.
+ * @brief Default sequence container instance.
  */
 template <typename T, int N, typename... TArgs>
 auto default_sequence_container()
@@ -27,17 +31,20 @@ auto default_sequence_container()
 }
 
 /**
- * Default sequence container type.
+ * @brief Default sequence container type.
  */
 template <typename T, int N, typename... TArgs>
 using SequenceContainer = decltype(default_sequence_container<T, N, TArgs...>());
 
 /**
- * Default image container instance.
+ * @brief Default image container instance.
  */
 template <typename T, int N, typename... TArgs>
 auto default_image_container()
 {
+  static_assert(kokkos_max_rank <= 8);
+  static_assert(N <= kokkos_max_rank);
+
   // We avoid recursion to make NVCC happier
   if constexpr (N == -1) {
     return Kokkos::DynRankView<T, TArgs...>();
@@ -61,7 +68,7 @@ auto default_image_container()
 }
 
 /**
- * Default image container type.
+ * @brief Default image container type.
  */
 template <typename T, int N, typename... TArgs>
 using ImageContainer = decltype(default_image_container<T, N, TArgs...>());
@@ -72,8 +79,8 @@ using ImageContainer = decltype(default_image_container<T, N, TArgs...>());
 template <typename T>
 struct Rebind {
   template <typename U>
-  using As = std::conditional_t<std::is_same_v<U, void>, T, U>;
-  using AsReadonly = const T;
+  using As = std::conditional_t<std::is_same_v<U, void>, T, U>; ///< New value type
+  using AsReadonly = const T; ///< Constant value type
 };
 
 /**
@@ -82,8 +89,8 @@ struct Rebind {
 template <typename T>
 struct Rebind<T*> {
   template <typename U>
-  using As = typename Rebind<T>::As<U>*;
-  using AsReadonly = typename Rebind<T>::AsReadonly*;
+  using As = typename Rebind<T>::As<U>*; ///< New pointed type
+  using AsReadonly = typename Rebind<T>::AsReadonly*; ///< Read-only pointer
 };
 
 /**
@@ -92,8 +99,8 @@ struct Rebind<T*> {
 template <typename T, std::size_t N>
 struct Rebind<T[N]> {
   template <typename U>
-  using As = typename Rebind<T>::As<U>[N];
-  using AsReadonly = typename Rebind<T>::AsReadonly[N];
+  using As = typename Rebind<T>::As<U>[N]; ///< Array of new type
+  using AsReadonly = typename Rebind<T>::AsReadonly[N]; ///< Read-only array
 };
 
 /**
@@ -102,13 +109,17 @@ struct Rebind<T[N]> {
 template <typename TData, typename... TArgs>
 struct Rebind<Kokkos::View<TData, TArgs...>> {
   template <typename U>
-  using As = Kokkos::View<typename Rebind<TData>::As<U>, TArgs...>;
-  using AsReadonly = Kokkos::View<typename Rebind<TData>::AsReadonly, TArgs...>;
-  using AsAtomic = Kokkos::View<TData, Kokkos::MemoryTraits<Kokkos::Atomic>, TArgs...>;
+  using As = Kokkos::View<typename Rebind<TData>::As<U>, TArgs...>; ///< View of new type
+  using AsReadonly = Kokkos::View<typename Rebind<TData>::AsReadonly, TArgs...>; ///< Read-only view
+  using AsAtomic = Kokkos::View<TData, Kokkos::MemoryTraits<Kokkos::Atomic>, TArgs...>; ///< Atomic-access view
 };
 
 /**
- * @brief Create a view with same shape but different data type.
+ * @brief Create a view with same layout and possibly different data type.
+ * @tparam U The new value type or `void`
+ * 
+ * The new view has the same memory layout and shape.
+ * The value type is also the same if `U` is void.
  */
 template <typename U = void, typename TData, typename... TArgs>
 decltype(auto) same_layout(const std::string& label, const Kokkos::View<TData, TArgs...>& in)
@@ -118,6 +129,8 @@ decltype(auto) same_layout(const std::string& label, const Kokkos::View<TData, T
 
 /**
  * @brief Get a read-only view.
+ * 
+ * This is a no-op if the view is already read-only.
  */
 template <typename TData, typename... TArgs>
 KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::View<TData, TArgs...>& in)
@@ -131,7 +144,7 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::View<TData, TArg
 }
 
 /**
- * @brief Get an atomic view.
+ * @brief Get an atomic-access view.
  */
 template <typename TData, typename... TArgs>
 KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Kokkos::View<TData, TArgs...>& in)
@@ -146,13 +159,17 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Kokkos::View<TData, TArgs.
 template <typename TData, typename... TArgs>
 struct Rebind<Kokkos::DynRankView<TData, TArgs...>> {
   template <typename U>
-  using As = Kokkos::DynRankView<typename Rebind<TData>::As<U>, TArgs...>;
-  using AsReadonly = Kokkos::DynRankView<typename Rebind<TData>::AsReadonly, TArgs...>;
-  using AsAtomic = Kokkos::DynRankView<TData, Kokkos::MemoryTraits<Kokkos::Atomic>, TArgs...>;
+  using As = Kokkos::DynRankView<typename Rebind<TData>::As<U>, TArgs...>; ///< View of new type
+  using AsReadonly = Kokkos::DynRankView<typename Rebind<TData>::AsReadonly, TArgs...>; ///< Read-only view
+  using AsAtomic = Kokkos::DynRankView<TData, Kokkos::MemoryTraits<Kokkos::Atomic>, TArgs...>; ///< Atomic-access view
 };
 
 /**
- * @brief Create a view with same shape but different data type.
+ * @brief Create a view with same layout and possibly different data type.
+ * @tparam U The new value type or `void`
+ * 
+ * The new view has the same memory layout and shape.
+ * The value type is also the same if `U` is void.
  */
 template <typename U = void, typename TData, typename... TArgs>
 decltype(auto) same_layout(const std::string& label, const Kokkos::DynRankView<TData, TArgs...>& in)
@@ -160,6 +177,11 @@ decltype(auto) same_layout(const std::string& label, const Kokkos::DynRankView<T
   return Kokkos::DynRankView<typename Rebind<TData>::As<U>, TArgs...>(label, in.layout());
 }
 
+/**
+ * @brief Get a read-only view.
+ * 
+ * This is a no-op if the view is already read-only.
+ */
 template <typename TData, typename... TArgs>
 KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::DynRankView<TData, TArgs...>& in)
 {
@@ -171,6 +193,9 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::DynRankView<TDat
   }
 }
 
+/**
+ * @brief Get an atomic-access view.
+ */
 template <typename TData, typename... TArgs>
 KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Kokkos::DynRankView<TData, TArgs...>& in)
 {
@@ -178,23 +203,40 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Kokkos::DynRankView<TData,
   return Out(in);
 }
 
+/**
+ * @brief Any type `T` with an `as_readonly(const T&)` overload.
+ */
 template <typename T>
 concept ViewableAsReadonly = requires(const T& in) { as_readonly(in); };
 
+/**
+ * @brief Any type `T` for which `as_readonly(const T&)` should not be applied.
+ * 
+ * This encompasses types without an `as_readonly(const T&)` overload
+ * and those with a const-qualified `T::value_type`.
+ */
 template <typename T>
-concept DontApplyReadonly = not ViewableAsReadonly<T> || std::is_const_v<typename T::value>;
+concept DontApplyReadonly = not ViewableAsReadonly<T> || std::is_const_v<typename T::value_type>;
 
+/**
+ * @brief Any type `T` for which `as_readonly(const T&)` should be applied.
+ * 
+ * This is the negation of `DontApplyReadonly`.
+ */
 template <typename T>
 concept ApplyReadonly = not DontApplyReadonly<T>;
 
-decltype(auto) try_as_readonly(const ApplyReadonly auto& in)
+/**
+ * @brief Return `as_readonly(in)` if applicable, `in` otherwise.
+ */
+template <typename T>
+decltype(auto) try_as_readonly(const T& in)
 {
-  return as_readonly(in);
-}
-
-decltype(auto) try_as_readonly(const DontApplyReadonly auto& in)
-{
-  return LINX_FORWARD(in);
+  if constexpr (ApplyReadonly<T>) {
+    return as_readonly(in);
+  } else {
+    return LINX_FORWARD(in);
+  }
 }
 
 } // namespace Linx

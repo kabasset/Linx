@@ -14,6 +14,7 @@ namespace Linx {
 template <typename T>
 concept LegacyArray = requires(const T a) {
   std::size(a);
+  std::data(a);
   a[0];
 };
 
@@ -24,7 +25,7 @@ concept LegacyArray = requires(const T a) {
 template <typename T>
 concept SizedData = requires(const T a) {
   std::size(a);
-  a.data();
+  std::data(a);
 };
 
 /**

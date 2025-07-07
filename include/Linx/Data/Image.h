@@ -24,11 +24,11 @@ namespace Linx {
  * @ingroup arrays
  * @brief Non-resizable ND array.
  * 
- * @tparam T The element value type
+ * @tparam T The element type
  * @tparam N The rank, or -1 for dynamic rank
  * @tparam TContainer The underlying container type
  * 
- * By default, image elements are default-initialized.
+ * Image elements are default-initialized at construction.
  * Copy constructor and copy assignment operator perform shallow copy.
  * 
  * @see arrays
@@ -41,8 +41,7 @@ class Image :
     public RangeMixin<is_contiguous<TContainer>(), T, Image<T, N, TContainer>> {
 private:
 
-  static constexpr int kokkos_max_dyn_rank = (N == -1 ? 7 : N); ///< The max dynamic rank supported by Kokkos
-  // TODO make public variable, as well as kokkos_max_rank = 8 and kokkos_max_op_rank = 6?
+  static constexpr int max_rank = (N == -1 ? 7 : N); ///< The max dynamic rank supported by Kokkos
 
 public:
 
@@ -101,18 +100,8 @@ public:
    */
   template <std::integral TInt, typename UContainer>
   explicit Image(const std::string& label, const Sequence<TInt, n, UContainer>& shape) :
-      Image(label, shape, std::make_index_sequence<kokkos_max_dyn_rank>()) // TODO use LegacyArray?
+      Image(label, shape, std::make_index_sequence<max_rank>()) // TODO use LegacyArray?
   {}
-
-  /**
-   * @copydoc Image()
-   */
-  [[deprecated]] KOKKOS_INLINE_FUNCTION explicit Image(const Container& container) : m_container(container) {}
-
-  /**
-   * @copydoc Image()
-   */
-  [[deprecated]] KOKKOS_INLINE_FUNCTION explicit Image(Container&& container) : m_container(LINX_FORWARD(container)) {}
 
   /**
    * @brief Forwarding constructor.
@@ -148,7 +137,7 @@ public:
    */
   template <typename U, std::integral TInt, typename UContainer>
   explicit Image(Wrap<U*> data, const Sequence<TInt, n, UContainer>& shape) :
-      Image(data, shape, std::make_index_sequence<kokkos_max_dyn_rank>()) // TODO use LegacyArray?
+      Image(data, shape, std::make_index_sequence<max_rank>()) // TODO use LegacyArray?
   {}
 
   /**
@@ -229,10 +218,10 @@ public:
   /**
    * @brief Access the element at position 0.
    */
-  KOKKOS_INLINE_FUNCTION reference origin() const
+  KOKKOS_INLINE_FUNCTION reference origin() const // FIXME pointer?
   {
+    static_assert(max_rank <= 8);
     return m_container.access(0, 0, 0, 0, 0, 0, 0, 0);
-    // FIXME not scalable if max rank goes >8 some day
   }
 
   /**
@@ -240,12 +229,12 @@ public:
    */
   KOKKOS_INLINE_FUNCTION reference back() const
   {
+    static_assert(max_rank <= 8);
     Kokkos::Array<int, 8> p;
     for (int i = 0; i < rank(); ++i) {
       p[i] = extent(i) - 1;
     }
     return m_container.access(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7]);
-    // FIXME not scalable if max rank goes >8 some day
   }
 
   /**
@@ -260,10 +249,10 @@ public:
    * @brief Access the element at given position.
    */
   template <std::integral TInt = int, int M = n>
-  KOKKOS_INLINE_FUNCTION reference operator[](const GPosition<TInt, M>& position) const // FIXME use LegacyArray?
+  [[deprecated]] KOKKOS_INLINE_FUNCTION reference
+  operator[](const GPosition<TInt, M>& position) const // FIXME use LegacyArray?
   {
-    // FIXME validate M
-    return at(position, std::make_index_sequence<kokkos_max_dyn_rank>());
+    return at_impl(position, std::make_index_sequence<max_rank>());
   }
 
   /**
@@ -293,15 +282,15 @@ public:
    * 
    * @see `Patch`
    */
-  template <typename U, typename... TFuncs>
-  auto operator[](const Slice<U, TFuncs...>& region) const // not __device__ because of `region & domain()`
+  template <std::integral TInt, typename... TFuncs>
+  auto operator[](const Slice<TInt, TFuncs...>& region) const // not __device__ because of `region & domain()`
   {
     const auto& crop = region & domain(); // Resolve Kokkos::ALL to drop offsets with subview
     if constexpr (sizeof...(TFuncs) == 1) {
       using Container = decltype(slice_last(std::make_index_sequence<n - 1>(), crop));
       return Image<T, Container::rank(), Container>(Forward {}, slice_last(std::make_index_sequence<n - 1>(), crop));
     } else {
-      // FIXME assert sizeoff...(TFuncs) == n?
+      static_assert(sizeof...(TFuncs) == n);
       using Container = decltype(slice_all(crop, std::make_index_sequence<sizeof...(TFuncs)>()));
       return Image<T, Container::rank(), Container>(
           Forward {},
@@ -331,9 +320,9 @@ private:
    * @brief Helper accessor to unroll position.
    */
   template <typename TPosition, std::size_t... Is>
-  KOKKOS_INLINE_FUNCTION reference at(const TPosition& position, std::index_sequence<Is...>) const // FIXME at_impl?
+  KOKKOS_INLINE_FUNCTION reference at_impl(const TPosition& position, std::index_sequence<Is...>) const
   {
-    return operator()(get_or<Is>(position, 0)...); // FIXME at()?
+    return operator()(get_or<Is>(position, 0)...);
   }
 
   /**
