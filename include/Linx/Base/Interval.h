@@ -228,10 +228,10 @@ private:
  * 
  * @tparam TSlice The interval type
  */
-template <typename TSlice>
 class OutOfBounds : public Exception {
 public:
 
+  template <typename TSlice>
   OutOfBounds(const std::string& name, auto value, const TSlice& bounds) :
       Exception("Out of bounds", name + " " + std::to_string(value) + " not in ")
   {
@@ -241,17 +241,24 @@ public:
   }
 
   /**
-   * @brief Constructor.
-   */
-  OutOfBounds(const std::string& name, auto value, const auto&... args) : OutOfBounds(name, value, TSlice(args...)) {}
-
-  /**
    * @brief Throw if a value lies out of given bounds.
    */
-  static void may_throw(const std::string& name, auto value, auto&&... args)
+  template <typename TSlice>
+  static void may_throw(const std::string& name, auto value, const TSlice& bounds)
   {
-    if (not TSlice(LINX_FORWARD(args)...).contains(value)) {
-      throw OutOfBounds(name, value, LINX_FORWARD(args)...);
+    if (not bounds.contains(value)) {
+      throw OutOfBounds(name, value, bounds);
+    }
+  }
+
+  /**
+   * @brief Abort if a value lies out of given bounds.
+   */
+  template <typename TSlice>
+  KOKKOS_INLINE_FUNCTION static void may_abort(const std::string& name, auto value, const TSlice& bounds)
+  {
+    if (not bounds.contains(value)) {
+      Kokkos::abort(OutOfBounds(name, value, bounds).what());
     }
   }
 };
@@ -269,12 +276,13 @@ KOKKOS_INLINE_FUNCTION Slice<T> clamp(const Unbounded<T>&, const auto& start, co
 /**
  * @relatesalso Slice
  * @brief Make an interval clamped between bounds.
+ * 
+ * @warning This function aborts if the singleton is out of bounds.
  */
 template <std::integral T>
 KOKKOS_INLINE_FUNCTION const Singleton<T>& clamp(const Singleton<T>& interval, const auto& start, const auto& stop)
 {
-  // OutOfBounds<Slice<T>>::may_throw("singleton", interval.start(), start, stop); // invalid on device
-  // Always return a singleton, not a span, to ensure slicing with a singleton reduces rank
+  OutOfBounds::may_abort("singleton", interval.start(), Slice(start, stop));
   return interval;
 }
 

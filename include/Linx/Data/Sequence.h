@@ -366,17 +366,12 @@ template <typename T, int N, typename TContainer = SequenceContainer<T, N>>
 Sequence(const char*, T (&&)[N]) -> Sequence<T, N, TContainer>;
 
 /**
- * @relatesalso Sequence
  * @brief I-th element of an array, or some fallback value if out of bounds.
  */
-template <int I, typename T, int N, typename TContainer, typename U>
-KOKKOS_INLINE_FUNCTION U get_or(const Sequence<T, N, TContainer>& in, U fallback) // FIXME LegacyArray?
+template <int I, typename T>
+KOKKOS_INLINE_FUNCTION T get_or(const LegacyArray auto& in, T fallback)
 {
-  if constexpr (N == -1) {
-    return (I < std::size(in)) ? static_cast<U>(in[I]) : fallback;
-  } else {
-    return I < N ? static_cast<U>(in[I]) : fallback;
-  }
+  return (I < std::size(in)) ? static_cast<T>(in[I]) : fallback;
 }
 
 /**

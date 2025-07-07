@@ -256,6 +256,22 @@ public:
   }
 
   /**
+   * @brief Access the element at given position, with bounds checking and support for backward indexing.
+   */
+  KOKKOS_INLINE_FUNCTION reference at(std::integral auto... position) const // TODO to DataMixin
+  {
+    return at(std::array {position...}); // FIXME avoid copy
+  }
+
+  /**
+   * @brief Access the element at given position, with bounds checking and support for backward indexing.
+   */
+  KOKKOS_INLINE_FUNCTION reference at(const LegacyArray auto& position) const // TODO to DataMixin
+  {
+    return at_impl(position, std::make_index_sequence<max_rank>());
+  }
+
+  /**
    * @brief Slice the image as a shallow copy.
    * @param region The slicing as a `Box`
    */
@@ -322,7 +338,19 @@ private:
   template <typename TPosition, std::size_t... Is>
   KOKKOS_INLINE_FUNCTION reference at_impl(const TPosition& position, std::index_sequence<Is...>) const
   {
-    return operator()(get_or<Is>(position, 0)...);
+    return operator()(index_along<Is>(get_or<Is>(position, 0))...);
+  }
+
+  /**
+   * @brief Deduce the in-bounds index, with support for backward indexing.
+   */
+  template <int I>
+  KOKKOS_INLINE_FUNCTION auto index_along(std::integral auto i) const
+  {
+    const auto stop = extent(I);
+    const auto out = i < 0 ? stop - i : i;
+    OutOfBounds::may_abort("index", out, Slice(0, stop));
+    return out;
   }
 
   /**

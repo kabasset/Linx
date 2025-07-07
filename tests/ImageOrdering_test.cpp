@@ -58,4 +58,12 @@ BOOST_AUTO_TEST_CASE(stride_test)
   BOOST_TEST(Linx::offset_from_origin(in, -1, -1, -1, -1, -1, -1, -1, -1) == -Linx::sum(strides));
 }
 
+BOOST_AUTO_TEST_CASE(backward_indexing_test)
+{
+  auto in = Linx::Raster<int, 2>("in", 4, 3).fill_with_offsets_from_data();
+  BOOST_TEST(in.at(-1, 0) == 3);
+  BOOST_TEST(in.at(0, -1) == 8);
+  BOOST_TEST(in.at(-1, -1) == 11);
+}
+
 BOOST_AUTO_TEST_SUITE_END()

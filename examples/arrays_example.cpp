@@ -90,9 +90,9 @@ BOOST_AUTO_TEST_CASE(access_test)
   a(0, 1) = 1;
   ASSERT(a(0, 1) == 1);
 
-  auto p = Linx::Position<2>({0, 1}); // FIXME NVCC bug: removing <2> makes p a Sequence on device!
-  a[p] = 2;
-  ASSERT(a[p] == 2);
+  auto p = Linx::Position<2>({0, 1});
+  a.at(p) = 2;
+  ASSERT(a.at(p) == 2);
   //! [access]
 }
 
