@@ -68,7 +68,7 @@ public:
   /**
    * @brief Rank: 1.
    */
-  static constexpr auto rank() const
+  static constexpr auto rank()
   {
     return 1;
   }
