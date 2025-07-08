@@ -71,4 +71,17 @@ auto generate(const std::string& label, const auto& func, std::integral auto... 
   return Image<T, n, ImageContainer<T, n, TSpace>>(label, shape...).copy_from(func);
 }
 
+/**
+ * @ingroup creation
+ * @brief Create an image with the same memory layout as another image.
+ * @tparam U The type of the elements in the new image (defaults to the type of the elements in the input image)
+ */
+template <typename U = void, typename T, int N, typename TContainer>
+auto same_layout(const std::string& label, const Image<T, N, TContainer>& in)
+{
+  return Image<typename Rebind<T>::As<U>, N, typename Rebind<TContainer>::As<U>>(
+      Forward(),
+      same_layout<U>(label, in.container()));
+}
+
 } // namespace Linx

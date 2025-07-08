@@ -54,18 +54,6 @@ decltype(auto) on_device(const Image<T, N, TContainer>& in)
 }
 
 /**
- * @brief Create an image with the same memory layout as another image.
- * @tparam U The type of the elements in the new image (defaults to the type of the elements in the input image)
- */
-template <typename U = void, typename T, int N, typename TContainer>
-auto same_layout(const std::string& label, const Image<T, N, TContainer>& in)
-{
-  return Image<typename Rebind<T>::As<U>, N, typename Rebind<TContainer>::As<U>>(
-      Forward(),
-      same_layout<U>(label, in.container()));
-}
-
-/**
  * @brief Iterator to the beginning of a contiguous image.
  */
 template <typename T, int N, typename TContainer>
