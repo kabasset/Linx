@@ -22,65 +22,89 @@ namespace Linx {
 namespace Impl {
 
 /**
- * @brief Functor which return a value from coordinates, typically using one or several images.
+ * @brief Functor which return a value for each position, typically using one or several images.
  */
 template <typename T, typename TFunc, typename TIns, std::size_t... Is>
 class Projection {
 public:
 
-  using value_type = std::remove_cv_t<T>;
+  using value_type = std::remove_cv_t<T>; ///< The projection value type
 
+  /**
+   * @brief Constructor.
+   */
   KOKKOS_INLINE_FUNCTION Projection(const TFunc& func, const TIns& ins) : m_func(func), m_ins(ins) {}
 
-  KOKKOS_INLINE_FUNCTION value_type operator()(auto... is) const
+  /**
+   * @brief Call `func(get<0>(ins)(position...), get<1>(ins)(position...), ...)`.
+   */
+  KOKKOS_INLINE_FUNCTION value_type operator()(auto... position) const
   {
-    return m_func(get<Is>(m_ins)(is...)...);
+    return m_func(get<Is>(m_ins)(position...)...);
   }
 
 private:
 
-  TFunc m_func;
-  TIns m_ins;
+  TFunc m_func; ///< The multivariate function
+  TIns m_ins; ///< The input tuple
 };
 
 /**
- * @brief Kokkos reducer built from a binary operation functor.
+ * @brief Kokkos-compliant reducer built from a binary operation functor.
  */
 template <typename T, typename TFunc, typename TSpace>
 class Reducer {
 public:
 
-  using reducer = Reducer; // Required for concept
-  using value_type = std::remove_cv_t<T>;
-  using result_view_type = Kokkos::View<value_type, TSpace>;
+  using reducer = Reducer; ///< This class, required for Kokkos' "concept"
+  using value_type = std::remove_cv_t<T>; ///< The reduced value type
+  using result_view_type = Kokkos::View<value_type, TSpace>; ///< The scalar result type, as a rank-0 view
 
+  /**
+   * @brief Value-based constructor.
+   */
   KOKKOS_INLINE_FUNCTION Reducer(value_type& value, const TFunc& func, const T& identity) :
       m_view(&value),
       m_func(func),
       m_identity(identity)
   {}
 
+  /**
+   * @brief View-based constructor.
+   */
   KOKKOS_INLINE_FUNCTION Reducer(const result_view_type& view, const TFunc& func, const T& identity) :
       m_view(view),
       m_func(func),
       m_identity(identity)
   {}
 
+  /**
+   * @brief Add a value.
+   */
   KOKKOS_INLINE_FUNCTION void join(value_type& dst, const value_type& src) const
   {
     dst = m_func(dst, src);
   }
 
+  /**
+   * @brief Initialize a value to the identity element.
+   */
   KOKKOS_INLINE_FUNCTION void init(value_type& value) const
   {
     value = m_identity;
   }
 
+  /**
+   * @brief Reference to the current value.
+   */
   KOKKOS_INLINE_FUNCTION value_type& reference() const
   {
-    return *m_view.data();
+    return m_view();
   }
 
+  /**
+   * @brief View of the current value.
+   */
   KOKKOS_INLINE_FUNCTION result_view_type view() const
   {
     return m_view;
@@ -88,20 +112,20 @@ public:
 
 private:
 
-  result_view_type m_view;
-  TFunc m_func;
-  value_type m_identity;
+  result_view_type m_view; ///< The view of the current value
+  TFunc m_func; ///< The binary function
+  value_type m_identity; ///< The identity element
 };
 
 /**
- * @brief Functor which combines a projection and a reducer.
+ * @brief Functor which combines a multivariate projection and a reducer.
  */
 template <typename T, typename TProj, typename TRed, std::size_t... Is>
 class ProjectionReducer {
 public:
 
-  static constexpr std::size_t n = sizeof...(Is);
-  using value_type = std::remove_cv_t<T>;
+  static constexpr std::size_t n = sizeof...(Is); ///< The rank
+  using value_type = std::remove_cv_t<T>; ///< The reduced value type
 
   /**
    * @brief Constructor.
@@ -112,7 +136,7 @@ public:
   {}
 
   /**
-   * @brief `reducer.join(tmp, projection(is...))`
+   * @brief Call `reducer.join(tmp, projection(is...))`
    * @param args `is..., tmp`
    */
   template <typename... Ts>
@@ -125,8 +149,8 @@ public:
 
 private:
 
-  TProj m_projection;
-  TRed m_reducer;
+  TProj m_projection; ///< The projection
+  TRed m_reducer; ///< The reducer
 };
 
 /**
@@ -156,7 +180,7 @@ void kokkos_reduce_impl(
 } // namespace Impl
 
 /**
- * @brief Apply a reduction to a region.
+ * @brief Apply a reduction over a region.
  * 
  * @param label Some label for debugging
  * @param region The region
@@ -196,7 +220,7 @@ void kokkos_reduce(const std::string& label, const TRegion& region, const TProj&
         LINX_CASE_RANK(5)
         LINX_CASE_RANK(6)
       default:
-        throw Linx::OutOfBounds("Dynamic rank", region.rank(), Segment<int>(0, 6));
+        throw Linx::OutOfBounds("Reduction dynamic rank", region.rank(), Segment<int>(0, 6));
     }
   } else {
     Impl::kokkos_reduce_impl<TSpace>(label, region, projection, reducer, std::make_index_sequence<TRegion::n>());
