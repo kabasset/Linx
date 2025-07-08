@@ -75,7 +75,7 @@ public:
 
     Lazy(const MedianFilter& filter, TIn in) :
         LazySpatialFilterMixin<MedianFilter, TIn, Lazy>(filter, LINX_MOVE(in)),
-        m_neighbors(this->m_offsets.size())
+        m_neighbors(this->m_profile.size())
     {}
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const

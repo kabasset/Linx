@@ -7,8 +7,9 @@
 
 #include "Linx/Base/mixins/Strided.h"
 #include "Linx/Data/Patch.h"
+#include "Linx/Data/Profile.h"
 #include "Linx/Data/Sequence.h"
-#include "Linx/Transforms/Resampling.h"
+#include "Linx/Transforms/Resampling.h" // FIXME used?
 #include "Linx/Transforms/Shift.h"
 
 #include <string>
@@ -230,14 +231,6 @@ private:
 
 /**
  * @brief Filtering task mixin.
- * 
- * With:
- * 
- * \code
- * class Convolve : public WeightedFilterMixin;
- * class Erode : public FilterMixin;
- * using Opening = Erode * Dilate
- * \endcode
  */
 template <typename TDerived>
 class FilterMixin {
@@ -318,24 +311,18 @@ private:
  */
 template <typename TFilter, typename TIn, typename TDerived>
 class LazySpatialFilterMixin {
+private:
+
+  using Profile = decltype(Profile(try_as_readonly(std::declval<TIn>()), 0));
+
 public:
 
-  // value_type does not necessarily come from TIn
   using execution_space = typename TIn::execution_space;
 
   LazySpatialFilterMixin(TFilter filter, const TIn& in) :
       m_filter(LINX_MOVE(filter)),
-      m_offsets("offsets", m_filter.footprint().size()),
-      m_in(try_as_readonly(in))
-  {
-    const auto& offsets_on_host = on_host(m_offsets);
-    auto it = offsets_on_host.begin();
-    for_each<Kokkos::Serial>("m_offsets", footprint(), [&](std::integral auto... is) {
-      *it = offset_from_origin(m_in, is...);
-      ++it;
-    });
-    Kokkos::deep_copy(m_offsets.container(), offsets_on_host.container());
-  }
+      m_profile(try_as_readonly(in), m_filter.footprint())
+  {}
 
   std::string label() const
   {
@@ -349,7 +336,7 @@ public:
 
   auto domain() const
   {
-    auto in_box = bbox(m_in.domain());
+    auto in_box = bbox(m_profile.parent().domain());
     auto footprint_box = bbox(footprint());
     return Box(
         in_box.start() - resize<TIn::n>("start", footprint_box.start()),
@@ -358,7 +345,7 @@ public:
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
   {
-    return LINX_CRTP_CONST_DERIVED.reduce(OffsetBasedRange(&this->m_in(is...), m_offsets)); // FIXME pool of patches?
+    return LINX_CRTP_CONST_DERIVED.reduce(m_profile.shifted_span(is...));
   }
 
   template <typename TOut>
@@ -371,8 +358,7 @@ public:
 protected:
 
   TFilter m_filter; ///< The filter
-  Sequence<std::ptrdiff_t, -1> m_offsets; ///< The footprint offsets in the input
-  decltype(try_as_readonly(std::declval<TIn>())) m_in; ///< The input
+  Profile m_profile; ///< The profile of the input
 };
 
 /**

@@ -138,12 +138,76 @@ public:
     return m_it != rhs.m_it;
   }
 
+  KOKKOS_INLINE_FUNCTION bool operator==(const std::ptrdiff_t* it) const
+  {
+    return m_it == it;
+  }
+
+  KOKKOS_INLINE_FUNCTION bool operator!=(const std::ptrdiff_t* it) const
+  {
+    return m_it != it;
+  }
+
 private:
 
   T* m_data; ///< The reference data
   const std::ptrdiff_t* m_begin; ///< The beginning offset iterator
   const std::ptrdiff_t* m_it; ///< The current offset iterator
 };
+
+template <typename T>
+class ProfileSpan {
+public:
+
+  KOKKOS_INLINE_FUNCTION ProfileSpan(T* data, const std::ptrdiff_t* begin, const std::ptrdiff_t* end) :
+      m_data(data),
+      m_begin(begin),
+      m_end(end)
+  {}
+
+  KOKKOS_INLINE_FUNCTION ProfileSpan(T* data, const auto& offsets) :
+      ProfileSpan(data, offsets.data(), offsets.data() + offsets.size())
+  {}
+
+  KOKKOS_INLINE_FUNCTION auto begin() const
+  {
+    return ProfileIterator<T>(m_data, m_begin);
+  }
+
+  KOKKOS_INLINE_FUNCTION auto end() const
+  {
+    return m_end;
+  }
+
+  KOKKOS_INLINE_FUNCTION auto ssize() const
+  {
+    return m_end - m_begin;
+  }
+
+  KOKKOS_INLINE_FUNCTION T& operator[](int i) const
+  {
+    return m_data[m_begin[i]];
+  }
+
+private:
+
+  T* m_data;
+  const std::ptrdiff_t* m_begin;
+  const std::ptrdiff_t* m_end;
+};
+
+namespace Impl {
+
+template <typename TProfile>
+struct EmplaceProfile {
+  KOKKOS_INLINE_FUNCTION void operator()(std::integral auto... position) const
+  {
+    m_profile.emplace_back(position...);
+  }
+  const TProfile& m_profile;
+};
+
+} // namespace Impl
 
 /**
  * @brief Resizable sequence of elements specified as offset from a reference memory address.
@@ -194,10 +258,8 @@ public:
    */
   void assign(const auto& region) const
   {
-    for_each<execution_space>( // FIXME keep order?
-        "assign",
-        region,
-        KOKKOS_CLASS_LAMBDA(std::integral auto... position) { emplace_back(position...); });
+    // FIXME keep order?
+    for_each<execution_space>("assign", region, Impl::EmplaceProfile {*this});
   }
 
   /**
@@ -214,6 +276,14 @@ public:
   auto size() const
   {
     return Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), m_size)();
+  }
+
+  /**
+   * @brief Parent data container.
+   */
+  const Parent& parent() const
+  {
+    return m_parent;
   }
 
   /**
@@ -254,6 +324,14 @@ public:
   KOKKOS_INLINE_FUNCTION const_iterator cend() const
   {
     return const_iterator(m_parent.data(), m_offsets.data() + m_size());
+  }
+
+  /**
+   * @brief Span relative to a given position.
+   */
+  KOKKOS_INLINE_FUNCTION ProfileSpan<value_type> shifted_span(std::integral auto... position) const
+  {
+    return ProfileSpan<value_type>(&m_parent(position...), m_offsets.data(), m_offsets.data() + m_size());
   }
 
   /**

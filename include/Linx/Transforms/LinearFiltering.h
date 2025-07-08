@@ -80,7 +80,7 @@ public:
       for (const auto& e : neighbors) {
         out += e;
       }
-      return out / this->m_offsets.size();
+      return out / this->m_profile.size();
     }
   };
 };
@@ -241,10 +241,7 @@ Shift<Sequence<T, -1>> sampled_gaussian_kernel(const T& sigma, Index radius)
   auto kernel = Shift(Sequence<T, -1>("gaussian kernel", 2 * radius + 1), -radius);
   const auto norm = std::numbers::inv_sqrtpi * std::numbers::sqrt2 * 0.5 / sigma;
   const auto factor = -0.5 / (sigma * sigma);
-  for_each(
-      "Gaussian kernel",
-      kernel.domain(),
-      KOKKOS_LAMBDA(int i) { kernel(i) = norm * std::exp(i * i * factor); });
+  for_each("Gaussian kernel", kernel.domain(), KOKKOS_LAMBDA(int i) { kernel(i) = norm * std::exp(i * i * factor); });
   return kernel;
 }
 
