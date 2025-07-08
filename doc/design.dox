@@ -4,6 +4,30 @@ namespace Linx {
 
 \addtogroup design
 
+\section design-structure Code structure
+
+The header-only library is structured into topical folders in `include/Linx`, namely:
+
+- `Data`: Data classes, regions and element-wise operations: arrays, boxes, patches...
+- `Base`: Lower level classes and services, which do not rely on Linx data classes: slices, reducers, functors...
+- `Transforms`: Global transforms: filters, resampling, DFT...
+- `Io`: Input/output operations: FITS files reading and writing.
+- `Run`: Runtime services: program options, timing, workflow API...
+
+For each class or class template, there is a header file with the same name as the class in the topical folders.
+There may also be a corresponding subfolder of the same name, which contains related header files,
+and should not be included directly by the user.
+For example:
+
+- `types.h` for aliases and deduction guides;
+- `operators.h` for free function operators;
+- `creation.h` for creation functions;
+- `funcs.h` for other related free functions.
+
+For example, class template `Image` is defined in `include/Linx/Data/Image.h`
+and related function `as_atomic()` is defined in `include/Linx/Data/Image/funcs.h`.
+The latter is included from `Image.h`.
+
 \section design-memory Memory management
 
 By default, memory is allocated on available acceleration devices (typically GPU's)
