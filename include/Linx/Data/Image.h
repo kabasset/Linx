@@ -67,7 +67,7 @@ public:
    * 
    * @warning If the rank is static (`n != -1`), the extent count must match it.
    */
-  explicit Image(std::integral auto... shape) : Image("", shape...) {}
+  explicit Image(std::integral auto... shape) : Image("<Image>", shape...) {}
 
   /**
    * @brief Constructor.
@@ -87,7 +87,7 @@ public:
    * @warning If the rank is static (`n != -1`), the shape rank must match it.
    */
   template <std::integral TInt, typename UContainer>
-  explicit Image(const Sequence<TInt, n, UContainer>& shape) : Image("", shape) // TODO use LegacyArray?
+  explicit Image(const Sequence<TInt, n, UContainer>& shape) : Image("<Image>", shape) // TODO use LegacyArray?
   {}
 
   /**

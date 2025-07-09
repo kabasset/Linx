@@ -45,7 +45,7 @@ public:
    * @param label The map label
    * @param out The value returned when out-of-domain elements are accessed
    */
-  Map(const std::string& label = "", const T& out = T()) :
+  Map(const std::string& label = "<Map>", const T& out = T()) :
       out_of_range(out),
       m_map_view(Kokkos::view_alloc(label, Kokkos::SequentialHostInit)),
       m_map(*m_map_view.data())

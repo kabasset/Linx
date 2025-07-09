@@ -63,7 +63,7 @@ public:
   /**
    * @brief Default constructor.
    */
-  Sequence() : Sequence("") {}
+  Sequence() : Sequence("<Sequence>") {}
 
   /**
    * @brief Constructor.
@@ -93,7 +93,7 @@ public:
    * 
    * @warning If the size is static (`n != -1`), the `size` parameter must match it.
    */
-  explicit Sequence(std::integral auto size) : Sequence("", size) {}
+  explicit Sequence(std::integral auto size) : Sequence("<Sequence>", size) {}
 
   /**
    * @copydoc Sequence()
@@ -113,7 +113,7 @@ public:
    * 
    * @warning If the size is static (`n != -1`), the value count must match it.
    */
-  Sequence(std::initializer_list<value_type> values) : Sequence("", values.begin(), values.end()) {}
+  Sequence(std::initializer_list<value_type> values) : Sequence("<Sequence>", values.begin(), values.end()) {}
 
   /**
    * @brief Constructor.
@@ -196,7 +196,7 @@ public:
    * @brief Constant constructor.
    */
   template <typename U>
-  [[deprecated]] Sequence(Constant<U> value, int size = std::abs(n)) : Sequence("", value, size)
+  [[deprecated]] Sequence(Constant<U> value, int size = std::abs(n)) : Sequence("<Sequence>", value, size)
   {}
 
   /**
