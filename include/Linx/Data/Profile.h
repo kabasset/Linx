@@ -165,10 +165,6 @@ public:
       m_end(end)
   {}
 
-  KOKKOS_INLINE_FUNCTION ProfileSpan(T* data, const auto& offsets) :
-      ProfileSpan(data, offsets.data(), offsets.data() + offsets.size())
-  {}
-
   KOKKOS_INLINE_FUNCTION auto begin() const
   {
     return ProfileIterator<T>(m_data, m_begin);
@@ -204,7 +200,7 @@ struct EmplaceProfile {
   {
     m_profile.emplace_back(position...);
   }
-  const TProfile& m_profile;
+  TProfile m_profile;
 };
 
 } // namespace Impl
@@ -276,6 +272,14 @@ public:
   auto size() const
   {
     return Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), m_size)();
+  }
+
+  /**
+   * @brief Maximum number of elements.
+   */
+  auto capacity() const
+  {
+    return m_offsets.size();
   }
 
   /**
