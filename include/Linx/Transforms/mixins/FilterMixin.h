@@ -206,6 +206,7 @@ public:
     auto extrapolated = Shift(TIn("extrapolated", domain.shape()), domain.start());
     extrapolated.copy_from(Extrapolation(in, m_method)); // TODO optimize
     return m_parent.lazy(Patch(Forward(), extrapolated, in.domain()));
+    // FIXME return m_parent.lazy(extrapolated): no domain() in Lazy
   }
 
   template <typename TIn>
@@ -339,8 +340,8 @@ public:
     auto in_box = bbox(m_profile.parent().domain());
     auto footprint_box = bbox(footprint());
     return Box(
-        in_box.start() - resize<TIn::n>("start", footprint_box.start()),
-        in_box.stop() - resize<TIn::n>("stop - 1", footprint_box.stop() - 1)); // TODO support -1
+        in_box.start() - resize<TIn::n, Kokkos::HostSpace>("start", footprint_box.start()),
+        in_box.stop() - resize<TIn::n, Kokkos::HostSpace>("stop - 1", footprint_box.stop() - 1)); // TODO support -1
   }
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
