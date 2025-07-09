@@ -59,7 +59,7 @@ struct FindSaturatedStars {
     auto local_satlevel = satlevel; // Prevents capture of *this by KOKKOS_LAMBDA
     Linx::for_each(
         label(),
-        median5.domain(),
+        Linx::Box(Linx::Position<2>({2, 2}), satpixels.shape() - 2),
         KOKKOS_LAMBDA(int i, int j) {
           if (data(i, j) >= local_satlevel) {
             satpixels(i, j) = (median5(i, j) > (local_satlevel / 10));
