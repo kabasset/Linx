@@ -66,6 +66,20 @@ BOOST_AUTO_TEST_CASE(box_additive_test)
   BOOST_TEST((minus.shape() == in.shape() - margin.shape()));
 }
 
+BOOST_AUTO_TEST_CASE(box_dilation_erosion_test)
+{
+  auto in = Linx::Box<2>({0, 1}, {10, 5});
+  auto margin = Linx::Box<1>({-1}, {3});
+
+  auto dilated = Linx::dilate(in, margin);
+  BOOST_TEST(dilated.start() == Linx::Position<2>({-1, 1}));
+  BOOST_TEST(dilated.stop() == Linx::Position<2>({12, 5}));
+
+  auto eroded = Linx::erode(in, margin);
+  BOOST_TEST(eroded.start() == Linx::Position<2>({1, 1}));
+  BOOST_TEST(eroded.stop() == Linx::Position<2>({8, 5}));
+}
+
 BOOST_AUTO_TEST_CASE(box_difference_test)
 {
   auto lhs = Linx::Box<2>({-2, 1}, {5, 4});

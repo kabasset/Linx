@@ -38,7 +38,7 @@ public:
   /**
    * @brief Output message.
    */
-  const char* what() const noexcept override
+  constexpr const char* what() const noexcept override
   {
     return m_message.c_str();
   }

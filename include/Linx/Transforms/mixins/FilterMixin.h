@@ -202,11 +202,11 @@ public:
   template <typename TIn>
   auto lazy(const TIn& in) const
   {
-    auto domain = bbox(in.domain()) + m_parent.footprint(); // FIXME test
+    auto domain = dilate(bbox(in.domain()), m_parent.footprint());
     auto extrapolated = Shift(TIn("extrapolated", domain.shape()), domain.start());
-    extrapolated.copy_from(Extrapolation(in, m_method)); // TODO optimize
-    return m_parent.lazy(Patch(Forward(), extrapolated, in.domain()));
-    // FIXME return m_parent.lazy(extrapolated): no domain() in Lazy
+    extrapolated.copy_from(Extrapolation(in, m_method));
+    return m_parent.lazy(extrapolated);
+    // TODO optimize memory?
   }
 
   template <typename TIn>
@@ -221,7 +221,7 @@ public:
   template <typename TIn, typename TOut>
   void transform(const TIn& in, const TOut& out) const
   {
-    out.copy_from(lazy(in)); // Use out's domain instead of in's
+    out.copy_from(lazy(in));
   }
 
 private:
@@ -260,11 +260,7 @@ public:
   auto operator()(const TIn& in) const
   {
     using T = std::remove_cvref_t<typename TDerived::Lazy<TIn>::value_type>;
-    auto in_box = bbox(in.domain());
-    auto footprint_box = bbox(LINX_CRTP_CONST_DERIVED.footprint());
-    auto domain =
-        Box(in_box.start() - resize<TIn::n, Kokkos::HostSpace>("start", footprint_box.start()),
-            in_box.stop() - resize<TIn::n, Kokkos::HostSpace>("stop - 1", footprint_box.stop() - 1)); // TODO support -1
+    auto domain = erode(bbox(in.domain()), LINX_CRTP_CONST_DERIVED.footprint());
     auto out = same_layout<T>(compose_label(LINX_CRTP_CONST_DERIVED.label(), in), in);
     transform(in, Patch(Forward(), out, domain));
     return out;
@@ -428,25 +424,9 @@ public:
     return m_filter.footprint();
   }
 
-  auto domain() const // FIXME to FilterMixin::operator()
-  {
-    auto in_box = bbox(m_in.domain());
-    auto footprint_box = bbox(footprint());
-    return Box(
-        in_box.start() - resize<TIn::n>("start", footprint_box.start()),
-        in_box.stop() - resize<TIn::n>("stop - 1", footprint_box.stop() - 1)); // TODO support -1
-  }
-
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
   {
     return LINX_CRTP_CONST_DERIVED.reduce(OffsetBasedRange(&m_in(is...), m_offsets));
-  }
-
-  template <typename TOut>
-  void copy_to(TOut& out) const
-  {
-    static_assert(Kokkos::SpaceAccessibility<execution_space, typename TOut::memory_space>::accessible);
-    for_each<execution_space>("copy_to", domain(), Copy(LINX_CRTP_CONST_DERIVED, out));
   }
 
 protected:

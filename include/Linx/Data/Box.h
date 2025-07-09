@@ -496,6 +496,30 @@ GBox<T, N> operator&(const GBox<T, N>& lhs, const GBox<U, M>& rhs)
 }
 
 /**
+ * @brief Create the dilation of a box by a given margin.
+ */
+template <typename T, int N>
+GBox<T, N> dilate(const GBox<T, N>& lhs, const auto& rhs)
+{
+  auto rhs_box = bbox(rhs);
+  return GBox<T, N>(
+      lhs.start() + resize<N, Kokkos::HostSpace>("margin start", rhs_box.start()),
+      lhs.stop() + resize<N, Kokkos::HostSpace>("margin stop", rhs_box.stop() - 1));
+}
+
+/**
+ * @brief Create the erosion of a box by a given margin.
+ */
+template <typename T, int N>
+GBox<T, N> erode(const GBox<T, N>& lhs, const auto& rhs)
+{
+  auto rhs_box = bbox(rhs);
+  return GBox<T, N>(
+      lhs.start() - resize<N, Kokkos::HostSpace>("margin start", rhs_box.start()),
+      lhs.stop() - resize<N, Kokkos::HostSpace>("margin stop", rhs_box.stop() - 1));
+}
+
+/**
  * @relatesalso GBox
  * @brief Get the 1D span along the i-th axis.
  */
