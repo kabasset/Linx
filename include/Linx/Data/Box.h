@@ -262,8 +262,8 @@ public:
   GBox& operator+=(const GBox<U, M>& margin)
   {
     // FIXME allow N=-1
-    m_start += resize<n>("start", margin.start());
-    m_stop += resize<n>("stop", margin.stop());
+    m_start += resize<n, Kokkos::HostSpace>("start", margin.start());
+    m_stop += resize<n, Kokkos::HostSpace>("stop", margin.stop());
     return *this;
   }
 
@@ -274,8 +274,8 @@ public:
   GBox& operator-=(const GBox<U, M>& margin)
   {
     // FIXME allow N=-1
-    m_start -= resize<n>("start", margin.start());
-    m_stop -= resize<n>("stop", margin.stop());
+    m_start -= resize<n, Kokkos::HostSpace>("start", margin.start());
+    m_stop -= resize<n, Kokkos::HostSpace>("stop", margin.stop());
     return *this;
   }
 
@@ -285,8 +285,8 @@ public:
   GBox& operator+=(const LegacyArray auto& vector)
   {
     // FIXME allow N=-1
-    m_start += resize<n>("start", vector);
-    m_stop += resize<n>("stop", vector);
+    m_start += resize<n, Kokkos::HostSpace>("start", vector);
+    m_stop += resize<n, Kokkos::HostSpace>("stop", vector);
     return *this;
   }
 
@@ -296,8 +296,8 @@ public:
   GBox& operator-=(const LegacyArray auto& vector)
   {
     // FIXME allow N=-1
-    m_start -= resize<n>("start", vector);
-    m_stop -= resize<n>("stop", vector);
+    m_start -= resize<n, Kokkos::HostSpace>("start", vector);
+    m_stop -= resize<n, Kokkos::HostSpace>("stop", vector);
     return *this;
   }
 
@@ -499,24 +499,44 @@ GBox<T, N> operator&(const GBox<T, N>& lhs, const GBox<U, M>& rhs)
  * @brief Create the dilation of a box by a given margin.
  */
 template <typename T, int N>
-GBox<T, N> dilate(const GBox<T, N>& lhs, const auto& rhs)
+GBox<T, N> dilate(const GBox<T, N>& box, const std::convertible_to<T> auto& margin)
 {
-  auto rhs_box = bbox(rhs);
-  return GBox<T, N>(
-      lhs.start() + resize<N, Kokkos::HostSpace>("margin start", rhs_box.start()),
-      lhs.stop() + resize<N, Kokkos::HostSpace>("margin stop", rhs_box.stop() - 1));
+  return GBox<T, N>(box.start() - margin, box.stop() + margin);
 }
 
 /**
  * @brief Create the erosion of a box by a given margin.
  */
 template <typename T, int N>
-GBox<T, N> erode(const GBox<T, N>& lhs, const auto& rhs)
+GBox<T, N> erode(const GBox<T, N>& box, const std::convertible_to<T> auto& margin)
 {
-  auto rhs_box = bbox(rhs);
+  return GBox<T, N>(box.start() + margin, box.stop() - margin);
+}
+
+/**
+ * @brief Create the dilation of a box by a given margin.
+ */
+template <typename T, int N, typename TRhs>
+  requires requires(const TRhs& rhs) { bbox(rhs); }
+GBox<T, N> dilate(const GBox<T, N>& box, const TRhs& margin)
+{
+  auto margin_box = bbox(margin);
   return GBox<T, N>(
-      lhs.start() - resize<N, Kokkos::HostSpace>("margin start", rhs_box.start()),
-      lhs.stop() - resize<N, Kokkos::HostSpace>("margin stop", rhs_box.stop() - 1));
+      box.start() + resize<N, Kokkos::HostSpace>("margin start", margin_box.start()),
+      box.stop() + resize<N, Kokkos::HostSpace>("margin stop", margin_box.stop() - 1));
+}
+
+/**
+ * @brief Create the erosion of a box by a given margin.
+ */
+template <typename T, int N, typename TRhs>
+  requires requires(const TRhs& rhs) { bbox(rhs); }
+GBox<T, N> erode(const GBox<T, N>& box, const TRhs& margin)
+{
+  auto margin_box = bbox(margin);
+  return GBox<T, N>(
+      box.start() - resize<N, Kokkos::HostSpace>("margin start", margin_box.start()),
+      box.stop() - resize<N, Kokkos::HostSpace>("margin stop", margin_box.stop() - 1));
 }
 
 /**
