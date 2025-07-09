@@ -54,21 +54,20 @@ struct FindSaturatedStars {
   template <typename TData, typename TMask>
   const TMask& operator()(const TMask& mask, const TData& data) const
   {
+    const auto domain = data.domain();
     auto satpixels = Linx::Image<bool, 2>("satpixels", data.shape());
     auto median5 = Linx::box_median_filter<2, 2>().lazy(data);
-    auto local_satlevel = satlevel; // Prevents capture of *this by KOKKOS_LAMBDA
     Linx::for_each(
         label(),
-        Linx::Box(Linx::Position<2>({2, 2}), satpixels.shape() - 2),
-        KOKKOS_LAMBDA(int i, int j) {
-          if (data(i, j) >= local_satlevel) {
-            satpixels(i, j) = (median5(i, j) > (local_satlevel / 10));
+        Linx::erode(domain, 2),
+        KOKKOS_CLASS_LAMBDA(int i, int j) {
+          if (data(i, j) >= satlevel) {
+            satpixels(i, j) = (median5(i, j) > (satlevel / 10));
           }
         });
     auto grow_mask = +mask; // Copy the borders
-    Linx::Dilation(strel(1)).transform(mask, grow_mask);
-    // FIXME auto grow_mask = Dilation::with_border_copy(mask)?
-    Linx::Dilation(strel(2)).transform(satpixels, mask);
+    Linx::Dilation(strel(1)).transform(mask, Linx::Patch(grow_mask, Linx::erode(domain, 1)));
+    Linx::Dilation(strel(2)).transform(satpixels, Linx::Patch(mask, Linx::erode(domain, 2)));
     mask &= grow_mask;
     return mask;
   }
