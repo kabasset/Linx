@@ -72,7 +72,10 @@ public:
     using value_type = const typename TIn::value_type;
     using element_type = std::remove_cvref_t<value_type>;
 
-    using LazySpatialFilterMixin<MeanFilter, TIn, Lazy>::LazySpatialFilterMixin;
+    Lazy(MeanFilter filter, const TIn& in) :
+        LazySpatialFilterMixin<MeanFilter, TIn, Lazy>(LINX_MOVE(filter), in),
+        m_size(this->m_profile.size())
+    {}
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
@@ -80,8 +83,12 @@ public:
       for (const auto& e : neighbors) {
         out += e;
       }
-      return out / this->m_profile.size();
+      return out / m_size;
     }
+
+  private:
+
+    std::size_t m_size;
   };
 };
 
