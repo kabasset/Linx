@@ -39,12 +39,9 @@ template <typename T, int N, typename TContainer = ImageContainer<T, N>>
 class Image :
     public DataMixin<T, DataArithmeticMixin<T, Image<T, N, TContainer>>, Image<T, N, TContainer>>,
     public RangeMixin<is_contiguous<TContainer>(), T, Image<T, N, TContainer>> {
-private:
-
-  static constexpr int max_rank = (N == -1 ? 7 : N); ///< The max dynamic rank supported by Kokkos
-
 public:
 
+  static constexpr int max_rank = (N == -1 ? 7 : N); ///< The max rank supported by Kokkos
   static constexpr int n = N; ///< The rank parameter
   using Container = TContainer; ///< The underlying container type
   using Shape = Position<N>; ///< The shape type
@@ -250,10 +247,9 @@ public:
    * @brief Access the element at given position.
    */
   template <std::integral TInt = int, int M = n>
-  [[deprecated]] KOKKOS_INLINE_FUNCTION reference
-  operator[](const GPosition<TInt, M>& position) const // FIXME use LegacyArray?
+  [[deprecated]] KOKKOS_INLINE_FUNCTION reference operator[](const GPosition<TInt, M>& position) const
   {
-    return at_impl(position, std::make_index_sequence<max_rank>());
+    return at(position);
   }
 
   /**

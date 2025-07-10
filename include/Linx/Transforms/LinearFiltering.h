@@ -74,7 +74,7 @@ public:
 
     Lazy(MeanFilter filter, const TIn& in) :
         LazySpatialFilterMixin<MeanFilter, TIn, Lazy>(LINX_MOVE(filter), in),
-        m_size(this->m_profile.size())
+        m_size(this->m_neighbors.size())
     {}
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
@@ -150,10 +150,9 @@ public:
 
     // Cannot be private
     // Cannot be the ctor (must take address)
-    // FIXME free function? Nested Conjugate?
     void conjugate_impl() const
     {
-      this->m_weights.transform("conjugate", Impl::Conjugate());
+      this->m_weights.transform("conjugate", Impl::Conjugate()); // FIXME this->m_weights.conj()
     }
   };
 };
@@ -214,19 +213,26 @@ public:
  * 
  * The filter is implemented as a correlation, such that conjugation is involved when the kernel is complex-valued.
  */
-template <std::integral auto... Is, typename T = int> // FIXME T = Forward
+template <
+    std::integral auto... Is,
+    typename TSpace = Kokkos::DefaultExecutionSpace,
+    typename T = int> // FIXME T = Forward or void // FIXME TSpace
 auto separable_laplacian(T s = T(1))
 {
-  static constexpr auto N = std::max({Is...}) + 1;
-  auto kernel = Map<T, N>();
+  static constexpr auto n = std::max({Is...}) + 1;
+  auto kernel = Shift(
+      Image<T, n, ImageContainer<T, n, TSpace>>("kernel", Position<n>("shape").fill(3)),
+      Position<n>("start").fill(-1));
+  const auto& kernel_on_host = on_host(kernel);
   for (auto i : {Is...}) {
-    auto p = Position<N>();
-    kernel[p] += -2 * s;
+    auto p = Position<n>();
+    kernel_on_host.at(p) += -2 * s;
     p[i] = -1;
-    kernel[p] = s;
+    kernel_on_host.at(p) = s;
     p[i] = 1;
-    kernel[p] = s;
+    kernel_on_host.at(p) = s;
   }
+  Kokkos::deep_copy(kernel.container(), kernel_on_host.container());
   return Correlation(LINX_MOVE(kernel));
 }
 

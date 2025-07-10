@@ -105,15 +105,23 @@ public:
     return at_impl(forward_as_tuple(is...), std::make_index_sequence<sizeof...(is)>());
   }
 
+  /**
+   * @brief Access the element at given position.
+   */
+  KOKKOS_INLINE_FUNCTION reference at(const LegacyArray auto& position) const // FIXME to DataMixin
+  {
+    return at_impl(position, std::make_index_sequence<Parent::max_rank>());
+  }
+
 private:
 
   /**
    * @brief Helper method to unroll indices.
    */
   template <std::size_t... Is>
-  KOKKOS_INLINE_FUNCTION reference at_impl(const auto& indices, std::index_sequence<Is...>) const
+  KOKKOS_INLINE_FUNCTION reference at_impl(const auto& position, std::index_sequence<Is...>) const
   {
-    return m_parent((get<Is>(indices) - m_offset[Is])...);
+    return m_parent((get_or<Is>(position, m_offset[Is]) - m_offset[Is])...);
   }
 
 private:

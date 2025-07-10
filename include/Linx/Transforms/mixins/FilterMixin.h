@@ -9,215 +9,94 @@
 #include "Linx/Data/Patch.h"
 #include "Linx/Data/Profile.h"
 #include "Linx/Data/Sequence.h"
-#include "Linx/Transforms/Resampling.h" // FIXME used?
+#include "Linx/Transforms/Resampling.h" // Pad FIXME rm when all extrapolations are supported
 #include "Linx/Transforms/Shift.h"
 
 #include <string>
 
 namespace Linx {
 
-template <typename T>
-class OffsetBasedRange {
+/**
+ * @brief Filter with extrapolation.
+ */
+template <typename TParent, typename TMethod>
+class ExtrapolatedFilter { // FIXME make the default, force nullprt for no extrapolation
+
 public:
 
-  using iterator_category = std::random_access_iterator_tag;
-  using difference_type = int;
-  using value_type = T;
-  using pointer = T*;
-  using reference = T&;
+  using Parent = TParent; ///< The parent filter
+  using Method = TMethod; ///< The extrapolation method
 
   /**
    * @brief Constructor.
-   * 
-   * @param data The reference data pointer
-   * @param offsets The sequence of address offsets
    */
-  KOKKOS_INLINE_FUNCTION explicit OffsetBasedRange(T* data, const auto& offsets) :
-      m_data(data),
-      m_begin(offsets.data()),
-      m_end(m_begin + offsets.size()),
-      m_it(m_begin)
-  {}
-
-  KOKKOS_INLINE_FUNCTION OffsetBasedRange(const OffsetBasedRange& rhs) :
-      m_data(rhs.m_data),
-      m_begin(rhs.m_begin),
-      m_end(rhs.m_end),
-      m_it(rhs.m_it)
-  {}
-
-  KOKKOS_INLINE_FUNCTION OffsetBasedRange& operator=(const OffsetBasedRange& rhs)
-  {
-    m_data = rhs.m_data;
-    m_begin = rhs.m_begin;
-    m_end = rhs.m_end;
-    m_it = rhs.m_it;
-    return *this;
-  }
-
-  KOKKOS_INLINE_FUNCTION void reset(T* data)
-  {
-    m_data = data;
-    m_it = m_begin;
-  }
-
-  KOKKOS_INLINE_FUNCTION OffsetBasedRange begin() const
-  {
-    auto out = *this;
-    out.m_it = m_begin;
-    return out;
-  }
-
-  KOKKOS_INLINE_FUNCTION OffsetBasedRange end() const
-  {
-    auto out = *this;
-    out.m_it = m_end;
-    return out;
-  }
-
-  KOKKOS_INLINE_FUNCTION auto ssize() const
-  {
-    return m_end - m_begin;
-  }
-
-  KOKKOS_INLINE_FUNCTION auto size() const
-  {
-    return static_cast<std::size_t>(ssize());
-  }
-
-  KOKKOS_INLINE_FUNCTION reference operator[](int i) const
-  {
-    return m_data[m_begin[i]];
-  }
-
-  KOKKOS_INLINE_FUNCTION reference operator*() const
-  {
-    return m_data[*m_it];
-  }
-
-  KOKKOS_INLINE_FUNCTION pointer operator->() const
-  {
-    return m_data + *m_it;
-  }
-
-  KOKKOS_INLINE_FUNCTION OffsetBasedRange& operator++()
-  {
-    ++m_it;
-    return *this;
-  }
-
-  KOKKOS_INLINE_FUNCTION OffsetBasedRange operator++(int)
-  {
-    auto out = *this;
-    ++(*this);
-    return out;
-  }
-
-  KOKKOS_INLINE_FUNCTION OffsetBasedRange& operator+=(int i)
-  {
-    m_it += i;
-    return *this;
-  }
-
-  KOKKOS_INLINE_FUNCTION OffsetBasedRange operator+(int i) const
-  {
-    auto out = *this;
-    out.m_it += i;
-    return out;
-  }
-
-  KOKKOS_INLINE_FUNCTION OffsetBasedRange& operator--()
-  {
-    --m_it;
-    return *this;
-  }
-
-  KOKKOS_INLINE_FUNCTION OffsetBasedRange operator--(int)
-  {
-    auto out = *this;
-    --(*this);
-    return out;
-  }
-
-  KOKKOS_INLINE_FUNCTION OffsetBasedRange& operator-=(int i)
-  {
-    m_it -= i;
-    return *this;
-  }
-
-  KOKKOS_INLINE_FUNCTION OffsetBasedRange operator-(int i) const
-  {
-    auto out = *this;
-    out.m_it -= i;
-    return out;
-  }
-
-  KOKKOS_INLINE_FUNCTION difference_type operator-(const OffsetBasedRange& rhs) const
-  {
-    return m_it - rhs.m_it;
-  }
-
-  KOKKOS_INLINE_FUNCTION bool operator==(const OffsetBasedRange& rhs) const
-  {
-    return m_it == rhs.m_it;
-  }
-
-  KOKKOS_INLINE_FUNCTION bool operator!=(const OffsetBasedRange& rhs) const
-  {
-    return m_it != rhs.m_it;
-  }
-
-private:
-
-  T* m_data; ///< The reference data
-  const std::ptrdiff_t* m_begin; ///< The begin offset iterator
-  const std::ptrdiff_t* m_end; ///< The end offset iterator
-  const std::ptrdiff_t* m_it; ///< The current offset iterator
-};
-
-template <typename TParent, typename TMethod>
-class ExtrapolatedFilter {
-public:
-
-  using Parent = TParent;
-  using Method = TMethod;
-
   ExtrapolatedFilter(Parent parent, Method method) : m_parent(parent), m_method(LINX_MOVE(method)) {}
 
-  std::string label() const
+  /**
+   * @brief Filter label.
+   */
+  std::string label() const // FIXME rm
   {
     return compose_label("extrapolate", m_parent, m_method);
   }
 
-  KOKKOS_INLINE_FUNCTION const Parent& parent() const
+  /**
+   * @brief Parent filter.
+   */
+  KOKKOS_INLINE_FUNCTION const Parent& parent() const // FIXME rm
   {
     return m_parent;
   }
 
+  /**
+   * @brief Extrapolation method.
+   */
   KOKKOS_INLINE_FUNCTION const Method& method() const
   {
     return m_method;
   }
 
+  /**
+   * @brief Lazy evaluator.
+   * 
+   * No computation is performed immediately.
+   * The returned object can then evaluate the filter at chosen positions.
+   * This is especially useful to filter only a few points of the input.
+   */
   template <typename TIn>
   auto lazy(const TIn& in) const
   {
-    auto domain = dilate(bbox(in.domain()), m_parent.footprint());
-    auto extrapolated = Shift(TIn("extrapolated", domain.shape()), domain.start());
-    extrapolated.copy_from(Extrapolation(in, m_method));
-    return m_parent.lazy(extrapolated);
-    // TODO optimize memory?
+    if constexpr (std::is_same_v<Method, std::nullptr_t>) {
+      // FIXME return typename TDerived::Lazy<TIn>(LINX_CRTP_CONST_DERIVED, in);
+    } else {
+      auto domain = dilate(bbox(in.domain()), m_parent.footprint());
+      auto extrapolated = Shift(TIn("extrapolated", domain.shape()), domain.start());
+      extrapolated.copy_from(Extrapolation(in, m_method));
+      return m_parent.lazy(extrapolated);
+    }
   }
 
+  /**
+   * @brief Apply the filter on a full input.
+   */
   template <typename TIn>
   auto operator()(const TIn& in) const
   {
     using T = std::remove_cvref_t<typename TParent::Lazy<TIn>::value_type>;
     auto out = same_layout<T>(compose_label(m_parent.label(), in), in);
+    // TODO if Method == Copy, out = Patch(+in, inner_domain);
     transform(in, out);
+    // TODO optimize memory usage by replacing lazy(in) with:
+    // - for (box : box_difference(domain, footprint)) extrapolate
+    // - for inner don't extrapolate
     return out;
   }
 
+  /**
+   * @brief Apply the filter into a preallocated output.
+   * 
+   * The domain of the output is used as the evaluation domain.
+   */
   template <typename TIn, typename TOut>
   void transform(const TIn& in, const TOut& out) const
   {
@@ -269,7 +148,7 @@ public:
   /**
    * @brief Filter an image without extrapolation.
    * 
-   * All the positions of the filtering domain are evaluated.
+   * All the positions of the output domain are evaluated.
    */
   template <typename TIn, typename TOut>
   void transform(const TIn& in, const TOut& out) const
@@ -277,9 +156,14 @@ public:
     out.copy_from(lazy(in));
   }
 
-  auto pad(const auto& value) const
+  /**
+   * @brief Use extrapolation with a given value or method.
+   */
+  auto pad(const auto& value) const // FIXME rename as padded()? extrapolated?
   {
-    return ExtrapolatedFilter(LINX_CRTP_CONST_DERIVED, Pad(value));
+    return ExtrapolatedFilter(
+        LINX_CRTP_CONST_DERIVED,
+        Pad(value)); // FIXME removing Pad() should work to accept any method
   }
 };
 
@@ -313,38 +197,36 @@ private:
  */
 template <typename TFilter, typename TIn, typename TDerived>
 class LazySpatialFilterMixin {
-private:
-
-  using Profile = decltype(Profile(try_as_readonly(std::declval<TIn>()), 0));
-
 public:
 
   using execution_space = typename TIn::execution_space;
 
   LazySpatialFilterMixin(TFilter filter, const TIn& in) :
       m_filter(LINX_MOVE(filter)),
-      m_profile(try_as_readonly(in), m_filter.footprint())
+      m_neighbors(try_as_readonly(in), m_filter.footprint())
   {}
 
   std::string label() const
   {
-    return m_filter.label();
+    return m_filter.label(); // FIXME should be optional
   }
 
-  decltype(auto) footprint() const
+  KOKKOS_INLINE_FUNCTION decltype(auto) footprint() const
   {
     return m_filter.footprint();
   }
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
   {
-    return LINX_CRTP_CONST_DERIVED.reduce(m_profile.shifted_span(is...));
+    return LINX_CRTP_CONST_DERIVED.reduce(m_neighbors.shifted_span(is...));
   }
 
 protected:
 
+  using Neighbors = decltype(Profile(try_as_readonly(std::declval<TIn>()), 0));
+
   TFilter m_filter; ///< The filter
-  Profile m_profile; ///< The profile of the input
+  Neighbors m_neighbors; ///< The profile of the input
 };
 
 /**
@@ -356,16 +238,21 @@ public:
 
   using value_type = const typename TKernel::value_type;
 
-  WeightedFilterMixin(TKernel kernel) : m_kernel(LINX_MOVE(kernel)) {}
+  WeightedFilterMixin(const TKernel& kernel) : m_kernel(try_as_readonly(kernel)) {}
 
-  auto footprint() const
+  decltype(auto) footprint() const
   {
     return m_kernel.domain();
   }
 
-  const auto& kernel() const
+  KOKKOS_INLINE_FUNCTION const auto& kernel() const
   {
     return m_kernel;
+  }
+
+  KOKKOS_INLINE_FUNCTION const auto& kernel(std::integral auto... position) const
+  {
+    return m_kernel(position...);
   }
 
   /**
@@ -379,8 +266,27 @@ public:
 
 private:
 
-  TKernel m_kernel; ///< The kernel
+  decltype(try_as_readonly(std::declval<TKernel>())) m_kernel; ///< The kernel
 };
+
+namespace Impl {
+
+template <typename TFilter, typename TNeighbors, typename TWeights>
+struct EmplaceWeights {
+  TFilter m_filter;
+  TNeighbors m_neighbors;
+  TWeights m_weights;
+
+  KOKKOS_INLINE_FUNCTION void operator()(std::integral auto... position) const
+  {
+    const auto& w = m_filter.kernel(position...);
+    // TODO discard if w == identity_element()'s
+    auto index = m_neighbors.emplace_back(position...);
+    m_weights[index] = w;
+  }
+};
+
+} // namespace Impl
 
 /**
  * @brief The helper class returned by `WeightedFilterMixin::lazy()`.
@@ -395,49 +301,53 @@ public:
 
   LazyWeightedFilterMixin(TFilter filter, const TIn& in) :
       m_filter(LINX_MOVE(filter)),
-      m_offsets("offsets", m_filter.footprint().size()),
-      m_weights("weights", m_offsets.size()),
-      m_in(try_as_readonly(in))
+      m_neighbors(try_as_readonly(in), m_filter.footprint().size()),
+      m_weights("weights", m_neighbors.capacity())
   {
-    const auto& offsets_on_host = on_host(m_offsets);
-    const auto& weights_on_host = on_host(m_weights);
-    const auto& kernel_on_host = on_host(m_filter.kernel());
-    auto oit = offsets_on_host.begin();
-    auto wit = weights_on_host.begin();
-    for_each<Kokkos::Serial>("compute offsets", m_filter.footprint(), [&](std::integral auto... is) {
-      *oit = offset_from_origin(m_in, is...);
-      *wit = kernel_on_host(is...);
-      ++oit;
-      ++wit;
-    });
-    Kokkos::deep_copy(m_offsets.container(), offsets_on_host.container());
-    Kokkos::deep_copy(m_weights.container(), weights_on_host.container());
+    init_impl();
   }
 
+  void init_impl() const
+  {
+    for_each<execution_space>(
+        "compute offsets",
+        m_filter.footprint(),
+        Impl::EmplaceWeights {m_filter, m_neighbors, m_weights});
+    // TODO resize m_weights if discarded identity_element()
+  }
+
+  /**
+   * @brief Filter label.
+   */
   std::string label() const
   {
-    return m_filter.label();
+    return m_filter.label(); // FIXME should be optional
   }
 
-  auto footprint() const
+  /**
+   * @brief Filter footprint.
+   */
+  KOKKOS_INLINE_FUNCTION decltype(auto) footprint() const
   {
     return m_filter.footprint();
   }
 
-  KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... is) const
+  /**
+   * @brief Single-position evaluation.
+   */
+  KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto... position) const
   {
-    return LINX_CRTP_CONST_DERIVED.reduce(OffsetBasedRange(&m_in(is...), m_offsets));
+    return LINX_CRTP_CONST_DERIVED.reduce(m_neighbors.shifted_span(position...));
   }
 
 protected:
 
-  template <typename T>
-  using Vector = Sequence<T, -1, SequenceContainer<T, -1, execution_space>>;
+  using Neighbors = decltype(Profile(try_as_readonly(std::declval<TIn>()), 0));
+  using Weights = Sequence<element_type, -1, SequenceContainer<element_type, -1, execution_space>>;
 
   TFilter m_filter; ///< The filter
-  Vector<std::ptrdiff_t> m_offsets; ///< The footprint offsets in the input
-  Vector<element_type> m_weights; ///< The weights in the same order
-  decltype(try_as_readonly(std::declval<TIn>())) m_in; ///< The input
+  Neighbors m_neighbors; ///< The image profile along the footprint
+  Weights m_weights; ///< The weights in the same order
 };
 
 } // namespace Linx

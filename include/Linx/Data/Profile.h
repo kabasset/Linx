@@ -356,21 +356,23 @@ public:
 
   /**
    * @brief Append an offset.
+   * @return The index of the appended element.
    */
-  KOKKOS_INLINE_FUNCTION void push_back(std::ptrdiff_t offset) const
+  KOKKOS_INLINE_FUNCTION std::size_t push_back(std::ptrdiff_t offset) const
   {
-    auto index = Kokkos::atomic_fetch_add(&m_size(), 1);
+    std::size_t index = Kokkos::atomic_fetch_add(&m_size(), 1);
     m_offsets(index) = offset;
+    return index;
   }
 
   /**
    * @brief Append and get the offset of a position.
+   * @return The index of the appended element.
    */
-  KOKKOS_INLINE_FUNCTION std::ptrdiff_t emplace_back(std::integral auto... position) const
+  KOKKOS_INLINE_FUNCTION std::size_t emplace_back(std::integral auto... position) const
   {
     auto out = offset_from_origin(m_parent, position...); // FIXME no need to require Strided
-    push_back(out);
-    return out;
+    return push_back(out);
   }
 
 private:

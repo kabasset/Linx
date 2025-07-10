@@ -302,8 +302,8 @@ public:
   }
 
   /**
-    * @brief Add a scalar to each coordinate.
-    */
+   * @brief Add a scalar to each coordinate.
+   */
   GBox& operator+=(size_type scalar)
   {
     m_start += scalar;

@@ -369,9 +369,18 @@ Sequence(const char*, T (&&)[N]) -> Sequence<T, N, TContainer>;
  * @brief I-th element of an array, or some fallback value if out of bounds.
  */
 template <int I, typename T>
-KOKKOS_INLINE_FUNCTION T get_or(const LegacyArray auto& in, T fallback)
+KOKKOS_INLINE_FUNCTION T get_or(const LegacyArray auto& in, T fallback) // FIXME to Containers.h?
 {
   return (I < std::size(in)) ? static_cast<T>(in[I]) : fallback;
+}
+
+/**
+ * @brief I-th element of a tuple, or some fallback value if out of bounds.
+ */
+template <int I, typename T, typename... Ts>
+KOKKOS_INLINE_FUNCTION T get_or(const Tuple<Ts...>& in, T fallback) // FIXME to Packs.h
+{
+  return (I < sizeof...(Ts)) ? static_cast<T>(get<I>(in)) : fallback;
 }
 
 /**

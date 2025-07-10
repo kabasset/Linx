@@ -75,12 +75,12 @@ public:
 
     Lazy(const MedianFilter& filter, TIn in) :
         LazySpatialFilterMixin<MedianFilter, TIn, Lazy>(filter, LINX_MOVE(in)),
-        m_neighbors(this->m_profile.size())
+        m_buffer(this->m_neighbors.size())
     {}
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      auto array = m_neighbors.array();
+      auto array = m_buffer.array();
       for (std::size_t i = 0; i < std::size(array); ++i) {
         array[i] = neighbors[i];
       }
@@ -89,7 +89,7 @@ public:
 
   private:
 
-    ArrayPool<element_type> m_neighbors; // FIXME TSpace
+    ArrayPool<element_type> m_buffer; // FIXME TSpace
   };
 };
 
