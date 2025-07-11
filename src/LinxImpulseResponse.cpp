@@ -27,13 +27,14 @@ auto filter(const auto& in, const std::string& name, const auto& radius)
 {
   auto footprint = Linx::Box<2>({-radius, -radius}, {radius + 1, radius + 1});
   if (name == "median") {
-    return Linx::MedianFilter(footprint).pad(0)(in);
+    return Linx::MedianFilter(footprint)(in);
   } else if (name == "max") {
-    return Linx::MaximumFilter(footprint).pad(0)(in);
+    return Linx::MaximumFilter(footprint)(in);
   } else if (name == "gaussian") {
-    return Linx::Convolution(Linx::sampled_gaussian_kernel(radius, in.extent(0) / 2)).pad(0)(in); // FIXME along 0, 1
+    auto k = Linx::sampled_gaussian_kernel(radius, 3 * radius);
+    return Linx::correlation_along<1>(k)(Linx::correlation_along<0>(k)(in)); // FIXME convolution_along<0, 1>
   } else if (name == "laplacian") {
-    return Linx::separable_laplacian<0, 1>(1.).pad(0)(in);
+    return Linx::separable_laplacian<0, 1>(1.)(in);
   } else {
     throw std::runtime_error(name); // TODO Linx::UnknownCase
   }

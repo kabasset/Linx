@@ -183,7 +183,10 @@ public:
 
     Lazy(Convolution filter, const TIn& in) : LazyWeightedFilterMixin<Convolution, TIn, Lazy>(LINX_MOVE(filter), in)
     {
-      this->m_weights.reverse(); // TODO use rbegin() in reduce instead?
+      this->m_weights.reverse();
+      // FIXME invalid with non-regular domain or non-sequential Profile
+      // FIXME take the opposite of the coordinates to build Profile instead?
+      // FIXME or opposite of the offsets?
     }
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
