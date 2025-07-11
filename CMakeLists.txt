@@ -65,6 +65,9 @@ target_link_libraries(LinCosmicX Linx)
 add_executable(LinxBenchmarkFilters src/LinxBenchmarkFilters.cpp)
 target_link_libraries(LinxBenchmarkFilters Linx)
 
+add_executable(LinxImpulseResponse src/LinxImpulseResponse.cpp)
+target_link_libraries(LinxImpulseResponse Linx)
+
 add_executable(KokkosBenchmarkConvolution src/KokkosBenchmarkConvolution.cpp)
 target_link_libraries(KokkosBenchmarkConvolution Linx)
 
