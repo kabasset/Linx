@@ -15,7 +15,8 @@ struct CompareValues {
   TTest m_test;
   KOKKOS_INLINE_FUNCTION void operator()(auto... is) const
   {
-    m_test(is...) = (m_in.front() + Linx::offset_from_origin(m_in, is...) == m_in(is...));
+    auto value = m_in.front() + static_cast<typename TIn::element_type>(Linx::offset_from_origin(m_in, is...));
+    m_test(is...) = (value == m_in(is...));
   }
 };
 
@@ -25,7 +26,8 @@ struct CompareAddresses {
   TTest m_test;
   KOKKOS_INLINE_FUNCTION void operator()(auto... is) const
   {
-    m_test(is...) = (&m_in.front() + Linx::offset_from_origin(m_in, is...) == &m_in(is...));
+    auto ptr = &m_in.front() + static_cast<typename TIn::element_type>(Linx::offset_from_origin(m_in, is...));
+    m_test(is...) = (ptr == &m_in(is...));
   }
 };
 

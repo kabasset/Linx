@@ -345,7 +345,7 @@ private:
   KOKKOS_INLINE_FUNCTION auto index_along(std::integral auto i) const
   {
     const auto stop = extent(I);
-    const auto out = i < 0 ? stop - i : i;
+    const auto out = i < 0 ? stop + i : i;
     OutOfBounds::may_abort("index", out, Slice(0, stop));
     return out;
   }
