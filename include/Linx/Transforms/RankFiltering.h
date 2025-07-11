@@ -9,7 +9,7 @@
 #include "Linx/Base/Median.h"
 #include "Linx/Data/Image.h"
 #include "Linx/Data/Sequence.h"
-#include "Linx/Transforms/mixins/FilterMixin.h"
+#include "Linx/Transforms/mixins/Filter.h"
 
 #include <concepts>
 #include <string>

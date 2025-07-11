@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/Linx
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef LINX_TRANSFORMS_FILTERMIXIN_H
-#define LINX_TRANSFORMS_FILTERMIXIN_H
+#ifndef LINX_TRANSFORMS_MIXINS_FILTER_H
+#define LINX_TRANSFORMS_MIXINS_FILTER_H
 
 #include "Linx/Base/mixins/Strided.h"
 #include "Linx/Data/Patch.h"
