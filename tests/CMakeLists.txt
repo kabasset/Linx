@@ -1,5 +1,3 @@
-enable_testing()
-
 file(GLOB files "*.cpp")
 foreach(f ${files})
     get_filename_component(n ${f} NAME_WE)

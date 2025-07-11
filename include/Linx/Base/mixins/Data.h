@@ -110,7 +110,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
     if constexpr (TDerived::n == 0) {
       return std::size_t(0);
     } else {
-      return LINX_CRTP_CONST_DERIVED.container().size();
+      return LINX_CRTP_CONST_DERIVED.rank() > 0 ? LINX_CRTP_CONST_DERIVED.container().size() : 0;
     }
   }
 

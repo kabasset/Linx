@@ -32,6 +32,7 @@ target_link_libraries(Linx INTERFACE ${Boost_LIBRARIES} Kokkos::kokkos ${CFITSIO
 
 # Tests
 
+enable_testing()
 add_subdirectory(tests)
 add_subdirectory(examples)
 

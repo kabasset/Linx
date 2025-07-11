@@ -29,7 +29,7 @@ struct Shape : StrongType<GPosition<T, N>, struct ShapeTag> { // FIXME const GPo
    */
   T size() const
   {
-    return product(this->value);
+    return this->value.rank() > 0 ? product(this->value) : 0;
   }
 };
 

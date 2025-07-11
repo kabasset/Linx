@@ -60,6 +60,14 @@ public:
   }
 
   /**
+   * @brief The parent rank.
+   */
+  KOKKOS_INLINE_FUNCTION int rank() const
+  {
+    return m_parent.rank();
+  }
+
+  /**
    * @brief The offset vector.
    */
   Position<n> vector() const
