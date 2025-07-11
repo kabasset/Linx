@@ -155,8 +155,9 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   const TDerived& fill(const T& value) const
   {
-    Kokkos::deep_copy(LINX_CRTP_CONST_DERIVED.container(), value); // FIXME will fail for patches
-    return LINX_CRTP_CONST_DERIVED;
+    // TODO if container() is root() and value type is compatible (i.e. no string?)
+    // TODO then use Kokkos::deep_copy()
+    return generate("fill", Constant(value));
   }
 
   /**

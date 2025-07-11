@@ -305,7 +305,7 @@ auto transform_reduce_with_side_effects_impl(
   using Space = std::decay_t<decltype(in0)>::execution_space; // FIXME test accessibility of all Is
   using Projection = Impl::Projection<T, TMap, TIns, Is...>;
   using Reducer = Impl::Reducer<T, TMonoid, Kokkos::HostSpace>;
-  T value = identity_element<T>(monoid);
+  T value = identity_element<Value>(monoid);
   kokkos_reduce<Space>(label, in0.domain(), Projection(map, ins), Reducer(value, monoid, identity_element<T>(monoid)));
   return value;
 }
