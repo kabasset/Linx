@@ -3,7 +3,7 @@
 
 #define BOOST_TEST_MODULE VectorCreationTest
 
-#include "Linx/Base/Vector.h"
+#include "Linx/Data/Vector.h"
 #include "Linx/Run/ProgramContext.h"
 
 #include <boost/test/unit_test.hpp>

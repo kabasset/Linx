@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/Linx
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef LINX_BASE_VECTOR_H
-#define LINX_BASE_VECTOR_H
+#ifndef LINX_DATA_VECTOR_H
+#define LINX_DATA_VECTOR_H
 
 #include "Linx/Base/Rank.h"
 
@@ -280,16 +280,30 @@ static constexpr auto vec()
 
 namespace Impl {
 
+/**
+ * @brief Helper function to silent warning.
+ */
+static constexpr auto discard_first(auto, auto out)
+{
+  return out;
+}
+
+/**
+ * @brief Helper function to repeat a coefficient.
+ */
 template <typename T, auto... Is>
 constexpr auto vec_impl(auto coef, std::integer_sequence<T, Is...>)
 {
-  return vec((Is, coef)...);
+  return vec(discard_first(Is, coef)...);
 }
 
+/**
+ * @brief Helper function to repeat a coefficient.
+ */
 template <std::integral auto Coef, typename T, auto... Is>
 static constexpr auto vec_impl(std::integer_sequence<T, Is...>)
 {
-  return vec<(Is, Coef)...>();
+  return vec<discard_first(Is, Coef)...>();
 }
 
 } // namespace Impl
