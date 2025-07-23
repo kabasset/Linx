@@ -143,9 +143,14 @@ public:
    */
   constexpr value_type operator[](std::integral auto i) const
   {
-    if (i >= n) {
-      return {};
-    }
+    return at(i);
+  }
+
+  /**
+   * @brief I-th coefficient.
+   */
+  static constexpr value_type at(std::integral auto i)
+  {
     return at_impl<Coefs...>(i);
   }
 
@@ -160,5 +165,23 @@ private:
     return i == 0 ? I0 : at_impl<Is...>(i - 1);
   }
 };
+
+/**
+ * @brief I-th coefficient of a static vector.
+ */
+template <std::integral auto I, typename T, std::integral auto... Is>
+static constexpr auto get(const VectorBase<std::integer_sequence<T, Is...>>&)
+{
+  return VectorBase<std::integer_sequence<T, Is...>>::at(I);
+}
+
+/**
+ * @brief I-th coefficient of a static vector, or a fallback value if i is out of bounds.
+ */
+template <auto I, auto Fallback, typename T, std::integral auto... Is>
+static constexpr auto get_or(const VectorBase<std::integer_sequence<T, Is...>>&)
+{
+  return I < 0 || I >= sizeof...(Is) ? Fallback : get<I>(VectorBase<std::integer_sequence<T, Is...>>());
+}
 
 } // namespace Linx
