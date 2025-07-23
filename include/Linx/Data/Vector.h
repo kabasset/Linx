@@ -18,13 +18,14 @@ namespace Linx {
 
 /**
  * @brief Non-resizable, rank-1 container on host.
- * 
- * @tparam T 
+ * @tparam T The coefficients specification
  */
-template <typename T = void>
+template <typename T = std::integer_sequence<int>>
 class Vector : public VectorBase<T> {
 public:
 
+  using typename VectorBase<T>::value_type;
+  using element_type = std::remove_cvref_t<value_type>;
   using reference = const VectorBase<T>::value_type&; ///< The reference type
 
   /**
@@ -38,6 +39,14 @@ public:
   constexpr decltype(auto) operator()(std::integral auto i) const
   {
     return this->operator[](i);
+  }
+
+  /**
+   * @brief Get the i-th element or a fallback if i is out of bounds.
+   */
+  constexpr element_type get_or(std::integral auto i, element_type fallback = {})
+  {
+    return i < 0 || i >= this->size() ? fallback : this->operator[](i);
   }
 };
 

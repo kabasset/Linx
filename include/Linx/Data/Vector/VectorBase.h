@@ -14,7 +14,7 @@ namespace Linx {
 
 /**
  * @brief Container adaptor for `Vector`.
- * @tparam T Coefficients specification
+ * @tparam T The coefficients specification
  * 
  * Only specializations are defined.
  * They must implement the `LegacyArray` interface.
@@ -143,6 +143,9 @@ public:
    */
   constexpr value_type operator[](std::integral auto i) const
   {
+    if (i >= n) {
+      return {};
+    }
     return at_impl<Coefs...>(i);
   }
 
@@ -155,47 +158,6 @@ private:
   static constexpr value_type at_impl(std::integral auto i)
   {
     return i == 0 ? I0 : at_impl<Is...>(i - 1);
-  }
-};
-
-/**
- * @brief Vector zero specialization.
- */
-template <>
-class VectorBase<void> {
-public:
-
-  static constexpr int n = 0; ///< The size
-  using value_type = const int; ///< The value type
-  using Container = void; ///< The underlying container
-
-  /**
-   * @brief No-op constructor.
-   */
-  constexpr VectorBase(auto&&...) {}
-
-  /**
-   * @brief Size. 
-   */
-  static constexpr int size()
-  {
-    return 0;
-  }
-
-  /**
-   * @brief Return 0.
-   */
-  constexpr int operator[](auto&&) const
-  {
-    return at(0);
-  }
-
-  /**
-   * @brief Return 0.
-   */
-  static constexpr int at(auto&&)
-  {
-    return 0;
   }
 };
 
