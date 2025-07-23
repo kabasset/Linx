@@ -44,7 +44,7 @@ auto operator+(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
     }
     return out;
   } else {
-    auto size = std::max(lhs.size(), rhs.size());
+    auto size = std::max<std::size_t>(lhs.size(), rhs.size());
     auto out = Vector<T*>(size);
     for (std::size_t i = 0; i < size; ++i) {
       out[i] = lhs.get_or(i, 0) + rhs.get_or(i, 0);

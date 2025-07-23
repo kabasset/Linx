@@ -75,4 +75,19 @@ BOOST_AUTO_TEST_CASE(zero_test)
   BOOST_TEST(x(2) == 1);
 }
 
+BOOST_AUTO_TEST_CASE(heterogeneous_test)
+{
+  using namespace Linx::Literals;
+
+  auto u = Linx::vec({1, 2, 3});
+  auto v = Linx::vec<4_D, 1>();
+  auto w = u + v;
+
+  BOOST_TEST(w.n == -1);
+  BOOST_TEST(w(0) == 2);
+  BOOST_TEST(w(1) == 3);
+  BOOST_TEST(w(2) == 4);
+  BOOST_TEST(w(3) == 1);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
