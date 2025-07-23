@@ -44,7 +44,7 @@ public:
   /**
    * @brief Get the i-th element or a fallback if i is out of bounds.
    */
-  constexpr element_type get_or(std::integral auto i, element_type fallback)
+  constexpr element_type get_or(std::integral auto i, element_type fallback) const
   {
     return i < 0 || i >= this->size() ? fallback : this->operator[](i);
   }

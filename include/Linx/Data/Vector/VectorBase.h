@@ -37,6 +37,16 @@ public:
   /**
    * @brief Constructor.
    */
+  constexpr VectorBase() : m_container() {}
+
+  /**
+   * @brief Constructor.
+   */
+  constexpr VectorBase(std::integral auto size) : m_container(size) {}
+
+  /**
+   * @brief Constructor.
+   */
   constexpr VectorBase(std::initializer_list<T> coefs) : VectorBase(coefs.begin(), coefs.end()) {}
 
   /**
@@ -60,6 +70,14 @@ public:
     return m_container[i];
   }
 
+  /**
+   * @brief Access the i-th coefficient.
+   */
+  constexpr value_type& operator[](std::integral auto i)
+  {
+    return m_container[i];
+  }
+
 private:
 
   Container m_container; ///< The underlying container
@@ -77,6 +95,11 @@ public:
   static constexpr int n = N; ///< The size parameter
   using value_type = T; ///< The value type
   using Container = std::array<T, N>; ///< The underlying container type
+
+  /**
+   * @brief Constructor.
+   */
+  constexpr VectorBase() : m_container {} {}
 
   /**
    * @brief Constructor.
@@ -103,6 +126,14 @@ public:
    * @brief Access the i-th coefficient.
    */
   constexpr const value_type& operator[](std::integral auto i) const
+  {
+    return m_container[i];
+  }
+
+  /**
+   * @brief Access the i-th coefficient.
+   */
+  constexpr value_type& operator[](std::integral auto i)
   {
     return m_container[i];
   }

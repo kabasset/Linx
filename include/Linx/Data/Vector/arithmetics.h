@@ -8,15 +8,16 @@ namespace Impl {
 
 template <typename T>
 struct VectorTraits {
-  static constexpr bool has_static_rank = (Vector<T>::n >= 0);
+  static constexpr auto n = Vector<T>::n;
+  static constexpr bool has_static_rank = (n >= 0);
   static constexpr bool has_static_coefs = std::is_same_v<typename Vector<T>::Container, void>;
-  static constexpr bool is_zero = (Vector<T>::n == 0);
+  static constexpr bool empty = (n == 0);
+  using element_type = typename Vector<T>::element_type;
 };
 
-template <typename TLhs, typename TRhs, std::size_t... Is>
+template <typename T, typename TLhs, typename TRhs, std::size_t... Is>
 static constexpr auto static_add_impl(const Vector<TLhs>&, const Vector<TRhs>&, std::index_sequence<Is...>)
 {
-  using T = decltype(typename TLhs::value_type() + typename TRhs::value_type());
   using TOut = std::integer_sequence<T, (get_or<Is, 0>(Vector<TLhs>()) + get_or<Is, 0>(Vector<TRhs>()))...>;
   return Vector<TOut>();
 }
@@ -24,19 +25,31 @@ static constexpr auto static_add_impl(const Vector<TLhs>&, const Vector<TRhs>&, 
 } // namespace Impl
 
 template <typename TLhs, typename TRhs>
-auto operator+(Vector<TLhs> lhs, const Vector<TRhs>& rhs)
+auto operator+(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 {
-  if constexpr (Impl::VectorTraits<TLhs>::is_zero) {
+  using LTraits = Impl::VectorTraits<TLhs>;
+  using RTraits = Impl::VectorTraits<TRhs>;
+  using T = decltype(typename LTraits::element_type() + typename RTraits::element_type());
+  if constexpr (LTraits::empty) {
     return rhs;
-  } else if constexpr (Impl::VectorTraits<TRhs>::is_zero) {
+  } else if constexpr (RTraits::empty) {
     return lhs;
-  } else if constexpr (Impl::VectorTraits<TLhs>::has_static_coefs && Impl::VectorTraits<TRhs>::has_static_coefs) {
-    return Impl::static_add_impl(lhs, rhs, std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
-  } else {
-    for (std::size_t i = 0; i < lhs.size(); ++i) {
-      lhs[i] += rhs[i];
+  } else if constexpr (LTraits::has_static_coefs && RTraits::has_static_coefs) {
+    return Impl::static_add_impl<T>(lhs, rhs, std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
+  } else if constexpr (LTraits::has_static_rank && RTraits::has_static_rank) {
+    constexpr auto N = std::max(LTraits::n, RTraits::n);
+    auto out = Vector<T[N]>();
+    for (std::size_t i = 0; i < N; ++i) {
+      out[i] = lhs.get_or(i, 0) + rhs.get_or(i, 0);
     }
-    return lhs;
+    return out;
+  } else {
+    auto size = std::max(lhs.size(), rhs.size());
+    auto out = Vector<T*>(size);
+    for (std::size_t i = 0; i < size; ++i) {
+      out[i] = lhs.get_or(i, 0) + rhs.get_or(i, 0);
+    }
+    return out;
   }
 }
 
