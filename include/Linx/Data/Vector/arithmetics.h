@@ -86,7 +86,7 @@ template <typename TLhs, std::convertible_to<typename Vector<TLhs>::value_type> 
 constexpr auto operator+(const Vector<TLhs>& lhs, TRhs rhs)
 {
   if constexpr (Impl::VectorTraits<TLhs>::has_static_coefs) {
-    return lhs + vec<Rank {Vector<TLhs>::n}>(rhs);
+    return lhs + vec<Dimension {Vector<TLhs>::n}>(rhs);
   } else {
     auto out = +lhs;
     for (std::size_t i = 0; i < out.size(); ++i) {
@@ -153,7 +153,7 @@ template <typename TLhs, std::convertible_to<typename Vector<TLhs>::value_type> 
 constexpr auto operator-(const Vector<TLhs>& lhs, TRhs rhs)
 {
   if constexpr (Impl::VectorTraits<TLhs>::has_static_coefs) {
-    return lhs - vec<Rank {Vector<TLhs>::n}>(rhs);
+    return lhs - vec<Dimension {Vector<TLhs>::n}>(rhs);
   } else {
     auto out = +lhs;
     for (std::size_t i = 0; i < out.size(); ++i) {

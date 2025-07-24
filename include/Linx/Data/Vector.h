@@ -5,7 +5,7 @@
 #ifndef LINX_DATA_VECTOR_H
 #define LINX_DATA_VECTOR_H
 
-#include "Linx/Base/Rank.h"
+#include "Linx/Base/Dimension.h"
 #include "Linx/Data/Vector/VectorBase.h"
 
 #include <array>

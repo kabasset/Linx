@@ -2,15 +2,15 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/Linx
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef LINX_BASE_RANK_H
-#define LINX_BASE_RANK_H
+#ifndef LINX_BASE_DIMENSION_H
+#define LINX_BASE_DIMENSION_H
 
 namespace Linx {
 
 /**
  * @brief Strong type for a rank.
  */
-struct Rank {
+struct Dimension {
   int n; ///< The rank parameter
 };
 
@@ -31,12 +31,12 @@ constexpr int parse_int_literal()
 }
 
 /**
- * @brief User-defined literal for a `Rank`.
+ * @brief User-defined literal for a `Dimension`.
  */
 template <char... Cs>
 constexpr auto operator""_D()
 {
-  return Rank {parse_int_literal<Cs...>()};
+  return Dimension {parse_int_literal<Cs...>()};
 }
 
 } // namespace Literals

@@ -2,7 +2,7 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/Linx
 // SPDX-License-Identifier: Apache-2.0
 
-#include "Linx/Base/Rank.h"
+#include "Linx/Base/Dimension.h"
 
 #include <array>
 #include <concepts>

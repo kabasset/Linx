@@ -72,27 +72,27 @@ static constexpr auto vec_impl(std::integer_sequence<T, Is...>)
 } // namespace Impl
 
 /**
- * @brief Fill a static-size vector of given rank with a given value.
- * @tparam R The rank
+ * @brief Fill a static-size vector of given dimension with a given value.
+ * @tparam D The dimension
  * @param coef The coefficient
  */
-template <Rank R>
+template <Dimension D>
 constexpr auto vec(auto coef)
 {
   using T = decltype(coef);
-  return Impl::vec_impl(coef, std::make_integer_sequence<T, R.n>());
+  return Impl::vec_impl(coef, std::make_integer_sequence<T, D.n>());
 }
 
 /**
- * @brief Fill a static-coefficients vector of given rank with a given value.
- * @tparam R The rank
+ * @brief Fill a static-coefficients vector of given dimension with a given value.
+ * @tparam D The dimension
  * @tparam Coef The coefficient
  */
-template <Rank R, std::integral auto Coef = 0>
+template <Dimension D, std::integral auto Coef = 0>
 static constexpr auto vec()
 {
   using T = decltype(Coef);
-  return Impl::vec_impl<Coef>(std::make_integer_sequence<T, R.n>());
+  return Impl::vec_impl<Coef>(std::make_integer_sequence<T, D.n>());
 }
 
 /**
