@@ -44,7 +44,7 @@ static constexpr auto static_subtract_impl(const Vector<TLhs>&, const Vector<TRh
 template <typename T>
 constexpr auto operator+(Vector<T> in)
 {
-  return in;
+  return in; // FIXME return Vector<in::element_type>
 }
 
 /**
@@ -57,9 +57,9 @@ constexpr auto operator+(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
   using RTraits = Impl::VectorTraits<TRhs>;
   using T = decltype(typename LTraits::element_type() + typename RTraits::element_type());
   if constexpr (LTraits::empty) {
-    return rhs;
+    return +rhs;
   } else if constexpr (RTraits::empty) {
-    return lhs;
+    return +lhs;
   } else if constexpr (LTraits::has_static_coefs && RTraits::has_static_coefs) {
     return Impl::static_add_impl<T>(lhs, rhs, std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
   } else if constexpr (LTraits::has_static_rank && RTraits::has_static_rank) {
@@ -74,6 +74,23 @@ constexpr auto operator+(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
     auto out = Vector<T*>(size);
     for (std::size_t i = 0; i < size; ++i) {
       out[i] = lhs.get_or(i, 0) + rhs.get_or(i, 0);
+    }
+    return out;
+  }
+}
+
+/**
+ * @brief Add a scalar to a vector.
+ */
+template <typename TLhs, std::convertible_to<typename Vector<TLhs>::value_type> TRhs>
+constexpr auto operator+(const Vector<TLhs>& lhs, TRhs rhs)
+{
+  if constexpr (Impl::VectorTraits<TLhs>::has_static_coefs) {
+    return lhs + vec<Rank {Vector<TLhs>::n}>(rhs);
+  } else {
+    auto out = +lhs;
+    for (std::size_t i = 0; i < out.size(); ++i) {
+      out[i] += rhs;
     }
     return out;
   }
@@ -109,7 +126,7 @@ constexpr auto operator-(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
   if constexpr (LTraits::empty) {
     return -rhs;
   } else if constexpr (RTraits::empty) {
-    return lhs;
+    return +lhs;
   } else if constexpr (LTraits::has_static_coefs && RTraits::has_static_coefs) {
     return Impl::static_subtract_impl<T>(lhs, rhs, std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
   } else if constexpr (LTraits::has_static_rank && RTraits::has_static_rank) {
@@ -124,6 +141,23 @@ constexpr auto operator-(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
     auto out = Vector<T*>(size);
     for (std::size_t i = 0; i < size; ++i) {
       out[i] = lhs.get_or(i, 0) - rhs.get_or(i, 0);
+    }
+    return out;
+  }
+}
+
+/**
+ * @brief Subtract a scalar to a vector.
+ */
+template <typename TLhs, std::convertible_to<typename Vector<TLhs>::value_type> TRhs>
+constexpr auto operator-(const Vector<TLhs>& lhs, TRhs rhs)
+{
+  if constexpr (Impl::VectorTraits<TLhs>::has_static_coefs) {
+    return lhs - vec<Rank {Vector<TLhs>::n}>(rhs);
+  } else {
+    auto out = +lhs;
+    for (std::size_t i = 0; i < out.size(); ++i) {
+      out[i] -= rhs;
     }
     return out;
   }

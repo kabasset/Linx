@@ -35,6 +35,28 @@ BOOST_AUTO_TEST_CASE(dynamic_rank_test)
   BOOST_TEST(x(3) == -1);
 }
 
+BOOST_AUTO_TEST_CASE(dynamic_rank_scalar_test)
+{
+  using namespace Linx::Literals;
+
+  auto u = Linx::vec({1, 2, 3});
+  auto w = u + 1;
+
+  BOOST_TEST(w.n == -1);
+  BOOST_TEST(w.size() == 3);
+  BOOST_TEST(w(0) == 2);
+  BOOST_TEST(w(1) == 3);
+  BOOST_TEST(w(2) == 4);
+
+  auto x = u - 1;
+
+  BOOST_TEST(x.n == -1);
+  BOOST_TEST(x.size() == 3);
+  BOOST_TEST(x(0) == 0);
+  BOOST_TEST(x(1) == 1);
+  BOOST_TEST(x(2) == 2);
+}
+
 BOOST_AUTO_TEST_CASE(static_rank_test)
 {
   using namespace Linx::Literals;
@@ -58,6 +80,26 @@ BOOST_AUTO_TEST_CASE(static_rank_test)
   BOOST_TEST(x(3) == -1);
 }
 
+BOOST_AUTO_TEST_CASE(static_rank_scalar_test)
+{
+  using namespace Linx::Literals;
+
+  auto u = Linx::vec(1, 2, 3);
+  auto w = u + 1;
+
+  BOOST_TEST(w.n == 3);
+  BOOST_TEST(w(0) == 2);
+  BOOST_TEST(w(1) == 3);
+  BOOST_TEST(w(2) == 4);
+
+  auto x = u - 1;
+
+  BOOST_TEST(x.n == 3);
+  BOOST_TEST(x(0) == 0);
+  BOOST_TEST(x(1) == 1);
+  BOOST_TEST(x(2) == 2);
+}
+
 BOOST_AUTO_TEST_CASE(static_coefs_test)
 {
   using namespace Linx::Literals;
@@ -79,6 +121,26 @@ BOOST_AUTO_TEST_CASE(static_coefs_test)
   BOOST_TEST(x(1) == 1);
   BOOST_TEST(x(2) == 2);
   BOOST_TEST(x(3) == -1);
+}
+
+BOOST_AUTO_TEST_CASE(static_coefs_scalar_test)
+{
+  using namespace Linx::Literals;
+
+  auto u = Linx::vec<1, 2, 3>();
+  auto w = u + 1;
+
+  BOOST_TEST(w.n == 3);
+  BOOST_TEST(w(0) == 2);
+  BOOST_TEST(w(1) == 3);
+  BOOST_TEST(w(2) == 4);
+
+  auto x = u - 1;
+
+  BOOST_TEST(x.n == 3);
+  BOOST_TEST(x(0) == 0);
+  BOOST_TEST(x(1) == 1);
+  BOOST_TEST(x(2) == 2);
 }
 
 BOOST_AUTO_TEST_CASE(zero_test)

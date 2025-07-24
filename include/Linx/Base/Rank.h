@@ -10,9 +10,8 @@ namespace Linx {
 /**
  * @brief Strong type for a rank.
  */
-template <int N>
 struct Rank {
-  static constexpr int n = N; ///< The rank parameter
+  int n; ///< The rank parameter
 };
 
 /**
@@ -37,7 +36,7 @@ constexpr int parse_int_literal()
 template <char... Cs>
 constexpr auto operator""_D()
 {
-  return Rank<parse_int_literal<Cs...>()>();
+  return Rank {parse_int_literal<Cs...>()};
 }
 
 } // namespace Literals
