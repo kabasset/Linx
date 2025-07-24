@@ -48,7 +48,7 @@ constexpr auto operator+(Vector<T> in)
 }
 
 /**
- * @brief Sum of two vectors.
+ * @brief Sum two vectors.
  */
 template <typename TLhs, typename TRhs>
 constexpr auto operator+(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
@@ -71,7 +71,7 @@ constexpr auto operator+(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
     return out;
   } else {
     auto size = std::max<std::size_t>(lhs.size(), rhs.size());
-    auto out = Vector<T*>(size);
+    auto out = Vector<T*>(Forward(), size);
     for (std::size_t i = 0; i < size; ++i) {
       out[i] = lhs.get_or(i, 0) + rhs.get_or(i, 0);
     }
@@ -115,7 +115,7 @@ constexpr auto operator-(Vector<T> in)
 }
 
 /**
- * @brief Difference between two vectors.
+ * @brief Subtract two vectors.
  */
 template <typename TLhs, typename TRhs>
 constexpr auto operator-(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
@@ -138,7 +138,7 @@ constexpr auto operator-(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
     return out;
   } else {
     auto size = std::max<std::size_t>(lhs.size(), rhs.size());
-    auto out = Vector<T*>(size);
+    auto out = Vector<T*>(Forward(), size);
     for (std::size_t i = 0; i < size; ++i) {
       out[i] = lhs.get_or(i, 0) - rhs.get_or(i, 0);
     }
@@ -147,7 +147,7 @@ constexpr auto operator-(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 }
 
 /**
- * @brief Subtract a scalar to a vector.
+ * @brief Subtract a scalar from a vector.
  */
 template <typename TLhs, std::convertible_to<typename Vector<TLhs>::value_type> TRhs>
 constexpr auto operator-(const Vector<TLhs>& lhs, TRhs rhs)

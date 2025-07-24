@@ -8,10 +8,10 @@
 namespace Linx {
 
 /**
- * @brief Strong type for a rank.
+ * @brief Strong type for a dimension.
  */
 struct Dimension {
-  int n; ///< The rank parameter
+  int value; ///< The value
 };
 
 /**

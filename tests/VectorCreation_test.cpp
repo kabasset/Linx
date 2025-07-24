@@ -18,6 +18,15 @@ BOOST_AUTO_TEST_CASE(dynamic_rank_test)
   BOOST_TEST(v(0) == 1);
   BOOST_TEST(v(1) == 2);
   BOOST_TEST(v(2) == 3);
+
+  using namespace Linx::Literals;
+
+  auto w = Linx::vec(3_D, 1);
+  BOOST_TEST(w.n == -1);
+  BOOST_TEST(w.size() == 3);
+  BOOST_TEST(w(0) == 1);
+  BOOST_TEST(w(1) == 1);
+  BOOST_TEST(w(2) == 1);
 }
 
 BOOST_AUTO_TEST_CASE(static_rank_test)

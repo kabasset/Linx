@@ -17,9 +17,9 @@ constexpr auto vec(std::initializer_list<T> coefs)
  * @brief Create a static-size vector.
  */
 template <typename T, std::size_t N>
-constexpr auto vec(const std::array<T, N>& coefs)
+constexpr auto vec(std::array<T, N> coefs)
 {
-  return Vector<T[N]>(std::begin(coefs), std::end(coefs));
+  return Vector<T[N]>(Forward(), LINX_MOVE(coefs));
 }
 
 /**
@@ -72,27 +72,38 @@ static constexpr auto vec_impl(std::integer_sequence<T, Is...>)
 } // namespace Impl
 
 /**
- * @brief Fill a static-size vector of given dimension with a given value.
+ * @brief Create a dynamic-size vector of given dimension full of a given value.
  * @tparam D The dimension
- * @param coef The coefficient
+ * @param value The value
  */
-template <Dimension D>
-constexpr auto vec(auto coef)
+constexpr auto vec(Dimension d, auto value)
 {
-  using T = decltype(coef);
-  return Impl::vec_impl(coef, std::make_integer_sequence<T, D.n>());
+  using T = decltype(value);
+  return Vector<T*>(Forward(), d.value, value);
 }
 
 /**
- * @brief Fill a static-coefficients vector of given dimension with a given value.
+ * @brief Create a static-size vector of given dimension full of a given value.
  * @tparam D The dimension
- * @tparam Coef The coefficient
+ * @param value The value
  */
-template <Dimension D, std::integral auto Coef = 0>
+template <Dimension D>
+constexpr auto vec(auto value)
+{
+  using T = decltype(value);
+  return Impl::vec_impl(value, std::make_integer_sequence<T, D.value>());
+}
+
+/**
+ * @brief Create a static-coefficients vector of given dimension full of a given value.
+ * @tparam D The dimension
+ * @tparam Value The value
+ */
+template <Dimension D, std::integral auto Value = 0>
 static constexpr auto vec()
 {
-  using T = decltype(Coef);
-  return Impl::vec_impl<Coef>(std::make_integer_sequence<T, D.n>());
+  using T = decltype(Value);
+  return Impl::vec_impl<Value>(std::make_integer_sequence<T, D.value>());
 }
 
 /**

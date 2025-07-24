@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #include "Linx/Base/Dimension.h"
+#include "Linx/Base/Functional.h"
 
 #include <array>
 #include <concepts>
@@ -42,17 +43,18 @@ public:
   /**
    * @brief Constructor.
    */
-  constexpr VectorBase(std::integral auto size) : m_container(size) {}
-
-  /**
-   * @brief Constructor.
-   */
   constexpr VectorBase(std::initializer_list<T> coefs) : VectorBase(coefs.begin(), coefs.end()) {}
 
   /**
    * @brief Constructor.
    */
   constexpr VectorBase(auto begin, auto end) : m_container(begin, end) {}
+
+  /**
+   * @brief Forwarding constructor.
+   */
+  constexpr VectorBase(Forward&&, auto&& arg0, auto&&... args) : m_container(LINX_FORWARD(arg0), LINX_FORWARD(args)...)
+  {}
 
   /**
    * @brief Size.
@@ -113,6 +115,12 @@ public:
   {
     std::copy(begin, end, m_container.data());
   }
+
+  /**
+   * @brief Forwarding constructor.
+   */
+  constexpr VectorBase(Forward&&, auto&& arg0, auto&&... args) : m_container(LINX_FORWARD(arg0), LINX_FORWARD(args)...)
+  {}
 
   /**
    * @brief Size.
