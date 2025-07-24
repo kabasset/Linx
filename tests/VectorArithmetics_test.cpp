@@ -24,6 +24,15 @@ BOOST_AUTO_TEST_CASE(dynamic_rank_test)
   BOOST_TEST(w(1) == 3);
   BOOST_TEST(w(2) == 4);
   BOOST_TEST(w(3) == 1);
+
+  auto x = u - v;
+
+  BOOST_TEST(x.n == -1);
+  BOOST_TEST(x.size() == 4);
+  BOOST_TEST(x(0) == 0);
+  BOOST_TEST(x(1) == 1);
+  BOOST_TEST(x(2) == 2);
+  BOOST_TEST(x(3) == -1);
 }
 
 BOOST_AUTO_TEST_CASE(static_rank_test)
@@ -39,6 +48,14 @@ BOOST_AUTO_TEST_CASE(static_rank_test)
   BOOST_TEST(w(1) == 3);
   BOOST_TEST(w(2) == 4);
   BOOST_TEST(w(3) == 1);
+
+  auto x = u - v;
+
+  BOOST_TEST(x.n == 4);
+  BOOST_TEST(x(0) == 0);
+  BOOST_TEST(x(1) == 1);
+  BOOST_TEST(x(2) == 2);
+  BOOST_TEST(x(3) == -1);
 }
 
 BOOST_AUTO_TEST_CASE(static_coefs_test)
@@ -54,6 +71,14 @@ BOOST_AUTO_TEST_CASE(static_coefs_test)
   BOOST_TEST(w(1) == 3);
   BOOST_TEST(w(2) == 4);
   BOOST_TEST(w(3) == 1);
+
+  auto x = u - v;
+
+  BOOST_TEST(x.n == 4);
+  BOOST_TEST(x(0) == 0);
+  BOOST_TEST(x(1) == 1);
+  BOOST_TEST(x(2) == 2);
+  BOOST_TEST(x(3) == -1);
 }
 
 BOOST_AUTO_TEST_CASE(zero_test)
@@ -73,6 +98,20 @@ BOOST_AUTO_TEST_CASE(zero_test)
   BOOST_TEST(x(0) == 3);
   BOOST_TEST(x(1) == 2);
   BOOST_TEST(x(2) == 1);
+
+  auto y = u - v;
+
+  BOOST_TEST(y.n == 3);
+  BOOST_TEST(y(0) == 3);
+  BOOST_TEST(y(1) == 2);
+  BOOST_TEST(y(2) == 1);
+
+  auto z = v - u;
+
+  BOOST_TEST(z.n == 3);
+  BOOST_TEST(z(0) == -3);
+  BOOST_TEST(z(1) == -2);
+  BOOST_TEST(z(2) == -1);
 }
 
 BOOST_AUTO_TEST_CASE(heterogeneous_test)
@@ -88,6 +127,15 @@ BOOST_AUTO_TEST_CASE(heterogeneous_test)
   BOOST_TEST(w(1) == 3);
   BOOST_TEST(w(2) == 4);
   BOOST_TEST(w(3) == 1);
+
+  auto x = u - v;
+
+  BOOST_TEST(x.n == -1);
+  BOOST_TEST(x.size() == 4);
+  BOOST_TEST(x(0) == 0);
+  BOOST_TEST(x(1) == 1);
+  BOOST_TEST(x(2) == 2);
+  BOOST_TEST(x(3) == -1);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
