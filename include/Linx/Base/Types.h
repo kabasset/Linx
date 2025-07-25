@@ -140,7 +140,11 @@ using QuickTestTypes = std::tuple<bool, int, double, Kokkos::complex<float>>; //
  */
 #ifndef __NVCC__
 #define LINX_STATIC_ASSERT_FALSE(message) \
-  []<bool DependentFalse = false>() { static_assert(DependentFalse, message); }()
+  []<bool DependentFalse = false>() \
+  { \
+    static_assert(DependentFalse, message); \
+  } \
+  ()
 #else
 #define LINX_STATIC_ASSERT_FALSE(message)
 #endif
@@ -169,6 +173,12 @@ struct IsSpecialization<TTemplate, TTemplate<TArgs...>> : std::true_type {};
  */
 template <template <typename...> class TTemplate, typename TClass>
 constexpr bool is_specialization = Impl::IsSpecialization<TTemplate, TClass>::value;
+
+/**
+ * @brief Any specialization of a template.
+ */
+template <typename T, template <typename...> class TTemplate>
+concept Specialization = is_specialization<TTemplate, T>;
 
 /**
  * @brief Type traits.
@@ -380,11 +390,15 @@ constexpr bool is_base_template_of()
 
 template <typename T>
 concept Labeled = requires(const T obj) // TODO to Base/concepts
-{ obj.label(); };
+{
+  obj.label();
+};
 
 template <typename T>
 concept Streamable = requires(const T obj) // TODO to Base/concepts
-{ std::stringstream() << obj; };
+{
+  std::stringstream() << obj;
+};
 
 template <typename T>
 concept StreamLabeled = Streamable<T> && not Labeled<T>;

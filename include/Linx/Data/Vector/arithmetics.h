@@ -7,7 +7,7 @@ namespace Linx {
 namespace Impl {
 
 template <typename T>
-struct VectorTraits {
+struct VectorTraits { // FIXME directly to Vector
   static constexpr auto n = Vector<T>::n;
   static constexpr bool has_static_rank = (n >= 0);
   static constexpr bool has_static_coefs = std::is_same_v<typename Vector<T>::Container, void>;
