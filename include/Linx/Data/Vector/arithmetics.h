@@ -6,15 +6,6 @@ namespace Linx {
 
 namespace Impl {
 
-template <typename T>
-struct VectorTraits { // FIXME directly to Vector
-  static constexpr auto n = Vector<T>::n;
-  static constexpr bool has_static_rank = (n >= 0);
-  static constexpr bool has_static_coefs = std::is_same_v<typename Vector<T>::Container, void>;
-  static constexpr bool empty = (n == 0);
-  using element_type = typename Vector<T>::element_type;
-};
-
 template <typename T, typename TLhs, typename TRhs, std::size_t... Is>
 static constexpr auto static_add_impl(const Vector<TLhs>&, const Vector<TRhs>&, std::index_sequence<Is...>)
 {
@@ -38,6 +29,38 @@ static constexpr auto static_subtract_impl(const Vector<TLhs>&, const Vector<TRh
 
 } // namespace Impl
 
+template <typename TLhs, typename TRhs>
+static constexpr auto static_add(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
+{
+  using T = decltype(typename Vector<TLhs>::element_type() + typename Vector<TRhs>::element_type());
+  return Impl::static_add_impl<T>(lhs, rhs, std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
+}
+
+template <typename TLhs, auto Rhs>
+static constexpr auto static_add(const Vector<TLhs>& lhs, const StaticConstant<Rhs>&)
+{
+  return static_add(lhs, vec<Dimension {Vector<TLhs>::n}, Rhs>());
+}
+
+template <typename T>
+static constexpr auto static_opposite(const Vector<T>& in)
+{
+  return Impl::static_opposite_impl(in, std::make_index_sequence<Vector<T>::n>());
+}
+
+template <typename TLhs, typename TRhs>
+static constexpr auto static_subtract(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
+{
+  using T = decltype(typename Vector<TLhs>::element_type() - typename Vector<TRhs>::element_type());
+  return Impl::static_subtract_impl<T>(lhs, rhs, std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
+}
+
+template <typename TLhs, auto Rhs>
+static constexpr auto static_subtract(const Vector<TLhs>& lhs, const StaticConstant<Rhs>&)
+{
+  return static_subtract(lhs, vec<Dimension {Vector<TLhs>::n}, Rhs>());
+}
+
 /**
  * @brief Vector copy.
  */
@@ -53,17 +76,17 @@ constexpr auto operator+(Vector<T> in)
 template <typename TLhs, typename TRhs>
 constexpr auto operator+(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 {
-  using LTraits = Impl::VectorTraits<TLhs>;
-  using RTraits = Impl::VectorTraits<TRhs>;
-  using T = decltype(typename LTraits::element_type() + typename RTraits::element_type());
-  if constexpr (LTraits::empty) {
+  using Lhs = Vector<TLhs>;
+  using Rhs = Vector<TRhs>;
+  using T = decltype(typename Vector<Lhs>::element_type() + typename Vector<Rhs>::element_type());
+  if constexpr (Lhs::static_empty_flag) {
     return +rhs;
-  } else if constexpr (RTraits::empty) {
+  } else if constexpr (Rhs::static_empty_flag) {
     return +lhs;
-  } else if constexpr (LTraits::has_static_coefs && RTraits::has_static_coefs) {
+  } else if constexpr (Lhs::static_coefs_flag && Rhs::static_coefs_flag) {
     return Impl::static_add_impl<T>(lhs, rhs, std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
-  } else if constexpr (LTraits::has_static_rank && RTraits::has_static_rank) {
-    constexpr auto N = std::max(LTraits::n, RTraits::n);
+  } else if constexpr (Lhs::static_size_flag && Rhs::static_size_flag) {
+    constexpr auto N = std::max(Lhs::n, Rhs::n);
     auto out = Vector<T[N]>();
     for (std::size_t i = 0; i < N; ++i) {
       out[i] = lhs.get_or(i, 0) + rhs.get_or(i, 0);
@@ -85,7 +108,7 @@ constexpr auto operator+(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 template <typename TLhs, std::convertible_to<typename Vector<TLhs>::value_type> TRhs>
 constexpr auto operator+(const Vector<TLhs>& lhs, TRhs rhs)
 {
-  if constexpr (Impl::VectorTraits<TLhs>::has_static_coefs) {
+  if constexpr (Vector<TLhs>::static_coefs_flag) {
     return lhs + vec<Dimension {Vector<TLhs>::n}>(rhs);
   } else {
     auto out = +lhs;
@@ -102,9 +125,9 @@ constexpr auto operator+(const Vector<TLhs>& lhs, TRhs rhs)
 template <typename T>
 constexpr auto operator-(Vector<T> in)
 {
-  if constexpr (Impl::VectorTraits<T>::empty) {
+  if constexpr (Vector<T>::static_empty_flag) {
     return in;
-  } else if constexpr (Impl::VectorTraits<T>::has_static_coefs) {
+  } else if constexpr (Vector<T>::static_coefs_flag) {
     return Impl::static_opposite_impl(in, std::make_index_sequence<T::size()>());
   } else {
     for (std::size_t i = 0; i < in.size(); ++i) {
@@ -120,17 +143,17 @@ constexpr auto operator-(Vector<T> in)
 template <typename TLhs, typename TRhs>
 constexpr auto operator-(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 {
-  using LTraits = Impl::VectorTraits<TLhs>;
-  using RTraits = Impl::VectorTraits<TRhs>;
-  using T = decltype(typename LTraits::element_type() - typename RTraits::element_type());
-  if constexpr (LTraits::empty) {
+  using Lhs = Vector<TLhs>;
+  using Rhs = Vector<TRhs>;
+  using T = decltype(typename Lhs::element_type() - typename Rhs::element_type());
+  if constexpr (Lhs::static_empty_flag) {
     return -rhs;
-  } else if constexpr (RTraits::empty) {
+  } else if constexpr (Rhs::static_empty_flag) {
     return +lhs;
-  } else if constexpr (LTraits::has_static_coefs && RTraits::has_static_coefs) {
+  } else if constexpr (Lhs::static_coefs_flag && Rhs::static_coefs_flag) {
     return Impl::static_subtract_impl<T>(lhs, rhs, std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
-  } else if constexpr (LTraits::has_static_rank && RTraits::has_static_rank) {
-    constexpr auto N = std::max(LTraits::n, RTraits::n);
+  } else if constexpr (Lhs::static_size_flag && Rhs::static_size_flag) {
+    constexpr auto N = std::max(Lhs::n, Rhs::n);
     auto out = Vector<T[N]>();
     for (std::size_t i = 0; i < N; ++i) {
       out[i] = lhs.get_or(i, 0) - rhs.get_or(i, 0);
@@ -152,7 +175,7 @@ constexpr auto operator-(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 template <typename TLhs, std::convertible_to<typename Vector<TLhs>::value_type> TRhs>
 constexpr auto operator-(const Vector<TLhs>& lhs, TRhs rhs)
 {
-  if constexpr (Impl::VectorTraits<TLhs>::has_static_coefs) {
+  if constexpr (Vector<TLhs>::static_coefs_flag) {
     return lhs - vec<Dimension {Vector<TLhs>::n}>(rhs);
   } else {
     auto out = +lhs;
