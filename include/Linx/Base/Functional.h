@@ -98,6 +98,14 @@ struct Constant {
   {
     return value;
   }
+
+  /**
+   * @brief Static value.
+   */
+  KOKKOS_INLINE_FUNCTION constexpr operator value_type() const
+  {
+    return value;
+  }
 };
 
 /**
@@ -126,6 +134,14 @@ struct StaticConstant {
    * @brief Static value.
    */
   KOKKOS_INLINE_FUNCTION constexpr value_type operator()(auto&&...) const
+  {
+    return value;
+  }
+
+  /**
+   * @brief Static value.
+   */
+  KOKKOS_INLINE_FUNCTION constexpr operator value_type() const
   {
     return value;
   }
@@ -229,7 +245,7 @@ struct Between {
     } \
   }; \
 \
-  Func() -> Func<Forward, Forward>; \
+  Func()->Func<Forward, Forward>; \
   template <typename T> \
   Func(T) -> Func<Forward, T>;
 

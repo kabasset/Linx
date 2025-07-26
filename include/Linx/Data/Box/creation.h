@@ -41,11 +41,7 @@ template <typename T>
 constexpr auto cube(const Vector<T>& radius)
 {
   // TODO handle floating point coefficients
-  if constexpr (Vector<T>::static_coefs_flag) {
-    return Box(static_opposite(radius), static_add(radius, StaticConstant<1>()));
-  } else {
-    return Box(-radius, radius + 1);
-  }
+  return Box(-radius, radius + StaticConstant<1>());
 }
 
 /**

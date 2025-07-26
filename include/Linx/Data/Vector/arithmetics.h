@@ -29,38 +29,6 @@ static constexpr auto static_subtract_impl(const Vector<TLhs>&, const Vector<TRh
 
 } // namespace Impl
 
-template <typename TLhs, typename TRhs>
-static constexpr auto static_add(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
-{
-  using T = decltype(typename Vector<TLhs>::element_type() + typename Vector<TRhs>::element_type());
-  return Impl::static_add_impl<T>(lhs, rhs, std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
-}
-
-template <typename TLhs, auto Rhs>
-static constexpr auto static_add(const Vector<TLhs>& lhs, const StaticConstant<Rhs>&)
-{
-  return static_add(lhs, vec<Dimension {Vector<TLhs>::n}, Rhs>());
-}
-
-template <typename T>
-static constexpr auto static_opposite(const Vector<T>& in)
-{
-  return Impl::static_opposite_impl(in, std::make_index_sequence<Vector<T>::n>());
-}
-
-template <typename TLhs, typename TRhs>
-static constexpr auto static_subtract(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
-{
-  using T = decltype(typename Vector<TLhs>::element_type() - typename Vector<TRhs>::element_type());
-  return Impl::static_subtract_impl<T>(lhs, rhs, std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
-}
-
-template <typename TLhs, auto Rhs>
-static constexpr auto static_subtract(const Vector<TLhs>& lhs, const StaticConstant<Rhs>&)
-{
-  return static_subtract(lhs, vec<Dimension {Vector<TLhs>::n}, Rhs>());
-}
-
 /**
  * @brief Vector copy.
  */
@@ -78,7 +46,7 @@ constexpr auto operator+(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 {
   using Lhs = Vector<TLhs>;
   using Rhs = Vector<TRhs>;
-  using T = decltype(typename Vector<Lhs>::element_type() + typename Vector<Rhs>::element_type());
+  using T = decltype(typename Lhs::element_type() + typename Rhs::element_type());
   if constexpr (Lhs::static_empty_flag) {
     return +rhs;
   } else if constexpr (Rhs::static_empty_flag) {
@@ -109,7 +77,11 @@ template <typename TLhs, std::convertible_to<typename Vector<TLhs>::value_type> 
 constexpr auto operator+(const Vector<TLhs>& lhs, TRhs rhs)
 {
   if constexpr (Vector<TLhs>::static_coefs_flag) {
-    return lhs + vec<Dimension {Vector<TLhs>::n}>(rhs);
+    if constexpr (requires { TRhs::value; }) {
+      return lhs + vec<Dimension {Vector<TLhs>::n}, TRhs::value>();
+    } else {
+      return lhs + vec<Dimension {Vector<TLhs>::n}>(rhs);
+    }
   } else {
     auto out = +lhs;
     for (std::size_t i = 0; i < out.size(); ++i) {
@@ -176,7 +148,11 @@ template <typename TLhs, std::convertible_to<typename Vector<TLhs>::value_type> 
 constexpr auto operator-(const Vector<TLhs>& lhs, TRhs rhs)
 {
   if constexpr (Vector<TLhs>::static_coefs_flag) {
-    return lhs - vec<Dimension {Vector<TLhs>::n}>(rhs);
+    if constexpr (requires { TRhs::value; }) {
+      return lhs - vec<Dimension {Vector<TLhs>::n}, TRhs::value>();
+    } else {
+      return lhs - vec<Dimension {Vector<TLhs>::n}>(rhs);
+    }
   } else {
     auto out = +lhs;
     for (std::size_t i = 0; i < out.size(); ++i) {
