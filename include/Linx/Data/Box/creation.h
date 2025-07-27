@@ -8,6 +8,12 @@
 namespace Linx {
 
 /**
+ * @brief Null rank.
+ */
+template <typename T = int>
+Box() -> Box<std::integer_sequence<T>, std::integer_sequence<T>>;
+
+/**
  * @brief Start at origin.
  */
 template <typename T, int N>

@@ -48,6 +48,12 @@ public:
   static constexpr bool static_size_flag = Shape::static_coefs_flag; ///< Static size flag
 
   /**
+   * @brief Default constructor.
+   * 
+   */
+  constexpr Box() : m_start {}, m_stop {} {}
+
+  /**
    * @brief Constructor.
    */
   constexpr Box(const Stop& stop) : m_start {}, m_stop(stop) {}
@@ -135,7 +141,7 @@ public:
   KOKKOS_INLINE_FUNCTION constexpr auto size() const
   {
     size_type out = 1;
-    for (std::size_t i = 0; i < m_start.size(); ++i) {
+    for (int i = 0; i < rank(); ++i) {
       out *= extent(i);
     }
     return out;
