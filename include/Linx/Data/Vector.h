@@ -59,13 +59,14 @@ public:
 
   constexpr bool equal(auto... coefs) const
   {
-    return equal_impl(forward_as_tuple(coefs...), std::make_index_sequence<sizeof...(coefs)>());
+    return this->size() == sizeof...(coefs)
+        && equal_impl(forward_as_tuple(coefs...), std::make_index_sequence<sizeof...(coefs)>());
   }
 
 private:
 
   template <std::size_t... Is>
-  constexpr bool equal_impl(auto coefs, std::index_sequence<Is...>) const
+  constexpr bool equal_impl([[maybe_unused]] auto coefs, std::index_sequence<Is...>) const
   {
     return ((operator()(Is) == get<Is>(coefs)) && ...);
   }
