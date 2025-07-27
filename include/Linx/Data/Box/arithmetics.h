@@ -22,7 +22,7 @@ constexpr auto operator+(const Box<TStart, TStop>& lhs, const auto& rhs)
 template <typename TStart, typename TStop>
 constexpr auto operator-(const Box<TStart, TStop>& lhs, const auto& rhs)
 {
-  return Box(lhs.start() - rhs, lhs.stop() - lhs);
+  return Box(lhs.start() - rhs, lhs.stop() - rhs);
 }
 
 /**
@@ -71,6 +71,15 @@ constexpr auto erode(const Box<TStart, TStop>& box, const TRhs& margin)
 {
   auto margin_box = bbox(margin);
   return Box(box.start() - margin_box.start(), box.stop() - (margin_box.stop() - 1));
+}
+
+/**
+ * @brief Intersect two boxes.
+ */
+template <typename TStartL, typename TStopL, typename TStartR, typename TStopR>
+auto operator&(const Box<TStartL, TStopL>& lhs, const Box<TStartR, TStopR>& rhs)
+{
+  return Box(max(lhs.start(), rhs.start()), min(lhs.stop(), rhs.stop()));
 }
 
 /**

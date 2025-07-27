@@ -8,6 +8,15 @@
 namespace Linx {
 
 /**
+ * @brief Stream insertion.
+ */
+template <typename TStart, typename TStop>
+std::ostream& operator<<(std::ostream& os, const Box<TStart, TStop>& box)
+{
+  return os << box.start() << " ~ " << box.stop();
+}
+
+/**
  * @relatesalso Box
  * @brief Get the 1D span along the i-th axis.
  */

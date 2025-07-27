@@ -2,9 +2,18 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/Linx
 // SPDX-License-Identifier: Apache-2.0
 
+#include "Linx/Base/Functional.h"
+
 namespace Linx {
 
 namespace Impl {
+
+template <typename T, typename TFunc, typename TLhs, typename TRhs, std::size_t... Is>
+static constexpr auto static_apply_impl(const Vector<TLhs>&, const Vector<TRhs>&, std::index_sequence<Is...>)
+{
+  using TOut = std::integer_sequence<T, TFunc()(get_or<Is, 0>(Vector<TLhs>()), get_or<Is, 0>(Vector<TRhs>()))...>;
+  return Vector<TOut>();
+}
 
 template <typename T, typename TLhs, typename TRhs, std::size_t... Is>
 static constexpr auto static_add_impl(const Vector<TLhs>&, const Vector<TRhs>&, std::index_sequence<Is...>)
@@ -160,6 +169,46 @@ constexpr auto operator-(const Vector<TLhs>& lhs, TRhs rhs)
     }
     return out;
   }
+}
+
+template <typename TFunc, typename TLhs, typename TRhs>
+constexpr auto apply_binary(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
+{
+  using Lhs = Vector<TLhs>;
+  using Rhs = Vector<TRhs>;
+  using T = decltype(TFunc()(typename Lhs::element_type(), typename Rhs::element_type()));
+  if constexpr (Lhs::static_coefs_flag && Rhs::static_coefs_flag) {
+    return Impl::static_apply_impl<T, TFunc>(
+        lhs,
+        rhs,
+        std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
+  } else if constexpr (Lhs::static_size_flag && Rhs::static_size_flag) {
+    constexpr auto N = std::max(Lhs::n, Rhs::n);
+    auto out = Vector<T[N]>();
+    for (std::size_t i = 0; i < N; ++i) {
+      out[i] = TFunc()(lhs.get_or(i, 0), rhs.get_or(i, 0));
+    }
+    return out;
+  } else {
+    auto size = std::max<std::size_t>(lhs.size(), rhs.size());
+    auto out = Vector<T*>(Forward(), size);
+    for (std::size_t i = 0; i < size; ++i) {
+      out[i] = TFunc()(lhs.get_or(i, 0), rhs.get_or(i, 0));
+    }
+    return out;
+  }
+}
+
+template <typename TLhs, typename TRhs>
+constexpr auto min(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
+{
+  return apply_binary<Min<>>(lhs, rhs);
+}
+
+template <typename TLhs, typename TRhs>
+constexpr auto max(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
+{
+  return apply_binary<Max<>>(lhs, rhs);
 }
 
 } // namespace Linx

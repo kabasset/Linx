@@ -15,7 +15,7 @@ namespace Linx {
  * @brief Functor which forwards its argument.
  */
 struct Forward {
-  std::string label() const
+  constexpr std::string label() const
   {
     return "Forward";
   }
@@ -43,7 +43,7 @@ struct Copy {
  * @brief Logical not.
  */
 struct Not {
-  std::string label() const
+  constexpr std::string label() const
   {
     return "Not";
   }
@@ -58,12 +58,12 @@ struct Not {
  * @brief Negation.
  */
 struct Negate {
-  std::string label() const
+  constexpr std::string label() const
   {
     return "Negate";
   }
 
-  KOKKOS_INLINE_FUNCTION auto operator()(const auto& e) const
+  KOKKOS_INLINE_FUNCTION constexpr auto operator()(const auto& e) const
   {
     return -e;
   }
@@ -157,18 +157,20 @@ struct Between {
   /**
    * @brief Always-false functor constructor.
    */
-  KOKKOS_INLINE_FUNCTION Between() : infimum(Limits<T>::max()), supremum(Limits<T>::min()) {} // FIXME rm
+  KOKKOS_INLINE_FUNCTION constexpr Between() : infimum(Limits<T>::max()), supremum(Limits<T>::min()) {} // FIXME rm
 
   /**
    * @brief Constructor.
    */
-  KOKKOS_INLINE_FUNCTION Between(const T& inf, const T& sup) : infimum(inf), supremum(sup) {}
+  KOKKOS_INLINE_FUNCTION constexpr Between(const T& inf, const T& sup) : infimum(inf), supremum(sup) {}
 
   /**
    * @brief Size-based constructor.
    */
   template <typename TSize>
-  KOKKOS_INLINE_FUNCTION Between(const T& inf, const Size<TSize>& size) : infimum(inf), supremum(infimum + size.value)
+  KOKKOS_INLINE_FUNCTION constexpr Between(const T& inf, const Size<TSize>& size) :
+      infimum(inf),
+      supremum(infimum + size.value)
   {
     if constexpr (std::is_integral_v<T>) {
       supremum += InclusiveInfimum + InclusiveSupremum - 1;
@@ -178,7 +180,7 @@ struct Between {
   /**
    * @brief Check whether a value is between the endpoints.
    */
-  KOKKOS_INLINE_FUNCTION bool operator()(const T& value) const
+  KOKKOS_INLINE_FUNCTION constexpr bool operator()(const T& value) const
   {
     return greater_than_infimum(value) && less_than_supremum(value);
   }
@@ -186,7 +188,7 @@ struct Between {
   /**
    * @brief Check whether a value is greater than the infimum.
    */
-  KOKKOS_INLINE_FUNCTION bool greater_than_infimum(const T& value) const
+  KOKKOS_INLINE_FUNCTION constexpr bool greater_than_infimum(const T& value) const
   {
     if constexpr (InclusiveInfimum) {
       return value >= infimum;
@@ -198,7 +200,7 @@ struct Between {
   /**
    * @brief Check whether a value is less than the supremum.
    */
-  KOKKOS_INLINE_FUNCTION bool less_than_supremum(const T& value) const
+  KOKKOS_INLINE_FUNCTION constexpr bool less_than_supremum(const T& value) const
   {
     if constexpr (InclusiveSupremum) {
       return value <= supremum;
@@ -220,7 +222,7 @@ struct Between {
     using value_type = TRhs; \
     TRhs rhs; \
     KOKKOS_INLINE_FUNCTION Func(TRhs value) : rhs {value} {} \
-    KOKKOS_INLINE_FUNCTION auto operator()(const auto& lhs) const \
+    KOKKOS_INLINE_FUNCTION constexpr auto operator()(const auto& lhs) const \
     { \
       return out; \
     } \
@@ -231,7 +233,7 @@ struct Between {
     using value_type = TLhs; \
     TLhs lhs; \
     KOKKOS_INLINE_FUNCTION Func(TLhs value) : lhs {value} {} \
-    KOKKOS_INLINE_FUNCTION auto operator()(const auto& rhs) const \
+    KOKKOS_INLINE_FUNCTION constexpr auto operator()(const auto& rhs) const \
     { \
       return out; \
     } \
@@ -239,7 +241,7 @@ struct Between {
 \
   template <> \
   struct Func<Forward, Forward> { \
-    KOKKOS_INLINE_FUNCTION auto operator()(const auto& lhs, const auto& rhs) const \
+    KOKKOS_INLINE_FUNCTION constexpr auto operator()(const auto& lhs, const auto& rhs) const \
     { \
       return out; \
     } \
@@ -255,7 +257,7 @@ struct Between {
   /** @ingroup reduction */ \
   /** @brief Identity element of a monoid. */ \
   template <typename T, typename TLhs, typename TRhs> \
-  KOKKOS_INLINE_FUNCTION auto identity_element(const Func<TLhs, TRhs>&) \
+  KOKKOS_INLINE_FUNCTION constexpr auto identity_element(const Func<TLhs, TRhs>&) \
   { \
     return identity; \
   }
