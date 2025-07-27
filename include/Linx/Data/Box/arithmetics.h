@@ -8,6 +8,24 @@
 namespace Linx {
 
 /**
+ * @brief Shift a box by a given vector or scalar.
+ */
+template <typename TStart, typename TStop>
+constexpr auto operator+(const Box<TStart, TStop>& lhs, const auto& rhs)
+{
+  return Box(lhs.start() + rhs, lhs.stop() + rhs);
+}
+
+/**
+ * @brief Shift a box by the opposite of a given vector or scalar.
+ */
+template <typename TStart, typename TStop>
+constexpr auto operator-(const Box<TStart, TStop>& lhs, const auto& rhs)
+{
+  return Box(lhs.start() - rhs, lhs.stop() - lhs);
+}
+
+/**
  * @brief Create the dilation of a box by a given margin.
  */
 template <typename TStart, typename TStop>

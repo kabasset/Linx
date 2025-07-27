@@ -97,7 +97,10 @@ BOOST_AUTO_TEST_CASE(static_size_test)
   BOOST_TEST(cube.stop().equal(2, 2, 2));
   BOOST_TEST(cube.size() == 27);
 
-  // auto shifted = Linx::shape<1, 2, 3>() + Linx::vec<3_D, -1>();
+  auto shifted = Linx::shape<1, 2, 3>() + Linx::vec<3_D, -1>();
+  BOOST_TEST(shifted.static_size_flag);
+  BOOST_TEST(shifted.start().equal(-1, -1, -1));
+  BOOST_TEST(shifted.stop().equal(0, 1, 2));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
