@@ -14,6 +14,18 @@ BOOST_AUTO_TEST_CASE(static_rank_test)
 {
   using namespace Linx::Literals;
 
+  auto single_list = Linx::Box({1, 2, 3});
+  BOOST_TEST(single_list.static_rank_flag);
+  BOOST_TEST(single_list.start().static_empty_flag);
+  BOOST_TEST(single_list.stop().equal(1, 2, 3));
+  BOOST_TEST(single_list.size() == 6);
+
+  auto double_list = Linx::Box({-1, -2, -3}, {2, 3, 4});
+  BOOST_TEST(double_list.static_rank_flag);
+  BOOST_TEST(double_list.start().equal(-1, -2, -3));
+  BOOST_TEST(double_list.stop().equal(2, 3, 4));
+  BOOST_TEST(double_list.size() == 105);
+
   auto stop = Linx::Box(Linx::vec(1, 2, 3));
   BOOST_TEST(stop.static_rank_flag);
   BOOST_TEST(stop.start().static_empty_flag);
