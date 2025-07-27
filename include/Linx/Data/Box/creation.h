@@ -40,11 +40,10 @@ constexpr auto shape(auto... args)
  * @brief Create a box centered at origin.
  * @param radius The radius vector
  * 
- * If the radius coefficients are different, then the box is not regular.
  * The extent of the box along axis `i` is `2 * radius[i] + 1`.
  */
 template <typename T>
-constexpr auto cube(const Vector<T>& radius)
+constexpr auto cuboid(const Vector<T>& radius)
 {
   // TODO handle floating point coefficients
   return Box(-radius, radius + StaticConstant<1>());
@@ -60,7 +59,7 @@ constexpr auto cube(const Vector<T>& radius)
 template <Dimension D>
 constexpr auto cube(auto radius)
 {
-  return cube(vec<D>(radius));
+  return cuboid(vec<D>(radius));
 }
 
 /**
@@ -73,7 +72,7 @@ constexpr auto cube(auto radius)
 template <Dimension D, std::integral auto Radius>
 constexpr auto cube()
 {
-  return cube(vec<D, Radius>());
+  return cuboid(vec<D, Radius>());
 }
 
 } // namespace Linx

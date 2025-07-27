@@ -38,11 +38,11 @@ BOOST_AUTO_TEST_CASE(static_rank_test)
   BOOST_TEST(box.stop().equal(2, 3, 4));
   BOOST_TEST(box.size() == 105);
 
-  auto centered = Linx::cube(Linx::vec(1, 2, 3));
-  BOOST_TEST(centered.static_rank_flag);
-  BOOST_TEST(centered.start().equal(-1, -2, -3));
-  BOOST_TEST(centered.stop().equal(2, 3, 4));
-  BOOST_TEST(centered.size() == 105);
+  auto cuboid = Linx::cuboid(Linx::vec(1, 2, 3));
+  BOOST_TEST(cuboid.static_rank_flag);
+  BOOST_TEST(cuboid.start().equal(-1, -2, -3));
+  BOOST_TEST(cuboid.stop().equal(2, 3, 4));
+  BOOST_TEST(cuboid.size() == 105);
 
   auto cube = Linx::cube<3_D>(1);
   BOOST_TEST(cube.static_rank_flag);
@@ -85,11 +85,11 @@ BOOST_AUTO_TEST_CASE(static_size_test)
   BOOST_TEST(box.stop().equal(2, 3, 4));
   BOOST_TEST(box.size() == 105);
 
-  auto centered = Linx::cube(Linx::vec<1, 2, 3>());
-  BOOST_TEST(centered.static_size_flag);
-  BOOST_TEST(centered.start().equal(-1, -2, -3));
-  BOOST_TEST(centered.stop().equal(2, 3, 4));
-  BOOST_TEST(centered.size() == 105);
+  auto cuboid = Linx::cuboid(Linx::vec<1, 2, 3>());
+  BOOST_TEST(cuboid.static_size_flag);
+  BOOST_TEST(cuboid.start().equal(-1, -2, -3));
+  BOOST_TEST(cuboid.stop().equal(2, 3, 4));
+  BOOST_TEST(cuboid.size() == 105);
 
   auto cube = Linx::cube<3_D, 1>();
   BOOST_TEST(cube.static_size_flag);
