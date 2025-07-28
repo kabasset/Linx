@@ -9,9 +9,12 @@ namespace Linx {
 namespace Impl {
 
 template <typename T, typename TFunc, typename TLhs, typename TRhs, std::size_t... Is>
-static constexpr auto static_apply_impl(const Vector<TLhs>&, const Vector<TRhs>&, std::index_sequence<Is...>)
+static constexpr auto
+static_transform_vectors_impl(const Vector<TLhs>&, const Vector<TRhs>&, std::index_sequence<Is...>)
 {
-  using TOut = std::integer_sequence<T, TFunc()(get_or<Is, 0>(Vector<TLhs>()), get_or<Is, 0>(Vector<TRhs>()))...>;
+  constexpr auto identity = identity_element<T>(TFunc());
+  using TOut =
+      std::integer_sequence<T, TFunc()(get_or<Is, identity>(Vector<TLhs>()), get_or<Is, identity>(Vector<TRhs>()))...>;
   return Vector<TOut>();
 }
 
@@ -171,14 +174,21 @@ constexpr auto operator-(const Vector<TLhs>& lhs, TRhs rhs)
   }
 }
 
+/**
+ * @brief Apply a monoid to each element of two vectors.
+ * 
+ * If the vectors have different sizes, the resulting size is the greatest of both,
+ * and the identity element of the monoid is used for padding.
+ */
 template <typename TFunc, typename TLhs, typename TRhs>
-constexpr auto apply_binary(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
+constexpr auto transform_vectors(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 {
   using Lhs = Vector<TLhs>;
   using Rhs = Vector<TRhs>;
   using T = decltype(TFunc()(typename Lhs::element_type(), typename Rhs::element_type()));
+  constexpr auto identity = identity_element<T>(TFunc());
   if constexpr (Lhs::static_coefs_flag && Rhs::static_coefs_flag) {
-    return Impl::static_apply_impl<T, TFunc>(
+    return Impl::static_transform_vectors_impl<T, TFunc>(
         lhs,
         rhs,
         std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
@@ -186,14 +196,14 @@ constexpr auto apply_binary(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
     constexpr auto N = std::max(Lhs::n, Rhs::n);
     auto out = Vector<T[N]>();
     for (std::size_t i = 0; i < N; ++i) {
-      out[i] = TFunc()(lhs.get_or(i, 0), rhs.get_or(i, 0));
+      out[i] = TFunc()(lhs.get_or(i, identity), rhs.get_or(i, identity));
     }
     return out;
   } else {
     auto size = std::max<std::size_t>(lhs.size(), rhs.size());
     auto out = Vector<T*>(Forward(), size);
     for (std::size_t i = 0; i < size; ++i) {
-      out[i] = TFunc()(lhs.get_or(i, 0), rhs.get_or(i, 0));
+      out[i] = TFunc()(lhs.get_or(i, identity), rhs.get_or(i, identity));
     }
     return out;
   }
@@ -202,13 +212,13 @@ constexpr auto apply_binary(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 template <typename TLhs, typename TRhs>
 constexpr auto min(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 {
-  return apply_binary<Min<>>(lhs, rhs);
+  return transform_vectors<Min<>>(lhs, rhs);
 }
 
 template <typename TLhs, typename TRhs>
 constexpr auto max(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 {
-  return apply_binary<Max<>>(lhs, rhs);
+  return transform_vectors<Max<>>(lhs, rhs);
 }
 
 } // namespace Linx

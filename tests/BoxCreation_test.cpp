@@ -119,12 +119,12 @@ BOOST_AUTO_TEST_CASE(intersection_test)
 {
   using namespace Linx::Literals;
 
-  auto lhs = Linx::shape<1, 3, 5>() - Linx::vec<3_D, 2>(); // [-2, -2, -2] ~ [-1, 1, 3]
+  auto lhs = Linx::shape<1, 3, 5, 7>() - Linx::vec<4_D, 2>(); // [-2, -2, -2, -2] ~ [-1, 1, 3, 5]
   auto rhs = Linx::cube<3_D, 1>(); // [-1, -1, -1] ~ [2, 2, 2]
   auto out = lhs & rhs;
   BOOST_TEST(out.static_size_flag);
-  BOOST_TEST(out.start().equal(-1, -1, -1));
-  BOOST_TEST(out.stop().equal(-1, 1, 2));
+  BOOST_TEST(out.start().equal(-1, -1, -1, -2));
+  BOOST_TEST(out.stop().equal(-1, 1, 2, 5));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
