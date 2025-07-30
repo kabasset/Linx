@@ -60,6 +60,18 @@ constexpr auto bbox(const Slice<T, TFuncs...>& slice)
   return Impl::box_impl(slice, std::make_index_sequence<sizeof...(TFuncs)>());
 }
 
+/**
+ * @brief Set the static rank of a box.
+ * 
+ * If `N` is larger than the box rank, bounds are padded with default-initialized values.
+ * If `N` is smaller than the box rank, they are truncated.
+ */
+template <int N, typename TStart, typename TStop>
+constexpr auto rerank(const Box<TStart, TStop>& in)
+{
+  return Box(resize<N>(in.start()), resize<N>(in.stop()));
+}
+
 namespace Impl {
 
 template <typename TSpace, typename TStart, typename TStop, std::size_t... Is>
@@ -102,7 +114,7 @@ void for_each(const std::string& label, const Box<TStart, TStop>& region, TFunc&
 #define LINX_CASE_RANK(n) \
   case n: \
     if constexpr (is_nary<TFunc, int, n>()) { \
-      return Kokkos::parallel_for(label, kokkos_execution_policy<TSpace>(pad<n>(region)), LINX_FORWARD(func)); \
+      return Kokkos::parallel_for(label, kokkos_execution_policy<TSpace>(rerank<n>(region)), LINX_FORWARD(func)); \
     } else { \
       return; \
     }

@@ -11,17 +11,37 @@ namespace Linx {
  * @brief Stream insertion.
  */
 template <typename T>
-std::ostream& operator<<(std::ostream& os, const Vector<T>& p)
+std::ostream& operator<<(std::ostream& os, const Vector<T>& in)
 {
-  if (p.size() == 0) {
+  if (in.size() == 0) {
     return os << "O";
   }
 
-  os << "[" << p(0);
-  for (int i = 1; i < p.size(); ++i) {
-    os << ", " << p(i);
+  os << "[" << in(0);
+  for (int i = 1; i < in.size(); ++i) {
+    os << ", " << in(i);
   }
   return os << "]";
+}
+
+/**
+ * @brief Resize a vector to a given static size, padding with default-initialized values if necessary.
+ */
+template <int N, typename T>
+constexpr auto resize(const Vector<T>& in)
+{
+  if constexpr (Vector<T>::static_coefs_flag) {
+    Impl::static_add_impl(
+        in,
+        vec<Linx::Dimension {N}, typename Vector<T>::element_type()>(),
+        std::make_index_sequence<N>());
+  } else {
+    auto out = Linx::vec<Linx::Dimension {N}>(typename Vector<T>::element_type());
+    for (std::size_t i = 0; i < in.size(); ++i) {
+      out[i] = in[i];
+    }
+    return out;
+  }
 }
 
 } // namespace Linx
