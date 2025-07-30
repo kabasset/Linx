@@ -66,12 +66,13 @@ constexpr auto operator+(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
   } else if constexpr (Lhs::static_coefs_flag && Rhs::static_coefs_flag) {
     return Impl::static_add_impl<T>(lhs, rhs, std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
   } else if constexpr (Lhs::static_size_flag && Rhs::static_size_flag) {
-    constexpr auto N = std::max(Lhs::n, Rhs::n);
-    auto out = Vector<T[N]>();
-    for (std::size_t i = 0; i < N; ++i) {
+    constexpr auto n = std::max<int>(Lhs::n, Rhs::n);
+    // auto out = Vector<T[n]>(); // nvcc 12.4 internal error
+    auto out = std::array<T, n>();
+    for (int i = 0; i < n; ++i) {
       out[i] = lhs.get_or(i, 0) + rhs.get_or(i, 0);
     }
-    return out;
+    return vec(LINX_MOVE(out));
   } else {
     auto size = std::max<std::size_t>(lhs.size(), rhs.size());
     auto out = Vector<T*>(Forward(), size);
@@ -137,12 +138,13 @@ constexpr auto operator-(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
   } else if constexpr (Lhs::static_coefs_flag && Rhs::static_coefs_flag) {
     return Impl::static_subtract_impl<T>(lhs, rhs, std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
   } else if constexpr (Lhs::static_size_flag && Rhs::static_size_flag) {
-    constexpr auto N = std::max(Lhs::n, Rhs::n);
-    auto out = Vector<T[N]>();
-    for (std::size_t i = 0; i < N; ++i) {
+    constexpr auto n = std::max(Lhs::n, Rhs::n);
+    // auto out = Vector<T[n]>(); // nvcc 12.4 internal error
+    auto out = std::array<T, n>();
+    for (std::size_t i = 0; i < n; ++i) {
       out[i] = lhs.get_or(i, 0) - rhs.get_or(i, 0);
     }
-    return out;
+    return vec(LINX_MOVE(out));
   } else {
     auto size = std::max<std::size_t>(lhs.size(), rhs.size());
     auto out = Vector<T*>(Forward(), size);
@@ -193,12 +195,13 @@ constexpr auto transform_vectors(const Vector<TLhs>& lhs, const Vector<TRhs>& rh
         rhs,
         std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
   } else if constexpr (Lhs::static_size_flag && Rhs::static_size_flag) {
-    constexpr auto N = std::max(Lhs::n, Rhs::n);
-    auto out = Vector<T[N]>();
-    for (std::size_t i = 0; i < N; ++i) {
+    constexpr auto n = std::max(Lhs::n, Rhs::n);
+    // auto out = Vector<T[n]>(); // nvcc 12.4 internal error
+    auto out = std::array<T, n>();
+    for (std::size_t i = 0; i < n; ++i) {
       out[i] = TFunc()(lhs.get_or(i, identity), rhs.get_or(i, identity));
     }
-    return out;
+    return vec(LINX_MOVE(out));
   } else {
     auto size = std::max<std::size_t>(lhs.size(), rhs.size());
     auto out = Vector<T*>(Forward(), size);

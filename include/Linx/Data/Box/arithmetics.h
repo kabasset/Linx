@@ -49,8 +49,7 @@ erode(const Box<TStart, TStop>& box, const std::convertible_to<typename Box<TSta
  * @brief Create the dilation of a box by a given margin.
  */
 template <typename TStart, typename TStop, typename TRhs> // TODO BoundedRegion TRhs
-  requires requires(const TRhs& rhs)
-  {
+  requires requires(const TRhs& rhs) {
     bbox(rhs); // TODO -> Box
   }
 constexpr auto dilate(const Box<TStart, TStop>& box, const TRhs& margin)
@@ -63,8 +62,7 @@ constexpr auto dilate(const Box<TStart, TStop>& box, const TRhs& margin)
  * @brief Create the erosion of a box by a given margin.
  */
 template <typename TStart, typename TStop, typename TRhs> // TODO BoundedRegion TRhs
-  requires requires(const TRhs& rhs)
-  {
+  requires requires(const TRhs& rhs) {
     bbox(rhs); // TODO -> Box
   }
 constexpr auto erode(const Box<TStart, TStop>& box, const TRhs& margin)
