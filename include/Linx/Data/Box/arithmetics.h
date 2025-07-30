@@ -99,6 +99,16 @@ operator&(const Slice<T, TFuncs...>& slice, const auto& region) // FIXME require
   }
 }
 
+/**
+ * @relatesalso Box
+ * @brief Compute the bounding box of two boxes.
+ */
+template <typename TStartL, typename TStopL, typename TStartR, typename TStopR>
+auto bbox(const Box<TStartL, TStopL>& lhs, const Box<TStartR, TStopR>& rhs)
+{
+  return Box(min(lhs.start(), rhs.start()), max(lhs.stop(), rhs.stop()));
+}
+
 } // namespace Linx
 
 #endif

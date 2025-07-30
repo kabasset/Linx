@@ -18,7 +18,7 @@ static constexpr auto identity_element_or(const auto& func, const T& fallback = 
   if constexpr (requires { identity_element<T>(func); }) {
     return identity_element<T>(func);
   } else {
-    return T {};
+    return fallback;
   }
 }
 

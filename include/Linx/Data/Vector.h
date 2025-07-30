@@ -57,10 +57,39 @@ public:
     return i < 0 || i >= this->size() ? fallback : this->operator[](i);
   }
 
-  constexpr bool equal(auto... coefs) const
+  /**
+   * @brief Equality comparison with a pack of coefficients.
+   */
+  constexpr bool equal(auto... coefs) const // TODO equality comparable with element_type
   {
     return this->size() == sizeof...(coefs)
         && equal_impl(forward_as_tuple(coefs...), std::make_index_sequence<sizeof...(coefs)>());
+  }
+
+  /**
+   * @brief Equality operator.
+   */
+  constexpr bool operator==(const auto& rhs) const
+  {
+    if (this->size() != std::size(rhs)) {
+      return false;
+    }
+
+    for (std::size_t i = 0; i < this->size(); ++i) {
+      if (this->operator[](i) != rhs[i]) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
+   * @brief Inequality operator.
+   */
+  constexpr bool operator!=(const auto& rhs) const
+  {
+    return not(*this == rhs);
   }
 
 private:
