@@ -2,7 +2,11 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/Linx
 // SPDX-License-Identifier: Apache-2.0
 
+#ifndef LINX_DATA_VECTOR_ARITHMETICS_H
+#define LINX_DATA_VECTOR_ARITHMETICS_H
+
 #include "Linx/Base/Functional.h"
+#include "Linx/Data/Vector/creation.h"
 
 namespace Linx {
 
@@ -199,3 +203,5 @@ constexpr auto max(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 }
 
 } // namespace Linx
+
+#endif

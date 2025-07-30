@@ -2,6 +2,9 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/Linx
 // SPDX-License-Identifier: Apache-2.0
 
+#ifndef LINX_DATA_VECTOR_CREATION_H
+#define LINX_DATA_VECTOR_CREATION_H
+
 namespace Linx {
 
 /**
@@ -115,3 +118,5 @@ static constexpr auto vec()
 }
 
 } // namespace Linx
+
+#endif

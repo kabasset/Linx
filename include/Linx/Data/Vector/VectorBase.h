@@ -2,6 +2,9 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/Linx
 // SPDX-License-Identifier: Apache-2.0
 
+#ifndef LINX_DATA_VECTORBASE_H
+#define LINX_DATA_VECTORBASE_H
+
 #include "Linx/Base/Dimension.h"
 #include "Linx/Base/Functional.h"
 
@@ -224,3 +227,5 @@ static constexpr auto get_or(const VectorBase<std::integer_sequence<T, Is...>>&)
 }
 
 } // namespace Linx
+
+#endif

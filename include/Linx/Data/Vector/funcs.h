@@ -2,6 +2,9 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/Linx
 // SPDX-License-Identifier: Apache-2.0
 
+#ifndef LINX_DATA_VECTOR_FUNCS_H
+#define LINX_DATA_VECTOR_FUNCS_H
+
 namespace Linx {
 
 /**
@@ -22,3 +25,5 @@ std::ostream& operator<<(std::ostream& os, const Vector<T>& p)
 }
 
 } // namespace Linx
+
+#endif

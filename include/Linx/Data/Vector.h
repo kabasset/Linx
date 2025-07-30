@@ -74,11 +74,8 @@ private:
 
 } // namespace Linx
 
-//
-#include "Linx/Data/Vector/creation.h"
-//
 #include "Linx/Data/Vector/arithmetics.h"
-//
+#include "Linx/Data/Vector/creation.h"
 #include "Linx/Data/Vector/funcs.h"
 
 #endif
