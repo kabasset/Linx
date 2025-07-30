@@ -8,11 +8,21 @@ namespace Linx {
 
 namespace Impl {
 
+template <typename T>
+static constexpr auto identity_element_or(const auto& func, const T& fallback = T {})
+{
+  if constexpr (requires { identity_element<T>(func); }) {
+    return identity_element<T>(func);
+  } else {
+    return T {};
+  }
+}
+
 template <typename T, typename TFunc, typename TLhs, typename TRhs, std::size_t... Is>
 static constexpr auto
 static_transform_vectors_impl(const Vector<TLhs>&, const Vector<TRhs>&, std::index_sequence<Is...>)
 {
-  constexpr auto identity = identity_element<T>(TFunc());
+  constexpr auto identity = identity_element_or<T>(TFunc());
   using TOut =
       std::integer_sequence<T, TFunc()(get_or<Is, identity>(Vector<TLhs>()), get_or<Is, identity>(Vector<TRhs>()))...>;
   return Vector<TOut>();
@@ -42,6 +52,42 @@ static constexpr auto static_subtract_impl(const Vector<TLhs>&, const Vector<TRh
 } // namespace Impl
 
 /**
+ * @brief Apply a monoid to each element of two vectors.
+ * 
+ * If the vectors have different sizes, the resulting size is the greatest of both,
+ * and the identity element of the monoid is used for padding.
+ */
+template <typename TFunc, typename TLhs, typename TRhs>
+constexpr auto transform_vectors(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
+{
+  using Lhs = Vector<TLhs>;
+  using Rhs = Vector<TRhs>;
+  using T = decltype(TFunc()(typename Lhs::element_type(), typename Rhs::element_type()));
+  constexpr auto identity = Impl::identity_element_or<T>(TFunc());
+  if constexpr (Lhs::static_coefs_flag && Rhs::static_coefs_flag) {
+    return Impl::static_transform_vectors_impl<T, TFunc>(
+        lhs,
+        rhs,
+        std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
+  } else if constexpr (Lhs::static_size_flag && Rhs::static_size_flag) {
+    constexpr auto n = std::max(Lhs::n, Rhs::n);
+    // auto out = Vector<T[n]>(); // nvcc 12.4 internal error
+    auto out = std::array<T, n>();
+    for (std::size_t i = 0; i < n; ++i) {
+      out[i] = TFunc()(lhs.get_or(i, identity), rhs.get_or(i, identity));
+    }
+    return vec(LINX_MOVE(out));
+  } else {
+    auto size = std::max<std::size_t>(lhs.size(), rhs.size());
+    auto out = Vector<T*>(Forward(), size);
+    for (std::size_t i = 0; i < size; ++i) {
+      out[i] = TFunc()(lhs.get_or(i, identity), rhs.get_or(i, identity));
+    }
+    return out;
+  }
+}
+
+/**
  * @brief Vector copy.
  */
 template <typename T>
@@ -56,30 +102,12 @@ constexpr auto operator+(Vector<T> in)
 template <typename TLhs, typename TRhs>
 constexpr auto operator+(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 {
-  using Lhs = Vector<TLhs>;
-  using Rhs = Vector<TRhs>;
-  using T = decltype(typename Lhs::element_type() + typename Rhs::element_type());
-  if constexpr (Lhs::static_empty_flag) {
+  if constexpr (Vector<TLhs>::static_empty_flag) {
     return +rhs;
-  } else if constexpr (Rhs::static_empty_flag) {
+  } else if constexpr (Vector<TRhs>::static_empty_flag) {
     return +lhs;
-  } else if constexpr (Lhs::static_coefs_flag && Rhs::static_coefs_flag) {
-    return Impl::static_add_impl<T>(lhs, rhs, std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
-  } else if constexpr (Lhs::static_size_flag && Rhs::static_size_flag) {
-    constexpr auto n = std::max<int>(Lhs::n, Rhs::n);
-    // auto out = Vector<T[n]>(); // nvcc 12.4 internal error
-    auto out = std::array<T, n>();
-    for (int i = 0; i < n; ++i) {
-      out[i] = lhs.get_or(i, 0) + rhs.get_or(i, 0);
-    }
-    return vec(LINX_MOVE(out));
   } else {
-    auto size = std::max<std::size_t>(lhs.size(), rhs.size());
-    auto out = Vector<T*>(Forward(), size);
-    for (std::size_t i = 0; i < size; ++i) {
-      out[i] = lhs.get_or(i, 0) + rhs.get_or(i, 0);
-    }
-    return out;
+    return transform_vectors<Add<>>(lhs, rhs);
   }
 }
 
@@ -128,30 +156,12 @@ constexpr auto operator-(Vector<T> in)
 template <typename TLhs, typename TRhs>
 constexpr auto operator-(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 {
-  using Lhs = Vector<TLhs>;
-  using Rhs = Vector<TRhs>;
-  using T = decltype(typename Lhs::element_type() - typename Rhs::element_type());
-  if constexpr (Lhs::static_empty_flag) {
+  if constexpr (Vector<TLhs>::static_empty_flag) {
     return -rhs;
-  } else if constexpr (Rhs::static_empty_flag) {
+  } else if constexpr (Vector<TRhs>::static_empty_flag) {
     return +lhs;
-  } else if constexpr (Lhs::static_coefs_flag && Rhs::static_coefs_flag) {
-    return Impl::static_subtract_impl<T>(lhs, rhs, std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
-  } else if constexpr (Lhs::static_size_flag && Rhs::static_size_flag) {
-    constexpr auto n = std::max(Lhs::n, Rhs::n);
-    // auto out = Vector<T[n]>(); // nvcc 12.4 internal error
-    auto out = std::array<T, n>();
-    for (std::size_t i = 0; i < n; ++i) {
-      out[i] = lhs.get_or(i, 0) - rhs.get_or(i, 0);
-    }
-    return vec(LINX_MOVE(out));
   } else {
-    auto size = std::max<std::size_t>(lhs.size(), rhs.size());
-    auto out = Vector<T*>(Forward(), size);
-    for (std::size_t i = 0; i < size; ++i) {
-      out[i] = lhs.get_or(i, 0) - rhs.get_or(i, 0);
-    }
-    return out;
+    return transform_vectors<Subtract<>>(lhs, rhs);
   }
 }
 
@@ -171,42 +181,6 @@ constexpr auto operator-(const Vector<TLhs>& lhs, TRhs rhs)
     auto out = +lhs;
     for (std::size_t i = 0; i < out.size(); ++i) {
       out[i] -= rhs;
-    }
-    return out;
-  }
-}
-
-/**
- * @brief Apply a monoid to each element of two vectors.
- * 
- * If the vectors have different sizes, the resulting size is the greatest of both,
- * and the identity element of the monoid is used for padding.
- */
-template <typename TFunc, typename TLhs, typename TRhs>
-constexpr auto transform_vectors(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
-{
-  using Lhs = Vector<TLhs>;
-  using Rhs = Vector<TRhs>;
-  using T = decltype(TFunc()(typename Lhs::element_type(), typename Rhs::element_type()));
-  constexpr auto identity = identity_element<T>(TFunc());
-  if constexpr (Lhs::static_coefs_flag && Rhs::static_coefs_flag) {
-    return Impl::static_transform_vectors_impl<T, TFunc>(
-        lhs,
-        rhs,
-        std::make_index_sequence<std::max(TLhs::size(), TRhs::size())>());
-  } else if constexpr (Lhs::static_size_flag && Rhs::static_size_flag) {
-    constexpr auto n = std::max(Lhs::n, Rhs::n);
-    // auto out = Vector<T[n]>(); // nvcc 12.4 internal error
-    auto out = std::array<T, n>();
-    for (std::size_t i = 0; i < n; ++i) {
-      out[i] = TFunc()(lhs.get_or(i, identity), rhs.get_or(i, identity));
-    }
-    return vec(LINX_MOVE(out));
-  } else {
-    auto size = std::max<std::size_t>(lhs.size(), rhs.size());
-    auto out = Vector<T*>(Forward(), size);
-    for (std::size_t i = 0; i < size; ++i) {
-      out[i] = TFunc()(lhs.get_or(i, identity), rhs.get_or(i, identity));
     }
     return out;
   }
