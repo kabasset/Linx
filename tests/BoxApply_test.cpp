@@ -5,7 +5,7 @@
 
 #include "Linx/Base/Functional.h"
 #include "Linx/Base/Reduction.h"
-#include "Linx/Data/BoxRefactoring.h"
+#include "Linx/Data/Box.h"
 #include "Linx/Run/ProgramContext.h"
 
 #include <Kokkos_Core.hpp>
@@ -77,6 +77,7 @@ BOOST_AUTO_TEST_CASE(static_rank_6_test)
 {
   const auto box = Linx::Box({-1, -2, -3, -4, -5, -6}, {1, 2, 3, 4, 5, 6});
   BOOST_TEST(box.n == 6);
+  BOOST_TEST(not box.static_flag);
   Linx::for_each<Kokkos::Serial>("test", box, [](int i, int j, int k, int l, int m, int n) {
     BOOST_TEST(i >= -1);
     BOOST_TEST(i < 1);
@@ -97,7 +98,7 @@ BOOST_AUTO_TEST_CASE(static_bounds_6_test)
 {
   const auto box = Linx::Box(Linx::vec<-1, -2, -3, -4, -5, -6>(), Linx::vec<1, 2, 3, 4, 5, 6>());
   BOOST_TEST(box.n == 6);
-  BOOST_TEST(box.static_size_flag);
+  BOOST_TEST(box.static_flag);
   Linx::for_each<Kokkos::Serial>("test", box, [](int i, int j, int k, int l, int m, int n) {
     BOOST_TEST(i >= -1);
     BOOST_TEST(i < 1);
