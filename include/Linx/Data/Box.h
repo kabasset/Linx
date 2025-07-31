@@ -196,5 +196,6 @@ private:
 #include "Linx/Data/Box/arithmetics.h"
 #include "Linx/Data/Box/creation.h"
 #include "Linx/Data/Box/funcs.h"
+#include "Linx/Data/Box/types.h"
 
 #endif

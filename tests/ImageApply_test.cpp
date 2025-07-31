@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(copy_test)
 {
   const int width = 4;
   const int height = 3;
-  using Domain = Linx::Box<std::index_sequence<>, int[2]>;
+  using Domain = Linx::Shape<int[2]>;
   using Right = Linx::Image<int, Domain, Linx::ImageContainer<int, Domain, Kokkos::LayoutRight>>;
   using Left = Linx::Image<int, Domain, Linx::ImageContainer<int, Domain, Kokkos::LayoutLeft>>;
   auto right = Right("right", width, height).fill_with_offsets_from_data();
