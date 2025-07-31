@@ -46,9 +46,13 @@ LINX_TEST_CASE_TEMPLATE(rowwise_test)
 LINX_QUICK_TEST_CASE_TEMPLATE(wrapper_test)
 {
   T v[6] = {1, 1, 1, 1, 1, 1};
-  // Linx::Position<3> shape {1, 2, 3};
-  // check_ctor(Linx::Raster<T, 3>(Linx::Wrap(v), 1, 2, 3), "", {1, 2, 3}); // FIXME CTAD
-  // check_ctor(Linx::Raster<T, 3>(Linx::Wrap(v), shape), "", shape); // FIXME CTAD
+
+  // Static rank
+  check_ctor(Linx::wrap(v, 1, 2, 3), "", Linx::shape(1, 2, 3));
+
+  // Static domain
+  const auto box = Linx::shape<1, 2, 3>();
+  check_ctor(Linx::wrap(v, box), "", box);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

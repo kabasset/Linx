@@ -355,7 +355,7 @@ private:
    */
   template <typename TValue, std::size_t... Is>
   Image(Wrap<TValue*> data, const Domain& domain, std::index_sequence<Is...>) :
-      m_container(data, get_or<Is, KOKKOS_INVALID_INDEX>(domain.shape())...),
+      m_container(data.value, get_or<Is, KOKKOS_INVALID_INDEX>(domain.shape())...),
       m_domain {}
   {}
 

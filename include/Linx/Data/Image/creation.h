@@ -111,6 +111,27 @@ auto rowwise(const std::string& label, T (&&rows)[N2][N1][N0])
 
 /**
  * @ingroup creation
+ * @brief Wrap a pointer as a raster with given shape.
+ */
+template <typename T>
+auto wrap(T* data, std::integral auto... extents)
+{
+  auto domain = shape(extents...);
+  return Raster<T, decltype(domain)>(Wrap(data), extents...);
+}
+
+/**
+ * @ingroup creation
+ * @brief Wrap a pointer as a raster with given domain.
+ */
+template <typename T>
+auto wrap(T* data, const auto& domain)
+{
+  return Raster<T, LINX_DECLTYPE(domain)>(Wrap(data), domain);
+}
+
+/**
+ * @ingroup creation
  * @brief Image filled with a single value.
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T>
