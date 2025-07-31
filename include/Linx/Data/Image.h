@@ -30,8 +30,9 @@ namespace Linx {
  * The image domain is a box, which does not necessarily starts at position 0,
  * and can have static or dynamic bounds.
  * 
- * Image elements are default-initialized at construction.
  * Copy constructor and copy assignment operator perform shallow copy.
+ * 
+ * Creation functions (@ref creation) make code much less verbose and should be preferred to constructors.
  * 
  * @see arrays
  * @see `Box`
@@ -252,7 +253,7 @@ public:
     if constexpr (domain_is_shape_flag) {
       return front();
     } else {
-      return at_impl<false>(-domain().start());
+      return at_impl<false>(vec());
     }
   }
 
@@ -274,7 +275,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION reference operator()(std::integral auto... position) const
   {
-    return at_impl<false>(vec(position...), std::make_index_sequence<max_rank>());
+    return at_impl<false>(vec(position...), std::make_index_sequence<max_rank>()); // FIXME avoid vec()
   }
 
   /**
@@ -282,7 +283,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION reference at(std::integral auto... position) const // TODO to DataMixin?
   {
-    return at(vec(position...));
+    return at(vec(position...)); // FIXME avoid vec()
   }
 
   /**
