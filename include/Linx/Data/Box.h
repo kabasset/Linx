@@ -41,7 +41,8 @@ public:
   using Stop = Vector<TStop>; ///< The stop vector type
   using Shape = decltype(std::declval<Stop>() - std::declval<Start>()); ///< The shape vector type
 
-  static constexpr int n = Shape::n; ///< The dimension parameter
+  static constexpr int n = std::max(Start::n, Stop::n); ///< The dimension parameter
+  // FIXME n = Shape::n and adapt either Shape definition or Vector arithmetics
   using size_type = typename Shape::element_type; ///< The coordinate type, which may be non-integral
 
   static constexpr bool static_rank_flag = (n >= 0); ///< Static rank flag

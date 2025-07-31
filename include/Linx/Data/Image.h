@@ -107,10 +107,7 @@ public:
    * @brief Forwarding constructor.
    * @param args The arguments to be forwarded to the container's constructor
    */
-  KOKKOS_INLINE_FUNCTION explicit Image(Forward, auto&&... args) : m_container(LINX_FORWARD(args)...), m_domain {}
-  {
-    static_assert(domain_is_shape_flag);
-  }
+  KOKKOS_INLINE_FUNCTION explicit Image(Forward, auto&&... args) : m_container(LINX_FORWARD(args)...), m_domain {} {}
 
   /**
    * @brief Wrapping constructor.
@@ -348,7 +345,7 @@ private:
   template <std::size_t... Is>
   Image(const std::string& label, const Domain& domain, std::index_sequence<Is...>) :
       m_container(label, get_or<Is, KOKKOS_INVALID_INDEX>(domain.shape())...),
-      m_domain {}
+      m_domain {domain}
   {}
 
   /**
@@ -357,7 +354,7 @@ private:
   template <typename TValue, std::size_t... Is>
   Image(Wrap<TValue*> data, const Domain& domain, std::index_sequence<Is...>) :
       m_container(data.value, get_or<Is, KOKKOS_INVALID_INDEX>(domain.shape())...),
-      m_domain {}
+      m_domain {domain}
   {}
 
   /**
@@ -449,7 +446,8 @@ private:
 private:
 
   Container m_container; ///< The underlying container
-  std::conditional_t<domain_is_shape_flag, std::nullptr_t, Domain> m_domain; ///< The domain, if any
+  using DummyDomain = Vector<>; ///< Placeholder with dummy variadic ctor
+  std::conditional_t<domain_is_shape_flag, DummyDomain, Domain> m_domain; ///< The domain, if any
 };
 
 } // namespace Linx

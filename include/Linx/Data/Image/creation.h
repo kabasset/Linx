@@ -140,6 +140,28 @@ auto fill(const std::string& label, const T& value, auto&&... domain)
   return uninit<T, TSpace>(label, LINX_FORWARD(domain)...).fill(value);
 }
 
+namespace Impl {
+
+auto apply_at_stop(auto func, std::integral auto... stop)
+{
+  return func(stop...);
+}
+
+template <std::size_t... Is>
+auto apply_at_stop_impl(auto func, const auto& domain, std::index_sequence<Is...>)
+{
+  return apply_at_stop(func, domain.stop(Is)...);
+}
+
+template <typename TDomain>
+  requires(TDomain::n >= 0)
+auto apply_at_stop(auto func, const TDomain& domain)
+{
+  return apply_at_stop_impl(func, domain, std::make_index_sequence<static_cast<std::size_t>(TDomain::n)>());
+}
+
+} // namespace Impl
+
 /**
  * @ingroup creation
  * @brief Generate an image.
@@ -150,7 +172,7 @@ auto fill(const std::string& label, const T& value, auto&&... domain)
 template <typename TSpace = Kokkos::DefaultExecutionSpace>
 auto generate(const std::string& label, const auto& func, auto&&... domain)
 {
-  using T = LINX_DECLTYPE(func(domain...)); // FIXME works with extents only
+  using T = LINX_DECLTYPE(Impl::apply_at_stop(func, domain...));
   return uninit<T, TSpace>(label, LINX_FORWARD(domain)...).copy_from(func);
 }
 
