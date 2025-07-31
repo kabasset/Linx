@@ -30,7 +30,7 @@ std::ostream& operator<<(std::ostream& os, const Vector<T>& in)
 template <int N, typename T>
 constexpr auto resize(const Vector<T>& in)
 {
-  if constexpr (Vector<T>::static_coefs_flag) {
+  if constexpr (Vector<T>::static_flag) {
     Impl::static_add_impl(
         in,
         vec<Linx::Dimension {N}, typename Vector<T>::element_type()>(),

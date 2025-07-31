@@ -2,6 +2,9 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/Linx
 // SPDX-License-Identifier: Apache-2.0
 
+#ifndef LINX_DATA_IMAGE_TYPES_H
+#define LINX_DATA_IMAGE_TYPES_H
+
 namespace Linx {
 
 /**
@@ -18,25 +21,9 @@ namespace Linx {
  * 
  * Said otherwise, the stride along axis 0 is 1.
  */
-template <typename T, int N = 2>
-using Raster = Image<T, N, ImageContainer<T, N, Kokkos::LayoutLeft, Kokkos::HostSpace>>;
-
-template <typename T, std::integral... TExtents>
-Image(Wrap<T*>, TExtents...) -> Image<T, sizeof...(TExtents)>;
-
-template <typename T, typename U, int N, typename TContainer>
-Image(Wrap<T*>, Sequence<U, N, TContainer>) -> Image<T, N>;
-
-template <typename T, typename U, int N>
-Image(Wrap<T*>, U (&&)[N]) -> Image<T, N>;
-
-template <typename T>
-struct IsImage : std::false_type {};
-
-template <typename T, int N, typename... TArgs>
-struct IsImage<Image<T, N, TArgs...>> : std::true_type {};
-
-template <typename T>
-concept AnyImage = IsImage<T>::value; // is_specialization won't work with non-type template parameters
+template <typename T, typename TDomain>
+using Raster = Image<T, TDomain, ImageContainer<T, TDomain, Kokkos::LayoutLeft, Kokkos::HostSpace>>;
 
 } // namespace Linx
+
+#endif

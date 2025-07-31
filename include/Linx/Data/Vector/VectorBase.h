@@ -226,6 +226,12 @@ static constexpr auto get_or(const VectorBase<std::integer_sequence<T, Is...>>&)
   return I < 0 || I >= sizeof...(Is) ? Fallback : get<I>(VectorBase<std::integer_sequence<T, Is...>>());
 }
 
+template <auto I, auto Fallback, typename T>
+constexpr auto get_or(const VectorBase<T>& v)
+{
+  return I < 0 || I >= v.size() ? Fallback : v[I];
+}
+
 } // namespace Linx
 
 #endif

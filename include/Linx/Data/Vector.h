@@ -33,7 +33,7 @@ public:
   using reference = const VectorBase<T>::value_type&; ///< The reference type
 
   static constexpr bool static_size_flag = (n >= 0); ///< Static size flag
-  static constexpr bool static_coefs_flag = std::is_same_v<Container, void>; ///< Static coefficients flag
+  static constexpr bool static_flag = std::is_same_v<Container, void>; ///< Static coefficients flag
   static constexpr bool static_empty_flag = (n == 0); ///< Statically empty flag
 
   /**

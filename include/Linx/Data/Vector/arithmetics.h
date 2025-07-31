@@ -68,7 +68,7 @@ constexpr auto transform_vectors(const Vector<TLhs>& lhs, const Vector<TRhs>& rh
   using Rhs = Vector<TRhs>;
   using T = decltype(TFunc()(typename Lhs::element_type(), typename Rhs::element_type()));
   constexpr auto identity = Impl::identity_element_or<T>(TFunc());
-  if constexpr (Lhs::static_coefs_flag && Rhs::static_coefs_flag) {
+  if constexpr (Lhs::static_flag && Rhs::static_flag) {
     return Impl::static_transform_vectors_impl<T, TFunc>(
         lhs,
         rhs,
@@ -121,7 +121,7 @@ constexpr auto operator+(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 template <typename TLhs, std::convertible_to<typename Vector<TLhs>::value_type> TRhs>
 constexpr auto operator+(const Vector<TLhs>& lhs, TRhs rhs)
 {
-  if constexpr (Vector<TLhs>::static_coefs_flag) {
+  if constexpr (Vector<TLhs>::static_flag) {
     if constexpr (requires { TRhs::value; }) {
       return lhs + vec<Dimension {Vector<TLhs>::n}, TRhs::value>();
     } else {
@@ -144,7 +144,7 @@ constexpr auto operator-(Vector<T> in)
 {
   if constexpr (Vector<T>::static_empty_flag) {
     return in;
-  } else if constexpr (Vector<T>::static_coefs_flag) {
+  } else if constexpr (Vector<T>::static_flag) {
     return Impl::static_opposite_impl(in, std::make_index_sequence<T::size()>());
   } else {
     for (std::size_t i = 0; i < in.size(); ++i) {
@@ -175,7 +175,7 @@ constexpr auto operator-(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 template <typename TLhs, std::convertible_to<typename Vector<TLhs>::value_type> TRhs>
 constexpr auto operator-(const Vector<TLhs>& lhs, TRhs rhs)
 {
-  if constexpr (Vector<TLhs>::static_coefs_flag) {
+  if constexpr (Vector<TLhs>::static_flag) {
     if constexpr (requires { TRhs::value; }) {
       return lhs - vec<Dimension {Vector<TLhs>::n}, TRhs::value>();
     } else {

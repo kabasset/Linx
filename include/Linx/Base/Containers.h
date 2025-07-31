@@ -39,30 +39,33 @@ using SequenceContainer = decltype(default_sequence_container<T, N, TArgs...>())
 /**
  * @brief Default image container instance.
  */
-template <typename T, int N, typename... TArgs>
+template <typename T, typename TDomain, typename... TArgs>
 auto default_image_container()
 {
+  static constexpr auto n = TDomain::n;
   static_assert(kokkos_max_rank <= 8);
-  static_assert(N <= kokkos_max_rank);
+  static_assert(n <= kokkos_max_rank);
+
+  // FIXME handle static domain
 
   // We avoid recursion to make NVCC happier
-  if constexpr (N == -1) {
+  if constexpr (n == -1) {
     return Kokkos::DynRankView<T, TArgs...>();
-  } else if constexpr (N == 0 || N == 1) {
+  } else if constexpr (n == 0 || n == 1) {
     return Kokkos::View<T*, TArgs...>();
-  } else if constexpr (N == 2) {
+  } else if constexpr (n == 2) {
     return Kokkos::View<T**, TArgs...>();
-  } else if constexpr (N == 3) {
+  } else if constexpr (n == 3) {
     return Kokkos::View<T***, TArgs...>();
-  } else if constexpr (N == 4) {
+  } else if constexpr (n == 4) {
     return Kokkos::View<T****, TArgs...>();
-  } else if constexpr (N == 5) {
+  } else if constexpr (n == 5) {
     return Kokkos::View<T*****, TArgs...>();
-  } else if constexpr (N == 6) {
+  } else if constexpr (n == 6) {
     return Kokkos::View<T******, TArgs...>();
-  } else if constexpr (N == 7) {
+  } else if constexpr (n == 7) {
     return Kokkos::View<T*******, TArgs...>();
-  } else if constexpr (N == 8) {
+  } else if constexpr (n == 8) {
     return Kokkos::View<T********, TArgs...>();
   }
 }
@@ -70,8 +73,8 @@ auto default_image_container()
 /**
  * @brief Default image container type.
  */
-template <typename T, int N, typename... TArgs>
-using ImageContainer = decltype(default_image_container<T, N, TArgs...>());
+template <typename T, typename TDomain, typename... TArgs>
+using ImageContainer = decltype(default_image_container<T, TDomain, TArgs...>());
 
 /**
  * @brief Traits to rebind containers.

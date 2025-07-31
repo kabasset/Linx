@@ -2,17 +2,79 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/Linx
 // SPDX-License-Identifier: Apache-2.0
 
+#ifndef LINX_DATA_IMAGE_CREATION_H
+#define LINX_DATA_IMAGE_CREATION_H
+
+#include "Linx/Data/Image/types.h"
+
 namespace Linx {
+
+/**
+ * @ingroup creation
+ * @brief Create a default-initialized image.
+ * @tparam T The value type
+ * @tparam TSpace The memory space
+ */
+template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
+auto default_init(const std::string& label, const auto& domain)
+{
+  using Domain = LINX_DECLTYPE(domain);
+  return Image<T, Domain, ImageContainer<T, Domain, TSpace>>(label, domain);
+}
+
+/**
+ * @ingroup creation
+ * @brief Create a default-initialized image.
+ * @tparam T The value type
+ * @tparam TSpace The memory space
+ */
+template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
+auto default_init(const std::string& label, std::integral auto... extents)
+{
+  using Domain = decltype(shape(extents...));
+  return Image<T, Domain, ImageContainer<T, Domain, TSpace>>(label, extents...);
+}
+
+/**
+ * @ingroup creation
+ * @brief Create an uninitialized image.
+ * @tparam T The value type
+ * @tparam TSpace The memory space
+ */
+template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
+auto uninit(const std::string& label, const auto& domain)
+{
+  using Domain = LINX_DECLTYPE(domain);
+  return Image<T, Domain, ImageContainer<T, Domain, TSpace>>(label, domain);
+  // FIXME view_alloc(label, WithoutInitializing)
+}
+
+/**
+ * @ingroup creation
+ * @brief Create an uninitialized image.
+ * @tparam T The value type
+ * @tparam TSpace The memory space
+ */
+template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
+auto uninit(const std::string& label, std::integral auto... extents)
+{
+  using Domain = decltype(shape(extents...));
+  return Image<T, Domain, ImageContainer<T, Domain, TSpace>>(
+      Forward(),
+      Kokkos::view_alloc(label, Kokkos::WithoutInitializing),
+      extents...);
+}
 
 /**
  * @ingroup creation
  * @brief Create a 1D image made of a single row.
  */
-template <typename T, int N>
+template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T, int N>
 auto rowwise(const std::string& label, T (&&row)[N])
 {
-  auto raster = Raster<T, 1>(Wrap(row), N);
-  auto out = Image<T, 1>(label, N);
+  auto domain = shape<N>();
+  auto raster = Raster<T, decltype(domain)>(Wrap(row), N);
+  auto out = uninit<T, TSpace>(label, domain);
   Kokkos::deep_copy(out.container(), raster.container());
   return out;
 }
@@ -21,12 +83,13 @@ auto rowwise(const std::string& label, T (&&row)[N])
  * @ingroup creation
  * @brief Create a 2D image from a collection of rows.
  */
-template <typename T, int N0, int N1>
+template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T, int N0, int N1>
 auto rowwise(const std::string& label, T (&&rows)[N1][N0])
 {
   T* data = *rows;
-  auto raster = Raster<T, 2>(Wrap(data), N0, N1);
-  auto out = Image<T, 2>(label, N0, N1);
+  auto domain = shape<N0, N1>();
+  auto raster = Raster<T, decltype(domain)>(Wrap(data), N0, N1);
+  auto out = uninit<T, TSpace>(label, domain);
   Kokkos::deep_copy(out.container(), raster.container());
   return out;
 }
@@ -35,12 +98,13 @@ auto rowwise(const std::string& label, T (&&rows)[N1][N0])
  * @ingroup creation
  * @brief Create a 3D image from a collection of rows.
  */
-template <typename T, int N0, int N1, int N2>
+template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T, int N0, int N1, int N2>
 auto rowwise(const std::string& label, T (&&rows)[N2][N1][N0])
 {
   T* data = **rows;
-  auto raster = Raster<T, 3>(Wrap(data), N0, N1, N2);
-  auto out = Image<T, 3>(label, N0, N1, N2);
+  auto domain = shape<N0, N1, N2>();
+  auto raster = Raster<T, decltype(domain)>(Wrap(data), N0, N1, N2);
+  auto out = uninit<T, TSpace>(label, domain);
   Kokkos::deep_copy(out.container(), raster.container());
   return out;
 }
@@ -49,11 +113,10 @@ auto rowwise(const std::string& label, T (&&rows)[N2][N1][N0])
  * @ingroup creation
  * @brief Image filled with a single value.
  */
-template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T, std::integral... Is>
-auto fill(const std::string& label, const T& value, Is... shape)
+template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T>
+auto fill(const std::string& label, const T& value, auto&&... domain)
 {
-  static constexpr auto n = sizeof...(Is);
-  return Image<T, n, ImageContainer<T, n, TSpace>>(label, shape...).fill(value); // TODO uninitialized
+  return uninit<T, TSpace>(label, LINX_FORWARD(domain)...).fill(value);
 }
 
 /**
@@ -61,27 +124,28 @@ auto fill(const std::string& label, const T& value, Is... shape)
  * @brief Generate an image.
  * @param label The label
  * @param func The generator
- * @param shape The shape
+ * @param domain The domain parameters
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace>
-auto generate(const std::string& label, const auto& func, std::integral auto... shape)
+auto generate(const std::string& label, const auto& func, auto&&... domain)
 {
-  using T = std::remove_cvref_t<decltype(func(shape...))>;
-  static constexpr auto n = sizeof...(shape);
-  return Image<T, n, ImageContainer<T, n, TSpace>>(label, shape...).copy_from(func);
+  using T = LINX_DECLTYPE(func(domain...)); // FIXME works with extents only
+  return uninit<T, TSpace>(label, LINX_FORWARD(domain)...).copy_from(func);
 }
 
 /**
  * @ingroup creation
  * @brief Create an image with the same memory layout as another image.
- * @tparam U The type of the elements in the new image (defaults to the type of the elements in the input image)
+ * @tparam TRebind The type of the elements in the new image (defaults to the type of the elements in the input image)
  */
-template <typename U = void, typename T, int N, typename TContainer>
-auto same_layout(const std::string& label, const Image<T, N, TContainer>& in)
+template <typename TRebind = void, typename T, typename TDomain, typename TContainer>
+auto same_layout(const std::string& label, const Image<T, TDomain, TContainer>& in)
 {
-  return Image<typename Rebind<T>::As<U>, N, typename Rebind<TContainer>::As<U>>(
+  return Image<typename Rebind<T>::As<TRebind>, TDomain, typename Rebind<TContainer>::As<TRebind>>(
       Forward(),
-      same_layout<U>(label, in.container()));
+      same_layout<TRebind>(label, in.container()));
 }
 
 } // namespace Linx
+
+#endif

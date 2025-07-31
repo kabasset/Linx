@@ -136,15 +136,16 @@ using QuickTestTypes = std::tuple<bool, int, double, Kokkos::complex<float>>; //
 #define LINX_CRTP_CONST_DERIVED static_cast<const TDerived&>(*this)
 
 /**
+ * @brief Base type of an identifier.
+ */
+#define LINX_DECLTYPE(identifier) std::remove_cvref_t<decltype(identifier)>
+
+/**
  * @brief Pre-C++23 `static_assert(false, message)`
  */
 #ifndef __NVCC__
 #define LINX_STATIC_ASSERT_FALSE(message) \
-  []<bool DependentFalse = false>() \
-  { \
-    static_assert(DependentFalse, message); \
-  } \
-  ()
+  []<bool DependentFalse = false>() { static_assert(DependentFalse, message); }()
 #else
 #define LINX_STATIC_ASSERT_FALSE(message)
 #endif
@@ -390,15 +391,11 @@ constexpr bool is_base_template_of()
 
 template <typename T>
 concept Labeled = requires(const T obj) // TODO to Base/concepts
-{
-  obj.label();
-};
+{ obj.label(); };
 
 template <typename T>
 concept Streamable = requires(const T obj) // TODO to Base/concepts
-{
-  std::stringstream() << obj;
-};
+{ std::stringstream() << obj; };
 
 template <typename T>
 concept StreamLabeled = Streamable<T> && not Labeled<T>;
@@ -492,9 +489,11 @@ struct StrongType {
   template <typename T> \
   Name(const T*) -> Name<const T*>;
 
-LINX_STRONG_TYPE(Size)
+LINX_STRONG_TYPE(Size) // FIXME replace with Dimension
 
 LINX_STRONG_TYPE(Wrap)
+
+struct Uninitialized {};
 
 } // namespace Linx
 

@@ -10,11 +10,10 @@
 #include "Linx/Base/Slice.h"
 #include "Linx/Base/Types.h"
 #include "Linx/Base/mixins/Data.h"
+#include "Linx/Base/mixins/Range.h"
 #include "Linx/Data/Box.h"
-#include "Linx/Data/Sequence.h"
 
 #include <Kokkos_Core.hpp>
-#include <Kokkos_StdAlgorithms.hpp>
 #include <concepts>
 #include <string>
 
@@ -25,44 +24,51 @@ namespace Linx {
  * @brief Non-resizable ND array.
  * 
  * @tparam T The element type
- * @tparam N The rank, or -1 for dynamic rank
+ * @tparam TDomain The domain type
  * @tparam TContainer The underlying container type
+ * 
+ * The image domain is a box, which does not necessarily starts at position 0,
+ * and can have static or dynamic bounds.
  * 
  * Image elements are default-initialized at construction.
  * Copy constructor and copy assignment operator perform shallow copy.
  * 
  * @see arrays
+ * @see `Box`
  * @see `DataMixin`
  * @see `RangeMixin`
  */
-template <typename T, int N, typename TContainer = ImageContainer<T, N>>
+template <typename T, typename TDomain, typename TContainer = ImageContainer<T, TDomain>>
 class Image :
-    public DataMixin<T, DataArithmeticMixin<T, Image<T, N, TContainer>>, Image<T, N, TContainer>>,
-    public RangeMixin<is_contiguous<TContainer>(), T, Image<T, N, TContainer>> {
+    public DataMixin<T, DataArithmeticMixin<T, Image<T, TDomain, TContainer>>, Image<T, TDomain, TContainer>>,
+    public RangeMixin<is_contiguous<TContainer>(), T, Image<T, TDomain, TContainer>> {
 public:
 
-  static constexpr int max_rank = (N == -1 ? 7 : N); ///< The max rank supported by Kokkos
-  static constexpr int n = N; ///< The rank parameter
-  using Container = TContainer; ///< The underlying container type
-  using Shape = Position<N>; ///< The shape type
-  using Domain = Box<N>; ///< The domain type
-
-  using memory_space = typename Container::memory_space;
-  using execution_space = typename Container::execution_space;
-
-  using value_type = typename Container::value_type; ///< The possibly const-qualified element type
+  using value_type = typename TContainer::value_type; ///< The possibly const-qualified element type
   using element_type = std::remove_cvref_t<value_type>; ///< The element type
-  using size_type = typename Container::size_type; ///< The index and size type
-  using difference_type = std::ptrdiff_t; ///< The index difference type
-  using reference = typename Container::reference_type; ///< The element reference type
-  using pointer = typename Container::pointer_type; ///< The element pointer type
+  using reference = value_type&; ///< The element reference type
+  using const_reference = const value_type&; ///< The constant element reference type
+  using pointer = value_type*; ///< The element pointer type
+  using const_pointer = const value_type*; ///< The constant element pointer type
+
+  using Domain = TDomain; ///< The domain type
+  using Shape = typename Domain::Shape;
+  static constexpr int n = Domain::n; ///< The rank parameter
+  static constexpr int max_rank = (n == -1 ? kokkos_max_dyn_rank : n); ///< The max rank supported by Kokkos
+  static constexpr bool static_rank_flag = (n >= 0); ///< Static rank flag
+  static constexpr bool static_domain_flag = Domain::static_flag; ///< Static domain flag
+  static constexpr bool domain_is_shape_flag = Domain::Start::static_empty_flag; ///< Shape-only domain flag
+
+  using Container = TContainer; ///< The underlying container type
+  using memory_space = typename Container::memory_space; ///< The memory space
+  using execution_space = typename Container::execution_space; ///< The default execution space
 
   /**
    * @brief Constructor.
    * 
    * @param shape The image extents along each axis
    * 
-   * @warning If the rank is static (`n != -1`), the extent count must match it.
+   * @warning If the rank is static, the extent count must match it.
    */
   explicit Image(std::integral auto... shape) : Image("<Image>", shape...) {}
 
@@ -72,41 +78,38 @@ public:
    * @param label The image label
    * @param shape The image extent along each axis
    * 
-   * @warning If the rank is static (`n != -1`), the extent count must match it.
+   * @warning If the rank is static, the extent count must match it.
    */
-  explicit Image(const std::string& label, std::integral auto... shape) : m_container(label, shape...) {}
+  explicit Image(const std::string& label, std::integral auto... shape) : m_container(label, shape...), m_domain {}
+  {
+    // FIXME static_assert m_domain needs no argument
+  }
 
   /**
    * @brief Constructor.
    * 
-   * @param shape The image extents along each axis
-   * 
-   * @warning If the rank is static (`n != -1`), the shape rank must match it.
+   * @param domain The image domain
    */
-  template <std::integral TInt, typename UContainer>
-  explicit Image(const Sequence<TInt, n, UContainer>& shape) : Image("<Image>", shape) // TODO use LegacyArray?
-  {}
+  explicit Image(Domain domain) : Image("<Image>", domain) {}
 
   /**
    * @brief Constructor.
    * 
    * @param label The image label
-   * @param shape The image extents along each axis
-   * 
-   * @warning If the rank is static (`n != -1`), the shape rank must match it.
+   * @param domain The image domain
    */
-  template <std::integral TInt, typename UContainer>
-  explicit Image(const std::string& label, const Sequence<TInt, n, UContainer>& shape) :
-      Image(label, shape, std::make_index_sequence<max_rank>()) // TODO use LegacyArray?
+  explicit Image(const std::string& label, const Domain& domain) :
+      Image(label, domain, std::make_index_sequence<max_rank>())
   {}
 
   /**
    * @brief Forwarding constructor.
-   * @param args The parameters forwarded to the container's constructor
+   * @param args The arguments to be forwarded to the container's constructor
    */
-  template <typename... TArgs>
-  KOKKOS_INLINE_FUNCTION explicit Image(Forward, TArgs&&... args) : m_container(LINX_FORWARD(args)...)
-  {}
+  KOKKOS_INLINE_FUNCTION explicit Image(Forward, auto&&... args) : m_container(LINX_FORWARD(args)...), m_domain {}
+  {
+    static_assert(domain_is_shape_flag);
+  }
 
   /**
    * @brief Wrapping constructor.
@@ -116,25 +119,37 @@ public:
    * The resulting image does not own the data.
    * It won't manage its memory or ensure it is valid.
    * 
-   * @warning If the rank is static (`n != -1`), the extent count must match it.
+   * @warning If the rank is static, the extent count must match it.
    */
-  template <typename U>
-  explicit Image(Wrap<U*> data, std::integral auto... shape) : m_container(data.value, shape...)
+  template <typename TValue>
+  explicit Image(Wrap<TValue*> data, std::integral auto... shape) : m_container(data.value, shape...), m_domain {}
   {}
 
   /**
    * @brief Wrapping constructor.
    * @param data The wrapped data
-   * @param shape The image extents along each axis
+   * @param domain The image domain
    * 
    * The resulting image does not own the data.
    * It won't manage its memory or ensure it is valid.
-   * 
-   * @warning If the rank is static (`n != -1`), the shape rank must match it.
    */
-  template <typename U, std::integral TInt, typename UContainer>
-  explicit Image(Wrap<U*> data, const Sequence<TInt, n, UContainer>& shape) :
-      Image(data, shape, std::make_index_sequence<max_rank>()) // TODO use LegacyArray?
+  template <typename TValue>
+  explicit Image(Wrap<TValue*> data, const Domain& domain) : Image(data, domain, std::make_index_sequence<max_rank>())
+  {}
+
+  /**
+   * @brief Uninitialized values constructor.
+   */
+  explicit Image(Uninitialized, const std::string& label, std::integral auto... shape) :
+      m_container(Kokkos::view_alloc(label, Kokkos::WithoutInitializing), shape...),
+      m_domain {}
+  {}
+
+  /**
+   * @brief Uninitialized values constructor.
+   */
+  explicit Image(Uninitialized, const std::string& label, const Domain& domain) :
+      Image(Uninitialized(), label, domain, std::make_index_sequence<max_rank>())
   {}
 
   /**
@@ -162,21 +177,32 @@ public:
    */
   Shape shape() const
   {
-    Shape out(rank());
-    for (int i = 0; i < rank(); ++i) {
-      out[i] = m_container.extent_int(i);
+    if constexpr (domain_is_shape_flag) {
+      Shape out(rank());
+      for (int i = 0; i < rank(); ++i) {
+        out[i] = m_container.extent_int(i);
+      }
+      return out;
+    } else {
+      return domain().shape();
     }
-    return out;
   }
 
   /**
-   * @brief Image domain. 
+   * @brief Image domain.
    */
-  Domain domain() const
+  decltype(auto) domain() const
   {
-    return domain(m_container);
+    if constexpr (domain_is_shape_flag) {
+      return domain(m_container);
+    } else {
+      return m_domain;
+    }
   }
 
+  /**
+   * @brief Memory stride along given axis.
+   */
   KOKKOS_INLINE_FUNCTION auto stride(std::integral auto i) const
   {
     return m_container.stride(i);
@@ -185,11 +211,11 @@ public:
   /**
    * @brief Memory striding.
    */
-  Position<n> strides() const
+  auto strides() const
   {
     std::vector<Index> longer(rank() + 1);
     m_container.stride(longer.data());
-    return Position<n>("strides", longer.data(), longer.data() + rank());
+    return vec(longer.data(), longer.data() + rank());
   }
 
   /**
@@ -207,10 +233,15 @@ public:
    * `&front()` is a pointer to the first element.
    * Therefore, `data()` can be less than `&front()`,
    * typically for memory alignment or padding purposes.
+   * 
+   * If the domain does not start at position 0, then `front()` and `origin()` are different.
+   * 
+   * @see `origin()`
    */
   KOKKOS_INLINE_FUNCTION reference front() const
   {
-    return origin();
+    static_assert(max_rank <= 8);
+    return m_container.access(0, 0, 0, 0, 0, 0, 0, 0);
   }
 
   /**
@@ -218,8 +249,11 @@ public:
    */
   KOKKOS_INLINE_FUNCTION reference origin() const
   {
-    static_assert(max_rank <= 8);
-    return m_container.access(0, 0, 0, 0, 0, 0, 0, 0);
+    if constexpr (domain_is_shape_flag) {
+      return front();
+    } else {
+      return at_impl<false>(-domain().start());
+    }
   }
 
   /**
@@ -240,30 +274,21 @@ public:
    */
   KOKKOS_INLINE_FUNCTION reference operator()(std::integral auto... position) const
   {
-    return m_container(position...);
+    return at_impl<false>(vec(position...), std::make_index_sequence<max_rank>());
   }
 
   /**
-   * @brief Access the element at given position.
+   * @brief Access the element at given position, with bounds checking.
    */
-  template <std::integral TInt = int, int M = n>
-  [[deprecated]] KOKKOS_INLINE_FUNCTION reference operator[](const GPosition<TInt, M>& position) const
+  KOKKOS_INLINE_FUNCTION reference at(std::integral auto... position) const // TODO to DataMixin?
   {
-    return at(position);
+    return at(vec(position...));
   }
 
   /**
-   * @brief Access the element at given position, with bounds checking and support for backward indexing.
+   * @brief Access the element at given position, with bounds checking.
    */
-  KOKKOS_INLINE_FUNCTION reference at(std::integral auto... position) const // TODO to DataMixin
-  {
-    return at(std::array {position...}); // FIXME avoid copy
-  }
-
-  /**
-   * @brief Access the element at given position, with bounds checking and support for backward indexing.
-   */
-  KOKKOS_INLINE_FUNCTION reference at(const LegacyArray auto& position) const // TODO to DataMixin
+  KOKKOS_INLINE_FUNCTION reference at(const auto& position) const // TODO to DataMixin?
   {
     return at_impl(position, std::make_index_sequence<max_rank>());
   }
@@ -272,12 +297,14 @@ public:
    * @brief Slice the image as a shallow copy.
    * @param region The slicing as a `Box`
    */
-  template <typename U, int M>
-  auto operator[](const GBox<U, M>& region) const // not __device__ because of `region & domain()`
+  template <typename TStart, typename TStop>
+  auto operator[](const Box<TStart, TStop>& region) const // not __device__ because of `region & domain()`
   {
     const auto& crop = region & domain();
-    using Container = decltype(slice_all(crop, std::make_index_sequence<M>()));
-    return Image<T, Container::rank(), Container>(Forward {}, slice_all(crop, std::make_index_sequence<M>()));
+    using Crop = LINX_DECLTYPE(crop);
+    using Container = LINX_DECLTYPE(slice_all(crop, std::make_index_sequence<Crop::n>()));
+    return Image<T, Crop, Container>(Forward {}, slice_all(crop, std::make_index_sequence<Crop::n>()));
+    // FIXME offset
   }
 
   /**
@@ -300,15 +327,16 @@ public:
   {
     const auto& crop = region & domain(); // Resolve Kokkos::ALL to drop offsets with subview
     if constexpr (sizeof...(TFuncs) == 1) {
-      using Container = decltype(slice_last(std::make_index_sequence<n - 1>(), crop));
-      return Image<T, Container::rank(), Container>(Forward {}, slice_last(std::make_index_sequence<n - 1>(), crop));
+      using Container = LINX_DECLTYPE(slice_last(std::make_index_sequence<n - 1>(), crop));
+      using Domain = LINX_DECLTYPE(domain(std::declval<Container>()));
+      return Image<T, Domain, Container>(Forward {}, slice_last(std::make_index_sequence<n - 1>(), crop));
     } else {
       static_assert(sizeof...(TFuncs) == n);
-      using Container = decltype(slice_all(crop, std::make_index_sequence<sizeof...(TFuncs)>()));
-      return Image<T, Container::rank(), Container>(
-          Forward {},
-          slice_all(crop, std::make_index_sequence<sizeof...(TFuncs)>()));
+      using Container = LINX_DECLTYPE(slice_all(crop, std::make_index_sequence<sizeof...(TFuncs)>()));
+      using Domain = LINX_DECLTYPE(domain(std::declval<Container>()));
+      return Image<T, Domain, Container>(Forward {}, slice_all(crop, std::make_index_sequence<sizeof...(TFuncs)>()));
     }
+    // FIXME offset
   }
 
 private:
@@ -316,53 +344,70 @@ private:
   /**
    * @brief Helper constructor to unroll shape.
    */
-  template <typename TShape, std::size_t... Is>
-  Image(const std::string& label, const TShape& shape, std::index_sequence<Is...>) :
-      Image(label, get_or<Is>(shape, KOKKOS_INVALID_INDEX)...)
+  template <std::size_t... Is>
+  Image(const std::string& label, const Domain& domain, std::index_sequence<Is...>) :
+      m_container(label, get_or<Is, KOKKOS_INVALID_INDEX>(domain.shape())...),
+      m_domain {}
   {}
 
   /**
    * @brief Helper constructor to unroll shape.
    */
-  template <typename U, typename TShape, std::size_t... Is>
-  Image(Wrap<U*> data, const TShape& shape, std::index_sequence<Is...>) :
-      Image(data, get_or<Is>(shape, KOKKOS_INVALID_INDEX)...)
+  template <typename TValue, std::size_t... Is>
+  Image(Wrap<TValue*> data, const Domain& domain, std::index_sequence<Is...>) :
+      m_container(data, get_or<Is, KOKKOS_INVALID_INDEX>(domain.shape())...),
+      m_domain {}
+  {}
+
+  /**
+   * @brief Helper constructor to unroll shape.
+   */
+  template <std::size_t... Is>
+  Image(Uninitialized, const std::string& label, const Domain& domain, std::index_sequence<Is...>) :
+      m_container(
+          Kokkos::view_alloc(label, Kokkos::WithoutInitializing),
+          get_or<Is, KOKKOS_INVALID_INDEX>(domain.shape())...),
+      m_domain {domain}
   {}
 
   /**
    * @brief Helper accessor to unroll position.
    */
-  template <typename TPosition, std::size_t... Is>
+  template <bool CheckBounds = true, typename TPosition, std::size_t... Is>
   KOKKOS_INLINE_FUNCTION reference at_impl(const TPosition& position, std::index_sequence<Is...>) const
   {
-    return operator()(index_along<Is>(get_or<Is>(position, 0))...);
+    return m_container.access(index_along<Is, CheckBounds>(get_or<Is, 0>(position))...);
   }
 
   /**
-   * @brief Deduce the in-bounds index, with support for backward indexing.
+   * @brief Underlying index.
    */
-  template <int I>
+  template <int I, bool CheckBounds>
   KOKKOS_INLINE_FUNCTION auto index_along(std::integral auto i) const
   {
-    const auto stop = extent(I);
-    const auto out = i < 0 ? stop + i : i;
-    OutOfBounds::may_abort("index", out, Slice(0, stop));
-    return out;
+    if constexpr (CheckBounds) {
+      OutOfBounds::may_abort("index", i, Slice(0, extent(I)));
+    }
+    if constexpr (domain_is_shape_flag) {
+      return i;
+    } else {
+      return i - m_domain.start(I);
+    }
   }
 
   /**
    * @brief Helper function for 0-based fixed-rank containers.
    */
   template <typename... TArgs>
-  static Domain domain(const Kokkos::View<TArgs...>& container) // TODO free function
+  static auto /*Domain*/ domain(const Kokkos::View<TArgs...>& container) // TODO free function
   {
-    Shape start("Image domain start");
-    Shape stop("Image domain stop");
-    for (int i = 0; i < n; ++i) {
-      start[i] = 0;
+    static constexpr auto n = Kokkos::View<TArgs...>::rank();
+    auto stop = vec<Dimension {n}>(0);
+    for (std::size_t i = 0; i < n; ++i) {
       stop[i] = container.extent_int(i);
     }
-    return {LINX_MOVE(start), LINX_MOVE(stop)};
+    return Box(stop);
+    // FIXME handle static domain
   }
 
   /**
@@ -372,13 +417,11 @@ private:
   static Domain domain(const Kokkos::DynRankView<TArgs...>& container) // TODO free function
   {
     auto rank = container.rank();
-    Shape start("Image domain start", rank);
-    Shape stop("Image domain stop", rank);
-    for (decltype(rank) i = 0; i < rank; ++i) {
-      start[i] = 0;
+    auto stop = vec(Dimension {rank}, 0);
+    for (LINX_DECLTYPE(rank) i = 0; i < rank; ++i) {
       stop[i] = container.extent_int(i);
     }
-    return {LINX_MOVE(start), LINX_MOVE(stop)};
+    return Box(stop);
   }
 
   /**
@@ -388,6 +431,7 @@ private:
   auto slice_all(const TSlice& slice, std::index_sequence<Is...>) const
   {
     return Kokkos::subview(m_container, kokkos_slice(get<Is>(slice))...);
+    // FIXME offset
   }
 
   /**
@@ -398,23 +442,19 @@ private:
   {
     using Prepend = std::array<Kokkos::ALL_t, sizeof...(Is)>;
     return Kokkos::subview(m_container, (typename std::tuple_element<Is, Prepend>::type {})..., kokkos_slice(slice));
+    // FIXME offset
   }
 
 private:
 
-  /**
-   * @brief The underlying container.
-   */
-  Container m_container;
+  Container m_container; ///< The underlying container
+  std::conditional_t<domain_is_shape_flag, std::nullptr_t, Domain> m_domain; ///< The domain, if any
 };
 
 } // namespace Linx
 
-// aliases and deduction guides
-#include "Linx/Data/Image/types.h"
-// creation functions
 #include "Linx/Data/Image/creation.h"
-// other free functions
 #include "Linx/Data/Image/funcs.h"
+#include "Linx/Data/Image/types.h"
 
 #endif

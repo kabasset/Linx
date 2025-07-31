@@ -12,7 +12,7 @@
 #include "Linx/Base/Slice.h"
 #include "Linx/Base/Types.h"
 #include "Linx/Base/concepts/Array.h"
-#include "Linx/Data/Sequence.h"
+#include "Linx/Data/Vector.h"
 
 #include <Kokkos_Core.hpp>
 #include <concepts>
@@ -20,103 +20,61 @@
 
 namespace Linx {
 
-template <typename T, int N>
-struct Shape : StrongType<GPosition<T, N>, struct ShapeTag> { // FIXME const GPosition&?
-  using StrongType<GPosition<T, N>, ShapeTag>::StrongType;
-
-  /**
-   * @brief Compute the shape size.
-   */
-  T size() const
-  {
-    return this->value.rank() > 0 ? product(this->value) : 0;
-  }
-};
-
-template <typename T, int N>
-Shape(T (&&)[N]) -> Shape<T, N>;
-
-template <typename T, int N>
-Shape(const GPosition<T, N>&) -> Shape<T, N>;
-
 /**
  * @ingroup regions
  * @relatesalso Window
  * @brief An ND bounding box, defined by its start (inclusive) and stop (exclusive) bounds.
  * 
- * @tparam T The coordinate type
- * @tparam N The dimension parameter
+ * @tparam TStart The start vector coefficients specification
+ * @tparam TStop The stop vector coefficients specification
  * 
- * If `T` is integral, the box can be iterated with `for_each()` and `kokkos_reduce()`,
- * and patches can be created from the box.
+ * If start and stop vectors have integral coefficients,
+ * the box can be iterated with `for_each()` and `kokkos_reduce()`, and patches can be created from the box.
  * 
  * @see `Patch`
  */
-template <typename T, int N>
-class GBox {
+template <typename TStart = std::integer_sequence<int>, typename TStop = std::integer_sequence<int>>
+class Box {
 public:
 
-  static constexpr int n = N; ///< The dimension parameter
-  using size_type = T; ///< The coordinate type, which may be non-integral
-  using value_type = GPosition<T, N>; ///< The position type
+  using Start = Vector<TStart>; ///< The start vector type
+  using Stop = Vector<TStop>; ///< The stop vector type
+  using Shape = decltype(std::declval<Stop>() - std::declval<Start>()); ///< The shape vector type
+
+  static constexpr int n = Shape::n; ///< The dimension parameter
+  using size_type = typename Shape::element_type; ///< The coordinate type, which may be non-integral
+
+  static constexpr bool static_rank_flag = (n >= 0); ///< Static rank flag
+  static constexpr bool static_flag = Shape::static_flag; ///< Static bounds flag
+
+  /**
+   * @brief Default constructor.
+   * 
+   */
+  constexpr Box() : m_start {}, m_stop {} {}
 
   /**
    * @brief Constructor.
    */
-  GBox() : GBox(std::abs(n)) {}
+  constexpr Box(const Stop& stop) : m_start {}, m_stop(stop) {}
 
   /**
-   * @copydoc GBox()
+   * @brief Constructor.
    */
-  explicit GBox(std::integral auto size) : m_start("start", size), m_stop("stop", size) {}
-
-  /**
-   * @copydoc GBox()
-   */
-  GBox(const LegacyArray auto& start, const LegacyArray auto& stop) : GBox(std::size(start))
-  {
-    SizeMismatch::may_throw("bounds", rank(), start, stop);
-    for (std::size_t i = 0; i < rank(); ++i) {
-      m_start[i] = start[i];
-      m_stop[i] = stop[i];
-    }
-  }
-
-  /**
-   * @copydoc GBox()
-   */
-  template <typename U>
-  GBox(std::initializer_list<U> start, std::initializer_list<U> stop) : GBox(std::size(start))
-  {
-    SizeMismatch::may_throw("bounds", rank(), start, stop);
-    auto start_it = start.begin();
-    auto stop_it = stop.begin();
-    for (std::size_t i = 0; i < rank(); ++i, ++start_it, ++stop_it) {
-      m_start[i] = *start_it;
-      m_stop[i] = *stop_it;
-    }
-  }
-
-  /**
-   * @copydoc GBox()
-   */
-  GBox(GPosition<size_type, n> start, Shape<size_type, n> shape) :
-      m_start(LINX_MOVE(start)),
-      m_stop(shape.value + m_start)
-  {}
+  constexpr Box(const Start& start, const Stop& stop) : m_start(start), m_stop(stop) {}
 
   /**
    * @brief The box rank.
    */
-  KOKKOS_INLINE_FUNCTION auto rank() const
+  KOKKOS_INLINE_FUNCTION constexpr auto rank() const
   {
-    return m_start.size();
+    return std::max(m_start.size(), m_stop.size());
   }
 
   /**
    * @brief The box shape.
    */
-  auto shape() const
+  constexpr auto shape() const
   {
     return m_stop - m_start;
   }
@@ -124,7 +82,7 @@ public:
   /**
    * @brief The start bound, inclusive.
    */
-  const auto& start() const
+  KOKKOS_INLINE_FUNCTION const auto& start() const
   {
     return m_start;
   }
@@ -132,7 +90,7 @@ public:
   /**
    * @brief The stop bound, exclusive.
    */
-  const auto& stop() const
+  KOKKOS_INLINE_FUNCTION const auto& stop() const
   {
     return m_stop;
   }
@@ -140,7 +98,7 @@ public:
   /**
    * @brief The start bound along given axis.
    */
-  KOKKOS_INLINE_FUNCTION auto start(std::integral auto i) const
+  KOKKOS_INLINE_FUNCTION constexpr auto start(std::integral auto i) const
   {
     return m_start[i];
   }
@@ -148,7 +106,7 @@ public:
   /**
    * @copybrief start()
    */
-  KOKKOS_INLINE_FUNCTION auto& start(std::integral auto i)
+  KOKKOS_INLINE_FUNCTION constexpr auto& start(std::integral auto i)
   {
     return m_start[i];
   }
@@ -156,7 +114,7 @@ public:
   /**
    * @brief The stop bound along given axis.
    */
-  KOKKOS_INLINE_FUNCTION auto stop(std::integral auto i) const
+  KOKKOS_INLINE_FUNCTION constexpr auto stop(std::integral auto i) const
   {
     return m_stop[i];
   }
@@ -164,7 +122,7 @@ public:
   /**
    * @copybrief stop()
    */
-  KOKKOS_INLINE_FUNCTION auto& stop(std::integral auto i)
+  KOKKOS_INLINE_FUNCTION constexpr auto& stop(std::integral auto i)
   {
     return m_stop[i];
   }
@@ -172,7 +130,7 @@ public:
   /**
    * @brief The extent along given axis.
    */
-  KOKKOS_INLINE_FUNCTION auto extent(std::integral auto i) const
+  KOKKOS_INLINE_FUNCTION constexpr auto extent(std::integral auto i) const
   {
     return m_stop[i] - m_start[i];
   }
@@ -180,10 +138,10 @@ public:
   /**
    * @brief The product of the extents.
    */
-  KOKKOS_INLINE_FUNCTION auto size() const
+  KOKKOS_INLINE_FUNCTION constexpr auto size() const
   {
-    T out = 1;
-    for (std::size_t i = 0; i < m_start.size(); ++i) {
+    size_type out = 1;
+    for (int i = 0; i < rank(); ++i) {
       out *= extent(i);
     }
     return out;
@@ -192,7 +150,7 @@ public:
   /**
    * @brief Check whether two boxes are equal.
    */
-  bool operator==(const auto& other) const
+  constexpr bool operator==(const auto& other) const
   {
     return m_start == other.start() && m_stop == other.stop();
   }
@@ -200,7 +158,7 @@ public:
   /**
    * @brief Check whether two boxes are different.
    */
-  bool operator!=(const auto& other) const
+  constexpr bool operator!=(const auto& other) const
   {
     return not(*this == other);
   }
@@ -224,460 +182,19 @@ public:
    */
   bool contains(std::integral auto... is) const
   {
-    return contains(value_type {is...});
-  }
-
-  /**
-   * @brief Shrink the box inside another box (i.e. get the intersection of both).
-   */
-  template <typename U, int M>
-  GBox& operator&=(const GBox<U, M>& rhs)
-  {
-    // FIXME assert rank() == rhs.rank()?
-    for (std::size_t i = 0; i < rank(); ++i) {
-      m_start[i] = std::max<size_type>(m_start[i], rhs.start(i));
-      m_stop[i] = std::min<size_type>(m_stop[i], rhs.stop(i));
-    }
-    return *this;
-  }
-
-  /**
-   * @brief Minimally grow the box to include another box (i.e. get the minimum box which contains both).
-   */
-  template <typename U, int M>
-  [[deprecated]] GBox& operator|=(const GBox<U, M>& rhs)
-  {
-    // FIXME assert rank() == rhs.rank()?
-    for (std::size_t i = 0; i < rank(); ++i) {
-      m_start[i] = std::min<size_type>(m_start[i], rhs.start(i));
-      m_stop[i] = std::max<size_type>(m_stop[i], rhs.stop(i));
-    }
-    return *this;
-  }
-
-  /**
-   * @brief Grow the box by a given margin.
-   */
-  template <typename U, int M>
-  GBox& operator+=(const GBox<U, M>& margin)
-  {
-    // FIXME allow N=-1
-    m_start += resize<n, Kokkos::HostSpace>("start", margin.start());
-    m_stop += resize<n, Kokkos::HostSpace>("stop", margin.stop());
-    return *this;
-  }
-
-  /**
-   * @brief Shrink the box by a given margin.
-   */
-  template <typename U, int M>
-  GBox& operator-=(const GBox<U, M>& margin)
-  {
-    // FIXME allow N=-1
-    m_start -= resize<n, Kokkos::HostSpace>("start", margin.start());
-    m_stop -= resize<n, Kokkos::HostSpace>("stop", margin.stop());
-    return *this;
-  }
-
-  /**
-   * @brief Translate the box by a given vector.
-   */
-  GBox& operator+=(const LegacyArray auto& vector)
-  {
-    // FIXME allow N=-1
-    m_start += resize<n, Kokkos::HostSpace>("start", vector);
-    m_stop += resize<n, Kokkos::HostSpace>("stop", vector);
-    return *this;
-  }
-
-  /**
-   * @brief Translate the box by the opposite of a given vector.
-   */
-  GBox& operator-=(const LegacyArray auto& vector)
-  {
-    // FIXME allow N=-1
-    m_start -= resize<n, Kokkos::HostSpace>("start", vector);
-    m_stop -= resize<n, Kokkos::HostSpace>("stop", vector);
-    return *this;
-  }
-
-  /**
-   * @brief Add a scalar to each coordinate.
-   */
-  GBox& operator+=(size_type scalar)
-  {
-    m_start += scalar;
-    m_stop += scalar;
-    return *this;
-  }
-
-  /**
-   * @brief Subtract a scalar to each coordinate.
-   */
-  GBox& operator-=(size_type scalar)
-  {
-    m_start -= scalar;
-    m_stop -= scalar;
-    return *this;
-  }
-
-  /**
-   * @brief Add 1 to each coordinate.
-   */
-  GBox& operator++()
-  {
-    return *this += 1;
-  }
-
-  GBox operator++(int)
-  {
-    GBox out = +(*this);
-    ++(*this);
-    return out;
-  }
-
-  /**
-   * @brief Subtract 1 to each coordinate.
-   */
-  GBox& operator--()
-  {
-    return *this -= 1;
-  }
-
-  GBox operator--(int)
-  {
-    GBox out = +(*this);
-    --(*this);
-    return out;
-  }
-
-  /**
-   * @brief Copy.
-   */
-  GBox operator+() const
-  {
-    return {+m_start, +m_stop};
-  }
-
-  /**
-   * @brief Invert the sign of each coordinate.
-   */
-  GBox operator-() const
-  {
-    // FIXME swap bounds?
-    return {-m_start, -m_stop};
-  }
-
-  /**
-   * @brief Multiply each coordinate.
-   */
-  GBox operator*=(size_type scalar)
-  {
-    // FIXME handle negative scalar?
-    m_start *= scalar;
-    m_stop *= scalar;
-    return *this;
-  }
-
-  /**
-   * @brief Divide each coordinate.
-   */
-  GBox operator/=(size_type scalar)
-  {
-    // FIXME handle negative scalar?
-    m_start /= scalar;
-    m_stop /= scalar;
-    return *this;
-  }
-
-  /**
-   * @brief Equality.
-   */
-  template <typename U, int M>
-  bool operator==(const GBox<U, M>& rhs) const
-  {
-    return m_start == rhs.m_start && m_stop == rhs.m_stop;
-  }
-
-  /**
-   * @brief Inequality.
-   */
-  template <typename U, int M>
-  bool operator!=(const GBox<U, M>& rhs) const
-  {
-    return not(*this == rhs);
+    return contains(std::array {is...});
   }
 
 private:
 
-  value_type m_start; ///< The start bound
-  value_type m_stop; ///< The stop bound
+  Start m_start; ///< The start bound
+  Stop m_stop; ///< The stop bound
 };
 
-GBox() -> GBox<int, 0>;
-
-template <typename T, int N>
-GBox(T (&&)[N]) -> GBox<T, N>;
-
-template <typename T, int N>
-GBox(T (&&)[N], T (&&)[N]) -> GBox<T, N>;
-
-template <typename T, int N>
-GBox(const GPosition<T, N>&) -> GBox<T, N>;
-
-template <typename T, int N>
-GBox(const GPosition<T, N>&, const GPosition<T, N>&) -> GBox<T, N>;
-
-template <typename T, int N>
-GBox(const GPosition<T, N>&, const Shape<T, N>&) -> GBox<T, N>;
-
-template <typename T, int N>
-GBox(T (&&)[N], const Shape<T, N>&) -> GBox<T, N>;
-
-template <int M, typename T, int N>
-GBox<T, M> pad(const GBox<T, N>& in) // FIXME rename as rerank?
-{
-  return GBox<T, M>({resize<M>("start", in.start()), resize<M>("stop", in.stop())});
-}
-
-/**
- * @relatesalso GBox
- */
-template <typename T, int N>
-GBox<T, N> operator+(const GBox<T, N>& lhs, const auto& rhs)
-{
-  auto out = +lhs;
-  out += rhs;
-  return out;
-}
-
-/**
- * @relatesalso GBox
- */
-template <typename T, int N>
-GBox<T, N> operator-(const GBox<T, N>& lhs, const auto& rhs)
-{
-  auto out = +lhs;
-  out -= rhs;
-  return out;
-}
-
-/**
- * @relatesalso GBox
- */
-template <typename T, int N>
-GBox<T, N> operator*(const GBox<T, N>& lhs, const auto& rhs)
-{
-  auto out = +lhs;
-  out *= rhs;
-  return out;
-}
-
-/**
- * @relatesalso GBox
- */
-template <typename T, int N>
-GBox<T, N> operator/(const GBox<T, N>& lhs, const auto& rhs)
-{
-  auto out = +lhs;
-  out /= rhs;
-  return out;
-}
-
-/**
- * @relatesalso GBox
- */
-template <typename T, int N, typename U, int M>
-GBox<T, N> operator&(const GBox<T, N>& lhs, const GBox<U, M>& rhs)
-{
-  auto out = +lhs;
-  out &= rhs;
-  return out;
-}
-
-/**
- * @brief Create the dilation of a box by a given margin.
- */
-template <typename T, int N>
-GBox<T, N> dilate(const GBox<T, N>& box, const std::convertible_to<T> auto& margin)
-{
-  return GBox<T, N>(box.start() - margin, box.stop() + margin);
-}
-
-/**
- * @brief Create the erosion of a box by a given margin.
- */
-template <typename T, int N>
-GBox<T, N> erode(const GBox<T, N>& box, const std::convertible_to<T> auto& margin)
-{
-  return GBox<T, N>(box.start() + margin, box.stop() - margin);
-}
-
-/**
- * @brief Create the dilation of a box by a given margin.
- */
-template <typename T, int N, typename TRhs>
-  requires requires(const TRhs& rhs) { bbox(rhs); }
-GBox<T, N> dilate(const GBox<T, N>& box, const TRhs& margin)
-{
-  auto margin_box = bbox(margin);
-  return GBox<T, N>(
-      box.start() + resize<N, Kokkos::HostSpace>("margin start", margin_box.start()),
-      box.stop() + resize<N, Kokkos::HostSpace>("margin stop", margin_box.stop() - 1));
-}
-
-/**
- * @brief Create the erosion of a box by a given margin.
- */
-template <typename T, int N, typename TRhs>
-  requires requires(const TRhs& rhs) { bbox(rhs); }
-GBox<T, N> erode(const GBox<T, N>& box, const TRhs& margin)
-{
-  auto margin_box = bbox(margin);
-  return GBox<T, N>(
-      box.start() - resize<N, Kokkos::HostSpace>("margin start", margin_box.start()),
-      box.stop() - resize<N, Kokkos::HostSpace>("margin stop", margin_box.stop() - 1));
-}
-
-/**
- * @relatesalso GBox
- * @brief Get the 1D span along the i-th axis.
- */
-template <int I, typename T, int N>
-Slice<T> get(const GBox<T, N>& box)
-{
-  return Slice(box.start(I), box.stop(I));
-}
-
-namespace Impl {
-
-template <typename TSlice, std::size_t... Is>
-auto box_impl(const TSlice& slice, std::index_sequence<Is...>)
-{
-  using T = typename TSlice::size_type;
-  static constexpr int N = sizeof...(Is);
-  return GBox<T, N>({get<Is>(slice).start()...}, {get<Is>(slice).stop()...});
-}
-
-} // namespace Impl
-
-/**
- * @relatesalso GBox
- * @brief Get the bounding box of a box.
- * 
- * This function is a no-op, it merely forwards its input.
- */
-template <typename T, int N>
-const GBox<T, N>& bbox(const GBox<T, N>& in)
-{
-  return in;
-}
-
-/**
- * @relatesalso Slice
- * @brief Get the bounding box of a slice.
- * 
- * @warning Unbounded slices are not supported, and singleton slices must be integral.
- */
-template <typename T, typename... TFuncs>
-GBox<T, sizeof...(TFuncs)> bbox(const Slice<T, TFuncs...>& slice)
-{
-  static constexpr int n = sizeof...(TFuncs);
-  return Impl::box_impl(slice, std::make_index_sequence<n>());
-}
-
-/**
- * @relatesalso Slice
- * @relatesalso GBox
- * @brief Make a slice clamped by a region.
- * 
- * The region may be of higher rank than the slice: extra dimensions are ignored.
- */
-template <typename T, typename... TFuncs>
-auto operator&(const Slice<T, TFuncs...>& slice, const auto& region) // FIXME requires region.start(i), regions.stop(i)
-{
-  static constexpr auto last = sizeof...(TFuncs) - 1;
-  if constexpr (last == 0) {
-    return clamp(slice, region.start(0), region.stop(0));
-  } else {
-    return Slice(Forward(), slice.lower() & region, clamp(slice.last(), region.start(last), region.stop(last)));
-  }
-}
-
-namespace Impl {
-
-template <typename TSpace, typename T, int N, std::size_t... Is>
-auto kokkos_execution_policy_impl(const GBox<T, N>& domain, std::index_sequence<Is...>)
-{
-  using Policy = Kokkos::MDRangePolicy<TSpace, Kokkos::Rank<N>, Kokkos::IndexType<Index>>;
-  using Array = Policy::point_type;
-  return Policy(Array {domain.start(Is)...}, Array {domain.stop(Is)...});
-}
-
-} // namespace Impl
-
-/**
- * @ingroup regions
- * @brief Shortcut for indexing.
- */
-template <int N>
-using Box = GBox<Index, N>;
-
-/**
- * @brief Get the execution policy of a box.
- */
-template <typename TSpace, typename T, int N>
-auto kokkos_execution_policy(const GBox<T, N>& domain)
-{
-  // TODO support Properties?
-  if constexpr (N == 1) {
-    return Kokkos::RangePolicy<TSpace, Kokkos::IndexType<Index>>(domain.start(0), domain.stop(0));
-  } else {
-    return Impl::kokkos_execution_policy_impl<TSpace>(domain, std::make_index_sequence<N>());
-  }
-}
-
-/**
- * @ingroup regions
- * @brief Apply a function to each position of a region.
- * 
- * @param label Some label for debugging
- * @param region The region
- * @param func The function
- * 
- * The coordinate type must be integral and the function must take integral coordinates as input.
- */
-template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T, int N, typename TFunc>
-void for_each(const std::string& label, const GBox<T, N>& region, TFunc&& func)
-{
-#define LINX_CASE_RANK(n) \
-  case n: \
-    if constexpr (is_nary<TFunc, int, n>()) { \
-      return Kokkos::parallel_for(label, kokkos_execution_policy<TSpace>(pad<n>(region)), LINX_FORWARD(func)); \
-    } else { \
-      return; \
-    }
-
-  if constexpr (N == -1) {
-    switch (region.rank()) {
-      case 0:
-        return;
-        LINX_CASE_RANK(1)
-        LINX_CASE_RANK(2)
-        LINX_CASE_RANK(3)
-        LINX_CASE_RANK(4)
-        LINX_CASE_RANK(5)
-        LINX_CASE_RANK(6)
-      default:
-        throw Linx::OutOfBounds("Dynamic rank", region.rank(), Segment<int>(0, 6));
-    }
-  } else {
-    Kokkos::parallel_for(label, kokkos_execution_policy<TSpace>(region), LINX_FORWARD(func));
-  }
-
-#undef LINX_CASE_RANK
-}
-
 } // namespace Linx
+
+#include "Linx/Data/Box/arithmetics.h"
+#include "Linx/Data/Box/creation.h"
+#include "Linx/Data/Box/funcs.h"
 
 #endif
