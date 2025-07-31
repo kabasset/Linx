@@ -71,6 +71,10 @@ BOOST_AUTO_TEST_CASE(generate_test)
       BOOST_TEST(a(i, j) == i + j * 4);
     }
   }
+
+  BOOST_TEST(a.front() == -1 - 2 * 4);
+  BOOST_TEST(a.origin() == 0);
+  BOOST_TEST(a.back() == 2 + 3 * 4);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

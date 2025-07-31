@@ -250,7 +250,7 @@ public:
     if constexpr (domain_is_shape_flag) {
       return front();
     } else {
-      return at_impl<false>(vec());
+      return at_impl<false>(vec(), std::make_index_sequence<max_rank>());
     }
   }
 
