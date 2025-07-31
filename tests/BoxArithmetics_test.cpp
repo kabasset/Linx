@@ -1,9 +1,9 @@
 // SPDX-FileCopyrightText: Copyright (C) 2024, Antoine Basset
 // SPDX-License-Identifier: Apache-2.0
 
-#define BOOST_TEST_MODULE BoxArithmeticTest
+#define BOOST_TEST_MODULE BoxArithmeticsTest
 
-#include "Linx/Data/BoxRefactoring.h"
+#include "Linx/Data/Box.h"
 #include "Linx/Run/ProgramContext.h"
 
 #include <boost/test/unit_test.hpp>
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(intersection_test)
   auto lhs = Linx::shape<1, 3, 5, 7>() - Linx::vec<4_D, 2>(); // [-2, -2, -2, -2] ~ [-1, 1, 3, 5]
   auto rhs = Linx::cube<3_D, 1>(); // [-1, -1, -1] ~ [2, 2, 2]
   auto out = lhs & rhs;
-  BOOST_TEST(out.static_size_flag);
+  BOOST_TEST(out.static_flag);
   BOOST_TEST(out.start().equal(-1, -1, -1, -2));
   BOOST_TEST(out.stop().equal(-1, 1, 2, 5));
 }
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(bbox_test)
   auto lhs = Linx::shape<1, 3, 5, 7>() - Linx::vec<4_D, 2>(); // [-2, -2, -2, -2] ~ [-1, 1, 3, 5]
   auto rhs = Linx::cube<3_D, 1>(); // [-1, -1, -1] ~ [2, 2, 2]
   auto out = Linx::bbox(lhs, rhs);
-  BOOST_TEST(out.static_size_flag);
+  BOOST_TEST(out.static_flag);
   BOOST_TEST(out.start().equal(-2, -2, -2, -2));
   BOOST_TEST(out.stop().equal(2, 2, 3, 5));
 }
