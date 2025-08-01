@@ -33,7 +33,7 @@ struct CompareAddresses {
 
 LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
-BOOST_AUTO_TEST_CASE(offset_test)
+BOOST_AUTO_TEST_CASE(address_test)
 {
   auto in = Linx::uninit<Linx::Index>("in", 1, 2, 3, 4, 5, 6).fill_with_offsets_from_data();
   auto test = Linx::default_init<Linx::Index>("test", in.domain());
@@ -60,12 +60,27 @@ BOOST_AUTO_TEST_CASE(stride_test)
   BOOST_TEST(Linx::offset_from_origin(in, -1, -1, -1, -1, -1, -1, -1, -1) == -Linx::sum(strides));
 }
 
-BOOST_AUTO_TEST_CASE(backward_indexing_test)
+BOOST_AUTO_TEST_CASE(shifted_stride_test)
+{
+  using namespace Linx::Literals;
+
+  auto in = Linx::uninit<bool>("in", Linx::cube<3_D, 1>());
+  auto strides = in.strides();
+  BOOST_TEST(Linx::offset_from_origin(in, -1, 0, 0) == -strides[0]);
+  BOOST_TEST(Linx::offset_from_origin(in, 0, -1, 0) == -strides[1]);
+  BOOST_TEST(Linx::offset_from_origin(in, 0, 0, -1) == -strides[2]);
+  BOOST_TEST(Linx::offset_from_origin(in, 1, 1, 1) == Linx::sum(strides));
+}
+
+BOOST_AUTO_TEST_CASE(raster_ordering_test)
 {
   auto in = Linx::Raster<int, Linx::Shape<int[2]>>("in", 4, 3).fill_with_offsets_from_data();
-  BOOST_TEST(in.at(-1, 0) == 3);
-  BOOST_TEST(in.at(0, -1) == 8);
-  BOOST_TEST(in.at(-1, -1) == 11);
+  // FIXME make Slice iterable: for(auto j : along<0>(in.domain())) (rename get as along?)
+  for (int j = 0; j < in.extent(1); ++j) {
+    for (int i = 0; i < in.extent(0); ++i) {
+      BOOST_TEST(in(i, j) == i + j * in.extent(0));
+    }
+  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
