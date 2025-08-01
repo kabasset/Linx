@@ -213,7 +213,7 @@ public:
   {
     std::vector<Index> longer(rank() + 1);
     m_container.stride(longer.data());
-    return vec(longer.data(), longer.data() + rank());
+    return Vector<Index*>(longer.data(), longer.data() + rank());
   }
 
   /**

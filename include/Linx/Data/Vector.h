@@ -6,6 +6,7 @@
 #define LINX_DATA_VECTOR_H
 
 #include "Linx/Base/Dimension.h"
+#include "Linx/Base/Slice.h"
 #include "Linx/Data/Vector/VectorBase.h"
 
 #include <array>
@@ -32,6 +33,9 @@ public:
   using element_type = std::remove_cvref_t<value_type>; ///< The element type
   using reference = const VectorBase<T>::value_type&; ///< The reference type
 
+  using memory_space = Kokkos::HostSpace; ///< The memory space
+  using execution_space = Kokkos::DefaultHostExecutionSpace; ///< The execution space
+
   static constexpr bool static_size_flag = (n >= 0); ///< Static size flag
   static constexpr bool static_flag = std::is_same_v<Container, void>; ///< Static coefficients flag
   static constexpr bool static_empty_flag = (n == 0); ///< Statically empty flag
@@ -40,6 +44,14 @@ public:
    * @brief Constructor.
    */
   using VectorBase<T>::VectorBase;
+
+  /**
+   * @brief The vector domain: `[0, size())`
+   */
+  constexpr auto domain() const
+  {
+    return Slice(0, this->size());
+  }
 
   /**
    * @brief Access the i-th coefficient.
