@@ -5,7 +5,11 @@
 #ifndef LINX_DATA_BOX_ARITHMETICS_H
 #define LINX_DATA_BOX_ARITHMETICS_H
 
+#include "Linx/Base/Slice.h"
+#include "Linx/Base/Types.h" // Specialization
 #include "Linx/Data/concepts/Region.h"
+
+#include <concepts>
 
 namespace Linx {
 
@@ -82,11 +86,10 @@ constexpr auto operator&(const Specialization<Box> auto& lhs, const Specializati
  * 
  * The region may be of higher rank than the slice: extra dimensions are ignored.
  */
-template <typename T, typename... TFuncs>
-// FIXME requires region.start(i), regions.stop(i)? Box or Slice?
-constexpr auto operator&(const Slice<T, TFuncs...>& slice, const auto& region)
+constexpr auto operator&(const Specialization<Slice> auto& slice, const auto& region)
+// FIXME requires region.start(i), regions.stop(i)? Box or Slice = concept Slicing?
 {
-  constexpr auto last = sizeof...(TFuncs) - 1;
+  constexpr auto last = LINX_DECLTYPE(slice)::n - 1;
   if constexpr (last == 0) {
     return clamp(slice, region.start(0), region.stop(0));
   } else {
