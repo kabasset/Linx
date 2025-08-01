@@ -163,17 +163,11 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   /**
    * @brief Fill the container with address offsets from the data to the elements.
    * 
-   * Conceptually, this function performs:
-   * 
-   * \code
-   * for (auto p : container.domain()) {
-   *   container[p] = &container[p] - container.data();
-   * }
-   * \endcode
+   * This is a shortcut for `generate_offsets(data())`.
    */
-  const TDerived& fill_with_offsets_from_data() const // FIXME rename as generate_offsets()
+  const TDerived& generate_offsets() const
   {
-    return generate_offsets(LINX_CRTP_CONST_DERIVED.data());
+    return generate_offsets(data());
   }
 
   /**
@@ -187,11 +181,11 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    * }
    * \endcode
    */
-  const TDerived& generate_offsets(const auto* ref) const
+  const TDerived& generate_offsets(const T* ref) const
   {
     const auto& derived = LINX_CRTP_CONST_DERIVED;
     using Space = typename TDerived::execution_space;
-    for_each<Space>("fill_with_offsets_from_data()", derived.domain(), Impl::OffsetFiller<TDerived>(derived, ref));
+    for_each<Space>("generate_offsets()", derived.domain(), Impl::OffsetFiller<TDerived>(derived, ref));
     return derived;
   }
 

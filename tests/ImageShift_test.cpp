@@ -14,7 +14,7 @@ LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 BOOST_AUTO_TEST_CASE(positive_offset_test)
 {
-  auto in = Linx::Image<int, 2>("in", 4, 3).fill_with_offsets_from_data();
+  auto in = Linx::Image<int, 2>("in", 4, 3).generate_offsets();
   auto shift = Linx::Shift(in, 2, 1);
   BOOST_TEST((shift.vector() == Linx::Position<2>({2, 1}))); // FIXME <2> should be deduced
   BOOST_TEST((shift.domain() == in.domain() + shift.vector()));
@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(positive_offset_test)
 
 BOOST_AUTO_TEST_CASE(negative_shift_offset_test)
 {
-  auto in = Linx::Position<4>("in", 4).fill_with_offsets_from_data();
+  auto in = Linx::Position<4>("in", 4).generate_offsets();
   auto shift = Linx::Shift(in, -2); // FIXME domain should be a Slice
   BOOST_TEST(Linx::offset_from_origin(shift, 0) == 0);
   const auto offset = &shift(0) - &in(0);

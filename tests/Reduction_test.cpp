@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(sum_min_max_test)
 
 void test_norm(const auto& in)
 {
-  in.fill_with_offsets_from_data();
+  in.generate_offsets();
 
   std::vector<int> expected(3); // FIXME transform_reduce to view
 

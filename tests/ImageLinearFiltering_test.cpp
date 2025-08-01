@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(correlation_impulse_response_test)
   in_on_host(2, 2) = 1;
   Kokkos::deep_copy(in.container(), in_on_host.container());
 
-  auto k = Linx::Image<Kokkos::complex<double>, 2>("kernel", 3, 3).fill_with_offsets_from_data(); // Unique values
+  auto k = Linx::Image<Kokkos::complex<double>, 2>("kernel", 3, 3).generate_offsets(); // Unique values
   k += Kokkos::complex<double>(0, 1); // Non-null imaginary part
   auto out = Linx::Correlation(k)(in);
 
@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(correlation_unit_response_test)
 {
   auto in = Linx::Image<int, 2>("unit", 5, 5).fill(1);
 
-  auto k = Linx::Image<int, 2>("kernel", 3, 3).fill_with_offsets_from_data();
+  auto k = Linx::Image<int, 2>("kernel", 3, 3).generate_offsets();
   auto out = Linx::Correlation(k)(in);
 
   auto test = Linx::Image<int, 2>("test", 5, 5);
@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(convolution_impulse_response_test)
   in_on_host(2, 2) = 1;
   Kokkos::deep_copy(in.container(), in_on_host.container());
 
-  auto k = Linx::Image<Kokkos::complex<double>, 2>("kernel", 3, 3).fill_with_offsets_from_data(); // Unique values
+  auto k = Linx::Image<Kokkos::complex<double>, 2>("kernel", 3, 3).generate_offsets(); // Unique values
   k += Kokkos::complex<double>(0, 1); // Non-null imaginary part
   auto out = Linx::Convolution(k)(in);
 

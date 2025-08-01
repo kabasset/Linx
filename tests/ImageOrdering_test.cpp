@@ -35,7 +35,7 @@ LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 BOOST_AUTO_TEST_CASE(address_test)
 {
-  auto in = Linx::uninit<Linx::Index>("in", 1, 2, 3, 4, 5, 6).fill_with_offsets_from_data();
+  auto in = Linx::uninit<Linx::Index>("in", 1, 2, 3, 4, 5, 6).generate_offsets();
   auto test = Linx::default_init<Linx::Index>("test", in.domain());
 
   Linx::for_each("test values", in.domain(), CompareValues {in, test});
@@ -76,11 +76,19 @@ BOOST_AUTO_TEST_CASE(raster_ordering_test)
 {
   auto domain = Linx::Box({-2, -1}, {2, 1});
   auto in = Linx::Raster<int, LINX_DECLTYPE(domain)>("in", domain);
+
   in.generate_offsets(&in.origin());
   // FIXME make Slice iterable: for(auto j : get<1>(in.domain())) (rename get as along?)
   for (auto j = Linx::get<1>(in.domain()).start(); j < Linx::get<1>(in.domain()).stop(); ++j) {
     for (auto i = Linx::get<0>(in.domain()).start(); i < Linx::get<0>(in.domain()).stop(); ++i) {
       BOOST_TEST(in(i, j) == i + j * in.extent(0));
+    }
+  }
+
+  in.generate_offsets();
+  for (auto j = Linx::get<1>(in.domain()).start(); j < Linx::get<1>(in.domain()).stop(); ++j) {
+    for (auto i = Linx::get<0>(in.domain()).start(); i < Linx::get<0>(in.domain()).stop(); ++i) {
+      BOOST_TEST(in(i, j) == (i - in.domain().start(0)) + (j - in.domain().start(1)) * in.extent(0));
     }
   }
 }

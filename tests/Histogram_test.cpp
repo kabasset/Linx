@@ -21,7 +21,7 @@ BOOST_AUTO_TEST_CASE(min_max_test)
 {
   const int size = 10;
   using Image = Matrix<int, 1>;
-  const auto a = Image("a", size).fill_with_offsets_from_data();
+  const auto a = Image("a", size).generate_offsets();
   BOOST_TEST(a.size() == size);
   const auto bins = Linx::Sequence<int, 2>("bins", {Linx::min(a), Linx::max(a) + 1});
   BOOST_TEST((Linx::on_host(bins)[0]) == (Linx::on_host(a)(0)));
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(min_maxm1_max_test)
 {
   const int size = 10;
   using Image = Matrix<int, 1>;
-  const auto a = Image("a", size).fill_with_offsets_from_data();
+  const auto a = Image("a", size).generate_offsets();
   const auto bins = Linx::Sequence<int, 3> {Linx::min(a), Linx::max(a), Linx::max(a) + 1};
   const auto histogram = Linx::histogram(a, bins);
   BOOST_TEST(histogram.size() == 2);
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(inner_test)
 {
   const int size = 10;
   using Image = Matrix<int, 1>;
-  const auto a = Image("a", size).fill_with_offsets_from_data();
+  const auto a = Image("a", size).generate_offsets();
   const auto bins = Linx::Sequence<int, 2> {Linx::min(a) + 1, Linx::max(a)};
   const auto histogram = Linx::histogram(a, bins);
   BOOST_TEST(histogram.size() == 1);

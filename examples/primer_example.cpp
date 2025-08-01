@@ -54,12 +54,12 @@ BOOST_AUTO_TEST_CASE(basics_test)
   auto a = Linx::Sequence<int, 42>("sequence on device").arithmetic(14, 3);
   ASSERT(a.matches(KOKKOS_LAMBDA(int i) { return 14 + 3 * i; }));
 
-  auto b = Linx::Image<double, 3>("image on device", 16, 9, 3).fill_with_offsets_from_data();
+  auto b = Linx::Image<double, 3>("image on device", 16, 9, 3).generate_offsets();
   const auto& b_on_host = Linx::on_host(b);
   ASSERT(b_on_host(0, 0, 0) == 0);
   ASSERT(b_on_host(15, 8, 2) == b.size() - 1);
 
-  auto c = Linx::Raster<double, 3>("image on host", 16, 9, 3).fill_with_offsets_from_data();
+  auto c = Linx::Raster<double, 3>("image on host", 16, 9, 3).generate_offsets();
   ASSERT(c.matches(KOKKOS_LAMBDA(int i, int j, int k) { return i + j * 16 + k * 16 * 9; }));
   //! [basics]
 }
