@@ -168,6 +168,8 @@ auto apply_at_stop(auto func, const TDomain& domain)
  * @param label The label
  * @param func The generator
  * @param domain The domain parameters
+ * 
+ * @warning Dynamic ranks are not supported.
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace>
 auto generate(const std::string& label, const auto& func, auto&&... domain)

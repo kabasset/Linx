@@ -45,9 +45,9 @@ const auto& heapselect_n(auto& in_out, std::integral auto n)
  * Insertion-sort has higher asymptotic complexity but should be faster for small arrays,
  * which is typically the case for rank-filtering.
  */
-KOKKOS_INLINE_FUNCTION const auto& insertsort_n(auto& in_out, std::integral auto n)
+KOKKOS_INLINE_FUNCTION constexpr const auto& insertsort_n(auto& in_out, std::integral auto n)
 {
-  using T = std::remove_cvref_t<decltype(in_out[0])>;
+  using T = LINX_DECLTYPE(in_out[0]);
   T current;
   std::size_t j;
   for (std::size_t i = 0; i < std::size(in_out); ++i) {
@@ -63,60 +63,55 @@ KOKKOS_INLINE_FUNCTION const auto& insertsort_n(auto& in_out, std::integral auto
 }
 
 /**
- * @brief Compute the median of an array of known size parity.
+ * @brief Compute the median of an array of odd size.
  */
-template <typename TParity>
-KOKKOS_INLINE_FUNCTION auto median(auto& in_out)
+KOKKOS_INLINE_FUNCTION constexpr auto median_odd(auto& in_out)
 {
-  if constexpr (std::is_same_v<TParity, OddNumber>) {
-    return insertsort_n(in_out, std::size(in_out) / 2);
-  } else if constexpr (std::is_same_v<TParity, EvenNumber>) {
-    const auto& high = insertsort_n(in_out, std::size(in_out) / 2);
-    const auto& low = *(&high - 1);
-    return std::midpoint(low, high);
-  } else {
-    LINX_STATIC_ASSERT_FALSE("Unsupported parity");
-  }
+  return insertsort_n(in_out, std::size(in_out) / 2);
+}
 
-  // FIXME accept integral_constant?
+/**
+ * @brief Compute the median of an array of even size.
+ */
+KOKKOS_INLINE_FUNCTION constexpr auto median_even(auto& in_out)
+{
+  const auto& high = insertsort_n(in_out, std::size(in_out) / 2);
+  const auto& low = *(&high - 1);
+  return std::midpoint(low, high);
 }
 
 /**
  * @brief Compute the median of an array of unknown size and size parity.
  */
-KOKKOS_INLINE_FUNCTION auto median(auto& in_out)
+template <typename TArray>
+KOKKOS_INLINE_FUNCTION constexpr auto median(TArray& in_out)
 {
-  if (std::size(in_out) % 2 == 0) {
-    return median<EvenNumber>(in_out);
+  if constexpr (requires { TArray::size() >= 0; }) {
+    return median<TArray::size()>(in_out);
   } else {
-    return median<OddNumber>(in_out);
+    if (std::size(in_out) % 2 == 0) {
+      return median_even(in_out);
+    } else {
+      return median_odd(in_out);
+    }
   }
 }
 
 /**
- * @brief Compute the median of an array of known size.
+ * @brief Compute the median of an array with static size.
  */
 template <std::integral auto N>
-KOKKOS_INLINE_FUNCTION auto median(auto& in_out)
+KOKKOS_INLINE_FUNCTION constexpr auto median(auto& in_out)
 {
-  return Impl::SelectNet<N>::median(in_out);
+  if constexpr (requires { SelectNet<N> {}; }) {
+    return SelectNet<N>::median(in_out);
+  } else if constexpr (N % 2 == 0) {
+    return median_even(in_out);
+  } else {
+    return median_odd(in_out);
+  }
 }
 
-namespace Impl {
-
-/**
- * @brief Fall back to parity-aware median if select net is not implemented for `N`.
- */
-template <int N>
-struct SelectNet {
-  using Parity = std::conditional_t<(N % 2 == 0), EvenNumber, OddNumber>;
-  KOKKOS_INLINE_FUNCTION static decltype(auto) median(auto& in_out)
-  {
-    return Linx::median<Parity>(in_out);
-  }
-};
-
-} // namespace Impl
 } // namespace Linx
 
 #endif

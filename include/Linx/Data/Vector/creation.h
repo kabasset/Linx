@@ -28,10 +28,10 @@ constexpr auto vec(std::array<T, N> coefs)
 /**
  * @brief Create a static-size vector.
  */
-template <std::integral T0, std::integral... Ts>
-constexpr auto vec(T0 coef0, Ts... coefs)
+template <typename T0, std::same_as<T0> T1, std::same_as<T0>... Ts>
+constexpr auto vec(T0 coef0, T1 coef1, Ts... coefs)
 {
-  return vec(std::array {coef0, T0 {coefs}...});
+  return vec(std::array {coef0, coef1, coefs...});
 }
 
 /**
@@ -57,8 +57,8 @@ static constexpr auto discard_first(auto, auto out)
 /**
  * @brief Helper function to repeat a coefficient.
  */
-template <typename T, auto... Is>
-constexpr auto vec_impl(auto coef, std::integer_sequence<T, Is...>)
+template <std::size_t... Is>
+constexpr auto vec_impl(auto coef, std::index_sequence<Is...>)
 {
   return vec(discard_first(Is, coef)...);
 }
@@ -93,8 +93,7 @@ constexpr auto vec(Dimension d, auto value)
 template <Dimension D>
 constexpr auto vec(auto value)
 {
-  using T = decltype(value);
-  return Impl::vec_impl(value, std::make_integer_sequence<T, D.value>());
+  return Impl::vec_impl(value, std::make_index_sequence<D.value>());
 }
 
 /**

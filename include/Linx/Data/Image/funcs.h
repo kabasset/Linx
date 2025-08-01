@@ -21,6 +21,7 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Image<T, TDomain, TConta
     using Out = Image<const T, TDomain, typename Rebind<TContainer>::AsReadonly>;
     return Out(Forward {}, in.container());
   }
+  // FIXME handle shifted in
 }
 
 /**
@@ -31,6 +32,7 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Image<T, TDomain, TContain
 {
   using Out = Image<T, TDomain, typename Rebind<TContainer>::AsAtomic>;
   return Out(Forward {}, in.container());
+  // FIXME handle shifted in
 }
 
 /**
@@ -58,6 +60,7 @@ decltype(auto) on_device(const Image<T, TDomain, TContainer>& in)
     auto container = Kokkos::create_mirror_view_and_copy(TSpace(), in.container());
     return Image<T, TDomain, decltype(container)>(Forward {}, LINX_MOVE(container));
   }
+  // FIXME handle shifted in
 }
 
 /**

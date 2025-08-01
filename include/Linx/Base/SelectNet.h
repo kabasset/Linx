@@ -9,23 +9,24 @@
 #include <numeric> // midpoint
 
 namespace Linx {
+
 namespace Impl {
 
 /**
  * @brief Swap two numbers if they are in descending order.
  */
-KOKKOS_INLINE_FUNCTION void sort_inplace(auto& a, auto& b)
+KOKKOS_INLINE_FUNCTION constexpr void sort_inplace(auto& a, auto& b)
 {
   if (a > b) {
     Kokkos::kokkos_swap(a, b);
   }
 }
 
+} // namespace Impl
+
 /**
  * @brief Selection network for fixed size arrays.
  * @tparam N The array size if known, or -2 for any even number, or -1 for any odd number, or 0 for any number
- * 
- * If a static implementation is not available for a given size, this falls back to instertion-sort.
  * 
  * @see https://bertdobbelaere.github.io/median_networks.html
  */
@@ -34,7 +35,7 @@ struct SelectNet;
 
 template <>
 struct SelectNet<1> {
-  KOKKOS_INLINE_FUNCTION static decltype(auto) median(auto& in_out)
+  KOKKOS_INLINE_FUNCTION static constexpr decltype(auto) median(auto& in_out)
   {
     return in_out[0];
   }
@@ -42,7 +43,7 @@ struct SelectNet<1> {
 
 template <>
 struct SelectNet<2> {
-  KOKKOS_INLINE_FUNCTION static decltype(auto) median(auto& in_out)
+  KOKKOS_INLINE_FUNCTION static constexpr decltype(auto) median(auto& in_out)
   {
     return std::midpoint(in_out[0], in_out[1]);
   }
@@ -50,7 +51,7 @@ struct SelectNet<2> {
 
 template <>
 struct SelectNet<3> {
-  KOKKOS_INLINE_FUNCTION static decltype(auto) median(auto& in_out)
+  KOKKOS_INLINE_FUNCTION static constexpr decltype(auto) median(auto& in_out)
   {
     Impl::sort_inplace(in_out[0], in_out[1]);
     Impl::sort_inplace(in_out[1], in_out[2]);
@@ -61,7 +62,7 @@ struct SelectNet<3> {
 
 template <>
 struct SelectNet<4> {
-  KOKKOS_INLINE_FUNCTION static decltype(auto) median(auto& in_out)
+  KOKKOS_INLINE_FUNCTION static constexpr decltype(auto) median(auto& in_out)
   {
     Impl::sort_inplace(in_out[0], in_out[1]);
     Impl::sort_inplace(in_out[2], in_out[3]);
@@ -73,7 +74,7 @@ struct SelectNet<4> {
 
 template <>
 struct SelectNet<5> {
-  KOKKOS_INLINE_FUNCTION static decltype(auto) median(auto& in_out)
+  KOKKOS_INLINE_FUNCTION static constexpr decltype(auto) median(auto& in_out)
   {
     Impl::sort_inplace(in_out[0], in_out[1]);
     Impl::sort_inplace(in_out[3], in_out[4]);
@@ -88,7 +89,7 @@ struct SelectNet<5> {
 
 template <>
 struct SelectNet<6> {
-  KOKKOS_INLINE_FUNCTION static decltype(auto) median(auto& in_out)
+  KOKKOS_INLINE_FUNCTION static constexpr decltype(auto) median(auto& in_out)
   {
     Impl::sort_inplace(in_out[1], in_out[2]);
     Impl::sort_inplace(in_out[3], in_out[4]);
@@ -108,7 +109,7 @@ struct SelectNet<6> {
 
 template <>
 struct SelectNet<7> {
-  KOKKOS_INLINE_FUNCTION static decltype(auto) median(auto& in_out)
+  KOKKOS_INLINE_FUNCTION static constexpr decltype(auto) median(auto& in_out)
   {
     Impl::sort_inplace(in_out[0], in_out[5]);
     Impl::sort_inplace(in_out[0], in_out[3]);
@@ -129,7 +130,7 @@ struct SelectNet<7> {
 
 template <>
 struct SelectNet<8> {
-  KOKKOS_INLINE_FUNCTION static decltype(auto) median(auto& in_out)
+  KOKKOS_INLINE_FUNCTION static constexpr decltype(auto) median(auto& in_out)
   {
     Impl::sort_inplace(in_out[0], in_out[2]);
     Impl::sort_inplace(in_out[1], in_out[3]);
@@ -153,7 +154,7 @@ struct SelectNet<8> {
 
 template <>
 struct SelectNet<9> {
-  KOKKOS_INLINE_FUNCTION static decltype(auto) median(auto& in_out)
+  KOKKOS_INLINE_FUNCTION static constexpr decltype(auto) median(auto& in_out)
   {
     Impl::sort_inplace(in_out[1], in_out[2]);
     Impl::sort_inplace(in_out[4], in_out[5]);
@@ -180,7 +181,7 @@ struct SelectNet<9> {
 
 template <>
 struct SelectNet<25> {
-  KOKKOS_INLINE_FUNCTION static decltype(auto) median(auto& in_out)
+  KOKKOS_INLINE_FUNCTION static constexpr decltype(auto) median(auto& in_out)
   {
     Impl::sort_inplace(in_out[0], in_out[1]);
     Impl::sort_inplace(in_out[3], in_out[4]);
@@ -286,7 +287,6 @@ struct SelectNet<25> {
   }
 };
 
-} // namespace Impl
 } // namespace Linx
 
 #endif
