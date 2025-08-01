@@ -10,16 +10,14 @@
 namespace Linx {
 
 /**
- * @brief Concept for all regions.
+ * @brief Collection of positions, which can be iterated.
  * 
- * A region is a collection of positions, which can be iterated.
  * If the region can be shifted, it is a window.
  * 
  * @see `Window`
  */
 template <typename T>
-concept Region = requires(const T region)
-{
+concept Region = requires(const T region) {
   T::n;
   typename T::size_type;
   typename T::value_type;
@@ -29,7 +27,15 @@ concept Region = requires(const T region)
 };
 
 /**
- * @brief Concept for windows, i.e. additive regions.
+ * @brief Object with finite bounding box.
+ */
+template <typename T>
+concept BoundedRegion = requires(const T region) {
+  bbox(region); // TODO return Box
+};
+
+/**
+ * @brief Additive region.
  * 
  * Patches whose domain are windows can be translated.
  * 

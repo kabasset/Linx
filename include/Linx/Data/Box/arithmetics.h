@@ -5,77 +5,72 @@
 #ifndef LINX_DATA_BOX_ARITHMETICS_H
 #define LINX_DATA_BOX_ARITHMETICS_H
 
+#include "Linx/Data/concepts/Region.h"
+
 namespace Linx {
 
 /**
- * @brief Shift a box by a given vector or scalar.
+ * @brief Box shifted by a given vector or scalar.
  */
-template <typename TStart, typename TStop>
-constexpr auto operator+(const Box<TStart, TStop>& lhs, const auto& rhs)
+constexpr auto operator+(const Specialization<Box> auto& lhs, const auto& rhs)
 {
   return Box(lhs.start() + rhs, lhs.stop() + rhs);
 }
 
 /**
- * @brief Shift a box by the opposite of a given vector or scalar.
+ * @brief Box shifted by the opposite of a given vector or scalar.
  */
-template <typename TStart, typename TStop>
-constexpr auto operator-(const Box<TStart, TStop>& lhs, const auto& rhs)
+constexpr auto operator-(const Specialization<Box> auto& lhs, const auto& rhs)
 {
   return Box(lhs.start() - rhs, lhs.stop() - rhs);
 }
 
 /**
- * @brief Create the dilation of a box by a given margin.
+ * @brief Dilation of a box by a given regular margin.
  */
-template <typename TStart, typename TStop>
-constexpr auto
-dilate(const Box<TStart, TStop>& box, const std::convertible_to<typename Box<TStart, TStop>::size_type> auto& margin)
+template <Specialization<Box> TBox>
+constexpr auto dilate(const TBox& box, const std::convertible_to<typename TBox::size_type> auto& margin)
 {
   return Box(box.start() - margin, box.stop() + margin);
 }
 
 /**
- * @brief Create the erosion of a box by a given margin.
+ * @brief Erosion of a box by a given regular margin.
  */
-template <typename TStart, typename TStop>
-constexpr auto
-erode(const Box<TStart, TStop>& box, const std::convertible_to<typename Box<TStart, TStop>::size_type> auto& margin)
+template <Specialization<Box> TBox>
+constexpr auto erode(const TBox& box, const std::convertible_to<typename TBox::size_type> auto& margin)
 {
   return Box(box.start() + margin, box.stop() - margin);
 }
 
 /**
- * @brief Create the dilation of a box by a given margin.
+ * @brief Dilation of a box by a given margin.
+ * 
+ * The resulting region starts at `box.start() + bbox(margin).start()`
+ * and stops at `box.stop() + (box(margin).stop() - 1)`.
  */
-template <typename TStart, typename TStop, typename TRhs> // TODO BoundedRegion TRhs
-  requires requires(const TRhs& rhs) {
-    bbox(rhs); // TODO -> Box
-  }
-constexpr auto dilate(const Box<TStart, TStop>& box, const TRhs& margin)
+constexpr auto dilate(const Specialization<Box> auto& box, const BoundedRegion auto& margin)
 {
   auto margin_box = bbox(margin);
   return Box(box.start() + margin_box.start(), box.stop() + (margin_box.stop() - 1));
 }
 
 /**
- * @brief Create the erosion of a box by a given margin.
+ * @brief Erosion of a box by a given margin.
+ * 
+ * The resulting region starts at `box.start() - bbox(margin).start()`
+ * and stops at `box.stop() - (box(margin).stop() - 1)`.
  */
-template <typename TStart, typename TStop, typename TRhs> // TODO BoundedRegion TRhs
-  requires requires(const TRhs& rhs) {
-    bbox(rhs); // TODO -> Box
-  }
-constexpr auto erode(const Box<TStart, TStop>& box, const TRhs& margin)
+constexpr auto erode(const Specialization<Box> auto& box, const BoundedRegion auto& margin)
 {
   auto margin_box = bbox(margin);
   return Box(box.start() - margin_box.start(), box.stop() - (margin_box.stop() - 1));
 }
 
 /**
- * @brief Intersect two boxes.
+ * @brief Intersection of two boxes.
  */
-template <typename TStartL, typename TStopL, typename TStartR, typename TStopR>
-auto operator&(const Box<TStartL, TStopL>& lhs, const Box<TStartR, TStopR>& rhs)
+constexpr auto operator&(const Specialization<Box> auto& lhs, const Specialization<Box> auto& rhs)
 {
   return Box(max(lhs.start(), rhs.start()), min(lhs.stop(), rhs.stop()));
 }
@@ -83,13 +78,13 @@ auto operator&(const Box<TStartL, TStopL>& lhs, const Box<TStartR, TStopR>& rhs)
 /**
  * @relatesalso Slice
  * @relatesalso Box
- * @brief Make a slice clamped by a region.
+ * @brief Intersection of a slice and a box or slice.
  * 
  * The region may be of higher rank than the slice: extra dimensions are ignored.
  */
 template <typename T, typename... TFuncs>
-constexpr auto
-operator&(const Slice<T, TFuncs...>& slice, const auto& region) // FIXME requires region.start(i), regions.stop(i)
+// FIXME requires region.start(i), regions.stop(i)? Box or Slice?
+constexpr auto operator&(const Slice<T, TFuncs...>& slice, const auto& region)
 {
   constexpr auto last = sizeof...(TFuncs) - 1;
   if constexpr (last == 0) {
@@ -101,10 +96,9 @@ operator&(const Slice<T, TFuncs...>& slice, const auto& region) // FIXME require
 
 /**
  * @relatesalso Box
- * @brief Compute the bounding box of two boxes.
+ * @brief Bounding box of two boxes.
  */
-template <typename TStartL, typename TStopL, typename TStartR, typename TStopR>
-auto bbox(const Box<TStartL, TStopL>& lhs, const Box<TStartR, TStopR>& rhs)
+constexpr auto bbox(const Specialization<Box> auto& lhs, const Specialization<Box> auto& rhs)
 {
   return Box(min(lhs.start(), rhs.start()), max(lhs.stop(), rhs.stop()));
 }
