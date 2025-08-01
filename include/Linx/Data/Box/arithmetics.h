@@ -14,6 +14,7 @@
 namespace Linx {
 
 /**
+ * @relatesalso Box
  * @brief Box shifted by a given vector or scalar.
  */
 constexpr auto operator+(const Specialization<Box> auto& lhs, const auto& rhs)
@@ -22,6 +23,7 @@ constexpr auto operator+(const Specialization<Box> auto& lhs, const auto& rhs)
 }
 
 /**
+ * @relatesalso Box
  * @brief Box shifted by the opposite of a given vector or scalar.
  */
 constexpr auto operator-(const Specialization<Box> auto& lhs, const auto& rhs)
@@ -30,6 +32,7 @@ constexpr auto operator-(const Specialization<Box> auto& lhs, const auto& rhs)
 }
 
 /**
+ * @relatesalso Box
  * @brief Dilation of a box by a given regular margin.
  */
 template <Specialization<Box> TBox>
@@ -39,6 +42,7 @@ constexpr auto dilate(const TBox& box, const std::convertible_to<typename TBox::
 }
 
 /**
+ * @relatesalso Box
  * @brief Erosion of a box by a given regular margin.
  */
 template <Specialization<Box> TBox>
@@ -48,6 +52,7 @@ constexpr auto erode(const TBox& box, const std::convertible_to<typename TBox::s
 }
 
 /**
+ * @relatesalso Box
  * @brief Dilation of a box by a given margin.
  * 
  * The resulting region starts at `box.start() + bbox(margin).start()`
@@ -60,6 +65,7 @@ constexpr auto dilate(const Specialization<Box> auto& box, const BoundedRegion a
 }
 
 /**
+ * @relatesalso Box
  * @brief Erosion of a box by a given margin.
  * 
  * The resulting region starts at `box.start() - bbox(margin).start()`
@@ -72,6 +78,7 @@ constexpr auto erode(const Specialization<Box> auto& box, const BoundedRegion au
 }
 
 /**
+ * @relatesalso Box
  * @brief Intersection of two boxes.
  */
 constexpr auto operator&(const Specialization<Box> auto& lhs, const Specialization<Box> auto& rhs)

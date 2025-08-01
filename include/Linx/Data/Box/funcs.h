@@ -73,10 +73,11 @@ constexpr auto rerank(const Specialization<Box> auto& in)
 /**
  * @brief Execution policy of a box.
  */
-template <typename TSpace> // TODO support Properties?
-auto kokkos_execution_policy(const Specialization<Box> auto& domain)
+template <typename TSpace, typename TStart, typename TStop> // TODO support Properties?
+auto kokkos_execution_policy(const Box<TStart, TStop>& domain)
+// NVCC 12.4 bug: cannot combine TSpace and Specialization<Box>
 {
-  static constexpr auto n = LINX_DECLTYPE(domain)::n;
+  static constexpr auto n = Box<TStart, TStop>::n;
   if constexpr (n == 1) {
     return Kokkos::RangePolicy<TSpace, Kokkos::IndexType<Index>>(domain.start(0), domain.stop(0));
   } else {

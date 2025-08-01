@@ -8,24 +8,28 @@
 namespace Linx {
 
 /**
+ * @relatesalso Box
  * @brief Null rank.
  */
 template <typename T = int>
 Box() -> Box<std::integer_sequence<T>, std::integer_sequence<T>>;
 
 /**
+ * @relatesalso Box
  * @brief Start at origin.
  */
 template <typename T, int N>
 Box(T (&&)[N]) -> Box<std::integer_sequence<int>, T[N]>;
 
 /**
+ * @relatesalso Box
  * @brief Specify start and stop bounds.
  */
 template <typename T0, int N0, typename T1, int N1>
 Box(T0 (&&)[N0], T1 (&&)[N1]) -> Box<T0[N0], T1[N1]>;
 
 /**
+ * @relatesalso Box
  * @brief Create a box which starts at origin.
  * 
  * This is a shortcut for `Box(vec<Args...>(args...))`.
@@ -37,6 +41,7 @@ constexpr auto shape(auto... args)
 }
 
 /**
+ * @relatesalso Box
  * @brief Create a box centered at origin.
  * @param radius The radius vector
  * 
@@ -50,7 +55,21 @@ constexpr auto cuboid(const Vector<T>& radius)
 }
 
 /**
- * @brief Create a static-rank, regular box centered at origin.
+ * @relatesalso Box
+ * @brief Create a dynamic-rank cube centered at origin.
+ * @param d The box rank
+ * @param radius The cube radius
+ * 
+ * The box extent along each axis is `2 * radius + 1`.
+ */
+constexpr auto cube(Dimension d, auto radius)
+{
+  return cuboid(vec(d, radius));
+}
+
+/**
+ * @relatesalso Box
+ * @brief Create a static-rank cube centered at origin.
  * @tparam D The box rank
  * @param radius The cube radius
  * 
@@ -63,9 +82,10 @@ constexpr auto cube(auto radius)
 }
 
 /**
- * @brief Create a static-size, regular box centered at origin.
+ * @relatesalso Box
+ * @brief Create a static-size cube centered at origin.
  * @tparam D The box rank
- * @tparam Radius The box radius
+ * @tparam Radius The cube radius
  * 
  * The box extent along each axis is `2 * Radius + 1`.
  */

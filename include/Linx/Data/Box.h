@@ -22,9 +22,7 @@ namespace Linx {
 
 /**
  * @ingroup regions
- * @relatesalso Window
- * @brief An ND bounding box, defined by its start (inclusive) and stop (exclusive) bounds.
- * 
+ * @brief An ND axis-aligned bounding box, defined by its start (inclusive) and stop (exclusive) bounds.
  * @tparam TStart The start vector coefficients specification
  * @tparam TStop The stop vector coefficients specification
  * 
@@ -42,7 +40,8 @@ public:
   using Shape = decltype(std::declval<Stop>() - std::declval<Start>()); ///< The shape vector type
 
   static constexpr int n = std::max(Start::n, Stop::n); ///< The dimension parameter
-  // FIXME n = Shape::n and adapt either Shape definition or Vector arithmetics
+  // FIXME n = Shape::n
+  // FIXME (max won't work if dynamic rank is greater than static rank, typically when Start::n = 0)
   using size_type = typename Shape::element_type; ///< The coordinate type, which may be non-integral
 
   static constexpr bool static_rank_flag = (n >= 0); ///< Static rank flag
@@ -83,7 +82,7 @@ public:
   /**
    * @brief The start bound, inclusive.
    */
-  KOKKOS_INLINE_FUNCTION const auto& start() const
+  KOKKOS_INLINE_FUNCTION constexpr const auto& start() const
   {
     return m_start;
   }
@@ -91,7 +90,7 @@ public:
   /**
    * @brief The stop bound, exclusive.
    */
-  KOKKOS_INLINE_FUNCTION const auto& stop() const
+  KOKKOS_INLINE_FUNCTION constexpr const auto& stop() const
   {
     return m_stop;
   }
@@ -151,7 +150,7 @@ public:
   /**
    * @brief Check whether two boxes are equal.
    */
-  constexpr bool operator==(const auto& other) const
+  constexpr bool operator==(const Specialization<Linx::Box> auto& other) const
   {
     return m_start == other.start() && m_stop == other.stop();
   }
@@ -159,7 +158,7 @@ public:
   /**
    * @brief Check whether two boxes are different.
    */
-  constexpr bool operator!=(const auto& other) const
+  constexpr bool operator!=(const Specialization<Linx::Box> auto& other) const
   {
     return not(*this == other);
   }
