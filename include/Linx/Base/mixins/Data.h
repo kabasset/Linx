@@ -23,10 +23,10 @@ struct OffsetFiller {
   KOKKOS_INLINE_FUNCTION void operator()(auto... is) const
   {
     auto ptr = &m_container(is...);
-    *ptr = ptr - m_data;
+    *ptr = ptr - m_ref;
   }
   TContainer m_container;
-  const typename TContainer::value_type* m_data;
+  const typename TContainer::value_type* m_ref;
 };
 
 template <typename TFunc, typename TOut, typename TIns, std::size_t... Is>
@@ -171,14 +171,27 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    * }
    * \endcode
    */
-  const TDerived& fill_with_offsets_from_data() const
+  const TDerived& fill_with_offsets_from_data() const // FIXME rename as generate_offsets()
+  {
+    return generate_offsets(LINX_CRTP_CONST_DERIVED.data());
+  }
+
+  /**
+   * @brief Fill the container with address offsets from some reference.
+   * 
+   * Conceptually, this function performs:
+   * 
+   * \code
+   * for (auto p : container.domain()) {
+   *   container.at(p) = &container.at(p) - ref;
+   * }
+   * \endcode
+   */
+  const TDerived& generate_offsets(const auto* ref) const
   {
     const auto& derived = LINX_CRTP_CONST_DERIVED;
     using Space = typename TDerived::execution_space;
-    for_each<Space>(
-        "fill_with_offsets_from_data()",
-        derived.domain(),
-        Impl::OffsetFiller<typename TDerived::Container>(derived.container(), derived.data()));
+    for_each<Space>("fill_with_offsets_from_data()", derived.domain(), Impl::OffsetFiller<TDerived>(derived, ref));
     return derived;
   }
 
