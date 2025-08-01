@@ -10,14 +10,9 @@
 
 LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
-BOOST_AUTO_TEST_CASE(sum_test)
+BOOST_AUTO_TEST_CASE(add_test)
 {
-  const int width = 4;
-  const int height = 3;
-  using Image = Linx::Image<int, 2>;
-
-  Image a("a", width, height);
-  a.fill(1);
+  auto a = Linx::fill("a", 1, 4, 3);
   BOOST_TEST(a.contains_only(1));
 
   auto b = +a;
@@ -32,14 +27,10 @@ BOOST_AUTO_TEST_CASE(sum_test)
 
 BOOST_AUTO_TEST_CASE(exp_test)
 {
-  const int width = 4;
-  const int height = 3;
-  using Image = Linx::Image<double, 2>;
-
-  Image a("a", width, height);
+  auto a = Linx::fill("a", 0., 4, 3);
   BOOST_TEST(a.contains_only(0.));
 
-  auto b = exp(a); // FIXME add name as first argument
+  auto b = exp(a);
   BOOST_TEST(a.contains_only(0.));
   BOOST_TEST(b.contains_only(1.));
 
