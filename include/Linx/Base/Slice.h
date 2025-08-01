@@ -157,26 +157,6 @@ private:
   Slice<T, TPredN> m_last; ///< The last slice
 };
 
-/**
- * @brief Get the Kokkos execution policy of a slice.
- */
-template <typename TSpace, std::integral T, typename TPred>
-auto kokkos_execution_policy(const Slice<T, TPred>& region) // FIXME requires start(region), stop(region)
-{
-  return Kokkos::RangePolicy<TSpace, Kokkos::IndexType<Index>>(region.start(), region.stop());
-}
-
-/**
- * @ingroup regions
- * @brief Apply a function to each element of the domain.
- * @tparam TSpace The execution space
- */
-template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T, typename TInterval>
-void for_each(const std::string& label, const Slice<T, TInterval>& slice, auto&& func)
-{
-  Kokkos::parallel_for(label, kokkos_execution_policy<TSpace>(slice), LINX_FORWARD(func));
-}
-
 } // namespace Linx
 
 #endif

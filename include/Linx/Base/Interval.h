@@ -374,4 +374,6 @@ std::ostream& operator<<(std::ostream& os, const Segment<T>& interval)
 
 } // namespace Linx
 
+#include "Linx/Base/Interval/funcs.h"
+
 #endif
