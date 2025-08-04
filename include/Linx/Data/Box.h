@@ -20,11 +20,29 @@
 
 namespace Linx {
 
+namespace Impl {
+
+template <int NStart, int NStop>
+static constexpr int static_rank()
+{
+  if constexpr (NStart == 0) {
+    return NStop;
+  }
+  if constexpr (NStart == 0) {
+    return NStop;
+  }
+  return std::max(NStart, NStop);
+}
+
+} // namespace Impl
+
 /**
  * @ingroup regions
  * @brief An ND axis-aligned bounding box, defined by its start (inclusive) and stop (exclusive) bounds.
  * @tparam TStart The start vector coefficients specification
  * @tparam TStop The stop vector coefficients specification
+ * 
+ * If the start and stop vectors are not statically empty, then they must have the same size.
  * 
  * If start and stop vectors have integral coefficients,
  * the box can be iterated with `for_each()` and `kokkos_reduce()`, and patches can be created from the box.
@@ -39,12 +57,13 @@ public:
   using Stop = Vector<TStop>; ///< The stop vector type
   using Shape = decltype(std::declval<Stop>() - std::declval<Start>()); ///< The shape vector type
 
-  static constexpr int n = std::max(Start::n, Stop::n); ///< The dimension parameter
-  // FIXME n = Shape::n
-  // FIXME (max won't work if dynamic rank is greater than static rank, typically when Start::n = 0)
-  using size_type = typename Shape::element_type; ///< The coordinate type, which may be non-integral
+  static constexpr int n = Impl::static_rank<Start::n, Stop::n>(); ///< The dimension parameter
 
-  static constexpr bool static_rank_flag = (n >= 0); ///< Static rank flag
+  using size_type = typename Shape::element_type; ///< The coordinate type, which may be non-integral
+  using value_type = const Vector<std::conditional_t<(n >= 0), size_type[n], size_type*>>; ///< The value type
+  using element_type = std::remove_cvref_t<value_type>; ///< The element type
+
+  static constexpr bool static_rank_flag = Shape::static_rank_flag; ///< Static rank flag
   static constexpr bool static_flag = Shape::static_flag; ///< Static bounds flag
 
   /**
@@ -96,6 +115,14 @@ public:
   }
 
   /**
+   * @brief The finish bound, inclusive.
+   */
+  KOKKOS_INLINE_FUNCTION constexpr auto finish() const
+  {
+    return m_stop - 1;
+  }
+
+  /**
    * @brief The start bound along given axis.
    */
   KOKKOS_INLINE_FUNCTION constexpr auto start(std::integral auto i) const
@@ -136,15 +163,24 @@ public:
   }
 
   /**
-   * @brief The product of the extents.
+   * @brief Product of the extents, may be negative.
    */
-  KOKKOS_INLINE_FUNCTION constexpr auto size() const
+  KOKKOS_INLINE_FUNCTION constexpr auto ssize() const
   {
     size_type out = 1;
     for (int i = 0; i < rank(); ++i) {
       out *= extent(i);
     }
     return out;
+  }
+
+  /**
+   * @brief Unsigned size.
+   */
+  KOKKOS_INLINE_FUNCTION constexpr auto size() const
+  {
+    auto s = ssize();
+    return s <= 0 ? std::size_t(0) : static_cast<std::size_t>(s);
   }
 
   /**
@@ -166,10 +202,10 @@ public:
   /**
    * @brief Check whether a position lies inside the box.
    */
-  bool contains(const LegacyArray auto& position) const
-  {
+  bool contains(const auto& position) const
+  { // FIXME Subscriptable<size_t>? Indexed?
     SizeMismatch::may_throw("position", rank(), position);
-    for (std::size_t i = 0; i < rank(); ++i) {
+    for (int i = 0; i < rank(); ++i) {
       if (position[i] < m_start[i] || position[i] > m_stop[i]) {
         return false;
       }
@@ -193,6 +229,7 @@ private:
 
 } // namespace Linx
 
+#include "Linx/Data/Box/BoxIterator.h"
 #include "Linx/Data/Box/arithmetics.h"
 #include "Linx/Data/Box/creation.h"
 #include "Linx/Data/Box/funcs.h"

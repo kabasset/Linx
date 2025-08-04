@@ -26,6 +26,9 @@ namespace Linx {
 template <typename T>
 class VectorBase;
 
+template <typename T>
+class Vector;
+
 /**
  * @brief Dynamic-rank specialization.
  * @tparam T The coefficient type
@@ -41,7 +44,7 @@ public:
   /**
    * @brief Constructor.
    */
-  constexpr VectorBase() : m_container() {}
+  constexpr VectorBase(std::size_t size = 0) : m_container(size) {}
 
   /**
    * @brief Constructor.
@@ -58,6 +61,17 @@ public:
    */
   constexpr VectorBase(Forward&&, auto&& arg0, auto&&... args) : m_container(LINX_FORWARD(arg0), LINX_FORWARD(args)...)
   {}
+
+  /**
+   * @brief Conversion constructor.
+   */
+  template <typename TSpec>
+  constexpr VectorBase(const Vector<TSpec>& other) : VectorBase(other.size())
+  {
+    for (std::size_t i = 0; i < size(); ++i) {
+      m_container[i] = other[i];
+    }
+  }
 
   /**
    * @brief Size.
@@ -124,6 +138,17 @@ public:
    */
   constexpr VectorBase(Forward&&, auto&& arg0, auto&&... args) : m_container(LINX_FORWARD(arg0), LINX_FORWARD(args)...)
   {}
+
+  /**
+   * @brief Conversion constructor.
+   */
+  template <typename TSpec>
+  constexpr VectorBase(const Vector<TSpec>& other) : VectorBase()
+  {
+    for (std::size_t i = 0; i < size(); ++i) {
+      m_container[i] = other[i];
+    }
+  }
 
   /**
    * @brief Size.
