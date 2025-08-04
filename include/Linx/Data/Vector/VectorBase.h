@@ -38,8 +38,18 @@ class VectorBase<T*> {
 public:
 
   static constexpr int n = -1; ///< The size parameter
+
+  using size_type = std::size_t; ///< The size type
+  using ssize_type = std::ptrdiff_t; ///< The signed size type
   using value_type = T; ///< The value type
-  using Container = std::vector<T>; ///< The underlying container type
+  using element_type = std::remove_cvref_t<value_type>; ///< The element type
+  using reference = value_type&; ///< The reference type
+  using const_reference = const value_type&; ///< The readonly reference type
+  using pointer = value_type*; ///< The pointer type
+  using const_pointer = const value_type*; /// The readonly pointer type
+  using Container = std::vector<value_type>; ///< The underlying container type
+  using iterator = typename Container::iterator; ///< The iterator type
+  using const_iterator = typename Container::const_iterator; ///< The readonly iterator type
 
   /**
    * @brief Constructor.
@@ -49,7 +59,9 @@ public:
   /**
    * @brief Constructor.
    */
-  constexpr VectorBase(std::initializer_list<T> coefs) : VectorBase(coefs.begin(), coefs.end()) {}
+  template <typename TCoef>
+  constexpr VectorBase(std::initializer_list<TCoef> coefs) : VectorBase(coefs.begin(), coefs.end())
+  {}
 
   /**
    * @brief Constructor.
@@ -76,15 +88,23 @@ public:
   /**
    * @brief Size.
    */
-  constexpr auto size() const
+  constexpr size_type size() const
   {
     return m_container.size();
   }
 
   /**
+   * @brief Signed size.
+   */
+  constexpr ssize_type ssize() const
+  {
+    return m_container.ssize();
+  }
+
+  /**
    * @brief Data pointer.
    */
-  constexpr decltype(auto) data() const
+  constexpr const_pointer data() const
   {
     return m_container.data();
   }
@@ -92,7 +112,7 @@ public:
   /**
    * @brief Data pointer.
    */
-  constexpr decltype(auto) data()
+  constexpr pointer data()
   {
     return m_container.data();
   }
@@ -100,7 +120,7 @@ public:
   /**
    * @brief Const iterator to the beginning.
    */
-  constexpr decltype(auto) begin() const
+  constexpr const_iterator begin() const
   {
     return m_container.begin();
   }
@@ -108,7 +128,7 @@ public:
   /**
    * @brief Iterator to the beginning.
    */
-  constexpr decltype(auto) begin()
+  constexpr iterator begin()
   {
     return m_container.begin();
   }
@@ -116,7 +136,7 @@ public:
   /**
    * @brief Const iterator to the end.
    */
-  constexpr decltype(auto) end() const
+  constexpr const_iterator end() const
   {
     return m_container.end();
   }
@@ -124,7 +144,7 @@ public:
   /**
    * @brief Iterator to the end.
    */
-  constexpr decltype(auto) end()
+  constexpr iterator end()
   {
     return m_container.end();
   }
@@ -132,7 +152,7 @@ public:
   /**
    * @brief Access the i-th coefficient.
    */
-  constexpr const value_type& operator[](std::integral auto i) const
+  constexpr const_reference operator[](std::integral auto i) const
   {
     return m_container[i];
   }
@@ -140,7 +160,7 @@ public:
   /**
    * @brief Access the i-th coefficient.
    */
-  constexpr value_type& operator[](std::integral auto i)
+  constexpr reference operator[](std::integral auto i)
   {
     return m_container[i];
   }
@@ -160,8 +180,18 @@ class VectorBase<T[N]> {
 public:
 
   static constexpr int n = N; ///< The size parameter
+
+  using size_type = std::size_t; ///< The size type
+  using ssize_type = std::ptrdiff_t; ///< The signed size type
   using value_type = T; ///< The value type
+  using element_type = std::remove_cvref_t<value_type>; ///< The element type
+  using reference = value_type&; ///< The reference type
+  using const_reference = const value_type&; ///< The readonly reference type
+  using pointer = value_type*; ///< The pointer type
+  using const_pointer = const value_type*; /// The readonly pointer type
   using Container = std::array<T, N>; ///< The underlying container type
+  using iterator = typename Container::iterator; ///< The iterator type
+  using const_iterator = typename Container::const_iterator; ///< The readonly iterator type
 
   /**
    * @brief Constructor.
@@ -171,7 +201,9 @@ public:
   /**
    * @brief Constructor.
    */
-  constexpr VectorBase(std::initializer_list<T> coefs) : VectorBase(coefs.begin(), coefs.end()) {}
+  template <typename TCoef>
+  constexpr VectorBase(std::initializer_list<TCoef> coefs) : VectorBase(coefs.begin(), coefs.end())
+  {}
 
   /**
    * @brief Constructor.
@@ -201,7 +233,15 @@ public:
   /**
    * @brief Size.
    */
-  static constexpr auto size()
+  static constexpr size_type size()
+  {
+    return N;
+  }
+
+  /**
+   * @brief Signed size.
+   */
+  static constexpr ssize_type ssize()
   {
     return n;
   }
@@ -209,7 +249,7 @@ public:
   /**
    * @brief Data pointer.
    */
-  constexpr decltype(auto) data() const
+  constexpr const_pointer data() const
   {
     return m_container.data();
   }
@@ -217,7 +257,7 @@ public:
   /**
    * @brief Data pointer.
    */
-  constexpr decltype(auto) data()
+  constexpr pointer data()
   {
     return m_container.data();
   }
@@ -225,7 +265,7 @@ public:
   /**
    * @brief Const iterator to the beginning.
    */
-  constexpr decltype(auto) begin() const
+  constexpr const_iterator begin() const
   {
     return m_container.begin();
   }
@@ -233,7 +273,7 @@ public:
   /**
    * @brief Iterator to the beginning.
    */
-  constexpr decltype(auto) begin()
+  constexpr iterator begin()
   {
     return m_container.begin();
   }
@@ -241,7 +281,7 @@ public:
   /**
    * @brief Const iterator to the end.
    */
-  constexpr decltype(auto) end() const
+  constexpr const_iterator end() const
   {
     return m_container.end();
   }
@@ -249,7 +289,7 @@ public:
   /**
    * @brief Iterator to the end.
    */
-  constexpr decltype(auto) end()
+  constexpr iterator end()
   {
     return m_container.end();
   }
@@ -257,7 +297,7 @@ public:
   /**
    * @brief Access the i-th coefficient.
    */
-  constexpr const value_type& operator[](std::integral auto i) const
+  constexpr const_reference operator[](std::integral auto i) const
   {
     return m_container[i];
   }
@@ -265,7 +305,7 @@ public:
   /**
    * @brief Access the i-th coefficient.
    */
-  constexpr value_type& operator[](std::integral auto i)
+  constexpr reference operator[](std::integral auto i)
   {
     return m_container[i];
   }
@@ -285,7 +325,15 @@ class VectorBase<std::integer_sequence<T, Coefs...>> {
 public:
 
   static constexpr int n = sizeof...(Coefs); ///< The size
+
+  using size_type = std::size_t; ///< The size type
+  using ssize_type = std::ptrdiff_t; ///< The signed size type
   using value_type = const T; ///< The value type
+  using element_type = std::remove_cvref_t<value_type>; ///< The element type
+  using reference = value_type&; ///< The reference type
+  using const_reference = const value_type&; ///< The readonly reference type
+  using pointer = value_type*; ///< The pointer type
+  using const_pointer = const value_type*; /// The readonly pointer type
   using Container = void; ///< The underlying container type
 
   /**
@@ -294,9 +342,17 @@ public:
   constexpr VectorBase(auto&&...) {}
 
   /**
-   * @brief The size.
+   * @brief Size.
    */
-  static constexpr auto size()
+  static constexpr size_type size()
+  {
+    return sizeof...(Coefs);
+  }
+
+  /**
+   * @brief Signed size.
+   */
+  static constexpr ssize_type ssize()
   {
     return n;
   }

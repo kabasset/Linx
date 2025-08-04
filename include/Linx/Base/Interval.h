@@ -175,7 +175,7 @@ public:
   /**
    * @brief Interval size, if bounded.
    * 
-   * The function is ill-formed if `interval_size(pred())` is not defined.
+   * The function is ill-formed if `interval_size(Pred)` is not defined.
    */
   KOKKOS_INLINE_FUNCTION auto size() const
   {
@@ -185,7 +185,7 @@ public:
   /**
    * @brief Start index, if it exists.
    * 
-   * The function is ill-formed if `interval_start(pred())` is not defined.
+   * The function is ill-formed if `interval_start(Pred)` is not defined.
    */
   KOKKOS_INLINE_FUNCTION auto start() const
   {
@@ -195,7 +195,7 @@ public:
   /**
    * @brief Stop index, if it exists.
    * 
-   * The function is ill-formed if `interval_stop(pred())` is not defined.
+   * The function is ill-formed if `interval_stop(Pred)` is not defined.
    */
   KOKKOS_INLINE_FUNCTION auto stop() const
   {
@@ -205,7 +205,7 @@ public:
   /**
    * @brief Predicate defining the interval.
    */
-  KOKKOS_INLINE_FUNCTION const Pred& pred() const // FIXME better name?
+  KOKKOS_INLINE_FUNCTION const Pred& pred() const
   {
     return m_pred;
   }

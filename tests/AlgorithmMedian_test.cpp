@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(no_selectnet_test)
   using namespace Linx::Literals;
 
   auto a = Linx::vec<100_D>(0.);
-  for (int i = 0; i < a.size(); ++i) {
+  for (std::size_t i = 0; i < a.size(); ++i) {
     a[i] = i;
   }
   BOOST_TEST(Linx::median(a) == 49.5);

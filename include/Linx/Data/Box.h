@@ -22,17 +22,38 @@ namespace Linx {
 
 namespace Impl {
 
-template <int NStart, int NStop>
+template <int N0, int N1>
 static constexpr int static_rank()
 {
-  if constexpr (NStart == 0) {
-    return NStop;
+  if constexpr (N0 <= 0 && N1 <= 0) {
+    return std::min(N0, N1);
+  } else if constexpr (N0 <= 0 || N1 <= 0) {
+    return std::max(N0, N1);
+  } else {
+    static_assert(N0 == N1);
+    return N0;
   }
-  if constexpr (NStart == 0) {
-    return NStop;
-  }
-  return std::max(NStart, NStop);
 }
+
+template <typename T, int N>
+struct VectorTraits {
+  using Spec = T[N];
+};
+
+template <typename T>
+struct VectorTraits<T, -1> {
+  using Spec = T*;
+};
+
+template <typename T>
+struct VectorTraits<T, 0> {
+  using Spec = std::integer_sequence<T>; // FIXME void?
+};
+
+template <typename T0, typename T1>
+using CommonVector = Vector<typename VectorTraits<
+    std::common_type_t<typename T0::element_type, typename T1::element_type>,
+    static_rank<T0::n, T1::n>()>::Spec>;
 
 } // namespace Impl
 
@@ -55,16 +76,16 @@ public:
 
   using Start = Vector<TStart>; ///< The start vector type
   using Stop = Vector<TStop>; ///< The stop vector type
-  using Shape = decltype(std::declval<Stop>() - std::declval<Start>()); ///< The shape vector type
 
-  static constexpr int n = Impl::static_rank<Start::n, Stop::n>(); ///< The dimension parameter
-
-  using size_type = typename Shape::element_type; ///< The coordinate type, which may be non-integral
-  using value_type = const Vector<std::conditional_t<(n >= 0), size_type[n], size_type*>>; ///< The value type
+  using size_type = std::size_t; ///< The size type
+  using ssize_type = std::ptrdiff_t; ///< The signed size type
+  using value_type = const Impl::CommonVector<Start, Stop>; ///< The value type
   using element_type = std::remove_cvref_t<value_type>; ///< The element type
+  using coef_type = typename element_type::element_type; ///< The coefficient type // FIXME rename?
 
-  static constexpr bool static_rank_flag = Shape::static_rank_flag; ///< Static rank flag
-  static constexpr bool static_flag = Shape::static_flag; ///< Static bounds flag
+  static constexpr int n = value_type::n; ///< The dimension parameter
+  static constexpr bool static_rank_flag = value_type::static_size_flag; ///< Static rank flag
+  static constexpr bool static_flag = Start::static_flag && Stop::static_flag; ///< Static bounds flag
 
   /**
    * @brief Default constructor.
@@ -85,7 +106,7 @@ public:
   /**
    * @brief The box rank.
    */
-  KOKKOS_INLINE_FUNCTION constexpr auto rank() const
+  KOKKOS_INLINE_FUNCTION constexpr size_type rank() const
   {
     return std::max(m_start.size(), m_stop.size());
   }
@@ -93,7 +114,7 @@ public:
   /**
    * @brief The box shape.
    */
-  constexpr auto shape() const
+  constexpr value_type shape() const
   {
     return m_stop - m_start;
   }
@@ -101,7 +122,7 @@ public:
   /**
    * @brief The start bound, inclusive.
    */
-  KOKKOS_INLINE_FUNCTION constexpr const auto& start() const
+  KOKKOS_INLINE_FUNCTION constexpr const Start& start() const
   {
     return m_start;
   }
@@ -109,7 +130,7 @@ public:
   /**
    * @brief The stop bound, exclusive.
    */
-  KOKKOS_INLINE_FUNCTION constexpr const auto& stop() const
+  KOKKOS_INLINE_FUNCTION constexpr const Stop& stop() const
   {
     return m_stop;
   }
@@ -117,7 +138,7 @@ public:
   /**
    * @brief The finish bound, inclusive.
    */
-  KOKKOS_INLINE_FUNCTION constexpr auto finish() const
+  KOKKOS_INLINE_FUNCTION constexpr Stop finish() const
   {
     return m_stop - 1;
   }
@@ -165,10 +186,10 @@ public:
   /**
    * @brief Product of the extents, may be negative.
    */
-  KOKKOS_INLINE_FUNCTION constexpr auto ssize() const
+  KOKKOS_INLINE_FUNCTION constexpr coef_type ssize() const // FIXME rename as volume?
   {
-    size_type out = 1;
-    for (int i = 0; i < rank(); ++i) {
+    coef_type out = 1;
+    for (size_type i = 0; i < rank(); ++i) {
       out *= extent(i);
     }
     return out;
@@ -177,10 +198,10 @@ public:
   /**
    * @brief Unsigned size.
    */
-  KOKKOS_INLINE_FUNCTION constexpr auto size() const
+  KOKKOS_INLINE_FUNCTION constexpr size_type size() const
   {
     auto s = ssize();
-    return s <= 0 ? std::size_t(0) : static_cast<std::size_t>(s);
+    return s <= 0 ? size_type(0) : static_cast<size_type>(s); // FIXME cannot cast when s is not integral
   }
 
   /**
@@ -218,7 +239,7 @@ public:
    */
   bool contains(std::integral auto... is) const
   {
-    return contains(std::array {is...});
+    return contains(std::array {is...}); // FIXME no instanciation
   }
 
 private:

@@ -27,11 +27,13 @@ public:
 
   static constexpr auto n = VectorBase<T>::n; ///< The size parameter
 
+  using typename VectorBase<T>::size_type;
+  using typename VectorBase<T>::ssize_type;
   using typename VectorBase<T>::value_type;
+  using typename VectorBase<T>::element_type;
+  using typename VectorBase<T>::reference;
+  using typename VectorBase<T>::const_reference;
   using typename VectorBase<T>::Container;
-
-  using element_type = std::remove_cvref_t<value_type>; ///< The element type
-  using reference = const VectorBase<T>::value_type&; ///< The reference type
 
   using memory_space = Kokkos::HostSpace; ///< The memory space
   using execution_space = Kokkos::DefaultHostExecutionSpace; ///< The execution space
@@ -46,7 +48,7 @@ public:
   using VectorBase<T>::VectorBase;
 
   /**
-   * @brief The vector domain: `[0, size())`
+   * @brief Vector domain: `Slice(0, size())`
    */
   constexpr auto domain() const
   {
@@ -62,7 +64,7 @@ public:
   }
 
   /**
-   * @brief Get the i-th element or a fallback if i is out of bounds.
+   * @brief I-th element or a fallback if i is out of bounds.
    */
   constexpr element_type get_or(std::integral auto i, element_type fallback) const
   {
@@ -106,6 +108,9 @@ public:
 
 private:
 
+  /**
+   * @brief Helper method to unroll coefficients.
+   */
   template <std::size_t... Is>
   constexpr bool equal_impl([[maybe_unused]] auto coefs, std::index_sequence<Is...>) const
   {

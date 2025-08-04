@@ -107,11 +107,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   KOKKOS_INLINE_FUNCTION auto size() const
   {
-    if constexpr (TDerived::n == 0) {
-      return std::size_t(0);
-    } else {
-      return LINX_CRTP_CONST_DERIVED.rank() > 0 ? LINX_CRTP_CONST_DERIVED.container().size() : 0;
-    }
+    return LINX_CRTP_CONST_DERIVED.container().size();
   }
 
   /**
@@ -119,7 +115,8 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   KOKKOS_INLINE_FUNCTION auto ssize() const
   {
-    return static_cast<std::ptrdiff_t>(size());
+    using Out = std::common_type_t<std::ptrdiff_t, std::make_signed_t<decltype(size())>>;
+    return static_cast<Out>(size());
   }
 
   /**
@@ -147,7 +144,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   KOKKOS_INLINE_FUNCTION bool empty() const
   {
-    return size() == 0;
+    return size() == 0; // FIXME should it be true for rank() = 0?
   }
 
   /**
@@ -155,7 +152,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   const TDerived& fill(const T& value) const
   {
-    // TODO if container() is root() and value type is compatible (i.e. no string?)
+    // TODO if is root() and value type is compatible (i.e. no string?)
     // TODO then use Kokkos::deep_copy()
     return generate("fill", Constant(value));
   }

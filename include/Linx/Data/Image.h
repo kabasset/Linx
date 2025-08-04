@@ -53,7 +53,7 @@ public:
   using const_pointer = const value_type*; ///< The constant element pointer type
 
   using Domain = TDomain; ///< The domain type
-  using Shape = typename Domain::Shape;
+  using Shape = typename Domain::value_type;
   static constexpr int n = Domain::n; ///< The rank parameter
   static constexpr int max_rank = (n == -1 ? kokkos_max_dyn_rank : n); ///< The max rank supported by Kokkos
   static constexpr bool static_rank_flag = (n >= 0); ///< Static rank flag

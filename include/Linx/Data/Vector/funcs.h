@@ -25,7 +25,7 @@ std::ostream& operator<<(std::ostream& os, const Vector<T>& in)
 }
 
 /**
- * @brief Resize a vector to a given static size, padding with default-initialized values if necessary.
+ * @brief Create a vector of given static size, padding with default-initialized values if necessary.
  */
 template <int N, typename T>
 constexpr auto resize(const Vector<T>& in)

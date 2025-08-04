@@ -28,10 +28,10 @@ constexpr auto vec(std::array<T, N> coefs)
 /**
  * @brief Create a static-size vector.
  */
-template <typename T0, std::same_as<T0> T1, std::same_as<T0>... Ts>
-constexpr auto vec(T0 coef0, T1 coef1, Ts... coefs)
+template <typename T0, std::convertible_to<T0>... Ts>
+constexpr auto vec(T0 coef0, Ts... coefs)
 {
-  return vec(std::array {coef0, coef1, coefs...});
+  return vec(std::array {coef0, T0 {coefs}...});
 }
 
 /**
