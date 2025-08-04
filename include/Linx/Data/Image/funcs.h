@@ -13,7 +13,7 @@ namespace Linx {
  * If the input image is aleady readonly, then this is a no-op.
  */
 template <typename T, typename TDomain, typename TContainer>
-KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Image<T, TDomain, TContainer>& in)
+decltype(auto) as_readonly(const Image<T, TDomain, TContainer>& in)
 {
   if constexpr (std::is_const_v<T>) {
     return in;
@@ -28,7 +28,7 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Image<T, TDomain, TConta
  * @brief Perform a shallow copy of an image, as an atomic image.
  */
 template <typename T, typename TDomain, typename TContainer>
-KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Image<T, TDomain, TContainer>& in)
+decltype(auto) as_atomic(const Image<T, TDomain, TContainer>& in)
 {
   using Out = Image<T, TDomain, typename Rebind<TContainer>::AsAtomic>;
   return Out(Forward {}, in.container());

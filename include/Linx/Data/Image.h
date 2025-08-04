@@ -107,7 +107,7 @@ public:
    * @brief Forwarding constructor.
    * @param args The arguments to be forwarded to the container's constructor
    */
-  KOKKOS_INLINE_FUNCTION explicit Image(Forward, auto&&... args) : m_container(LINX_FORWARD(args)...), m_domain {} {}
+  explicit Image(Forward, auto&&... args) : m_container(LINX_FORWARD(args)...), m_domain {} {}
 
   /**
    * @brief Wrapping constructor.

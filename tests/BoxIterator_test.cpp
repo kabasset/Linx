@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(static_box_size_test)
 {
   using namespace Linx::Literals;
 
-  constexpr auto region = Linx::shape<4_D, 2>();
+  [[maybe_unused]] constexpr auto region = Linx::shape<4_D, 2>();
   constexpr auto size = Linx::count_if<decltype(region), Linx::StaticConstant<true>>();
   BOOST_TEST(size == 2 * 2 * 2 * 2);
 

@@ -226,7 +226,7 @@ public:
   bool contains(const auto& position) const
   { // FIXME Subscriptable<size_t>? Indexed?
     SizeMismatch::may_throw("position", rank(), position);
-    for (int i = 0; i < rank(); ++i) {
+    for (std::size_t i = 0; i < rank(); ++i) {
       if (position[i] < m_start[i] || position[i] > m_stop[i]) {
         return false;
       }
