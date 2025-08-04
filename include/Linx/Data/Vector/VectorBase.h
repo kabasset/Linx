@@ -82,6 +82,54 @@ public:
   }
 
   /**
+   * @brief Data pointer.
+   */
+  constexpr decltype(auto) data() const
+  {
+    return m_container.data();
+  }
+
+  /**
+   * @brief Data pointer.
+   */
+  constexpr decltype(auto) data()
+  {
+    return m_container.data();
+  }
+
+  /**
+   * @brief Const iterator to the beginning.
+   */
+  constexpr decltype(auto) begin() const
+  {
+    return m_container.begin();
+  }
+
+  /**
+   * @brief Iterator to the beginning.
+   */
+  constexpr decltype(auto) begin()
+  {
+    return m_container.begin();
+  }
+
+  /**
+   * @brief Const iterator to the end.
+   */
+  constexpr decltype(auto) end() const
+  {
+    return m_container.end();
+  }
+
+  /**
+   * @brief Iterator to the end.
+   */
+  constexpr decltype(auto) end()
+  {
+    return m_container.end();
+  }
+
+  /**
    * @brief Access the i-th coefficient.
    */
   constexpr const value_type& operator[](std::integral auto i) const
@@ -156,6 +204,54 @@ public:
   static constexpr auto size()
   {
     return n;
+  }
+
+  /**
+   * @brief Data pointer.
+   */
+  constexpr decltype(auto) data() const
+  {
+    return m_container.data();
+  }
+
+  /**
+   * @brief Data pointer.
+   */
+  constexpr decltype(auto) data()
+  {
+    return m_container.data();
+  }
+
+  /**
+   * @brief Const iterator to the beginning.
+   */
+  constexpr decltype(auto) begin() const
+  {
+    return m_container.begin();
+  }
+
+  /**
+   * @brief Iterator to the beginning.
+   */
+  constexpr decltype(auto) begin()
+  {
+    return m_container.begin();
+  }
+
+  /**
+   * @brief Const iterator to the end.
+   */
+  constexpr decltype(auto) end() const
+  {
+    return m_container.end();
+  }
+
+  /**
+   * @brief Iterator to the end.
+   */
+  constexpr decltype(auto) end()
+  {
+    return m_container.end();
   }
 
   /**
