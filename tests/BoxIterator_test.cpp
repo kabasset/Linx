@@ -25,6 +25,17 @@ BOOST_AUTO_TEST_CASE(box_iterator_test)
   BOOST_TEST(size == region.size());
 }
 
+BOOST_AUTO_TEST_CASE(static_box_size_test)
+{
+  using namespace Linx::Literals;
+
+  constexpr auto region = Linx::shape<4_D, 2>();
+  constexpr auto size = Linx::count_if<decltype(region), Linx::StaticConstant<true>>();
+  BOOST_TEST(size == 2 * 2 * 2 * 2);
+
+  static_assert(Linx::count_if<decltype(region), Linx::StaticConstant<true>>() == 2 * 2 * 2 * 2);
+}
+
 BOOST_AUTO_TEST_CASE(empty_box_iterator_test)
 {
   using namespace Linx::Literals;

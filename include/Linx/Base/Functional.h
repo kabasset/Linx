@@ -120,7 +120,7 @@ struct StaticConstant {
   /**
    * @brief Constructor.
    */
-  KOKKOS_INLINE_FUNCTION StaticConstant(auto&&...) {}
+  KOKKOS_INLINE_FUNCTION constexpr StaticConstant(auto&&...) {}
 
   /**
    * @brief Label.

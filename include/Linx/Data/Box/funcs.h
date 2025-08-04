@@ -53,9 +53,11 @@ constexpr const auto& bbox(const Specialization<Box> auto& in)
  */
 constexpr auto bbox(const Specialization<Slice> auto& slice)
 {
-  return [=]<std::size_t... Is>(const auto& s, std::index_sequence<Is...>) {
+  return [=]<std::size_t... Is>(const auto& s, std::index_sequence<Is...>)
+  {
     return Box(vec(get<Is>(s).start()...), vec(get<Is>(s).stop()...));
-  }(slice, std::make_index_sequence<LINX_DECLTYPE(slice)::n>());
+  }
+  (slice, std::make_index_sequence<LINX_DECLTYPE(slice)::n>());
 }
 
 /**
@@ -81,11 +83,13 @@ auto kokkos_execution_policy(const Box<TStart, TStop>& domain)
   if constexpr (n == 1) {
     return Kokkos::RangePolicy<TSpace, Kokkos::IndexType<Index>>(domain.start(0), domain.stop(0));
   } else {
-    return [=]<std::size_t... Is>(const auto& d, std::index_sequence<Is...>) {
+    return [=]<std::size_t... Is>(const auto& d, std::index_sequence<Is...>)
+    {
       using Policy = Kokkos::MDRangePolicy<TSpace, Kokkos::Rank<n>, Kokkos::IndexType<Index>>;
       using Array = Policy::point_type;
       return Policy(Array {d.start(Is)...}, Array {d.stop(Is)...});
-    }(domain, std::make_index_sequence<n>());
+    }
+    (domain, std::make_index_sequence<n>());
   }
 }
 
@@ -128,6 +132,31 @@ void for_each(const std::string& label, const Specialization<Box> auto& region, 
   }
 
 #undef LINX_CASE_RANK
+}
+
+/**
+ * @brief Statically count the number of positions of a region for which a predicate holds.
+ */
+template <typename TRegion, typename TPred>
+constexpr std::size_t count_if()
+{
+  return count_if(TRegion(), TPred());
+}
+
+/**
+ * @brief Sequentially count the number of positions of a region for which a predicate holds.
+ * 
+ * @warning This function is not parallelized.
+ */
+constexpr std::size_t count_if(const auto& region, const auto& pred)
+{
+  std::size_t out = 0;
+  for (const auto& p : region) { // FIXME parallel?
+    if (pred(p)) {
+      ++out;
+    }
+  }
+  return out;
 }
 
 } // namespace Linx
