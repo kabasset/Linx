@@ -33,12 +33,8 @@ BOOST_AUTO_TEST_CASE(span_unbounded_singleton_slice_test)
   auto slice = image[Linx::Slice(1, 5)()(3)];
   BOOST_TEST(slice.label() == image.label());
   BOOST_TEST(slice.n == 2);
-  BOOST_TEST(slice.extent(0) == 4);
-  BOOST_TEST(slice.extent(1) == 9);
-  BOOST_TEST(slice.domain().start(0) == 0);
-  BOOST_TEST(slice.domain().stop(0) == 4);
-  BOOST_TEST(slice.domain().start(1) == 0);
-  BOOST_TEST(slice.domain().stop(1) == 9);
+  BOOST_TEST(slice.static_start_at_origin_flag);
+  BOOST_TEST(slice.domain() == Linx::Box({4, 9}));
 
   auto box = Linx::Box({0, 0}, {4, 9});
   auto diff = Linx::no_init<float>("diff", box);
@@ -54,17 +50,10 @@ BOOST_AUTO_TEST_CASE(box_slice_test)
   auto slice = image[box];
   BOOST_TEST(slice.label() == image.label());
   BOOST_TEST(slice.n == 3);
-  BOOST_TEST(slice.extent(0) == 4);
-  BOOST_TEST(slice.extent(1) == 9);
-  BOOST_TEST(slice.extent(2) == 1);
-  BOOST_TEST(slice.domain().start(0) == 0);
-  BOOST_TEST(slice.domain().stop(0) == 4);
-  BOOST_TEST(slice.domain().start(1) == 0);
-  BOOST_TEST(slice.domain().stop(1) == 9);
-  BOOST_TEST(slice.domain().start(2) == 0);
-  BOOST_TEST(slice.domain().stop(2) == 1);
+  BOOST_TEST(slice.static_start_at_origin_flag);
+  BOOST_TEST(slice.domain() == Linx::Box({4, 9, 1}));
 
-  auto diff = Linx::no_init<float>("diff", box - box.start()); // FIXME no_init(string, Vector)
+  auto diff = Linx::no_init<float>("diff", box - box.start());
   Linx::for_each(
       "test",
       diff.domain(),
@@ -79,15 +68,8 @@ BOOST_AUTO_TEST_CASE(index_range_slice_test)
   auto slice = image[Linx::Slice(1, 3)];
   BOOST_TEST(slice.label() == image.label());
   BOOST_TEST(slice.n == 3);
-  BOOST_TEST(slice.extent(0) == 16);
-  BOOST_TEST(slice.extent(1) == 9);
-  BOOST_TEST(slice.extent(2) == 2);
-  BOOST_TEST(slice.domain().start(0) == 0);
-  BOOST_TEST(slice.domain().stop(0) == 16);
-  BOOST_TEST(slice.domain().start(1) == 0);
-  BOOST_TEST(slice.domain().stop(1) == 9);
-  BOOST_TEST(slice.domain().start(2) == 0);
-  BOOST_TEST(slice.domain().stop(2) == 2);
+  BOOST_TEST(slice.static_start_at_origin_flag);
+  BOOST_TEST(slice.domain() == Linx::Box({16, 9, 2}));
 
   auto diff = Linx::no_init<float>("diff", slice.domain());
   Linx::for_each(
@@ -104,12 +86,8 @@ BOOST_AUTO_TEST_CASE(index_slice_test)
   auto slice = image[Linx::Slice(1)];
   BOOST_TEST(slice.label() == image.label());
   BOOST_TEST(slice.n == 2);
-  BOOST_TEST(slice.extent(0) == 16);
-  BOOST_TEST(slice.extent(1) == 9);
-  BOOST_TEST(slice.domain().start(0) == 0);
-  BOOST_TEST(slice.domain().stop(0) == 16);
-  BOOST_TEST(slice.domain().start(1) == 0);
-  BOOST_TEST(slice.domain().stop(1) == 9);
+  BOOST_TEST(slice.static_start_at_origin_flag);
+  BOOST_TEST(slice.domain() == Linx::Box({16, 9}));
 
   auto diff = Linx::no_init<float>("diff", slice.domain());
   Linx::for_each("test", slice.domain(), KOKKOS_LAMBDA(int i, int j) { diff(i, j) = slice(i, j) - image(i, j, 1); });

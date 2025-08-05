@@ -301,8 +301,8 @@ public:
     const auto& crop = region & domain();
     using Crop = LINX_DECLTYPE(crop);
     using Container = LINX_DECLTYPE(slice_all(crop, std::make_index_sequence<Crop::n>()));
-    return Image<T, Crop, Container>(Forward {}, slice_all(crop, std::make_index_sequence<Crop::n>()));
-    // FIXME offset
+    using Domain = LINX_DECLTYPE(domain(std::declval<Container>()));
+    return Image<T, Domain, Container>(Forward {}, slice_all(crop, std::make_index_sequence<Crop::n>()));
   }
 
   /**
