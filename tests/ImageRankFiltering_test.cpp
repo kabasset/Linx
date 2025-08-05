@@ -3,6 +3,7 @@
 
 #define BOOST_TEST_MODULE ImageRankFilteringTest
 
+#include "Linx/Data/Image.h"
 #include "Linx/Run/ProgramContext.h"
 #include "Linx/Transforms/RankFiltering.h"
 
@@ -14,11 +15,11 @@ BOOST_AUTO_TEST_CASE(min_test)
 {
   const int width = 16;
   const int height = 9;
-  const auto in = Linx::Image<int, 2>("input", width, height).generate_offsets();
+  const auto in = Linx::no_init<int>("input", width, height).generate_offsets();
 
   const int start = -1;
   const int stop = 2;
-  const auto strel = Linx::Box<2>({start, start}, {stop, stop});
+  const auto strel = Linx::Box({start, start}, {stop, stop});
   const auto out = Linx::MinimumFilter(strel)(in);
   BOOST_TEST(out.extent(0) == width);
   BOOST_TEST(out.extent(1) == height);
@@ -42,11 +43,11 @@ BOOST_AUTO_TEST_CASE(max_test)
 {
   const int width = 16;
   const int height = 9;
-  const auto in = Linx::Image<int, 2>("input", width, height).generate_offsets();
+  const auto in = Linx::no_init<int>("input", width, height).generate_offsets();
 
   const int start = -1;
   const int stop = 2;
-  const auto strel = Linx::Box<2>({start, start}, {stop, stop});
+  const auto strel = Linx::Box({start, start}, {stop, stop});
   const auto out = Linx::MaximumFilter(strel)(in);
   BOOST_TEST(out.extent(0) == width);
   BOOST_TEST(out.extent(1) == height);
@@ -70,10 +71,10 @@ BOOST_AUTO_TEST_CASE(median_test)
 {
   const int width = 16;
   const int height = 9;
-  const auto in = Linx::Image<int, 2>("input", width, height).generate_offsets();
+  const auto in = Linx::no_init<int>("input", width, height).generate_offsets();
 
   const int radius = 1;
-  const auto strel = Linx::Box<2>({-radius, -radius}, {radius + 1, radius + 1});
+  const auto strel = Linx::Box({-radius, -radius}, {radius + 1, radius + 1});
   const auto out = Linx::MedianFilter(strel)(in);
   BOOST_TEST(out.extent(0) == width);
   BOOST_TEST(out.extent(1) == height);

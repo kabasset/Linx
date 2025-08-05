@@ -7,8 +7,6 @@
 
 #include "Linx/Base/ArrayPool.h"
 #include "Linx/Base/Median.h"
-#include "Linx/Data/Image.h"
-#include "Linx/Data/Sequence.h"
 #include "Linx/Transforms/mixins/Filter.h"
 
 #include <concepts>
