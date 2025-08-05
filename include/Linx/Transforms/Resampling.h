@@ -7,7 +7,6 @@
 
 #include "Linx/Base/Packs.h"
 #include "Linx/Data/Image.h"
-#include "Linx/Data/Sequence.h"
 
 #include <concepts>
 #include <string>

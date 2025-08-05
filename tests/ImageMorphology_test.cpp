@@ -3,6 +3,7 @@
 
 #define BOOST_TEST_MODULE ImageMorphologyTest
 
+#include "Linx/Data/Image.h"
 #include "Linx/Run/ProgramContext.h"
 #include "Linx/Transforms/Morphology.h"
 
@@ -14,8 +15,8 @@ BOOST_AUTO_TEST_CASE(crop_test)
 {
   const int width = 16;
   const int height = 9;
-  const auto zero = Linx::Image<bool, 2>("0", width, height);
-  const auto one = Linx::Image<bool, 2>("1", width, height).fill(true);
+  const auto zero = Linx::default_init<bool>("0", width, height);
+  const auto one = Linx::fill("1", true, width, height);
 
   const int radius = 1;
   auto strel = Linx::Box({-radius, -radius}, {radius + 1, radius + 1});

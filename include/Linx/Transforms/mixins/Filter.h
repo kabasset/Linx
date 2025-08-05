@@ -8,9 +8,7 @@
 #include "Linx/Base/mixins/Strided.h"
 #include "Linx/Data/Patch.h"
 #include "Linx/Data/Profile.h"
-#include "Linx/Data/Sequence.h"
 #include "Linx/Transforms/Resampling.h" // Pad FIXME rm when all extrapolations are supported
-#include "Linx/Transforms/Shift.h"
 
 #include <string>
 
@@ -70,7 +68,7 @@ public:
       // FIXME return typename TDerived::Lazy<TIn>(LINX_CRTP_CONST_DERIVED, in);
     } else {
       auto domain = dilate(bbox(in.domain()), m_parent.footprint());
-      auto extrapolated = Shift(TIn("extrapolated", domain.shape()), domain.start());
+      auto extrapolated = Linx::no_init<typename TIn::element_type>("extrapolated", domain);
       extrapolated.copy_from(Extrapolation(in, m_method));
       return m_parent.lazy(extrapolated);
     }
@@ -343,7 +341,7 @@ public:
 protected:
 
   using Neighbors = decltype(Profile(try_as_readonly(std::declval<TIn>()), 0));
-  using Weights = Sequence<element_type, -1, SequenceContainer<element_type, -1, execution_space>>;
+  using Weights = decltype(no_init<element_type, execution_space>("", 0)); // FIXME adapt domain, if possible static
 
   TFilter m_filter; ///< The filter
   Neighbors m_neighbors; ///< The image profile along the footprint
