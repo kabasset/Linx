@@ -10,7 +10,6 @@
 
 #include <array>
 #include <concepts>
-#include <iostream>
 #include <utility> // integer_sequence
 #include <vector>
 
@@ -38,6 +37,7 @@ class VectorBase<T*> {
 public:
 
   static constexpr int n = -1; ///< The size parameter
+  static constexpr bool static_zero_flag = false; ///< Statically zero flag
 
   using size_type = std::size_t; ///< The size type
   using ssize_type = std::ptrdiff_t; ///< The signed size type
@@ -180,6 +180,7 @@ class VectorBase<T[N]> {
 public:
 
   static constexpr int n = N; ///< The size parameter
+  static constexpr bool static_zero_flag = (n == 0); ///< Statically zero flag
 
   using size_type = std::size_t; ///< The size type
   using ssize_type = std::ptrdiff_t; ///< The signed size type
@@ -325,6 +326,7 @@ class VectorBase<std::integer_sequence<T, Coefs...>> {
 public:
 
   static constexpr int n = sizeof...(Coefs); ///< The size
+  static constexpr bool static_zero_flag = ((Coefs == 0) && ...); ///< Statically zero flag
 
   using size_type = std::size_t; ///< The size type
   using ssize_type = std::ptrdiff_t; ///< The signed size type

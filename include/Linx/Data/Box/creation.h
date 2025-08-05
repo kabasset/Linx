@@ -7,26 +7,46 @@
 
 namespace Linx {
 
+template <typename TVec>
+auto origin()
+{
+  if constexpr (TVec::static_size_flag) {
+    return vec<Dimension {TVec::n}>();
+  } else {
+    return TVec();
+  }
+}
+
+template <typename TSpec>
+using OriginSpec = typename decltype(origin<Vector<TSpec>>())::Spec;
+
 /**
- * @relatesalso Box
+ * @relates Box
  * @brief Null rank.
  */
 template <typename T = int>
 Box() -> Box<std::integer_sequence<T>, std::integer_sequence<T>>;
 
 /**
- * @relatesalso Box
+ * @relates Box
  * @brief Start at origin.
  */
 template <typename T, int N>
-Box(T (&&)[N]) -> Box<std::integer_sequence<int>, T[N]>;
+Box(T (&&)[N]) -> Box<OriginSpec<T[N]>, T[N]>;
 
 /**
- * @relatesalso Box
+ * @relates Box
+ * @brief Start at origin
+ */
+template <typename TStop>
+Box(const Vector<TStop>&) -> Box<OriginSpec<TStop>, TStop>;
+
+/**
+ * @relates Box
  * @brief Specify start and stop bounds.
  */
 template <typename T0, int N0, typename T1, int N1>
-Box(T0 (&&)[N0], T1 (&&)[N1]) -> Box<T0[N0], T1[N1]>;
+Box(T0 (&&)[N0], T1 (&&)[N1]) -> Box<T0[N0], T1[N1]>; // FIXME forbid different N's?
 
 /**
  * @relatesalso Box
@@ -37,7 +57,12 @@ Box(T0 (&&)[N0], T1 (&&)[N1]) -> Box<T0[N0], T1[N1]>;
 template <auto... Args>
 constexpr auto shape(auto... args)
 {
-  return Box(vec<Args...>(args...));
+  auto stop = vec<Args...>(args...);
+  if constexpr (decltype(stop)::static_size_flag) {
+    return Box(vec<Dimension {decltype(stop)::n}>(), stop);
+  } else {
+    return Box(vec(Dimension(stop.size())), stop);
+  }
 }
 
 /**

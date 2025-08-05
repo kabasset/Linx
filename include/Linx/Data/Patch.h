@@ -8,7 +8,6 @@
 #include "Linx/Base/Functional.h"
 #include "Linx/Base/Types.h"
 #include "Linx/Data/Image.h"
-#include "Linx/Data/Sequence.h"
 
 #include <Kokkos_Core.hpp>
 
@@ -229,7 +228,6 @@ decltype(auto) on_host(const Patch<TParent, TDomain>& in)
 }
 
 // FIXME Mask-based patch
-// FIXME Sequence/Path-based patch
 
 } // namespace Linx
 

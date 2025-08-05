@@ -12,6 +12,9 @@ namespace Linx {
 
 namespace Impl {
 
+/**
+ * @brief Identity element of a monoid, or a fallback if it is undefined.
+ */
 template <typename T>
 static constexpr auto identity_element_or(const auto& func, const T& fallback = T {})
 {
@@ -22,6 +25,46 @@ static constexpr auto identity_element_or(const auto& func, const T& fallback = 
   }
 }
 
+/**
+ * @brief Common static size of two input sizes.
+ * 
+ * Compilation fails if input sizes are incompatible.
+ */
+template <int N0, int N1>
+constexpr int common_size()
+{
+  if constexpr (N0 <= 0 && N1 <= 0) {
+    return std::min(N0, N1);
+  } else if constexpr (N0 <= 0 || N1 <= 0) {
+    return std::max(N0, N1);
+  } else {
+    static_assert(N0 == N1);
+    return N0;
+  }
+}
+
+/**
+ * @brief Common dynamic size of two input sizes.
+ * 
+ * Aborts if input sizes are incompatible.
+ */
+constexpr int common_size(int n0, int n1)
+{
+  if (n0 <= 0 && n1 <= 0) {
+    return std::min(n0, n1);
+  } else if (n0 <= 0 || n1 <= 0) {
+    return std::max(n0, n1);
+  } else {
+    if (n0 != n1) {
+      Kokkos::abort("common_size() missmatch");
+    }
+    return n0;
+  }
+}
+
+/**
+ * @brief Helper function to unroll indices statically.
+ */
 template <typename T, typename TFunc, typename TLhs, typename TRhs, std::size_t... Is>
 static constexpr auto
 static_transform_vectors_impl(const Vector<TLhs>&, const Vector<TRhs>&, std::index_sequence<Is...>)

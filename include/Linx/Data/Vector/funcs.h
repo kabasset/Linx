@@ -13,7 +13,7 @@ namespace Linx {
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const Vector<T>& in)
 {
-  if (in.size() == 0) {
+  if (Vector<T>::static_zero_flag || in.size() == 0) {
     return os << "O";
   }
 

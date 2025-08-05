@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (C) 2024, Antoine Basset
 // SPDX-License-Identifier: Apache-2.0
 
-#define BOOST_TEST_MODULE BoxCtorsTest
+#define BOOST_TEST_MODULE BoxCreationTest
 
 #include "Linx/Data/Box.h"
 #include "Linx/Run/ProgramContext.h"
@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE(static_rank_test)
 
   auto single_list = Linx::Box({1, 2, 3});
   BOOST_TEST(single_list.static_rank_flag);
-  BOOST_TEST(single_list.start().static_empty_flag);
+  BOOST_TEST(single_list.start().static_zero_flag);
   BOOST_TEST(single_list.stop().equal(1, 2, 3));
   BOOST_TEST(single_list.size() == 6);
 
@@ -28,19 +28,19 @@ BOOST_AUTO_TEST_CASE(static_rank_test)
 
   auto stop = Linx::Box(Linx::vec(1, 2, 3));
   BOOST_TEST(stop.static_rank_flag);
-  BOOST_TEST(stop.start().static_empty_flag);
+  BOOST_TEST(stop.start().static_zero_flag);
   BOOST_TEST(stop.stop().equal(1, 2, 3));
   BOOST_TEST(stop.size() == 6);
 
   auto shape = Linx::shape(1, 2, 3);
   BOOST_TEST(shape.static_rank_flag);
-  BOOST_TEST(shape.start().static_empty_flag);
+  BOOST_TEST(shape.start().static_zero_flag);
   BOOST_TEST(shape.stop().equal(1, 2, 3));
   BOOST_TEST(shape.size() == 6);
 
   auto unit = Linx::shape<3_D>(1);
   BOOST_TEST(unit.static_rank_flag);
-  BOOST_TEST(unit.start().static_empty_flag);
+  BOOST_TEST(unit.start().static_zero_flag);
   BOOST_TEST(unit.stop().equal(1, 1, 1));
   BOOST_TEST(unit.size() == 1);
 
@@ -75,19 +75,19 @@ BOOST_AUTO_TEST_CASE(static_test)
 
   auto empty = Linx::Box(Linx::vec<1_D>());
   BOOST_TEST(empty.static_flag);
-  BOOST_TEST(empty.start().equal());
+  BOOST_TEST(empty.start().equal(0));
   BOOST_TEST(empty.stop().equal(0));
   BOOST_TEST(empty.size() == 0);
 
   auto stop = Linx::Box(Linx::vec<1, 2, 3>());
   BOOST_TEST(stop.static_flag);
-  BOOST_TEST(stop.start().static_empty_flag);
+  BOOST_TEST(stop.start().static_zero_flag);
   BOOST_TEST(stop.stop().equal(1, 2, 3));
   BOOST_TEST(stop.size() == 6);
 
   auto shape = Linx::shape<1, 2, 3>();
   BOOST_TEST(shape.static_flag);
-  BOOST_TEST(shape.start().static_empty_flag);
+  BOOST_TEST(shape.start().static_zero_flag);
   BOOST_TEST(shape.stop().equal(1, 2, 3));
   BOOST_TEST(shape.size() == 6);
 

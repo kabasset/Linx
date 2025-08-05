@@ -42,7 +42,7 @@ auto default_init(const std::string& label, std::integral auto... extents)
  * @tparam TSpace The memory space
  */
 template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
-auto uninit(const std::string& label, const auto& domain)
+auto no_init(const std::string& label, const auto& domain)
 {
   using Domain = LINX_DECLTYPE(domain);
   return Image<T, Domain, ImageContainer<T, Domain, TSpace>>(label, domain);
@@ -56,7 +56,7 @@ auto uninit(const std::string& label, const auto& domain)
  * @tparam TSpace The memory space
  */
 template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
-auto uninit(const std::string& label, std::integral auto... extents)
+auto no_init(const std::string& label, std::integral auto... extents)
 {
   using Domain = decltype(shape(extents...));
   return Image<T, Domain, ImageContainer<T, Domain, TSpace>>(
@@ -74,7 +74,7 @@ auto rowwise(const std::string& label, T (&&row)[N])
 {
   auto domain = shape<N>();
   auto raster = Raster<T, decltype(domain)>(Wrap(row), N);
-  auto out = uninit<T, TSpace>(label, domain);
+  auto out = no_init<T, TSpace>(label, domain);
   Kokkos::deep_copy(out.container(), raster.container());
   return out;
 }
@@ -89,7 +89,7 @@ auto rowwise(const std::string& label, T (&&rows)[N1][N0])
   T* data = *rows;
   auto domain = shape<N0, N1>();
   auto raster = Raster<T, decltype(domain)>(Wrap(data), N0, N1);
-  auto out = uninit<T, TSpace>(label, domain);
+  auto out = no_init<T, TSpace>(label, domain);
   Kokkos::deep_copy(out.container(), raster.container());
   return out;
 }
@@ -104,7 +104,7 @@ auto rowwise(const std::string& label, T (&&rows)[N2][N1][N0])
   T* data = **rows;
   auto domain = shape<N0, N1, N2>();
   auto raster = Raster<T, decltype(domain)>(Wrap(data), N0, N1, N2);
-  auto out = uninit<T, TSpace>(label, domain);
+  auto out = no_init<T, TSpace>(label, domain);
   Kokkos::deep_copy(out.container(), raster.container());
   return out;
 }
@@ -137,7 +137,7 @@ auto wrap(T* data, const auto& domain)
 template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T>
 auto fill(const std::string& label, const T& value, auto&&... domain)
 {
-  return uninit<T, TSpace>(label, LINX_FORWARD(domain)...).fill(value);
+  return no_init<T, TSpace>(label, LINX_FORWARD(domain)...).fill(value);
 }
 
 namespace Impl {
@@ -175,7 +175,7 @@ template <typename TSpace = Kokkos::DefaultExecutionSpace>
 auto generate(const std::string& label, const auto& func, auto&&... domain)
 {
   using T = LINX_DECLTYPE(Impl::apply_at_stop(func, domain...));
-  return uninit<T, TSpace>(label, LINX_FORWARD(domain)...).copy_from(func);
+  return no_init<T, TSpace>(label, LINX_FORWARD(domain)...).copy_from(func);
 }
 
 /**

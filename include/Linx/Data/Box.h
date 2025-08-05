@@ -22,19 +22,6 @@ namespace Linx {
 
 namespace Impl {
 
-template <int N0, int N1>
-static constexpr int static_rank()
-{
-  if constexpr (N0 <= 0 && N1 <= 0) {
-    return std::min(N0, N1);
-  } else if constexpr (N0 <= 0 || N1 <= 0) {
-    return std::max(N0, N1);
-  } else {
-    static_assert(N0 == N1);
-    return N0;
-  }
-}
-
 template <typename T, int N>
 struct VectorTraits {
   using Spec = T[N];
@@ -53,7 +40,7 @@ struct VectorTraits<T, 0> {
 template <typename T0, typename T1>
 using CommonVector = Vector<typename VectorTraits<
     std::common_type_t<typename T0::element_type, typename T1::element_type>,
-    static_rank<T0::n, T1::n>()>::Spec>;
+    Impl::common_size<T0::n, T1::n>()>::Spec>;
 
 } // namespace Impl
 
@@ -70,7 +57,7 @@ using CommonVector = Vector<typename VectorTraits<
  * 
  * @see `Patch`
  */
-template <typename TStart = std::integer_sequence<int>, typename TStop = std::integer_sequence<int>>
+template <typename TStart, typename TStop>
 class Box {
 public:
 
@@ -86,6 +73,7 @@ public:
   static constexpr int n = value_type::n; ///< The dimension parameter
   static constexpr bool static_rank_flag = value_type::static_size_flag; ///< Static rank flag
   static constexpr bool static_flag = Start::static_flag && Stop::static_flag; ///< Static bounds flag
+  static constexpr bool static_start_at_origin_flag = Start::static_zero_flag; ///< Start is origin flag
 
   /**
    * @brief Default constructor.
@@ -108,7 +96,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION constexpr size_type rank() const
   {
-    return std::max(m_start.size(), m_stop.size());
+    return Impl::common_size(m_start.size(), m_stop.size());
   }
 
   /**
@@ -138,7 +126,7 @@ public:
   /**
    * @brief The finish bound, inclusive.
    */
-  KOKKOS_INLINE_FUNCTION constexpr Stop finish() const
+  KOKKOS_INLINE_FUNCTION constexpr auto finish() const
   {
     return m_stop - 1;
   }
@@ -154,7 +142,7 @@ public:
   /**
    * @copybrief start()
    */
-  KOKKOS_INLINE_FUNCTION constexpr auto& start(std::integral auto i)
+  KOKKOS_INLINE_FUNCTION constexpr decltype(auto) start(std::integral auto i)
   {
     return m_start[i];
   }
@@ -170,7 +158,7 @@ public:
   /**
    * @copybrief stop()
    */
-  KOKKOS_INLINE_FUNCTION constexpr auto& stop(std::integral auto i)
+  KOKKOS_INLINE_FUNCTION constexpr decltype(auto) stop(std::integral auto i)
   {
     return m_stop[i];
   }

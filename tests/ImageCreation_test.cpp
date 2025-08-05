@@ -17,7 +17,7 @@ void check_ctor(
 {
   BOOST_TEST(image.n == domain.n);
   BOOST_TEST(image.static_domain_flag == domain.static_flag);
-  BOOST_TEST(image.domain_is_shape_flag == domain.start().static_empty_flag);
+  BOOST_TEST(image.static_start_at_origin_flag == domain.static_start_at_origin_flag);
   BOOST_TEST(image.rank() == domain.rank());
   BOOST_TEST(image.label() == label);
 

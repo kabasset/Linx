@@ -11,7 +11,6 @@
 
 #include <array>
 #include <concepts>
-#include <iostream>
 #include <utility> // integer_sequence
 #include <vector>
 
@@ -21,11 +20,12 @@ namespace Linx {
  * @brief Non-resizable, rank-1 container on host.
  * @tparam T The coefficients specification
  */
-template <typename T = std::integer_sequence<int>>
+template <typename T = std::integer_sequence<int>> // FIXME rm default tparam
 class Vector : public VectorBase<T> {
 public:
 
   static constexpr auto n = VectorBase<T>::n; ///< The size parameter
+  using Spec = T; ///< The coefficients specification
 
   using typename VectorBase<T>::size_type;
   using typename VectorBase<T>::ssize_type;
@@ -39,8 +39,8 @@ public:
   using execution_space = Kokkos::DefaultHostExecutionSpace; ///< The execution space
 
   static constexpr bool static_size_flag = (n >= 0); ///< Static size flag
-  static constexpr bool static_flag = std::is_same_v<Container, void>; ///< Static coefficients flag
   static constexpr bool static_empty_flag = (n == 0); ///< Statically empty flag
+  static constexpr bool static_flag = (n == 0) || std::is_same_v<Container, void>; ///< Static coefficients flag
 
   /**
    * @brief Constructor.
@@ -85,6 +85,26 @@ public:
    */
   constexpr bool operator==(const auto& rhs) const
   {
+    // FIXME rm cases 0?
+
+    if (this->size() == 0) {
+      for (std::size_t i = 0; i < std::size(rhs); ++i) {
+        if (rhs[i] != 0) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    if (std::size(rhs) == 0) {
+      for (std::size_t i = 0; i < this->size(); ++i) {
+        if (this->operator[](i) != 0) {
+          return false;
+        }
+      }
+      return true;
+    }
+
     if (this->size() != std::size(rhs)) {
       return false;
     }

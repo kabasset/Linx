@@ -58,7 +58,7 @@ public:
   static constexpr int max_rank = (n == -1 ? kokkos_max_dyn_rank : n); ///< The max rank supported by Kokkos
   static constexpr bool static_rank_flag = (n >= 0); ///< Static rank flag
   static constexpr bool static_domain_flag = Domain::static_flag; ///< Static domain flag
-  static constexpr bool domain_is_shape_flag = Domain::Start::static_empty_flag; ///< Shape-only domain flag
+  static constexpr bool static_start_at_origin_flag = Domain::static_start_at_origin_flag; ///< Shape-only domain flag
 
   using Container = TContainer; ///< The underlying container type
   using memory_space = typename Container::memory_space; ///< The memory space
@@ -175,7 +175,7 @@ public:
    */
   Shape shape() const
   {
-    if constexpr (domain_is_shape_flag) {
+    if constexpr (static_start_at_origin_flag) {
       Shape out(rank());
       for (int i = 0; i < rank(); ++i) {
         out[i] = m_container.extent_int(i);
@@ -191,7 +191,7 @@ public:
    */
   decltype(auto) domain() const
   {
-    if constexpr (domain_is_shape_flag) {
+    if constexpr (static_start_at_origin_flag) {
       return domain(m_container);
     } else {
       return m_domain;
@@ -247,7 +247,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION reference origin() const
   {
-    if constexpr (domain_is_shape_flag) {
+    if constexpr (static_start_at_origin_flag) {
       return front();
     } else {
       return at_impl<false>(vec(), std::make_index_sequence<max_rank>());
@@ -386,7 +386,7 @@ private:
     if constexpr (CheckBounds) {
       OutOfBounds::may_abort("index", i, Slice(0, extent(I)));
     }
-    if constexpr (domain_is_shape_flag) {
+    if constexpr (static_start_at_origin_flag) {
       return i;
     } else {
       return i - m_domain.start(I);
@@ -447,7 +447,7 @@ private:
 
   Container m_container; ///< The underlying container
   using DummyDomain = Vector<>; ///< Placeholder with dummy variadic ctor
-  std::conditional_t<domain_is_shape_flag, DummyDomain, Domain> m_domain; ///< The domain, if any
+  std::conditional_t<static_start_at_origin_flag, DummyDomain, Domain> m_domain; ///< The domain, if any
 };
 
 } // namespace Linx
