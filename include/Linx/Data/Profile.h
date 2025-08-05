@@ -7,7 +7,6 @@
 
 #include "Linx/Base/mixins/Data.h"
 #include "Linx/Base/mixins/Strided.h"
-#include "Linx/Data/Sequence.h"
 
 #include <concepts>
 #include <string>
@@ -30,19 +29,19 @@ public:
    * @param data The reference data pointer
    * @param offsets The sequence of address offsets
    */
-  KOKKOS_INLINE_FUNCTION explicit ProfileIterator(T* data, const std::ptrdiff_t* begin) :
+  KOKKOS_INLINE_FUNCTION constexpr explicit ProfileIterator(T* data, const std::ptrdiff_t* begin) :
       m_data(data),
       m_begin(begin),
       m_it(begin)
   {}
 
-  KOKKOS_INLINE_FUNCTION ProfileIterator(const ProfileIterator& rhs) :
+  KOKKOS_INLINE_FUNCTION constexpr ProfileIterator(const ProfileIterator& rhs) :
       m_data(rhs.m_data),
       m_begin(rhs.m_begin),
       m_it(rhs.m_it)
   {}
 
-  KOKKOS_INLINE_FUNCTION ProfileIterator& operator=(const ProfileIterator& rhs)
+  KOKKOS_INLINE_FUNCTION constexpr ProfileIterator& operator=(const ProfileIterator& rhs)
   {
     m_data = rhs.m_data;
     m_begin = rhs.m_begin;
@@ -50,100 +49,100 @@ public:
     return *this;
   }
 
-  KOKKOS_INLINE_FUNCTION void reset(T* data)
+  KOKKOS_INLINE_FUNCTION constexpr void reset(T* data)
   {
     m_data = data;
     m_it = m_begin;
   }
 
-  KOKKOS_INLINE_FUNCTION reference operator[](int i) const
+  KOKKOS_INLINE_FUNCTION constexpr reference operator[](int i) const
   {
     return m_data[m_begin[i]];
   }
 
-  KOKKOS_INLINE_FUNCTION reference operator*() const
+  KOKKOS_INLINE_FUNCTION constexpr reference operator*() const
   {
     return m_data[*m_it];
   }
 
-  KOKKOS_INLINE_FUNCTION pointer operator->() const
+  KOKKOS_INLINE_FUNCTION constexpr pointer operator->() const
   {
     return m_data + *m_it;
   }
 
-  KOKKOS_INLINE_FUNCTION ProfileIterator& operator++()
+  KOKKOS_INLINE_FUNCTION constexpr ProfileIterator& operator++()
   {
     ++m_it;
     return *this;
   }
 
-  KOKKOS_INLINE_FUNCTION ProfileIterator operator++(int)
+  KOKKOS_INLINE_FUNCTION constexpr ProfileIterator operator++(int)
   {
     auto out = *this;
     ++(*this);
     return out;
   }
 
-  KOKKOS_INLINE_FUNCTION ProfileIterator& operator+=(int i)
+  KOKKOS_INLINE_FUNCTION constexpr ProfileIterator& operator+=(int i)
   {
     m_it += i;
     return *this;
   }
 
-  KOKKOS_INLINE_FUNCTION ProfileIterator operator+(int i) const
+  KOKKOS_INLINE_FUNCTION constexpr ProfileIterator operator+(int i) const
   {
     auto out = *this;
     out.m_it += i;
     return out;
   }
 
-  KOKKOS_INLINE_FUNCTION ProfileIterator& operator--()
+  KOKKOS_INLINE_FUNCTION constexpr ProfileIterator& operator--()
   {
     --m_it;
     return *this;
   }
 
-  KOKKOS_INLINE_FUNCTION ProfileIterator operator--(int)
+  KOKKOS_INLINE_FUNCTION constexpr ProfileIterator operator--(int)
   {
     auto out = *this;
     --(*this);
     return out;
   }
 
-  KOKKOS_INLINE_FUNCTION ProfileIterator& operator-=(int i)
+  KOKKOS_INLINE_FUNCTION constexpr ProfileIterator& operator-=(int i)
   {
     m_it -= i;
     return *this;
   }
 
-  KOKKOS_INLINE_FUNCTION ProfileIterator operator-(int i) const
+  KOKKOS_INLINE_FUNCTION constexpr ProfileIterator operator-(int i) const
   {
     auto out = *this;
     out.m_it -= i;
     return out;
   }
 
-  KOKKOS_INLINE_FUNCTION difference_type operator-(const ProfileIterator& rhs) const
+  KOKKOS_INLINE_FUNCTION constexpr difference_type operator-(const ProfileIterator& rhs) const
   {
     return m_it - rhs.m_it;
   }
 
-  KOKKOS_INLINE_FUNCTION bool operator==(const ProfileIterator& rhs) const
+  KOKKOS_INLINE_FUNCTION constexpr bool operator==(const ProfileIterator& rhs) const
   {
     return m_it == rhs.m_it;
   }
 
-  KOKKOS_INLINE_FUNCTION bool operator!=(const ProfileIterator& rhs) const
+  KOKKOS_INLINE_FUNCTION constexpr bool operator!=(const ProfileIterator& rhs) const
   {
     return m_it != rhs.m_it;
   }
 
-  KOKKOS_INLINE_FUNCTION bool operator==(const std::ptrdiff_t* it) const
+  KOKKOS_INLINE_FUNCTION constexpr bool operator==(const std::ptrdiff_t* it) const
   {
     return m_it == it;
   }
 
-  KOKKOS_INLINE_FUNCTION bool operator!=(const std::ptrdiff_t* it) const
+  KOKKOS_INLINE_FUNCTION constexpr bool operator!=(const std::ptrdiff_t* it) const
   {
     return m_it != it;
   }
@@ -159,28 +158,28 @@ template <typename T>
 class ProfileSpan {
 public:
 
-  KOKKOS_INLINE_FUNCTION ProfileSpan(T* data, const std::ptrdiff_t* begin, const std::ptrdiff_t* end) :
+  KOKKOS_INLINE_FUNCTION constexpr ProfileSpan(T* data, const std::ptrdiff_t* begin, const std::ptrdiff_t* end) :
       m_data(data),
       m_begin(begin),
       m_end(end)
   {}
 
-  KOKKOS_INLINE_FUNCTION auto begin() const
+  KOKKOS_INLINE_FUNCTION constexpr auto begin() const
   {
     return ProfileIterator<T>(m_data, m_begin);
   }
 
-  KOKKOS_INLINE_FUNCTION auto end() const
+  KOKKOS_INLINE_FUNCTION constexpr auto end() const
   {
     return m_end;
   }
 
-  KOKKOS_INLINE_FUNCTION auto ssize() const
+  KOKKOS_INLINE_FUNCTION constexpr auto ssize() const
   {
     return m_end - m_begin;
   }
 
-  KOKKOS_INLINE_FUNCTION T& operator[](int i) const
+  KOKKOS_INLINE_FUNCTION constexpr T& operator[](int i) const
   {
     return m_data[m_begin[i]];
   }
@@ -196,7 +195,7 @@ namespace Impl {
 
 template <typename TProfile>
 struct EmplaceProfile {
-  KOKKOS_INLINE_FUNCTION void operator()(std::integral auto... position) const
+  KOKKOS_INLINE_FUNCTION constexpr void operator()(std::integral auto... position) const
   {
     m_profile.emplace_back(position...);
   }
@@ -277,7 +276,7 @@ public:
   /**
    * @brief Maximum number of elements.
    */
-  auto capacity() const
+  constexpr auto capacity() const
   {
     return m_offsets.size();
   }
@@ -285,7 +284,7 @@ public:
   /**
    * @brief Parent data container.
    */
-  const Parent& parent() const
+  constexpr const Parent& parent() const
   {
     return m_parent;
   }
@@ -293,7 +292,7 @@ public:
   /**
    * @brief Index range.
    */
-  auto domain() const
+  constexpr auto domain() const
   {
     return Slice(0, size());
   }
@@ -301,7 +300,7 @@ public:
   /**
    * @brief Iterator to the beginning.
    */
-  KOKKOS_INLINE_FUNCTION iterator begin() const
+  KOKKOS_INLINE_FUNCTION constexpr iterator begin() const
   {
     return iterator(m_parent.data(), m_offsets.data());
   }
@@ -309,7 +308,7 @@ public:
   /**
    * @brief Iterator to the end.
    */
-  KOKKOS_INLINE_FUNCTION iterator end() const
+  KOKKOS_INLINE_FUNCTION constexpr iterator end() const
   {
     return iterator(m_parent.data(), m_offsets.data() + m_size());
   }
@@ -317,7 +316,7 @@ public:
   /**
    * @brief Read-only iterator to the beginning.
    */
-  KOKKOS_INLINE_FUNCTION const_iterator cbegin() const
+  KOKKOS_INLINE_FUNCTION constexpr const_iterator cbegin() const
   {
     return const_iterator(m_parent.data(), m_offsets.data());
   }
@@ -325,7 +324,7 @@ public:
   /**
    * @brief Read-only iterator to the end.
    */
-  KOKKOS_INLINE_FUNCTION const_iterator cend() const
+  KOKKOS_INLINE_FUNCTION constexpr const_iterator cend() const
   {
     return const_iterator(m_parent.data(), m_offsets.data() + m_size());
   }
@@ -333,7 +332,7 @@ public:
   /**
    * @brief Span relative to a given position.
    */
-  KOKKOS_INLINE_FUNCTION ProfileSpan<value_type> shifted_span(std::integral auto... position) const
+  KOKKOS_INLINE_FUNCTION constexpr ProfileSpan<value_type> shifted_span(std::integral auto... position) const
   {
     return ProfileSpan<value_type>(&m_parent(position...), m_offsets.data(), m_offsets.data() + m_size());
   }
@@ -341,7 +340,7 @@ public:
   /**
    * @brief Reference to the i-th element.
    */
-  KOKKOS_INLINE_FUNCTION reference operator()(std::integral auto i) const
+  KOKKOS_INLINE_FUNCTION constexpr reference operator()(std::integral auto i) const
   {
     return m_parent.data()[m_offsets(i)]; // FIXME .origin()?
   }
@@ -349,7 +348,7 @@ public:
   /**
    * @brief Reference to the i-th element.
    */
-  KOKKOS_INLINE_FUNCTION reference operator[](std::integral auto i) const
+  KOKKOS_INLINE_FUNCTION constexpr reference operator[](std::integral auto i) const
   {
     return m_parent.data()[m_offsets(i)]; // FIXME .origin()?
   }
@@ -378,8 +377,7 @@ public:
 private:
 
   Parent m_parent; ///< The parent data container
-  Sequence<std::ptrdiff_t, -1, SequenceContainer<std::ptrdiff_t, -1, memory_space>>
-      m_offsets; ///< The offsets in the parent
+  Kokkos::View<std::ptrdiff_t*, memory_space> m_offsets; ///< The offsets in the parent
   Kokkos::View<std::size_t, memory_space> m_size; ///< The profile size
 };
 
