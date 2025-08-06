@@ -46,28 +46,64 @@ auto default_image_container()
   static_assert(kokkos_max_rank <= 8);
   static_assert(n <= kokkos_max_rank);
 
-  // FIXME handle static domain
+#define N(I) (TDomain::Stop::at(I) - TDomain::Start::at(I))
 
   // We avoid recursion to make NVCC happier
   if constexpr (n == -1) {
     return Kokkos::DynRankView<T, TArgs...>();
-  } else if constexpr (n == 0 || n == 1) {
-    return Kokkos::View<T*, TArgs...>();
+  } else if constexpr (n == 0) {
+    return Kokkos::View<T, TArgs...>(); // Scalar
+  } else if constexpr (n == 1) {
+    if constexpr (TDomain::static_flag) {
+      return Kokkos::View<T[N(0)], TArgs...>();
+    } else {
+      return Kokkos::View<T*, TArgs...>();
+    }
   } else if constexpr (n == 2) {
-    return Kokkos::View<T**, TArgs...>();
+    if constexpr (TDomain::static_flag) {
+      return Kokkos::View<T[N(0)][N(1)], TArgs...>();
+    } else {
+      return Kokkos::View<T**, TArgs...>();
+    }
   } else if constexpr (n == 3) {
-    return Kokkos::View<T***, TArgs...>();
+    if constexpr (TDomain::static_flag) {
+      return Kokkos::View<T[N(0)][N(1)][N(2)], TArgs...>();
+    } else {
+      return Kokkos::View<T***, TArgs...>();
+    }
   } else if constexpr (n == 4) {
-    return Kokkos::View<T****, TArgs...>();
+    if constexpr (TDomain::static_flag) {
+      return Kokkos::View<T[N(0)][N(1)][N(2)][N(3)], TArgs...>();
+    } else {
+      return Kokkos::View<T****, TArgs...>();
+    }
   } else if constexpr (n == 5) {
-    return Kokkos::View<T*****, TArgs...>();
+    if constexpr (TDomain::static_flag) {
+      return Kokkos::View<T[N(0)][N(1)][N(2)][N(3)][N(4)], TArgs...>();
+    } else {
+      return Kokkos::View<T*****, TArgs...>();
+    }
   } else if constexpr (n == 6) {
-    return Kokkos::View<T******, TArgs...>();
+    if constexpr (TDomain::static_flag) {
+      return Kokkos::View<T[N(0)][N(1)][N(2)][N(3)][N(4)][N(5)], TArgs...>();
+    } else {
+      return Kokkos::View<T******, TArgs...>();
+    }
   } else if constexpr (n == 7) {
-    return Kokkos::View<T*******, TArgs...>();
+    if constexpr (TDomain::static_flag) {
+      return Kokkos::View<T[N(0)][N(1)][N(2)][N(3)][N(4)][N(5)][N(6)], TArgs...>();
+    } else {
+      return Kokkos::View<T*******, TArgs...>();
+    }
   } else if constexpr (n == 8) {
-    return Kokkos::View<T********, TArgs...>();
+    if constexpr (TDomain::static_flag) {
+      return Kokkos::View<T[N(0)][N(1)][N(2)][N(3)][N(4)][N(5)][N(6)][N(7)], TArgs...>();
+    } else {
+      return Kokkos::View<T********, TArgs...>();
+    }
   }
+
+#undef N
 }
 
 /**
