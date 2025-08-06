@@ -19,7 +19,7 @@ decltype(auto) as_readonly(const Image<T, TDomain, TContainer>& in)
     return in;
   } else {
     using Out = Image<const T, TDomain, typename Rebind<TContainer>::AsReadonly>;
-    return Out(Forward {}, in.container());
+    return Out(in.domain(), Forward {}, in.container());
   }
   // FIXME handle shifted in
 }
@@ -31,8 +31,7 @@ template <typename T, typename TDomain, typename TContainer>
 decltype(auto) as_atomic(const Image<T, TDomain, TContainer>& in)
 {
   using Out = Image<T, TDomain, typename Rebind<TContainer>::AsAtomic>;
-  return Out(Forward {}, in.container());
-  // FIXME handle shifted in
+  return Out(in.domain(), Forward {}, in.container());
 }
 
 /**
@@ -58,7 +57,7 @@ decltype(auto) on_device(const Image<T, TDomain, TContainer>& in)
     return in;
   } else {
     auto container = Kokkos::create_mirror_view_and_copy(TSpace(), in.container());
-    return Image<T, TDomain, decltype(container)>(Forward {}, LINX_MOVE(container));
+    return Image<T, TDomain, decltype(container)>(in.domain(), Forward {}, LINX_MOVE(container));
   }
   // FIXME handle shifted in
 }

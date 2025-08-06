@@ -187,6 +187,7 @@ template <typename TRebind = void, typename T, typename TDomain, typename TConta
 auto same_layout(const std::string& label, const Image<T, TDomain, TContainer>& in)
 {
   return Image<typename Rebind<T>::As<TRebind>, TDomain, typename Rebind<TContainer>::As<TRebind>>(
+      in.domain(),
       Forward(),
       same_layout<TRebind>(label, in.container()));
 }
