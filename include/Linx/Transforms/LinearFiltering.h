@@ -5,9 +5,6 @@
 #ifndef LINX_TRANSFORMS_LINEARFILTERING_H
 #define LINX_TRANSFORMS_LINEARFILTERING_H
 
-#include "Linx/Data/Image.h"
-#include "Linx/Data/Map.h"
-#include "Linx/Data/Sequence.h"
 #include "Linx/Transforms/mixins/Filter.h"
 
 #include <concepts>
@@ -141,7 +138,7 @@ public:
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
       element_type out {};
-      auto wit = this->m_weights.begin();
+      auto wit = this->m_weights.data(); // FIXME guaranteed to be contiguous and non padded?
       for (auto nit = neighbors.begin(); nit != neighbors.end(); ++nit, ++wit) {
         out += *nit * *wit;
       }
@@ -183,16 +180,13 @@ public:
 
     Lazy(Convolution filter, const TIn& in) : LazyWeightedFilterMixin<Convolution, TIn, Lazy>(LINX_MOVE(filter), in)
     {
-      this->m_weights.reverse();
-      // FIXME invalid with non-regular domain or non-sequential Profile
-      // FIXME take the opposite of the coordinates to build Profile instead?
-      // FIXME or opposite of the offsets?
+      this->m_neighbors.inverse();
     }
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
       element_type out {};
-      auto wit = this->m_weights.begin();
+      auto wit = this->m_weights.data(); // FIXME guaranteed to be contiguous and non padded?
       for (auto nit = neighbors.begin(); nit != neighbors.end(); ++nit, ++wit) {
         out += *nit * *wit;
       }
@@ -216,19 +210,14 @@ public:
  * 
  * The filter is implemented as a correlation, such that conjugation is involved when the kernel is complex-valued.
  */
-template <
-    std::integral auto... Is,
-    typename TSpace = Kokkos::DefaultExecutionSpace,
-    typename T = int> // FIXME T = Forward or void // FIXME TSpace
+template <std::integral auto... Is, typename TSpace = Kokkos::DefaultExecutionSpace, typename T = int>
 auto separable_laplacian(T s = T(1))
 {
   static constexpr auto n = std::max({Is...}) + 1;
-  auto kernel = Shift(
-      Image<T, n, ImageContainer<T, n, TSpace>>("kernel", Position<n>("shape").fill(3)),
-      Position<n>("start").fill(-1));
+  auto kernel = fill<TSpace>("kernel", T {0}, cube<Dimension {n}, 1>()); // FIXME map?
   const auto& kernel_on_host = on_host(kernel);
   for (auto i : {Is...}) {
-    auto p = Position<n>();
+    auto p = vec<Dimension {n}>(0);
     kernel_on_host.at(p) += -2 * s;
     p[i] = -1;
     kernel_on_host.at(p) = s;
@@ -238,6 +227,31 @@ auto separable_laplacian(T s = T(1))
   Kokkos::deep_copy(kernel.container(), kernel_on_host.container());
   return Correlation(LINX_MOVE(kernel));
 }
+
+/**
+ * @brief AD Gaussian function.
+ */
+template <typename T>
+struct Gaussian {
+  /**
+   * @brief Constructor.
+   */
+  constexpr Gaussian(T sigma) :
+      m_norm(std::numbers::inv_sqrtpi * std::numbers::sqrt2 * 0.5 / sigma),
+      m_constant(-0.5 / (sigma * sigma))
+  {}
+
+  /**
+   * @brief Call operator.
+   */
+  KOKKOS_INLINE_FUNCTION constexpr T operator()(std::integral auto i) const
+  {
+    return m_norm * std::exp(i * i * m_constant);
+  }
+
+  T m_norm; ///< The normalization factor
+  T m_constant; ///< The constant factor in the exponential
+};
 
 /**
  * @brief Create a 1D sampled Gaussian kernel.
@@ -251,14 +265,10 @@ auto separable_laplacian(T s = T(1))
  * auto out = filter.pad(0)(in);
  * ```
  */
-template <typename T>
-Shift<Sequence<T, -1>> sampled_gaussian_kernel(const T& sigma, Index radius)
+auto sampled_gaussian_kernel(const auto& sigma, Index radius)
 {
-  auto kernel = Shift(Sequence<T, -1>("gaussian kernel", 2 * radius + 1), -radius);
-  const auto norm = std::numbers::inv_sqrtpi * std::numbers::sqrt2 * 0.5 / sigma;
-  const auto factor = -0.5 / (sigma * sigma);
-  for_each("Gaussian kernel", kernel.domain(), KOKKOS_LAMBDA(int i) { kernel(i) = norm * std::exp(i * i * factor); });
-  return kernel;
+  using namespace Linx::Literals;
+  return generate("gaussian kernel", Gaussian(sigma), cube<1_D>(radius));
 }
 
 template <Index I, Index N = I + 1> // FIXME rm N, support non matching ranks in FilterMixin

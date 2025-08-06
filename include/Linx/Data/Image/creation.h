@@ -16,7 +16,7 @@ namespace Linx {
  * @tparam TSpace The memory space
  */
 template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
-auto default_init(const std::string& label, const auto& domain)
+auto default_init(const std::string& label, const NotConvertibleTo<int> auto& domain)
 {
   using Domain = LINX_DECLTYPE(domain);
   return Image<T, Domain, ImageContainer<T, Domain, TSpace>>(label, domain);
@@ -42,7 +42,7 @@ auto default_init(const std::string& label, std::integral auto... extents)
  * @tparam TSpace The memory space
  */
 template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
-auto no_init(const std::string& label, const auto& domain)
+auto no_init(const std::string& label, const NotConvertibleTo<int> auto& domain)
 {
   using Domain = LINX_DECLTYPE(domain);
   return Image<T, Domain, ImageContainer<T, Domain, TSpace>>(label, domain);
@@ -125,7 +125,7 @@ auto wrap(T* data, std::integral auto... extents)
  * @brief Wrap a pointer as a raster with given domain.
  */
 template <typename T>
-auto wrap(T* data, const auto& domain)
+auto wrap(T* data, const NotConvertibleTo<int> auto& domain)
 {
   return Raster<T, LINX_DECLTYPE(domain)>(Wrap(data), domain);
 }

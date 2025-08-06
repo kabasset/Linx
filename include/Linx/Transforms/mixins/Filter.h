@@ -278,9 +278,8 @@ struct EmplaceWeights {
   KOKKOS_INLINE_FUNCTION void operator()(std::integral auto... position) const
   {
     const auto& w = m_filter.kernel(position...);
-    // TODO discard if w == identity_element()'s
-    auto index = m_neighbors.emplace_back(position...);
-    m_weights[index] = w;
+    auto i = m_neighbors.emplace_back(position...);
+    m_weights(i) = w;
   }
 };
 

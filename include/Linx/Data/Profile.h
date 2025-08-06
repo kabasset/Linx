@@ -374,6 +374,15 @@ public:
     return push_back(out);
   }
 
+  /**
+   * @brief Negate the offsets.
+   */
+  const Profile& inverse() const
+  {
+    for_each<execution_space>("inverse", Slice(0, size()), KOKKOS_LAMBDA(int i) { m_offsets(i) = -m_offsets(i); });
+    return *this;
+  }
+
 private:
 
   Parent m_parent; ///< The parent data container
