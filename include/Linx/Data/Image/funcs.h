@@ -83,6 +83,40 @@ auto end(const Image<T, TDomain, TContainer>& image)
   return begin(image) + image.size();
 }
 
+std::ostream& operator<<(std::ostream& os, const Specialization<Image> auto& image)
+{
+  os << image.label() << " " << image.domain();
+
+  auto stream_row = [&](auto... is) {
+    os << "  [" << image(0, is...);
+    for (int i = 1; i < image.extent(0); ++i) {
+      os << ", " << image(i, is...);
+    }
+    os << "]";
+  };
+
+  auto stream_section = [&](auto... is) {
+    os << "\n [";
+    stream_row(0, is...);
+    for (int i = 1; i < image.extent(1); ++i) {
+      os << "\n  ";
+      stream_row(i, is...);
+    }
+    os << " ]";
+  };
+
+  if (image.rank() == 3) {
+    for (int i = 0; i < image.extent(2); ++i) {
+      stream_section(i);
+    }
+  } else if (image.rank() == 2) {
+    stream_section();
+  } else if (image.rank() == 1) {
+    stream_row();
+  }
+  return os;
+}
+
 } // namespace Linx
 
 #endif

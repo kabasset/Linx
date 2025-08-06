@@ -22,6 +22,10 @@ BOOST_AUTO_TEST_CASE(correlation_impulse_response_test)
   k += Kokkos::complex<double>(0, 1); // Non-null imaginary part
   auto out = Linx::Correlation(k)(in);
 
+  std::cout << k << std::endl;
+  std::cout << in << std::endl;
+  std::cout << out << std::endl;
+
   auto test = Linx::no_init<Kokkos::complex<double>>("test", 5, 5);
   BOOST_TEST((out.domain() == test.domain()));
   Linx::for_each("test", k.domain(), KOKKOS_LAMBDA(int i, int j) { test(2 - i, 2 - j) = Kokkos::conj(k(i, j)); });

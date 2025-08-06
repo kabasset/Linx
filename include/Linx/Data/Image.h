@@ -42,7 +42,7 @@ namespace Linx {
 template <typename T, typename TDomain, typename TContainer = ImageContainer<T, TDomain>>
 class Image :
     public DataMixin<T, DataArithmeticMixin<T, Image<T, TDomain, TContainer>>, Image<T, TDomain, TContainer>>,
-    public RangeMixin<is_contiguous<TContainer>(), T, Image<T, TDomain, TContainer>> {
+    public RangeMixin<is_contiguous<TContainer>(), T, Image<T, TDomain, TContainer>> { // FIXME bool(Range<TContainer>)
 public:
 
   using value_type = typename TContainer::value_type; ///< The possibly const-qualified element type

@@ -34,6 +34,33 @@ constexpr bool is_contiguous()
 }
 
 /**
+ * @brief Enable `Kokkos::Experimental::begin()`.
+ */
+template <typename TContainer>
+auto begin(const TContainer& in) -> decltype(Kokkos::Experimental::begin(in))
+{
+  return Kokkos::Experimental::begin(in);
+}
+
+/**
+ * @brief Enable `Kokkos::Experimental::end()`.
+ */
+template <typename TContainer>
+auto end(const TContainer& in) -> decltype(Kokkos::Experimental::end(in))
+{
+  return Kokkos::Experimental::end(in);
+}
+
+/**
+ * @brief Type with defined `begin(T)` and `end(T)` free functions in `Linx` namespace or via ADL.
+ */
+template <typename T>
+concept Range = requires(const T& t) {
+  begin(t);
+  end(t);
+};
+
+/**
  * @ingroup pixelwise
  * @ingroup mixins
  * @brief Base class to provide range operations.
