@@ -85,34 +85,54 @@ auto end(const Image<T, TDomain, TContainer>& image)
 
 std::ostream& operator<<(std::ostream& os, const Specialization<Image> auto& image)
 {
-  os << image.label() << " " << image.domain();
+  os << image.label() << ": " << image.domain() << "\n  ";
+  if (image.size() == 0) {
+    return os << "[]";
+  }
 
-  auto stream_row = [&](auto... is) {
-    os << "  [" << image(0, is...);
-    for (int i = 1; i < image.extent(0); ++i) {
-      os << ", " << image(i, is...);
-    }
-    os << "]";
-  };
+  // FIXME on_host()
 
-  auto stream_section = [&](auto... is) {
-    os << "\n [";
-    stream_row(0, is...);
-    for (int i = 1; i < image.extent(1); ++i) {
-      os << "\n  ";
-      stream_row(i, is...);
+  auto stream_row = [&](int tab, auto... is) {
+    os << std::string(tab * 2, ' ') << "[ " << image(image.start(0), is...);
+    for (int i = image.start(0) + 1; i < image.stop(0); ++i) {
+      os << " " << image(i, is...);
     }
     os << " ]";
   };
 
-  if (image.rank() == 3) {
-    for (int i = 0; i < image.extent(2); ++i) {
-      stream_section(i);
+  auto stream_section = [&](int tab, auto... is) {
+    os << "[ ";
+    stream_row(0, image.start(1), is...);
+    for (int i = image.start(1) + 1; i < image.stop(1); ++i) {
+      os << "\n";
+      stream_row(tab + 2, i, is...);
     }
-  } else if (image.rank() == 2) {
-    stream_section();
-  } else if (image.rank() == 1) {
-    stream_row();
+    os << " ]";
+  };
+
+  auto n = image.rank();
+  if (n > 3) {
+    for (int i = 0; i < n; ++i) {
+      os << "[ ";
+    }
+    os << image.front() << " ... " << image.back();
+    for (int i = 0; i < n; ++i) {
+      os << " ]";
+    }
+  } else if (n == 3) {
+    os << "[ ";
+    stream_section(1, image.start(2));
+    for (int i = image.start(2) + 1; i < image.stop(2); ++i) {
+      os << "\n    ";
+      stream_section(1, i);
+    }
+    os << " ]";
+  } else if (n == 2) {
+    stream_section(0);
+  } else if (n == 1) {
+    stream_row(0);
+  } else {
+    os << image.front();
   }
   return os;
 }

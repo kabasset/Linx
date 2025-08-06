@@ -83,7 +83,9 @@ public:
    */
   explicit Image(const std::string& label, std::integral auto... shape) : m_container(label, shape...), m_domain {}
   {
-    // FIXME static_assert m_domain needs no argument
+    if constexpr (not static_start_at_origin_flag) {
+      throw std::runtime_error("Image(label, shape): domain is missing.");
+    }
   }
 
   /**
@@ -91,7 +93,7 @@ public:
    * 
    * @param domain The image domain
    */
-  explicit Image(Domain domain) : Image("<Image>", domain) {}
+  explicit Image(const Domain& domain) : Image("<Image>", domain) {}
 
   /**
    * @brief Constructor.
@@ -107,7 +109,20 @@ public:
    * @brief Forwarding constructor.
    * @param args The arguments to be forwarded to the container's constructor
    */
-  explicit Image(Forward, auto&&... args) : m_container(LINX_FORWARD(args)...), m_domain {} {}
+  explicit Image(Forward, auto&&... args) : m_container(LINX_FORWARD(args)...), m_domain {}
+  {
+    if constexpr (not static_start_at_origin_flag) {
+      throw std::runtime_error("Image(Forward, args): domain is missing.");
+    }
+  }
+
+  /**
+   * @brief Forwarding constructor.
+   * @param domain The image domain
+   * @param args The arguments to be forwarded to the container's constructor
+   */
+  explicit Image(const Domain& domain, Forward, auto&&... args) : m_container(LINX_FORWARD(args)...), m_domain {domain}
+  {}
 
   /**
    * @brief Wrapping constructor.
@@ -121,7 +136,11 @@ public:
    */
   template <typename TValue>
   explicit Image(Wrap<TValue*> data, std::integral auto... shape) : m_container(data.value, shape...), m_domain {}
-  {}
+  {
+    if constexpr (not static_start_at_origin_flag) {
+      throw std::runtime_error("Image(data, shape): domain is missing.");
+    }
+  }
 
   /**
    * @brief Wrapping constructor.
@@ -136,21 +155,6 @@ public:
   {}
 
   /**
-   * @brief Uninitialized values constructor.
-   */
-  explicit Image(Uninitialized, const std::string& label, std::integral auto... shape) :
-      m_container(Kokkos::view_alloc(label, Kokkos::WithoutInitializing), shape...),
-      m_domain {}
-  {}
-
-  /**
-   * @brief Uninitialized values constructor.
-   */
-  explicit Image(Uninitialized, const std::string& label, const Domain& domain) :
-      Image(Uninitialized(), label, domain, std::make_index_sequence<max_rank>())
-  {}
-
-  /**
    * @brief Image rank.
    */
   KOKKOS_INLINE_FUNCTION int rank() const
@@ -159,6 +163,30 @@ public:
       return Kokkos::rank(m_container);
     } else {
       return n;
+    }
+  }
+
+  /**
+   * @brief Start index along given axis.
+   */
+  KOKKOS_INLINE_FUNCTION auto start(std::integral auto i) const
+  {
+    if constexpr (static_start_at_origin_flag) {
+      return 0;
+    } else {
+      return m_domain.start(i);
+    }
+  }
+
+  /**
+   * @brief Stop index along given axis.
+   */
+  KOKKOS_INLINE_FUNCTION auto stop(std::integral auto i) const
+  {
+    if constexpr (static_start_at_origin_flag) {
+      return extent(i);
+    } else {
+      return m_domain.stop(i);
     }
   }
 
@@ -358,17 +386,6 @@ private:
   {}
 
   /**
-   * @brief Helper constructor to unroll shape.
-   */
-  template <std::size_t... Is>
-  Image(Uninitialized, const std::string& label, const Domain& domain, std::index_sequence<Is...>) :
-      m_container(
-          Kokkos::view_alloc(label, Kokkos::WithoutInitializing),
-          get_or<Is, KOKKOS_INVALID_INDEX>(domain.shape())...),
-      m_domain {domain}
-  {}
-
-  /**
    * @brief Helper accessor to unroll position.
    */
   template <bool CheckBounds = true, typename TPosition, std::size_t... Is>
@@ -397,7 +414,7 @@ private:
    * @brief Helper function for 0-based fixed-rank containers.
    */
   template <typename... TArgs>
-  static auto /*Domain*/ domain(const Kokkos::View<TArgs...>& container) // TODO free function
+  static auto domain(const Kokkos::View<TArgs...>& container) // TODO free function
   {
     static constexpr auto n = Kokkos::View<TArgs...>::rank();
     auto stop = vec<Dimension {n}>(0);
@@ -412,7 +429,7 @@ private:
    * @brief Helper function for 0-based dynamic rank containers.
    */
   template <typename... TArgs>
-  static Domain domain(const Kokkos::DynRankView<TArgs...>& container) // TODO free function
+  static auto domain(const Kokkos::DynRankView<TArgs...>& container) // TODO free function
   {
     auto rank = container.rank();
     auto stop = vec(Dimension {rank}, 0);
