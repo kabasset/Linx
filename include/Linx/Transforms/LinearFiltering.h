@@ -158,6 +158,11 @@ public:
  * @ingroup filtering
  * @brief Convolution filter class.
  * 
+ * As opposed to correlation, the convolution kernel is inversed wrt. the origin,
+ * such that the impulse response is exactly the kernel,
+ * and convolution is associative and commutative.
+ * Consequently, the filter footprint is the opposite of the kernel domain.
+ * 
  * @see `Correlation`
  */
 template <typename TKernel>
@@ -172,6 +177,11 @@ public:
   std::string label() const
   {
     return "Convolution";
+  }
+
+  auto footprint() const
+  {
+    return -WeightedFilterMixin<TKernel, Convolution>::footprint();
   }
 
   template <typename TIn>

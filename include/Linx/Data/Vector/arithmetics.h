@@ -180,6 +180,15 @@ constexpr auto operator+(const Vector<TLhs>& lhs, TRhs rhs)
 }
 
 /**
+ * @brief Add a vector to a scalar.
+ */
+template <typename TRhs, std::convertible_to<typename Vector<TRhs>::value_type> TLhs>
+constexpr auto operator+(const TLhs& lhs, const Vector<TRhs>& rhs)
+{
+  return rhs + lhs;
+}
+
+/**
  * @brief Opposite of a vector.
  */
 template <typename T>
@@ -231,6 +240,15 @@ constexpr auto operator-(const Vector<TLhs>& lhs, TRhs rhs)
     }
     return out;
   }
+}
+
+/**
+ * @brief Subtract a vector from a scalar.
+ */
+template <typename TRhs, std::convertible_to<typename Vector<TRhs>::value_type> TLhs>
+constexpr auto operator-(const TLhs& lhs, const Vector<TRhs>& rhs)
+{
+  return -(rhs - lhs);
 }
 
 template <typename TLhs, typename TRhs>

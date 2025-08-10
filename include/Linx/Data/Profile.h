@@ -214,7 +214,7 @@ struct EmplaceProfile {
  * 
  * Elements can be added up to a given maximum, fixed capacity.
  */
-template <Strided TParent> // FIXME must work with all mappings
+template <Strided TParent> // FIXME should work with all mappings
 class Profile : public DataMixin<typename TParent::value_type, typename TParent::Arithmetic, Profile<TParent>> {
 public:
 
@@ -342,7 +342,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION constexpr reference operator()(std::integral auto i) const
   {
-    return m_parent.data()[m_offsets(i)]; // FIXME .origin()?
+    return (&m_parent.origin())[m_offsets(i)]; // FIXME .origin() should return a pointer
   }
 
   /**
@@ -350,7 +350,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION constexpr reference operator[](std::integral auto i) const
   {
-    return m_parent.data()[m_offsets(i)]; // FIXME .origin()?
+    return (&m_parent.origin())[m_offsets(i)]; // FIXME .origin() should return a pointer
   }
 
   /**
@@ -370,7 +370,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION std::size_t emplace_back(std::integral auto... position) const
   {
-    auto out = offset_from_origin(m_parent, position...); // FIXME no need to require Strided
+    auto out = offset_from_origin(m_parent, position...); // TODO no need to require Strided?
     return push_back(out);
   }
 
@@ -379,7 +379,10 @@ public:
    */
   const Profile& inverse() const
   {
-    for_each<execution_space>("inverse", Slice(0, size()), KOKKOS_LAMBDA(int i) { m_offsets(i) = -m_offsets(i); });
+    for_each<execution_space>(
+        "inverse",
+        Slice(0, size()),
+        KOKKOS_LAMBDA(int i) { m_offsets(i) = -m_offsets(i); });
     return *this;
   }
 
@@ -401,7 +404,7 @@ struct FilterOffsets {
   {
     const auto* ptr = &m_in(position...);
     if (m_pred(*ptr)) {
-      m_out.push_back(ptr - m_in.data()); // FIXME .origin()
+      m_out.push_back(ptr - &m_in.origin()); // FIXME .origin() should return a pointer
     }
   }
 };
@@ -419,7 +422,7 @@ Profile<TIn> filter(const TIn& in, TPred pred)
       "filter size",
       KOKKOS_LAMBDA(const typename TIn::value_type& e) { return pred(e) ? 1 : 0; },
       Add(),
-      in); // FIXME in.count_if(pred)
+      in); // FIXME count_if(in, pred)
   auto out = Profile<TIn>(in, size);
   for_each<typename TIn::execution_space>("filter", in.domain(), Impl::FilterOffsets<TIn, TPred> {in, pred, out});
   return out;

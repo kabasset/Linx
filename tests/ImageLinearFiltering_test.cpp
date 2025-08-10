@@ -61,26 +61,17 @@ BOOST_AUTO_TEST_CASE(convolution_impulse_response_test)
   in_on_host(2, 2) = 1;
   Kokkos::deep_copy(in.container(), in_on_host.container());
 
-  std::cout << in << std::endl;
-
   auto k = Linx::no_init<Kokkos::complex<double>>("kernel", 3, 3).generate_offsets();
   k += Kokkos::complex<double>(0, 1); // Non-null imaginary part
-
-  std::cout << k << std::endl;
-
   auto out = Linx::Convolution(k)(in);
-
-  std::cout << out << std::endl;
 
   auto test = Linx::default_init<Kokkos::complex<double>>("test", 5, 5);
   BOOST_TEST((out.domain() == test.domain()));
   Linx::for_each(
       "test",
       k.domain(),
-      KOKKOS_LAMBDA(int i, int j) { test(i, j) = k(i, j); });
+      KOKKOS_LAMBDA(int i, int j) { test(i + 2, j + 2) = k(i, j); });
   test -= out;
-
-  std::cout << test << std::endl;
 
   BOOST_TEST(test.contains_only(0));
 }

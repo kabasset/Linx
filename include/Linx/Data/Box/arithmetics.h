@@ -33,6 +33,15 @@ constexpr auto operator-(const Specialization<Box> auto& lhs, const auto& rhs)
 
 /**
  * @relatesalso Box
+ * @brief Inverse a box. 
+ */
+constexpr auto operator-(const Specialization<Box> auto& in)
+{
+  return Box(1 - in.stop(), 1 - in.start());
+}
+
+/**
+ * @relatesalso Box
  * @brief Dilation of a box by a given regular margin.
  */
 template <Specialization<Box> TBox>

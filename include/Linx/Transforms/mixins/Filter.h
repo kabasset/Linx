@@ -308,7 +308,7 @@ public:
   {
     for_each<execution_space>(
         "compute offsets",
-        m_filter.footprint(),
+        m_filter.kernel().domain(),
         Impl::EmplaceWeights {m_filter, m_neighbors, m_weights});
     // TODO resize m_weights if discarded identity_element()
   }
