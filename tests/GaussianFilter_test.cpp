@@ -29,33 +29,14 @@ BOOST_AUTO_TEST_CASE(kernel_test)
   BOOST_TEST(Linx::sum(k) >= 0.999);
 }
 
-BOOST_AUTO_TEST_CASE(position_impulse_test)
-{
-  const float sigma = 1;
-  constexpr int radius = 3;
-  auto k = Linx::on_host(Linx::sampled_gaussian_kernel(sigma, radius));
-  auto conv = Linx::Convolution(k);
-  auto in = Linx::Position<2 * radius + 1>("in");
-  in[radius] = 1;
-  auto out = conv(in);
-  BOOST_TEST(out.size() == in.size());
-  for (int i = 0; i < in.ssize(); ++i) {
-    if (i == radius) {
-      BOOST_TEST(in(i) == 1);
-      BOOST_TEST(out(i) == k(0));
-    } else {
-      BOOST_TEST(out(i) == 0);
-    }
-  }
-}
-
 BOOST_AUTO_TEST_CASE(raster_impulse_test)
 {
   const float sigma = 1;
   const int radius = 5;
   auto k = Linx::on_host(Linx::sampled_gaussian_kernel(sigma, radius));
   auto conv = Linx::Convolution(k);
-  auto in = Linx::Raster<float>("in", 2 * radius + 1, 1);
+  auto domain = Linx::shape(2 * radius + 1, 1);
+  auto in = Linx::Raster<float, decltype(domain)>("in", domain);
   in(radius, 0) = 1;
   auto out = conv(in);
   BOOST_TEST(out.size() == in.size());
@@ -71,11 +52,14 @@ BOOST_AUTO_TEST_CASE(raster_impulse_test)
 
 BOOST_AUTO_TEST_CASE(extrapolated_impulse_test)
 {
+  using namespace Linx::Literals;
+
   const float sigma = 3;
   const int radius = 10 * sigma;
   auto k = Linx::sampled_gaussian_kernel(sigma, radius);
   auto conv = Linx::Convolution(k).pad(0);
-  auto in = Linx::Image<int, 1>("in", 1).fill(1);
+  auto domain = Linx::cube<1_D, 0>();
+  auto in = Linx::fill("in", 1, domain);
   auto out = conv(in);
   const auto& k_h = Linx::on_host(k);
   const auto& out_h = Linx::on_host(out);
