@@ -15,9 +15,11 @@ BOOST_AUTO_TEST_CASE(sum_min_max_test)
 {
   const int width = 4;
   const int height = 3;
-  Linx::Image<int, 2> a("a", width, height);
-
-  Linx::for_each("range", a.domain(), KOKKOS_LAMBDA(int i, int j) { a(i, j) = i + j * width; });
+  auto a = Linx::generate(
+      "a",
+      KOKKOS_LAMBDA(int i, int j) { return i + j * width; },
+      width,
+      height);
 
   auto sum = Linx::sum(a);
   auto min = Linx::min(a);
@@ -55,22 +57,17 @@ void test_norm(const auto& in)
 
 BOOST_AUTO_TEST_CASE(norm_1d_test)
 {
-  test_norm(Linx::Image<int, 1>("a", 4));
+  test_norm(Linx::no_init<int>("a", 4));
 }
 
 BOOST_AUTO_TEST_CASE(norm_2d_test)
 {
-  test_norm(Linx::Image<int, 2>("a", 3, 2));
+  test_norm(Linx::no_init<int>("a", 3, 2));
 }
 
 BOOST_AUTO_TEST_CASE(norm_3d_test)
 {
-  test_norm(Linx::Image<int, 3>("a", 3, 2, 4));
-}
-
-BOOST_AUTO_TEST_CASE(norm_seq_test)
-{
-  test_norm(Linx::Sequence<int, 4>("a"));
+  test_norm(Linx::no_init<int>("a", 3, 2, 4));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
