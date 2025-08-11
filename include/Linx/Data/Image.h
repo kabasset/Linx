@@ -401,7 +401,7 @@ private:
   KOKKOS_INLINE_FUNCTION auto index_along(std::integral auto i) const
   {
     if constexpr (CheckBounds) {
-      OutOfBounds::may_abort("index", i, Slice(0, extent(I)));
+      OutOfBounds::may_abort("index", i, Slice(start(I), stop(I)));
     }
     if constexpr (static_start_at_origin_flag) {
       return i;
