@@ -220,7 +220,7 @@ public:
   decltype(auto) domain() const
   {
     if constexpr (static_start_at_origin_flag) {
-      return domain(m_container);
+      return domain_impl(m_container);
     } else {
       return m_domain;
     }
@@ -273,7 +273,7 @@ public:
   /**
    * @brief Access the element at position 0.
    */
-  KOKKOS_INLINE_FUNCTION reference origin() const
+  KOKKOS_INLINE_FUNCTION reference origin() const // FIXME return pointer?
   {
     if constexpr (static_start_at_origin_flag) {
       return front();
@@ -414,18 +414,24 @@ private:
    * @brief Helper function for 0-based fixed-rank containers.
    */
   template <typename... TArgs>
-  static auto domain(const Kokkos::View<TArgs...>& container) // TODO free function
+  static auto domain_impl(const auto& container)
   {
     if constexpr (static_domain_flag) {
       return Domain();
     } else {
-      static constexpr auto n = Kokkos::View<TArgs...>::rank();
-      auto stop = vec<Dimension {n}>(0);
-      for (std::size_t i = 0; i < n; ++i) {
-        stop[i] = container.extent_int(i);
-      }
-      return Domain(stop);
+      return Domain(domain(container));
     }
+  }
+
+  template <typename... TArgs>
+  static auto domain(const Kokkos::View<TArgs...>& container)
+  { // TODO free function
+    static constexpr auto n = Kokkos::View<TArgs...>::rank();
+    auto stop = vec<Dimension {n}>(0);
+    for (std::size_t i = 0; i < n; ++i) {
+      stop[i] = container.extent_int(i);
+    }
+    return Box(stop);
   }
 
   /**
@@ -439,7 +445,7 @@ private:
     for (LINX_DECLTYPE(rank) i = 0; i < rank; ++i) {
       stop[i] = container.extent_int(i);
     }
-    return Domain(stop);
+    return Box(stop);
   }
 
   /**
