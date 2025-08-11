@@ -2,28 +2,10 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/Linx
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef LINX_DATA_BOXUNION_H
-#define LINX_DATA_BOXUNION_H
-
-#include "Linx/Data/Box.h"
+#ifndef LINX_DATA_BOX_BOXUNION_H
+#define LINX_DATA_BOX_BOXUNION_H
 
 namespace Linx {
-
-/**
- * @relatesalso GBox
- * @brief Compute the bounding box of two boxes.
- */
-template <typename T, int N, typename U, int M>
-GBox<T, N> bbox(const GBox<T, N>& lhs, const GBox<U, M>& rhs)
-{
-  auto start = +lhs.start();
-  auto stop = +lhs.stop();
-  for (Index i = 0; i < start.rank(); ++i) {
-    start[i] = std::min<T>(start[i], rhs.start(i));
-    stop[i] = std::max<T>(stop[i], rhs.stop(i));
-  }
-  return {LINX_MOVE(start), LINX_MOVE(stop)};
-}
 
 /**
  * @brief A region made of a collection of disjoint boxes.
@@ -35,7 +17,7 @@ class BoxUnion {
 public:
 
   using value_type = typename TBox::value_type;
-  using size_type = typename TBox::size_type;
+  using coef_type = typename TBox::coef_type;
   static constexpr auto n = TBox::n;
 
   BoxUnion() : m_boxes {} {}
@@ -57,7 +39,7 @@ public:
    */
   auto size() const
   {
-    size_type out = 0;
+    coef_type out = 0;
     for (const auto& box : m_boxes) {
       out += box.size();
     }
@@ -107,26 +89,26 @@ void for_each(const std::string& label, const BoxUnion<TBox>& region, auto&& fun
  * The output is a union of boxes representing
  * the elements contained in the left-hand side box which are not contained in the right-hand side box.
  */
-template <typename T, int N>
-BoxUnion<GBox<T, N>> set_difference(const GBox<T, N>& lhs, const auto& rhs)
+template <typename TBox>
+BoxUnion<TBox> set_difference(const TBox& lhs, const auto& rhs)
 {
   // Inner box
   const auto inner = lhs & rhs;
   if (inner.size() == 0) {
-    return BoxUnion<GBox<T, N>>(+lhs);
+    return BoxUnion<TBox>(lhs);
   }
 
   // Processed region
-  const auto& current_start = inner.start();
-  const auto& current_stop = inner.stop();
+  auto current_start = inner.start();
+  auto current_stop = inner.stop();
 
-  auto out = BoxUnion<GBox<T, N>>();
+  auto out = BoxUnion<TBox>();
   for (std::size_t i = 0; i < lhs.rank(); ++i) {
     // Add box, grow current region frontwards
     const auto start_i = lhs.start(i) - current_start[i];
     if (start_i < 0) {
-      auto start = +current_start;
-      auto stop = +current_stop;
+      auto start = current_start;
+      auto stop = current_stop;
       stop[i] = current_start[i];
       start[i] = current_start[i] += start_i;
       out.emplace_disjoint(LINX_MOVE(start), LINX_MOVE(stop));
@@ -135,8 +117,8 @@ BoxUnion<GBox<T, N>> set_difference(const GBox<T, N>& lhs, const auto& rhs)
     // Add box, grow current region backwards
     const auto stop_i = lhs.stop(i) - current_stop[i];
     if (stop_i > 0) {
-      auto start = +current_start;
-      auto stop = +current_stop;
+      auto start = current_start;
+      auto stop = current_stop;
       start[i] = current_stop[i];
       stop[i] = current_stop[i] += stop_i;
       out.emplace_disjoint(LINX_MOVE(start), LINX_MOVE(stop));
@@ -154,8 +136,8 @@ BoxUnion<GBox<T, N>> set_difference(const GBox<T, N>& lhs, const auto& rhs)
  * the elements contained in the left-hand side box and/or in the right-hand side box.
  * The left-hand side box is one of the boxes in the output.
  */
-template <typename T, int N>
-BoxUnion<GBox<T, N>> operator|(const GBox<T, N>& lhs, const auto& rhs)
+template <typename TBox>
+BoxUnion<TBox> operator|(const TBox& lhs, const auto& rhs)
 {
   auto out = set_difference(rhs, lhs); // Split `rhs`
   out.emplace_disjoint(lhs); // Keep `lhs` as is

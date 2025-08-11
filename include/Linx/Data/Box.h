@@ -239,6 +239,7 @@ private:
 } // namespace Linx
 
 #include "Linx/Data/Box/BoxIterator.h"
+#include "Linx/Data/Box/BoxUnion.h"
 #include "Linx/Data/Box/arithmetics.h"
 #include "Linx/Data/Box/creation.h"
 #include "Linx/Data/Box/funcs.h"
