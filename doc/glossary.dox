@@ -9,7 +9,7 @@ namespace Linx {
 @concept Proxy
 @brief A `Mapping` which does not manage its memory.
 
-It relies on a parent ND array instead, while altering some of its behaviors; e.g. `Shift`
+It relies on a parent ND array instead, while altering some of its behaviors; e.g. `Profile`
 
 @concept Reducer
 @brief An associative and commutative binary function which has an identity element.
@@ -28,7 +28,7 @@ It relies on a parent ND array instead, while altering some of its behaviors; e.
 
 @concept Strided
 @brief A `Mapping` whose neighboring elements along each axis have a constant distance in memory.
-@see `Sequence`, `Image`, `Shift`...
+@see `Sequence`, `Image`...
 
 @concept Window
 @brief A `Region` which can be shifted with `operator-` and `operator+`.

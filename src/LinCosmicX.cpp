@@ -12,7 +12,6 @@
 #include "Linx/Transforms/Morphology.h"
 #include "Linx/Transforms/RankFiltering.h"
 #include "Linx/Transforms/Resampling.h"
-#include "Linx/Transforms/Shift.h" // FIXME rm
 
 void print_2d(const auto& image)
 {
