@@ -5,7 +5,7 @@
 #ifndef LINX_RUN_FLOW_H
 #define LINX_RUN_FLOW_H
 
-#include "Linx/Run/PipelineTasks.h"
+#include "Linx/Run/PipelineTasks.h" // FIXME rm
 
 #include <string>
 #include <tuple>
@@ -229,7 +229,7 @@ public:
   }
 
   /**
-   * Apply an element-wise functions as a new instance.
+   * Apply element-wise functions as a new instance.
    */
   template <typename TPolicy = Overwrite>
   auto transform(auto&&... funcs)
@@ -238,7 +238,7 @@ public:
   }
 
   /**
-   * Apply an element-wise function and append the results.
+   * Apply element-wise functions and append the results.
    */
   auto append_apply(auto&&... funcs)
   {
@@ -246,7 +246,7 @@ public:
   }
 
   /**
-   * Apply an element-wise functino and prepend the results.
+   * Apply element-wise functions and prepend the results.
    */
   auto prepend_apply(auto&&... funcs)
   {
@@ -256,35 +256,22 @@ public:
   /**
    * Restrict the state domain.
    */
-  template <typename T>
-  auto domain(const Slice<T>& span)
+  auto domain(const auto& region) // FIXME requires bbox()
   {
-    return make_state<Overwrite>("Domain", sequences_domain(span, std::make_index_sequence<sizeof...(TValues)>()));
-  }
-
-  /**
-   * Restrict the state domain.
-   */
-  template <int N>
-  auto domain(Box<N>&& box)
-  {
-    return run(Pipeline::Impl::RestrictImage(LINX_FORWARD(box))); // FIXME simplify implementation
+    return make_state<Overwrite>("Domain", domain_impl(bbox(region), std::make_index_sequence<sizeof...(TValues)>()));
   }
 
 private:
 
   template <std::size_t... Is>
-  auto sequences_domain(const auto& span, std::index_sequence<Is...>) const
+  auto domain_impl(const auto& region, std::index_sequence<Is...>) const
   {
-    return std::tuple(sequence_domain(span, std::get<Is>(m_values))...);
+    return std::tuple(single_value_domain_impl(region, std::get<Is>(m_values))...);
   }
 
-  template <typename TIn>
-  auto sequence_domain(const auto& span, const TIn& in) const
+  auto single_value_domain_impl(const auto& region, const auto& in) const
   {
-    using T = std::remove_cvref_t<typename TIn::value_type>;
-    return Sequence<T, -1>(label(in), span.size()).copy_from(in);
-    // FIXME offset
+    return Linx::generate(label(in), in, region); // FIXME execution space
   }
 
 private:

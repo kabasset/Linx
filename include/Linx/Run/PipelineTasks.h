@@ -65,9 +65,7 @@ public:
   template <typename TIn>
   auto operator()(const TIn& in) const
   {
-    using T = std::remove_cvref_t<typename TIn::value_type>;
-    return Image<T, TDomain::n>(label(), m_domain.shape()).copy_from(in);
-    // FIXME offset
+    return generate(label(), in, m_domain);
   }
 
 private:
@@ -90,7 +88,7 @@ auto operator|(AnyState auto&& pipeline, Slice<T>&& span)
  * @brief Set the pipeline domain.
  */
 template <Index N>
-auto operator|(AnyState auto&& pipeline, Box<N>&& box)
+auto operator|(AnyState auto&& pipeline, Specialization<Box> auto&& box)
 {
   return LINX_FORWARD(pipeline) | Impl::RestrictImage(LINX_FORWARD(box));
 }
