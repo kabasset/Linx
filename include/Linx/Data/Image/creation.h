@@ -106,6 +106,17 @@ auto rowwise(const std::string& label, T (&&rows)[N2][N1][N0])
 
 /**
  * @ingroup creation
+ * @brief Create a 1D image made of a single row.
+ */
+template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T0, std::convertible_to<T0>... Ts>
+auto seq(const std::string& label, T0 value0, Ts... values)
+{
+  T0 row[] = {value0, values...};
+  return rowwise(label, LINX_MOVE(row));
+}
+
+/**
+ * @ingroup creation
  * @brief Wrap a pointer as a raster with given shape.
  */
 template <typename T>

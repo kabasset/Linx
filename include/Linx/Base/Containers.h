@@ -150,7 +150,7 @@ struct Rebind<Kokkos::View<TData, TArgs...>> {
   template <typename U>
   using As = Kokkos::View<typename Rebind<TData>::As<U>, TArgs...>; ///< View of new type
   using AsReadonly = Kokkos::View<typename Rebind<TData>::AsReadonly, TArgs...>; ///< Read-only view
-  using AsAtomic = Kokkos::View<TData, Kokkos::MemoryTraits<Kokkos::Atomic>, TArgs...>; ///< Atomic-access view
+  using AsAtomic = Kokkos::View<TData, TArgs..., Kokkos::MemoryTraits<Kokkos::Atomic>>; ///< Atomic-access view
 };
 
 /**
@@ -200,7 +200,7 @@ struct Rebind<Kokkos::DynRankView<TData, TArgs...>> {
   template <typename U>
   using As = Kokkos::DynRankView<typename Rebind<TData>::As<U>, TArgs...>; ///< View of new type
   using AsReadonly = Kokkos::DynRankView<typename Rebind<TData>::AsReadonly, TArgs...>; ///< Read-only view
-  using AsAtomic = Kokkos::DynRankView<TData, Kokkos::MemoryTraits<Kokkos::Atomic>, TArgs...>; ///< Atomic-access view
+  using AsAtomic = Kokkos::DynRankView<TData, TArgs..., Kokkos::MemoryTraits<Kokkos::Atomic>>; ///< Atomic-access view
 };
 
 /**

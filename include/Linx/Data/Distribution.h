@@ -5,20 +5,20 @@
 #ifndef LINX_DATA_DISTRIBUTION_H
 #define LINX_DATA_DISTRIBUTION_H
 
-#include "Linx/Data/Sequence.h"
+#include "Linx/Data/Image.h"
 
 namespace Linx {
 
 namespace Impl {
 
 template <typename TIn, typename TBins, typename TOut>
-struct HistogramBinFinder {
+struct IncrementHistogramBin {
   TIn m_in;
   TBins m_bins;
   TOut m_out;
   int m_bin_count;
 
-  HistogramBinFinder(TIn in, TBins bins, TOut out) :
+  IncrementHistogramBin(TIn in, TBins bins, TOut out) :
       m_in(LINX_MOVE(in)),
       m_bins(LINX_MOVE(bins)),
       m_out(LINX_MOVE(out)),
@@ -28,9 +28,9 @@ struct HistogramBinFinder {
   KOKKOS_INLINE_FUNCTION void operator()(auto... is) const
   {
     auto value = m_in(is...);
-    if (value >= m_bins[0] && value < m_bins[m_bin_count]) {
+    if (value >= m_bins(0) && value < m_bins(m_bin_count)) {
       int index = 0;
-      while (index < m_bin_count && value >= m_bins[index + 1]) {
+      while (index < m_bin_count && value >= m_bins(index + 1)) {
         ++index;
       };
       ++m_out(index);
@@ -46,8 +46,10 @@ void histogram_to(const TIn& in, const TBins& bins, TOut& out)
   const auto& atomic_out = as_atomic(out.container());
   const auto& readonly_in = try_as_readonly(in);
 
-  for_each("histogram()", in.domain(), Impl::HistogramBinFinder(readonly_in, bins, atomic_out)); // FIXME TSpace
-  Kokkos::fence();
+  for_each<typename TOut::execution_space>(
+      "histogram_to()",
+      in.domain(),
+      Impl::IncrementHistogramBin(readonly_in, bins, atomic_out));
 }
 
 /**
@@ -63,21 +65,10 @@ void histogram_to(const TIn& in, const TBins& bins, TOut& out)
 template <typename TOut = int, typename TBins>
 auto histogram(const auto& in, const TBins& bins)
 {
-  constexpr auto N = std::max(TBins::n - 1, -1);
-  Sequence<TOut, N> out(compose_label("histogram", in), bins.size() - 1);
+  auto out = default_init<TOut>(compose_label("histogram", in), bins.size() - 1);
   histogram_to(in, bins, out);
   return out;
 }
-
-/**
- * @relatesalo RangeMixin
- * @brief Create a `DataDistribution` from the container.
- */
-// template <typename TRange>
-// DataDistribution<typename TRange::value_type> distribution(const TRange& in)
-// {
-//   return DataDistribution<typename TRange::value_type>(in);
-// }
 
 } // namespace Linx
 
