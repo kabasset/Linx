@@ -416,13 +416,16 @@ private:
   template <typename... TArgs>
   static auto domain(const Kokkos::View<TArgs...>& container) // TODO free function
   {
-    static constexpr auto n = Kokkos::View<TArgs...>::rank();
-    auto stop = vec<Dimension {n}>(0);
-    for (std::size_t i = 0; i < n; ++i) {
-      stop[i] = container.extent_int(i);
+    if constexpr (static_domain_flag) {
+      return Domain();
+    } else {
+      static constexpr auto n = Kokkos::View<TArgs...>::rank();
+      auto stop = vec<Dimension {n}>(0);
+      for (std::size_t i = 0; i < n; ++i) {
+        stop[i] = container.extent_int(i);
+      }
+      return Domain(stop);
     }
-    return Box(stop);
-    // FIXME handle static domain
   }
 
   /**
@@ -436,7 +439,7 @@ private:
     for (LINX_DECLTYPE(rank) i = 0; i < rank; ++i) {
       stop[i] = container.extent_int(i);
     }
-    return Box(stop);
+    return Domain(stop);
   }
 
   /**
