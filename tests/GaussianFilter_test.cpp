@@ -35,8 +35,7 @@ BOOST_AUTO_TEST_CASE(raster_impulse_test)
   const int radius = 5;
   auto k = Linx::on_host(Linx::sampled_gaussian_kernel(sigma, radius));
   auto conv = Linx::Convolution(k);
-  auto domain = Linx::shape(2 * radius + 1, 1);
-  auto in = Linx::Raster<float, decltype(domain)>("in", domain);
+  auto in = Linx::Raster<float, 2>("in", 2 * radius + 1, 1);
   in(radius, 0) = 1;
   auto out = conv(in);
   BOOST_TEST(out.size() == in.size());

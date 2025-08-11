@@ -246,7 +246,10 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Kokkos::DynRankView<TData,
  * @brief Any type `T` with an `as_readonly(const T&)` overload.
  */
 template <typename T>
-concept ViewableAsReadonly = requires(const T& in) { as_readonly(in); };
+concept ViewableAsReadonly = requires(const T& in)
+{
+  as_readonly(in);
+};
 
 /**
  * @brief Any type `T` for which `as_readonly(const T&)` should not be applied.

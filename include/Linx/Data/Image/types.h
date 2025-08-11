@@ -5,7 +5,45 @@
 #ifndef LINX_DATA_IMAGE_TYPES_H
 #define LINX_DATA_IMAGE_TYPES_H
 
+#include "Linx/Data/Box.h"
+
+#include <Kokkos_Core.hpp>
+
 namespace Linx {
+
+/**
+ * @brief Default raster domain instance.
+ */
+template <int N>
+auto default_raster_domain()
+{
+  if constexpr (N == -1) {
+    return Shape<Index*>();
+  } else {
+    return Shape<Index[N]>();
+  }
+}
+
+/**
+ * @brief Default raster domain type.
+ */
+template <int N>
+using RasterDomain = decltype(default_raster_domain<N>());
+
+/**
+ * @brief Default raster container instance.
+ */
+template <typename T, int N>
+auto default_raster_container()
+{
+  return default_image_container<T, RasterDomain<N>, Kokkos::LayoutLeft, Kokkos::HostSpace>();
+}
+
+/**
+ * @brief Default raster container type.
+ */
+template <typename T, int N>
+using RasterContainer = decltype(default_raster_container<T, N>());
 
 /**
  * @brief Contiguous image on host with row-major ordering.
@@ -21,8 +59,8 @@ namespace Linx {
  * 
  * Said otherwise, the stride along axis 0 is 1.
  */
-template <typename T, typename TDomain>
-using Raster = Image<T, TDomain, ImageContainer<T, TDomain, Kokkos::LayoutLeft, Kokkos::HostSpace>>;
+template <typename T, int N>
+using Raster = Image<T, RasterDomain<N>, RasterContainer<T, N>>;
 
 } // namespace Linx
 

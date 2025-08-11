@@ -5,13 +5,15 @@
 #ifndef LINX_DATA_BOX_TYPES_H
 #define LINX_DATA_BOX_TYPES_H
 
+#include "Linx/Data/Box/creation.h"
+
 namespace Linx {
 
 /**
  * @brief Box which starts at origin.
  */
 template <typename TStop>
-using Shape = Box<std::integer_sequence<int>, TStop>;
+using Shape = decltype(Box(std::declval<Vector<TStop>>()));
 
 } // namespace Linx
 

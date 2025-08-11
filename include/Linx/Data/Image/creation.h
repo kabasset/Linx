@@ -72,9 +72,8 @@ auto no_init(const std::string& label, std::integral auto... extents)
 template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T, int N>
 auto rowwise(const std::string& label, T (&&row)[N])
 {
-  auto domain = shape<N>();
-  auto raster = Raster<T, decltype(domain)>(Wrap(row), N);
-  auto out = no_init<T, TSpace>(label, domain);
+  auto raster = Raster<T, 1>(Wrap(row), N);
+  auto out = no_init<T, TSpace>(label, shape<N>());
   Kokkos::deep_copy(out.container(), raster.container());
   return out;
 }
@@ -86,10 +85,8 @@ auto rowwise(const std::string& label, T (&&row)[N])
 template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T, int N0, int N1>
 auto rowwise(const std::string& label, T (&&rows)[N1][N0])
 {
-  T* data = *rows;
-  auto domain = shape<N0, N1>();
-  auto raster = Raster<T, decltype(domain)>(Wrap(data), N0, N1);
-  auto out = no_init<T, TSpace>(label, domain);
+  auto raster = Raster<T, 2>(Wrap(*rows), N0, N1);
+  auto out = no_init<T, TSpace>(label, shape<N0, N1>());
   Kokkos::deep_copy(out.container(), raster.container());
   return out;
 }
@@ -101,10 +98,8 @@ auto rowwise(const std::string& label, T (&&rows)[N1][N0])
 template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T, int N0, int N1, int N2>
 auto rowwise(const std::string& label, T (&&rows)[N2][N1][N0])
 {
-  T* data = **rows;
-  auto domain = shape<N0, N1, N2>();
-  auto raster = Raster<T, decltype(domain)>(Wrap(data), N0, N1, N2);
-  auto out = no_init<T, TSpace>(label, domain);
+  auto raster = Raster<T, 3>(Wrap(**rows), N0, N1, N2);
+  auto out = no_init<T, TSpace>(label, shape<N0, N1, N2>());
   Kokkos::deep_copy(out.container(), raster.container());
   return out;
 }
@@ -116,8 +111,7 @@ auto rowwise(const std::string& label, T (&&rows)[N2][N1][N0])
 template <typename T>
 auto wrap(T* data, std::integral auto... extents)
 {
-  auto domain = shape(extents...);
-  return Raster<T, decltype(domain)>(Wrap(data), extents...);
+  return Raster<T, sizeof...(extents)>(Wrap(data), extents...);
 }
 
 /**
@@ -127,7 +121,7 @@ auto wrap(T* data, std::integral auto... extents)
 template <typename T>
 auto wrap(T* data, const NotConvertibleTo<int> auto& domain)
 {
-  return Raster<T, LINX_DECLTYPE(domain)>(Wrap(data), domain);
+  return Image<T, LINX_DECLTYPE(domain), RasterContainer<T, LINX_DECLTYPE(domain)::n>>(Wrap(data), domain);
 }
 
 /**
@@ -160,6 +154,14 @@ auto apply_at_stop(auto func, const TDomain& domain)
   return apply_at_stop_impl(func, domain, std::make_index_sequence<static_cast<std::size_t>(TDomain::n)>());
 }
 
+template <typename T>
+struct IsOrigin {
+  KOKKOS_INLINE_FUNCTION constexpr T operator()(std::integral auto... is) const
+  {
+    return ((is == 0) && ...);
+  }
+};
+
 } // namespace Impl
 
 /**
@@ -176,6 +178,23 @@ auto generate(const std::string& label, const auto& func, auto&&... domain)
 {
   using T = LINX_DECLTYPE(Impl::apply_at_stop(func, domain...));
   return no_init<T, TSpace>(label, LINX_FORWARD(domain)...).copy_from(func);
+}
+
+/**
+ * @ingroup creation
+ * @brief Generate an impulse.
+ * 
+ * @tparam T The value type
+ * @tparam TSpace The memory space
+ * @param label The label
+ * @param domain The domain parameters
+ * 
+ * The generated image is filled with `T(false)` except at origin where it is `T(true)`.
+ */
+template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
+auto impulse(const std::string& label, auto&&... domain)
+{
+  return generate(label, Impl::IsOrigin<T>(), LINX_FORWARD(domain)...);
 }
 
 /**

@@ -72,24 +72,4 @@ BOOST_AUTO_TEST_CASE(shifted_stride_test)
   BOOST_TEST(Linx::offset_from_origin(in, 1, 1, 1) == Linx::sum(strides));
 }
 
-BOOST_AUTO_TEST_CASE(raster_ordering_test)
-{
-  auto domain = Linx::Box({-2, -1}, {2, 1});
-  auto in = Linx::Raster<int, LINX_DECLTYPE(domain)>("in", domain);
-
-  in.generate_offsets(&in.origin());
-  for (auto j : Linx::get<1>(in.domain())) {
-    for (auto i : Linx::get<0>(in.domain())) {
-      BOOST_TEST(in(i, j) == i + j * in.extent(0));
-    }
-  }
-
-  in.generate_offsets();
-  for (auto j : Linx::get<1>(in.domain())) {
-    for (auto i : Linx::get<0>(in.domain())) {
-      BOOST_TEST(in(i, j) == (i - in.domain().start(0)) + (j - in.domain().start(1)) * in.extent(0));
-    }
-  }
-}
-
 BOOST_AUTO_TEST_SUITE_END()

@@ -24,11 +24,10 @@ BOOST_AUTO_TEST_CASE(impulse_test)
   using namespace Linx::Literals;
 
   auto domain = Linx::cube<3_D, 2>();
-  const auto in_h = Linx::Raster<int, decltype(domain)>("in", domain);
-  in_h.origin() = 1;
-  const auto out = Linx::separable_laplacian<0, 1, 2>(-1)(Linx::on_device(in_h));
+  const auto in_h = Linx::impulse<bool, Kokkos::HostSpace>("in", domain);
+  const auto out = Linx::separable_laplacian<0, 1, 2>(-1)(in_h);
   static_assert(std::is_same_v<decltype(out)::execution_space, Kokkos::DefaultExecutionSpace>);
-  const auto expected_h = Linx::Raster<int, decltype(domain)>("exp", domain);
+  const auto expected_h = Linx::default_init<int, Kokkos::HostSpace>("exp", domain);
   expected_h(0, 0, -1) = -1;
   expected_h(0, -1, 0) = -1;
   expected_h(-1, 0, 0) = -1;
