@@ -15,7 +15,7 @@
 namespace Linx {
 
 template <int I, typename TIn>
-using Profile = Patch<TIn, Line<int, I, TIn::n>>;
+using ProfileAlong = Patch<TIn, Line<int, I, TIn::n>>;
 
 /**
  * @brief Get the collection of all the profiles of an image along a given axis.
@@ -32,27 +32,21 @@ using Profile = Patch<TIn, Line<int, I, TIn::n>>;
  * @see `rows()`
  */
 template <int I, typename TIn>
-std::vector<Profile<I, TIn>> profiles(const TIn& in)
+auto profiles(const TIn& in) // FIXME profiles_along?
 {
-  static constexpr int n = TIn::n;
-  using Domain = Line<int, I, n>;
-  const auto& domain = in.domain();
-  const auto& start = domain.start();
-  auto shape = domain.shape();
-  shape[I] = 1;
-  auto stop = domain.stop(I);
-  auto size = product(shape);
-  std::vector<Profile<I, TIn>> vec;
-  vec.reserve(size);
-  for (int i = 0; i < size; ++i) {
-    vec.emplace_back(in, Domain(+start, stop)); // Shallow-copy is not enough
-  }
-  Raster<Profile<I, TIn>, n> out(Wrap(vec.data()), shape); // FIXME owning raster somehow?
+  auto fronts = in.domain();
+  fronts.stop(I) = fronts.start(I) + 1; // Flat along I
+  const auto& start = fronts.start();
+  auto stop = start + 1;
+  stop[I] = in.stop(I); // Non-flat only along I
+  auto profile = Box(start, stop);
+  auto out = std::vector(fronts.size(), Patch(in, profile));
+  auto raster = wrap(out.data(), fronts);
   Linx::for_each<Kokkos::Serial>(
       "profiles",
-      Box<n> {Position<n> {}, shape}, // FIXME handle potential offset
-      [&](auto... is) { out(is...).shift(is...); }); // This is serial for now, no KOKKOS_LAMBDA needed
-  return vec; // FIXME return out somehow?
+      fronts, // FIXME handle potential offset
+      [&](auto... is) { /* FIXME raster(is...).shift(is...); */ }); // This is serial for now, no KOKKOS_LAMBDA needed
+  return out; // FIXME return raster somehow?
 }
 
 /**

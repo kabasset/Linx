@@ -115,6 +115,14 @@ public:
   }
 
   /**
+   * @brief Forward to parent's `at()`.
+   */
+  KOKKOS_INLINE_FUNCTION reference at(auto&&... args) const
+  {
+    return m_parent.at(LINX_FORWARD(args)...);
+  }
+
+  /**
    * @brief Reference to the element at a given domain-local position.
    * 
    * The arguments are forwarded to the domain,

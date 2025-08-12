@@ -92,7 +92,7 @@ constexpr auto erode(const Specialization<Box> auto& box, const BoundedRegion au
  */
 constexpr auto operator&(const Specialization<Box> auto& lhs, const Specialization<Box> auto& rhs)
 {
-  return Box(max(lhs.start(), rhs.start()), min(lhs.stop(), rhs.stop()));
+  return Box(Linx::max(lhs.start(), rhs.start()), Linx::min(lhs.stop(), rhs.stop()));
 }
 
 /**

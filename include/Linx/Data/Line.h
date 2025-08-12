@@ -24,7 +24,7 @@ public:
   static constexpr int axis = I;
 
   using size_type = T;
-  using value_type = GPosition<size_type, n>;
+  using value_type = Vector<typename Impl::VectorTraits<T, N>::Spec>;
 
   GLine() : m_start {}, m_stop(0), m_step(1) {}
 
@@ -60,8 +60,7 @@ public:
   /**
    * @brief Clamp the line into a bounding box.
    */
-  template <typename U, int M>
-  GLine& operator&=(const GBox<U, M>& rhs)
+  GLine& operator&=(const Specialization<Box> auto& rhs)
   {
     // FIXME assert rank() == rhs.rank()?
     // FIXME handle empty intersection
@@ -126,8 +125,8 @@ using Line = GLine<Index, I, N>;
 /**
  * @relatesalso GLine
  */
-template <typename T, int I, int N, typename U, int M>
-GLine<T, I, N> operator&(const GLine<T, I, N>& lhs, const GBox<U, M>& rhs)
+template <typename T, int I, int N>
+GLine<T, I, N> operator&(const GLine<T, I, N>& lhs, const Specialization<Box> auto& rhs)
 {
   auto out = lhs;
   out &= rhs;
