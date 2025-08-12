@@ -82,6 +82,31 @@ auto end(const Image<T, TDomain, TContainer>& image)
   return begin(image) + image.size();
 }
 
+/**
+ * @brief Align a contiguous-domain 1D data container along an axis, reshaping it into an ND image.
+ * @tparam I The axis to align the array along
+ * @tparam N The rank of the output image (-1 is not supported)
+ * 
+ * The input can be a sequence or a 1D image, possibly offset.
+ * The output is an image or an offset image.
+ */
+template <Index I, Index N = I + 1, typename TIn>
+auto along(const TIn& in)
+{
+  const auto& r = root(in);
+  auto extents = vec<Dimension(N)>(1);
+  extents[I] = r.size();
+  auto out = no_init<typename TIn::element_type, typename TIn::execution_space>(r.label(), Box(extents));
+  const auto& out_on_host = on_host(out);
+  for (auto i : get<0>(in.domain())) {
+    auto p = vec<Dimension(N)>(0);
+    p[I] = i;
+    out_on_host.at(p) = r(i);
+  }
+  Kokkos::deep_copy(out.container(), out_on_host.container());
+  return out;
+}
+
 std::ostream& operator<<(std::ostream& os, const Specialization<Image> auto& image)
 {
   os << image.label() << ": " << image.domain() << "\n  ";

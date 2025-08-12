@@ -146,7 +146,7 @@ public:
    * @brief Read an image at given (0-based) HDU index.
    */
   template <typename T, int N>
-  Image<T, N> read(Index hdu = 0)
+  auto read(Index hdu = 0)
   {
     std::stringstream label;
     label << m_path.stem() << '[' << hdu << ']';
@@ -154,12 +154,12 @@ public:
     int naxis = 0;
     fits_movabs_hdu(m_fptr, hdu + 1, nullptr, &status);
     fits_get_img_dim(m_fptr, &naxis, &status);
-    Position<N> shape("shape", naxis);
+    auto shape = vec(Dimension(naxis), 0L);
     fits_get_img_size(m_fptr, naxis, shape.data(), &status);
     Raster<T, N> out("raster", shape);
     fits_read_img(m_fptr, typecode<T>(), 1, out.size(), nullptr, out.data(), nullptr, &status);
     CfitsioError::may_throw("Cannot read HDU", m_fptr, status);
-    return Image<T, N>(label.str(), shape).copy_from(out); // FIXME optimize
+    return no_init<T>(label.str(), out.domain()).copy_from(out); // FIXME optimize
   }
 
   /**
@@ -176,7 +176,7 @@ public:
     }
     fits_create_img(m_fptr, image_typecode<typename TImage::element_type>(), in.rank(), shape.data(), &status);
     if (in.size() > 0) {
-      write_pixels(m_fptr, in, Position<-1>("first", in.rank()));
+      write_pixels(in);
     }
     CfitsioError::may_throw("Cannot write HDU", m_fptr, status);
   }
@@ -196,26 +196,28 @@ public:
     return 0;
   }
 
+private:
+
   /**
    * @brief Write pixels in an existing image HDU.
    * @param in The image to be written
-   * @param start The position of the first pixel in the file
    */
-  template <typename TIn, typename TStart>
-  void write_pixels(fitsfile* m_fptr, const TIn& in, const TStart& start)
+  template <typename TIn>
+  void write_pixels(const TIn& in)
   {
+    // FIXME if is raster, write directly
     using T = typename TIn::element_type;
     static constexpr auto n = TIn::n;
     const auto& h = on_host(in);
     const auto raster = Raster<T, n>(compose_label("raster", in.label()), in.shape()).copy_from(h);
-    write_pixels(m_fptr, raster, start);
+    write_raster_pixels(raster);
   }
 
-  template <typename T, int N, typename TStart>
-  void write_pixels(fitsfile* m_fptr, const Raster<T, N>& in, const TStart& start)
+  template <typename TIn>
+  void write_raster_pixels(const TIn& in)
   {
     int status = 0;
-    fits_write_img(m_fptr, typecode<T>(), 1, in.size(), in.data(), &status);
+    fits_write_img(m_fptr, typecode<typename TIn::element_type>(), 1, in.size(), in.data(), &status);
     CfitsioError::may_throw("Cannot write pixels", m_fptr, status);
   }
 

@@ -122,6 +122,33 @@ constexpr auto bbox(const Specialization<Box> auto& lhs, const Specialization<Bo
   return Box(min(lhs.start(), rhs.start()), max(lhs.stop(), rhs.stop()));
 }
 
+/**
+ * @relatesalso Box
+ * @brief Box scaled by a given factor.
+ */
+constexpr auto operator*(const Specialization<Box> auto& lhs, const auto& rhs)
+{
+  return Box(lhs.start() * rhs, lhs.stop() * rhs);
+}
+
+/**
+ * @relatesalso Box
+ * @brief Box scaled by a given factor.
+ */
+constexpr auto operator*(const auto& lhs, const Specialization<Box> auto& rhs)
+{
+  return Box(lhs * rhs.start(), lhs * rhs.stop());
+}
+
+/**
+ * @relatesalso Box
+ * @brief Box scaled by the inverse of a given factor.
+ */
+constexpr auto operator/(const Specialization<Box> auto& lhs, const auto& rhs)
+{
+  return Box(lhs.start() / rhs, lhs.stop() / rhs);
+}
+
 } // namespace Linx
 
 #endif

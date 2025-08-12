@@ -105,6 +105,11 @@ class UniformDistribution {
 public:
 
   /**
+   * @brief Default constructor.
+   */
+  KOKKOS_INLINE_FUNCTION UniformDistribution() : m_span(Limits<T>::min(), Limits<T>::max()) {} // FIXME segment
+
+  /**
    * @brief Constructor.
    */
   KOKKOS_INLINE_FUNCTION UniformDistribution(Slice<T> span) : m_span(LINX_MOVE(span)) {}
@@ -180,7 +185,7 @@ public:
   /**
    * @brief Constructor.
    */
-  UniformRng(UniformDistribution<T> distribution, Index seed = -1) :
+  UniformRng(UniformDistribution<T> distribution = UniformDistribution<T>(), Index seed = -1) :
       m_distribution(LINX_MOVE(distribution)),
       m_pool(seed)
   {}
@@ -203,13 +208,18 @@ public:
    */
   KOKKOS_INLINE_FUNCTION T operator()(auto&&...) const
   {
-    return m_pool.uniform(m_distribution.start(), m_distribution.stop());
+    if constexpr (std::is_same_v<T, bool>) {
+      return m_pool.uniform(0, 2); // FIXME
+    } else {
+      return m_pool.uniform(m_distribution.start(), m_distribution.stop());
+    }
   }
 
 private:
 
   UniformDistribution<T> m_distribution; ///< Distribution parameters
-  RngPool<T, Kokkos::Random_XorShift64_Pool<TSpace>> m_pool; ///< RNG pool
+  using Value = std::conditional_t<std::is_same_v<T, bool>, char, T>; ///< Specific handling
+  RngPool<Value, Kokkos::Random_XorShift64_Pool<TSpace>> m_pool; ///< RNG pool
 };
 
 template <typename T>

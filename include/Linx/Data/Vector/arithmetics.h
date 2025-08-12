@@ -251,6 +251,48 @@ constexpr auto operator-(const TLhs& lhs, const Vector<TRhs>& rhs)
   return -(rhs - lhs);
 }
 
+template <typename TLhs, std::convertible_to<typename Vector<TLhs>::element_type> TRhs>
+constexpr auto operator*(const Vector<TLhs>& lhs, const TRhs& rhs)
+{
+  if constexpr (Vector<TLhs>::static_flag) {
+    if constexpr (requires { TRhs::value; }) {
+      return transform_vectors<Multiply<>>(lhs, vec<Dimension {Vector<TLhs>::n}, TRhs::value>());
+    } else {
+      return transform_vectors<Multiply<>>(lhs, vec<Dimension {Vector<TLhs>::n}>(rhs));
+    }
+  } else {
+    auto out = +lhs;
+    for (std::size_t i = 0; i < out.size(); ++i) {
+      out[i] *= rhs;
+    }
+    return out;
+  }
+}
+
+template <typename TRhs, std::convertible_to<typename Vector<TRhs>::value_type> TLhs>
+constexpr auto operator*(const TLhs& lhs, const Vector<TRhs>& rhs)
+{
+  return rhs * lhs;
+}
+
+template <typename TLhs, std::convertible_to<typename Vector<TLhs>::element_type> TRhs>
+constexpr auto operator/(const Vector<TLhs>& lhs, const TRhs& rhs)
+{
+  if constexpr (Vector<TLhs>::static_flag) {
+    if constexpr (requires { TRhs::value; }) {
+      return transform_vectors<Divide<>>(lhs, vec<Dimension {Vector<TLhs>::n}, TRhs::value>());
+    } else {
+      return transform_vectors<Divide<>>(lhs, vec<Dimension {Vector<TLhs>::n}>(rhs));
+    }
+  } else {
+    auto out = +lhs;
+    for (std::size_t i = 0; i < out.size(); ++i) {
+      out[i] /= rhs;
+    }
+    return out;
+  }
+}
+
 template <typename TLhs, typename TRhs>
 constexpr auto min(const Vector<TLhs>& lhs, const Vector<TRhs>& rhs)
 {

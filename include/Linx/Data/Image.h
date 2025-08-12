@@ -201,14 +201,14 @@ public:
   /**
    * @brief Image extents along all axes. 
    */
-  Shape shape() const
+  Shape shape() const // FIXME deprecate?
   {
     if constexpr (static_start_at_origin_flag) {
-      Shape out(rank());
+      auto out = std::vector<int>(rank());
       for (int i = 0; i < rank(); ++i) {
         out[i] = m_container.extent_int(i);
       }
-      return out;
+      return Shape(out.begin(), out.end());
     } else {
       return domain().shape();
     }

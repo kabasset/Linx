@@ -13,6 +13,8 @@
 #include "Linx/Transforms/RankFiltering.h"
 #include "Linx/Transforms/Resampling.h"
 
+using namespace Linx::Literals;
+
 void print_2d(const auto& image)
 {
   auto name = image.label();
@@ -25,19 +27,13 @@ void print_2d(const auto& image)
   Linx::Fits(filename, 'w').write(image);
 }
 
-Linx::Box<2> strel(Linx::Index radius)
-{
-  return {{-radius, -radius}, {radius + 1, radius + 1}};
-}
-
 namespace Linx {
 
-template <Index... Radii> // FIXME strong type
-auto box_median_filter()
+template <typename TFootprint>
+auto box_median_filter(const TFootprint& footprint)
 {
-  static constexpr Index Size = (1 * ... * Radii);
-  return Linx::MedianFilter<Size, Linx::Box<sizeof...(Radii)>>({{-Radii...}, {Radii + 1 ...}});
-  // FIXME return Linx::MedianFilter<Linx::SBox<Radii...>>();
+  static constexpr auto Size = TFootprint().size();
+  return Linx::MedianFilter<Size, TFootprint>(TFootprint()); // FIXME detect size in MedianFilter
 }
 
 } // namespace Linx
@@ -54,8 +50,8 @@ struct FindSaturatedStars {
   const TMask& operator()(const TMask& mask, const TData& data) const
   {
     const auto domain = data.domain();
-    auto satpixels = Linx::Image<bool, 2>("satpixels", data.shape());
-    auto median5 = Linx::box_median_filter<2, 2>().lazy(data);
+    auto satpixels = Linx::default_init<bool>("satpixels", domain);
+    auto median5 = Linx::box_median_filter(Linx::cube<2_D, 2>()).lazy(data);
     Linx::for_each(
         label(),
         Linx::erode(domain, 2),
@@ -65,8 +61,8 @@ struct FindSaturatedStars {
           }
         });
     auto grow_mask = +mask; // Copy the borders
-    Linx::Dilation(strel(1)).transform(mask, Linx::Patch(grow_mask, Linx::erode(domain, 1)));
-    Linx::Dilation(strel(2)).transform(satpixels, Linx::Patch(mask, Linx::erode(domain, 2)));
+    Linx::Dilation(Linx::cube<2_D, 1>()).transform(mask, Linx::Patch(grow_mask, Linx::erode(domain, 1)));
+    Linx::Dilation(Linx::cube<2_D, 2>()).transform(satpixels, Linx::Patch(mask, Linx::erode(domain, 2)));
     mask &= grow_mask;
     return mask;
   }
@@ -131,7 +127,7 @@ struct SensorParams {
 };
 
 template <typename TData, typename TMask>
-std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
+auto lacosmic(
     const TData& data,
     const TMask& mask,
     const DetectionParams& det,
@@ -156,14 +152,14 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
   Linx::Flow("Find saturated stars", logger).append(mask, data).run(FindSaturatedStars(sensor.satlevel));
   auto [backgroundlevel] = Linx::Flow("Compute background level", logger).append(data, mask).run(BackgroundLevel());
 
-  auto crmask = Linx::Image<bool, 2>("crmask", data.shape());
+  auto crmask = Linx::default_init<bool>("crmask", data.domain());
   auto psfk = Linx::sampled_gaussian_kernel(psffwhm * 2 * std::sqrt(2 * std::log(2)), psfsize);
 
   for (Linx::Index i = 1; i <= niter; ++i) {
     auto label = "Iteration " + std::to_string(i) + " / " + std::to_string(niter);
     logger(label, "Start");
 
-    auto [m5] = Linx::Flow("Compute m5", logger).append(data).run(Linx::box_median_filter<2, 2>());
+    auto [m5] = Linx::Flow("Compute m5", logger).append(data).run(Linx::box_median_filter(Linx::cube<2_D, 2>()));
 
     auto [noise] = Linx::Flow("Compute noise map", logger)
                        .append(m5.copy_as("noise")) // FIXME copy only used for cleantype = median
@@ -174,10 +170,10 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
             .append(data)
             .run(Linx::Upsample(2), Linx::separable_laplacian<0, 1>(-1.))
             .transform(Linx::Max(T(0)))
-            .run(Linx::MeanFilter(Linx::Box<2>({0, 0}, {2, 2})), Linx::Downsample(2))
+            .run(Linx::MeanFilter(Linx::shape<2, 2>()), Linx::Downsample(2))
             .append(noise)
             .transform(Linx::Divide(), Linx::Divide(2))
-            .prepend_run(Linx::box_median_filter<2, 2>())
+            .prepend_run(Linx::box_median_filter(Linx::cube<2_D, 2>()))
             .transform(Linx::Subtract(), Linx::Negate());
 
     auto [f] =
@@ -192,10 +188,10 @@ std::tuple<TData, Linx::Image<bool, 2>> lacosmic(
         Linx::Flow("Find candidate CRs", logger)
             .append(crmask, sp, f)
             .transform(FindCandidates(det.sigclip, det.objlim))
-            .run(Linx::Dilation(strel(1)))
+            .run(Linx::Dilation(Linx::cube<2_D, 1>()))
             .append(crmask, sp)
             .transform(FindNeighborCandidates(det.sigclip))
-            .run(Linx::Dilation(strel(1)))
+            .run(Linx::Dilation(Linx::cube<2_D, 1>()))
             .append(crmask, sp)
             .transform(FindNeighborCandidates(det.sigclip * det.sigfrac));
 
@@ -224,8 +220,8 @@ int main(int argc, char const* argv[])
   const auto extent = context.as<Linx::Index>("image");
   const auto niter = context.as<Linx::Index>("niter");
 
-  auto data = Linx::Image<double, 2>("data", extent, extent).generate("random data", Linx::GaussianRng<double>(0, 1));
-  auto mask = Linx::Image<bool, 2>("mask", extent, extent).generate("random mask", Linx::UniformRng<int>({0, 2}));
+  auto data = Linx::generate("random data", Linx::GaussianRng<double>(0, 1), extent, extent);
+  auto mask = Linx::generate("random mask", Linx::UniformRng<bool>(), extent, extent);
   // FIXME init psfk
 
   print_2d(data);
