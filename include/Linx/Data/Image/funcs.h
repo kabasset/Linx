@@ -94,9 +94,11 @@ template <Index I, Index N = I + 1, typename TIn>
 auto along(const TIn& in)
 {
   const auto& r = root(in);
-  auto extents = vec<Dimension(N)>(1);
-  extents[I] = r.size();
-  auto out = no_init<typename TIn::element_type, typename TIn::execution_space>(r.label(), Box(extents));
+  auto start = vec<Dimension(N)>(0);
+  auto stop = vec<Dimension(N)>(1);
+  start[I] = r.start(0);
+  stop[I] = r.stop(0);
+  auto out = no_init<typename TIn::element_type, typename TIn::execution_space>(r.label(), Box(start, stop));
   const auto& out_on_host = on_host(out);
   for (auto i : get<0>(in.domain())) {
     auto p = vec<Dimension(N)>(0);
