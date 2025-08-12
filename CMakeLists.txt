@@ -67,12 +67,3 @@ target_link_libraries(LinxBenchmarkFilters Linx)
 
 add_executable(LinxImpulseResponse src/LinxImpulseResponse.cpp)
 target_link_libraries(LinxImpulseResponse Linx)
-
-add_executable(KokkosBenchmarkConvolution src/KokkosBenchmarkConvolution.cpp)
-target_link_libraries(KokkosBenchmarkConvolution Linx)
-
-add_executable(KokkosBenchmarkExp src/KokkosBenchmarkExp.cpp)
-target_link_libraries(KokkosBenchmarkExp Linx)
-
-add_executable(KokkosBenchmarkIteration src/KokkosBenchmarkIteration.cpp)
-target_link_libraries(KokkosBenchmarkIteration Linx)
