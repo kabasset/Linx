@@ -57,11 +57,15 @@ Box(T0 (&&)[N0], T1 (&&)[N1]) -> Box<T0[N0], T1[N1]>; // FIXME forbid different 
 template <auto... Args>
 constexpr auto shape(auto... args)
 {
-  auto stop = vec<Args...>(args...);
-  if constexpr (decltype(stop)::static_size_flag) {
-    return Box(vec<Dimension {decltype(stop)::n}>(), stop);
+  if constexpr (sizeof...(Args) == 0 && sizeof...(args) == 0) {
+    return Box<std::integer_sequence<int>, std::integer_sequence<int>>();
   } else {
-    return Box(vec(Dimension(stop.size())), stop);
+    auto stop = vec<Args...>(args...);
+    if constexpr (decltype(stop)::static_size_flag) {
+      return Box(vec<Dimension {decltype(stop)::n}>(), stop);
+    } else {
+      return Box(vec(Dimension(stop.size())), stop);
+    }
   }
 }
 
