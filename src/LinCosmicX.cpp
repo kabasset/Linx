@@ -27,17 +27,6 @@ void print_2d(const auto& image)
   Linx::Fits(filename, 'w').write(image);
 }
 
-namespace Linx {
-
-template <typename TFootprint>
-auto box_median_filter(const TFootprint& footprint)
-{
-  static constexpr auto Size = TFootprint().size();
-  return Linx::MedianFilter<Size, TFootprint>(TFootprint()); // FIXME detect size in MedianFilter
-}
-
-} // namespace Linx
-
 struct FindSaturatedStars {
   double satlevel;
 
@@ -51,7 +40,7 @@ struct FindSaturatedStars {
   {
     const auto domain = data.domain();
     auto satpixels = Linx::default_init<bool>("satpixels", domain);
-    auto median5 = Linx::box_median_filter(Linx::cube<2_D, 2>()).lazy(data);
+    auto median5 = Linx::MedianFilter(Linx::cube<2_D, 2>()).lazy(data);
     Linx::for_each(
         label(),
         Linx::erode(domain, 2),
@@ -159,7 +148,7 @@ auto lacosmic(
     auto label = "Iteration " + std::to_string(i) + " / " + std::to_string(niter);
     logger(label, "Start");
 
-    auto [m5] = Linx::Flow("Compute m5", logger).append(data).run(Linx::box_median_filter(Linx::cube<2_D, 2>()));
+    auto [m5] = Linx::Flow("Compute m5", logger).append(data).run(Linx::MedianFilter(Linx::cube<2_D, 2>()));
 
     auto [noise] = Linx::Flow("Compute noise map", logger)
                        .append(m5.copy_as("noise")) // FIXME copy only used for cleantype = median
@@ -173,7 +162,7 @@ auto lacosmic(
             .run(Linx::MeanFilter(Linx::shape<2, 2>()), Linx::Downsample(2))
             .append(noise)
             .transform(Linx::Divide(), Linx::Divide(2))
-            .prepend_run(Linx::box_median_filter(Linx::cube<2_D, 2>()))
+            .prepend_run(Linx::MedianFilter(Linx::cube<2_D, 2>()))
             .transform(Linx::Subtract(), Linx::Negate());
 
     auto [f] =

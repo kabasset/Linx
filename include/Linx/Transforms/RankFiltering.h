@@ -18,9 +18,11 @@ namespace Linx {
  * @ingroup filtering
  * @brief Median filter.
  */
-template <int Size, typename TFootprint>
-class MedianFilter : public SpatialFilterMixin<TFootprint, MedianFilter<Size, TFootprint>> {
+template <typename TFootprint>
+class MedianFilter : public SpatialFilterMixin<TFootprint, MedianFilter<TFootprint>> {
 public:
+
+  static constexpr bool static_size_flag = TFootprint::static_flag;
 
   MedianFilter(TFootprint footprint) : SpatialFilterMixin<TFootprint, MedianFilter>(LINX_MOVE(footprint)) {}
 
@@ -30,49 +32,36 @@ public:
   }
 
   template <typename TIn>
-  class Lazy : public LazySpatialFilterMixin<MedianFilter, TIn, Lazy<TIn>> {
+  class StaticSizeLazy : public LazySpatialFilterMixin<MedianFilter, TIn, StaticSizeLazy<TIn>> {
   public:
 
     using value_type = typename TIn::value_type;
     using element_type = std::remove_cvref_t<value_type>;
 
-    Lazy(const MedianFilter& filter, TIn in) : LazySpatialFilterMixin<MedianFilter, TIn, Lazy>(filter, LINX_MOVE(in)) {}
+    StaticSizeLazy(const MedianFilter& filter, TIn in) :
+        LazySpatialFilterMixin<MedianFilter, TIn, StaticSizeLazy>(filter, LINX_MOVE(in))
+    {}
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      Kokkos::Array<element_type, Size> array;
+      static constexpr auto n = TFootprint().size();
+      Kokkos::Array<element_type, n> array;
       for (std::size_t i = 0; i < std::size(array); ++i) {
         array[i] = neighbors[i];
       }
-      return median<Size>(array);
+      return median<n>(array);
     }
   };
-};
-
-/**
- * @ingroup filtering
- * @brief Median filter with a dynamic footprint size.
- */
-template <typename TFootprint>
-class MedianFilter<0, TFootprint> : public SpatialFilterMixin<TFootprint, MedianFilter<0, TFootprint>> {
-public:
-
-  MedianFilter(TFootprint footprint) : SpatialFilterMixin<TFootprint, MedianFilter>(LINX_MOVE(footprint)) {}
-
-  std::string label() const
-  {
-    return "MedianFilter";
-  }
 
   template <typename TIn>
-  class Lazy : public LazySpatialFilterMixin<MedianFilter, TIn, Lazy<TIn>> {
+  class DynamicSizeLazy : public LazySpatialFilterMixin<MedianFilter, TIn, DynamicSizeLazy<TIn>> {
   public:
 
     using value_type = typename TIn::value_type;
     using element_type = std::remove_cvref_t<value_type>;
 
-    Lazy(const MedianFilter& filter, TIn in) :
-        LazySpatialFilterMixin<MedianFilter, TIn, Lazy>(filter, LINX_MOVE(in)),
+    DynamicSizeLazy(const MedianFilter& filter, TIn in) :
+        LazySpatialFilterMixin<MedianFilter, TIn, DynamicSizeLazy>(filter, LINX_MOVE(in)),
         m_buffer(this->m_neighbors.size())
     {}
 
@@ -89,10 +78,10 @@ public:
 
     ArrayPool<element_type> m_buffer; // FIXME TSpace
   };
-};
 
-template <typename T>
-MedianFilter(const T&) -> MedianFilter<0, T>;
+  template <typename TIn>
+  using Lazy = std::conditional_t<static_size_flag, StaticSizeLazy<TIn>, DynamicSizeLazy<TIn>>;
+};
 
 /**
  * @ingroup filtering

@@ -11,6 +11,8 @@
 
 using T = std::int32_t;
 
+using namespace Linx::Literals;
+
 void print_2d(const auto& image)
 {
   auto name = image.label();
@@ -37,9 +39,9 @@ auto filter(const auto& in, const auto& k, const std::string& name)
   } else if (name == "median") {
     return Linx::MedianFilter(k.domain())(in);
   } else if (name == "median3") {
-    return Linx::MedianFilter<9, LINX_DECLTYPE(k.domain())>(k.domain())(in);
+    return Linx::MedianFilter(Linx::cube<2_D, 1>())(in);
   } else if (name == "median5") {
-    return Linx::MedianFilter<25, LINX_DECLTYPE(k.domain())>(k.domain())(in);
+    return Linx::MedianFilter(Linx::cube<2_D, 2>())(in);
   } else if (name == "min") {
     return Linx::MinimumFilter(k.domain())(in);
   } else if (name == "laplacian") {
