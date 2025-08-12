@@ -382,7 +382,7 @@ public:
     for_each<execution_space>(
         "inverse",
         Slice(0, size()),
-        KOKKOS_LAMBDA(int i) { m_offsets(i) = -m_offsets(i); });
+        KOKKOS_CLASS_LAMBDA(int i) { m_offsets(i) = -m_offsets(i); });
     return *this;
   }
 
