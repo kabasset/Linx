@@ -30,16 +30,16 @@ void print_2d(const auto& image)
   std::cout << on_host(width - 2, height - 1) << ", " << on_host(width - 1, height - 1) << "]" << std::endl;
 }
 
-Linx::Image<T, 2> filter(const auto& in, const auto& k, const std::string& name)
+auto filter(const auto& in, const auto& k, const std::string& name)
 {
   if (name == "correlation") {
     return Linx::Correlation(k)(in);
   } else if (name == "median") {
     return Linx::MedianFilter(k.domain())(in);
   } else if (name == "median3") {
-    return Linx::MedianFilter<9, Linx::Box<2>>(k.domain())(in);
+    return Linx::MedianFilter<9, LINX_DECLTYPE(k.domain())>(k.domain())(in);
   } else if (name == "median5") {
-    return Linx::MedianFilter<25, Linx::Box<2>>(k.domain())(in);
+    return Linx::MedianFilter<25, LINX_DECLTYPE(k.domain())>(k.domain())(in);
   } else if (name == "min") {
     return Linx::MinimumFilter(k.domain())(in);
   } else if (name == "laplacian") {
@@ -63,8 +63,8 @@ int main(int argc, char const* argv[])
   const auto iter_count = context.as<int>("iter");
 
   std::cout << "Generating input and kernel..." << std::endl;
-  const auto in = Linx::Image<T, 2>("input", in_extent, in_extent).generate_offsets();
-  const auto k = Linx::Image<T, 2>("kernel", k_extent, k_extent).generate_offsets();
+  const auto in = Linx::no_init<T>("input", in_extent, in_extent).generate_offsets();
+  const auto k = Linx::no_init<T>("kernel", k_extent, k_extent).generate_offsets();
   print_2d(in);
   print_2d(k);
   Kokkos::fence();
