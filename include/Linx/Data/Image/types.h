@@ -59,7 +59,7 @@ using RasterContainer = decltype(default_raster_container<T, N>());
  * 
  * Said otherwise, the stride along axis 0 is 1.
  */
-template <typename T, int N>
+template <typename T, int N = 2>
 using Raster = Image<T, RasterDomain<N>, RasterContainer<T, N>>;
 
 } // namespace Linx

@@ -13,7 +13,7 @@ LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 
 BOOST_AUTO_TEST_CASE(sequence_test)
 {
-  const auto a = Linx::Position({-1, 0, 1});
+  const auto a = Linx::seq("a", -1, 0, 1);
   const auto interpolated = Linx::Interpolation(a, Linx::Linear());
   const auto& interpolated_h = Linx::on_host(interpolated);
   BOOST_TEST(interpolated_h(0.0) == -1);
