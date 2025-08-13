@@ -325,7 +325,8 @@ public:
    */
   KOKKOS_INLINE_FUNCTION reference operator[](std::integral auto i) const
   {
-    return m_container.data()[i]; // FIXME handle non contiguous containers, e.g. using Kokkos' internals
+    return m_container.accessor().access(m_container.data_handle(), i);
+    // FIXME check that this undocumented API is stable (same as mdspan)
   }
 
   /**

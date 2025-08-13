@@ -52,7 +52,11 @@ BOOST_AUTO_TEST_CASE(range_test)
   auto raster = Linx::Raster<int, 2>("range", width, height).arithmetic(1, 2);
   for (int j = 0; j < height; ++j) {
     for (int i = 0; i < width; ++i) {
-      BOOST_TEST(raster(i, j) == 1 + 2 * (i + width * j));
+      auto offset = i + width * j;
+      auto ptr = &raster[offset];
+      BOOST_TEST(ptr = raster.data() + offset);
+      BOOST_TEST(&raster(i, j) == ptr);
+      BOOST_TEST(raster(i, j) == 1 + 2 * offset);
     }
   }
 }
