@@ -109,46 +109,47 @@ auto along(const TIn& in)
   return out;
 }
 
-std::ostream& operator<<(std::ostream& os, const Specialization<Image> auto& image)
+std::ostream& operator<<(std::ostream& os, const Specialization<Image> auto& in)
 {
-  os << image.label() << ": " << image.domain() << "\n  ";
-  if (image.size() == 0) {
+  os << in.label() << ": " << in.domain() << "\n  ";
+  if (in.size() == 0) {
     return os << "[]";
   }
 
   // FIXME on_host()
 
+  const auto& in_on_host = on_host(in);
   auto stream_row = [&](int tab, auto... is) {
-    os << std::string(tab * 2, ' ') << "[ " << image(image.start(0), is...);
-    for (int i = image.start(0) + 1; i < image.stop(0); ++i) {
-      os << " " << image(i, is...);
+    os << std::string(tab * 2, ' ') << "[ " << in_on_host(in_on_host.start(0), is...);
+    for (int i = in_on_host.start(0) + 1; i < in_on_host.stop(0); ++i) {
+      os << " " << in_on_host(i, is...);
     }
     os << " ]";
   };
 
   auto stream_section = [&](int tab, auto... is) {
     os << "[ ";
-    stream_row(0, image.start(1), is...);
-    for (int i = image.start(1) + 1; i < image.stop(1); ++i) {
+    stream_row(0, in_on_host.start(1), is...);
+    for (int i = in_on_host.start(1) + 1; i < in_on_host.stop(1); ++i) {
       os << "\n";
       stream_row(tab + 2, i, is...);
     }
     os << " ]";
   };
 
-  auto n = image.rank();
+  auto n = in_on_host.rank();
   if (n > 3) {
     for (int i = 0; i < n; ++i) {
       os << "[ ";
     }
-    os << image.front() << " ... " << image.back();
+    os << in_on_host.front() << " ... " << in_on_host.back();
     for (int i = 0; i < n; ++i) {
       os << " ]";
     }
   } else if (n == 3) {
     os << "[ ";
-    stream_section(1, image.start(2));
-    for (int i = image.start(2) + 1; i < image.stop(2); ++i) {
+    stream_section(1, in_on_host.start(2));
+    for (int i = in_on_host.start(2) + 1; i < in_on_host.stop(2); ++i) {
       os << "\n    ";
       stream_section(1, i);
     }
@@ -158,7 +159,7 @@ std::ostream& operator<<(std::ostream& os, const Specialization<Image> auto& ima
   } else if (n == 1) {
     stream_row(0);
   } else {
-    os << image.front();
+    os << in_on_host.front();
   }
   return os;
 }
