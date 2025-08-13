@@ -21,7 +21,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 find_package(Boost COMPONENTS unit_test_framework program_options REQUIRED)
-find_package(Kokkos 4.4.01 REQUIRED CONFIG) # SequentialHostInit >= 4.4.01
+find_package(Kokkos 4.7.0 REQUIRED CONFIG) # SequentialHostInit >= 4.4.01, mdspan-based View >= 4.7.0
 find_package(Cfitsio REQUIRED) # FIXME make optional
 
 # Library
