@@ -4,6 +4,7 @@
 #define BOOST_TEST_MODULE LinearInterpolationTest
 
 #include "Linx/Data/Image.h"
+#include "Linx/Data/Sequence.h"
 #include "Linx/Run/ProgramContext.h"
 #include "Linx/Transforms/Resampling.h"
 

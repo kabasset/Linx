@@ -24,14 +24,17 @@ BOOST_AUTO_TEST_CASE(sequence_size_test)
   ASSERT(a.rank() == 1);
   ASSERT(a.size() == 3);
   ASSERT(a.static_domain_flag);
+  ASSERT(a.static_contiguous_flag);
 
   ASSERT(b.rank() == 1);
   ASSERT(b.size() == 3);
+  ASSERT(b.static_contiguous_flag);
 
   ASSERT(c.rank() == 2);
   ASSERT(c.size() == 12);
   ASSERT(c.extent(0) == 3);
   ASSERT(c.extent(1) == 4);
+  ASSERT(c.static_contiguous_flag);
   //! [sequence_size]
 }
 
@@ -42,10 +45,12 @@ BOOST_AUTO_TEST_CASE(sequence_null_size_test)
   // ASSERT(a.rank() == 1);
   // ASSERT(a.size() == 0);
   // ASSERT(a.static_size_flag);
+  // ASSERT(a.static_contiguous_flag);
 
   auto b = Linx::default_init<int>("b", 0);
   ASSERT(b.rank() == 1);
   ASSERT(b.size() == 0);
+  ASSERT(b.static_contiguous_flag);
   //! [sequence_null_size]
 }
 
@@ -64,6 +69,8 @@ BOOST_AUTO_TEST_CASE(access_test)
   a.at(p) = 2;
   ASSERT(a.at(p) == 2);
   //! [access]
+
+  ASSERT(a.static_contiguous_flag);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

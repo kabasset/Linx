@@ -157,6 +157,9 @@ BOOST_AUTO_TEST_CASE(generators_test)
 
   ASSERT(a.size() == 12);
   ASSERT(a.matches(Linx::Abspow<2>()));
+  ASSERT(a.static_contiguous_flag);
+  ASSERT(c.static_contiguous_flag);
+  ASSERT(e.static_contiguous_flag);
 }
 
 BOOST_AUTO_TEST_CASE(result_test)

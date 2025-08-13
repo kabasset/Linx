@@ -19,6 +19,9 @@ void check_ctor(
   std::cout << image << std::endl;
 
   BOOST_TEST(image.n == domain.n);
+  if (image.n == 1) {
+    BOOST_TEST(image.static_contiguous_flag);
+  }
   BOOST_TEST(image.static_domain_flag == domain.static_flag);
   BOOST_TEST(image.static_start_at_origin_flag == domain.static_start_at_origin_flag);
   BOOST_TEST(image.label() == label);

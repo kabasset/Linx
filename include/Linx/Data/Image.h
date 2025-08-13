@@ -59,6 +59,7 @@ public:
   static constexpr bool static_rank_flag = (n >= 0); ///< Static rank flag
   static constexpr bool static_domain_flag = Domain::static_flag; ///< Static domain flag
   static constexpr bool static_start_at_origin_flag = Domain::static_start_at_origin_flag; ///< Shape-only domain flag
+  static constexpr bool static_contiguous_flag = is_contiguous<TContainer>(); ///< Contiguity flag
 
   using Container = TContainer; ///< The underlying container type
   using memory_space = typename Container::memory_space; ///< The memory space
@@ -201,7 +202,7 @@ public:
   /**
    * @brief Image extents along all axes. 
    */
-  Shape shape() const // FIXME deprecate?
+  Shape shape() const // FIXME rm
   {
     if constexpr (static_start_at_origin_flag) {
       auto out = std::vector<int>(rank());
@@ -317,6 +318,14 @@ public:
   KOKKOS_INLINE_FUNCTION reference at(const auto& position) const // TODO to DataMixin?
   {
     return at_impl(position, std::make_index_sequence<max_rank>());
+  }
+
+  /**
+   * @brief Access the i-th element in the storage order.
+   */
+  KOKKOS_INLINE_FUNCTION reference operator[](std::integral auto i) const
+  {
+    return m_container.data()[i]; // FIXME handle non contiguous containers, e.g. using Kokkos' internals
   }
 
   /**

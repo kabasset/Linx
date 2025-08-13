@@ -18,6 +18,7 @@ BOOST_AUTO_TEST_CASE(single_row_test)
   BOOST_TEST(raster.container().span() == width);
   BOOST_TEST(raster.container().span_is_contiguous());
   BOOST_TEST(raster.container().stride(0) == 1);
+  BOOST_TEST(raster.static_contiguous_flag);
 }
 
 BOOST_AUTO_TEST_CASE(single_column_test)
@@ -28,6 +29,7 @@ BOOST_AUTO_TEST_CASE(single_column_test)
   BOOST_TEST(raster.container().span() == height);
   BOOST_TEST(raster.container().span_is_contiguous());
   BOOST_TEST(raster.container().stride(1) == 1);
+  BOOST_TEST(raster.static_contiguous_flag);
 }
 
 BOOST_AUTO_TEST_CASE(rectangle_test)
@@ -40,6 +42,7 @@ BOOST_AUTO_TEST_CASE(rectangle_test)
   BOOST_TEST(raster.container().span_is_contiguous());
   BOOST_TEST(raster.container().stride(0) == 1);
   BOOST_TEST(raster.container().stride(1) == width);
+  BOOST_TEST(raster.static_contiguous_flag);
 }
 
 BOOST_AUTO_TEST_CASE(range_test)

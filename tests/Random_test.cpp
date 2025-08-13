@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(poisson_stability_test)
   b.transform("seed 2", Linx::PoissonNoise(2));
   c.transform("seed 1", Linx::PoissonNoise(1));
   BOOST_TEST((b != a));
-  auto diff = Linx::Sequence<int, 100>("diff"); // FIXME norm breaks when T = bool
+  auto diff = Linx::no_init<int, 100>("diff"); // FIXME norm breaks when T = bool
   Linx::for_each(
       "assess stability",
       diff.domain(),
