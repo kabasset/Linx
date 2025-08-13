@@ -419,7 +419,8 @@ private:
     if constexpr (static_domain_flag) {
       return Domain();
     } else {
-      return Domain(domain(container));
+      const auto& box = domain(container); // Not necessarily of type Domain
+      return Domain(box.start(), box.stop());
     }
   }
 

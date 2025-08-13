@@ -6,6 +6,7 @@
 
 #include "Linx/Base/Random.h"
 #include "Linx/Data/Image.h"
+#include "Linx/Data/Sequence.h"
 #include "Linx/Run/ProgramContext.h"
 #include "Linx/Transforms/LinearFiltering.h"
 
@@ -51,10 +52,10 @@ LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 BOOST_AUTO_TEST_CASE(basics_test)
 {
   //! [basics]
-  auto a = Linx::Sequence<int, 42>("sequence on device").arithmetic(14, 3);
+  auto a = Linx::arithmetic<42>("sequence on device", 14, 3);
   ASSERT(a.matches(KOKKOS_LAMBDA(int i) { return 14 + 3 * i; }));
 
-  auto b = Linx::Image<double, 3>("image on device", 16, 9, 3).generate_offsets();
+  auto b = Linx::no_init<double>("image on device", 16, 9, 3).generate_offsets();
   const auto& b_on_host = Linx::on_host(b);
   ASSERT(b_on_host(0, 0, 0) == 0);
   ASSERT(b_on_host(15, 8, 2) == b.size() - 1);

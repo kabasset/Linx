@@ -20,13 +20,15 @@ BOOST_AUTO_TEST_CASE(default_test)
 {
   //! [default]
   // Basic constructors
-  auto a = Linx::Sequence<int, 12>("static size, default sequence");
-  auto b = Linx::Sequence<int, -1>("dynamic-size, default sequence", 12);
-  auto c = Linx::Image<int, 2>("default image", 4, 3);
+  auto a = Linx::default_init<int, 12>("static-size sequence");
+  auto b = Linx::default_init<int>(12, "dynamic-size sequence");
+  auto c = Linx::default_init<int>("static-rank, dynamic-size image", 4, 3);
+  auto d = Linx::default_init<int>("static-domain image", Linx::shape<4, 3>());
 
-  ASSERT(a.n == 12 && a.size() == 12 && a.contains_only(0));
-  ASSERT(b.n == -1 && b.size() == 12 && b.contains_only(0));
-  ASSERT(c.n == 2 && c.size() == 12 && c.contains_only(0));
+  ASSERT(a.rank() == 1 && a.size() == 12 && a.contains_only(0) && a.static_domain_flag);
+  ASSERT(b.rank() == 1 && b.size() == 12 && b.contains_only(0));
+  ASSERT(c.rank() == 2 && c.size() == 12 && c.contains_only(0));
+  ASSERT(d.rank() == 2 && d.size() == 12 && d.contains_only(0) && d.static_domain_flag);
   //! [default]
 }
 
@@ -34,15 +36,15 @@ BOOST_AUTO_TEST_CASE(resize_test)
 {
   //! [resize]
   // Create sequences from lists
-  auto a = Linx::Sequence("deduced static-size", {1, 2, 3, 4});
-  auto b = Linx::resize<5>("padded, static-size", {1, 2, 3, 4});
-  auto c = Linx::resize(3, "cropped, dynamic-size", {1, 2, 3, 4});
-  auto d = Linx::resize<4, Kokkos::HostSpace>("static-size, on host", {1, 2, 3, 4});
+  auto a = Linx::seq("deduced static-size", 1, 2, 3, 4);
+  auto b = Linx::resize<5>("padded, static-size", a);
+  auto c = Linx::resize(3, "cropped, dynamic-size", a);
+  auto d = Linx::resize<4, Kokkos::HostSpace>("static-size, on host", a);
 
-  ASSERT(a.n == 4);
-  ASSERT(b.n == 5);
-  ASSERT(c.n == -1 && c.size() == 3);
-  ASSERT(d.n == 4);
+  ASSERT(a.size() == 4);
+  ASSERT(b.size() == 5);
+  ASSERT(c.size() == 3);
+  ASSERT(d.size() == 4);
   //! [resize]
 
   ASSERT(a.matches(Linx::Add(1)));
@@ -57,7 +59,7 @@ BOOST_AUTO_TEST_CASE(rowwise_test)
   // Create up-to-3D images row by row
   auto a = Linx::rowwise("1D int", {1, 2, 3, 4});
   auto b = Linx::rowwise("2D char", {{'a', 'b'}, {'c', 'd'}});
-  auto c = Linx::rowwise<float>("3D float", {{{1, 2, 3}, {4, 5, 6}}});
+  auto c = Linx::rowwise<Kokkos::HostSpace, float>("3D float", {{{1, 2, 3}, {4, 5, 6}}});
 
   ASSERT(a.n == 1 && typeid(a.front()) == typeid(int));
   ASSERT(b.n == 2 && typeid(b.front()) == typeid(char));
@@ -90,7 +92,7 @@ BOOST_AUTO_TEST_CASE(wrap_test)
   //! [wrap]
   // Wrap a data pointer
   auto v = std::vector {1, 2, 3, 4, 5, 6};
-  auto a = Linx::Raster<int, 2>(Linx::Wrap(v.data()), 3, 2);
+  auto a = Linx::wrap(v.data(), 3, 2);
 
   // Perform Linx operations
   a(2, 0) = 7;
@@ -133,8 +135,8 @@ BOOST_AUTO_TEST_CASE(builtins_test)
   ASSERT(g.size() == 12);
 
   ASSERT(h.size() == 12);
-  ASSERT(h[0] == 0);
-  ASSERT(h[11] == 330);
+  ASSERT(h.front() == 0);
+  ASSERT(h.back() == 330);
 }
 
 BOOST_AUTO_TEST_CASE(generators_test)
@@ -153,7 +155,7 @@ BOOST_AUTO_TEST_CASE(generators_test)
   auto e = Linx::generate("double[12]", KOKKOS_LAMBDA(int a_i, double c_i) { return a_i + c_i * c_i; }, a, c);
   //! [generators]
 
-  ASSERT(a.n == 12);
+  ASSERT(a.size() == 12);
   ASSERT(a.matches(Linx::Abspow<2>()));
 }
 

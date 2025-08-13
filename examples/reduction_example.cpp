@@ -44,8 +44,8 @@ BOOST_AUTO_TEST_CASE(transform_test)
 BOOST_AUTO_TEST_CASE(multiple_test)
 {
   //! [multiple]
-  auto a = Linx::Sequence({1, 2, 3, 4});
-  auto b = Linx::Sequence({4, 3, 2, 1});
+  auto a = Linx::seq("a", 1, 2, 3, 4);
+  auto b = Linx::seq("b", 4, 3, 2, 1);
 
   // Squared L2-distance between a and b
   auto lambda = Linx::transform_reduce(
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE(multiple_test)
   auto builtin = Linx::distance(a, b);
 
   // Third array, of doubles
-  auto c = Linx::Sequence({3.0e8, -1.0, -1.0, -1.0});
+  auto c = Linx::seq("c", 3.0e8, -1.0, -1.0, -1.0);
 
   // Mixing element types and function types
   auto mixed = Linx::transform_reduce(

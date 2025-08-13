@@ -5,7 +5,10 @@
 #ifndef LINX_DATA_IMAGE_CREATION_H
 #define LINX_DATA_IMAGE_CREATION_H
 
+#include "Linx/Data/Box.h"
 #include "Linx/Data/Image/types.h"
+
+#include <Kokkos_Core.hpp>
 
 namespace Linx {
 
@@ -14,9 +17,11 @@ namespace Linx {
  * @brief Create a default-initialized image.
  * @tparam T The value type
  * @tparam TSpace The memory space
+ * @param label The label
+ * @param domain The domain
  */
 template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
-auto default_init(const std::string& label, const NotConvertibleTo<int> auto& domain)
+auto default_init(const std::string& label, const Specialization<Box> auto& domain)
 {
   using Domain = LINX_DECLTYPE(domain);
   return Image<T, Domain, ImageContainer<T, Domain, TSpace>>(label, domain);
@@ -27,6 +32,8 @@ auto default_init(const std::string& label, const NotConvertibleTo<int> auto& do
  * @brief Create a default-initialized image.
  * @tparam T The value type
  * @tparam TSpace The memory space
+ * @param label The label
+ * @param extents The domain extents
  */
 template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
 auto default_init(const std::string& label, std::integral auto... extents)
@@ -40,9 +47,11 @@ auto default_init(const std::string& label, std::integral auto... extents)
  * @brief Create an uninitialized image.
  * @tparam T The value type
  * @tparam TSpace The memory space
+ * @param label The label
+ * @param domain The domain
  */
 template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
-auto no_init(const std::string& label, const NotConvertibleTo<int> auto& domain)
+auto no_init(const std::string& label, const Specialization<Box> auto& domain)
 {
   using Domain = LINX_DECLTYPE(domain);
   return Image<T, Domain, ImageContainer<T, Domain, TSpace>>(label, domain);
@@ -68,6 +77,9 @@ auto no_init(const std::string& label, std::integral auto... extents)
 /**
  * @ingroup creation
  * @brief Create a 1D image made of a single row.
+ * @tparam TSpace The memory space
+ * @param label The label
+ * @param row The array of values
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T, int N>
 auto rowwise(const std::string& label, T (&&row)[N])
@@ -81,6 +93,9 @@ auto rowwise(const std::string& label, T (&&row)[N])
 /**
  * @ingroup creation
  * @brief Create a 2D image from a collection of rows.
+ * @tparam TSpace The memory space
+ * @param label The label
+ * @param rows The array of arrays of values
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T, int N0, int N1>
 auto rowwise(const std::string& label, T (&&rows)[N1][N0])
@@ -94,6 +109,9 @@ auto rowwise(const std::string& label, T (&&rows)[N1][N0])
 /**
  * @ingroup creation
  * @brief Create a 3D image from a collection of rows.
+ * @tparam TSpace The memory space
+ * @param label The label
+ * @param rows The array of arrays of arrays of values
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T, int N0, int N1, int N2>
 auto rowwise(const std::string& label, T (&&rows)[N2][N1][N0])
@@ -106,18 +124,9 @@ auto rowwise(const std::string& label, T (&&rows)[N2][N1][N0])
 
 /**
  * @ingroup creation
- * @brief Create a 1D image made of a single row.
- */
-template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T0, std::convertible_to<T0>... Ts>
-auto seq(const std::string& label, T0 value0, Ts... values)
-{
-  T0 row[] = {value0, values...};
-  return rowwise(label, LINX_MOVE(row));
-}
-
-/**
- * @ingroup creation
- * @brief Wrap a pointer as a raster with given shape.
+ * @brief Wrap a pointer as a raster.
+ * @param data The pointer
+ * @param extents The domain extents
  */
 template <typename T>
 auto wrap(T* data, std::integral auto... extents)
@@ -127,17 +136,23 @@ auto wrap(T* data, std::integral auto... extents)
 
 /**
  * @ingroup creation
- * @brief Wrap a pointer as a raster with given domain.
+ * @brief Wrap a pointer as a raster.
+ * @param data The pointer
+ * @param domain The domain
  */
 template <typename T>
-auto wrap(T* data, const NotConvertibleTo<int> auto& domain)
+auto wrap(T* data, const Specialization<Box> auto& domain)
 {
   return Image<T, LINX_DECLTYPE(domain), RasterContainer<T, LINX_DECLTYPE(domain)::n>>(Wrap(data), domain);
 }
 
 /**
  * @ingroup creation
- * @brief Image filled with a single value.
+ * @brief Create an image filled with a single value.
+ * @tparam TSpace The memory space
+ * @param label The label
+ * @param value The value
+ * @param domain The domain or extents
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T>
 auto fill(const std::string& label, const T& value, auto&&... domain)
@@ -178,27 +193,34 @@ struct IsOrigin {
 /**
  * @ingroup creation
  * @brief Generate an image.
+ * @tparam TSpace The memory space
  * @param label The label
  * @param func The generator
- * @param domain The domain parameters
+ * @param extents The domain extents
  * 
  * @warning Dynamic ranks are not supported.
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace>
-auto generate(const std::string& label, const auto& func, auto&&... domain)
+auto generate(const std::string& label, const auto& func, std::integral auto... extents)
 {
-  using T = LINX_DECLTYPE(Impl::apply_at_stop(func, domain...));
-  return no_init<T, TSpace>(label, LINX_FORWARD(domain)...).copy_from(func);
+  using T = LINX_DECLTYPE(Impl::apply_at_stop(func, extents...));
+  return no_init<T, TSpace>(label, LINX_FORWARD(extents)...).copy_from(func);
+}
+
+template <typename TSpace = Kokkos::DefaultExecutionSpace>
+auto generate(const std::string& label, const auto& func, const Specialization<Box> auto& domain)
+{
+  using T = LINX_DECLTYPE(Impl::apply_at_stop(func, domain));
+  return no_init<T, TSpace>(label, domain).copy_from(func);
 }
 
 /**
  * @ingroup creation
  * @brief Generate an impulse.
- * 
  * @tparam T The value type
  * @tparam TSpace The memory space
  * @param label The label
- * @param domain The domain parameters
+ * @param domain The domain or extents
  * 
  * The generated image is filled with `T(false)` except at origin where it is `T(true)`.
  */
@@ -212,6 +234,8 @@ auto impulse(const std::string& label, auto&&... domain)
  * @ingroup creation
  * @brief Create an image with the same memory layout as another image.
  * @tparam TRebind The type of the elements in the new image (defaults to the type of the elements in the input image)
+ * @param label The label
+ * @param in The input image
  */
 template <typename TRebind = void, typename T, typename TDomain, typename TContainer>
 auto same_layout(const std::string& label, const Image<T, TDomain, TContainer>& in)

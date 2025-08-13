@@ -5,6 +5,7 @@
 #define BOOST_TEST_MODULE PixelwiseExample
 
 #include "Linx/Data/Image.h"
+#include "Linx/Data/Sequence.h"
 #include "Linx/Run/ProgramContext.h"
 
 #include <boost/test/unit_test.hpp>
