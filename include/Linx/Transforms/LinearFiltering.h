@@ -138,7 +138,7 @@ public:
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
       element_type out {};
-      auto wit = begin(this->m_weights);
+      auto wit = this->m_weights.data(); // FIXME static_assert contiguity
       for (auto nit = neighbors.begin(); nit != neighbors.end(); ++nit, ++wit) {
         out += *nit * *wit;
       }
@@ -196,7 +196,7 @@ public:
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
       element_type out {};
-      auto wit = begin(this->m_weights);
+      auto wit = this->m_weights.data();
       for (auto nit = neighbors.begin(); nit != neighbors.end(); ++nit, ++wit) {
         out += *nit * *wit;
       }
