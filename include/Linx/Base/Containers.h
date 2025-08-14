@@ -40,9 +40,9 @@ using SequenceContainer = decltype(default_sequence_container<T, N, TArgs...>())
  * @brief Default image container instance.
  */
 template <typename T, typename TDomain, typename... TArgs>
-auto default_image_container()
+static constexpr auto default_image_container()
 {
-  static constexpr auto n = TDomain::n;
+  constexpr auto n = TDomain::n;
   static_assert(kokkos_max_rank <= 8);
   static_assert(n <= kokkos_max_rank);
 
@@ -55,7 +55,11 @@ auto default_image_container()
     return Kokkos::View<T, TArgs...>(); // Scalar
   } else if constexpr (n == 1) {
     if constexpr (TDomain::static_flag) {
-      return Kokkos::View<T[N(0)], TArgs...>();
+      if constexpr (N(0) == 0) { // TODO perform test for each axis?
+        return Kokkos::View<T*, TArgs...>();
+      } else {
+        return Kokkos::View<T[N(0)], TArgs...>();
+      }
     } else {
       return Kokkos::View<T*, TArgs...>();
     }
@@ -174,7 +178,7 @@ decltype(auto) same_layout(const std::string& label, const Kokkos::View<TData, T
 template <typename TData, typename... TArgs>
 KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::View<TData, TArgs...>& in)
 {
-  if constexpr (std::is_const_v<TData>) { // FIXME rm pointer
+  if constexpr (std::is_const_v<typename Kokkos::View<TData, TArgs...>::value_type>) {
     return in;
   } else {
     using Out = typename Rebind<Kokkos::View<TData, TArgs...>>::AsReadonly;
@@ -224,7 +228,7 @@ decltype(auto) same_layout(const std::string& label, const Kokkos::DynRankView<T
 template <typename TData, typename... TArgs>
 KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::DynRankView<TData, TArgs...>& in)
 {
-  if constexpr (std::is_const_v<TData>) { // FIXME rm pointer
+  if constexpr (std::is_const_v<typename Kokkos::DynRankView<TData, TArgs...>::value_type>) {
     return in;
   } else {
     using Out = typename Rebind<Kokkos::DynRankView<TData, TArgs...>>::AsReadonly;
@@ -246,10 +250,7 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Kokkos::DynRankView<TData,
  * @brief Any type `T` with an `as_readonly(const T&)` overload.
  */
 template <typename T>
-concept ViewableAsReadonly = requires(const T& in)
-{
-  as_readonly(in);
-};
+concept ViewableAsReadonly = requires(const T& in) { as_readonly(in); };
 
 /**
  * @brief Any type `T` for which `as_readonly(const T&)` should not be applied.

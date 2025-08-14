@@ -41,11 +41,11 @@ BOOST_AUTO_TEST_CASE(sequence_size_test)
 BOOST_AUTO_TEST_CASE(sequence_null_size_test)
 {
   //! [sequence_null_size]
-  // auto a = Linx::default_init<int, 0>("a"); // FIXME
-  // ASSERT(a.rank() == 1);
-  // ASSERT(a.size() == 0);
-  // ASSERT(a.static_size_flag);
-  // ASSERT(a.static_contiguous_flag);
+  auto a = Linx::default_init<int, 0>("a");
+  ASSERT(a.rank() == 1);
+  ASSERT(a.size() == 0);
+  ASSERT(a.static_domain_flag);
+  ASSERT(a.static_contiguous_flag);
 
   auto b = Linx::default_init<int>("b", 0);
   ASSERT(b.rank() == 1);
