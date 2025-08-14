@@ -5,6 +5,7 @@
 #ifndef LINX_TRANSFORMS_LINEARFILTERING_H
 #define LINX_TRANSFORMS_LINEARFILTERING_H
 
+#include "Linx/Base/Random.h" // Gaussian
 #include "Linx/Transforms/mixins/Filter.h"
 
 #include <concepts>
@@ -239,31 +240,6 @@ auto separable_laplacian(T s = T(1))
 }
 
 /**
- * @brief AD Gaussian function.
- */
-template <typename T>
-struct Gaussian {
-  /**
-   * @brief Constructor.
-   */
-  constexpr Gaussian(T sigma) :
-      m_norm(std::numbers::inv_sqrtpi * std::numbers::sqrt2 * 0.5 / sigma),
-      m_constant(-0.5 / (sigma * sigma))
-  {}
-
-  /**
-   * @brief Call operator.
-   */
-  KOKKOS_INLINE_FUNCTION constexpr T operator()(std::integral auto i) const
-  {
-    return m_norm * std::exp(i * i * m_constant);
-  }
-
-  T m_norm; ///< The normalization factor
-  T m_constant; ///< The constant factor in the exponential
-};
-
-/**
  * @brief Create a 1D sampled Gaussian kernel.
  * 
  * Example 2D Gaussian filtering of an image with 0-padding:
@@ -275,10 +251,11 @@ struct Gaussian {
  * auto out = filter.pad(0)(in);
  * ```
  */
-auto sampled_gaussian_kernel(const auto& sigma, Index radius)
+template <typename T>
+auto sampled_gaussian_kernel(const T& sigma, Index radius)
 {
   using namespace Linx::Literals;
-  return generate("gaussian kernel", Gaussian(sigma), cube<1_D>(radius));
+  return generate("gaussian kernel", GaussianDistribution(T(), sigma), cube<1_D>(radius));
 }
 
 template <Index I, Index N = I + 1> // FIXME rm N, support non matching ranks in FilterMixin
