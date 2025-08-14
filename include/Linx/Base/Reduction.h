@@ -291,7 +291,7 @@ namespace Impl {
 /**
  * @brief Helper function to iterate over the pack.
  */
-template <typename TMap, typename TMonoid, typename TIns, std::size_t... Is>
+template <typename T, typename TMap, typename TMonoid, typename TIns, std::size_t... Is>
 auto transform_reduce_with_side_effects_impl(
     const std::string& label,
     const TMap& map,
@@ -300,17 +300,42 @@ auto transform_reduce_with_side_effects_impl(
     std::index_sequence<Is...>)
 {
   const auto& in0 = get<0>(ins);
-  using Value = std::decay_t<decltype(in0)>::element_type;
-  using T = decltype(identity_element<Value>(monoid));
-  using Space = std::decay_t<decltype(in0)>::execution_space; // FIXME test accessibility of all Is
+  using Space = LINX_DECLTYPE(in0)::execution_space; // FIXME test accessibility of all Is
   using Projection = Impl::Projection<T, TMap, TIns, Is...>;
   using Reducer = Impl::Reducer<T, TMonoid, Kokkos::HostSpace>;
-  T value = identity_element<Value>(monoid);
-  kokkos_reduce<Space>(label, in0.domain(), Projection(map, ins), Reducer(value, monoid, identity_element<T>(monoid)));
+  auto value = identity_element<T>(monoid);
+  kokkos_reduce<Space>(label, in0.domain(), Projection(map, ins), Reducer(value, monoid, value));
   return value;
 }
 
 } // namespace Impl
+
+/**
+ * @brief Evaluate a function at origin, while detecting its arity up to 8.
+ */
+template <typename TFunc>
+auto at_origin(const TFunc& func)
+{
+  if constexpr (is_nary<TFunc, int, 0>()) {
+    return func();
+  } else if constexpr (is_nary<TFunc, int, 1>()) {
+    return func(0);
+  } else if constexpr (is_nary<TFunc, int, 2>()) {
+    return func(0, 0);
+  } else if constexpr (is_nary<TFunc, int, 3>()) {
+    return func(0, 0, 0);
+  } else if constexpr (is_nary<TFunc, int, 4>()) {
+    return func(0, 0, 0, 0);
+  } else if constexpr (is_nary<TFunc, int, 5>()) {
+    return func(0, 0, 0, 0, 0);
+  } else if constexpr (is_nary<TFunc, int, 6>()) {
+    return func(0, 0, 0, 0, 0, 0);
+  } else if constexpr (is_nary<TFunc, int, 7>()) {
+    return func(0, 0, 0, 0, 0, 0, 0);
+  } else if constexpr (is_nary<TFunc, int, 8>()) {
+    return func(0, 0, 0, 0, 0, 0, 0, 0);
+  }
+}
 
 /**
  * @copydoc transform_reduce()
@@ -322,7 +347,8 @@ auto transform_reduce_with_side_effects(
     const TMonoid& monoid,
     const TIns&... ins)
 {
-  return Impl::transform_reduce_with_side_effects_impl(
+  using T = LINX_DECLTYPE(map(at_origin(ins)...));
+  return Impl::transform_reduce_with_side_effects_impl<T>(
       label,
       map,
       monoid,
