@@ -209,7 +209,7 @@ int main(int argc, char const* argv[])
   const auto extent = context.as<Linx::Index>("image");
   const auto niter = context.as<Linx::Index>("niter");
 
-  auto data = Linx::generate("random data", Linx::GaussianRng<double>(0, 1), extent, extent);
+  auto data = Linx::generate("random data", Linx::GaussianRng<double>(), extent, extent);
   auto mask = Linx::generate("random mask", Linx::UniformRng<bool>(), extent, extent);
   // FIXME init psfk
 

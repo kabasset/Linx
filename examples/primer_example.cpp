@@ -43,7 +43,7 @@ int main(int argc, const char* argv[])
   
   return 0;
 }
-*/ // FIXME to dedicated example program
+*/ // TODO to dedicated example program
 
 } // namespace Impl
 
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(label_test)
 
 BOOST_AUTO_TEST_CASE(functional_test)
 {
-  // FIXME update clang-format to interpret macro KOKKOS_LAMBDA and remove spurious parentheses
+  // TODO update clang-format to interpret macro KOKKOS_LAMBDA and remove spurious parentheses
   //! [functional]
   auto a = Linx::arithmetic<4>("a"); // {0, 1, 2, 3}
   a -= (KOKKOS_LAMBDA(int i) { return i; }); // {0, 0, 0, 0}

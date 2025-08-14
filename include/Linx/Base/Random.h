@@ -17,6 +17,30 @@
 namespace Linx {
 
 /**
+ * @brief Strong type for seeding RNGs.
+ */
+class Seed {
+public:
+
+  /**
+   * @brief Constructor.
+   */
+  constexpr explicit Seed(Index value = -1) : m_value(value) {}
+
+  /**
+   * @brief Value.
+   */
+  constexpr auto operator()() const
+  {
+    return m_value;
+  }
+
+private:
+
+  Index m_value; ///< The value
+};
+
+/**
  * @brief Pool of random number generators for parallel usage.
  */
 template <typename T, typename TPool = Kokkos::Random_XorShift64_Pool<Kokkos::DefaultExecutionSpace>>
@@ -45,10 +69,10 @@ public:
     /**
      * @brief Draw a single, uniformly distributed sample.
      */
-    template <typename U>
-    KOKKOS_INLINE_FUNCTION U uniform(U start, U stop)
+    template <typename TOut>
+    KOKKOS_INLINE_FUNCTION TOut uniform(TOut infimum, TOut supremum)
     {
-      return Kokkos::rand<decltype(m_gen), U>::draw(m_gen, start, stop);
+      return Kokkos::rand<decltype(m_gen), TOut>::draw(m_gen, infimum, supremum);
     }
 
   private:
@@ -68,9 +92,9 @@ public:
    * 
    * For more complex cases, use `generator()`.
    */
-  KOKKOS_INLINE_FUNCTION T uniform(T start, T stop) const
+  KOKKOS_INLINE_FUNCTION T uniform(T infimum, T supremum) const
   {
-    return generator().uniform(start, stop);
+    return generator().uniform(infimum, supremum);
   }
 
   /**
@@ -99,51 +123,50 @@ private:
 /**
  * @ingroup random
  * @brief Uniform probability distribution.
+ * 
+ * For integral types, the interval is closed;
+ * for other types, the supremum is exclusive.
  */
 template <typename T>
 class UniformDistribution {
 public:
 
-  /**
-   * @brief Default constructor.
-   */
-  KOKKOS_INLINE_FUNCTION UniformDistribution() : m_span(Limits<T>::min(), Limits<T>::max()) {} // FIXME segment
+  using Interval = std::conditional_t<std::is_integral_v<T>, Segment<T>, Slice<T>>; ///< The type of interval
 
   /**
    * @brief Constructor.
    */
-  KOKKOS_INLINE_FUNCTION UniformDistribution(Slice<T> span) : m_span(LINX_MOVE(span)) {}
+  KOKKOS_INLINE_FUNCTION UniformDistribution(T infimum = Limits<T>::min(), T supremum = Limits<T>::max()) :
+      m_slice(infimum, supremum)
+  {}
 
   /**
    * @brief Constructor.
    */
-  KOKKOS_INLINE_FUNCTION UniformDistribution(T start, T stop) : m_span(start, stop) {}
+  KOKKOS_INLINE_FUNCTION UniformDistribution(Interval slice) : m_slice(LINX_MOVE(slice)) {}
 
   /**
    * @brief Lower bound (inclusive).
    */
-  KOKKOS_INLINE_FUNCTION T start() const // FIXME minimum
+  KOKKOS_INLINE_FUNCTION T infimum() const
   {
-    return m_span.pred().infimum;
+    return m_slice.pred().infimum;
   }
 
   /**
    * @brief Upper bound (exclusive).
    */
-  KOKKOS_INLINE_FUNCTION T stop() const // FIXME rename as supremum
+  KOKKOS_INLINE_FUNCTION T supremum() const
   {
-    return m_span.pred().supremum;
+    return m_slice.pred().supremum;
   }
 
   /**
-   * @brief Probability density function.
+   * @brief Probability density or mass function.
    */
-  KOKKOS_INLINE_FUNCTION double pdf(auto x) const
+  KOKKOS_INLINE_FUNCTION double operator()(auto x) const
   {
-    // FIXME handle integral types
-    const auto& a = start();
-    const auto& b = stop();
-    return m_span.contains(x) ? 1. / (b - a) : 0.;
+    return m_slice.contains(x) ? 1. / m_slice.size() : 0.;
   }
 
   /**
@@ -151,21 +174,23 @@ public:
    */
   KOKKOS_INLINE_FUNCTION double cdf(auto x) const
   {
-    // FIXME handle integral types
-    if (x <= start()) {
+    const auto& a = infimum();
+    const auto& b = supremum();
+
+    if (x <= a) {
       return 0.;
     }
-    if (x >= stop()) {
+
+    if (x >= b) {
       return 1.;
     }
-    const auto& a = start();
-    const auto& b = stop();
-    return double(x - a) / (b - a);
+
+    return double(T(x) - a + std::is_integral_v<T>) / m_slice.size();
   }
 
 private:
 
-  Slice<T> m_span; ///< Bounds
+  Slice<T> m_slice; ///< Interval
 };
 
 /**
@@ -183,13 +208,21 @@ public:
   using value_type = const T;
 
   /**
-   * @brief Constructor.
+   * @brief Fixed-seed constructor.
    */
-  UniformRng(UniformDistribution<T> distribution = UniformDistribution<T>(), Index seed = -1) :
-      m_distribution(LINX_MOVE(distribution)),
-      m_pool(seed)
+  UniformRng(Seed seed, T infimum = Limits<T>::min(), T supremum = Limits<T>::max()) :
+      m_distribution(infimum, supremum),
+      m_pool(seed())
   {}
 
+  /**
+   * @brief Automatic-seed constructor.
+   */
+  UniformRng(T infimum = Limits<T>::min(), T supremum = Limits<T>::max()) : UniformRng(Seed(), infimum, supremum) {}
+
+  /**
+   * @brief Label.
+   */
   std::string label() const
   {
     return "Uniform"; // TODO parameters
@@ -208,11 +241,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION T operator()(auto&&...) const
   {
-    if constexpr (std::is_same_v<T, bool>) {
-      return m_pool.uniform(0, 2); // FIXME
-    } else {
-      return m_pool.uniform(m_distribution.start(), m_distribution.stop());
-    }
+    return m_pool.uniform(m_distribution.infimum(), m_distribution.supremum() + std::is_integral_v<T>);
   }
 
 private:
@@ -221,18 +250,6 @@ private:
   using Value = std::conditional_t<std::is_same_v<T, bool>, char, T>; ///< Specific handling
   RngPool<Value, Kokkos::Random_XorShift64_Pool<TSpace>> m_pool; ///< RNG pool
 };
-
-template <typename T>
-UniformRng(T (&&)[2]) -> UniformRng<T>;
-
-template <typename T>
-UniformRng(const Slice<T>&) -> UniformRng<T>;
-
-template <typename T>
-UniformRng(T (&&)[2], Index) -> UniformRng<T>;
-
-template <typename T>
-UniformRng(const Slice<T>&, Index) -> UniformRng<T>;
 
 /**
  * @ingroup random
@@ -270,7 +287,7 @@ public:
   /**
    * @brief Probability density function.
    */
-  KOKKOS_INLINE_FUNCTION double pdf(const auto& x) const
+  KOKKOS_INLINE_FUNCTION double operator()(const auto& x) const
   {
     const auto u = x - m_mu;
     const auto two_var = 2 * m_sigma * m_sigma;
@@ -302,13 +319,18 @@ public:
   using value_type = const T;
 
   /**
-   * @brief Constructor.
+   * @brief Fixed-seed constructor.
    */
-  GaussianRng(GaussianDistribution<T> distribution, Index seed = -1) :
-      m_distribution(LINX_MOVE(distribution)),
-      m_pool(seed)
-  {}
+  GaussianRng(Seed seed, T mu = 0, T sigma = 1) : m_distribution(mu, sigma), m_pool(seed()) {}
 
+  /**
+   * @brief Automatic-seed constructor.
+   */
+  GaussianRng(T mu = 0, T sigma = 1) : GaussianRng(Seed(), mu, sigma) {}
+
+  /**
+   * @brief Label.
+   */
   std::string label() const
   {
     return "Gaussian"; // TODO parameters
@@ -352,12 +374,6 @@ private:
   RngPool<T, Kokkos::Random_XorShift64_Pool<TSpace>> m_pool; ///< RNG pool
 };
 
-template <typename T>
-GaussianRng(T (&&)[2]) -> GaussianRng<T>;
-
-template <typename T>
-GaussianRng(T (&&)[2], Index) -> GaussianRng<T>;
-
 /**
  * @ingroup random
  * @brief Poisson probability distribution.
@@ -382,7 +398,7 @@ public:
   /**
    * @brief Probability mass function.
    */
-  KOKKOS_INLINE_FUNCTION double pmf(const std::integral auto& k) const
+  KOKKOS_INLINE_FUNCTION double operator()(const std::integral auto& k) const
   {
     return std::pow(m_lambda, k) * std::exp(-m_lambda) / boost::math::factorial(k);
   }
@@ -412,10 +428,18 @@ public:
   using value_type = const T;
 
   /**
-   * @brief Constructor.
+   * @brief Fixed-seed constructor.
    */
-  PoissonRng(T lambda, Index seed = -1) : m_lambda(lambda), m_pool(seed) {}
+  PoissonRng(Seed seed, T lambda) : m_lambda(lambda), m_pool(seed()) {}
 
+  /**
+   * @brief Automatic-seed constructor.
+   */
+  PoissonRng(T lambda) : PoissonRng(Seed(), lambda) {}
+
+  /**
+   * @brief Label.
+   */
   std::string label() const
   {
     return "Poisson"; // TODO parameters
@@ -478,7 +502,7 @@ public:
   /**
    * @brief Constructor.
    */
-  PoissonNoise(Index seed = -1) : m_pool(seed) {}
+  PoissonNoise(Seed seed = Seed()) : m_pool(seed()) {}
 
   /**
    * @brief Sample from a given mean value.

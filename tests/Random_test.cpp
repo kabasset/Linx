@@ -14,9 +14,9 @@ LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE)
 BOOST_AUTO_TEST_CASE(generate_uniform_test)
 {
   Linx::Sequence<int, 100> zero;
-  auto a = Linx::generate<100>("a", Linx::UniformRng(Linx::Slice(0, 1000), 42));
-  auto b = Linx::generate(100, "b", Linx::UniformRng({0, 1000}, 42));
-  auto c = Linx::generate(100, "c", Linx::UniformRng({0, 1000}, 43));
+  auto a = Linx::generate<100>("a", Linx::UniformRng(Linx::Seed(42), 0, 1000));
+  auto b = Linx::generate(100, "b", Linx::UniformRng(Linx::Seed(42), 0, 1000));
+  auto c = Linx::generate(100, "c", Linx::UniformRng(Linx::Seed(43), 0, 1000));
   BOOST_TEST((a != zero));
   BOOST_TEST((b == a));
   BOOST_TEST((c != zero));
@@ -27,8 +27,8 @@ BOOST_AUTO_TEST_CASE(generate_uniform_test)
 BOOST_AUTO_TEST_CASE(apply_uniform_test)
 {
   auto signal = Linx::generate<100>("signal", Linx::Constant(1.));
-  auto noise = Linx::generate<100>("noise", Linx::UniformRng({0., 1.}, 3));
-  auto data = signal * Linx::UniformRng({0., 1.}, 3);
+  auto noise = Linx::generate<100>("noise", Linx::UniformRng(Linx::Seed(3), 0., 1.));
+  auto data = signal * Linx::UniformRng(Linx::Seed(3), 0., 1.);
   BOOST_TEST((data == signal * noise));
   signal *= noise;
   BOOST_TEST((signal == data));
@@ -36,9 +36,9 @@ BOOST_AUTO_TEST_CASE(apply_uniform_test)
 
 BOOST_AUTO_TEST_CASE(generate_gaussian_test)
 {
-  auto a = Linx::generate<100>("a", Linx::GaussianRng({100, 15}, 42));
-  auto b = Linx::generate(100, "b", Linx::GaussianRng({100, 15}, 42));
-  auto c = Linx::generate(100, "c", Linx::GaussianRng({100, 15}, 43));
+  auto a = Linx::generate<100>("a", Linx::GaussianRng(Linx::Seed(42), 100, 15));
+  auto b = Linx::generate(100, "b", Linx::GaussianRng(Linx::Seed(42), 100, 15));
+  auto c = Linx::generate(100, "c", Linx::GaussianRng(Linx::Seed(43), 100, 15));
   BOOST_TEST((b == a));
   BOOST_TEST((c != a));
   // FIXME test stats
@@ -47,8 +47,8 @@ BOOST_AUTO_TEST_CASE(generate_gaussian_test)
 BOOST_AUTO_TEST_CASE(apply_gaussian_test)
 {
   auto signal = Linx::generate<100>("signal", Linx::Constant(1.));
-  auto noise = Linx::generate<100>("noise", Linx::GaussianRng({0., 1.}, 3));
-  auto data = signal + Linx::GaussianRng({0., 1.}, 3);
+  auto noise = Linx::generate<100>("noise", Linx::GaussianRng(Linx::Seed(3), 0., 1.));
+  auto data = signal + Linx::GaussianRng(Linx::Seed(3), 0., 1.);
   BOOST_TEST((data == signal + noise));
   signal += noise;
   BOOST_TEST((signal == data));
@@ -60,9 +60,9 @@ BOOST_AUTO_TEST_CASE(poisson_stability_test)
   auto b = Linx::generate<100>("b", Linx::Constant(2.0));
   auto c = +a;
   Linx::for_each("perturbate", c.domain(), KOKKOS_LAMBDA(Linx::Index i) { c[i] = (i % 2) * a[i]; });
-  a.transform("seed 1", Linx::PoissonNoise(1));
-  b.transform("seed 2", Linx::PoissonNoise(2));
-  c.transform("seed 1", Linx::PoissonNoise(1));
+  a.transform("seed 1", Linx::PoissonNoise(Linx::Seed(1)));
+  b.transform("seed 2", Linx::PoissonNoise(Linx::Seed(2)));
+  c.transform("seed 1", Linx::PoissonNoise(Linx::Seed(1)));
   BOOST_TEST((b != a));
   auto diff = Linx::no_init<int, 100>("diff"); // FIXME norm breaks when T = bool
   Linx::for_each(

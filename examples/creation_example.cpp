@@ -147,9 +147,9 @@ BOOST_AUTO_TEST_CASE(generators_test)
   auto b = Linx::generate("int**", KOKKOS_LAMBDA(int i, int j) { return i * j; }, 4, 3);
 
   // Generate random numbers
-  auto seed = 42;
-  auto c = Linx::generate(12, "double*", Linx::UniformRng(Linx::Slice(0., 1.), seed));
-  auto d = Linx::generate("int***", Linx::GaussianRng({100, 15}, seed), 4, 3, 2);
+  auto seed = Linx::Seed(42);
+  auto c = Linx::generate(12, "double*", Linx::UniformRng(seed, 0., 1.));
+  auto d = Linx::generate("int***", Linx::GaussianRng(seed, 100, 15), 4, 3, 2);
 
   // Generate from other arrays
   auto e = Linx::generate("double[12]", KOKKOS_LAMBDA(int a_i, double c_i) { return a_i + c_i * c_i; }, a, c);
@@ -165,14 +165,14 @@ BOOST_AUTO_TEST_CASE(generators_test)
 BOOST_AUTO_TEST_CASE(result_test)
 {
   //! [result]
-  auto seed = 42;
-  auto a = Linx::generate("noise", Linx::PoissonRng(10., seed), 3, 2);
+  auto seed = Linx::Seed(42);
+  auto a = Linx::generate("noise", Linx::PoissonRng(seed, 10.), 3, 2);
 
   // Math function
   auto b = Linx::sqrt(a);
 
   // Arithmetics
-  auto c = b + Linx::GaussianRng({0., 3.}, seed);
+  auto c = b + Linx::GaussianRng(seed, 0., 3.);
 
   // Filtering
   auto d = Linx::separable_laplacian<0, 1>()(a);
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE(slicing_test)
   ASSERT(Linx::sum(cube) == 16 * 9 * 3);
 
   // First image row
-  auto row = cube[Linx::Slice()(0)(0)]; // FIXME rm ()
+  auto row = cube[Linx::Slice()(0)(0)]; // TODO rm ()?
   ASSERT(row.n == 1);
   ASSERT(Linx::sum(row) == 16);
 
