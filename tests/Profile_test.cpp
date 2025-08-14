@@ -5,6 +5,7 @@
 
 #include "Linx/Data/Image.h"
 #include "Linx/Data/Profile.h"
+#include "Linx/Data/Sequence.h"
 #include "Linx/Run/ProgramContext.h"
 
 #include <boost/test/unit_test.hpp>
@@ -13,7 +14,7 @@ LINX_AUTO_TEST_SUITE(BOOST_TEST_MODULE) // FIXME to some Testing.h
 
 BOOST_AUTO_TEST_CASE(iteration_test)
 {
-  auto a = Linx::rowwise("a", {0, 1, 2, 3, 4, 5, 6, 7}); // FIXME arithmetic
+  auto a = Linx::arithmetic<8, Kokkos::HostSpace>("a", 0, 1);
   auto profile = Linx::Profile(a, 10);
   for (int i = 0; i < 5; ++i) {
     profile.push_back(i);
