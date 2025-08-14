@@ -5,6 +5,8 @@
 #ifndef LINX_DATA_IMAGE_FUNCS_H
 #define LINX_DATA_IMAGE_FUNCS_H
 
+#include "Linx/Base/OutputStream.h"
+
 namespace Linx {
 
 /**
@@ -118,42 +120,98 @@ std::ostream& operator<<(std::ostream& os, const Specialization<Image> auto& in)
     return os << "[]";
   }
 
-  // FIXME on_host()
+  const int radius = PrintLimit::edge(os);
+  const int diameter = radius == 0 ? std::numeric_limits<int>::max() : 2 * radius + 1;
 
   const auto& in_on_host = on_host(in);
+
   auto stream_row = [&](int tab, auto... is) {
-    os << std::string(tab * 2, ' ') << "[ " << in_on_host(in_on_host.start(0), is...);
-    for (int i = in_on_host.start(0) + 1; i < in_on_host.stop(0); ++i) {
-      os << " " << in_on_host(i, is...);
+    auto start = in_on_host.start(0);
+    auto stop = in_on_host.stop(0);
+    // First value
+    os << std::string(tab * 2, ' ') << "[ " << in_on_host(start, is...);
+    if (in_on_host.extent(0) <= diameter) {
+      // Remaining values
+      for (auto i = start + 1; i < stop; ++i) {
+        os << " " << in_on_host(i, is...);
+      }
+    } else {
+      // Remaining values in front edge
+      for (auto i = start + 1; i < start + radius; ++i) {
+        os << " " << in_on_host(i, is...);
+      }
+      // Ellipsis
+      os << " ...";
+      // Values in back edge
+      for (auto i = stop - radius; i < stop; ++i) {
+        os << " " << in_on_host(i, is...);
+      }
     }
     os << " ]";
   };
 
   auto stream_section = [&](int tab, auto... is) {
+    auto start = in_on_host.start(1);
+    auto stop = in_on_host.stop(1);
+    // First row
     os << "[ ";
-    stream_row(0, in_on_host.start(1), is...);
-    for (int i = in_on_host.start(1) + 1; i < in_on_host.stop(1); ++i) {
-      os << "\n";
-      stream_row(tab + 2, i, is...);
+    stream_row(0, start, is...);
+    if (in_on_host.extent(1) <= diameter) {
+      // Remaining rows
+      for (int i = start + 1; i < stop; ++i) {
+        os << "\n";
+        stream_row(tab + 2, i, is...);
+      }
+    } else {
+      // Remaining rows in front edge
+      for (auto i = start + 1; i < start + radius; ++i) {
+        os << "\n";
+        stream_row(tab + 2, i, is...);
+      }
+      // Ellipsis
+      os << "\n" << std::string(tab * 2 + 4, ' ') << "...";
+      // Rows in back edge
+      for (auto i = stop - radius; i < stop; ++i) {
+        os << "\n";
+        stream_row(tab + 2, i, is...);
+      }
     }
     os << " ]";
   };
 
-  auto n = in_on_host.rank();
+  long n = in_on_host.rank();
   if (n > 3) {
-    for (int i = 0; i < n; ++i) {
+    for (auto i = 0; i < n; ++i) {
       os << "[ ";
     }
     os << in_on_host.front() << " ... " << in_on_host.back();
-    for (int i = 0; i < n; ++i) {
+    for (auto i = 0; i < n; ++i) {
       os << " ]";
     }
   } else if (n == 3) {
+    auto start = in_on_host.start(2);
+    auto stop = in_on_host.stop(2);
+    // First section
     os << "[ ";
-    stream_section(1, in_on_host.start(2));
-    for (int i = in_on_host.start(2) + 1; i < in_on_host.stop(2); ++i) {
-      os << "\n    ";
-      stream_section(1, i);
+    stream_section(1, start);
+    if (in_on_host.extent(2) <= diameter) {
+      // Remaining sections
+      for (auto i = start + 1; i < stop; ++i) {
+        os << "\n    ";
+        stream_section(1, i);
+      }
+    } else {
+      // Remaining sections in front edge
+      for (auto i = start + 1; i < start + radius; ++i) {
+        os << "\n    ";
+        stream_section(1, i);
+      }
+      // Ellipsis
+      os << "\n" << std::string(4, ' ') << "...";
+      for (auto i = stop - radius; i < stop; ++i) {
+        os << "\n    ";
+        stream_section(1, i);
+      }
     }
     os << " ]";
   } else if (n == 2) {

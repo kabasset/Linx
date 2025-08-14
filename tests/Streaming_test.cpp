@@ -4,15 +4,16 @@
 #define BOOST_TEST_MODULE SlicingTest
 
 #include "Linx/Data/Image.h"
+#include "Linx/Data/Sequence.h"
 #include "Linx/Run/ProgramContext.h"
 
 #include <boost/test/unit_test.hpp>
 #include <sstream>
 
-void check_streaming(const auto& in, const std::string& expected)
+void check_streaming(const auto& in, const std::string& expected, long edge = 0)
 {
-  std::cout << in << std::endl;
-  auto str = (std::stringstream() << in).str();
+  std::cout << Linx::PrintLimit(edge) << in << std::endl;
+  auto str = (std::stringstream() << Linx::PrintLimit(edge) << in).str();
   BOOST_TEST(str == expected);
 }
 
@@ -25,6 +26,11 @@ BOOST_AUTO_TEST_CASE(image_1D_test)
 
   auto b = Linx::default_init<int>("", Linx::Box({-1}, {1}));
   check_streaming(b, "<Image>: [-1] ~ [1]\n  [ 0 0 ]");
+
+  auto c = Linx::default_init<int, 5>("c");
+  check_streaming(c, "c: O ~ [5]\n  [ 0 0 0 0 0 ]");
+  check_streaming(c, "c: O ~ [5]\n  [ 0 0 0 0 0 ]", 2);
+  check_streaming(c, "c: O ~ [5]\n  [ 0 ... 0 ]", 1);
 }
 
 BOOST_AUTO_TEST_CASE(image_2D_test)
@@ -36,6 +42,9 @@ BOOST_AUTO_TEST_CASE(image_2D_test)
 
   auto b = Linx::default_init<int>("b", Linx::cube<2_D>(1));
   check_streaming(b, "b: [-1, -1] ~ [2, 2]\n  [ [ 0 0 0 ]\n    [ 0 0 0 ]\n    [ 0 0 0 ] ]");
+
+  auto c = Linx::default_init<int>("c", Linx::cube<2_D>(2));
+  check_streaming(c, "c: [-2, -2] ~ [3, 3]\n  [ [ 0 ... 0 ]\n    ...\n    [ 0 ... 0 ] ]", 1);
 }
 
 BOOST_AUTO_TEST_CASE(image_3D_test)
@@ -47,6 +56,15 @@ BOOST_AUTO_TEST_CASE(image_3D_test)
 
   auto b = Linx::default_init<int>("b", Linx::shape<3_D, 1>());
   check_streaming(b, "b: O ~ [1, 1, 1]\n  [ [ [ 0 ] ] ]");
+
+  auto c = Linx::default_init<int>("c", Linx::cube<3_D>(2));
+  check_streaming(
+      c,
+      "c: [-2, -2, -2] ~ [3, 3, 3]\n"
+      "  [ [ [ 0 ... 0 ]\n      ...\n      [ 0 ... 0 ] ]\n"
+      "    ...\n"
+      "    [ [ 0 ... 0 ]\n      ...\n      [ 0 ... 0 ] ] ]",
+      1);
 }
 
 BOOST_AUTO_TEST_CASE(image_4D_test)
