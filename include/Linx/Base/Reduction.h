@@ -311,33 +311,6 @@ auto transform_reduce_with_side_effects_impl(
 } // namespace Impl
 
 /**
- * @brief Evaluate a function at origin, while detecting its arity up to 8.
- */
-template <typename TFunc>
-auto at_origin(const TFunc& func)
-{
-  if constexpr (is_nary<TFunc, int, 0>()) {
-    return func();
-  } else if constexpr (is_nary<TFunc, int, 1>()) {
-    return func(0);
-  } else if constexpr (is_nary<TFunc, int, 2>()) {
-    return func(0, 0);
-  } else if constexpr (is_nary<TFunc, int, 3>()) {
-    return func(0, 0, 0);
-  } else if constexpr (is_nary<TFunc, int, 4>()) {
-    return func(0, 0, 0, 0);
-  } else if constexpr (is_nary<TFunc, int, 5>()) {
-    return func(0, 0, 0, 0, 0);
-  } else if constexpr (is_nary<TFunc, int, 6>()) {
-    return func(0, 0, 0, 0, 0, 0);
-  } else if constexpr (is_nary<TFunc, int, 7>()) {
-    return func(0, 0, 0, 0, 0, 0, 0);
-  } else if constexpr (is_nary<TFunc, int, 8>()) {
-    return func(0, 0, 0, 0, 0, 0, 0, 0);
-  }
-}
-
-/**
  * @copydoc transform_reduce()
  */
 template <typename TMap, typename TMonoid, typename... TIns>

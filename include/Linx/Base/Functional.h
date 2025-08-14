@@ -31,8 +31,8 @@ struct Forward {
  */
 template <typename TIn, typename TOut>
 struct Copy {
-  TIn m_in; // FIXME private
-  TOut m_out;
+  TIn m_in; // TODO private
+  TOut m_out; // TODO private
   KOKKOS_INLINE_FUNCTION void operator()(std::integral auto... is) const
   {
     m_out(is...) = m_in(is...);
@@ -247,7 +247,7 @@ struct Between {
     } \
   }; \
 \
-  Func()->Func<Forward, Forward>; \
+  Func() -> Func<Forward, Forward>; \
   template <typename T> \
   Func(T) -> Func<Forward, T>;
 
@@ -336,10 +336,40 @@ struct can_accept_impl<
     decltype(std::declval<TFunc>()(((void)Is, T())...), void())> : std::true_type {};
 } // namespace Impl
 
+/**
+ * @brief Check whether a function accepts a given amount of default values of a given type.
+ */
 template <typename TFunc, typename T, int N>
 constexpr bool is_nary()
 {
   return Impl::can_accept_impl<TFunc, T, std::make_index_sequence<N>>::value;
+}
+
+/**
+ * @brief Evaluate a function at origin, while detecting its arity up to 8.
+ */
+template <typename TFunc>
+auto at_origin(const TFunc& func)
+{
+  if constexpr (is_nary<TFunc, int, 0>()) {
+    return func();
+  } else if constexpr (is_nary<TFunc, int, 1>()) {
+    return func(0);
+  } else if constexpr (is_nary<TFunc, int, 2>()) {
+    return func(0, 0);
+  } else if constexpr (is_nary<TFunc, int, 3>()) {
+    return func(0, 0, 0);
+  } else if constexpr (is_nary<TFunc, int, 4>()) {
+    return func(0, 0, 0, 0);
+  } else if constexpr (is_nary<TFunc, int, 5>()) {
+    return func(0, 0, 0, 0, 0);
+  } else if constexpr (is_nary<TFunc, int, 6>()) {
+    return func(0, 0, 0, 0, 0, 0);
+  } else if constexpr (is_nary<TFunc, int, 7>()) {
+    return func(0, 0, 0, 0, 0, 0, 0);
+  } else if constexpr (is_nary<TFunc, int, 8>()) {
+    return func(0, 0, 0, 0, 0, 0, 0, 0);
+  }
 }
 
 namespace Impl {
