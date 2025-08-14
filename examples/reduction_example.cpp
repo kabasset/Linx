@@ -33,7 +33,11 @@ BOOST_AUTO_TEST_CASE(transform_test)
   auto a = Linx::geometric<100>("a", 1, -1); // 1, -1, 1, -1, ...
 
   // L1 norm
-  auto functor = Linx::transform_reduce("norm", KOKKOS_LAMBDA(int i) { return Kokkos::abs(i); }, Linx::Add(), a);
+  auto functor = Linx::transform_reduce(
+      "norm",
+      KOKKOS_LAMBDA(int i) { return Kokkos::abs(i); },
+      Linx::Add(),
+      a);
   auto builtin = Linx::norm<1>(a);
 
   BOOST_TEST(functor == 100);
@@ -63,11 +67,11 @@ BOOST_AUTO_TEST_CASE(multiple_test)
   // Mixing element types and function types
   auto mixed = Linx::transform_reduce(
       "interval",
-      KOKKOS_LAMBDA(int a_i, int b_i, double c_i) { return Kokkos::pow(a_i - b_i, 2) * c_i; },
+      KOKKOS_LAMBDA(double c_i, int a_i, int b_i) { return c_i * Kokkos::pow(a_i - b_i, 2); },
       Linx::Add(),
+      c,
       a,
-      b,
-      c);
+      b);
   //! [multiple]
 
   ASSERT(lambda == 20);
