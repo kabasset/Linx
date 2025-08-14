@@ -72,17 +72,23 @@ struct RangeMixin {
   /**
    * @brief Test equality with values.
    */
-  KOKKOS_INLINE_FUNCTION bool equal(std::convertible_to<T> auto... values) const
+  bool equal(std::convertible_to<T> auto... values) const
   {
-    return equal_impl(forward_as_tuple(values...), std::make_index_sequence<sizeof...(values)>());
+    const auto& container =
+        Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), LINX_CRTP_CONST_DERIVED.container());
+    return equal_impl(container, forward_as_tuple(values...), std::make_index_sequence<sizeof...(values)>());
+    return LINX_CRTP_CONST_DERIVED;
   }
 
   /**
    * @brief Copy values.
    */
-  KOKKOS_INLINE_FUNCTION const TDerived& assign(std::convertible_to<T> auto... values) const
+  const TDerived& assign(std::convertible_to<T> auto... values) const
   {
-    assign_impl(forward_as_tuple(values...), std::make_index_sequence<sizeof...(values)>());
+    const auto& container =
+        Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), LINX_CRTP_CONST_DERIVED.container());
+    assign_impl(container, forward_as_tuple(values...), std::make_index_sequence<sizeof...(values)>());
+    Kokkos::deep_copy(LINX_CRTP_CONST_DERIVED.container(), container);
     return LINX_CRTP_CONST_DERIVED;
   }
 
@@ -105,7 +111,7 @@ struct RangeMixin {
     auto mirror_data = mirror.data();
     Kokkos::parallel_for(
         Kokkos::RangePolicy<Kokkos::HostSpace::execution_space>(0, container.size()),
-        KOKKOS_LAMBDA(int i) { mirror_data[i] = *std::next(begin, i); });
+        KOKKOS_CLASS_LAMBDA(std::size_t i) { mirror_data[i] = *std::next(begin, i); });
     Kokkos::deep_copy(container, mirror);
     return LINX_CRTP_CONST_DERIVED;
   }
@@ -120,7 +126,7 @@ struct RangeMixin {
     auto mirror_data = mirror.data();
     Kokkos::parallel_for(
         Kokkos::RangePolicy<Kokkos::HostSpace::execution_space>(0, container.size()),
-        KOKKOS_LAMBDA(int i) { mirror_data[i] = data[i]; });
+        KOKKOS_CLASS_LAMBDA(std::size_t i) { mirror_data[i] = data[i]; });
     Kokkos::deep_copy(container, mirror);
     return LINX_CRTP_CONST_DERIVED;
   }
@@ -140,7 +146,7 @@ struct RangeMixin {
   template <typename T0 = T, typename T1 = T>
   const TDerived& arithmetic(const T0& first = Limits<T0>::zero(), const T1& difference = Limits<T1>::one()) const
   {
-    return generate_flat(KOKKOS_LAMBDA(int i) { return first + i * difference; });
+    return generate_flat(KOKKOS_CLASS_LAMBDA(std::size_t i) { return first + i * difference; });
   }
 
   /**
@@ -190,7 +196,7 @@ struct RangeMixin {
   template <typename T0, typename T1>
   const TDerived& geometric(const T0& first, const T1& ratio) const
   {
-    return generate_flat(KOKKOS_LAMBDA(int i) { return first * Kokkos::pow(ratio, i); });
+    return generate_flat(KOKKOS_CLASS_LAMBDA(std::size_t i) { return first * Kokkos::pow(ratio, i); });
   }
 
   /**
@@ -228,14 +234,19 @@ struct RangeMixin {
     auto ptr = LINX_CRTP_CONST_DERIVED.data(); // FIXME origin()?
     const auto size = LINX_CRTP_CONST_DERIVED.size();
     using Space = typename TDerived::execution_space;
-    Kokkos::parallel_for("range()", Kokkos::RangePolicy<Space>(0, size), KOKKOS_LAMBDA(int i) { ptr[i] = func(i); });
+    Kokkos::parallel_for(
+        "range()",
+        Kokkos::RangePolicy<Space>(0, size),
+        KOKKOS_CLASS_LAMBDA(std::size_t i) { ptr[i] = func(i); });
     // FIXME what if stride(0) != 1 ?
   }
 
+  /**
+   * @brief Helper function for unfolding pack.
+   */
   template <std::size_t... Is>
-  KOKKOS_INLINE_FUNCTION bool equal_impl(const auto& values, std::index_sequence<Is...>) const
+  bool equal_impl(const auto& container, const auto& values, std::index_sequence<Is...>) const
   {
-    const auto& container = LINX_CRTP_CONST_DERIVED.container(); // FIXME enable on device
     return ((container(Is) == get<Is>(values)) && ...);
   }
 
@@ -243,9 +254,8 @@ struct RangeMixin {
    * @brief Helper function for unfolding pack.
    */
   template <std::size_t... Is>
-  KOKKOS_INLINE_FUNCTION void assign_impl(const auto& values, std::index_sequence<Is...>) const
+  void assign_impl(const auto& container, const auto& values, std::index_sequence<Is...>) const
   {
-    const auto& container = LINX_CRTP_CONST_DERIVED.container(); // FIXME enable on device
     ((container(Is) = get<Is>(values)), ...);
   }
   /// @endcond
