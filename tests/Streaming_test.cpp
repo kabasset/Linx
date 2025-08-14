@@ -23,8 +23,8 @@ BOOST_AUTO_TEST_CASE(image_1D_test)
   auto a = Linx::rowwise("a", {3.14});
   check_streaming(a, "a: O ~ [1]\n  [ 3.14 ]");
 
-  auto b = Linx::default_init<int>("b", Linx::Box({-1}, {1}));
-  check_streaming(b, "b: [-1] ~ [1]\n  [ 0 0 ]");
+  auto b = Linx::default_init<int>("", Linx::Box({-1}, {1}));
+  check_streaming(b, "<Image>: [-1] ~ [1]\n  [ 0 0 ]");
 }
 
 BOOST_AUTO_TEST_CASE(image_2D_test)

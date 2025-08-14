@@ -111,7 +111,9 @@ auto along(const TIn& in)
 
 std::ostream& operator<<(std::ostream& os, const Specialization<Image> auto& in)
 {
-  os << in.label() << ": " << in.domain() << "\n  ";
+  auto label = in.label().empty() ? "<Image>" : in.label();
+
+  os << label << ": " << in.domain() << "\n  ";
   if (in.size() == 0) {
     return os << "[]";
   }
