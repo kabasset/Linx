@@ -68,7 +68,11 @@ public:
    */
   constexpr element_type get_or(std::integral auto i, element_type fallback) const
   {
-    return i < 0 || i >= this->size() ? fallback : this->operator[](i);
+    if constexpr (std::is_signed_v<decltype(i)>) {
+      return i < 0 || i >= this->size() ? fallback : this->operator[](i);
+    } else {
+      return i >= this->size() ? fallback : this->operator[](i);
+    }
   }
 
   /**
