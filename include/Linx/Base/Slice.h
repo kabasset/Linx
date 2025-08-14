@@ -19,7 +19,7 @@ namespace Linx {
  * @brief Get the interval along i-th axis.
  */
 template <int I, typename T, typename... TPreds>
-KOKKOS_INLINE_FUNCTION constexpr auto& get(const Slice<T, TPreds...>& slice) // FIXME in std:: ?
+KOKKOS_INLINE_FUNCTION constexpr auto& get(const Slice<T, TPreds...>& slice)
 {
   if constexpr (sizeof...(TPreds) == 1) {
     return slice;

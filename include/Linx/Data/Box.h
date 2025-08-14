@@ -34,7 +34,7 @@ struct VectorTraits<T, -1> {
 
 template <typename T>
 struct VectorTraits<T, 0> {
-  using Spec = std::integer_sequence<T>; // FIXME void?
+  using Spec = std::integer_sequence<T>;
 };
 
 template <typename T0, typename T1>
@@ -174,7 +174,7 @@ public:
   /**
    * @brief Product of the extents, may be negative.
    */
-  KOKKOS_INLINE_FUNCTION constexpr coef_type ssize() const // FIXME rename as volume?
+  KOKKOS_INLINE_FUNCTION constexpr coef_type ssize() const // FIXME rename as volume
   {
     coef_type out = 1;
     for (size_type i = 0; i < rank(); ++i) {
@@ -184,12 +184,12 @@ public:
   }
 
   /**
-   * @brief Unsigned size.
+   * @brief Unsigned size, only valid for integral coefficients.
    */
   KOKKOS_INLINE_FUNCTION constexpr size_type size() const
   {
     auto s = ssize();
-    return s <= 0 ? size_type(0) : static_cast<size_type>(s); // FIXME cannot cast when s is not integral
+    return s <= 0 ? size_type(0) : static_cast<size_type>(s);
   }
 
   /**
@@ -212,7 +212,7 @@ public:
    * @brief Check whether a position lies inside the box.
    */
   bool contains(const auto& position) const
-  { // FIXME Subscriptable<size_t>? Indexed?
+  { // TODO Subscriptable<size_t>? Indexed?
     SizeMismatch::may_throw("position", rank(), position);
     for (std::size_t i = 0; i < rank(); ++i) {
       if (position[i] < m_start[i] || position[i] > m_stop[i]) {
@@ -225,9 +225,9 @@ public:
   /**
    * @copydoc contains()
    */
-  bool contains(std::integral auto... is) const
+  bool contains(std::integral auto... is) const // TODO LINX_UFUNC
   {
-    return contains(std::array {is...}); // FIXME no instanciation
+    return contains(std::array {is...}); // TODO no instantiation
   }
 
 private:

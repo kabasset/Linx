@@ -157,25 +157,12 @@ struct Between {
   /**
    * @brief Always-false functor constructor.
    */
-  KOKKOS_INLINE_FUNCTION constexpr Between() : infimum(Limits<T>::max()), supremum(Limits<T>::min()) {} // FIXME rm
+  KOKKOS_INLINE_FUNCTION constexpr Between() : infimum(Limits<T>::max()), supremum(Limits<T>::min()) {}
 
   /**
    * @brief Constructor.
    */
   KOKKOS_INLINE_FUNCTION constexpr Between(const T& inf, const T& sup) : infimum(inf), supremum(sup) {}
-
-  /**
-   * @brief Size-based constructor.
-   */
-  template <typename TSize>
-  KOKKOS_INLINE_FUNCTION constexpr Between(const T& inf, const Size<TSize>& size) :
-      infimum(inf),
-      supremum(infimum + size.value)
-  {
-    if constexpr (std::is_integral_v<T>) {
-      supremum += InclusiveInfimum + InclusiveSupremum - 1;
-    }
-  };
 
   /**
    * @brief Check whether a value is between the endpoints.

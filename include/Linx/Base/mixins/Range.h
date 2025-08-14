@@ -210,7 +210,7 @@ struct RangeMixin {
    * }
    * ```
    */
-  const TDerived& generate_flat(auto func) const // FIXME args...
+  const TDerived& generate_flat(auto func) const // TODO accept args...
   {
     generate_flat_impl(func);
     return LINX_CRTP_CONST_DERIVED;
@@ -231,14 +231,13 @@ struct RangeMixin {
   template <typename TFunc>
   void generate_flat_impl(TFunc func) const // TODO to public API, with args
   {
-    auto ptr = LINX_CRTP_CONST_DERIVED.data(); // FIXME origin()?
     const auto size = LINX_CRTP_CONST_DERIVED.size();
+    const auto& derived = LINX_CRTP_CONST_DERIVED;
     using Space = typename TDerived::execution_space;
     Kokkos::parallel_for(
         "range()",
         Kokkos::RangePolicy<Space>(0, size),
-        KOKKOS_CLASS_LAMBDA(std::size_t i) { ptr[i] = func(i); });
-    // FIXME what if stride(0) != 1 ?
+        KOKKOS_CLASS_LAMBDA(std::size_t i) { derived[i] = func(i); });
   }
 
   /**

@@ -144,7 +144,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   KOKKOS_INLINE_FUNCTION bool empty() const
   {
-    return size() == 0; // FIXME should it be true for rank() = 0?
+    return size() == 0;
   }
 
   /**
@@ -191,7 +191,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   const TDerived& copy_from(const auto& container) const
   {
-    // FIXME use Kokkos::deep_copy wherever possible
+    // TODO use Kokkos::deep_copy wherever possible
     return generate(compose_label("copy", container), Forward(), container);
   }
 
@@ -200,7 +200,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   const TDerived& copy_to(const auto& container) const
   {
-    // FIXME use Kokkos::deep_copy wherever possible
+    // TODO use Kokkos::deep_copy wherever possible
     return transform(compose_label("copy", *this), Forward(), container, *this);
   }
 
@@ -318,7 +318,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
       const std::string& label,
       TFunc func,
       const TIns& others,
-      std::index_sequence<Is...>) const // FIXME private
+      std::index_sequence<Is...>) const // TODO private
   {
     using Generator = Impl::Generator<TFunc, TDerived, TIns, Is...>;
     using Space = typename TDerived::execution_space;
@@ -372,11 +372,11 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   }
 
   /**
-   * @brief Equality of domain and values.
+   * @brief Equality of size and values.
    */
   bool operator==(const auto& rhs) const
   {
-    return (LINX_CRTP_CONST_DERIVED.size() == rhs.size()) && matches(rhs); // FIXME .domain()?
+    return (LINX_CRTP_CONST_DERIVED.size() == rhs.size()) && matches(rhs); // TODO .domain()?
   }
 
   /**

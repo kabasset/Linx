@@ -70,7 +70,7 @@ constexpr SliceIterator<T> end(const Slice<T, TPred>& interval)
  * @brief Get the Kokkos execution policy of a slice.
  */
 template <typename TSpace, std::integral T, typename TPred>
-auto kokkos_execution_policy(const Slice<T, TPred>& region) // FIXME requires start(region), stop(region)
+auto kokkos_execution_policy(const Slice<T, TPred>& region)
 {
   return Kokkos::RangePolicy<TSpace, Kokkos::IndexType<Index>>(region.start(), region.stop());
 }

@@ -45,7 +45,7 @@ using Index = int;
 /**
  * @brief List of supported types as a tuple.
  */
-using SupportedTypes = std::tuple<LINX_SUPPORTED_TYPES>; // FIXME std::string?
+using SupportedTypes = std::tuple<LINX_SUPPORTED_TYPES>; // TODO std::string?
 
 /**
  * @brief `BOOST_AUTO_TEST_CASE_TEMPLATE` for each supported type.
@@ -55,7 +55,7 @@ using SupportedTypes = std::tuple<LINX_SUPPORTED_TYPES>; // FIXME std::string?
 /**
  * @brief List of types for non-exhaustive template tests.
  */
-using QuickTestTypes = std::tuple<bool, int, double, Kokkos::complex<float>>; // FIXME std::string?
+using QuickTestTypes = std::tuple<bool, int, double, Kokkos::complex<float>>; // TODO std::string?
 
 /**
  * @brief `BOOST_AUTO_TEST_CASE_TEMPLATE` for a few supported types.
@@ -483,8 +483,6 @@ struct StrongType {
   Name(T*) -> Name<T*>; \
   template <typename T> \
   Name(const T*) -> Name<const T*>;
-
-LINX_STRONG_TYPE(Size) // FIXME replace with Dimension
 
 LINX_STRONG_TYPE(Wrap)
 

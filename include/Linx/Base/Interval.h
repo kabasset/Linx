@@ -133,13 +133,6 @@ template <typename T0, typename T1>
 Slice(const T0&, const T1&) -> Slice<decltype(T1() - T0())>;
 
 /**
- * @brief Start and size deduction guide for spans.
- */
-template <typename T, typename TSize>
-  requires(std::is_arithmetic_v<T>)
-Slice(const T&, const Size<TSize>&) -> Slice<T>;
-
-/**
  * @brief Interval (slice of rank 1).
  * @tparam TPred The predicate defining the interval
  */

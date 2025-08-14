@@ -59,10 +59,7 @@ concept StridedFunc = IndexedFunc<T, N> && requires(const T f) { f.stride(0); };
  * @brief A `BoundedFunc` which is defined over a box-shaped domain.
  */
 template <typename T, int N>
-concept BoxedFunc = BoundedFunc<T, N> && requires(const T f) {
-  f.extent(0);
-  f.shape(); // FIXME useful?
-};
+concept BoxedFunc = BoundedFunc<T, N> && requires(const T f) { f.extent(0); };
 
 // /**
 //  * @brief A `BoxedFunc` which manages its memory.
@@ -70,7 +67,7 @@ concept BoxedFunc = BoundedFunc<T, N> && requires(const T f) {
 //  */
 // template <typename T, int N>
 // concept Array = BoxedFunc<T, N> && requires(const T data) {
-//   data.container(); // FIXME -> Kokkos View-like
+//   data.container(); // TODO -> Kokkos View-like
 // };
 
 } // namespace Linx

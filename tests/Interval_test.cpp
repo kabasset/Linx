@@ -78,15 +78,4 @@ BOOST_AUTO_TEST_CASE(span_test)
   BOOST_TEST(str == std::to_string(start) + ':' + std::to_string(stop));
 }
 
-BOOST_AUTO_TEST_CASE(span_from_size_test)
-{
-  Linx::Index start = 3;
-  Linx::Index stop = 14;
-  Linx::Index size = stop - start;
-  auto interval = Linx::Slice(start, Linx::Size(size));
-  BOOST_TEST(interval.size() == size);
-  BOOST_TEST(interval.start() == start);
-  BOOST_TEST(interval.stop() == stop);
-}
-
 BOOST_AUTO_TEST_SUITE_END()
