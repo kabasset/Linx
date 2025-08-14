@@ -73,12 +73,13 @@ auto no_init(std::size_t size, const std::string& label)
  * @tparam TSpace The memory space
  * @param label The label
  * @param value0, values The values
+ * 
+ * The type of the first value is used as the sequence value type.
  */
 template <typename TSpace = Kokkos::DefaultExecutionSpace, typename T0, std::convertible_to<T0>... Ts>
 auto seq(const std::string& label, T0 value0, Ts... values)
 {
-  T0 row[] = {value0, values...};
-  return rowwise(label, LINX_MOVE(row));
+  return no_init<T0, 1 + sizeof...(Ts), TSpace>(label).assign(value0, values...);
 }
 
 /**

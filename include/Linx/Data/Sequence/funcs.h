@@ -14,12 +14,18 @@ namespace Linx {
 
 /**
  * @brief Copy as many elements as possible from `in` to `out`.
+ * 
+ * If the inputs have different sizes, the number of elements copied is the minimum of the sizes.
  */
 template <typename TIn, typename TOut>
-void copy_to(const TIn& in, const TOut& out) // FIXME rm
+void copy_max(const TIn& in, const TOut& out) // FIXME rm
 {
-  auto domain = Slice(0, std::min<int>(std::size(in), std::size(out)));
-  for_each<typename TOut::execution_space>("copy_to()", domain, KOKKOS_LAMBDA(int i) { out(i) = in(i); });
+  const auto in_on_device = on_device<typename TOut::memory_space>(in);
+  auto domain = Slice(std::size_t(0), std::min<std::size_t>(std::size(in), std::size(out)));
+  for_each<typename TOut::execution_space>(
+      "copy_max()",
+      domain,
+      KOKKOS_LAMBDA(std::size_t i) { out(i) = in_on_device(i); });
 }
 
 /**
@@ -39,7 +45,7 @@ auto resize(const std::string& label, const Specialization<Image> auto& in)
   static_assert(N >= 0);
   using T = LINX_DECLTYPE(in(0));
   auto out = no_init<T, N, TSpace>(label);
-  copy_to(in, out);
+  copy_max(in, out);
   return out;
 }
 
@@ -59,7 +65,7 @@ auto resize(std::integral auto size, const std::string& label, const Specializat
 {
   using T = LINX_DECLTYPE(in(0));
   auto out = no_init<T, TSpace>(size, label);
-  copy_to(in, out);
+  copy_max(in, out);
   return out;
 }
 
