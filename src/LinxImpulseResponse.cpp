@@ -11,17 +11,6 @@
 
 using namespace Linx::Literals;
 
-void print_2d(const auto& image)
-{
-  const auto& on_host = Linx::on_host(image);
-  for (auto j : get<1>(image.domain())) {
-    for (auto i : get<0>(image.domain())) {
-      std::cout << on_host(i, j) << " ";
-    }
-    std::cout << std::endl;
-  }
-}
-
 auto filter(const auto& in, const std::string& name, const auto& radius)
 {
   auto footprint = Linx::cube<2_D>(int(radius));
@@ -57,7 +46,8 @@ int main(int argc, char const* argv[])
 
   std::cout << "Filtering..." << std::endl;
   auto out = filter(in, filter_name, filter_radius);
-  print_2d(out);
+
+  std::cout << Linx::PrintLimit(7) << out << std::endl;
 
   Linx::Fits(output_name, 'w').write(out);
   std::cout << "Saved output to: " << output_name << std::endl;

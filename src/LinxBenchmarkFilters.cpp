@@ -13,25 +13,6 @@ using T = std::int32_t;
 
 using namespace Linx::Literals;
 
-void print_2d(const auto& image)
-{
-  auto name = image.label();
-  auto width = image.extent(0);
-  auto height = image.extent(1);
-  std::cout << name << ":" << std::endl;
-  std::cout << "  " << width << " x " << height << std::endl;
-
-  const auto& on_host = Linx::on_host(image);
-  std::cout << "  [" << on_host(0, 0) << ", " << on_host(1, 0) << ", ... , ";
-  std::cout << on_host(width - 2, 0) << ", " << on_host(width - 1, 0) << "]" << std::endl;
-  std::cout << "  [" << on_host(0, 1) << ", " << on_host(1, 1) << ", ... , ";
-  std::cout << on_host(width - 2, 1) << ", " << on_host(width - 1, 1) << "]" << std::endl;
-  std::cout << "  [" << on_host(0, height - 2) << ", " << on_host(1, height - 2) << ", ... , ";
-  std::cout << on_host(width - 2, height - 2) << ", " << on_host(width - 1, height - 2) << "]" << std::endl;
-  std::cout << "  [" << on_host(0, height - 1) << ", " << on_host(1, height - 1) << ", ... , ";
-  std::cout << on_host(width - 2, height - 1) << ", " << on_host(width - 1, height - 1) << "]" << std::endl;
-}
-
 auto filter(const auto& in, const auto& k, const std::string& name)
 {
   if (name == "correlation") {
@@ -67,10 +48,12 @@ int main(int argc, char const* argv[])
   std::cout << "Generating input and kernel..." << std::endl;
   const auto in = Linx::no_init<T>("input", in_extent, in_extent).generate_offsets();
   const auto k = Linx::no_init<T>("kernel", k_extent, k_extent).generate_offsets();
-  print_2d(in);
-  print_2d(k);
-  Kokkos::fence();
 
+  std::cout << Linx::PrintLimit(3);
+  std::cout << in << std::endl;
+  std::cout << k << std::endl;
+
+  Kokkos::fence();
   Linx::TimerLogger logger;
   logger(filter_name, "Start");
   for (int i = 0; i < iter_count; ++i) {
