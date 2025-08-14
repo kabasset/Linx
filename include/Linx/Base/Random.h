@@ -25,12 +25,12 @@ public:
   /**
    * @brief Constructor.
    */
-  constexpr explicit Seed(Index value = -1) : m_value(value) {}
+  LINX_UFUNC explicit Seed(Index value = -1) : m_value(value) {}
 
   /**
    * @brief Value.
    */
-  constexpr auto operator()() const
+  LINX_UFUNC Index operator()() const
   {
     return m_value;
   }
@@ -136,19 +136,19 @@ public:
   /**
    * @brief Constructor.
    */
-  KOKKOS_INLINE_FUNCTION UniformDistribution(T infimum = Limits<T>::min(), T supremum = Limits<T>::max()) :
+  LINX_UFUNC explicit UniformDistribution(T infimum = Limits<T>::min(), T supremum = Limits<T>::max()) :
       m_slice(infimum, supremum)
   {}
 
   /**
    * @brief Constructor.
    */
-  KOKKOS_INLINE_FUNCTION UniformDistribution(Interval slice) : m_slice(LINX_MOVE(slice)) {}
+  LINX_UFUNC explicit UniformDistribution(Interval slice) : m_slice(LINX_MOVE(slice)) {}
 
   /**
    * @brief Lower bound (inclusive).
    */
-  KOKKOS_INLINE_FUNCTION T infimum() const
+  LINX_UFUNC T infimum() const
   {
     return m_slice.pred().infimum;
   }
@@ -156,7 +156,7 @@ public:
   /**
    * @brief Upper bound (exclusive).
    */
-  KOKKOS_INLINE_FUNCTION T supremum() const
+  LINX_UFUNC T supremum() const
   {
     return m_slice.pred().supremum;
   }
@@ -164,7 +164,7 @@ public:
   /**
    * @brief Probability density or mass function.
    */
-  KOKKOS_INLINE_FUNCTION double operator()(auto x) const
+  LINX_UFUNC double operator()(auto x) const
   {
     return m_slice.contains(x) ? 1. / m_slice.size() : 0.;
   }
@@ -172,7 +172,7 @@ public:
   /**
    * @brief Cumulative density function.
    */
-  KOKKOS_INLINE_FUNCTION double cdf(auto x) const
+  LINX_UFUNC double cdf(auto x) const
   {
     const auto& a = infimum();
     const auto& b = supremum();
@@ -210,7 +210,7 @@ public:
   /**
    * @brief Fixed-seed constructor.
    */
-  UniformRng(Seed seed, T infimum = Limits<T>::min(), T supremum = Limits<T>::max()) :
+  explicit UniformRng(Seed seed, T infimum = Limits<T>::min(), T supremum = Limits<T>::max()) :
       m_distribution(infimum, supremum),
       m_pool(seed())
   {}
@@ -218,12 +218,14 @@ public:
   /**
    * @brief Automatic-seed constructor.
    */
-  UniformRng(T infimum = Limits<T>::min(), T supremum = Limits<T>::max()) : UniformRng(Seed(), infimum, supremum) {}
+  explicit UniformRng(T infimum = Limits<T>::min(), T supremum = Limits<T>::max()) :
+      UniformRng(Seed(), infimum, supremum)
+  {}
 
   /**
    * @brief Label.
    */
-  std::string label() const
+  constexpr std::string label() const
   {
     return "Uniform"; // TODO parameters
   }
@@ -231,7 +233,7 @@ public:
   /**
    * @brief The distribution.
    */
-  KOKKOS_INLINE_FUNCTION const auto& distribution() const
+  LINX_UFUNC const auto& distribution() const
   {
     return m_distribution;
   }
@@ -266,12 +268,12 @@ public:
   /**
    * @brief Constructor.
    */
-  KOKKOS_INLINE_FUNCTION GaussianDistribution(T mu = 0, T sigma = 1) : m_mu(mu), m_sigma(sigma) {}
+  LINX_UFUNC explicit GaussianDistribution(T mu = 0, T sigma = 1) : m_mu(mu), m_sigma(sigma) {}
 
   /**
    * @brief Mean.
    */
-  KOKKOS_INLINE_FUNCTION T mean() const
+  LINX_UFUNC T mean() const
   {
     return m_mu;
   }
@@ -279,7 +281,7 @@ public:
   /**
    * @brief Standard deviation. 
    */
-  KOKKOS_INLINE_FUNCTION T stddev() const
+  LINX_UFUNC T stddev() const
   {
     return m_sigma;
   }
@@ -287,17 +289,18 @@ public:
   /**
    * @brief Probability density function.
    */
-  KOKKOS_INLINE_FUNCTION double operator()(const auto& x) const
+  LINX_UFUNC double operator()(const auto& x) const
   {
     const auto u = x - m_mu;
-    const auto two_var = 2 * m_sigma * m_sigma;
-    return std::numbers::inv_sqrtpi / (std::numbers::sqrt2 * m_sigma) * std::exp(-u * u / two_var);
+    const auto norm = std::numbers::inv_sqrtpi * std::numbers::sqrt2 * 0.5 / m_sigma;
+    const auto constant = -0.5 / (m_sigma * m_sigma);
+    return norm * std::exp(u * u * constant);
   }
 
   /**
    * @brief Cumulative density function.
    */
-  KOKKOS_INLINE_FUNCTION double cdf(const auto& x) const
+  LINX_UFUNC double cdf(const auto& x) const
   {
     return .5 * (1. + std::erf((x - m_mu) / (std::numbers::sqrt2 * m_sigma)));
   }
@@ -321,17 +324,17 @@ public:
   /**
    * @brief Fixed-seed constructor.
    */
-  GaussianRng(Seed seed, T mu = 0, T sigma = 1) : m_distribution(mu, sigma), m_pool(seed()) {}
+  explicit GaussianRng(Seed seed, T mu = 0, T sigma = 1) : m_distribution(mu, sigma), m_pool(seed()) {}
 
   /**
    * @brief Automatic-seed constructor.
    */
-  GaussianRng(T mu = 0, T sigma = 1) : GaussianRng(Seed(), mu, sigma) {}
+  explicit GaussianRng(T mu = 0, T sigma = 1) : GaussianRng(Seed(), mu, sigma) {}
 
   /**
    * @brief Label.
    */
-  std::string label() const
+  constexpr std::string label() const
   {
     return "Gaussian"; // TODO parameters
   }
@@ -339,7 +342,7 @@ public:
   /**
    * @brief The distribution.
    */
-  KOKKOS_INLINE_FUNCTION const auto& distribution() const
+  LINX_UFUNC const auto& distribution() const
   {
     return m_distribution;
   }
@@ -385,12 +388,12 @@ public:
   /**
    * @brief Constructor.
    */
-  KOKKOS_INLINE_FUNCTION PoissonDistribution(T lambda) : m_lambda(lambda) {}
+  LINX_UFUNC explicit PoissonDistribution(T lambda) : m_lambda(lambda) {}
 
   /**
    * @brief Mean.
    */
-  KOKKOS_INLINE_FUNCTION T mean() const
+  LINX_UFUNC T mean() const
   {
     return m_lambda;
   }
@@ -398,7 +401,7 @@ public:
   /**
    * @brief Probability mass function.
    */
-  KOKKOS_INLINE_FUNCTION double operator()(const std::integral auto& k) const
+  LINX_UFUNC double operator()(const std::integral auto& k) const
   {
     return std::pow(m_lambda, k) * std::exp(-m_lambda) / boost::math::factorial(k);
   }
@@ -406,7 +409,7 @@ public:
   /**
    * @brief Cumulative density function.
    */
-  KOKKOS_INLINE_FUNCTION double cdf(const auto& x) const
+  LINX_UFUNC double cdf(const auto& x) const
   {
     auto floor = std::floor(x);
     return boost::math::gamma_q(floor + 1, m_lambda);
@@ -430,17 +433,17 @@ public:
   /**
    * @brief Fixed-seed constructor.
    */
-  PoissonRng(Seed seed, T lambda) : m_lambda(lambda), m_pool(seed()) {}
+  explicit PoissonRng(Seed seed, T lambda) : m_lambda(lambda), m_pool(seed()) {}
 
   /**
    * @brief Automatic-seed constructor.
    */
-  PoissonRng(T lambda) : PoissonRng(Seed(), lambda) {}
+  explicit PoissonRng(T lambda) : PoissonRng(Seed(), lambda) {}
 
   /**
    * @brief Label.
    */
-  std::string label() const
+  constexpr std::string label() const
   {
     return "Poisson"; // TODO parameters
   }
@@ -502,7 +505,7 @@ public:
   /**
    * @brief Constructor.
    */
-  PoissonNoise(Seed seed = Seed()) : m_pool(seed()) {}
+  explicit PoissonNoise(Seed seed = Seed()) : m_pool(seed()) {}
 
   /**
    * @brief Sample from a given mean value.

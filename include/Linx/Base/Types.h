@@ -20,16 +20,6 @@ namespace Linx {
 using Index = int;
 
 /**
- * @brief Even number tag.
- */
-struct EvenNumber {};
-
-/**
- * @brief Odd number tag.
- */
-struct OddNumber {};
-
-/**
  * @brief List of supported integral types.
  */
 #define LINX_SUPPORTED_INTS \
@@ -114,6 +104,11 @@ using QuickTestTypes = std::tuple<bool, int, double, Kokkos::complex<float>>; //
   KOKKOS_FUNCTION Class(Class&&) = delete; \
   /** @brief Deleted move assignment operator. */ \
   KOKKOS_FUNCTION Class& operator=(Class&&) = delete;
+
+/**
+ * @brief Universal function, usable callable from host and device, and at compile-time.
+ */
+#define LINX_UFUNC KOKKOS_INLINE_FUNCTION constexpr
 
 /**
  * @brief Non-function `std::move`.
