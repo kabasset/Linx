@@ -5,12 +5,12 @@
 #ifndef LINX_DATA_BOX_H
 #define LINX_DATA_BOX_H
 
-#include "Linx/Base/Containers.h"
 #include "Linx/Base/Exceptions.h"
 #include "Linx/Base/Functional.h"
 #include "Linx/Base/Packs.h"
 #include "Linx/Base/Slice.h"
 #include "Linx/Base/Types.h"
+#include "Linx/Base/Views.h"
 #include "Linx/Base/concepts/Array.h"
 #include "Linx/Data/Vector.h"
 

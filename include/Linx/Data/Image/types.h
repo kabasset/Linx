@@ -31,19 +31,19 @@ template <int N>
 using RasterDomain = decltype(default_raster_domain<N>());
 
 /**
- * @brief Default raster container instance.
+ * @brief Default raster view instance.
  */
 template <typename T, int N>
-auto default_raster_container()
+auto default_raster_view()
 {
-  return default_image_container<T, RasterDomain<N>, Kokkos::LayoutLeft, Kokkos::HostSpace>();
+  return default_image_view<T, RasterDomain<N>, Kokkos::LayoutLeft, Kokkos::HostSpace>();
 }
 
 /**
- * @brief Default raster container type.
+ * @brief Default raster view type.
  */
 template <typename T, int N>
-using RasterContainer = decltype(default_raster_container<T, N>());
+using RasterContainer = decltype(default_raster_view<T, N>());
 
 /**
  * @brief Contiguous image on host with row-major ordering.

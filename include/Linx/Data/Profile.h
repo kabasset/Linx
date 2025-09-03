@@ -276,7 +276,7 @@ public:
   }
 
   /**
-   * @brief Parent data container.
+   * @brief Parent data view.
    */
   constexpr const Parent& parent() const
   {
@@ -382,7 +382,7 @@ public:
 
 private:
 
-  Parent m_parent; ///< The parent data container
+  Parent m_parent; ///< The parent data view
   Kokkos::View<std::ptrdiff_t*, memory_space> m_offsets; ///< The offsets in the parent
   Kokkos::View<std::size_t, memory_space> m_size; ///< The profile size
 };
@@ -407,7 +407,7 @@ struct FilterOffsets {
 
 /**
  * @relatesalso Profile
- * @brief Select the positions where some predicate over an input container's elements holds.
+ * @brief Select the positions where some predicate over an input view's elements holds.
  */
 template <Strided TIn, typename TPred>
 Profile<TIn> filter(const TIn& in, TPred pred)

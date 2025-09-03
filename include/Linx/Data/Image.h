@@ -5,10 +5,10 @@
 #ifndef LINX_DATA_IMAGE_H
 #define LINX_DATA_IMAGE_H
 
-#include "Linx/Base/Containers.h"
 #include "Linx/Base/Functional.h"
 #include "Linx/Base/Slice.h"
 #include "Linx/Base/Types.h"
+#include "Linx/Base/Views.h"
 #include "Linx/Base/mixins/Data.h"
 #include "Linx/Base/mixins/Range.h"
 #include "Linx/Data/Box.h"
@@ -61,7 +61,7 @@ public:
   static constexpr bool static_start_at_origin_flag = Domain::static_start_at_origin_flag; ///< Shape-only domain flag
   static constexpr bool static_contiguous_flag = is_contiguous<TView>(); ///< Contiguity flag
 
-  using base_type = TView; ///< The underlying container type // FIXME base_type
+  using base_type = TView; ///< The underlying view type
   using memory_space = typename base_type::memory_space; ///< The memory space
   using execution_space = typename base_type::execution_space; ///< The default execution space
 
@@ -82,7 +82,7 @@ public:
    * 
    * @warning If the rank is static, the extent count must match it.
    */
-  explicit Image(const std::string& label, std::integral auto... shape) : m_container(label, shape...), m_domain {}
+  explicit Image(const std::string& label, std::integral auto... shape) : m_view(label, shape...), m_domain {}
   {
     if constexpr (not static_start_at_origin_flag) {
       throw std::runtime_error("Image(label, shape): domain is missing.");
@@ -108,9 +108,9 @@ public:
 
   /**
    * @brief Forwarding constructor.
-   * @param args The arguments to be forwarded to the container's constructor
+   * @param args The arguments to be forwarded to the view's constructor
    */
-  explicit Image(Forward, auto&&... args) : m_container(LINX_FORWARD(args)...), m_domain {}
+  explicit Image(Forward, auto&&... args) : m_view(LINX_FORWARD(args)...), m_domain {}
   {
     if constexpr (not static_start_at_origin_flag) {
       throw std::runtime_error("Image(Forward, args): domain is missing.");
@@ -120,10 +120,9 @@ public:
   /**
    * @brief Forwarding constructor.
    * @param domain The image domain
-   * @param args The arguments to be forwarded to the container's constructor
+   * @param args The arguments to be forwarded to the view's constructor
    */
-  explicit Image(const Domain& domain, Forward, auto&&... args) : m_container(LINX_FORWARD(args)...), m_domain {domain}
-  {}
+  explicit Image(const Domain& domain, Forward, auto&&... args) : m_view(LINX_FORWARD(args)...), m_domain {domain} {}
 
   /**
    * @brief Wrapping constructor.
@@ -136,7 +135,7 @@ public:
    * @warning If the rank is static, the extent count must match it.
    */
   template <typename TValue>
-  explicit Image(Wrap<TValue*> data, std::integral auto... shape) : m_container(data.value, shape...), m_domain {}
+  explicit Image(Wrap<TValue*> data, std::integral auto... shape) : m_view(data.value, shape...), m_domain {}
   {
     if constexpr (not static_start_at_origin_flag) {
       throw std::runtime_error("Image(data, shape): domain is missing.");
@@ -161,7 +160,7 @@ public:
   KOKKOS_INLINE_FUNCTION int rank() const
   {
     if constexpr (n == -1) {
-      return Kokkos::rank(m_container);
+      return Kokkos::rank(m_view);
     } else {
       return n;
     }
@@ -196,7 +195,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION int extent(std::integral auto i) const
   {
-    return m_container.extent_int(i);
+    return m_view.extent_int(i);
   }
 
   /**
@@ -207,7 +206,7 @@ public:
     if constexpr (static_start_at_origin_flag) {
       auto out = std::vector<int>(rank());
       for (int i = 0; i < rank(); ++i) {
-        out[i] = m_container.extent_int(i);
+        out[i] = m_view.extent_int(i);
       }
       return Shape(out.begin(), out.end());
     } else {
@@ -221,7 +220,7 @@ public:
   decltype(auto) domain() const
   {
     if constexpr (static_start_at_origin_flag) {
-      return domain_impl(m_container);
+      return domain_impl(m_view);
     } else {
       return m_domain;
     }
@@ -232,7 +231,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION auto stride(std::integral auto i) const
   {
-    return m_container.stride(i);
+    return m_view.stride(i);
   }
 
   /**
@@ -241,16 +240,16 @@ public:
   auto strides() const
   {
     std::vector<Index> longer(rank() + 1);
-    m_container.stride(longer.data());
+    m_view.stride(longer.data());
     return Vector<Index*>(longer.data(), longer.data() + rank());
   }
 
   /**
-   * @brief Underlying container.
+   * @brief Underlying view.
    */
   KOKKOS_INLINE_FUNCTION const base_type& base() const // FIXME base()
   {
-    return m_container;
+    return m_view;
   }
 
   /**
@@ -268,7 +267,7 @@ public:
   KOKKOS_INLINE_FUNCTION reference front() const
   {
     static_assert(max_rank <= 8);
-    return m_container.access(0, 0, 0, 0, 0, 0, 0, 0);
+    return m_view.access(0, 0, 0, 0, 0, 0, 0, 0);
   }
 
   /**
@@ -293,7 +292,7 @@ public:
     for (int i = 0; i < rank(); ++i) {
       p[i] = extent(i) - 1;
     }
-    return m_container.access(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7]);
+    return m_view.access(p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7]);
   }
 
   /**
@@ -325,7 +324,7 @@ public:
    */
   KOKKOS_INLINE_FUNCTION reference operator[](std::integral auto i) const
   {
-    return m_container.accessor().access(m_container.data_handle(), i);
+    return m_view.accessor().access(m_view.data_handle(), i);
     // FIXME check that this undocumented API is stable (same as mdspan)
   }
 
@@ -382,7 +381,7 @@ private:
    */
   template <std::size_t... Is>
   Image(const std::string& label, const Domain& domain, std::index_sequence<Is...>) :
-      m_container(label, get_or<Is, KOKKOS_INVALID_INDEX>(domain.shape())...),
+      m_view(label, get_or<Is, KOKKOS_INVALID_INDEX>(domain.shape())...),
       m_domain {domain}
   {}
 
@@ -391,7 +390,7 @@ private:
    */
   template <typename TValue, std::size_t... Is>
   Image(Wrap<TValue*> data, const Domain& domain, std::index_sequence<Is...>) :
-      m_container(data.value, get_or<Is, KOKKOS_INVALID_INDEX>(domain.shape())...),
+      m_view(data.value, get_or<Is, KOKKOS_INVALID_INDEX>(domain.shape())...),
       m_domain {domain}
   {}
 
@@ -401,7 +400,7 @@ private:
   template <bool CheckBounds = true, typename TPosition, std::size_t... Is>
   KOKKOS_INLINE_FUNCTION reference at_impl(const TPosition& position, std::index_sequence<Is...>) const
   {
-    return m_container.access(index_along<Is, CheckBounds>(get_or<Is, 0>(position))...);
+    return m_view.access(index_along<Is, CheckBounds>(get_or<Is, 0>(position))...);
   }
 
   /**
@@ -421,40 +420,40 @@ private:
   }
 
   /**
-   * @brief Helper function for 0-based fixed-rank containers.
+   * @brief Helper function for 0-based fixed-rank views.
    */
   template <typename... TArgs>
-  static auto domain_impl(const auto& container)
+  static auto domain_impl(const auto& view)
   {
     if constexpr (static_domain_flag) {
       return Domain();
     } else {
-      const auto& box = domain(container); // Not necessarily of type Domain
+      const auto& box = domain(view); // Not necessarily of type Domain
       return Domain(box.start(), box.stop());
     }
   }
 
   template <typename... TArgs>
-  static auto domain(const Kokkos::View<TArgs...>& container)
+  static auto domain(const Kokkos::View<TArgs...>& view)
   { // TODO free function
     static constexpr auto n = Kokkos::View<TArgs...>::rank();
     auto stop = vec<Dimension {n}>(0);
     for (std::size_t i = 0; i < n; ++i) {
-      stop[i] = container.extent_int(i);
+      stop[i] = view.extent_int(i);
     }
     return Box(stop);
   }
 
   /**
-   * @brief Helper function for 0-based dynamic rank containers.
+   * @brief Helper function for 0-based dynamic rank views.
    */
   template <typename... TArgs>
-  static auto domain(const Kokkos::DynRankView<TArgs...>& container) // TODO free function
+  static auto domain(const Kokkos::DynRankView<TArgs...>& view) // TODO free function
   {
-    auto rank = container.rank();
+    auto rank = view.rank();
     auto stop = vec(Dimension {rank}, 0);
     for (LINX_DECLTYPE(rank) i = 0; i < rank; ++i) {
-      stop[i] = container.extent_int(i);
+      stop[i] = view.extent_int(i);
     }
     return Box(stop);
   }
@@ -465,7 +464,7 @@ private:
   template <typename TSlice, std::size_t... Is>
   auto slice_all(const TSlice& slice, std::index_sequence<Is...>) const
   {
-    return Kokkos::subview(m_container, kokkos_slice(get<Is>(slice))...);
+    return Kokkos::subview(m_view, kokkos_slice(get<Is>(slice))...);
     // FIXME offset
   }
 
@@ -476,13 +475,13 @@ private:
   auto slice_last(std::index_sequence<Is...>, const TSlice& slice) const
   {
     using Prepend = std::array<Kokkos::ALL_t, sizeof...(Is)>;
-    return Kokkos::subview(m_container, (typename std::tuple_element<Is, Prepend>::type {})..., kokkos_slice(slice));
+    return Kokkos::subview(m_view, (typename std::tuple_element<Is, Prepend>::type {})..., kokkos_slice(slice));
     // FIXME offset
   }
 
 private:
 
-  base_type m_container; ///< The underlying container
+  base_type m_view; ///< The underlying view
   using DummyDomain = Vector<>; ///< Placeholder with dummy variadic ctor
   std::conditional_t<static_start_at_origin_flag, DummyDomain, Domain> m_domain; ///< The domain, if any
 };

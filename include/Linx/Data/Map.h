@@ -22,7 +22,7 @@ namespace Linx {
  * @ingroup regions
  * @brief Mapping from positions to values.
  * 
- * As opposed to an image, map is a resizable container, whose memory is always on host.
+ * As opposed to an image, map is a resizable view, whose memory is always on host.
  * Trying to access an element out of the map domain returns a reference to the default value `out_of_bounds`,
  * such that a map is naturally extrapolated, with using this constant value.
  * 

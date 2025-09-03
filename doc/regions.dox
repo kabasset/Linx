@@ -28,7 +28,7 @@ Such constructs can be combined through `operator()` to create multi-dimensional
 In contrast to slices, no assumptions are made on the memory layout of restrictions, therefore they support domains of any kind.
 There are two kinds of restrictions:
 - Patches, explicitely defined by their domain;
-- Selections, defined by a predicate applied to the values of the parent container.
+- Selections, defined by a predicate applied to the values of the parent view.
 
 `Patch` and `Selection` are extremely lightweight classes that simply holds a domain or predicate and a pointer to the parent data.
 The latter must remain valid during the lifetime of the restriction.

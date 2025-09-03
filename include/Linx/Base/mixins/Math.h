@@ -17,10 +17,10 @@ namespace Linx {
 /**
  * @ingroup pixelwise
  * @ingroup mixins
- * @brief Mixin to provide mathematical operations and transforms to a container.
+ * @brief Mixin to provide mathematical operations and transforms to a view.
  * 
  * Implements element-wise mathematical functions which may take a range or scalar argument (or none).
- * In the former case, the number of elements in the range must match that of the container.
+ * In the former case, the number of elements in the range must match that of the view.
  * @see pixelwise
  * @see https://en.cppreference.com/w/cpp/header/cmath for functions description
  */

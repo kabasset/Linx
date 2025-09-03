@@ -43,8 +43,8 @@ public:
    * @brief Constructor.
    * 
    * The patch parent will be `root(in)` and its domain `region & in.domain()`.
-   * This ensures that the patch refers directly to the root data container,
-   * and that the patch domain is completely inside the root data container domain.
+   * This ensures that the patch refers directly to the root data view,
+   * and that the patch domain is completely inside the root data view domain.
    * 
    * There is another, `Forward`-tagged constructor, which bypasses those transforms.
    */
@@ -75,7 +75,7 @@ public:
   }
 
   /**
-   * @brief The underlying container.
+   * @brief The underlying view.
    */
   KOKKOS_INLINE_FUNCTION const auto& base() const
   {
@@ -180,7 +180,7 @@ concept AnyPatch = is_specialization<Patch, T>;
 
 /**
  * @relatesalso Patch
- * @brief Get the root data container.
+ * @brief Get the root data view.
  */
 KOKKOS_INLINE_FUNCTION const auto& root(const AnyPatch auto& patch)
 {

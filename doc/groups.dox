@@ -4,7 +4,7 @@
 \brief Kokkos, execution and memory spaces, initialization.
 
 \defgroup arrays 1D, ND arrays
-\brief Sequences, images, associated containers.
+\brief Sequences, images, associated views.
 
   \defgroup creation Creating arrays
   \ingroup arrays

@@ -22,10 +22,10 @@ template <typename TView>
 struct OffsetFiller {
   KOKKOS_INLINE_FUNCTION void operator()(auto... is) const
   {
-    auto ptr = &m_container(is...);
+    auto ptr = &m_view(is...);
     *ptr = ptr - m_ref;
   }
-  TView m_container;
+  TView m_view;
   const typename TView::value_type* m_ref; // FIXME const_pointer?
 };
 
@@ -84,7 +84,7 @@ using DataArithmeticMixin = std::conditional_t<
 
 /**
  * @ingroup pixelwise
- * @brief Data container mixin.
+ * @brief Data view mixin.
  * 
  * @tparam T The value type
  * @tparam TArithmetic The arithmetic tag
@@ -140,7 +140,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   }
 
   /**
-   * @brief Test whether the container is empty.
+   * @brief Test whether the view is empty.
    */
   KOKKOS_INLINE_FUNCTION bool empty() const
   {
@@ -148,7 +148,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   }
 
   /**
-   * @brief Fill the container with a single value.
+   * @brief Fill the view with a single value.
    */
   const TDerived& fill(const T& value) const
   {
@@ -158,7 +158,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   }
 
   /**
-   * @brief Fill the container with address offsets from the data to the elements.
+   * @brief Fill the view with address offsets from the data to the elements.
    * 
    * This is a shortcut for `generate_offsets(data())`.
    */
@@ -168,13 +168,13 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   }
 
   /**
-   * @brief Fill the container with address offsets from some reference.
+   * @brief Fill the view with address offsets from some reference.
    * 
    * Conceptually, this function performs:
    * 
    * \code
-   * for (auto p : container.domain()) {
-   *   container.at(p) = &container.at(p) - ref;
+   * for (auto p : view.domain()) {
+   *   view.at(p) = &view.at(p) - ref;
    * }
    * \endcode
    */
@@ -187,21 +187,21 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   }
 
   /**
-   * @brief Copy the values from another container.
+   * @brief Copy the values from another view.
    */
-  const TDerived& copy_from(const auto& container) const
+  const TDerived& copy_from(const auto& view) const
   {
     // TODO use Kokkos::deep_copy wherever possible
-    return generate(compose_label("copy", container), Forward(), container);
+    return generate(compose_label("copy", view), Forward(), view);
   }
 
   /**
-   * @brief Copy the values to another container.
+   * @brief Copy the values to another view.
    */
-  const TDerived& copy_to(const auto& container) const
+  const TDerived& copy_to(const auto& view) const
   {
     // TODO use Kokkos::deep_copy wherever possible
-    return transform(compose_label("copy", *this), Forward(), container, *this);
+    return transform(compose_label("copy", *this), Forward(), view, *this);
   }
 
   /**
@@ -209,30 +209,30 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    * 
    * @param label A label for debugging
    * @param func The function
-   * @param inputs Optional input containers
+   * @param inputs Optional input views
    * 
-   * The first argument of the function is the element of the container itself.
+   * The first argument of the function is the element of the view itself.
    * If other images are passed as input, their elements are respectively passed to the function.
    * In this case, it is recommended to avoid side effects and to pass the inputs as readonly.
    * 
    * In other words:
    * 
    * \code
-   * container.transform(label, func, a, b);
+   * view.transform(label, func, a, b);
    * \endcode
    * 
    * conceptually performs:
    * 
    * \code
-   * for (auto p : container.domain()) {
-   *   container[p] = func(Linx::as_readonly(container)[p], Linx::as_readonly(a)[p], Linx::as_readonly(b)[p]);
+   * for (auto p : view.domain()) {
+   *   view[p] = func(Linx::as_readonly(view)[p], Linx::as_readonly(a)[p], Linx::as_readonly(b)[p]);
    * }
    * \endcode
    * 
    * and is equivalent to:
    * 
    * \code
-   * container.generate(label, func, container, a, b);
+   * view.generate(label, func, view, a, b);
    * \endcode
    * 
    * @see `generate()`
@@ -277,26 +277,26 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    * 
    * @param label A label for debugging
    * @param func The function
-   * @param others Optional containers the function acts on
+   * @param others Optional views the function acts on
    * 
-   * The arguments of the function are the elements of the containers, if any, i.e.:
+   * The arguments of the function are the elements of the views, if any, i.e.:
    * 
    * \code
-   * container.generate_with_side_effects(label, func, a, b);
+   * view.generate_with_side_effects(label, func, a, b);
    * \endcode
    * 
    * conceptually performs:
    * 
    * \code
-   * for (auto p : container.domain()) {
-   *   container[p] = func(a[p], b[p]);
+   * for (auto p : view.domain()) {
+   *   view[p] = func(a[p], b[p]);
    * }
    * \endcode
    * 
-   * The domain of the optional containers must include the container domain.
+   * The domain of the optional views must include the view domain.
    * 
    * The function is allowed to have side effects, i.e., to modify its arguments.
-   * In this case, the elements of the optional containers are effectively modified.
+   * In this case, the elements of the optional views are effectively modified.
    * If the function has no side effect, it is preferrable to use `generate()` instead.
    * 
    * @see `DataMixin::transform()`
@@ -329,7 +329,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   }
 
   /**
-   * @brief Test whether the container contains a given value.
+   * @brief Test whether the view contains a given value.
    */
   bool contains(const T& value) const
   {
@@ -338,7 +338,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   }
 
   /**
-   * @brief Test whether the container contains NaNs.
+   * @brief Test whether the view contains NaNs.
    */
   bool contains_nan() const
   {
@@ -349,7 +349,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   /**
    * @brief Test whether all elements are equal to a given value.
    * 
-   * If the container is empty, return `false`.
+   * If the view is empty, return `false`.
    */
   bool contains_only(const T& value) const
   {

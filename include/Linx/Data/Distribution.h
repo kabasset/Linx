@@ -53,9 +53,9 @@ void histogram_to(const TIn& in, const TBins& bins, TOut& out)
 }
 
 /**
- * @brief Compute the histogram of a container.
+ * @brief Compute the histogram of a view.
  * 
- * @param in The container
+ * @param in The view
  * @param bins The bin bounds
  * 
  * The bins are half-open intervals, such that `histogram[i]` is the number of values

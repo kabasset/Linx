@@ -63,8 +63,8 @@ namespace Linx {
 
 /**
  * @ingroup pixelwise
- * @brief Mixin which provides arithmetic operators to a derived container class.
- * @tparam TDerived The container which inherits this class
+ * @brief Mixin which provides arithmetic operators to a derived view class.
+ * @tparam TDerived The view which inherits this class
  * 
  * @see `BooleanArithmeticMixin`
  * @see `VectorArithmeticMixin`

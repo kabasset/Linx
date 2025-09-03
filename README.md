@@ -57,9 +57,9 @@ make install
 
 ## API overview
 
-**Data containers**
+**Data views**
 
-There are two main data containers: `Sequence` for 1D arrays, and `Image` for ND arrays.
+There are two main data views: `Sequence` for 1D arrays, and `Image` for ND arrays.
 Underlying storage is handled by Kokkos by default, and adapts to the target infrastructure.
 There is generally no memory ordering or contiguity guarantee for `Image` objects.
 In return, execution is automatically parallelized by Kokkos, including on GPU.
@@ -69,7 +69,7 @@ For interfacing with libraries which require contiguity,
 It is a standard range (providing `begin()` and `end()`) which eases interfacing with the standard library.
 `Image` and `Raster` are also compatible with `std::mdspan`.
 
-Data containers have shared pointer semantics, so that copy is shallow by default.
+Data views have shared pointer semantics, so that copy is shallow by default.
 Deep copy has to be explicit:
 
 ```cpp
@@ -82,7 +82,7 @@ c *= 2; // Modifies c only
 
 **Pointwise transforms**
 
-Data containers offer a variety of pointwise transforms which can either modify the data in-place or return new instances or values.
+Data views offer a variety of pointwise transforms which can either modify the data in-place or return new instances or values.
 In-place transforms are methods, such as `Image::exp()`, while new-instance transforms are free functions, such as `exp(const Image&)`:
 
 ```cpp
@@ -105,7 +105,7 @@ a.transform(
     KOKKOS_LAMBDA(auto a_i) { return 1. / (1. + std::exp(-a_i)); });
 ```
 
-Both methods accept auxiliary data containers as function parameters:
+Both methods accept auxiliary data views as function parameters:
 
 ```cpp
 auto a = Linx::Image(...);
@@ -140,7 +140,7 @@ Slices are created from regions of type either `Slice` or `Box`.
 Patches accept any type of region, are extremely lightweight and can be moved around when the region is a window, i.e. has shifting capabilities.
 Typical windows are `Box`, `Mask` or `Path` and can be used to perform operations locally.
 As opposed to slicing, patching results in an object of type `Patch` instead of simply `Sequence` or `Image`.
-Nevertheless, patches are themselves data containers and can be transformed pointwise:
+Nevertheless, patches are themselves data views and can be transformed pointwise:
 
 ```cpp
 auto image = Linx::Image(...):

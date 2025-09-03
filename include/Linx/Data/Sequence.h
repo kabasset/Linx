@@ -5,7 +5,7 @@
 #ifndef LINX_DATA_SEQUENCE_H
 #define LINX_DATA_SEQUENCE_H
 
-#include "Linx/Base/Containers.h"
+#include "Linx/Base/Views.h"
 #include "Linx/Data/Image.h"
 
 namespace Linx {

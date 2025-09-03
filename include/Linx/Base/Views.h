@@ -2,8 +2,8 @@
 // SPDX-PackageSourceInfo: https://github.com/kabasset/Linx
 // SPDX-License-Identifier: Apache-2.0
 
-#ifndef LINX_BASE_CONTAINERS_H
-#define LINX_BASE_CONTAINERS_H
+#ifndef LINX_BASE_VIEWS_H
+#define LINX_BASE_VIEWS_H
 
 #include "Linx/Base/Types.h"
 
@@ -18,10 +18,10 @@ static constexpr int kokkos_max_dyn_rank = 7; ///< Maximum rank of a `Kokkos::Dy
 static constexpr int kokkos_max_op_rank = 6; ///< Maximum rank of most Kokkos operations
 
 /**
- * @brief Default sequence container instance.
+ * @brief Default sequence view instance.
  */
 template <typename T, int N, typename... TArgs>
-auto default_sequence_container()
+auto default_sequence_view()
 {
   if constexpr (N == -1 || N == 0) {
     return Kokkos::View<T*, TArgs...>();
@@ -31,16 +31,16 @@ auto default_sequence_container()
 }
 
 /**
- * @brief Default sequence container type.
+ * @brief Default sequence view type.
  */
 template <typename T, int N, typename... TArgs>
-using SequenceContainer = decltype(default_sequence_container<T, N, TArgs...>());
+using SequenceContainer = decltype(default_sequence_view<T, N, TArgs...>());
 
 /**
- * @brief Default image container instance.
+ * @brief Default image view instance.
  */
 template <typename T, typename TDomain, typename... TArgs>
-static constexpr auto default_image_container()
+static constexpr auto default_image_view()
 {
   constexpr auto n = TDomain::n;
   static_assert(kokkos_max_rank <= 8);
@@ -111,13 +111,13 @@ static constexpr auto default_image_container()
 }
 
 /**
- * @brief Default image container type.
+ * @brief Default image view type.
  */
 template <typename T, typename TDomain, typename... TArgs>
-using ImageContainer = decltype(default_image_container<T, TDomain, TArgs...>());
+using ImageContainer = decltype(default_image_view<T, TDomain, TArgs...>());
 
 /**
- * @brief Traits to rebind containers.
+ * @brief Traits to rebind views.
  */
 template <typename T>
 struct Rebind {

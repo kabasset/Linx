@@ -5,11 +5,11 @@
 #ifndef LINX_BASE_REDUCTION_H
 #define LINX_BASE_REDUCTION_H
 
-#include "Linx/Base/Containers.h"
 #include "Linx/Base/Functional.h"
 #include "Linx/Base/Packs.h"
 #include "Linx/Base/Slice.h" // OutOfBounds
 #include "Linx/Base/Types.h"
+#include "Linx/Base/Views.h"
 #include "Linx/Base/mixins/Data.h"
 
 #include <Kokkos_Core.hpp>
@@ -235,7 +235,7 @@ void kokkos_reduce(const std::string& label, const TRegion& region, const TProj&
  * 
  * @param label A label for debugging
  * @param monoid The reduction monoid
- * @param in The input data container
+ * @param in The input data view
  * 
  * The monoid is an associative binary operator functor, for which `identity_element()` is defined,
  * i.e. the following is available: `identity_element<T>(monoid)`, where `T` is the element type of `in`.
@@ -261,9 +261,9 @@ auto reduce(const std::string& label, const TMonoid& monoid, const TIn& in)
  * @param label A label for debugging
  * @param map The mapping functor
  * @param monoid The reduction monoid
- * @param ins Input data containers
+ * @param ins Input data views
  * 
- * For each position of the input domain, the elements of each input data container are passed to the mapping function
+ * For each position of the input domain, the elements of each input data view are passed to the mapping function
  * before the reduction monoid is applied, i.e., `transform_reduce("", map, monoid, a, b, c)` produces:
  * 
  * \code
@@ -272,7 +272,7 @@ auto reduce(const std::string& label, const TMonoid& monoid, const TIn& in)
  * 
  * where `p0, p1, ... , pN` are the positions in the image domain and `+` denotes the monoid operator.
  * 
- * Typically, the dot product of two containers `a` and `b` can be implemented as:
+ * Typically, the dot product of two views `a` and `b` can be implemented as:
  * 
  * \code
  * transform_reduce("dot", Multiply(), Add(), a, b);
@@ -331,7 +331,7 @@ auto transform_reduce_with_side_effects(
 
 /**
  * @ingroup reduction
- * @brief Minimun value of a data container.
+ * @brief Minimun value of a data view.
  */
 template <typename TIn>
 typename TIn::value_type min(const TIn& in)
@@ -341,7 +341,7 @@ typename TIn::value_type min(const TIn& in)
 
 /**
  * @ingroup reduction
- * @brief Maximum value of a data container.
+ * @brief Maximum value of a data view.
  */
 template <typename TIn>
 typename TIn::value_type max(const TIn& in)
@@ -351,7 +351,7 @@ typename TIn::value_type max(const TIn& in)
 
 /**
  * @ingroup reduction
- * @brief Compute the sum of all elements of a data container.
+ * @brief Compute the sum of all elements of a data view.
  */
 template <typename TIn>
 typename TIn::value_type sum(const TIn& in) // TODO limit to DataMixins
@@ -361,7 +361,7 @@ typename TIn::value_type sum(const TIn& in) // TODO limit to DataMixins
 
 /**
  * @ingroup reduction
- * @brief Compute the product of all elements of a data container.
+ * @brief Compute the product of all elements of a data view.
  */
 template <typename TIn>
 typename TIn::value_type product(const TIn& in) // TODO limit to DataMixins
@@ -371,7 +371,7 @@ typename TIn::value_type product(const TIn& in) // TODO limit to DataMixins
 
 /**
  * @ingroup reduction
- * @brief Compute the dot product of two data containers.
+ * @brief Compute the dot product of two data views.
  */
 template <typename TLhs, typename TRhs>
 typename TLhs::value_type dot(const TLhs& lhs, const TRhs& rhs)

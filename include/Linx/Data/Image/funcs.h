@@ -54,8 +54,8 @@ decltype(auto) on_device(const Image<T, TDomain, TView>& in)
   if constexpr (Kokkos::SpaceAccessibility<TSpace, typename TView::memory_space>::accessible) {
     return in;
   } else {
-    auto container = Kokkos::create_mirror_view_and_copy(TSpace(), in.base());
-    return Image<T, TDomain, decltype(container)>(in.domain(), Forward {}, LINX_MOVE(container));
+    auto view = Kokkos::create_mirror_view_and_copy(TSpace(), in.base());
+    return Image<T, TDomain, decltype(view)>(in.domain(), Forward {}, LINX_MOVE(view));
   }
   // FIXME handle shifted in
 }
@@ -81,7 +81,7 @@ auto end(const Image<T, TDomain, TView>& image)
 }
 
 /**
- * @brief Align a contiguous-domain 1D data container along an axis, reshaping it into an ND image.
+ * @brief Align a contiguous-domain 1D data view along an axis, reshaping it into an ND image.
  * @tparam I The axis to align the array along
  * @tparam N The rank of the output image (-1 is not supported)
  * 

@@ -74,8 +74,8 @@ struct RangeMixin {
    */
   bool equal(std::convertible_to<T> auto... values) const
   {
-    const auto& container = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), LINX_CRTP_CONST_DERIVED.base());
-    return equal_impl(container, forward_as_tuple(values...), std::make_index_sequence<sizeof...(values)>());
+    const auto& view = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), LINX_CRTP_CONST_DERIVED.base());
+    return equal_impl(view, forward_as_tuple(values...), std::make_index_sequence<sizeof...(values)>());
     return LINX_CRTP_CONST_DERIVED;
   }
 
@@ -84,9 +84,9 @@ struct RangeMixin {
    */
   const TDerived& assign(std::convertible_to<T> auto... values) const
   {
-    const auto& container = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), LINX_CRTP_CONST_DERIVED.base());
-    assign_impl(container, forward_as_tuple(values...), std::make_index_sequence<sizeof...(values)>());
-    Kokkos::deep_copy(LINX_CRTP_CONST_DERIVED.base(), container);
+    const auto& view = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), LINX_CRTP_CONST_DERIVED.base());
+    assign_impl(view, forward_as_tuple(values...), std::make_index_sequence<sizeof...(values)>());
+    Kokkos::deep_copy(LINX_CRTP_CONST_DERIVED.base(), view);
     return LINX_CRTP_CONST_DERIVED;
   }
 
@@ -104,13 +104,13 @@ struct RangeMixin {
   template <std::input_iterator TIt>
   const TDerived& assign(TIt begin) const
   {
-    const auto& container = LINX_CRTP_CONST_DERIVED.base();
-    auto mirror = Kokkos::create_mirror_view(container);
+    const auto& view = LINX_CRTP_CONST_DERIVED.base();
+    auto mirror = Kokkos::create_mirror_view(view);
     auto mirror_data = mirror.data();
     Kokkos::parallel_for(
-        Kokkos::RangePolicy<Kokkos::HostSpace::execution_space>(0, container.size()),
+        Kokkos::RangePolicy<Kokkos::HostSpace::execution_space>(0, view.size()),
         KOKKOS_CLASS_LAMBDA(std::size_t i) { mirror_data[i] = *std::next(begin, i); });
-    Kokkos::deep_copy(container, mirror);
+    Kokkos::deep_copy(view, mirror);
     return LINX_CRTP_CONST_DERIVED;
   }
 
@@ -119,18 +119,18 @@ struct RangeMixin {
    */
   const TDerived& assign(const T* data) const
   {
-    const auto& container = LINX_CRTP_CONST_DERIVED.base();
-    auto mirror = Kokkos::create_mirror_view(container);
+    const auto& view = LINX_CRTP_CONST_DERIVED.base();
+    auto mirror = Kokkos::create_mirror_view(view);
     auto mirror_data = mirror.data();
     Kokkos::parallel_for(
-        Kokkos::RangePolicy<Kokkos::HostSpace::execution_space>(0, container.size()),
+        Kokkos::RangePolicy<Kokkos::HostSpace::execution_space>(0, view.size()),
         KOKKOS_CLASS_LAMBDA(std::size_t i) { mirror_data[i] = data[i]; });
-    Kokkos::deep_copy(container, mirror);
+    Kokkos::deep_copy(view, mirror);
     return LINX_CRTP_CONST_DERIVED;
   }
 
   /**
-   * @brief Fill the container with an arithmetic progression.
+   * @brief Fill the view with an arithmetic progression.
    * @param first The first value to be generated
    * @param difference The common difference
    * Conceptually, this function performs:
@@ -148,7 +148,7 @@ struct RangeMixin {
   }
 
   /**
-   * @brief Fill the container with an arithmetic progression.
+   * @brief Fill the view with an arithmetic progression.
    * @param slice The closed generation interval
    * 
    * The resulting value of `front()` is `slice.start()`,
@@ -163,7 +163,7 @@ struct RangeMixin {
   }
 
   /**
-   * @brief Fill the container with an arithmetic progression.
+   * @brief Fill the view with an arithmetic progression.
    * @param slice The generation interval, supremum of which is excluded
    * 
    * The resulting value of `front()` is `slice.start()`,
@@ -179,7 +179,7 @@ struct RangeMixin {
   }
 
   /**
-   * @brief Fill the container with a geometric progression.
+   * @brief Fill the view with a geometric progression.
    * @param first The first value to be generated
    * @param ratio The ratio between two consecutive values
    * 
@@ -242,24 +242,24 @@ struct RangeMixin {
    * @brief Helper function for unfolding pack.
    */
   template <std::size_t... Is>
-  bool equal_impl(const auto& container, const auto& values, std::index_sequence<Is...>) const
+  bool equal_impl(const auto& view, const auto& values, std::index_sequence<Is...>) const
   {
-    return ((container(Is) == get<Is>(values)) && ...);
+    return ((view(Is) == get<Is>(values)) && ...);
   }
 
   /**
    * @brief Helper function for unfolding pack.
    */
   template <std::size_t... Is>
-  void assign_impl(const auto& container, const auto& values, std::index_sequence<Is...>) const
+  void assign_impl(const auto& view, const auto& values, std::index_sequence<Is...>) const
   {
-    ((container(Is) = get<Is>(values)), ...);
+    ((view(Is) = get<Is>(values)), ...);
   }
   /// @endcond
 };
 
 /**
- * @brief Disable range operations for incompatible containers.
+ * @brief Disable range operations for incompatible views.
  */
 template <typename T, typename TDerived>
 struct RangeMixin<false, T, TDerived> {};

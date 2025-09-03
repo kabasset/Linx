@@ -50,7 +50,7 @@ auto b = Linx::exp(a); // Create `b`, do not modify `a`
 auto c = +a; // Deep copy `a`
 ```
 
-When the operators or functions expect parameters, scalars or containers of compatible shapes are accepted:
+When the operators or functions expect parameters, scalars or views of compatible shapes are accepted:
 
 ```
 a.pow(b);

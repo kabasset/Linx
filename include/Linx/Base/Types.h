@@ -413,7 +413,7 @@ std::string label(const auto&)
 }
 
 /**
- * @brief Create a label from a function name and input containers.
+ * @brief Create a label from a function name and input views.
  * @return `<func>(<in.label()>)`
  */
 std::string compose_label(const std::string& func, const auto& in0, const auto&... ins)

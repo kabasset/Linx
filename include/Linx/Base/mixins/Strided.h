@@ -27,7 +27,7 @@ KOKKOS_INLINE_FUNCTION auto offset_impl(const auto& in, const auto& indices, std
 } // namespace Impl
 
 /**
- * @brief Address offset from the origin element of some strided input data container to the element at given indices.
+ * @brief Address offset from the origin element of some strided input data view to the element at given indices.
  */
 KOKKOS_INLINE_FUNCTION auto offset_from_origin(const Strided auto& in, std::integral auto... indices)
 {

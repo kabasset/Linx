@@ -38,8 +38,8 @@ Like `resize()`, `rowwise()` accepts a template parameter specifying the memory 
 \section creation-wrap Pointer wrapping
 
 `Sequence` and `Image` can serve as adaptors for C pointers, in which case they do not manage memory:
-no allocation or deallocation is performed, and the pointer must remain valid throughout the lifetime of the container.
-This is especially useful to enable signal or image processing for arbitrary containers.
+no allocation or deallocation is performed, and the pointer must remain valid throughout the lifetime of the view.
+This is especially useful to enable signal or image processing for arbitrary views.
 `Raster` is a row-major ordered image with contiguous memory and compatible with the standard ranges concepts.
 As such, it is particularly well suited to interface with the standard library.
 
