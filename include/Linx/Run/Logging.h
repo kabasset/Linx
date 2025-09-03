@@ -33,17 +33,20 @@ template <typename TLogger = CerrLogger> // FIXME add TUnit with GCC 12 support 
 class TimerLogger {
 public:
 
-  using Timer = Linx::Timer<std::chrono::milliseconds>;
-  using Logger = TLogger;
+  using timer_type = Linx::Timer<std::chrono::milliseconds>;
+  using logger_type = TLogger;
 
-  TimerLogger(Timer timer = Timer(), Logger logger = Logger()) : m_timer(timer), m_logger(LINX_MOVE(logger)) {}
+  TimerLogger(timer_type timer = timer_type(), logger_type logger = logger_type()) :
+      m_timer(timer),
+      m_logger(LINX_MOVE(logger))
+  {}
 
-  const Timer& timer() const
+  const timer_type& timer() const
   {
     return m_timer;
   }
 
-  Timer& timer()
+  timer_type& timer()
   {
     return m_timer;
   }
@@ -74,7 +77,7 @@ public:
 
 private:
 
-  Timer m_timer;
+  timer_type m_timer;
   TLogger m_logger;
 };
 

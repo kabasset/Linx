@@ -240,7 +240,7 @@ auto impulse(const std::string& label, auto&&... domain)
 template <typename TRebind = void, typename T, typename TDomain, typename TView>
 auto same_layout(const std::string& label, const Image<T, TDomain, TView>& in)
 {
-  return Image<typename Rebind<T>::As<TRebind>, TDomain, typename Rebind<TView>::As<TRebind>>(
+  return Image<typename Rebind<T>::as_type<TRebind>, TDomain, typename Rebind<TView>::as_type<TRebind>>(
       in.domain(),
       Forward(),
       same_layout<TRebind>(label, in.base()));

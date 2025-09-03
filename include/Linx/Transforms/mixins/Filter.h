@@ -22,13 +22,13 @@ class ExtrapolatedFilter { // FIXME make the default, force nullprt for no extra
 
 public:
 
-  using Parent = TParent; ///< The parent filter
+  using parent_type = TParent; ///< The parent filter
   using Method = TMethod; ///< The extrapolation method
 
   /**
    * @brief Constructor.
    */
-  ExtrapolatedFilter(Parent parent, Method method) : m_parent(parent), m_method(LINX_MOVE(method)) {}
+  ExtrapolatedFilter(parent_type parent, Method method) : m_parent(parent), m_method(LINX_MOVE(method)) {}
 
   /**
    * @brief Filter label.
@@ -41,7 +41,7 @@ public:
   /**
    * @brief Parent filter.
    */
-  KOKKOS_INLINE_FUNCTION const Parent& parent() const // FIXME rm
+  KOKKOS_INLINE_FUNCTION const parent_type& parent() const // FIXME rm
   {
     return m_parent;
   }
@@ -103,7 +103,7 @@ public:
 
 private:
 
-  Parent m_parent;
+  parent_type m_parent;
   Method m_method;
 };
 

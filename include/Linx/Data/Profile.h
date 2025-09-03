@@ -208,14 +208,14 @@ template <Strided TParent> // FIXME should work with all mappings
 class Profile :
     public DataMixin<
         typename TParent::value_type,
-        typename TParent::Arithmetic,
+        typename TParent::arithmetics_type,
         Profile<TParent>> { // FIXME element_type?
 public:
 
-  using Parent = TParent; ///< The parent mapping
+  using parent_type = TParent; ///< The parent mapping
   static constexpr auto n = 1; ///< The rank
-  using element_type = Parent::element_type; ///< The element type
-  using value_type = Parent::value_type; ///< The value type
+  using element_type = parent_type::element_type; ///< The element type
+  using value_type = parent_type::value_type; ///< The value type
   using reference = element_type&; ///< The reference type
   using pointer = element_type*; ///< The pointer type
   using iterator = ProfileIterator<element_type>; ///< The iterator type
@@ -228,7 +228,7 @@ public:
    * @param parent The parent mapping
    * @param capacity The maximum size of the sequence
    */
-  Profile(const Parent& parent, std::integral auto capacity) :
+  Profile(const parent_type& parent, std::integral auto capacity) :
       m_parent(parent),
       m_offsets("Profile offsets", capacity),
       m_size("Profile size")
@@ -237,7 +237,7 @@ public:
   /**
    * @brief Region-based constructor.
    */
-  Profile(const Parent& parent, const NotConvertibleTo<std::size_t> auto& region) : Profile(parent, region.size())
+  Profile(const parent_type& parent, const NotConvertibleTo<std::size_t> auto& region) : Profile(parent, region.size())
   {
     assign(region);
   }
@@ -278,7 +278,7 @@ public:
   /**
    * @brief Parent data view.
    */
-  constexpr const Parent& parent() const
+  constexpr const parent_type& parent() const
   {
     return m_parent;
   }
@@ -382,7 +382,7 @@ public:
 
 private:
 
-  Parent m_parent; ///< The parent data view
+  parent_type m_parent; ///< The parent data view
   Kokkos::View<std::ptrdiff_t*, memory_space> m_offsets; ///< The offsets in the parent
   Kokkos::View<std::size_t, memory_space> m_size; ///< The profile size
 };

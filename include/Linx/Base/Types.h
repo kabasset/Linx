@@ -178,14 +178,14 @@ struct TypeTraits {
    * A floating point type wide enough to handle any value of type `T`.
    * Can be complex.
    */
-  using Floating = std::conditional_t<std::is_floating_point<T>::value, T, double>;
+  using floating_point_type = std::conditional_t<std::is_floating_point_v<T>, T, double>;
 
   /**
    * @brief The scalar type which corresponds to `T`.
    * 
    * The type itself in general, or the value type of complex types.
    */
-  using Scalar = T;
+  using scalar_type = T;
 
   /**
    * @brief Make some `T` from a scalar.
@@ -193,7 +193,7 @@ struct TypeTraits {
    * Return the value itself if `T` is already scalar,
    * or a complex with same real and imaginary parts if `T` is complex.
    */
-  KOKKOS_INLINE_FUNCTION static T from_scalar(Scalar in)
+  KOKKOS_INLINE_FUNCTION static T from_scalar(scalar_type in)
   {
     return in;
   }
@@ -213,9 +213,9 @@ struct TypeTraits {
 /// @cond
 template <typename T>
 struct TypeTraits<std::complex<T>> {
-  using Floating = std::complex<T>;
+  using floating_point_type = std::complex<T>;
 
-  using Scalar = T;
+  using scalar_type = T;
 
   KOKKOS_INLINE_FUNCTION static std::complex<T> from_scalar(T in)
   {
@@ -248,7 +248,7 @@ struct Limits {
   /**
    * @brief The type for real numbers, the component type for complex numbers.
    */
-  using Scalar = typename TypeTraits<T>::Scalar;
+  using scalar_type = typename TypeTraits<T>::scalar_type;
 
   /**
    * @brief 0 in general, or `false` for Booleans.
@@ -271,7 +271,7 @@ struct Limits {
    */
   KOKKOS_INLINE_FUNCTION static T min()
   {
-    return TypeTraits<T>::from_scalar(std::numeric_limits<Scalar>::lowest());
+    return TypeTraits<T>::from_scalar(std::numeric_limits<scalar_type>::lowest());
   }
 
   /**
@@ -279,7 +279,7 @@ struct Limits {
    */
   KOKKOS_INLINE_FUNCTION static T max()
   {
-    return TypeTraits<T>::from_scalar(std::numeric_limits<Scalar>::max());
+    return TypeTraits<T>::from_scalar(std::numeric_limits<scalar_type>::max());
   }
 
   /**
@@ -287,7 +287,7 @@ struct Limits {
    */
   KOKKOS_INLINE_FUNCTION static T inf()
   {
-    constexpr auto infinity = std::numeric_limits<Scalar>::infinity();
+    constexpr auto infinity = std::numeric_limits<scalar_type>::infinity();
     return infinity ? TypeTraits<T>::from_scalar(infinity) : max();
   }
 
@@ -299,7 +299,7 @@ struct Limits {
     if constexpr (std::is_integral_v<T>) {
       return T(1);
     } else {
-      return TypeTraits<T>::from_scalar(std::numeric_limits<Scalar>::epsilon());
+      return TypeTraits<T>::from_scalar(std::numeric_limits<scalar_type>::epsilon());
     }
   }
 

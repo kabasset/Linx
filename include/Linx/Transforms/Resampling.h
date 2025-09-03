@@ -21,17 +21,17 @@ template <typename TParent, typename TMethod>
 class Interpolation {
 public:
 
-  using Parent = TParent;
+  using parent_type = TParent;
   using Method = TMethod;
 
-  Interpolation(Parent parent, Method method) : m_parent(LINX_MOVE(parent)), m_method(LINX_MOVE(method)) {}
+  Interpolation(parent_type parent, Method method) : m_parent(LINX_MOVE(parent)), m_method(LINX_MOVE(method)) {}
 
   std::string label() const
   {
     return compose_label("interpolate", m_parent, m_method);
   }
 
-  KOKKOS_INLINE_FUNCTION const Parent& parent() const
+  KOKKOS_INLINE_FUNCTION const parent_type& parent() const
   {
     return m_parent;
   }
@@ -53,7 +53,7 @@ public:
 
 private:
 
-  Parent m_parent;
+  parent_type m_parent;
   Method m_method;
 };
 
@@ -77,21 +77,21 @@ template <typename TParent, typename TMethod>
 class Extrapolation {
 public:
 
-  using Parent = TParent;
+  using parent_type = TParent;
   using Method = TMethod;
   using memory_space = TParent::memory_space;
   using execution_space = TParent::execution_space;
 
-  Extrapolation(Parent parent, Method method) : m_parent(LINX_MOVE(parent)), m_method(LINX_MOVE(method)) {}
+  Extrapolation(parent_type parent, Method method) : m_parent(LINX_MOVE(parent)), m_method(LINX_MOVE(method)) {}
 
-  Extrapolation(Parent parent, auto&&... args) : m_parent(LINX_MOVE(parent)), m_method {LINX_FORWARD(args)...} {}
+  Extrapolation(parent_type parent, auto&&... args) : m_parent(LINX_MOVE(parent)), m_method {LINX_FORWARD(args)...} {}
 
   std::string label() const
   {
     return compose_label("extrapolate", m_parent, m_method);
   }
 
-  KOKKOS_INLINE_FUNCTION const Parent& parent() const
+  KOKKOS_INLINE_FUNCTION const parent_type& parent() const
   {
     return m_parent;
   }
@@ -108,7 +108,7 @@ public:
 
 private:
 
-  Parent m_parent;
+  parent_type m_parent;
   Method m_method;
 };
 

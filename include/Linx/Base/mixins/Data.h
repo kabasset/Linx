@@ -92,7 +92,7 @@ using DataArithmeticMixin = std::conditional_t<
  */
 template <typename T, typename TArithmeticMixin, typename TDerived>
 struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerived> {
-  using Arithmetic = TArithmeticMixin;
+  using arithmetics_type = TArithmeticMixin;
 
   /**
    * @brief Label.

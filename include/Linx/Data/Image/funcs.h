@@ -20,7 +20,7 @@ decltype(auto) as_readonly(const Image<T, TDomain, TView>& in)
   if constexpr (std::is_const_v<T>) {
     return in;
   } else {
-    using Out = Image<const T, TDomain, typename Rebind<TView>::AsReadonly>;
+    using Out = Image<const T, TDomain, typename Rebind<TView>::add_const>;
     return Out(in.domain(), Forward {}, in.base());
   }
   // FIXME handle shifted in
@@ -32,7 +32,7 @@ decltype(auto) as_readonly(const Image<T, TDomain, TView>& in)
 template <typename T, typename TDomain, typename TView>
 decltype(auto) as_atomic(const Image<T, TDomain, TView>& in)
 {
-  using Out = Image<T, TDomain, typename Rebind<TView>::AsAtomic>;
+  using Out = Image<T, TDomain, typename Rebind<TView>::add_atomic>;
   return Out(in.domain(), Forward {}, in.base());
 }
 

@@ -21,18 +21,19 @@ namespace Linx {
  * As opposed to an image slice, an image patch always has the same rank as the image, and its domain is the input domain.
  */
 template <typename TParent, typename TDomain>
-class Patch : public DataMixin<typename TParent::element_type, typename TParent::Arithmetic, Patch<TParent, TDomain>> {
+class Patch :
+    public DataMixin<typename TParent::element_type, typename TParent::arithmetics_type, Patch<TParent, TDomain>> {
 public:
 
   static constexpr int n = TDomain::n; ///< The dimension parameter
-  using Parent = TParent; ///< The parent, which may be a patch
-  using Domain = TDomain; ///< The domain
+  using parent_type = TParent; ///< The parent, which may be a patch
+  using domain_type = TDomain; ///< The domain
 
-  using memory_space = typename Parent::memory_space;
-  using execution_space = typename Parent::execution_space;
+  using memory_space = typename parent_type::memory_space;
+  using execution_space = typename parent_type::execution_space;
 
-  using value_type = typename Parent::value_type; ///< The value type
-  using reference = typename Parent::reference; ///< The reference type
+  using value_type = typename parent_type::value_type; ///< The value type
+  using reference = typename parent_type::reference; ///< The reference type
 
   /**
    * @brief Default constructor.
@@ -56,12 +57,12 @@ public:
    * The parent and domain are unaltered, which may result in a patch of patch,
    * and a domain which spans outside of the parent domain.
    */
-  Patch(Forward, const Parent& parent, Domain domain) : m_parent(parent), m_domain(LINX_MOVE(domain)) {}
+  Patch(Forward, const parent_type& parent, domain_type domain) : m_parent(parent), m_domain(LINX_MOVE(domain)) {}
 
   /**
    * @brief Parent.
    */
-  KOKKOS_INLINE_FUNCTION const Parent& parent() const
+  KOKKOS_INLINE_FUNCTION const parent_type& parent() const
   {
     return m_parent;
   }
@@ -69,7 +70,7 @@ public:
   /**
    * @brief Domain.
    */
-  KOKKOS_INLINE_FUNCTION const Domain& domain() const
+  KOKKOS_INLINE_FUNCTION const domain_type& domain() const
   {
     return m_domain;
   }
@@ -171,8 +172,8 @@ public:
 
 private:
 
-  Parent m_parent; ///< The parent
-  Domain m_domain; ///< The domain
+  parent_type m_parent; ///< The parent
+  domain_type m_domain; ///< The domain
 };
 
 template <typename T>
@@ -200,16 +201,17 @@ namespace Impl {
 
 template <typename TIn, typename TDomain>
 struct PatchTraits {
-  using Parent = std::remove_cvref_t<decltype(root(std::declval<TIn>()))>;
-  using Domain = std::remove_cvref_t<decltype(std::declval<TDomain>() & std::declval<TIn>().domain())>;
-  using Type = Patch<Parent, Domain>;
+  using parent_type = std::remove_cvref_t<decltype(root(std::declval<TIn>()))>;
+  using domain_type = std::remove_cvref_t<decltype(std::declval<TDomain>() & std::declval<TIn>().domain())>;
+  using type = Patch<parent_type, domain_type>;
 };
 
 } // namespace Impl
 
 template <typename TIn, typename TDomain>
-Patch(const TIn&, const TDomain&)
-    -> Patch<typename Impl::PatchTraits<TIn, TDomain>::Parent, typename Impl::PatchTraits<TIn, TDomain>::Domain>;
+Patch(const TIn&, const TDomain&) -> Patch<
+    typename Impl::PatchTraits<TIn, TDomain>::parent_type,
+    typename Impl::PatchTraits<TIn, TDomain>::domain_type>;
 
 template <typename TParent, typename TDomain>
 decltype(auto) as_readonly(const Patch<TParent, TDomain>& in)

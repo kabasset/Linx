@@ -17,14 +17,14 @@ namespace Linx {
  */
 template <typename T0, typename... Ts>
 struct PackTraits {
-  using First = T0;
-  using Last = typename decltype((std::type_identity<Ts> {}, ...))::type;
+  using first_type = T0;
+  using last_type = typename decltype((std::type_identity<Ts> {}, ...))::type;
 };
 
 template <typename T>
 struct PackTraits<T> {
-  using First = T;
-  using Last = T;
+  using first_type = T;
+  using last_type = T;
 };
 
 namespace Impl {

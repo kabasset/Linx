@@ -52,13 +52,14 @@ public:
   using pointer = T*; ///< The value pointer type
   using const_pointer = const T*; ///< The constant pointer type
 
-  using Domain = TDomain; ///< The domain type // FIXME domain_type
-  using Shape = typename Domain::value_type; ///< The shape type ///< FIXME shape_type?
-  static constexpr int n = Domain::n; ///< The rank parameter
+  using domain_type = TDomain; ///< The domain type // FIXME domain_type
+  using shape_type = typename domain_type::value_type; ///< The shape type ///< FIXME shape_type?
+  static constexpr int n = domain_type::n; ///< The rank parameter
   static constexpr int max_rank = (n == -1 ? kokkos_max_dyn_rank : n); ///< The max rank supported by Kokkos
   static constexpr bool static_rank_flag = (n >= 0); ///< Static rank flag
-  static constexpr bool static_domain_flag = Domain::static_flag; ///< Static domain flag
-  static constexpr bool static_start_at_origin_flag = Domain::static_start_at_origin_flag; ///< Shape-only domain flag
+  static constexpr bool static_domain_flag = domain_type::static_flag; ///< Static domain flag
+  static constexpr bool static_start_at_origin_flag =
+      domain_type::static_start_at_origin_flag; ///< Shape-only domain flag
   static constexpr bool static_contiguous_flag = is_contiguous<TView>(); ///< Contiguity flag
 
   using base_type = TView; ///< The underlying view type
@@ -94,7 +95,7 @@ public:
    * 
    * @param domain The image domain
    */
-  explicit Image(const Domain& domain) : Image("<Image>", domain) {}
+  explicit Image(const domain_type& domain) : Image("<Image>", domain) {}
 
   /**
    * @brief Constructor.
@@ -102,7 +103,7 @@ public:
    * @param label The image label
    * @param domain The image domain
    */
-  explicit Image(const std::string& label, const Domain& domain) :
+  explicit Image(const std::string& label, const domain_type& domain) :
       Image(label, domain, std::make_index_sequence<max_rank>())
   {}
 
@@ -122,7 +123,8 @@ public:
    * @param domain The image domain
    * @param args The arguments to be forwarded to the view's constructor
    */
-  explicit Image(const Domain& domain, Forward, auto&&... args) : m_view(LINX_FORWARD(args)...), m_domain {domain} {}
+  explicit Image(const domain_type& domain, Forward, auto&&... args) : m_view(LINX_FORWARD(args)...), m_domain {domain}
+  {}
 
   /**
    * @brief Wrapping constructor.
@@ -151,7 +153,8 @@ public:
    * It won't manage its memory or ensure it is valid.
    */
   template <typename TValue>
-  explicit Image(Wrap<TValue*> data, const Domain& domain) : Image(data, domain, std::make_index_sequence<max_rank>())
+  explicit Image(Wrap<TValue*> data, const domain_type& domain) :
+      Image(data, domain, std::make_index_sequence<max_rank>())
   {}
 
   /**
@@ -201,14 +204,14 @@ public:
   /**
    * @brief Image extents along all axes. 
    */
-  Shape shape() const // FIXME rm?
+  shape_type shape() const // FIXME rm?
   {
     if constexpr (static_start_at_origin_flag) {
       auto out = std::vector<int>(rank());
       for (int i = 0; i < rank(); ++i) {
         out[i] = m_view.extent_int(i);
       }
-      return Shape(out.begin(), out.end());
+      return shape_type(out.begin(), out.end());
     } else {
       return domain().shape();
     }
@@ -380,7 +383,7 @@ private:
    * @brief Helper constructor to unroll shape.
    */
   template <std::size_t... Is>
-  Image(const std::string& label, const Domain& domain, std::index_sequence<Is...>) :
+  Image(const std::string& label, const domain_type& domain, std::index_sequence<Is...>) :
       m_view(label, get_or<Is, KOKKOS_INVALID_INDEX>(domain.shape())...),
       m_domain {domain}
   {}
@@ -389,7 +392,7 @@ private:
    * @brief Helper constructor to unroll shape.
    */
   template <typename TValue, std::size_t... Is>
-  Image(Wrap<TValue*> data, const Domain& domain, std::index_sequence<Is...>) :
+  Image(Wrap<TValue*> data, const domain_type& domain, std::index_sequence<Is...>) :
       m_view(data.value, get_or<Is, KOKKOS_INVALID_INDEX>(domain.shape())...),
       m_domain {domain}
   {}
@@ -426,10 +429,10 @@ private:
   static auto domain_impl(const auto& view)
   {
     if constexpr (static_domain_flag) {
-      return Domain();
+      return domain_type();
     } else {
-      const auto& box = domain(view); // Not necessarily of type Domain
-      return Domain(box.start(), box.stop());
+      const auto& box = domain(view); // Not necessarily of type domain_type
+      return domain_type(box.start(), box.stop());
     }
   }
 
@@ -483,7 +486,7 @@ private:
 
   base_type m_view; ///< The underlying view
   using DummyDomain = Vector<>; ///< Placeholder with dummy variadic ctor
-  std::conditional_t<static_start_at_origin_flag, DummyDomain, Domain> m_domain; ///< The domain, if any
+  std::conditional_t<static_start_at_origin_flag, DummyDomain, domain_type> m_domain; ///< The domain, if any
 };
 
 } // namespace Linx

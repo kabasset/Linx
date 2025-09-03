@@ -40,7 +40,7 @@ template <typename TLogger>
 class FlowContext {
 public:
 
-  using Logger = TLogger;
+  using logger_type = TLogger;
 
   FlowContext(const std::string& label, TLogger& logger) : m_label(label), m_logger(logger) {}
 

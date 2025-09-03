@@ -122,8 +122,8 @@ using ImageView = decltype(default_image_view<T, TDomain, TArgs...>());
 template <typename T>
 struct Rebind {
   template <typename U>
-  using As = std::conditional_t<std::is_same_v<U, void>, T, U>; ///< New value type
-  using AsReadonly = const T; ///< Constant value type
+  using as_type = std::conditional_t<std::is_same_v<U, void>, T, U>; ///< New value type
+  using add_const = const T; ///< Constant value type
 };
 
 /**
@@ -132,8 +132,8 @@ struct Rebind {
 template <typename T>
 struct Rebind<T*> {
   template <typename U>
-  using As = typename Rebind<T>::As<U>*; ///< New pointed type
-  using AsReadonly = typename Rebind<T>::AsReadonly*; ///< Read-only pointer
+  using as_type = typename Rebind<T>::as_type<U>*; ///< New pointed type
+  using add_const = typename Rebind<T>::add_const*; ///< Read-only pointer
 };
 
 /**
@@ -142,8 +142,8 @@ struct Rebind<T*> {
 template <typename T, std::size_t N>
 struct Rebind<T[N]> {
   template <typename U>
-  using As = typename Rebind<T>::As<U>[N]; ///< Array of new type
-  using AsReadonly = typename Rebind<T>::AsReadonly[N]; ///< Read-only array
+  using as_type = typename Rebind<T>::as_type<U>[N]; ///< Array of new type
+  using add_const = typename Rebind<T>::add_const[N]; ///< Read-only array
 };
 
 /**
@@ -152,9 +152,9 @@ struct Rebind<T[N]> {
 template <typename TData, typename... TArgs>
 struct Rebind<Kokkos::View<TData, TArgs...>> {
   template <typename U>
-  using As = Kokkos::View<typename Rebind<TData>::As<U>, TArgs...>; ///< View of new type
-  using AsReadonly = Kokkos::View<typename Rebind<TData>::AsReadonly, TArgs...>; ///< Read-only view
-  using AsAtomic = Kokkos::View<TData, TArgs..., Kokkos::MemoryTraits<Kokkos::Atomic>>; ///< Atomic-access view
+  using as_type = Kokkos::View<typename Rebind<TData>::as_type<U>, TArgs...>; ///< View of new type
+  using add_const = Kokkos::View<typename Rebind<TData>::add_const, TArgs...>; ///< Read-only view
+  using add_atomic = Kokkos::View<TData, TArgs..., Kokkos::MemoryTraits<Kokkos::Atomic>>; ///< Atomic-access view
 };
 
 /**
@@ -167,7 +167,7 @@ struct Rebind<Kokkos::View<TData, TArgs...>> {
 template <typename U = void, typename TData, typename... TArgs>
 decltype(auto) same_layout(const std::string& label, const Kokkos::View<TData, TArgs...>& in)
 {
-  return Kokkos::View<typename Rebind<TData>::As<U>, TArgs...>(label, in.layout());
+  return Kokkos::View<typename Rebind<TData>::as_type<U>, TArgs...>(label, in.layout());
 }
 
 /**
@@ -181,7 +181,7 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::View<TData, TArg
   if constexpr (std::is_const_v<typename Kokkos::View<TData, TArgs...>::value_type>) {
     return in;
   } else {
-    using Out = typename Rebind<Kokkos::View<TData, TArgs...>>::AsReadonly;
+    using Out = typename Rebind<Kokkos::View<TData, TArgs...>>::add_const;
     return Out(in);
   }
 }
@@ -192,7 +192,7 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::View<TData, TArg
 template <typename TData, typename... TArgs>
 KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Kokkos::View<TData, TArgs...>& in)
 {
-  using Out = typename Rebind<Kokkos::View<TData, TArgs...>>::AsAtomic;
+  using Out = typename Rebind<Kokkos::View<TData, TArgs...>>::add_atomic;
   return Out(in);
 }
 
@@ -202,9 +202,9 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Kokkos::View<TData, TArgs.
 template <typename TData, typename... TArgs>
 struct Rebind<Kokkos::DynRankView<TData, TArgs...>> {
   template <typename U>
-  using As = Kokkos::DynRankView<typename Rebind<TData>::As<U>, TArgs...>; ///< View of new type
-  using AsReadonly = Kokkos::DynRankView<typename Rebind<TData>::AsReadonly, TArgs...>; ///< Read-only view
-  using AsAtomic = Kokkos::DynRankView<TData, TArgs..., Kokkos::MemoryTraits<Kokkos::Atomic>>; ///< Atomic-access view
+  using as_type = Kokkos::DynRankView<typename Rebind<TData>::as_type<U>, TArgs...>; ///< View of new type
+  using add_const = Kokkos::DynRankView<typename Rebind<TData>::add_const, TArgs...>; ///< Read-only view
+  using add_atomic = Kokkos::DynRankView<TData, TArgs..., Kokkos::MemoryTraits<Kokkos::Atomic>>; ///< Atomic-access view
 };
 
 /**
@@ -217,7 +217,7 @@ struct Rebind<Kokkos::DynRankView<TData, TArgs...>> {
 template <typename U = void, typename TData, typename... TArgs>
 decltype(auto) same_layout(const std::string& label, const Kokkos::DynRankView<TData, TArgs...>& in)
 {
-  return Kokkos::DynRankView<typename Rebind<TData>::As<U>, TArgs...>(label, in.layout());
+  return Kokkos::DynRankView<typename Rebind<TData>::as_type<U>, TArgs...>(label, in.layout());
 }
 
 /**
@@ -231,7 +231,7 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::DynRankView<TDat
   if constexpr (std::is_const_v<typename Kokkos::DynRankView<TData, TArgs...>::value_type>) {
     return in;
   } else {
-    using Out = typename Rebind<Kokkos::DynRankView<TData, TArgs...>>::AsReadonly;
+    using Out = typename Rebind<Kokkos::DynRankView<TData, TArgs...>>::add_const;
     return Out(in);
   }
 }
@@ -242,7 +242,7 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::DynRankView<TDat
 template <typename TData, typename... TArgs>
 KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Kokkos::DynRankView<TData, TArgs...>& in)
 {
-  using Out = typename Rebind<Kokkos::DynRankView<TData, TArgs...>>::AsAtomic;
+  using Out = typename Rebind<Kokkos::DynRankView<TData, TArgs...>>::add_atomic;
   return Out(in);
 }
 

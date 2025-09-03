@@ -131,7 +131,7 @@ template <typename T>
 class UniformDistribution {
 public:
 
-  using Interval = std::conditional_t<std::is_integral_v<T>, Segment<T>, Slice<T>>; ///< The type of interval
+  using slice_type = std::conditional_t<std::is_integral_v<T>, Segment<T>, Slice<T>>; ///< The type of interval
 
   /**
    * @brief Constructor.
@@ -143,7 +143,7 @@ public:
   /**
    * @brief Constructor.
    */
-  LINX_UFUNC explicit UniformDistribution(Interval slice) : m_slice(LINX_MOVE(slice)) {}
+  LINX_UFUNC explicit UniformDistribution(slice_type slice) : m_slice(LINX_MOVE(slice)) {}
 
   /**
    * @brief Lower bound (inclusive).

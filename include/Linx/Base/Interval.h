@@ -141,7 +141,7 @@ class Slice<T, TPred> {
 public:
 
   using size_type = T; ///< The index and size type
-  using Pred = TPred; ///< The predicate defining the interval
+  using pred_type = TPred; ///< The predicate defining the interval
   static constexpr auto n = 1; ///< The region rank
 
   /**
@@ -168,7 +168,7 @@ public:
   /**
    * @brief Interval size, if bounded.
    * 
-   * The function is ill-formed if `interval_size(Pred)` is not defined.
+   * The function is ill-formed if `interval_size(pred_type)` is not defined.
    */
   KOKKOS_INLINE_FUNCTION auto size() const
   {
@@ -178,7 +178,7 @@ public:
   /**
    * @brief Start index, if it exists.
    * 
-   * The function is ill-formed if `interval_start(Pred)` is not defined.
+   * The function is ill-formed if `interval_start(pred_type)` is not defined.
    */
   KOKKOS_INLINE_FUNCTION auto start() const
   {
@@ -188,7 +188,7 @@ public:
   /**
    * @brief Stop index, if it exists.
    * 
-   * The function is ill-formed if `interval_stop(Pred)` is not defined.
+   * The function is ill-formed if `interval_stop(pred_type)` is not defined.
    */
   KOKKOS_INLINE_FUNCTION auto stop() const
   {
@@ -198,7 +198,7 @@ public:
   /**
    * @brief Predicate defining the interval.
    */
-  KOKKOS_INLINE_FUNCTION const Pred& pred() const
+  KOKKOS_INLINE_FUNCTION const pred_type& pred() const
   {
     return m_pred;
   }
@@ -213,7 +213,7 @@ public:
 
 private:
 
-  Pred m_pred; ///< The predicate defining the interval
+  pred_type m_pred; ///< The predicate defining the interval
 };
 
 /**

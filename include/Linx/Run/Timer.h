@@ -33,7 +33,7 @@ public:
   /**
    * @brief The time unit.
    */
-  using Unit = TUnit;
+  using duration_type = TUnit;
 
   /**
    * @brief Create a timer with optional offset.
