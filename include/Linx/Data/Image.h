@@ -39,7 +39,7 @@ namespace Linx {
  * @see `DataMixin`
  * @see `RangeMixin`
  */
-template <typename T, typename TDomain, typename TView = ImageContainer<T, TDomain>>
+template <typename T, typename TDomain, typename TView = ImageView<T, TDomain>>
 class Image :
     public DataMixin<T, DataArithmeticMixin<T, Image<T, TDomain, TView>>, Image<T, TDomain, TView>>,
     public RangeMixin<is_contiguous<TView>(), T, Image<T, TDomain, TView>> { // FIXME bool(Range<TView>)

@@ -17,10 +17,10 @@ as well as global transforms such as filtering and Fourier transforms.
 Slicing and domain restriction enable operations over arbitrary regions.
 
 ```
-template <typename T, int N, typename TView = ImageContainer<T, N>>
+template <typename T, int N, typename TView = ImageView<T, N>>
 class Image;
 
-template <typename T, typename TView = SequenceContainer<T>>
+template <typename T, typename TView = SequenceView<T>>
 class Sequence;
 ```
 

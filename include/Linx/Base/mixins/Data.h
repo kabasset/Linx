@@ -103,7 +103,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   }
 
   /**
-   * @brief Container size.
+   * @brief View size.
    */
   KOKKOS_INLINE_FUNCTION auto size() const
   {
@@ -111,7 +111,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
   }
 
   /**
-   * @brief Container size as a signed integer.
+   * @brief View size as a signed integer.
    */
   KOKKOS_INLINE_FUNCTION auto ssize() const
   {

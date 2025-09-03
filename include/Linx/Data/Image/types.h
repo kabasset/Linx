@@ -43,7 +43,7 @@ auto default_raster_view()
  * @brief Default raster view type.
  */
 template <typename T, int N>
-using RasterContainer = decltype(default_raster_view<T, N>());
+using RasterView = decltype(default_raster_view<T, N>());
 
 /**
  * @brief Contiguous image on host with row-major ordering.
@@ -60,7 +60,7 @@ using RasterContainer = decltype(default_raster_view<T, N>());
  * Said otherwise, the stride along axis 0 is 1.
  */
 template <typename T, int N = 2>
-using Raster = Image<T, RasterDomain<N>, RasterContainer<T, N>>;
+using Raster = Image<T, RasterDomain<N>, RasterView<T, N>>;
 
 } // namespace Linx
 

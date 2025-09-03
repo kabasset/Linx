@@ -34,7 +34,7 @@ auto default_sequence_view()
  * @brief Default sequence view type.
  */
 template <typename T, int N, typename... TArgs>
-using SequenceContainer = decltype(default_sequence_view<T, N, TArgs...>());
+using SequenceView = decltype(default_sequence_view<T, N, TArgs...>());
 
 /**
  * @brief Default image view instance.
@@ -114,7 +114,7 @@ static constexpr auto default_image_view()
  * @brief Default image view type.
  */
 template <typename T, typename TDomain, typename... TArgs>
-using ImageContainer = decltype(default_image_view<T, TDomain, TArgs...>());
+using ImageView = decltype(default_image_view<T, TDomain, TArgs...>());
 
 /**
  * @brief Traits to rebind views.

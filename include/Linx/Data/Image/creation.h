@@ -24,7 +24,7 @@ template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
 auto default_init(const std::string& label, const Specialization<Box> auto& domain)
 {
   using Domain = LINX_DECLTYPE(domain);
-  return Image<T, Domain, ImageContainer<T, Domain, TSpace>>(label, domain);
+  return Image<T, Domain, ImageView<T, Domain, TSpace>>(label, domain);
 }
 
 /**
@@ -39,7 +39,7 @@ template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
 auto default_init(const std::string& label, std::integral auto... extents)
 {
   using Domain = decltype(shape(extents...));
-  return Image<T, Domain, ImageContainer<T, Domain, TSpace>>(label, extents...);
+  return Image<T, Domain, ImageView<T, Domain, TSpace>>(label, extents...);
 }
 
 /**
@@ -54,7 +54,7 @@ template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
 auto no_init(const std::string& label, const Specialization<Box> auto& domain)
 {
   using Domain = LINX_DECLTYPE(domain);
-  return Image<T, Domain, ImageContainer<T, Domain, TSpace>>(label, domain);
+  return Image<T, Domain, ImageView<T, Domain, TSpace>>(label, domain);
   // FIXME view_alloc(label, WithoutInitializing)
 }
 
@@ -68,7 +68,7 @@ template <typename T, typename TSpace = Kokkos::DefaultExecutionSpace>
 auto no_init(const std::string& label, std::integral auto... extents)
 {
   using Domain = decltype(shape(extents...));
-  return Image<T, Domain, ImageContainer<T, Domain, TSpace>>(
+  return Image<T, Domain, ImageView<T, Domain, TSpace>>(
       Forward(),
       Kokkos::view_alloc(label, Kokkos::WithoutInitializing),
       extents...);
@@ -143,7 +143,7 @@ auto wrap(T* data, std::integral auto... extents)
 template <typename T>
 auto wrap(T* data, const Specialization<Box> auto& domain)
 {
-  return Image<T, LINX_DECLTYPE(domain), RasterContainer<T, LINX_DECLTYPE(domain)::n>>(Wrap(data), domain);
+  return Image<T, LINX_DECLTYPE(domain), RasterView<T, LINX_DECLTYPE(domain)::n>>(Wrap(data), domain);
 }
 
 /**

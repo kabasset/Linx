@@ -124,7 +124,7 @@ private:
     ((m_positions(index, Is) = get<Is>(position)), ...);
   }
 
-  Image<size_type, 2, ImageContainer<size_type, 2, Kokkos::HostSpace>> m_positions; ///< The positions
+  Image<size_type, 2, ImageView<size_type, 2, Kokkos::HostSpace>> m_positions; ///< The positions
   Kokkos::View<int, Kokkos::HostSpace> m_size; ///< The size
 };
 
@@ -182,7 +182,7 @@ struct ExpandPath {
     return m_func(m_view(i, Is)...);
   }
 
-  Image<int, 2, ImageContainer<int, 2, TSpace>> m_view;
+  Image<int, 2, ImageView<int, 2, TSpace>> m_view;
   TFunc m_func;
 };
 
