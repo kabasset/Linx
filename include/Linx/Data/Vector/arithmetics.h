@@ -109,7 +109,7 @@ constexpr auto transform_vectors(const Vector<TLhs>& lhs, const Vector<TRhs>& rh
 {
   using Lhs = Vector<TLhs>;
   using Rhs = Vector<TRhs>;
-  using T = decltype(TFunc()(typename Lhs::element_type(), typename Rhs::element_type()));
+  using T = decltype(TFunc()(typename Lhs::value_type(), typename Rhs::value_type()));
   constexpr auto identity = Impl::identity_element_or<T>(TFunc());
   if constexpr (Lhs::static_flag && Rhs::static_flag) {
     return Impl::static_transform_vectors_impl<T, TFunc>(
@@ -140,7 +140,7 @@ constexpr auto transform_vectors(const Vector<TLhs>& lhs, const Vector<TRhs>& rh
 template <typename T>
 constexpr auto operator+(Vector<T> in)
 {
-  return in; // FIXME return Vector<in::element_type>
+  return in; // FIXME return Vector<in::value_type>
 }
 
 /**
@@ -251,7 +251,7 @@ constexpr auto operator-(const TLhs& lhs, const Vector<TRhs>& rhs)
   return -(rhs - lhs);
 }
 
-template <typename TLhs, std::convertible_to<typename Vector<TLhs>::element_type> TRhs>
+template <typename TLhs, std::convertible_to<typename Vector<TLhs>::value_type> TRhs>
 constexpr auto operator*(const Vector<TLhs>& lhs, const TRhs& rhs)
 {
   if constexpr (Vector<TLhs>::static_flag) {
@@ -275,7 +275,7 @@ constexpr auto operator*(const TLhs& lhs, const Vector<TRhs>& rhs)
   return rhs * lhs;
 }
 
-template <typename TLhs, std::convertible_to<typename Vector<TLhs>::element_type> TRhs>
+template <typename TLhs, std::convertible_to<typename Vector<TLhs>::value_type> TRhs>
 constexpr auto operator/(const Vector<TLhs>& lhs, const TRhs& rhs)
 {
   if constexpr (Vector<TLhs>::static_flag) {

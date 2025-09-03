@@ -74,9 +74,10 @@ struct Negate {
  */
 template <typename T>
 struct Constant {
-  using value_type = const T; ///< The value type
+  using value_type = T; ///< The value type
+  using const_reference = const value_type&; ///< The readonly reference type
 
-  const T value; ///< The value
+  value_type value; ///< The value
 
   /**
    * @brief Constructor.
@@ -94,13 +95,13 @@ struct Constant {
   /**
    * @brief Reference to the value.
    */
-  KOKKOS_INLINE_FUNCTION constexpr const value_type& operator()(auto&&...) const
+  KOKKOS_INLINE_FUNCTION constexpr const_reference& operator()(auto&&...) const
   {
     return value;
   }
 
   /**
-   * @brief Static value.
+   * @brief Converted value.
    */
   KOKKOS_INLINE_FUNCTION constexpr operator value_type() const
   {
@@ -113,7 +114,7 @@ struct Constant {
  */
 template <auto Value>
 struct StaticConstant {
-  using value_type = const decltype(Value);
+  using value_type = decltype(Value);
 
   static constexpr value_type value = Value; ///< The static value
 
@@ -139,7 +140,7 @@ struct StaticConstant {
   }
 
   /**
-   * @brief Static value.
+   * @brief Converted value.
    */
   KOKKOS_INLINE_FUNCTION constexpr operator value_type() const
   {
@@ -152,7 +153,7 @@ struct StaticConstant {
  */
 template <bool InclusiveInfimum, bool InclusiveSupremum, typename T>
 struct Between {
-  using value_type = const T; ///< The value type
+  using value_type = T; ///< The value type
 
   /**
    * @brief Always-false functor constructor.
@@ -162,12 +163,13 @@ struct Between {
   /**
    * @brief Constructor.
    */
-  KOKKOS_INLINE_FUNCTION constexpr Between(const T& inf, const T& sup) : infimum(inf), supremum(sup) {}
+  KOKKOS_INLINE_FUNCTION constexpr Between(const value_type& inf, const value_type& sup) : infimum(inf), supremum(sup)
+  {}
 
   /**
    * @brief Check whether a value is between the endpoints.
    */
-  KOKKOS_INLINE_FUNCTION constexpr bool operator()(const T& value) const
+  KOKKOS_INLINE_FUNCTION constexpr bool operator()(const value_type& value) const
   {
     return greater_than_infimum(value) && less_than_supremum(value);
   }
@@ -175,7 +177,7 @@ struct Between {
   /**
    * @brief Check whether a value is greater than the infimum.
    */
-  KOKKOS_INLINE_FUNCTION constexpr bool greater_than_infimum(const T& value) const
+  KOKKOS_INLINE_FUNCTION constexpr bool greater_than_infimum(const value_type& value) const
   {
     if constexpr (InclusiveInfimum) {
       return value >= infimum;
@@ -187,7 +189,7 @@ struct Between {
   /**
    * @brief Check whether a value is less than the supremum.
    */
-  KOKKOS_INLINE_FUNCTION constexpr bool less_than_supremum(const T& value) const
+  KOKKOS_INLINE_FUNCTION constexpr bool less_than_supremum(const value_type& value) const
   {
     if constexpr (InclusiveSupremum) {
       return value <= supremum;
@@ -196,8 +198,8 @@ struct Between {
     }
   }
 
-  T infimum; ///< The interval infimum
-  T supremum; ///< The interval supremum
+  value_type infimum; ///< The interval infimum
+  value_type supremum; ///< The interval supremum
 };
 
 #define LINX_DEFINE_BINARY_OPERATOR(Func, out) \
@@ -208,7 +210,7 @@ struct Between {
   struct Func<Forward, TRhs> { \
     using value_type = TRhs; \
     TRhs rhs; \
-    KOKKOS_INLINE_FUNCTION Func(TRhs value) : rhs {value} {} \
+    KOKKOS_INLINE_FUNCTION Func(value_type value) : rhs {value} {} \
     KOKKOS_INLINE_FUNCTION constexpr auto operator()(const auto& lhs) const \
     { \
       return out; \
@@ -219,7 +221,7 @@ struct Between {
   struct Func<TLhs, Forward> { \
     using value_type = TLhs; \
     TLhs lhs; \
-    KOKKOS_INLINE_FUNCTION Func(TLhs value) : lhs {value} {} \
+    KOKKOS_INLINE_FUNCTION Func(value_type value) : lhs {value} {} \
     KOKKOS_INLINE_FUNCTION constexpr auto operator()(const auto& rhs) const \
     { \
       return out; \

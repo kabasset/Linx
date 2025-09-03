@@ -35,8 +35,8 @@ public:
   class StaticSizeLazy : public LazySpatialFilterMixin<MedianFilter, TIn, StaticSizeLazy<TIn>> {
   public:
 
-    using value_type = typename TIn::value_type;
-    using element_type = std::remove_cvref_t<value_type>;
+    using element_type = typename TIn::element_type;
+    using value_type = std::remove_cvref_t<element_type>;
 
     StaticSizeLazy(const MedianFilter& filter, TIn in) :
         LazySpatialFilterMixin<MedianFilter, TIn, StaticSizeLazy>(filter, LINX_MOVE(in))
@@ -45,7 +45,7 @@ public:
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
       static constexpr auto n = TFootprint().size();
-      Kokkos::Array<element_type, n> array;
+      Kokkos::Array<value_type, n> array;
       for (std::size_t i = 0; i < std::size(array); ++i) {
         array[i] = neighbors[i];
       }
@@ -57,8 +57,8 @@ public:
   class DynamicSizeLazy : public LazySpatialFilterMixin<MedianFilter, TIn, DynamicSizeLazy<TIn>> {
   public:
 
-    using value_type = typename TIn::value_type;
-    using element_type = std::remove_cvref_t<value_type>;
+    using element_type = typename TIn::element_type;
+    using value_type = std::remove_cvref_t<element_type>;
 
     DynamicSizeLazy(const MedianFilter& filter, TIn in) :
         LazySpatialFilterMixin<MedianFilter, TIn, DynamicSizeLazy>(filter, LINX_MOVE(in)),
@@ -76,7 +76,7 @@ public:
 
   private:
 
-    ArrayPool<element_type> m_buffer; // FIXME TSpace
+    ArrayPool<value_type> m_buffer; // FIXME TSpace
   };
 
   template <typename TIn>
@@ -102,14 +102,14 @@ public:
   class Lazy : public LazySpatialFilterMixin<MinimumFilter, TIn, Lazy<TIn>> {
   public:
 
-    using value_type = typename TIn::value_type;
-    using element_type = std::remove_cvref_t<value_type>;
+    using element_type = typename TIn::element_type;
+    using value_type = std::remove_cvref_t<element_type>;
 
     using LazySpatialFilterMixin<MinimumFilter, TIn, Lazy>::LazySpatialFilterMixin;
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      element_type out = neighbors[0];
+      value_type out = neighbors[0];
       for (int i = 1; i < neighbors.ssize(); ++i) {
         out = neighbors[i] < out ? neighbors[i] : out;
       }
@@ -137,14 +137,14 @@ public:
   class Lazy : public LazySpatialFilterMixin<MaximumFilter, TIn, Lazy<TIn>> {
   public:
 
-    using value_type = typename TIn::value_type;
-    using element_type = std::remove_cvref_t<value_type>;
+    using element_type = typename TIn::element_type;
+    using value_type = std::remove_cvref_t<element_type>;
 
     using LazySpatialFilterMixin<MaximumFilter, TIn, Lazy>::LazySpatialFilterMixin;
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      element_type out = neighbors[0];
+      value_type out = neighbors[0];
       for (int i = 1; i < neighbors.ssize(); ++i) {
         out = neighbors[i] > out ? neighbors[i] : out;
       }

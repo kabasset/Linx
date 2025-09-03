@@ -132,19 +132,9 @@ public:
     return m_it == rhs.m_it;
   }
 
-  KOKKOS_INLINE_FUNCTION constexpr bool operator!=(const ProfileIterator& rhs) const
-  {
-    return m_it != rhs.m_it;
-  }
-
   KOKKOS_INLINE_FUNCTION constexpr bool operator==(const std::ptrdiff_t* it) const
   {
     return m_it == it;
-  }
-
-  KOKKOS_INLINE_FUNCTION constexpr bool operator!=(const std::ptrdiff_t* it) const
-  {
-    return m_it != it;
   }
 
 private:
@@ -215,17 +205,21 @@ struct EmplaceProfile {
  * Elements can be added up to a given maximum, fixed capacity.
  */
 template <Strided TParent> // FIXME should work with all mappings
-class Profile : public DataMixin<typename TParent::value_type, typename TParent::Arithmetic, Profile<TParent>> {
+class Profile :
+    public DataMixin<
+        typename TParent::value_type,
+        typename TParent::Arithmetic,
+        Profile<TParent>> { // FIXME element_type?
 public:
 
   using Parent = TParent; ///< The parent mapping
   static constexpr auto n = 1; ///< The rank
+  using element_type = Parent::element_type; ///< The element type
   using value_type = Parent::value_type; ///< The value type
-  using element_type = std::remove_cvref_t<value_type>; ///< The element type
-  using reference = value_type&; ///< The reference type
-  using pointer = value_type&; ///< The pointer type
-  using iterator = ProfileIterator<value_type>; ///< The iterator type
-  using const_iterator = ProfileIterator<const value_type>; ///< The read-only iterator type
+  using reference = element_type&; ///< The reference type
+  using pointer = element_type*; ///< The pointer type
+  using iterator = ProfileIterator<element_type>; ///< The iterator type
+  using const_iterator = ProfileIterator<const element_type>; ///< The read-only iterator type
   using memory_space = typename TParent::memory_space; ///< The parent memory space
   using execution_space = typename TParent::execution_space; ///< The parent execution space
 
@@ -332,9 +326,9 @@ public:
   /**
    * @brief Span relative to a given position.
    */
-  KOKKOS_INLINE_FUNCTION constexpr ProfileSpan<value_type> shifted_span(std::integral auto... position) const
+  KOKKOS_INLINE_FUNCTION constexpr ProfileSpan<element_type> shifted_span(std::integral auto... position) const
   {
-    return ProfileSpan<value_type>(&m_parent(position...), m_offsets.data(), m_offsets.data() + m_size());
+    return ProfileSpan<element_type>(&m_parent(position...), m_offsets.data(), m_offsets.data() + m_size());
   }
 
   /**

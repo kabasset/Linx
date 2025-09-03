@@ -16,7 +16,7 @@
 namespace Linx {
 
 /**
- * @brief Container adaptor for `Vector`.
+ * @brief base_type adaptor for `Vector`.
  * @tparam T The coefficients specification
  * 
  * Only specializations are defined.
@@ -42,14 +42,13 @@ public:
   using size_type = std::size_t; ///< The size type
   using ssize_type = std::ptrdiff_t; ///< The signed size type
   using value_type = T; ///< The value type
-  using element_type = std::remove_cvref_t<value_type>; ///< The element type
   using reference = value_type&; ///< The reference type
   using const_reference = const value_type&; ///< The readonly reference type
   using pointer = value_type*; ///< The pointer type
   using const_pointer = const value_type*; /// The readonly pointer type
-  using Container = std::vector<value_type>; ///< The underlying container type
-  using iterator = typename Container::iterator; ///< The iterator type
-  using const_iterator = typename Container::const_iterator; ///< The readonly iterator type
+  using base_type = std::vector<value_type>; ///< The underlying container type
+  using iterator = typename base_type::iterator; ///< The iterator type
+  using const_iterator = typename base_type::const_iterator; ///< The readonly iterator type
 
   /**
    * @brief Constructor.
@@ -77,8 +76,8 @@ public:
   /**
    * @brief Conversion constructor.
    */
-  template <typename TSpec>
-  constexpr VectorBase(const Vector<TSpec>& other) : VectorBase(other.size())
+  template <typename TData>
+  constexpr VectorBase(const Vector<TData>& other) : VectorBase(other.size())
   {
     for (std::size_t i = 0; i < size(); ++i) {
       m_container[i] = other[i];
@@ -167,7 +166,7 @@ public:
 
 private:
 
-  Container m_container; ///< The underlying container
+  base_type m_container; ///< The underlying container
 };
 
 /**
@@ -185,14 +184,13 @@ public:
   using size_type = std::size_t; ///< The size type
   using ssize_type = std::ptrdiff_t; ///< The signed size type
   using value_type = T; ///< The value type
-  using element_type = std::remove_cvref_t<value_type>; ///< The element type
   using reference = value_type&; ///< The reference type
   using const_reference = const value_type&; ///< The readonly reference type
   using pointer = value_type*; ///< The pointer type
   using const_pointer = const value_type*; /// The readonly pointer type
-  using Container = std::array<T, N>; ///< The underlying container type
-  using iterator = typename Container::iterator; ///< The iterator type
-  using const_iterator = typename Container::const_iterator; ///< The readonly iterator type
+  using base_type = std::array<T, N>; ///< The underlying container type
+  using iterator = typename base_type::iterator; ///< The iterator type
+  using const_iterator = typename base_type::const_iterator; ///< The readonly iterator type
 
   /**
    * @brief Constructor.
@@ -223,8 +221,8 @@ public:
   /**
    * @brief Conversion constructor.
    */
-  template <typename TSpec>
-  constexpr VectorBase(const Vector<TSpec>& other) : VectorBase()
+  template <typename TData>
+  constexpr VectorBase(const Vector<TData>& other) : VectorBase()
   {
     for (std::size_t i = 0; i < size(); ++i) {
       m_container[i] = other[i];
@@ -313,7 +311,7 @@ public:
 
 private:
 
-  Container m_container; ///< The underlying container
+  base_type m_container; ///< The underlying container
 };
 
 /**
@@ -330,13 +328,12 @@ public:
 
   using size_type = std::size_t; ///< The size type
   using ssize_type = std::ptrdiff_t; ///< The signed size type
-  using value_type = const T; ///< The value type
-  using element_type = std::remove_cvref_t<value_type>; ///< The element type
+  using value_type = const T; ///< The value type // FIXME const?
   using reference = value_type&; ///< The reference type
   using const_reference = const value_type&; ///< The readonly reference type
   using pointer = value_type*; ///< The pointer type
   using const_pointer = const value_type*; /// The readonly pointer type
-  using Container = void; ///< The underlying container type
+  using base_type = void; ///< The underlying container type
 
   /**
    * @brief No-op constructor.

@@ -10,8 +10,8 @@
 
 namespace Linx {
 
-template <typename T, int N, typename TContainer = SequenceContainer<T, N>>
-using Sequence = Image<T, Shape<std::integer_sequence<int, N>>, TContainer>; // FIXME enable operator[] and range ops
+template <typename T, int N, typename TView = SequenceContainer<T, N>>
+using Sequence = Image<T, Shape<std::integer_sequence<int, N>>, TView>; // FIXME enable operator[] and range ops
 
 } // namespace Linx
 

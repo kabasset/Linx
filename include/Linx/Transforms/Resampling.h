@@ -162,7 +162,7 @@ private:
   value_type m_value;
 };
 
-template <typename TParent, std::convertible_to<typename TParent::element_type> T>
+template <typename TParent, std::convertible_to<typename TParent::value_type> T>
 Extrapolation(TParent, const T&) -> Extrapolation<TParent, Pad<T>>;
 
 /**

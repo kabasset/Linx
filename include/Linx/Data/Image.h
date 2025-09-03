@@ -25,7 +25,7 @@ namespace Linx {
  * 
  * @tparam T The element type
  * @tparam TDomain The domain type
- * @tparam TContainer The underlying container type
+ * @tparam TView The underlying view type
  * 
  * The image domain is a box, which does not necessarily starts at position 0,
  * and can have static or dynamic bounds.
@@ -39,31 +39,31 @@ namespace Linx {
  * @see `DataMixin`
  * @see `RangeMixin`
  */
-template <typename T, typename TDomain, typename TContainer = ImageContainer<T, TDomain>>
+template <typename T, typename TDomain, typename TView = ImageContainer<T, TDomain>>
 class Image :
-    public DataMixin<T, DataArithmeticMixin<T, Image<T, TDomain, TContainer>>, Image<T, TDomain, TContainer>>,
-    public RangeMixin<is_contiguous<TContainer>(), T, Image<T, TDomain, TContainer>> { // FIXME bool(Range<TContainer>)
+    public DataMixin<T, DataArithmeticMixin<T, Image<T, TDomain, TView>>, Image<T, TDomain, TView>>,
+    public RangeMixin<is_contiguous<TView>(), T, Image<T, TDomain, TView>> { // FIXME bool(Range<TView>)
 public:
 
-  using value_type = typename TContainer::value_type; ///< The possibly const-qualified element type
-  using element_type = std::remove_cvref_t<value_type>; ///< The element type
-  using reference = value_type&; ///< The element reference type
-  using const_reference = const value_type&; ///< The constant element reference type
-  using pointer = value_type*; ///< The element pointer type
-  using const_pointer = const value_type*; ///< The constant element pointer type
+  using element_type = T; ///< The possibly const-qualified element type
+  using value_type = std::remove_cvref_t<element_type>; ///< The value type
+  using reference = T&; ///< The value reference type
+  using const_reference = const T&; ///< The constant reference type
+  using pointer = T*; ///< The value pointer type
+  using const_pointer = const T*; ///< The constant pointer type
 
-  using Domain = TDomain; ///< The domain type
-  using Shape = typename Domain::value_type;
+  using Domain = TDomain; ///< The domain type // FIXME domain_type
+  using Shape = typename Domain::value_type; ///< The shape type ///< FIXME shape_type?
   static constexpr int n = Domain::n; ///< The rank parameter
   static constexpr int max_rank = (n == -1 ? kokkos_max_dyn_rank : n); ///< The max rank supported by Kokkos
   static constexpr bool static_rank_flag = (n >= 0); ///< Static rank flag
   static constexpr bool static_domain_flag = Domain::static_flag; ///< Static domain flag
   static constexpr bool static_start_at_origin_flag = Domain::static_start_at_origin_flag; ///< Shape-only domain flag
-  static constexpr bool static_contiguous_flag = is_contiguous<TContainer>(); ///< Contiguity flag
+  static constexpr bool static_contiguous_flag = is_contiguous<TView>(); ///< Contiguity flag
 
-  using Container = TContainer; ///< The underlying container type
-  using memory_space = typename Container::memory_space; ///< The memory space
-  using execution_space = typename Container::execution_space; ///< The default execution space
+  using base_type = TView; ///< The underlying container type // FIXME base_type
+  using memory_space = typename base_type::memory_space; ///< The memory space
+  using execution_space = typename base_type::execution_space; ///< The default execution space
 
   /**
    * @brief Constructor.
@@ -202,7 +202,7 @@ public:
   /**
    * @brief Image extents along all axes. 
    */
-  Shape shape() const // FIXME rm
+  Shape shape() const // FIXME rm?
   {
     if constexpr (static_start_at_origin_flag) {
       auto out = std::vector<int>(rank());
@@ -248,7 +248,7 @@ public:
   /**
    * @brief Underlying container.
    */
-  KOKKOS_INLINE_FUNCTION const Container& container() const
+  KOKKOS_INLINE_FUNCTION const base_type& base() const // FIXME base()
   {
     return m_container;
   }
@@ -338,9 +338,9 @@ public:
   {
     const auto& crop = region & domain();
     using Crop = LINX_DECLTYPE(crop);
-    using Container = LINX_DECLTYPE(slice_all(crop, std::make_index_sequence<Crop::n>()));
-    using Domain = LINX_DECLTYPE(domain(std::declval<Container>()));
-    return Image<T, Domain, Container>(Forward {}, slice_all(crop, std::make_index_sequence<Crop::n>()));
+    using View = LINX_DECLTYPE(slice_all(crop, std::make_index_sequence<Crop::n>()));
+    using Domain = LINX_DECLTYPE(domain(std::declval<View>()));
+    return Image<T, Domain, View>(Forward {}, slice_all(crop, std::make_index_sequence<Crop::n>()));
   }
 
   /**
@@ -363,14 +363,14 @@ public:
   {
     const auto& crop = region & domain(); // Resolve Kokkos::ALL to drop offsets with subview
     if constexpr (sizeof...(TFuncs) == 1) {
-      using Container = LINX_DECLTYPE(slice_last(std::make_index_sequence<n - 1>(), crop));
-      using Domain = LINX_DECLTYPE(domain(std::declval<Container>()));
-      return Image<T, Domain, Container>(Forward {}, slice_last(std::make_index_sequence<n - 1>(), crop));
+      using View = LINX_DECLTYPE(slice_last(std::make_index_sequence<n - 1>(), crop));
+      using Domain = LINX_DECLTYPE(domain(std::declval<View>()));
+      return Image<T, Domain, View>(Forward {}, slice_last(std::make_index_sequence<n - 1>(), crop));
     } else {
       static_assert(sizeof...(TFuncs) == n);
-      using Container = LINX_DECLTYPE(slice_all(crop, std::make_index_sequence<sizeof...(TFuncs)>()));
-      using Domain = LINX_DECLTYPE(domain(std::declval<Container>()));
-      return Image<T, Domain, Container>(Forward {}, slice_all(crop, std::make_index_sequence<sizeof...(TFuncs)>()));
+      using View = LINX_DECLTYPE(slice_all(crop, std::make_index_sequence<sizeof...(TFuncs)>()));
+      using Domain = LINX_DECLTYPE(domain(std::declval<View>()));
+      return Image<T, Domain, View>(Forward {}, slice_all(crop, std::make_index_sequence<sizeof...(TFuncs)>()));
     }
     // FIXME offset
   }
@@ -482,7 +482,7 @@ private:
 
 private:
 
-  Container m_container; ///< The underlying container
+  base_type m_container; ///< The underlying container
   using DummyDomain = Vector<>; ///< Placeholder with dummy variadic ctor
   std::conditional_t<static_start_at_origin_flag, DummyDomain, Domain> m_domain; ///< The domain, if any
 };

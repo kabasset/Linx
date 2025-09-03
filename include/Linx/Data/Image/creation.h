@@ -86,7 +86,7 @@ auto rowwise(const std::string& label, T (&&row)[N])
 {
   auto raster = Raster<T, 1>(Wrap(row), N);
   auto out = no_init<T, TSpace>(label, shape<N>());
-  Kokkos::deep_copy(out.container(), raster.container());
+  Kokkos::deep_copy(out.base(), raster.base());
   return out;
 }
 
@@ -102,7 +102,7 @@ auto rowwise(const std::string& label, T (&&rows)[N1][N0])
 {
   auto raster = Raster<T, 2>(Wrap(*rows), N0, N1);
   auto out = no_init<T, TSpace>(label, shape<N0, N1>());
-  Kokkos::deep_copy(out.container(), raster.container());
+  Kokkos::deep_copy(out.base(), raster.base());
   return out;
 }
 
@@ -118,7 +118,7 @@ auto rowwise(const std::string& label, T (&&rows)[N2][N1][N0])
 {
   auto raster = Raster<T, 3>(Wrap(**rows), N0, N1, N2);
   auto out = no_init<T, TSpace>(label, shape<N0, N1, N2>());
-  Kokkos::deep_copy(out.container(), raster.container());
+  Kokkos::deep_copy(out.base(), raster.base());
   return out;
 }
 
@@ -237,13 +237,13 @@ auto impulse(const std::string& label, auto&&... domain)
  * @param label The label
  * @param in The input image
  */
-template <typename TRebind = void, typename T, typename TDomain, typename TContainer>
-auto same_layout(const std::string& label, const Image<T, TDomain, TContainer>& in)
+template <typename TRebind = void, typename T, typename TDomain, typename TView>
+auto same_layout(const std::string& label, const Image<T, TDomain, TView>& in)
 {
-  return Image<typename Rebind<T>::As<TRebind>, TDomain, typename Rebind<TContainer>::As<TRebind>>(
+  return Image<typename Rebind<T>::As<TRebind>, TDomain, typename Rebind<TView>::As<TRebind>>(
       in.domain(),
       Forward(),
-      same_layout<TRebind>(label, in.container()));
+      same_layout<TRebind>(label, in.base()));
 }
 
 } // namespace Linx

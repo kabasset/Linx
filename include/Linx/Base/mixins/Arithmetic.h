@@ -78,7 +78,7 @@ struct CopyArithmeticMixin {
   TDerived copy_as(const std::string& label) const
   {
     auto out = same_layout(label, LINX_CRTP_CONST_DERIVED);
-    Kokkos::deep_copy(out.container(), LINX_CRTP_CONST_DERIVED.container());
+    Kokkos::deep_copy(out.base(), LINX_CRTP_CONST_DERIVED.base());
     return out;
   }
 

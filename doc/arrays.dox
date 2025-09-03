@@ -17,10 +17,10 @@ as well as global transforms such as filtering and Fourier transforms.
 Slicing and domain restriction enable operations over arbitrary regions.
 
 ```
-template <typename T, int N, typename TContainer = ImageContainer<T, N>>
+template <typename T, int N, typename TView = ImageContainer<T, N>>
 class Image;
 
-template <typename T, typename TContainer = SequenceContainer<T>>
+template <typename T, typename TView = SequenceContainer<T>>
 class Sequence;
 ```
 
@@ -38,7 +38,7 @@ For example, `Raster` uses a contiguous, row-major ordered layout, which is comp
 Arrays can be viewed on the host or any device with `on_host()` or `on_device()`,
 which are no-ops if the image is already acessible from the specified space.
 
-The container can be accessed through the `container()` method in order to interface with other Kokkos-based libraries.
+The underlying view can be accessed through the `base()` method in order to interface with other Kokkos-based libraries.
 It is also possible to obtain a pointer to the raw data using the `data()` method, which is useful for interoperability with other libraries.
 
 \section arrays-types Value types

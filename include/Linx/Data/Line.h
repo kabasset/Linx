@@ -24,7 +24,7 @@ public:
   static constexpr int axis = I;
 
   using size_type = T;
-  using value_type = Vector<typename Impl::VectorTraits<T, N>::Spec>;
+  using value_type = Vector<typename Impl::VectorTraits<T, N>::data_type>;
 
   GLine() : m_start {}, m_stop(0), m_step(1) {}
 

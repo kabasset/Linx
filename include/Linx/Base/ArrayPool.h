@@ -39,7 +39,6 @@ public:
   public:
 
     using value_type = T; ///< The raw value type
-    using element_type = std::remove_cvref_t<T>; ///< The decayed value type
     using pointer = value_type*; ///< The pointer type
     using reference = value_type&; ///< The reference type
 

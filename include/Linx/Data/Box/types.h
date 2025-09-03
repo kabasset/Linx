@@ -13,7 +13,7 @@ namespace Linx {
  * @brief Box which starts at origin.
  */
 template <typename TStop>
-using Shape = decltype(Box(std::declval<Vector<TStop>>()));
+using Shape = decltype(Box(std::declval<Vector<TStop>>())); // FIXME rm?
 
 } // namespace Linx
 

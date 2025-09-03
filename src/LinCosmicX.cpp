@@ -132,7 +132,7 @@ auto lacosmic(
     double psfbeta = 4.765,
     bool verbose = false)
 {
-  using T = typename TData::element_type;
+  using T = typename TData::value_type;
 
   Linx::TimerLogger logger;
   logger("Lacosmic", "Start");

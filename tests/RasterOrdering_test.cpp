@@ -15,9 +15,9 @@ BOOST_AUTO_TEST_CASE(single_row_test)
   const int width = 4;
   Linx::Raster<int, 1> raster("row", width);
   BOOST_TEST(raster.size() == width);
-  BOOST_TEST(raster.container().span() == width);
-  BOOST_TEST(raster.container().span_is_contiguous());
-  BOOST_TEST(raster.container().stride(0) == 1);
+  BOOST_TEST(raster.base().span() == width);
+  BOOST_TEST(raster.base().span_is_contiguous());
+  BOOST_TEST(raster.base().stride(0) == 1);
   BOOST_TEST(raster.static_contiguous_flag);
 }
 
@@ -26,9 +26,9 @@ BOOST_AUTO_TEST_CASE(single_column_test)
   const int height = 3;
   Linx::Raster<int, 2> raster("column", 1, height);
   BOOST_TEST(raster.size() == height);
-  BOOST_TEST(raster.container().span() == height);
-  BOOST_TEST(raster.container().span_is_contiguous());
-  BOOST_TEST(raster.container().stride(1) == 1);
+  BOOST_TEST(raster.base().span() == height);
+  BOOST_TEST(raster.base().span_is_contiguous());
+  BOOST_TEST(raster.base().stride(1) == 1);
   BOOST_TEST(raster.static_contiguous_flag);
 }
 
@@ -38,10 +38,10 @@ BOOST_AUTO_TEST_CASE(rectangle_test)
   const int height = 4;
   Linx::Raster<int, 2> raster("rectangle", width, height);
   BOOST_TEST(raster.size() == width * height);
-  BOOST_TEST(raster.container().span() == width * height);
-  BOOST_TEST(raster.container().span_is_contiguous());
-  BOOST_TEST(raster.container().stride(0) == 1);
-  BOOST_TEST(raster.container().stride(1) == width);
+  BOOST_TEST(raster.base().span() == width * height);
+  BOOST_TEST(raster.base().span_is_contiguous());
+  BOOST_TEST(raster.base().stride(0) == 1);
+  BOOST_TEST(raster.base().stride(1) == width);
   BOOST_TEST(raster.static_contiguous_flag);
 }
 
@@ -79,10 +79,10 @@ BOOST_AUTO_TEST_CASE(ptr_raster_test)
   const int height = 3;
   const int depth = 10;
   auto src = Linx::Raster<int, 3>("src", width, height, depth).generate_offsets();
-  BOOST_TEST(src.container().use_count() == 1);
+  BOOST_TEST(src.base().use_count() == 1);
   auto ptr = Linx::Raster<int, 3>(Linx::Wrap(src.data()), width, height, depth);
-  BOOST_TEST(src.container().use_count() == 1);
-  BOOST_TEST(ptr.container().use_count() == 0);
+  BOOST_TEST(src.base().use_count() == 1);
+  BOOST_TEST(ptr.base().use_count() == 0);
   BOOST_TEST((ptr == src));
   ptr.fill(-1);
   BOOST_TEST(src(0, 0, 0) == -1);

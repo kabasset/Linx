@@ -66,19 +66,19 @@ BOOST_AUTO_TEST_CASE(rowwise_test)
   ASSERT(c.n == 3 && typeid(c.front()) == typeid(float));
   //! [rowwise]
 
-  static_assert(std::is_same_v<decltype(a)::element_type, int>);
+  static_assert(std::is_same_v<decltype(a)::value_type, int>);
   ASSERT(a.label() == "1D int");
   ASSERT(a.size() == 4);
   ASSERT(a.matches(Linx::Add(1)));
 
-  static_assert(std::is_same_v<decltype(b)::element_type, char>);
+  static_assert(std::is_same_v<decltype(b)::value_type, char>);
   ASSERT(b.label() == "2D char");
   ASSERT(b.size() == 4);
   ASSERT(b.extent(0) == 2);
   ASSERT(b.extent(1) == 2);
   ASSERT(b.matches(KOKKOS_LAMBDA(int i, int j) { return char('a' + 2 * j + i); }));
 
-  static_assert(std::is_same_v<decltype(c)::element_type, float>);
+  static_assert(std::is_same_v<decltype(c)::value_type, float>);
   ASSERT(c.label() == "3D float");
   ASSERT(c.size() == 6);
   ASSERT(c.extent(0) == 3);

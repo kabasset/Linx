@@ -68,7 +68,7 @@ public:
       // FIXME return typename TDerived::Lazy<TIn>(LINX_CRTP_CONST_DERIVED, in);
     } else {
       auto domain = dilate(bbox(in.domain()), m_parent.footprint());
-      auto extrapolated = Linx::no_init<typename TIn::element_type>("extrapolated", domain);
+      auto extrapolated = Linx::no_init<typename TIn::value_type>("extrapolated", domain);
       extrapolated.copy_from(Extrapolation(in, m_method));
       return m_parent.lazy(extrapolated);
     }
@@ -80,7 +80,7 @@ public:
   template <typename TIn>
   auto operator()(const TIn& in) const
   {
-    using T = std::remove_cvref_t<typename TParent::Lazy<TIn>::value_type>;
+    using T = std::remove_cvref_t<typename TParent::Lazy<TIn>::element_type>;
     auto out = same_layout<T>(compose_label(m_parent.label(), in), in);
     // TODO if Method == Copy, out = Patch(+in, inner_domain);
     transform(in, out);
@@ -136,7 +136,7 @@ public:
   template <typename TIn>
   auto operator()(const TIn& in) const
   {
-    using T = std::remove_cvref_t<typename TDerived::Lazy<TIn>::value_type>;
+    using T = typename TDerived::Lazy<TIn>::value_type;
     auto domain = erode(bbox(in.domain()), LINX_CRTP_CONST_DERIVED.footprint());
     auto out = same_layout<T>(compose_label(LINX_CRTP_CONST_DERIVED.label(), in), in);
     transform(in, Patch(Forward(), out, domain));
@@ -234,7 +234,7 @@ template <typename TKernel, typename TDerived>
 class WeightedFilterMixin : public FilterMixin<TDerived> {
 public:
 
-  using value_type = const typename TKernel::value_type;
+  using element_type = const typename TKernel::element_type;
 
   WeightedFilterMixin(const TKernel& kernel) : m_kernel(try_as_readonly(kernel)) {}
 
@@ -292,8 +292,8 @@ template <typename TFilter, typename TIn, typename TDerived>
 class LazyWeightedFilterMixin {
 public:
 
-  using value_type = typename TFilter::value_type;
-  using element_type = std::remove_cvref_t<value_type>;
+  using element_type = typename TFilter::element_type;
+  using value_type = std::remove_cvref_t<element_type>;
   using execution_space = typename TIn::execution_space;
 
   LazyWeightedFilterMixin(TFilter filter, const TIn& in) :
@@ -340,7 +340,7 @@ public:
 protected:
 
   using Neighbors = decltype(Profile(try_as_readonly(std::declval<TIn>()), 0));
-  using Weights = decltype(no_init<element_type, execution_space>("", 0)); // FIXME adapt domain, if possible static
+  using Weights = decltype(no_init<value_type, execution_space>("", 0)); // FIXME adapt domain, if possible static
 
   TFilter m_filter; ///< The filter
   Neighbors m_neighbors; ///< The image profile along the footprint

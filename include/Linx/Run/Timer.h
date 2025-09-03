@@ -153,7 +153,7 @@ public:
   /**
    * @brief Get the split times as `double`s.
    */
-  const std::vector<std::pair<std::string, double>>& container() const
+  const std::vector<std::pair<std::string, double>>& base() const
   {
     return m_container;
   }

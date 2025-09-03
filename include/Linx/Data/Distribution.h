@@ -43,7 +43,7 @@ struct IncrementHistogramBin {
 template <typename TIn, typename TBins, typename TOut>
 void histogram_to(const TIn& in, const TBins& bins, TOut& out)
 {
-  const auto& atomic_out = as_atomic(out.container());
+  const auto& atomic_out = as_atomic(out.base());
   const auto& readonly_in = try_as_readonly(in);
 
   for_each<typename TOut::execution_space>(

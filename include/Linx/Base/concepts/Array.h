@@ -67,7 +67,7 @@ concept BoxedFunc = BoundedFunc<T, N> && requires(const T f) { f.extent(0); };
 //  */
 // template <typename T, int N>
 // concept Array = BoxedFunc<T, N> && requires(const T data) {
-//   data.container(); // TODO -> Kokkos View-like
+//   data.base(); // TODO -> Kokkos View-like
 // };
 
 } // namespace Linx

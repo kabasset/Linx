@@ -46,7 +46,7 @@ static constexpr auto default_image_container()
   static_assert(kokkos_max_rank <= 8);
   static_assert(n <= kokkos_max_rank);
 
-#define N(I) (TDomain::Stop::at(I) - TDomain::Start::at(I))
+#define N(I) (TDomain::stop_type::at(I) - TDomain::start_type::at(I))
 
   // We avoid recursion to make NVCC happier
   if constexpr (n == -1) {
@@ -256,10 +256,10 @@ concept ViewableAsReadonly = requires(const T& in) { as_readonly(in); };
  * @brief Any type `T` for which `as_readonly(const T&)` should not be applied.
  * 
  * This encompasses types without an `as_readonly(const T&)` overload
- * and those with a const-qualified `T::value_type`.
+ * and those with a const-qualified `T::element_type`.
  */
 template <typename T>
-concept DontApplyReadonly = not ViewableAsReadonly<T> || std::is_const_v<typename T::value_type>;
+concept DontApplyReadonly = not ViewableAsReadonly<T> || std::is_const_v<typename T::element_type>;
 
 /**
  * @brief Any type `T` for which `as_readonly(const T&)` should be applied.

@@ -168,7 +168,7 @@ struct ExpandPath {
   {
     const auto& h = on_host(m_view);
     h.copy_from(path);
-    Kokkos::deep_copy(m_view.container(), h.container()); // FIXME as method? in copy_from/to()?
+    Kokkos::deep_copy(m_view.base(), h.base()); // FIXME as method? in copy_from/to()?
   }
 
   KOKKOS_INLINE_FUNCTION auto operator()(std::integral auto i) const

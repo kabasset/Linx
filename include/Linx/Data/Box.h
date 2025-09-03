@@ -24,23 +24,23 @@ namespace Impl {
 
 template <typename T, int N>
 struct VectorTraits {
-  using Spec = T[N];
+  using data_type = T[N];
 };
 
 template <typename T>
 struct VectorTraits<T, -1> {
-  using Spec = T*;
+  using data_type = T*;
 };
 
 template <typename T>
 struct VectorTraits<T, 0> {
-  using Spec = std::integer_sequence<T>;
+  using data_type = std::integer_sequence<T>;
 };
 
 template <typename T0, typename T1>
 using CommonVector = Vector<typename VectorTraits<
-    std::common_type_t<typename T0::element_type, typename T1::element_type>,
-    Impl::common_size<T0::n, T1::n>()>::Spec>;
+    std::common_type_t<typename T0::value_type, typename T1::value_type>,
+    Impl::common_size<T0::n, T1::n>()>::data_type>;
 
 } // namespace Impl
 
@@ -61,19 +61,17 @@ template <typename TStart, typename TStop>
 class Box {
 public:
 
-  using Start = Vector<TStart>; ///< The start vector type
-  using Stop = Vector<TStop>; ///< The stop vector type
+  using start_type = Vector<TStart>; ///< The start vector type
+  using stop_type = Vector<TStop>; ///< The stop vector type
 
   using size_type = std::size_t; ///< The size type
-  using ssize_type = std::ptrdiff_t; ///< The signed size type
-  using value_type = const Impl::CommonVector<Start, Stop>; ///< The value type
-  using element_type = std::remove_cvref_t<value_type>; ///< The element type
-  using coef_type = typename element_type::element_type; ///< The coefficient type // FIXME rename?
+  using value_type = Impl::CommonVector<start_type, stop_type>; ///< The position type
+  using index_type = std::remove_cvref_t<typename value_type::value_type>; ///< The coefficient type
 
   static constexpr int n = value_type::n; ///< The dimension parameter
   static constexpr bool static_rank_flag = value_type::static_size_flag; ///< Static rank flag
-  static constexpr bool static_flag = Start::static_flag && Stop::static_flag; ///< Static bounds flag
-  static constexpr bool static_start_at_origin_flag = Start::static_zero_flag; ///< Start is origin flag
+  static constexpr bool static_flag = start_type::static_flag && stop_type::static_flag; ///< Static bounds flag
+  static constexpr bool static_start_at_origin_flag = start_type::static_zero_flag; ///< Start is origin flag
 
   /**
    * @brief Default constructor.
@@ -84,12 +82,12 @@ public:
   /**
    * @brief Constructor.
    */
-  constexpr Box(const Stop& stop) : m_start {}, m_stop(stop) {}
+  constexpr Box(const stop_type& stop) : m_start {}, m_stop(stop) {}
 
   /**
    * @brief Constructor.
    */
-  constexpr Box(const Start& start, const Stop& stop) : m_start(start), m_stop(stop) {}
+  constexpr Box(const start_type& start, const stop_type& stop) : m_start(start), m_stop(stop) {}
 
   /**
    * @brief The box rank.
@@ -110,7 +108,7 @@ public:
   /**
    * @brief The start bound, inclusive.
    */
-  KOKKOS_INLINE_FUNCTION constexpr const Start& start() const
+  KOKKOS_INLINE_FUNCTION constexpr const start_type& start() const
   {
     return m_start;
   }
@@ -118,7 +116,7 @@ public:
   /**
    * @brief The stop bound, exclusive.
    */
-  KOKKOS_INLINE_FUNCTION constexpr const Stop& stop() const
+  KOKKOS_INLINE_FUNCTION constexpr const stop_type& stop() const
   {
     return m_stop;
   }
@@ -174,9 +172,9 @@ public:
   /**
    * @brief Product of the extents, may be negative.
    */
-  KOKKOS_INLINE_FUNCTION constexpr coef_type ssize() const // FIXME rename as volume
+  KOKKOS_INLINE_FUNCTION constexpr index_type volume() const // FIXME rename as volume
   {
-    coef_type out = 1;
+    index_type out = 1;
     for (size_type i = 0; i < rank(); ++i) {
       out *= extent(i);
     }
@@ -188,8 +186,8 @@ public:
    */
   KOKKOS_INLINE_FUNCTION constexpr size_type size() const
   {
-    auto s = ssize();
-    return s <= 0 ? size_type(0) : static_cast<size_type>(s);
+    auto v = volume();
+    return v <= 0 ? size_type(0) : static_cast<size_type>(v);
   }
 
   /**
@@ -232,8 +230,8 @@ public:
 
 private:
 
-  Start m_start; ///< The start bound
-  Stop m_stop; ///< The stop bound
+  start_type m_start; ///< The start bound
+  stop_type m_stop; ///< The stop bound
 };
 
 } // namespace Linx

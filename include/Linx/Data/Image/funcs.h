@@ -14,14 +14,14 @@ namespace Linx {
  * 
  * If the input image is aleady readonly, then this is a no-op.
  */
-template <typename T, typename TDomain, typename TContainer>
-decltype(auto) as_readonly(const Image<T, TDomain, TContainer>& in)
+template <typename T, typename TDomain, typename TView>
+decltype(auto) as_readonly(const Image<T, TDomain, TView>& in)
 {
   if constexpr (std::is_const_v<T>) {
     return in;
   } else {
-    using Out = Image<const T, TDomain, typename Rebind<TContainer>::AsReadonly>;
-    return Out(in.domain(), Forward {}, in.container());
+    using Out = Image<const T, TDomain, typename Rebind<TView>::AsReadonly>;
+    return Out(in.domain(), Forward {}, in.base());
   }
   // FIXME handle shifted in
 }
@@ -29,18 +29,18 @@ decltype(auto) as_readonly(const Image<T, TDomain, TContainer>& in)
 /**
  * @brief Perform a shallow copy of an image, as an atomic image.
  */
-template <typename T, typename TDomain, typename TContainer>
-decltype(auto) as_atomic(const Image<T, TDomain, TContainer>& in)
+template <typename T, typename TDomain, typename TView>
+decltype(auto) as_atomic(const Image<T, TDomain, TView>& in)
 {
-  using Out = Image<T, TDomain, typename Rebind<TContainer>::AsAtomic>;
-  return Out(in.domain(), Forward {}, in.container());
+  using Out = Image<T, TDomain, typename Rebind<TView>::AsAtomic>;
+  return Out(in.domain(), Forward {}, in.base());
 }
 
 /**
  * @brief Copy the data to host if on device.
  */
-template <typename T, typename TDomain, typename TContainer>
-decltype(auto) on_host(const Image<T, TDomain, TContainer>& in)
+template <typename T, typename TDomain, typename TView>
+decltype(auto) on_host(const Image<T, TDomain, TView>& in)
 {
   return on_device<Kokkos::HostSpace>(in);
 }
@@ -48,17 +48,13 @@ decltype(auto) on_host(const Image<T, TDomain, TContainer>& in)
 /**
  * @brief Copy the data to a given memory space if not already accessible from it.
  */
-template <
-    typename TSpace = Kokkos::DefaultExecutionSpace::memory_space,
-    typename T,
-    typename TDomain,
-    typename TContainer>
-decltype(auto) on_device(const Image<T, TDomain, TContainer>& in)
+template <typename TSpace = Kokkos::DefaultExecutionSpace::memory_space, typename T, typename TDomain, typename TView>
+decltype(auto) on_device(const Image<T, TDomain, TView>& in)
 {
-  if constexpr (Kokkos::SpaceAccessibility<TSpace, typename TContainer::memory_space>::accessible) {
+  if constexpr (Kokkos::SpaceAccessibility<TSpace, typename TView::memory_space>::accessible) {
     return in;
   } else {
-    auto container = Kokkos::create_mirror_view_and_copy(TSpace(), in.container());
+    auto container = Kokkos::create_mirror_view_and_copy(TSpace(), in.base());
     return Image<T, TDomain, decltype(container)>(in.domain(), Forward {}, LINX_MOVE(container));
   }
   // FIXME handle shifted in
@@ -67,9 +63,9 @@ decltype(auto) on_device(const Image<T, TDomain, TContainer>& in)
 /**
  * @brief Iterator to the beginning of a contiguous image.
  */
-template <typename T, typename TDomain, typename TContainer>
-  requires(is_contiguous<TContainer>())
-auto begin(const Image<T, TDomain, TContainer>& image)
+template <typename T, typename TDomain, typename TView>
+  requires(is_contiguous<TView>())
+auto begin(const Image<T, TDomain, TView>& image)
 {
   return image.data();
 }
@@ -77,9 +73,9 @@ auto begin(const Image<T, TDomain, TContainer>& image)
 /**
  * @brief Iterator to the end of a contiguous image.
  */
-template <typename T, typename TDomain, typename TContainer>
-  requires(is_contiguous<TContainer>())
-auto end(const Image<T, TDomain, TContainer>& image)
+template <typename T, typename TDomain, typename TView>
+  requires(is_contiguous<TView>())
+auto end(const Image<T, TDomain, TView>& image)
 {
   return begin(image) + image.size();
 }
@@ -100,14 +96,14 @@ auto along(const TIn& in)
   auto stop = vec<Dimension(N)>(1);
   start[I] = r.start(0);
   stop[I] = r.stop(0);
-  auto out = no_init<typename TIn::element_type, typename TIn::execution_space>(r.label(), Box(start, stop));
+  auto out = no_init<typename TIn::value_type, typename TIn::execution_space>(r.label(), Box(start, stop));
   const auto& out_on_host = on_host(out);
   for (auto i : get<0>(in.domain())) {
     auto p = vec<Dimension(N)>(0);
     p[I] = i;
     out_on_host.at(p) = r(i);
   }
-  Kokkos::deep_copy(out.container(), out_on_host.container());
+  Kokkos::deep_copy(out.base(), out_on_host.base());
   return out;
 }
 

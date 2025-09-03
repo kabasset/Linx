@@ -18,15 +18,15 @@ namespace Linx {
 
 namespace Impl {
 
-template <typename TContainer>
+template <typename TView>
 struct OffsetFiller {
   KOKKOS_INLINE_FUNCTION void operator()(auto... is) const
   {
     auto ptr = &m_container(is...);
     *ptr = ptr - m_ref;
   }
-  TContainer m_container;
-  const typename TContainer::value_type* m_ref;
+  TView m_container;
+  const typename TView::value_type* m_ref; // FIXME const_pointer?
 };
 
 template <typename TFunc, typename TOut, typename TIns, std::size_t... Is>
@@ -99,7 +99,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   decltype(auto) label() const
   {
-    return LINX_CRTP_CONST_DERIVED.container().label();
+    return LINX_CRTP_CONST_DERIVED.base().label();
   }
 
   /**
@@ -107,7 +107,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   KOKKOS_INLINE_FUNCTION auto size() const
   {
-    return LINX_CRTP_CONST_DERIVED.container().size();
+    return LINX_CRTP_CONST_DERIVED.base().size();
   }
 
   /**
@@ -127,7 +127,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
     if constexpr (TDerived::n == 0) {
       return nullptr;
     } else {
-      return LINX_CRTP_CONST_DERIVED.container().data();
+      return LINX_CRTP_CONST_DERIVED.base().data();
     }
   }
 

@@ -45,7 +45,7 @@ constexpr auto operator-(const Specialization<Box> auto& in)
  * @brief Dilation of a box by a given regular margin.
  */
 template <Specialization<Box> TBox>
-constexpr auto dilate(const TBox& box, const std::convertible_to<typename TBox::size_type> auto& margin)
+constexpr auto dilate(const TBox& box, const std::convertible_to<typename TBox::index_type> auto& margin)
 {
   return Box(box.start() - margin, box.stop() + margin);
 }
@@ -55,7 +55,7 @@ constexpr auto dilate(const TBox& box, const std::convertible_to<typename TBox::
  * @brief Erosion of a box by a given regular margin.
  */
 template <Specialization<Box> TBox>
-constexpr auto erode(const TBox& box, const std::convertible_to<typename TBox::size_type> auto& margin)
+constexpr auto erode(const TBox& box, const std::convertible_to<typename TBox::index_type> auto& margin)
 {
   return Box(box.start() + margin, box.stop() - margin);
 }

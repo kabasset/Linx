@@ -16,12 +16,18 @@ template <typename TBox>
 class BoxUnion {
 public:
 
-  using value_type = typename TBox::value_type;
-  using coef_type = typename TBox::coef_type;
-  static constexpr auto n = TBox::n;
+  using value_type = typename TBox::value_type; ///< The position type
+  using index_type = typename TBox::index_type; ///< The coefficient type
+  static constexpr auto n = TBox::n; ///< The rank parameter
 
+  /**
+   * @brief Constructor.
+   */
   BoxUnion() : m_boxes {} {}
 
+  /**
+   * @brief Constructor.
+   */
   BoxUnion(auto&& box) : m_boxes {LINX_MOVE(box)} {}
 
   /**
@@ -39,7 +45,7 @@ public:
    */
   auto size() const
   {
-    coef_type out = 0;
+    index_type out = 0;
     for (const auto& box : m_boxes) {
       out += box.size();
     }
@@ -103,7 +109,7 @@ BoxUnion<TBox> set_difference(const TBox& lhs, const auto& rhs)
   auto current_stop = inner.stop();
 
   auto out = BoxUnion<TBox>();
-  for (std::size_t i = 0; i < lhs.rank(); ++i) {
+  for (std::size_t i = 0; i < lhs.rank(); ++i) { // FIXME rank_type?
     // Add box, grow current region frontwards
     const auto start_i = lhs.start(i) - current_start[i];
     if (start_i < 0) {

@@ -28,7 +28,7 @@ template <typename T, typename TFunc, typename TIns, std::size_t... Is>
 class Projection {
 public:
 
-  using value_type = std::remove_cv_t<T>; ///< The projection value type
+  using value_type = std::remove_cvref_t<T>; ///< The projection value type
 
   /**
    * @brief Constructor.
@@ -57,7 +57,7 @@ class Reducer {
 public:
 
   using reducer = Reducer; ///< This class, required for Kokkos' "concept"
-  using value_type = std::remove_cv_t<T>; ///< The reduced value type
+  using value_type = std::remove_cvref_t<T>; ///< The reduced value type
   using result_view_type = Kokkos::View<value_type, TSpace>; ///< The scalar result type, as a rank-0 view
 
   /**
@@ -125,7 +125,7 @@ class ProjectionReducer {
 public:
 
   static constexpr std::size_t n = sizeof...(Is); ///< The rank
-  using value_type = std::remove_cv_t<T>; ///< The reduced value type
+  using value_type = std::remove_cvref_t<T>; ///< The reduced value type
 
   /**
    * @brief Constructor.
@@ -243,7 +243,7 @@ void kokkos_reduce(const std::string& label, const TRegion& region, const TProj&
 template <typename TMonoid, typename TIn>
 auto reduce(const std::string& label, const TMonoid& monoid, const TIn& in)
 {
-  using T = typename TIn::element_type;
+  using T = typename TIn::value_type;
   using Reducer = Impl::Reducer<T, TMonoid, Kokkos::HostSpace>;
   T value = identity_element<T>(monoid);
   kokkos_reduce<typename TIn::execution_space>(
@@ -334,7 +334,7 @@ auto transform_reduce_with_side_effects(
  * @brief Minimun value of a data container.
  */
 template <typename TIn>
-typename TIn::element_type min(const TIn& in)
+typename TIn::value_type min(const TIn& in)
 {
   return reduce("min", Min(), in);
 }
@@ -344,7 +344,7 @@ typename TIn::element_type min(const TIn& in)
  * @brief Maximum value of a data container.
  */
 template <typename TIn>
-typename TIn::element_type max(const TIn& in)
+typename TIn::value_type max(const TIn& in)
 {
   return reduce("max", Max(), in);
 }
@@ -354,7 +354,7 @@ typename TIn::element_type max(const TIn& in)
  * @brief Compute the sum of all elements of a data container.
  */
 template <typename TIn>
-typename TIn::element_type sum(const TIn& in) // TODO limit to DataMixins
+typename TIn::value_type sum(const TIn& in) // TODO limit to DataMixins
 {
   return reduce("sum", Add(), in);
 }
@@ -364,7 +364,7 @@ typename TIn::element_type sum(const TIn& in) // TODO limit to DataMixins
  * @brief Compute the product of all elements of a data container.
  */
 template <typename TIn>
-typename TIn::element_type product(const TIn& in) // TODO limit to DataMixins
+typename TIn::value_type product(const TIn& in) // TODO limit to DataMixins
 {
   return reduce("product", Multiply(), in);
 }
@@ -374,7 +374,7 @@ typename TIn::element_type product(const TIn& in) // TODO limit to DataMixins
  * @brief Compute the dot product of two data containers.
  */
 template <typename TLhs, typename TRhs>
-typename TLhs::element_type dot(const TLhs& lhs, const TRhs& rhs)
+typename TLhs::value_type dot(const TLhs& lhs, const TRhs& rhs)
 {
   return transform_reduce("dot", Multiply(), Add(), lhs, rhs);
 }
@@ -385,7 +385,7 @@ typename TLhs::element_type dot(const TLhs& lhs, const TRhs& rhs)
  * @tparam P The power
  */
 template <int P = 2, typename TIn>
-typename TIn::element_type norm(const TIn& in)
+typename TIn::value_type norm(const TIn& in)
 {
   return transform_reduce("norm", Abspow<P>(), Add(), in);
 }
@@ -396,7 +396,7 @@ typename TIn::element_type norm(const TIn& in)
  * @tparam P The power
  */
 template <int P = 2, typename TLhs, typename TRhs>
-typename TLhs::element_type distance(const TLhs& lhs, const TRhs& rhs)
+typename TLhs::value_type distance(const TLhs& lhs, const TRhs& rhs)
 {
   return transform_reduce("distance", Abspow<P>(), Add(), lhs, rhs);
 }

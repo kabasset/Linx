@@ -174,7 +174,7 @@ public:
     for (int i = 0; i < in.rank(); ++i) {
       shape[i] = in.extent(i);
     }
-    fits_create_img(m_fptr, image_typecode<typename TImage::element_type>(), in.rank(), shape.data(), &status);
+    fits_create_img(m_fptr, image_typecode<typename TImage::value_type>(), in.rank(), shape.data(), &status);
     if (in.size() > 0) {
       write_pixels(in);
     }
@@ -206,7 +206,7 @@ private:
   void write_pixels(const TIn& in)
   {
     // FIXME if is raster, write directly
-    using T = typename TIn::element_type;
+    using T = typename TIn::value_type;
     static constexpr auto n = TIn::n;
     const auto& h = on_host(in);
     const auto raster = Raster<T, n>(compose_label("raster", in.label()), in.shape()).copy_from(h);
@@ -217,7 +217,7 @@ private:
   void write_raster_pixels(const TIn& in)
   {
     int status = 0;
-    fits_write_img(m_fptr, typecode<typename TIn::element_type>(), 1, in.size(), in.data(), &status);
+    fits_write_img(m_fptr, typecode<typename TIn::value_type>(), 1, in.size(), in.data(), &status);
     CfitsioError::may_throw("Cannot write pixels", m_fptr, status);
   }
 

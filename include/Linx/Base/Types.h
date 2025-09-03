@@ -145,15 +145,6 @@ using QuickTestTypes = std::tuple<bool, int, double, Kokkos::complex<float>>; //
 #define LINX_STATIC_ASSERT_FALSE(message)
 #endif
 
-/**
- * @brief Get the value type of a container.
- * 
- * If the container is constant, then the type is, too.
- */
-template <typename TContainer>
-using Value = std::
-    conditional_t<std::is_const_v<TContainer>, const typename TContainer::value_type, typename TContainer::value_type>;
-
 namespace Impl {
 
 template <template <typename...> class TTemplate, typename TClass>
@@ -452,8 +443,7 @@ using DisableIfReference = std::enable_if_t<not std::is_reference_v<T>>;
  */
 template <typename T, typename TTag> // Defaulting `TTag = void` makes NVCC unhappy.
 struct StrongType {
-  using value_type = T; ///< The raw underlying type
-  using element_type = std::remove_cv_t<T>; ///< The decayed decayed underlying type
+  using value_type = T; ///< The value type
 
   /**
    * @brief Constructor.
@@ -463,7 +453,7 @@ struct StrongType {
   /**
    * @brief Constructor.
    */
-  template <typename U = value_type, typename = DisableIfReference<U>>
+  template <typename TDummy = value_type, typename = DisableIfReference<TDummy>>
   KOKKOS_INLINE_FUNCTION explicit StrongType(value_type&& v) : value(LINX_MOVE(v))
   {}
 

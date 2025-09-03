@@ -27,17 +27,17 @@ struct IsContiguousLayout<Kokkos::LayoutRight> : std::true_type {};
 
 } // namespace Impl
 
-template <typename TContainer>
+template <typename TView>
 constexpr bool is_contiguous()
 {
-  return Impl::IsContiguousLayout<typename TContainer::array_layout>::value;
+  return Impl::IsContiguousLayout<typename TView::array_layout>::value;
 }
 
 /**
  * @brief Enable `Kokkos::Experimental::begin()`.
  */
-template <typename TContainer>
-auto begin(const TContainer& in) -> decltype(Kokkos::Experimental::begin(in))
+template <typename TView>
+auto begin(const TView& in) -> decltype(Kokkos::Experimental::begin(in))
 {
   return Kokkos::Experimental::begin(in);
 }
@@ -45,8 +45,8 @@ auto begin(const TContainer& in) -> decltype(Kokkos::Experimental::begin(in))
 /**
  * @brief Enable `Kokkos::Experimental::end()`.
  */
-template <typename TContainer>
-auto end(const TContainer& in) -> decltype(Kokkos::Experimental::end(in))
+template <typename TView>
+auto end(const TView& in) -> decltype(Kokkos::Experimental::end(in))
 {
   return Kokkos::Experimental::end(in);
 }
@@ -74,8 +74,7 @@ struct RangeMixin {
    */
   bool equal(std::convertible_to<T> auto... values) const
   {
-    const auto& container =
-        Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), LINX_CRTP_CONST_DERIVED.container());
+    const auto& container = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), LINX_CRTP_CONST_DERIVED.base());
     return equal_impl(container, forward_as_tuple(values...), std::make_index_sequence<sizeof...(values)>());
     return LINX_CRTP_CONST_DERIVED;
   }
@@ -85,10 +84,9 @@ struct RangeMixin {
    */
   const TDerived& assign(std::convertible_to<T> auto... values) const
   {
-    const auto& container =
-        Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), LINX_CRTP_CONST_DERIVED.container());
+    const auto& container = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace(), LINX_CRTP_CONST_DERIVED.base());
     assign_impl(container, forward_as_tuple(values...), std::make_index_sequence<sizeof...(values)>());
-    Kokkos::deep_copy(LINX_CRTP_CONST_DERIVED.container(), container);
+    Kokkos::deep_copy(LINX_CRTP_CONST_DERIVED.base(), container);
     return LINX_CRTP_CONST_DERIVED;
   }
 
@@ -106,7 +104,7 @@ struct RangeMixin {
   template <std::input_iterator TIt>
   const TDerived& assign(TIt begin) const
   {
-    const auto& container = LINX_CRTP_CONST_DERIVED.container();
+    const auto& container = LINX_CRTP_CONST_DERIVED.base();
     auto mirror = Kokkos::create_mirror_view(container);
     auto mirror_data = mirror.data();
     Kokkos::parallel_for(
@@ -121,7 +119,7 @@ struct RangeMixin {
    */
   const TDerived& assign(const T* data) const
   {
-    const auto& container = LINX_CRTP_CONST_DERIVED.container();
+    const auto& container = LINX_CRTP_CONST_DERIVED.base();
     auto mirror = Kokkos::create_mirror_view(container);
     auto mirror_data = mirror.data();
     Kokkos::parallel_for(

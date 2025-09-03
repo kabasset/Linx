@@ -17,8 +17,8 @@ auto origin()
   }
 }
 
-template <typename TSpec>
-using OriginSpec = typename decltype(origin<Vector<TSpec>>())::Spec;
+template <typename TData>
+using OriginData = typename decltype(origin<Vector<TData>>())::data_type;
 
 /**
  * @relates Box
@@ -32,14 +32,14 @@ Box() -> Box<std::integer_sequence<T>, std::integer_sequence<T>>;
  * @brief Start at origin.
  */
 template <typename T, int N>
-Box(T (&&)[N]) -> Box<OriginSpec<T[N]>, T[N]>;
+Box(T (&&)[N]) -> Box<OriginData<T[N]>, T[N]>;
 
 /**
  * @relates Box
  * @brief Start at origin
  */
 template <typename TStop>
-Box(const Vector<TStop>&) -> Box<OriginSpec<TStop>, TStop>;
+Box(const Vector<TStop>&) -> Box<OriginData<TStop>, TStop>;
 
 /**
  * @relates Box

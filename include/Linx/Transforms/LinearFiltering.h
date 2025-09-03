@@ -32,14 +32,14 @@ public:
   class Lazy : public LazySpatialFilterMixin<SumFilter, TIn, Lazy<TIn>> {
   public:
 
-    using value_type = const typename TIn::value_type;
-    using element_type = std::remove_cvref_t<value_type>;
+    using element_type = const typename TIn::element_type;
+    using value_type = std::remove_cvref_t<element_type>;
 
     using LazySpatialFilterMixin<SumFilter, TIn, Lazy>::LazySpatialFilterMixin;
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      element_type out {};
+      value_type out {};
       for (const auto& e : neighbors) {
         out += e;
       }
@@ -67,8 +67,8 @@ public:
   class Lazy : public LazySpatialFilterMixin<MeanFilter, TIn, Lazy<TIn>> {
   public:
 
-    using value_type = const typename TIn::value_type;
-    using element_type = std::remove_cvref_t<value_type>;
+    using element_type = const typename TIn::element_type;
+    using value_type = std::remove_cvref_t<element_type>;
 
     Lazy(MeanFilter filter, const TIn& in) :
         LazySpatialFilterMixin<MeanFilter, TIn, Lazy>(LINX_MOVE(filter), in),
@@ -77,7 +77,7 @@ public:
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      element_type out {};
+      value_type out {};
       for (const auto& e : neighbors) {
         out += e;
       }
@@ -115,8 +115,8 @@ template <typename TKernel>
 class Correlation : public WeightedFilterMixin<TKernel, Correlation<TKernel>> {
 public:
 
-  using value_type = const typename TKernel::value_type;
-  using element_type = std::remove_cvref_t<value_type>;
+  using element_type = const typename TKernel::element_type;
+  using value_type = std::remove_cvref_t<element_type>;
 
   Correlation(TKernel kernel) : WeightedFilterMixin<TKernel, Correlation>(LINX_MOVE(kernel)) {}
 
@@ -131,14 +131,14 @@ public:
 
     Lazy(Correlation filter, const TIn& in) : LazyWeightedFilterMixin<Correlation, TIn, Lazy>(LINX_MOVE(filter), in)
     {
-      if constexpr (is_complex<element_type>()) {
+      if constexpr (is_complex<value_type>()) {
         conjugate_impl();
       }
     }
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      element_type out {};
+      value_type out {};
       auto wit = this->m_weights.data(); // FIXME static_assert contiguity
       for (auto nit = neighbors.begin(); nit != neighbors.end(); ++nit, ++wit) {
         out += *nit * *wit;
@@ -170,8 +170,8 @@ template <typename TKernel>
 class Convolution : public WeightedFilterMixin<TKernel, Convolution<TKernel>> {
 public:
 
-  using value_type = const typename TKernel::value_type; // FIXME deduce from reduce()
-  using element_type = std::remove_cvref_t<value_type>;
+  using element_type = const typename TKernel::element_type; // FIXME deduce from reduce()
+  using value_type = std::remove_cvref_t<element_type>;
 
   Convolution(TKernel kernel) : WeightedFilterMixin<TKernel, Convolution>(LINX_MOVE(kernel)) {}
 
@@ -196,7 +196,7 @@ public:
 
     KOKKOS_INLINE_FUNCTION auto reduce(const auto& neighbors) const
     {
-      element_type out {};
+      value_type out {};
       auto wit = this->m_weights.data();
       for (auto nit = neighbors.begin(); nit != neighbors.end(); ++nit, ++wit) {
         out += *nit * *wit;
@@ -235,7 +235,7 @@ auto separable_laplacian(T s = T(1))
     p[i] = 1;
     kernel_on_host.at(p) = s;
   }
-  Kokkos::deep_copy(kernel.container(), kernel_on_host.container());
+  Kokkos::deep_copy(kernel.base(), kernel_on_host.base());
   return Correlation(LINX_MOVE(kernel));
 }
 

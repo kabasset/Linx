@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(patch_unbounded_singleton_patch_test)
   for_each("init", image.domain(), KOKKOS_LAMBDA(int i, int j, int k) { image(i, j, k) = i + j + k; });
   auto patch = Linx::Patch(image, Linx::Slice(1, 5)()(3));
   BOOST_TEST((Linx::root(patch) == image));
-  BOOST_TEST((Linx::root(patch).container() == image.container()));
+  BOOST_TEST((Linx::root(patch).base() == image.base()));
   BOOST_TEST(patch.n == 3);
   const auto& domain = Linx::bbox(patch.domain());
   BOOST_TEST(domain.extent(0) == 4);

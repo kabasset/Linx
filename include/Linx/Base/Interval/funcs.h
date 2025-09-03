@@ -10,30 +10,48 @@
 
 namespace Linx {
 
+/**
+ * @brief Integral slice iterator.
+ */
 template <std::integral T>
-struct SliceIterator {
-  using value_type = const T;
-  using element_type = T;
-  using pointer = value_type*;
-  using reference = value_type&;
-  using difference_type = std::ptrdiff_t;
+class SliceIterator {
+public:
 
+  using value_type = T; ///< The value type
+  using pointer = const T*; ///< The constant pointer type
+  using reference = const T&; ///< The constant pointer type
+  using difference_type = std::ptrdiff_t; ///< The address difference type
+
+  explicit SliceIterator(const value_type& current) : m_current(current) {}
+
+  /**
+   * @brief Dereference operator.
+   */
   constexpr reference operator*() const
   {
-    return value;
+    return m_current;
   }
 
+  /**
+   * @brief Arrow operator.
+   */
   constexpr pointer operator->() const
   {
-    return &value;
+    return &m_current;
   }
 
+  /**
+   * @brief Prefix increment operator.
+   */
   constexpr SliceIterator& operator++()
   {
-    ++value;
+    ++m_current;
     return *this;
   }
 
+  /**
+   * @brief Postfix increment operator.
+   */
   constexpr SliceIterator operator++(int)
   {
     auto out = *this;
@@ -41,29 +59,35 @@ struct SliceIterator {
     return out;
   }
 
+  /**
+   * @brief Equality operator.
+   */
   constexpr bool operator==(const SliceIterator& other) const
   {
-    return value == other.value;
+    return m_current == other.m_current;
   };
 
-  constexpr bool operator!=(const SliceIterator& other) const
-  {
-    return value != other.value;
-  };
+private:
 
-  element_type value;
+  T m_current; ///< Non-const value
 };
 
+/**
+ * @brief Iterator to the beginning of an integral slice.
+ */
 template <std::integral T, typename TPred>
 constexpr SliceIterator<T> begin(const Slice<T, TPred>& interval)
 {
-  return {interval.start()};
+  return SliceIterator<T>(interval.start());
 }
 
+/**
+ * @brief Iterator to the end of an integral slice.
+ */
 template <std::integral T, typename TPred>
 constexpr SliceIterator<T> end(const Slice<T, TPred>& interval)
 {
-  return {interval.stop()};
+  return SliceIterator<T>(interval.stop());
 }
 
 /**

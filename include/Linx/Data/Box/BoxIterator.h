@@ -14,17 +14,15 @@ template <typename TStart, typename TStop>
 class BoxIterator {
 public:
 
-  using iterator_tag = std::input_iterator_tag; ///< The tye of iterator
-  using element_type = typename Box<TStart, TStop>::element_type; ///< The element type
-  using value_type = const element_type; ///< The value type
-  using size_type = typename element_type::element_type; ///< The coefficient type
-  using reference = value_type&; ///< The reference type
-  using pointer = value_type*; ///< The pointer type
+  using value_type = typename Box<TStart, TStop>::value_type; ///< The value type
+  using index_type = typename Box<TStart, TStop>::index_type; ///< The coefficient type
+  using reference = const value_type&; ///< The reference type
+  using pointer = const value_type*; ///< The pointer type
 
   /**
    * @brief Constructor.
    */
-  explicit constexpr BoxIterator(const Box<TStart, TStop>& region, element_type current) :
+  explicit constexpr BoxIterator(const Box<TStart, TStop>& region, value_type current) :
       m_region(region),
       m_current(LINX_MOVE(current))
   {}
@@ -79,33 +77,17 @@ public:
   }
 
   /**
-   * @brief Inequality operator.
-   */
-  constexpr bool operator!=(const BoxIterator& rhs) const
-  {
-    return m_current != rhs.m_current;
-  }
-
-  /**
    * @brief Sentinel equality operator.
    */
-  constexpr bool operator==(size_type rhs) const
+  constexpr bool operator==(index_type rhs) const
   {
     return m_current[m_current.size() - 1] == rhs;
-  }
-
-  /**
-   * @brief Sentinel inequality operator.
-   */
-  constexpr bool operator!=(size_type rhs) const
-  {
-    return not(*this == rhs);
   }
 
 private:
 
   const Box<TStart, TStop>& m_region; ///< The box
-  element_type m_current; ///< The current position
+  value_type m_current; ///< The current position
 };
 
 /**
@@ -114,7 +96,7 @@ private:
 template <typename TStart, typename TStop>
 constexpr auto begin(const Box<TStart, TStop>& box)
 {
-  typename Box<TStart, TStop>::element_type current = box.start();
+  typename Box<TStart, TStop>::value_type current = box.start();
   return BoxIterator<TStart, TStop>(box, LINX_MOVE(current));
 }
 
@@ -124,7 +106,7 @@ constexpr auto begin(const Box<TStart, TStop>& box)
 template <typename TStart, typename TStop>
 constexpr auto end(const Box<TStart, TStop>& box)
 {
-  return box.ssize() > 0 ? box.stop(box.rank() - 1) : box.start(box.rank() - 1);
+  return box.volume() > 0 ? box.stop(box.rank() - 1) : box.start(box.rank() - 1);
 }
 
 } // namespace Linx

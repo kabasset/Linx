@@ -25,22 +25,21 @@ class Vector : public VectorBase<T> {
 public:
 
   static constexpr auto n = VectorBase<T>::n; ///< The size parameter
-  using Spec = T; ///< The coefficients specification
+  using data_type = T; ///< The coefficients specification
 
   using typename VectorBase<T>::size_type;
   using typename VectorBase<T>::ssize_type;
   using typename VectorBase<T>::value_type;
-  using typename VectorBase<T>::element_type;
   using typename VectorBase<T>::reference;
   using typename VectorBase<T>::const_reference;
-  using typename VectorBase<T>::Container;
+  using typename VectorBase<T>::base_type;
 
   using memory_space = Kokkos::HostSpace; ///< The memory space
   using execution_space = Kokkos::DefaultHostExecutionSpace; ///< The execution space
 
   static constexpr bool static_size_flag = (n >= 0); ///< Static size flag
   static constexpr bool static_empty_flag = (n == 0); ///< Statically empty flag
-  static constexpr bool static_flag = (n == 0) || std::is_same_v<Container, void>; ///< Static coefficients flag
+  static constexpr bool static_flag = (n == 0) || std::is_same_v<base_type, void>; ///< Static coefficients flag
 
   /**
    * @brief Constructor.
@@ -66,7 +65,8 @@ public:
   /**
    * @brief I-th element or a fallback if i is out of bounds.
    */
-  constexpr element_type get_or(std::integral auto i, element_type fallback) const
+  template <typename TFallback>
+  constexpr TFallback get_or(std::integral auto i, TFallback fallback) const
   {
     if constexpr (std::is_signed_v<decltype(i)>) {
       return i < 0 || i >= this->size() ? fallback : this->operator[](i);
@@ -78,7 +78,7 @@ public:
   /**
    * @brief Equality comparison with a pack of coefficients.
    */
-  constexpr bool equal(auto... coefs) const // TODO equality comparable with element_type
+  constexpr bool equal(auto... coefs) const // TODO equality comparable with value_type
   {
     return this->size() == sizeof...(coefs)
         && equal_impl(forward_as_tuple(coefs...), std::make_index_sequence<sizeof...(coefs)>());
@@ -120,14 +120,6 @@ public:
     }
 
     return true;
-  }
-
-  /**
-   * @brief Inequality operator.
-   */
-  constexpr bool operator!=(const auto& rhs) const
-  {
-    return not(*this == rhs);
   }
 
 private:
