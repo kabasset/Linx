@@ -75,7 +75,7 @@ struct Negate {
 template <typename T>
 struct Constant {
   using value_type = T; ///< The value type
-  using const_reference = const value_type&; ///< The readonly reference type
+  using const_reference = const value_type&; ///< The read-only reference type
 
   value_type value; ///< The value
 

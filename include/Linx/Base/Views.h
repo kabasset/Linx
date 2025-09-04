@@ -154,6 +154,8 @@ struct Rebind<Kokkos::View<TData, TArgs...>> {
   template <typename U>
   using as_type = Kokkos::View<typename Rebind<TData>::as_type<U>, TArgs...>; ///< View of new type
   using add_const = Kokkos::View<typename Rebind<TData>::add_const, TArgs...>; ///< Read-only view
+  using add_random_access =
+      Kokkos::View<TData, TArgs..., Kokkos::MemoryTraits<Kokkos::RandomAccess>>; ///< Random-access view
   using add_atomic = Kokkos::View<TData, TArgs..., Kokkos::MemoryTraits<Kokkos::Atomic>>; ///< Atomic-access view
 };
 
@@ -176,7 +178,7 @@ decltype(auto) same_layout(const std::string& label, const Kokkos::View<TData, T
  * This is a no-op if the view is already read-only.
  */
 template <typename TData, typename... TArgs>
-KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::View<TData, TArgs...>& in)
+KOKKOS_INLINE_FUNCTION decltype(auto) as_const(const Kokkos::View<TData, TArgs...>& in)
 {
   if constexpr (std::is_const_v<typename Kokkos::View<TData, TArgs...>::value_type>) {
     return in;
@@ -184,6 +186,16 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::View<TData, TArg
     using Out = typename Rebind<Kokkos::View<TData, TArgs...>>::add_const;
     return Out(in);
   }
+}
+
+/**
+ * @brief Get a read-only view optimized for random access.
+ */
+template <typename TData, typename... TArgs>
+KOKKOS_INLINE_FUNCTION decltype(auto) as_texture(const Kokkos::View<TData, TArgs...>& in)
+{
+  using Out = typename Rebind<typename Rebind<Kokkos::View<TData, TArgs...>>::add_const>::add_random_access;
+  return Out(in);
 }
 
 /**
@@ -204,6 +216,8 @@ struct Rebind<Kokkos::DynRankView<TData, TArgs...>> {
   template <typename U>
   using as_type = Kokkos::DynRankView<typename Rebind<TData>::as_type<U>, TArgs...>; ///< View of new type
   using add_const = Kokkos::DynRankView<typename Rebind<TData>::add_const, TArgs...>; ///< Read-only view
+  using add_random_access =
+      Kokkos::DynRankView<TData, TArgs..., Kokkos::MemoryTraits<Kokkos::RandomAccess>>; ///< Random-access view
   using add_atomic = Kokkos::DynRankView<TData, TArgs..., Kokkos::MemoryTraits<Kokkos::Atomic>>; ///< Atomic-access view
 };
 
@@ -226,7 +240,7 @@ decltype(auto) same_layout(const std::string& label, const Kokkos::DynRankView<T
  * This is a no-op if the view is already read-only.
  */
 template <typename TData, typename... TArgs>
-KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::DynRankView<TData, TArgs...>& in)
+KOKKOS_INLINE_FUNCTION decltype(auto) as_const(const Kokkos::DynRankView<TData, TArgs...>& in)
 {
   if constexpr (std::is_const_v<typename Kokkos::DynRankView<TData, TArgs...>::value_type>) {
     return in;
@@ -234,6 +248,16 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Kokkos::DynRankView<TDat
     using Out = typename Rebind<Kokkos::DynRankView<TData, TArgs...>>::add_const;
     return Out(in);
   }
+}
+
+/**
+ * @brief Get a read-only view optimized for random access.
+ */
+template <typename TData, typename... TArgs>
+KOKKOS_INLINE_FUNCTION decltype(auto) as_texture(const Kokkos::DynRankView<TData, TArgs...>& in)
+{
+  using Out = typename Rebind<typename Rebind<Kokkos::DynRankView<TData, TArgs...>>::add_const>::add_random_access;
+  return Out(in);
 }
 
 /**
@@ -247,22 +271,22 @@ KOKKOS_INLINE_FUNCTION decltype(auto) as_atomic(const Kokkos::DynRankView<TData,
 }
 
 /**
- * @brief Any type `T` with an `as_readonly(const T&)` overload.
+ * @brief Any type `T` with an `as_const(const T&)` overload.
  */
 template <typename T>
-concept ViewableAsReadonly = requires(const T& in) { as_readonly(in); };
+concept ViewableAsReadonly = requires(const T& in) { as_const(in); };
 
 /**
- * @brief Any type `T` for which `as_readonly(const T&)` should not be applied.
+ * @brief Any type `T` for which `as_const(const T&)` should not be applied.
  * 
- * This encompasses types without an `as_readonly(const T&)` overload
+ * This encompasses types without an `as_const(const T&)` overload
  * and those with a const-qualified `T::element_type`.
  */
 template <typename T>
 concept DontApplyReadonly = not ViewableAsReadonly<T> || std::is_const_v<typename T::element_type>;
 
 /**
- * @brief Any type `T` for which `as_readonly(const T&)` should be applied.
+ * @brief Any type `T` for which `as_const(const T&)` should be applied.
  * 
  * This is the negation of `DontApplyReadonly`.
  */
@@ -270,15 +294,34 @@ template <typename T>
 concept ApplyReadonly = not DontApplyReadonly<T>;
 
 /**
- * @brief Return `as_readonly(in)` if applicable, `in` otherwise.
+ * @brief Return `as_const(in)` if applicable, `in` otherwise.
  */
 template <typename T>
-decltype(auto) try_as_readonly(const T& in)
+decltype(auto) try_as_const(const T& in)
 {
   if constexpr (ApplyReadonly<T>) {
-    return as_readonly(in);
+    return as_const(in);
   } else {
     return LINX_FORWARD(in);
+  }
+}
+
+/**
+ * @brief Try applying `as_texture()` or `as_const()`.
+ * 
+ * `as_texture(in)` is returned if defined.
+ * Otherwise, `as_const(in)` is returned if defined.
+ * Otherwise, `in` is returned.
+ */
+template <typename T>
+decltype(auto) try_as_texture(const T& in)
+{
+  if constexpr (requires { as_texture(in); }) {
+    return as_texture(in);
+  } else if constexpr (requires { as_const(in); }) {
+    return as_const(in);
+  } else {
+    return in;
   }
 }
 

@@ -201,7 +201,7 @@ public:
 
   LazySpatialFilterMixin(TFilter filter, const TIn& in) :
       m_filter(LINX_MOVE(filter)),
-      m_neighbors(try_as_readonly(in), m_filter.footprint())
+      m_neighbors(try_as_texture(in), m_filter.footprint())
   {}
 
   std::string label() const
@@ -221,7 +221,7 @@ public:
 
 protected:
 
-  using Neighbors = decltype(Profile(try_as_readonly(std::declval<TIn>()), 0));
+  using Neighbors = decltype(Profile(try_as_texture(std::declval<TIn>()), 0));
 
   TFilter m_filter; ///< The filter
   Neighbors m_neighbors; ///< The profile of the input
@@ -236,7 +236,7 @@ public:
 
   using element_type = const typename TKernel::element_type;
 
-  WeightedFilterMixin(const TKernel& kernel) : m_kernel(try_as_readonly(kernel)) {}
+  WeightedFilterMixin(const TKernel& kernel) : m_kernel(try_as_const(kernel)) {}
 
   decltype(auto) footprint() const
   {
@@ -264,7 +264,7 @@ public:
 
 private:
 
-  decltype(try_as_readonly(std::declval<TKernel>())) m_kernel; ///< The kernel
+  decltype(try_as_const(std::declval<TKernel>())) m_kernel; ///< The kernel
 };
 
 namespace Impl {
@@ -298,7 +298,7 @@ public:
 
   LazyWeightedFilterMixin(TFilter filter, const TIn& in) :
       m_filter(LINX_MOVE(filter)),
-      m_neighbors(try_as_readonly(in), m_filter.footprint().size()),
+      m_neighbors(try_as_texture(in), m_filter.footprint().size()),
       m_weights("weights", m_neighbors.capacity())
   {
     init_impl();
@@ -339,7 +339,7 @@ public:
 
 protected:
 
-  using Neighbors = decltype(Profile(try_as_readonly(std::declval<TIn>()), 0));
+  using Neighbors = decltype(Profile(try_as_texture(std::declval<TIn>()), 0));
   using Weights = decltype(no_init<value_type, execution_space>("", 0)); // FIXME adapt domain, if possible static
 
   TFilter m_filter; ///< The filter

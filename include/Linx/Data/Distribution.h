@@ -44,12 +44,12 @@ template <typename TIn, typename TBins, typename TOut>
 void histogram_to(const TIn& in, const TBins& bins, TOut& out)
 {
   const auto& atomic_out = as_atomic(out.base());
-  const auto& readonly_in = try_as_readonly(in);
+  const auto& const_in = try_as_const(in);
 
   for_each<typename TOut::execution_space>(
       "histogram_to()",
       in.domain(),
-      Impl::IncrementHistogramBin(readonly_in, bins, atomic_out));
+      Impl::IncrementHistogramBin(const_in, bins, atomic_out));
 }
 
 /**

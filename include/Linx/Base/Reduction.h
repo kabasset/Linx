@@ -249,7 +249,7 @@ auto reduce(const std::string& label, const TMonoid& monoid, const TIn& in)
   kokkos_reduce<typename TIn::execution_space>(
       label,
       in.domain(),
-      try_as_readonly(in),
+      try_as_const(in),
       Reducer(value, monoid, identity_element<T>(monoid)));
   return value;
 }
@@ -283,7 +283,7 @@ auto reduce(const std::string& label, const TMonoid& monoid, const TIn& in)
 template <typename TMap, typename TMonoid, typename... TIns>
 auto transform_reduce(const std::string& label, const TMap& map, const TMonoid& monoid, const TIns&... ins)
 {
-  return transform_reduce_with_side_effects(label, map, monoid, try_as_readonly(ins)...);
+  return transform_reduce_with_side_effects(label, map, monoid, try_as_const(ins)...);
 }
 
 namespace Impl {

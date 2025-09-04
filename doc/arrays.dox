@@ -9,12 +9,12 @@ namespace Linx {
 Linx provides classes and services for handling one-dimensional (1D) and multi-dimensional (ND) arrays.
 They contain an arbitrary number of elements of the same type, laid out in memory according to infrastructure-dependent policies.
 1D arrays are implemented by the `Sequence` class template, while ND arrays are implemented by the `Image` class template.
-The default data view type is generally a `Kokkos::View`, but other views can be used if needed.
-Elements can be accessed and modified using indexing operators.
-Both classes support operations that modify the array in place and operations that create a new instance of the array.
+The arrays rely on an underlying data view for managing memory; The default view type is generally a `Kokkos::View`, but other types can be used if needed.
+Elements can be accessed and modified using indexing and call operators.
+Both classes support both operations which modify the array in place and operations which create a new instance of the array.
 Such operations encompass element-wise arithmetic or mathematical functions, reductions,
 as well as global transforms such as filtering and Fourier transforms.
-Slicing and domain restriction enable operations over arbitrary regions.
+Slicing and other domain restriction features enable operations over arbitrary regions.
 
 ```
 template <typename T, int N, typename TView = ImageView<T, N>>
@@ -26,9 +26,11 @@ class Sequence;
 
 \section arrays-memory Memory management
 
-The semantics of `Sequence` and `Image` are similar to those of `std::shared_ptr`:
+Linx' arrays are said to be "views", instead of "containers".
+This means that their semantics are similar to those of `std::shared_ptr`:
 memory is managed automatically, and can be shared between multiple objects without copying the underlying data.
-Copy constructor and copy assignment operator perform shallow copy.
+Copy constructor and copy assignment operator perform shallow copy
+(it is still possible to explicitely create deep copies if needed).
 Memory is released when the last reference to the data is destroyed.
 
 The memory layout (alignment, padding and element storage order) depends on the underlying machine architecture and the underlying data view type.
@@ -47,11 +49,11 @@ Both `Sequence` and `Image` support numerical value types, including integers, f
 Custom data types can also be used, with constraints inherited from the underlying data view type, such as `Kokkos::View`.
 Typically, it is not possible by default to use non-POD types.
 
-The value type can be const-qualified to indicate that the array is read-only.
+The element type can be const-qualified to indicate that the array is read-only.
 Because this may enable low-level optimizations by Kokkos,
 it is recommended to declare arrays as read-only whenever possible,
 at the last moment -- typically in function calls.
-This is achieved with `as_readonly()`.
+This is achieved with `as_const()`.
 
 \snippet{trimleft} arrays_example.cpp types
 

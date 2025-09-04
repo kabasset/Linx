@@ -214,9 +214,9 @@ Patch(const TIn&, const TDomain&) -> Patch<
     typename Impl::PatchTraits<TIn, TDomain>::domain_type>;
 
 template <typename TParent, typename TDomain>
-decltype(auto) as_readonly(const Patch<TParent, TDomain>& in)
+decltype(auto) as_const(const Patch<TParent, TDomain>& in)
 {
-  return Patch(Forward(), try_as_readonly(in.parent()), in.domain());
+  return Patch(Forward(), try_as_const(in.parent()), in.domain());
 }
 
 /**

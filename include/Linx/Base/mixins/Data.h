@@ -213,7 +213,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    * 
    * The first argument of the function is the element of the view itself.
    * If other images are passed as input, their elements are respectively passed to the function.
-   * In this case, it is recommended to avoid side effects and to pass the inputs as readonly.
+   * In this case, it is recommended to avoid side effects and to pass the inputs as read-only.
    * 
    * In other words:
    * 
@@ -225,7 +225,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    * 
    * \code
    * for (auto p : view.domain()) {
-   *   view[p] = func(Linx::as_readonly(view)[p], Linx::as_readonly(a)[p], Linx::as_readonly(b)[p]);
+   *   view[p] = func(Linx::as_const(view)[p], Linx::as_const(a)[p], Linx::as_const(b)[p]);
    * }
    * \endcode
    * 
@@ -239,9 +239,9 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   const TDerived& transform(const std::string& label, auto&& func, const auto&... inputs) const
   {
-    const auto& derived = as_readonly(LINX_CRTP_CONST_DERIVED);
+    const auto& derived = as_const(LINX_CRTP_CONST_DERIVED);
     return LINX_CRTP_CONST_DERIVED
-        .generate_with_side_effects(label, LINX_FORWARD(func), derived, try_as_readonly(inputs)...);
+        .generate_with_side_effects(label, LINX_FORWARD(func), derived, try_as_const(inputs)...);
   }
 
   /**
@@ -269,7 +269,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   const TDerived& generate(const std::string& label, auto&& func, const auto&... inputs) const
   {
-    return generate_with_side_effects(label, LINX_FORWARD(func), try_as_readonly(inputs)...);
+    return generate_with_side_effects(label, LINX_FORWARD(func), try_as_const(inputs)...);
   }
 
   /**
@@ -333,7 +333,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   bool contains(const T& value) const
   {
-    const auto& derived = as_readonly(LINX_CRTP_CONST_DERIVED);
+    const auto& derived = as_const(LINX_CRTP_CONST_DERIVED);
     return transform_reduce("contains()", Equal(value), Or(), derived);
   }
 
@@ -342,7 +342,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   bool contains_nan() const
   {
-    const auto& derived = as_readonly(LINX_CRTP_CONST_DERIVED);
+    const auto& derived = as_const(LINX_CRTP_CONST_DERIVED);
     return transform_reduce("contains_nan()", IsNan(), Or(), derived);
   }
 
@@ -353,7 +353,7 @@ struct DataMixin : public TArithmeticMixin, public MathFunctionsMixin<T, TDerive
    */
   bool contains_only(const T& value) const
   {
-    const auto& derived = as_readonly(LINX_CRTP_CONST_DERIVED);
+    const auto& derived = as_const(LINX_CRTP_CONST_DERIVED);
     return transform_reduce("contains_only()", Equal(value), And(), derived);
   }
 

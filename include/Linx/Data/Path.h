@@ -132,7 +132,7 @@ private:
  * @relatesalso Path
  */
 template <int N>
-KOKKOS_INLINE_FUNCTION decltype(auto) as_readonly(const Path<N>& in)
+KOKKOS_INLINE_FUNCTION decltype(auto) as_const(const Path<N>& in)
 {
   return in; // FIXME const value_type
 }

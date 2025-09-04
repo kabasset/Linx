@@ -10,12 +10,12 @@
 namespace Linx {
 
 /**
- * @brief Perform a shallow copy of an image, as a readonly image.
+ * @brief Perform a shallow copy of an image, as a read-only image.
  * 
- * If the input image is aleady readonly, then this is a no-op.
+ * If the input image is aleady read-only, then this is a no-op.
  */
 template <typename T, typename TDomain, typename TView>
-decltype(auto) as_readonly(const Image<T, TDomain, TView>& in)
+decltype(auto) as_const(const Image<T, TDomain, TView>& in)
 {
   if constexpr (std::is_const_v<T>) {
     return in;
@@ -24,6 +24,16 @@ decltype(auto) as_readonly(const Image<T, TDomain, TView>& in)
     return Out(in.domain(), Forward {}, in.base());
   }
   // FIXME handle shifted in
+}
+
+/**
+ * @brief Perform a shallow copy of the image, as a read-only image flagged for random access.
+ */
+template <typename T, typename TDomain, typename TView>
+decltype(auto) as_texture(const Image<T, TDomain, TView>& in)
+{
+  using View = LINX_DECLTYPE(as_texture(in.base()));
+  return Image<const T, TDomain, View>(in.domain(), Forward(), as_texture(in.base()));
 }
 
 /**

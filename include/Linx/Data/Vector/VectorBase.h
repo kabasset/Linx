@@ -43,12 +43,12 @@ public:
   using ssize_type = std::ptrdiff_t; ///< The signed size type
   using value_type = T; ///< The value type
   using reference = value_type&; ///< The reference type
-  using const_reference = const value_type&; ///< The readonly reference type
+  using const_reference = const value_type&; ///< The read-only reference type
   using pointer = value_type*; ///< The pointer type
-  using const_pointer = const value_type*; /// The readonly pointer type
+  using const_pointer = const value_type*; /// The read-only pointer type
   using base_type = std::vector<value_type>; ///< The underlying container type
   using iterator = typename base_type::iterator; ///< The iterator type
-  using const_iterator = typename base_type::const_iterator; ///< The readonly iterator type
+  using const_iterator = typename base_type::const_iterator; ///< The read-only iterator type
 
   /**
    * @brief Constructor.
@@ -185,12 +185,12 @@ public:
   using ssize_type = std::ptrdiff_t; ///< The signed size type
   using value_type = T; ///< The value type
   using reference = value_type&; ///< The reference type
-  using const_reference = const value_type&; ///< The readonly reference type
+  using const_reference = const value_type&; ///< The read-only reference type
   using pointer = value_type*; ///< The pointer type
-  using const_pointer = const value_type*; /// The readonly pointer type
+  using const_pointer = const value_type*; /// The read-only pointer type
   using base_type = std::array<T, N>; ///< The underlying container type
   using iterator = typename base_type::iterator; ///< The iterator type
-  using const_iterator = typename base_type::const_iterator; ///< The readonly iterator type
+  using const_iterator = typename base_type::const_iterator; ///< The read-only iterator type
 
   /**
    * @brief Constructor.
@@ -330,9 +330,9 @@ public:
   using ssize_type = std::ptrdiff_t; ///< The signed size type
   using value_type = const T; ///< The value type // FIXME const?
   using reference = value_type&; ///< The reference type
-  using const_reference = const value_type&; ///< The readonly reference type
+  using const_reference = const value_type&; ///< The read-only reference type
   using pointer = value_type*; ///< The pointer type
-  using const_pointer = const value_type*; /// The readonly pointer type
+  using const_pointer = const value_type*; /// The read-only pointer type
   using base_type = void; ///< The underlying container type
 
   /**
